@@ -364,6 +364,166 @@ Keresett útvonalak:%1</translation>
     </message>
 </context>
 <context>
+    <name>BugReportDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="8"/>
+        <source>Report a problem</source>
+        <translation>Probléma jelentése</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="37"/>
+        <source>CAT / HRD</source>
+        <translation>CAT / HRD</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="38"/>
+        <source>Reception / decoding</source>
+        <translation>Vétel / dekódolás</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="39"/>
+        <source>Transmission</source>
+        <translation>Adás</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="40"/>
+        <source>Interface</source>
+        <translation>Felület</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="41"/>
+        <source>Audio &amp; peripherals</source>
+        <translation>Hang és perifériák</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="42"/>
+        <source>Installation &amp; updates</source>
+        <translation>Telepítés és frissítések</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="43"/>
+        <source>Translations</source>
+        <translation>Fordítások</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="44"/>
+        <source>General / Other</source>
+        <translation>Általános / Egyéb</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="70"/>
+        <source>Problem in %1</source>
+        <translation>Probléma: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="80"/>
+        <source>Automatic self-check:</source>
+        <translation>Automatikus önellenőrzés:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="119"/>
+        <source>Your report is posted on the community forum, in your language, so others can help.</source>
+        <translation>A jelentésed a közösségi fórumon jelenik meg, a saját nyelveden, hogy mások segíthessenek.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="148"/>
+        <source>Found %n likely cause(s) — please check these before reporting:</source>
+        <translation>
+            <numerusform>%n valószínű ok található — ellenőrizd őket bejelentés előtt:</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="195"/>
+        <source>Self-check found no known cause — please describe the problem below.</source>
+        <translation>Az önellenőrzés nem talált ismert okot — írd le a problémát alább.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="206"/>
+        <source>Category:</source>
+        <translation>Kategória:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="222"/>
+        <source>Describe the problem:</source>
+        <translation>Írd le a problémát:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="249"/>
+        <source>What happens, since when, and what you already tried. Paste any error messages too.</source>
+        <translation>Mi történik, mióta, és mit próbáltál már. Illessz be minden hibaüzenetet is.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="258"/>
+        <source>Diagnostic info (auto-collected):</source>
+        <translation>Diagnosztikai adatok (automatikusan gyűjtve):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="273"/>
+        <source>Diagnostics not available</source>
+        <translation>A diagnosztika nem érhető el</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="289"/>
+        <source>Copy Report</source>
+        <translation>Jelentés másolása</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="300"/>
+        <source>Copied!</source>
+        <translation>Másolva!</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="309"/>
+        <source>Sending...</source>
+        <translation>Küldés...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="309"/>
+        <source>Upload last diagnostic log</source>
+        <translation>Utolsó diagnosztikai napló feltöltése</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="316"/>
+        <source>Diagnostic log — %1 — %2</source>
+        <translation>Diagnosztikai napló — %1 — %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="323"/>
+        <source>The diagnostic log could not be read.</source>
+        <translation>A diagnosztikai napló nem olvasható.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="327"/>
+        <source>Diagnostic log uploaded from Decodium.</source>
+        <translation>Diagnosztikai napló feltöltve a Decodiumból.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="338"/>
+        <source>Posting...</source>
+        <translation>Közzététel...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="338"/>
+        <source>Post to community</source>
+        <translation>Közzététel a közösségben</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="345"/>
+        <source>You already reported this recently. Check the community for replies: %1</source>
+        <translation>Ezt nemrég már jelentetted. Nézd meg a válaszokat a közösségben: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="357"/>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="380"/>
+        <source>Posted! Open the groups: %1</source>
+        <translation>Közzétéve! Nyisd meg a csoportokat: %1</translation>
+    </message>
+</context>
+<context>
     <name>CAboutDlg</name>
     <message>
         <location filename="../widgets/about.ui" line="9"/>
@@ -1790,37 +1950,37 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="25585"/>
+        <location filename="../DecodiumBridge.cpp" line="27517"/>
         <source>TX non avviata</source>
         <translation>TX nem indult el</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="25586"/>
+        <location filename="../DecodiumBridge.cpp" line="27518"/>
         <source>Nominativo compresso non risolto</source>
         <translation>A tömörített hívójel nem feloldható</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="29403"/>
+        <location filename="../DecodiumBridge.cpp" line="31529"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ leállítva</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="29404"/>
+        <location filename="../DecodiumBridge.cpp" line="31530"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Közvetlen hívás érkezett, de a hívójel nem feloldható</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="34602"/>
+        <location filename="../DecodiumBridge.cpp" line="36831"/>
         <source>Map selection: %1 %2</source>
         <translation>Térkép-kijelölés: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="34603"/>
+        <location filename="../DecodiumBridge.cpp" line="36832"/>
         <source>Map selection: %1</source>
         <translation>Térkép-kijelölés: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="41269"/>
+        <location filename="../DecodiumBridge.cpp" line="44439"/>
         <source>Update checks are disabled in this build.</source>
         <translation>A frissítések ellenőrzése le van tiltva ebben a buildben.</translation>
     </message>
@@ -1874,6 +2034,46 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
     </message>
 </context>
 <context>
+    <name>DecodiumCommunityReport</name>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="99"/>
+        <source>Please describe the problem before sending.</source>
+        <translation>Küldés előtt írd le a problémát.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="123"/>
+        <source>Cannot reach the community: %1</source>
+        <translation>A közösség nem érhető el: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="145"/>
+        <source>The community form could not be prepared. Please try again later or post manually at %1</source>
+        <translation>A közösségi űrlapot nem sikerült előkészíteni. Próbáld újra később, vagy tedd közzé kézzel itt: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="172"/>
+        <source>
+[...truncated, %1 characters total...]</source>
+        <translation>
+[...levágva, összesen %1 karakter...]</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="215"/>
+        <source>The community rejected the report (likely too long). Please shorten it and try again.</source>
+        <translation>A közösség elutasította a jelentést (valószínűleg túl hosszú). Rövidítsd le, és próbáld újra.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="222"/>
+        <source>Could not send the report: %1</source>
+        <translation>A jelentés nem küldhető el: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="225"/>
+        <source>unexpected server response (%1)</source>
+        <translation>váratlan kiszolgálóválasz (%1)</translation>
+    </message>
+</context>
+<context>
     <name>DecodiumDxCluster</name>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="422"/>
@@ -1897,7 +2097,7 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
     </message>
     <message>
         <location filename="../DecodiumDxCluster.cpp" line="493"/>
-        <location filename="../DecodiumDxCluster.cpp" line="1201"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1208"/>
         <source>Error: %1</source>
         <translation>Hiba: %1</translation>
     </message>
@@ -2076,7 +2276,7 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
         <translation>Ismeretlen socket hiba</translation>
     </message>
     <message>
-        <location filename="../DecodiumDxCluster.cpp" line="1203"/>
+        <location filename="../DecodiumDxCluster.cpp" line="1209"/>
         <source>Socket error: %1</source>
         <translation>Socket hiba: %1</translation>
     </message>
@@ -2163,9 +2363,73 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
 <context>
     <name>DecodiumTransceiverManager</name>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="2173"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="2213"/>
         <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
         <translation>CAT megszakadt, automatikus újracsatlakozás (%1/%2)...</translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumUpdater</name>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="146"/>
+        <source>Checking for updates...</source>
+        <translation>Frissítések keresése...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="171"/>
+        <source>Could not check for updates: %1</source>
+        <translation>Nem sikerült frissítést keresni: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="180"/>
+        <location filename="../DecodiumUpdater.cpp" line="189"/>
+        <source>Could not read the release information.</source>
+        <translation>A kiadási információk nem olvashatók.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="221"/>
+        <source>Decodium is up to date (%1).</source>
+        <translation>A Decodium naprakész (%1).</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="227"/>
+        <source>Version %1 is available.</source>
+        <translation>A(z) %1 verzió elérhető.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="244"/>
+        <source>Version %1 will be skipped.</source>
+        <translation>A(z) %1 verzió kihagyásra kerül.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="267"/>
+        <source>Cannot write to the temporary folder.</source>
+        <translation>Nem lehet írni az ideiglenes mappába.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="274"/>
+        <source>Downloading %1...</source>
+        <translation>%1 letöltése...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="300"/>
+        <source>Download failed: %1</source>
+        <translation>A letöltés sikertelen: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="308"/>
+        <source>The downloaded file is incomplete. Please try again.</source>
+        <translation>A letöltött fájl hiányos. Próbáld újra.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="319"/>
+        <source>Starting the installer...</source>
+        <translation>A telepítő indítása...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="323"/>
+        <source>Could not start the installer.</source>
+        <translation>A telepítő nem indítható el.</translation>
     </message>
 </context>
 <context>
@@ -3097,133 +3361,139 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
 <context>
     <name>HamlibTransceiver</name>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="481"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="529"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="482"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="530"/>
         <source>Hamlib initialisation error</source>
         <translation>Hamlib inicializálási hiba</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="685"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="711"/>
         <source>Hamlib settings file error: %1 at character offset %2</source>
         <translation>Hamlib-beállítási fájl hiba: %1, a %2 karaktereltolásnál</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="691"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="717"/>
         <source>Hamlib settings file error: top level must be a JSON object</source>
         <translation>Hamlib beállítási fájl hiba: a legfelső szintnek egy JSON objektumnak kell lennie</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="703"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="729"/>
         <source>Hamlib settings file error: config must be a JSON object</source>
         <translation>Hamlib beállítási fájl hiba: a config-nak egy JSON objektumnak kell lennie</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="614"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="640"/>
         <source>Unsupported CAT type</source>
         <translation>Nem támogatott CAT-típus</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="330"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="331"/>
         <source>Hamlib error: %1 while %2</source>
         <translation>Hamlib hiba: %1 amíg %2</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="727"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="753"/>
         <source>opening connection to rig</source>
         <translation>jelenlegi kapcsolat az adó-vevővel</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="735"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="761"/>
         <source>Rig not ready — caps null after open (no response from radio?)</source>
         <translation>A rig nem áll készen — a caps null a megnyitás után (nincs válasz a rádiótól?)</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="845"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="873"/>
         <source>getting current frequency</source>
         <translation>aktuális frekvencia lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="849"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="877"/>
         <source>getting current mode</source>
         <translation>aktuális üzemmód lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="878"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="898"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="906"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="926"/>
         <source>exchanging VFOs</source>
         <translation>VFO-k cseréje</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="886"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1378"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="914"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1690"/>
         <source>getting other VFO frequency</source>
         <translation>másik VFO frekvencia lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="890"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="918"/>
         <source>getting other VFO mode</source>
         <translation>másik VFO üzemmód lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1121"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1196"/>
         <source>setting TX VFO mode</source>
         <translation>TX VFO mód beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="351"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="903"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1214"/>
+        <source>setting TX/split frequency</source>
+        <translation>TX/split frekvencia beállítása</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="352"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="931"/>
         <source>setting current VFO</source>
         <translation>aktuális VFO beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="912"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="940"/>
         <source>getting frequency</source>
         <translation>frekvencia lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="916"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="944"/>
         <source>getting mode</source>
         <translation>üzemmód lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="339"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="933"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1317"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="340"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="961"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1602"/>
         <source>getting current VFO</source>
         <translation>aktuálisi VFO választása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="984"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="992"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1006"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1357"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1018"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1026"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1040"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1664"/>
         <source>getting current VFO frequency</source>
         <translation>aktuális VFO frekvencia lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="990"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1005"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1012"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1092"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1110"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1177"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1024"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1039"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1046"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1153"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1180"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1264"/>
         <source>setting frequency</source>
         <translation>frekvencia beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1100"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1184"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1262"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1275"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1170"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1271"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1354"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1367"/>
         <source>getting current VFO mode</source>
         <translation>aktuális VFO üzemmód lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1106"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1115"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1176"/>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="1190"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1268"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1281"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1277"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1332"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1360"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1373"/>
         <source>setting current VFO mode</source>
         <translation>aktuális VFO üzemmód beállítása</translation>
     </message>
@@ -3232,60 +3502,75 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <translation type="vanished">VFOB mód beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1164"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1233"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1251"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1320"/>
         <source>setting/unsetting split mode</source>
         <translation>osztott üzemmód beállítása/feloldása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1175"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1215"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1262"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1302"/>
         <source>setting split mode</source>
         <translation>osztott (split) üzemmód beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1203"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1290"/>
         <source>setting split TX frequency and mode</source>
         <translation>osztott TX frekvencia és üzemmód beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1208"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1295"/>
         <source>setting split TX frequency</source>
         <translation>osztott TX frekvencia beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1286"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1378"/>
         <source>getting split TX VFO mode</source>
         <translation>osztott TX VFO üzemmód lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1293"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1385"/>
         <source>setting split TX VFO mode</source>
         <translation>osztott TX VFO üzemmód beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1418"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1511"/>
+        <source> (write preflight timeout)</source>
+        <translation> (írási preflight időtúllépés)</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1546"/>
+        <source> (write tolerated)</source>
+        <translation> (írás tolerálva)</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1665"/>
+        <source>getting RX VFO frequency</source>
+        <translation>RX VFO frekvencia lekérése</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1732"/>
         <source>getting PTT state</source>
         <translation>PTT állapot lekérése</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1704"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2020"/>
         <source>setting PTT on</source>
         <translation>PTT aktiválása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="1806"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="2126"/>
         <source>setting PTT off</source>
         <translation>PTT deaktiválása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="374"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="375"/>
         <source>setting a configuration item</source>
         <translation>konfigurációs elem beállítása</translation>
     </message>
     <message>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="386"/>
-        <location filename="../Transceiver/HamlibTransceiver.cpp" line="393"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="387"/>
+        <location filename="../Transceiver/HamlibTransceiver.cpp" line="394"/>
         <source>getting a configuration item</source>
         <translation>konfigurációs elem lekérése</translation>
     </message>
@@ -3727,39 +4012,39 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <translation>Küldje el ezt a QSO-t a DX Clusterre, ha a cluster kapcsolat már aktív volt.</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="642"/>
+        <location filename="../widgets/logqso.cpp" line="648"/>
         <source>Log backend is not available</source>
         <translation>A naplózási backend nem érhető el</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="677"/>
-        <location filename="../widgets/logqso.cpp" line="687"/>
+        <location filename="../widgets/logqso.cpp" line="683"/>
+        <location filename="../widgets/logqso.cpp" line="693"/>
         <source>Invalid QSO Data</source>
         <translation>Helytelen QSO adat</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="678"/>
+        <location filename="../widgets/logqso.cpp" line="684"/>
         <source>Check exchange sent and received</source>
         <translation>Küldött és vett kontrol-szám ellenőrzés</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="688"/>
+        <location filename="../widgets/logqso.cpp" line="694"/>
         <source>Check all fields</source>
         <translation>Minden mező ellenőrzése</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="641"/>
-        <location filename="../widgets/logqso.cpp" line="708"/>
+        <location filename="../widgets/logqso.cpp" line="647"/>
+        <location filename="../widgets/logqso.cpp" line="714"/>
         <source>Log file error</source>
         <translation>Log fájl hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="709"/>
+        <location filename="../widgets/logqso.cpp" line="715"/>
         <source>Cannot open &quot;%1&quot; for append</source>
         <translation>A &quot;%1&quot; nem nyitható meg a hozzáadáshoz</translation>
     </message>
     <message>
-        <location filename="../widgets/logqso.cpp" line="710"/>
+        <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Hiba: %1</translation>
     </message>
@@ -3831,33 +4116,33 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10288"/>
+        <location filename="../qml/decodium/Main.qml" line="10574"/>
         <source>About Decodium</source>
         <translation>A Decodium névjegye</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10305"/>
+        <location filename="../qml/decodium/Main.qml" line="10591"/>
         <source>Useful Links...</source>
         <translation>Hasznos linkek...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10329"/>
-        <location filename="../qml/decodium/Main.qml" line="11191"/>
+        <location filename="../qml/decodium/Main.qml" line="10615"/>
+        <location filename="../qml/decodium/Main.qml" line="11493"/>
         <source>Keyboard Shortcuts</source>
         <translation>Billentyűparancsok</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10345"/>
+        <location filename="../qml/decodium/Main.qml" line="10631"/>
         <source>SWL Mode (RX Only)</source>
         <translation>SWL mód (csak RX)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10361"/>
+        <location filename="../qml/decodium/Main.qml" line="10647"/>
         <source>Multi-Answer Mode</source>
         <translation>Többválaszos mód</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10377"/>
+        <location filename="../qml/decodium/Main.qml" line="10663"/>
         <source>MAM Window...</source>
         <translation>MAM ablak...</translation>
     </message>
@@ -3866,8 +4151,8 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <translation type="vanished">ALL.TXT mappa megnyitása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10417"/>
-        <location filename="../qml/decodium/Main.qml" line="11036"/>
+        <location filename="../qml/decodium/Main.qml" line="10703"/>
+        <location filename="../qml/decodium/Main.qml" line="11338"/>
         <source>TX Watchdog</source>
         <translation>TX őr</translation>
     </message>
@@ -3876,23 +4161,33 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <translation type="vanished">Split mód</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10433"/>
-        <location filename="../qml/decodium/Main.qml" line="11113"/>
+        <location filename="../qml/decodium/Main.qml" line="10719"/>
+        <location filename="../qml/decodium/Main.qml" line="11415"/>
         <source>Contest Mode</source>
         <translation>Verseny mód</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11147"/>
+        <location filename="../qml/decodium/Main.qml" line="11449"/>
         <source>Rule: 1 point per worked station</source>
         <translation>Szabály: 1 pont összeköttetésenként</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10473"/>
+        <location filename="../qml/decodium/Main.qml" line="10759"/>
         <source>CQ Only</source>
         <translation>Csak CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10489"/>
+        <location filename="../qml/decodium/Main.qml" line="892"/>
+        <source>Full screen</source>
+        <translation>Teljes képernyő</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="1883"/>
+        <source>Decodium is up to date (%1).</source>
+        <translation>A Decodium naprakész (%1).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10775"/>
         <source>My Call Only</source>
         <translation>Csak saját hívójel</translation>
     </message>
@@ -3901,100 +4196,114 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <translation type="vanished">ZAP mód</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10513"/>
+        <location filename="../qml/decodium/Main.qml" line="10799"/>
         <source>Deep Search</source>
         <translation>Mély keresés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10529"/>
+        <location filename="../qml/decodium/Main.qml" line="10815"/>
         <source>Avg Decode</source>
         <translation>Átlag dekódolás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10563"/>
+        <location filename="../qml/decodium/Main.qml" line="10849"/>
         <source>VHF/UHF Features</source>
         <translation>VHF/UHF funkciók</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10587"/>
+        <location filename="../qml/decodium/Main.qml" line="10873"/>
         <source>Record RX</source>
         <translation>RX rögzítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10603"/>
+        <location filename="../qml/decodium/Main.qml" line="10889"/>
         <source>Record TX</source>
         <translation>TX rögzítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12386"/>
+        <location filename="../qml/decodium/Main.qml" line="10959"/>
+        <source>Report a problem...</source>
+        <translation>Probléma jelentése...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10975"/>
+        <source>Checking...</source>
+        <translation>Ellenőrzés...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10975"/>
+        <source>Check for updates...</source>
+        <translation>Frissítések keresése...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12688"/>
         <source>decodes</source>
         <translation>dekodolas</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13123"/>
+        <location filename="../qml/decodium/Main.qml" line="13421"/>
         <source>msgs</source>
         <translation>uzenet</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12400"/>
-        <location filename="../qml/decodium/Main.qml" line="13138"/>
+        <location filename="../qml/decodium/Main.qml" line="12702"/>
+        <location filename="../qml/decodium/Main.qml" line="13436"/>
         <source>Clear</source>
         <translation>Torles</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="891"/>
         <source>Schermo intero</source>
-        <translation>Teljes képernyő</translation>
+        <translation type="vanished">Teljes képernyő</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1817"/>
+        <location filename="../qml/decodium/Main.qml" line="1924"/>
         <source>Open WAV file for decoding</source>
         <translation>WAV fájl megnyitása dekódoláshoz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1819"/>
+        <location filename="../qml/decodium/Main.qml" line="1926"/>
         <source>File WAV (*.wav)</source>
         <translation>WAV fájl (*.wav)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1819"/>
+        <location filename="../qml/decodium/Main.qml" line="1926"/>
         <source>All files (*)</source>
         <translation>Minden fájl (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1827"/>
+        <location filename="../qml/decodium/Main.qml" line="1934"/>
         <source>Select folder with WAV files</source>
         <translation>WAV fájlokat tartalmazó mappa kiválasztása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3786"/>
+        <location filename="../qml/decodium/Main.qml" line="3925"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
         <translation>Kattintás: NTP szinkronizálás most a DT igazításához (FT8/FT4)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3869"/>
+        <location filename="../qml/decodium/Main.qml" line="4008"/>
         <source>Auto RX level active</source>
         <translation>Auto RX szint aktív</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3870"/>
+        <location filename="../qml/decodium/Main.qml" line="4009"/>
         <source>Auto RX level disabled</source>
         <translation>Auto RX szint letiltva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4363"/>
+        <location filename="../qml/decodium/Main.qml" line="4502"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
         <translation>Kattintás: WAV fájl megnyitása
 Jobb kattintás: mappa dekódolása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4463"/>
+        <location filename="../qml/decodium/Main.qml" line="4602"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
         <translation>Elrendezés visszaállítása (Ctrl+Shift+L)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4495"/>
+        <location filename="../qml/decodium/Main.qml" line="4634"/>
         <source>Decode history (Ctrl+Shift+H)</source>
         <translation>Dekódolási előzmények (Ctrl+Shift+H)</translation>
     </message>
@@ -4003,17 +4312,17 @@ Jobb kattintás: mappa dekódolása</translation>
         <translation type="vanished">Kiegyensúlyozott</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4590"/>
+        <location filename="../qml/decodium/Main.qml" line="4729"/>
         <source>Weak-signal / DX</source>
         <translation>Gyenge jel / DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4590"/>
+        <location filename="../qml/decodium/Main.qml" line="4729"/>
         <source>Contest</source>
         <translation>Verseny</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4590"/>
+        <location filename="../qml/decodium/Main.qml" line="4729"/>
         <source>CPU-limited</source>
         <translation>CPU-korlátozott</translation>
     </message>
@@ -4026,82 +4335,82 @@ Jobb kattintás: mappa dekódolása</translation>
         <translation type="vanished">Profilok készen — egy blokkban alkalmazzák az FT2/dekódolás kapcsolókat. Részletek: Setup → FT2.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4590"/>
+        <location filename="../qml/decodium/Main.qml" line="4729"/>
         <source>Balanced</source>
         <translation>Kiegyensúlyozott</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4591"/>
+        <location filename="../qml/decodium/Main.qml" line="4730"/>
         <source>Profiles...</source>
         <translation>Profilok…</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4596"/>
+        <location filename="../qml/decodium/Main.qml" line="4735"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
         <translation>Készenléti profilok – egy blokkban alkalmazzák az FT2/dekódolás kapcsolókat. Részletek: Setup -&gt; TX.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4834"/>
+        <location filename="../qml/decodium/Main.qml" line="4973"/>
         <source>Drag to reposition the clock</source>
         <translation>Húzza az óra áthelyezéséhez</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5025"/>
+        <location filename="../qml/decodium/Main.qml" line="5164"/>
         <source>Cerca città...</source>
         <translation>Város keresése...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5133"/>
+        <location filename="../qml/decodium/Main.qml" line="5272"/>
         <source>Type a city name</source>
         <translation>Írjon be egy városnevet</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5133"/>
+        <location filename="../qml/decodium/Main.qml" line="5272"/>
         <source>No matching city</source>
         <translation>Nincs egyező város</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5168"/>
+        <location filename="../qml/decodium/Main.qml" line="5307"/>
         <source>Analog clock</source>
         <translation>Analóg óra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5172"/>
+        <location filename="../qml/decodium/Main.qml" line="5311"/>
         <source>Digital clock</source>
         <translation>Digitális óra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5176"/>
+        <location filename="../qml/decodium/Main.qml" line="5315"/>
         <source>City labels</source>
         <translation>Városcímkék</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5183"/>
+        <location filename="../qml/decodium/Main.qml" line="5322"/>
         <source>Hide clock</source>
         <translation>Óra elrejtése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5231"/>
+        <location filename="../qml/decodium/Main.qml" line="5370"/>
         <source>Restore Waterfall</source>
         <translation>Waterfall visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5283"/>
+        <location filename="../qml/decodium/Main.qml" line="5422"/>
         <source>Restore QSO Log</source>
         <translation>QSO Log visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5335"/>
+        <location filename="../qml/decodium/Main.qml" line="5474"/>
         <source>Restore astronomical data</source>
         <translation>Csillagászati adatok visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5392"/>
+        <location filename="../qml/decodium/Main.qml" line="5531"/>
         <source>Restore Live Map</source>
         <translation>Live Map visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5533"/>
+        <location filename="../qml/decodium/Main.qml" line="5672"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
@@ -4110,113 +4419,113 @@ Bal kattintás: megnyitás és csatlakozás
 Jobb kattintás: lecsatlakozás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5610"/>
+        <location filename="../qml/decodium/Main.qml" line="5749"/>
         <source>Disable filter bypass</source>
         <translation>Szűrő-megkerülés letiltása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5611"/>
+        <location filename="../qml/decodium/Main.qml" line="5750"/>
         <source>Bypass CQ/My Call and setup filters</source>
         <translation>CQ/My Call és setup szűrők megkerülése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5658"/>
+        <location filename="../qml/decodium/Main.qml" line="5797"/>
         <source>Restore Macro configuration</source>
         <translation>Makró konfiguráció visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5710"/>
+        <location filename="../qml/decodium/Main.qml" line="5849"/>
         <source>Restore Rig Control</source>
         <translation>Rig Control visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5763"/>
+        <location filename="../qml/decodium/Main.qml" line="5902"/>
         <source>Restore Full Spectrum</source>
         <translation>Full Spectrum visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5815"/>
+        <location filename="../qml/decodium/Main.qml" line="5954"/>
         <source>Restore Period 2</source>
         <translation>2. periódus visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5866"/>
+        <location filename="../qml/decodium/Main.qml" line="6005"/>
         <source>Restore Signal RX</source>
         <translation>Signal RX visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5918"/>
+        <location filename="../qml/decodium/Main.qml" line="6057"/>
         <source>Restore TX panel</source>
         <translation>TX panel visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6173"/>
+        <location filename="../qml/decodium/Main.qml" line="6312"/>
         <source>Clock</source>
         <translation>Óra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7581"/>
-        <location filename="../qml/decodium/Main.qml" line="8374"/>
-        <location filename="../qml/decodium/Main.qml" line="12444"/>
-        <location filename="../qml/decodium/Main.qml" line="13182"/>
+        <location filename="../qml/decodium/Main.qml" line="7820"/>
+        <location filename="../qml/decodium/Main.qml" line="8618"/>
+        <location filename="../qml/decodium/Main.qml" line="12746"/>
+        <location filename="../qml/decodium/Main.qml" line="13480"/>
         <source>Return to normal row height</source>
         <translation>Visszatérés a normál sormagassághoz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7582"/>
-        <location filename="../qml/decodium/Main.qml" line="8375"/>
-        <location filename="../qml/decodium/Main.qml" line="12445"/>
-        <location filename="../qml/decodium/Main.qml" line="13183"/>
+        <location filename="../qml/decodium/Main.qml" line="7821"/>
+        <location filename="../qml/decodium/Main.qml" line="8619"/>
+        <location filename="../qml/decodium/Main.qml" line="12747"/>
+        <location filename="../qml/decodium/Main.qml" line="13481"/>
         <source>Compact rows (2x visible decodes)</source>
         <translation>Kompakt sorok (2x látható dekódolás)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7612"/>
+        <location filename="../qml/decodium/Main.qml" line="7851"/>
         <source>Detach Full Spectrum</source>
         <translation>Full Spectrum leválasztása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8154"/>
+        <location filename="../qml/decodium/Main.qml" line="8398"/>
         <source>Go to the latest decode</source>
         <translation>Ugrás a legutóbbi dekódoláshoz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8340"/>
+        <location filename="../qml/decodium/Main.qml" line="8584"/>
         <source>Clear Signal RX</source>
         <translation>Signal RX törlése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8405"/>
+        <location filename="../qml/decodium/Main.qml" line="8649"/>
         <source>Detach Signal RX</source>
         <translation>Signal RX leválasztása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8817"/>
+        <location filename="../qml/decodium/Main.qml" line="9075"/>
         <source>Stacca</source>
         <translation>Leválasztás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8829"/>
+        <location filename="../qml/decodium/Main.qml" line="9087"/>
         <source>Stacca il DX Cluster in finestra</source>
         <translation>A DX Cluster leválasztása ablakba</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9091"/>
+        <location filename="../qml/decodium/Main.qml" line="9349"/>
         <source>Drag to swap the column</source>
         <translation>Húzza az oszlop felcseréléséhez</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9294"/>
+        <location filename="../qml/decodium/Main.qml" line="9560"/>
         <source>Detach TX panel</source>
         <translation>TX panel leválasztása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9436"/>
+        <location filename="../qml/decodium/Main.qml" line="9702"/>
         <source>Reset Layout</source>
         <translation>Elrendezés visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9452"/>
+        <location filename="../qml/decodium/Main.qml" line="9718"/>
         <source>Riportare tutte le finestre flottanti dentro la finestra principale
 e ricentrare Decodium sul monitor principale?
 
@@ -4227,81 +4536,80 @@ Le coordinate salvate verranno cancellate.</source>
 A mentett koordináták törlődnek.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9753"/>
+        <location filename="../qml/decodium/Main.qml" line="10019"/>
         <source>Notifica</source>
         <translation>Értesítés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10393"/>
+        <location filename="../qml/decodium/Main.qml" line="10679"/>
         <source>Apri cartella ALL.TXT</source>
         <translation>ALL.TXT mappa megnyitása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10457"/>
+        <location filename="../qml/decodium/Main.qml" line="10743"/>
         <source>Bypass Filters</source>
         <translation>Szűrők megkerülése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10673"/>
         <source>Update checks disabled</source>
-        <translation>A frissítések ellenőrzése letiltva</translation>
+        <translation type="vanished">A frissítések ellenőrzése letiltva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10688"/>
+        <location filename="../qml/decodium/Main.qml" line="10990"/>
         <source>Esporta Cabrillo...</source>
         <translation>Cabrillo exportálása...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10716"/>
+        <location filename="../qml/decodium/Main.qml" line="11018"/>
         <source>Mostra orologio</source>
         <translation>Óra megjelenítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10731"/>
+        <location filename="../qml/decodium/Main.qml" line="11033"/>
         <source>Mostra DX Cluster</source>
         <translation>DX Cluster megjelenítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10746"/>
+        <location filename="../qml/decodium/Main.qml" line="11048"/>
         <source>Mostra PSK Reporter</source>
         <translation>PSK Reporter megjelenítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10898"/>
+        <location filename="../qml/decodium/Main.qml" line="11200"/>
         <source>Waterfall / Panadapter</source>
         <translation>Waterfall / Panadapter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10943"/>
+        <location filename="../qml/decodium/Main.qml" line="11245"/>
         <source>DecoSyncTime Monitor</source>
         <translation>DecoSyncTime Monitor</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11521"/>
-        <location filename="../qml/decodium/Main.qml" line="12470"/>
-        <location filename="../qml/decodium/Main.qml" line="13196"/>
-        <location filename="../qml/decodium/Main.qml" line="13209"/>
-        <location filename="../qml/decodium/Main.qml" line="13738"/>
+        <location filename="../qml/decodium/Main.qml" line="11823"/>
+        <location filename="../qml/decodium/Main.qml" line="12772"/>
+        <location filename="../qml/decodium/Main.qml" line="13494"/>
+        <location filename="../qml/decodium/Main.qml" line="13507"/>
+        <location filename="../qml/decodium/Main.qml" line="14041"/>
         <source>Dock</source>
         <translation>Dokkolas</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13747"/>
+        <location filename="../qml/decodium/Main.qml" line="14050"/>
         <source>Dock TX panel</source>
         <translation>TX panel dokkolása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="14214"/>
+        <location filename="../qml/decodium/Main.qml" line="14566"/>
         <source>Inserisci nel layout:</source>
         <translation>Beillesztés az elrendezésbe:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="14221"/>
+        <location filename="../qml/decodium/Main.qml" line="14573"/>
         <source>◧ accanto a Full Spectrum</source>
         <translation>◧ a Full Spectrum mellett</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="14222"/>
+        <location filename="../qml/decodium/Main.qml" line="14574"/>
         <source>◧ accanto a Signal RX</source>
         <translation>◧ a Signal RX mellett</translation>
     </message>
@@ -4310,27 +4618,27 @@ A mentett koordináták törlődnek.</translation>
         <translation type="vanished">TX panel dokkolasa</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10546"/>
+        <location filename="../qml/decodium/Main.qml" line="10832"/>
         <source>Hide ASYNC icon</source>
         <translation>ASYNC ikon elrejtése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10547"/>
+        <location filename="../qml/decodium/Main.qml" line="10833"/>
         <source>Show ASYNC icon</source>
         <translation>ASYNC ikon megjelenítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10627"/>
+        <location filename="../qml/decodium/Main.qml" line="10913"/>
         <source>Alert on CQ</source>
         <translation>Riasztás CQ-ra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10648"/>
+        <location filename="../qml/decodium/Main.qml" line="10934"/>
         <source>Color Highlighting...</source>
         <translation>Színes kiemelés...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10660"/>
+        <location filename="../qml/decodium/Main.qml" line="10946"/>
         <source>QSY...</source>
         <translation>QSY...</translation>
     </message>
@@ -4347,12 +4655,12 @@ A mentett koordináták törlődnek.</translation>
         <translation type="vanished">Cabrillo exportálása...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10700"/>
+        <location filename="../qml/decodium/Main.qml" line="11002"/>
         <source>cty.dat downloading...</source>
         <translation>cty.dat letöltése...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10700"/>
+        <location filename="../qml/decodium/Main.qml" line="11002"/>
         <source>Update cty.dat</source>
         <translation>cty.dat frissítése</translation>
     </message>
@@ -4369,17 +4677,17 @@ A mentett koordináták törlődnek.</translation>
         <translation type="vanished">PSK Reporter megjelenítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10870"/>
+        <location filename="../qml/decodium/Main.qml" line="11172"/>
         <source>Time Sync Panel</source>
         <translation>Időszinkron panel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10884"/>
+        <location filename="../qml/decodium/Main.qml" line="11186"/>
         <source>Active Stations</source>
         <translation>Aktív állomások</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10913"/>
+        <location filename="../qml/decodium/Main.qml" line="11215"/>
         <source>Live Map</source>
         <translation>Élő térkép</translation>
     </message>
@@ -4392,17 +4700,17 @@ A mentett koordináták törlődnek.</translation>
         <translation type="vanished">Hound mód</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10928"/>
+        <location filename="../qml/decodium/Main.qml" line="11230"/>
         <source>Astro / EME</source>
         <translation>Astro / EME</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10957"/>
+        <location filename="../qml/decodium/Main.qml" line="11259"/>
         <source>DX Cluster Panel</source>
         <translation>DX Cluster panel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10971"/>
+        <location filename="../qml/decodium/Main.qml" line="11273"/>
         <source>Alert on My Call</source>
         <translation>Riasztás saját hívójelre</translation>
     </message>
@@ -4411,15 +4719,15 @@ A mentett koordináták törlődnek.</translation>
     <name>MainWindow</name>
     <message>
         <location filename="../widgets/mainwindow.ui" line="52"/>
-        <location filename="../widgets/mainwindow.cpp" line="10225"/>
-        <location filename="../widgets/mainwindow.cpp" line="10228"/>
-        <location filename="../widgets/mainwindow.cpp" line="22776"/>
-        <location filename="../widgets/mainwindow.cpp" line="22893"/>
-        <location filename="../widgets/mainwindow.cpp" line="22977"/>
-        <location filename="../widgets/mainwindow.cpp" line="23313"/>
-        <location filename="../widgets/mainwindow.cpp" line="23561"/>
-        <location filename="../widgets/mainwindow.cpp" line="23625"/>
-        <location filename="../widgets/mainwindow.cpp" line="23794"/>
+        <location filename="../widgets/mainwindow.cpp" line="10511"/>
+        <location filename="../widgets/mainwindow.cpp" line="10514"/>
+        <location filename="../widgets/mainwindow.cpp" line="23137"/>
+        <location filename="../widgets/mainwindow.cpp" line="23254"/>
+        <location filename="../widgets/mainwindow.cpp" line="23338"/>
+        <location filename="../widgets/mainwindow.cpp" line="23674"/>
+        <location filename="../widgets/mainwindow.cpp" line="23922"/>
+        <location filename="../widgets/mainwindow.cpp" line="23986"/>
+        <location filename="../widgets/mainwindow.cpp" line="24181"/>
         <source>Band Activity</source>
         <translation>Sáv-aktivítás</translation>
     </message>
@@ -4431,13 +4739,13 @@ A mentett koordináták törlődnek.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="195"/>
-        <location filename="../widgets/mainwindow.cpp" line="10229"/>
-        <location filename="../widgets/mainwindow.cpp" line="22777"/>
-        <location filename="../widgets/mainwindow.cpp" line="22892"/>
-        <location filename="../widgets/mainwindow.cpp" line="22976"/>
-        <location filename="../widgets/mainwindow.cpp" line="23308"/>
-        <location filename="../widgets/mainwindow.cpp" line="23562"/>
-        <location filename="../widgets/mainwindow.cpp" line="23626"/>
+        <location filename="../widgets/mainwindow.cpp" line="10515"/>
+        <location filename="../widgets/mainwindow.cpp" line="23138"/>
+        <location filename="../widgets/mainwindow.cpp" line="23253"/>
+        <location filename="../widgets/mainwindow.cpp" line="23337"/>
+        <location filename="../widgets/mainwindow.cpp" line="23669"/>
+        <location filename="../widgets/mainwindow.cpp" line="23923"/>
+        <location filename="../widgets/mainwindow.cpp" line="23987"/>
         <source>Rx Frequency</source>
         <translation>Rx-frekvencia</translation>
     </message>
@@ -5047,7 +5355,7 @@ Ez nem áll rendelkezésre a nem szabványos hívójelek tulajdonosai számára.
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="1650"/>
-        <location filename="../widgets/mainwindow.cpp" line="23348"/>
+        <location filename="../widgets/mainwindow.cpp" line="23709"/>
         <source>Fox</source>
         <translation>Fox</translation>
     </message>
@@ -5495,10 +5803,10 @@ meghatározott listához. A listát a Beállításokban (F2) lehet karbantartani
         <location filename="../widgets/mainwindow.ui" line="3138"/>
         <location filename="../widgets/mainwindow.ui" line="3145"/>
         <location filename="../widgets/mainwindow.ui" line="4208"/>
-        <location filename="../widgets/mainwindow.cpp" line="6434"/>
-        <location filename="../widgets/mainwindow.cpp" line="20958"/>
-        <location filename="../widgets/mainwindow.cpp" line="24038"/>
-        <location filename="../widgets/mainwindow.cpp" line="26944"/>
+        <location filename="../widgets/mainwindow.cpp" line="6644"/>
+        <location filename="../widgets/mainwindow.cpp" line="21319"/>
+        <location filename="../widgets/mainwindow.cpp" line="24425"/>
+        <location filename="../widgets/mainwindow.cpp" line="27333"/>
         <source>Random</source>
         <translation>Véletlen</translation>
     </message>
@@ -7334,175 +7642,175 @@ meghatározott listához. A listát a Beállításokban (F2) lehet karbantartani
         <translation>WSJT-X 2.5.0, és MAP65 3.0 Gyors útmutató</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2355"/>
-        <location filename="../widgets/mainwindow.cpp" line="24987"/>
+        <location filename="../widgets/mainwindow.cpp" line="2470"/>
+        <location filename="../widgets/mainwindow.cpp" line="25369"/>
         <source>Rig Control Error</source>
         <translation>Rig vezérlési hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2480"/>
-        <location filename="../widgets/mainwindow.cpp" line="17410"/>
-        <location filename="../widgets/mainwindow.cpp" line="26781"/>
+        <location filename="../widgets/mainwindow.cpp" line="2595"/>
+        <location filename="../widgets/mainwindow.cpp" line="17750"/>
+        <location filename="../widgets/mainwindow.cpp" line="27170"/>
         <source>Receiving</source>
         <translation>Vétel</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2840"/>
-        <location filename="../widgets/mainwindow.cpp" line="24988"/>
+        <location filename="../widgets/mainwindow.cpp" line="2950"/>
+        <location filename="../widgets/mainwindow.cpp" line="25370"/>
         <source>Do you want to reconfigure the radio interface?</source>
         <translation>Újra kívánja konfigurálni a rádió interfészt?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3604"/>
+        <location filename="../widgets/mainwindow.cpp" line="3714"/>
         <source>Error Loading LotW Users Data</source>
         <translation>Hiba a LotW felhasználói adatok betöltésekor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3690"/>
+        <location filename="../widgets/mainwindow.cpp" line="3800"/>
         <source>Error Writing WAV File</source>
         <translation>Hiba a WAV fájl írásakor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3725"/>
+        <location filename="../widgets/mainwindow.cpp" line="3835"/>
         <source>Enumerating audio devices</source>
         <translation>Audió eszközök felsorolása</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3746"/>
+        <location filename="../widgets/mainwindow.cpp" line="3856"/>
         <source>Configurations...</source>
         <translation>Konfigurációk...</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
-        <location filename="../widgets/mainwindow.cpp" line="3846"/>
-        <location filename="../widgets/mainwindow.cpp" line="22881"/>
-        <location filename="../widgets/mainwindow.cpp" line="22968"/>
-        <location filename="../widgets/mainwindow.cpp" line="22978"/>
-        <location filename="../widgets/mainwindow.cpp" line="23300"/>
-        <location filename="../widgets/mainwindow.cpp" line="23314"/>
-        <location filename="../widgets/mainwindow.cpp" line="23468"/>
-        <location filename="../widgets/mainwindow.cpp" line="23469"/>
-        <location filename="../widgets/mainwindow.cpp" line="23543"/>
-        <location filename="../widgets/mainwindow.cpp" line="23544"/>
-        <location filename="../widgets/mainwindow.cpp" line="23550"/>
-        <location filename="../widgets/mainwindow.cpp" line="23551"/>
-        <location filename="../widgets/mainwindow.cpp" line="23693"/>
-        <location filename="../widgets/mainwindow.cpp" line="23694"/>
-        <location filename="../widgets/mainwindow.cpp" line="23785"/>
-        <location filename="../widgets/mainwindow.cpp" line="23786"/>
-        <location filename="../widgets/mainwindow.cpp" line="25795"/>
-        <location filename="../widgets/mainwindow.cpp" line="25798"/>
-        <location filename="../widgets/mainwindow.cpp" line="25803"/>
-        <location filename="../widgets/mainwindow.cpp" line="25806"/>
+        <location filename="../widgets/mainwindow.cpp" line="3956"/>
+        <location filename="../widgets/mainwindow.cpp" line="23242"/>
+        <location filename="../widgets/mainwindow.cpp" line="23329"/>
+        <location filename="../widgets/mainwindow.cpp" line="23339"/>
+        <location filename="../widgets/mainwindow.cpp" line="23661"/>
+        <location filename="../widgets/mainwindow.cpp" line="23675"/>
+        <location filename="../widgets/mainwindow.cpp" line="23829"/>
+        <location filename="../widgets/mainwindow.cpp" line="23830"/>
+        <location filename="../widgets/mainwindow.cpp" line="23904"/>
+        <location filename="../widgets/mainwindow.cpp" line="23905"/>
+        <location filename="../widgets/mainwindow.cpp" line="23911"/>
+        <location filename="../widgets/mainwindow.cpp" line="23912"/>
+        <location filename="../widgets/mainwindow.cpp" line="24054"/>
+        <location filename="../widgets/mainwindow.cpp" line="24055"/>
+        <location filename="../widgets/mainwindow.cpp" line="24172"/>
+        <location filename="../widgets/mainwindow.cpp" line="24173"/>
+        <location filename="../widgets/mainwindow.cpp" line="26184"/>
+        <location filename="../widgets/mainwindow.cpp" line="26187"/>
+        <location filename="../widgets/mainwindow.cpp" line="26192"/>
+        <location filename="../widgets/mainwindow.cpp" line="26195"/>
         <source>Message</source>
         <translation>Üzenet</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6516"/>
-        <location filename="../widgets/mainwindow.cpp" line="23746"/>
+        <location filename="../widgets/mainwindow.cpp" line="6726"/>
+        <location filename="../widgets/mainwindow.cpp" line="24135"/>
         <source>Improper mode</source>
         <translation>Helytelen üzemmód</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6869"/>
-        <location filename="../widgets/mainwindow.cpp" line="28385"/>
+        <location filename="../widgets/mainwindow.cpp" line="7082"/>
+        <location filename="../widgets/mainwindow.cpp" line="28774"/>
         <source>File Open Error</source>
         <translation>Fájl megnyitási hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6870"/>
-        <location filename="../widgets/mainwindow.cpp" line="26847"/>
-        <location filename="../widgets/mainwindow.cpp" line="27371"/>
-        <location filename="../widgets/mainwindow.cpp" line="28386"/>
-        <location filename="../widgets/mainwindow.cpp" line="28958"/>
+        <location filename="../widgets/mainwindow.cpp" line="7083"/>
+        <location filename="../widgets/mainwindow.cpp" line="27236"/>
+        <location filename="../widgets/mainwindow.cpp" line="27760"/>
+        <location filename="../widgets/mainwindow.cpp" line="28775"/>
+        <location filename="../widgets/mainwindow.cpp" line="29349"/>
         <source>Cannot open &quot;%1&quot; for append: %2</source>
         <translation>Nem lehet megnyitni a &quot;%1&quot;-et a hozzáfűzéshez: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7134"/>
+        <location filename="../widgets/mainwindow.cpp" line="7390"/>
         <source>Error saving c2 file</source>
         <translation>Hiba a c2 fájl mentésekor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8108"/>
-        <location filename="../widgets/mainwindow.cpp" line="8111"/>
+        <location filename="../widgets/mainwindow.cpp" line="8369"/>
+        <location filename="../widgets/mainwindow.cpp" line="8372"/>
         <source>Error in Sound Input</source>
         <translation>Hiba a Sound Input-ban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8120"/>
-        <location filename="../widgets/mainwindow.cpp" line="8123"/>
+        <location filename="../widgets/mainwindow.cpp" line="8381"/>
+        <location filename="../widgets/mainwindow.cpp" line="8384"/>
         <source>Error in Sound Output</source>
         <translation>Hiba a Sound Output-ban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8824"/>
-        <location filename="../widgets/mainwindow.cpp" line="10221"/>
+        <location filename="../widgets/mainwindow.cpp" line="9106"/>
+        <location filename="../widgets/mainwindow.cpp" line="10507"/>
         <source>Single-Period Decodes</source>
         <translation>Egy periódusú dekódolások</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8825"/>
-        <location filename="../widgets/mainwindow.cpp" line="10222"/>
+        <location filename="../widgets/mainwindow.cpp" line="9107"/>
+        <location filename="../widgets/mainwindow.cpp" line="10508"/>
         <source>Average Decodes</source>
         <translation>Átlag dekódolások</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9952"/>
+        <location filename="../widgets/mainwindow.cpp" line="10238"/>
         <source>Change Operator</source>
         <translation>Operátor váltás</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9952"/>
+        <location filename="../widgets/mainwindow.cpp" line="10238"/>
         <source>New operator:</source>
         <translation>Új operátor:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10188"/>
+        <location filename="../widgets/mainwindow.cpp" line="10474"/>
         <source>Status File Error</source>
         <translation>Status File hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10189"/>
-        <location filename="../widgets/mainwindow.cpp" line="20763"/>
+        <location filename="../widgets/mainwindow.cpp" line="10475"/>
+        <location filename="../widgets/mainwindow.cpp" line="21124"/>
         <source>Cannot open &quot;%1&quot; for writing: %2</source>
         <translation>Nem lehet megnyitni a &quot;%1&quot;-et írásra: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10226"/>
+        <location filename="../widgets/mainwindow.cpp" line="10512"/>
         <source>Decodes containing My Call</source>
         <translation>A Saját hívást tartalmazó dekódolás</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10509"/>
+        <location filename="../widgets/mainwindow.cpp" line="10795"/>
         <source>Subprocess Error</source>
         <translation>Alfolyamat hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10510"/>
+        <location filename="../widgets/mainwindow.cpp" line="10796"/>
         <source>Subprocess failed with exit code %1</source>
         <translation>Az alfolyamat meghiúsult a %1 kilépési kóddal</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10512"/>
-        <location filename="../widgets/mainwindow.cpp" line="10558"/>
+        <location filename="../widgets/mainwindow.cpp" line="10798"/>
+        <location filename="../widgets/mainwindow.cpp" line="10844"/>
         <source>Running: %1
 %2</source>
         <translation>Indítás: %1
 %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10557"/>
+        <location filename="../widgets/mainwindow.cpp" line="10843"/>
         <source>Subprocess error</source>
         <translation>Alfolyamat hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10682"/>
+        <location filename="../widgets/mainwindow.cpp" line="10968"/>
         <source>Reference spectrum saved</source>
         <translation>Referencia spektrum elmentve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10771"/>
+        <location filename="../widgets/mainwindow.cpp" line="11057"/>
         <source>It is very important to avoid audio harmonics and distorted audio signals.
 This is usually achieved by the following step-by-step approach:
 
@@ -7551,22 +7859,22 @@ Ha lehetséges, időről időre ellenőrizze az átvitelt webSDR segítségével
 hogy a jel tiszta és ne torzuljon.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10787"/>
+        <location filename="../widgets/mainwindow.cpp" line="11073"/>
         <source>&lt;b&gt;Recommended Audio Settings&lt;/b&gt;</source>
         <translation>&lt;b&gt;Javasolt hangbeállítások&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10851"/>
+        <location filename="../widgets/mainwindow.cpp" line="11137"/>
         <source>Invalid data in fmt.all at line %1</source>
         <translation>Érvénytelen adat az fmt.all-ban a %1 sorban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10857"/>
+        <location filename="../widgets/mainwindow.cpp" line="11143"/>
         <source>Good Calibration Solution</source>
         <translation>Jó kalibrálási megoldás</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10858"/>
+        <location filename="../widgets/mainwindow.cpp" line="11144"/>
         <source>&lt;pre&gt;%1%L2 ±%L3 ppm
 %4%L5 ±%L6 Hz
 
@@ -7579,37 +7887,37 @@ hogy a jel tiszta és ne torzuljon.</translation>
 %9%L10 Hz&lt;/pre&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10872"/>
+        <location filename="../widgets/mainwindow.cpp" line="11158"/>
         <source>Delete Calibration Measurements</source>
         <translation>Kalibrálási mérések törlése</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10873"/>
+        <location filename="../widgets/mainwindow.cpp" line="11159"/>
         <source>The &quot;fmt.all&quot; file will be renamed as &quot;fmt.bak&quot;</source>
         <translation>Az &quot;fmt.all&quot; fájl neve &quot;fmt.bak&quot; lesz.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11597"/>
+        <location filename="../widgets/mainwindow.cpp" line="11883"/>
         <source>No data read from disk. Wrong file format?</source>
         <translation>Nincs adatolvasás a lemezről. Rossz fájlformátum?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11604"/>
+        <location filename="../widgets/mainwindow.cpp" line="11890"/>
         <source>Confirm Delete</source>
         <translation>Törlés megerősítése</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11605"/>
+        <location filename="../widgets/mainwindow.cpp" line="11891"/>
         <source>Are you sure you want to delete all *.wav and *.c2 files in &quot;%1&quot;?</source>
         <translation>Biztos, hogy törölni akarja az összes *.wav és *.c2 fájlt a &quot;%1&quot;-ben?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11642"/>
+        <location filename="../widgets/mainwindow.cpp" line="11928"/>
         <source>Keyboard Shortcuts</source>
         <translation>Gyorsbillentyűk</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11644"/>
+        <location filename="../widgets/mainwindow.cpp" line="11930"/>
         <source>&lt;table cellspacing=1&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
@@ -7711,33 +8019,33 @@ hogy a jel tiszta és ne torzuljon.</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11704"/>
+        <location filename="../widgets/mainwindow.cpp" line="11990"/>
         <source>Special Mouse Commands</source>
         <translation>Speciális egérparancsok</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="12438"/>
+        <location filename="../widgets/mainwindow.cpp" line="12729"/>
         <source>No more files to open.</source>
         <translation>Nincs több megnyitható fájl.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="13887"/>
+        <location filename="../widgets/mainwindow.cpp" line="14216"/>
         <source>Embedded WSPR decoder unavailable.</source>
         <translation>A beágyazott WSPR dekóder nem érhető el.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="15990"/>
-        <location filename="../widgets/mainwindow.cpp" line="27417"/>
+        <location filename="../widgets/mainwindow.cpp" line="16319"/>
+        <location filename="../widgets/mainwindow.cpp" line="27806"/>
         <source>Spotting to PSK Reporter unavailable</source>
         <translation>A PSK Reporterhez a spottolás nem működik</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16219"/>
+        <location filename="../widgets/mainwindow.cpp" line="16548"/>
         <source>WSPR Guard Band</source>
         <translation>WSPR Védett Sáv, más típusú modulációs adás blokkolva van benne.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11706"/>
+        <location filename="../widgets/mainwindow.cpp" line="11992"/>
         <source>&lt;table cellpadding=5&gt;
   &lt;tr&gt;
     &lt;th align=&quot;right&quot;&gt;Click on&lt;/th&gt;
@@ -7853,13 +8161,13 @@ hogy a jel tiszta és ne torzuljon.</translation>
         <translation>&lt;table cellpadding=5&gt;&lt;tr&gt;&lt;th align=&quot;right&quot;&gt;Kattintson a&lt;/th&gt;elemre&lt;th align=&quot;left&quot;&gt;Akció&lt;/th&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Vízesés:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre az Rx frekvencia beállításához.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Tx frekvencia beállításához.&lt;br/&gt;&lt;b&gt;Kattintson duplán a jobb gombbal a&lt;/b&gt;elemre az Rx és Tx frekvenciák beállításához.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Dekódolt szöveg:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson duplán a&lt;/b&gt;elemre a második hívójel másolásához a Dx hívásba, a lokátor Dx Gridbe, az Rx megváltoztatásához&lt;br/&gt;és Tx frekvenciát a dekódolt jel frekvenciájára, és szabványos üzeneteket generál.&lt;br/&gt;Tartsa lenyomva a&lt;b&gt;Alt&lt;/b&gt;gombot, hogy megakadályozza a Tx engedélyezését a&lt;b&gt;eszközön, kattintson duplán a&lt;/b&gt;ikonra.&lt;br/&gt;Ha a&lt;b&gt;Hold Tx Freq&lt;/b&gt;be van jelölve, vagy az első bejelentkezési üzenet az Ön&lt;br/&gt;saját hívás, a Tx frekvencia nem változik, hacsak nem tartja lenyomva a&lt;b&gt;Ctrl&lt;/b&gt;billentyűt.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Tárcsázási frekvencia:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Forgassa el az egér görgőjét&lt;/b&gt;a kHz értékek módosításához, vagy:&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a frekvencia 1 kHz-cel történő növeléséhez.&lt;br/&gt;&lt;b&gt;Kattintson a bal gombbal a&lt;/b&gt;-re a frekvencia 1 kHz-cel történő csökkentéséhez.&lt;br/&gt;Az egérmutatónak a tárcsázási frekvencia jelző fölött kell lennie.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;H Gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre az FT8 Hound mód be- és kikapcsolásához.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a SuperFox mód be- vagy kikapcsolásához.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;FT8 Gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre az FT8 Hound módra váltáshoz.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre az utoljára használt különleges működési tevékenység be-/kikapcsolásához.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Q65 Gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre, hogy Q65 módba váltson.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Q65 Pileup módra váltáshoz.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;JT65 Gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a JT65 módra váltáshoz.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a JT9 módba való váltáshoz.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Tx5 gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Tx5 szabad szöveg megőrzéséhez.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Tx Páros/1.:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a jelölőnégyzet állapotának rögzítéséhez.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal az FT8 gombra&lt;/b&gt;a lefagyás feloldásához.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Tx engedélyezése gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre az Auto-Tx mód be- és kikapcsolásához.&lt;br/&gt;&lt;b&gt;Kattintson a jobb gombbal a&lt;/b&gt;elemre a Wait &amp; Pounce be-/kikapcsolásához.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Törlés gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre az Rx Frequency ablak törléséhez.&lt;br/&gt;&lt;b&gt;Kattintson duplán a&lt;/b&gt;elemre az Rx Frequency és Band Activity ablakok törléséhez.&lt;br/&gt;Ha a&lt;b&gt;Alternate Erase gomb viselkedése&lt;/b&gt;be van jelölve:&lt;br/&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a Band Activity ablak törléséhez.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre az Rx Frequency ablak törléséhez.&lt;br/&gt;&lt;b&gt;Kattintson duplán a&lt;/b&gt;elemre az Rx Frequency és Band Activity ablakok törléséhez.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;DX hívógomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a Várakozás és hívás be-/kikapcsolásához.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Dx hívás, Dx Grid és Std Msgs törléséhez.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;keresőgomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a hívójel kereséséhez az adatbázisban.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Dx Call kereséséhez a qrz.com webhelyen.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Hozzáadás gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a hívójel és a helymeghatározó hozzáadásához az adatbázishoz.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Dx Call kereséséhez a hamqth.com webhelyen.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Figyelmen kívül hagyó gomb:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a hívójel hozzáadásához a figyelmen kívül hagyó listához.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre a Dx Call kereséséhez a qrzcq.com webhelyen.&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td align=&quot;right&quot;&gt;Sávgombok:&lt;/td&gt;&lt;td&gt;&lt;b&gt;Kattintson a&lt;/b&gt;elemre a sáv/mód alapértelmezett frekvenciák közötti váltáshoz.&lt;br/&gt;&lt;b&gt;Kattintson jobb gombbal a&lt;/b&gt;elemre az FT8 DXpedition frekvenciáinak váltásához.&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16238"/>
-        <location filename="../widgets/mainwindow.cpp" line="16255"/>
+        <location filename="../widgets/mainwindow.cpp" line="16567"/>
+        <location filename="../widgets/mainwindow.cpp" line="16584"/>
         <source>Fox Mode warning</source>
         <translation>Fox mód figyelmeztetés</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18097"/>
+        <location filename="../widgets/mainwindow.cpp" line="18439"/>
         <source>This station transmits in the same time slot as you do.
 
 You must not start a QSO if both stations Tx even/1st
@@ -7876,7 +8184,7 @@ Kattintson az MSK144 mód gombra a Tx páros/1
 jelölőnégyzetet, vagy válasszon másik állomást.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18723"/>
+        <location filename="../widgets/mainwindow.cpp" line="19082"/>
         <source>Should you switch to EU VHF Contest mode?
 
 To do so, check &apos;Special operating activity&apos; and
@@ -7887,35 +8195,35 @@ Ehhez jelölje be a „Speciális tevékenységek” négyzetet és
 az „EU VHFContest” lehetőséget a Beállítások | Haladó fülön.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18742"/>
+        <location filename="../widgets/mainwindow.cpp" line="19101"/>
         <source>Should you switch to ARRL Field Day mode?</source>
         <translation>Át akar vátani ARRL Field Day módra?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18747"/>
+        <location filename="../widgets/mainwindow.cpp" line="19106"/>
         <source>Should you switch to RTTY contest mode?</source>
         <translation>Át akar váltani RTTY contest módra?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20725"/>
-        <location filename="../widgets/mainwindow.cpp" line="20744"/>
-        <location filename="../widgets/mainwindow.cpp" line="20762"/>
-        <location filename="../widgets/mainwindow.cpp" line="20789"/>
+        <location filename="../widgets/mainwindow.cpp" line="21086"/>
+        <location filename="../widgets/mainwindow.cpp" line="21105"/>
+        <location filename="../widgets/mainwindow.cpp" line="21123"/>
+        <location filename="../widgets/mainwindow.cpp" line="21150"/>
         <source>Add to CALL3.TXT</source>
         <translation>Hozzáadás a CALL3.TXT-hez</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20726"/>
+        <location filename="../widgets/mainwindow.cpp" line="21087"/>
         <source>Please enter a valid grid locator</source>
         <translation>Adjon meg egy érvényes QRA lokátort</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20745"/>
+        <location filename="../widgets/mainwindow.cpp" line="21106"/>
         <source>Cannot open &quot;%1&quot; for read/write: %2</source>
         <translation>A &quot;%1&quot; nem nyitható meg olvasásra/írásra: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20787"/>
+        <location filename="../widgets/mainwindow.cpp" line="21148"/>
         <source>%1
 is already in CALL3.TXT, do you wish to replace it?</source>
         <translation>%1
@@ -7926,291 +8234,291 @@ már szerepel a CALL3.TXT ben, szeretné ezt kicserélni?</translation>
         <translation type="vanished">Figyelmeztetés: A DX Hívójel mező üres.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3195"/>
-        <location filename="../widgets/mainwindow.cpp" line="22442"/>
+        <location filename="../widgets/mainwindow.cpp" line="3305"/>
+        <location filename="../widgets/mainwindow.cpp" line="22803"/>
         <source>Log file error</source>
         <translation>Log fájl hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="1219"/>
-        <location filename="../widgets/mainwindow.cpp" line="29411"/>
+        <location filename="../widgets/mainwindow.cpp" line="1230"/>
+        <location filename="../widgets/mainwindow.cpp" line="29811"/>
         <source>Async L2 Mode On</source>
         <translation>Async L2 Mode On</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2764"/>
+        <location filename="../widgets/mainwindow.cpp" line="2879"/>
         <source>Language</source>
         <translation>Nyelv</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2804"/>
+        <location filename="../widgets/mainwindow.cpp" line="2919"/>
         <source>Language changed</source>
         <translation>A nyelv megváltozott</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2805"/>
+        <location filename="../widgets/mainwindow.cpp" line="2920"/>
         <source>Please restart the application for the language change to take effect.</source>
         <translation>Kérjük, indítsa újra az alkalmazást, hogy a nyelvi módosítás életbe lépjen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2865"/>
+        <location filename="../widgets/mainwindow.cpp" line="2975"/>
         <source>Idle</source>
         <translation>Tétlen</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2955"/>
+        <location filename="../widgets/mainwindow.cpp" line="3065"/>
         <source>Error scanning logbook</source>
         <translation>Hiba a napló beolvasása közben</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2960"/>
+        <location filename="../widgets/mainwindow.cpp" line="3070"/>
         <source>Scanned logbook, %1 worked-before records created. CTY: %2</source>
         <translation>Beolvasott napló,%1munka előtt rekordok létrehozása. CTY:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3190"/>
+        <location filename="../widgets/mainwindow.cpp" line="3300"/>
         <source>Error</source>
         <translation>Hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3190"/>
+        <location filename="../widgets/mainwindow.cpp" line="3300"/>
         <source>parts != 4</source>
         <translation>részek != 4</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3195"/>
-        <location filename="../widgets/mainwindow.cpp" line="22443"/>
+        <location filename="../widgets/mainwindow.cpp" line="3305"/>
+        <location filename="../widgets/mainwindow.cpp" line="22804"/>
         <source>Cannot open &quot;%1&quot;</source>
         <translation>&quot;%1&quot; nem nyitható meg</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3207"/>
-        <location filename="../widgets/mainwindow.cpp" line="3212"/>
-        <location filename="../widgets/mainwindow.cpp" line="22486"/>
-        <location filename="../widgets/mainwindow.cpp" line="22494"/>
+        <location filename="../widgets/mainwindow.cpp" line="3317"/>
+        <location filename="../widgets/mainwindow.cpp" line="3322"/>
+        <location filename="../widgets/mainwindow.cpp" line="22847"/>
+        <location filename="../widgets/mainwindow.cpp" line="22855"/>
         <source>Error sending log to N1MM</source>
         <translation>Hiba történt a napló N1MM-hez küldésekor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3208"/>
-        <location filename="../widgets/mainwindow.cpp" line="22487"/>
+        <location filename="../widgets/mainwindow.cpp" line="3318"/>
+        <location filename="../widgets/mainwindow.cpp" line="22848"/>
         <source>Unable to resolve &quot;%1&quot;: %2</source>
         <translation>Nem oldható fel: &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3212"/>
-        <location filename="../widgets/mainwindow.cpp" line="22495"/>
+        <location filename="../widgets/mainwindow.cpp" line="3322"/>
+        <location filename="../widgets/mainwindow.cpp" line="22856"/>
         <source>Write returned &quot;%1&quot;</source>
         <translation>A beírás &quot;%1&quot; ad vissza</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3239"/>
+        <location filename="../widgets/mainwindow.cpp" line="3349"/>
         <source>AutoSpot</source>
         <translation>AutoSpot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3241"/>
+        <location filename="../widgets/mainwindow.cpp" line="3351"/>
         <source>Invia spot al cluster configurato dopo il log QSO (73 confermato).</source>
         <translation>Invia spot al cluster configurato dopo il log QSO (73 confermato).</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3279"/>
+        <location filename="../widgets/mainwindow.cpp" line="3389"/>
         <source>Remote Web disabled: invalid configured HTTP port %1</source>
         <translation>Távoli web letiltva: érvénytelen a konfigurált HTTP-port%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3333"/>
+        <location filename="../widgets/mainwindow.cpp" line="3443"/>
         <source>Remote WS: invalid FT2_REMOTE_WS_BIND=&quot;%1&quot; (using 0.0.0.0)</source>
         <translation>Távoli WS: érvénytelen FT2_REMOTE_WS_BIND=&quot;%1&quot; (0.0.0.0 használata esetén)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3344"/>
+        <location filename="../widgets/mainwindow.cpp" line="3454"/>
         <source>Remote Web disabled: non-loopback bind requires token authentication.</source>
         <translation>Távoli web letiltva: a visszahurkolt kötéshez token hitelesítés szükséges.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3349"/>
+        <location filename="../widgets/mainwindow.cpp" line="3459"/>
         <source>Remote Web disabled: token must be at least 12 characters on LAN/WAN bind.</source>
         <translation>Távoli web letiltva: a tokennek legalább 12 karakterből kell állnia a LAN/WAN kapcsolaton.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3433"/>
+        <location filename="../widgets/mainwindow.cpp" line="3543"/>
         <source>Remote HTTP: invalid FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (using default ws+1)</source>
         <translation>Távoli HTTP: érvénytelen FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (alapértelmezett ws+1 használatával)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3485"/>
+        <location filename="../widgets/mainwindow.cpp" line="3595"/>
         <source>Remote WS disabled: failed to bind %1:%2</source>
         <translation>A távoli WS letiltva: nem sikerült a kötés%1:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3491"/>
+        <location filename="../widgets/mainwindow.cpp" line="3601"/>
         <source>Remote Web notice: traffic is plain HTTP/WS. Use only trusted LAN/VPN or a TLS reverse proxy.</source>
         <translation>Távoli webes megjegyzés: a forgalom sima HTTP/WS. Csak megbízható LAN/VPN-t vagy TLS fordított proxyt használjon.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3497"/>
+        <location filename="../widgets/mainwindow.cpp" line="3607"/>
         <source>Remote WS disabled: invalid FT2_REMOTE_WS_PORT=&quot;%1&quot;</source>
         <translation>Távoli WS letiltva: érvénytelen FT2_REMOTE_WS_PORT=&quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5277"/>
+        <location filename="../widgets/mainwindow.cpp" line="5472"/>
         <source>Audio input refreshed after device reconnect.</source>
         <translation>Audió bemenet frissítve az eszköz újracsatlakozása után.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5281"/>
-        <location filename="../widgets/mainwindow.cpp" line="5289"/>
+        <location filename="../widgets/mainwindow.cpp" line="5476"/>
+        <location filename="../widgets/mainwindow.cpp" line="5484"/>
         <source>Audio output refreshed after device reconnect.</source>
         <translation>Audió kimenet frissítve az eszköz újracsatlakozása után.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6134"/>
+        <location filename="../widgets/mainwindow.cpp" line="6346"/>
         <source>Decodium v3.0 FT2 Raptor</source>
         <translation>Decodium v3.0 FT2 Raptor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6135"/>
+        <location filename="../widgets/mainwindow.cpp" line="6347"/>
         <source>There must be a callsign in the
  DX Call Box to send QSY Request</source>
         <translation>Kell egy hívójel a
  DX Call Boxban a QSY kérés küldéséhez</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8555"/>
+        <location filename="../widgets/mainwindow.cpp" line="8837"/>
         <source>Audio input resumed after system wake.</source>
         <translation>A hangbemenet a rendszer felébresztése után folytatódik.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9014"/>
+        <location filename="../widgets/mainwindow.cpp" line="9300"/>
         <source>Check for updates...</source>
         <translation>Frissítések keresése...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9098"/>
-        <location filename="../widgets/mainwindow.cpp" line="9539"/>
+        <location filename="../widgets/mainwindow.cpp" line="9384"/>
+        <location filename="../widgets/mainwindow.cpp" line="9825"/>
         <source>Update checks are disabled in this build.</source>
         <translation>A frissítések ellenőrzése le van tiltva ebben a buildben.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9117"/>
+        <location filename="../widgets/mainwindow.cpp" line="9403"/>
         <source>An update check is already in progress.</source>
         <translation>A frissítés ellenőrzése már folyamatban van.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9131"/>
+        <location filename="../widgets/mainwindow.cpp" line="9417"/>
         <source>Checking for updates...</source>
         <translation>Frissítések keresése...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9382"/>
+        <location filename="../widgets/mainwindow.cpp" line="9668"/>
         <source>A new Decodium release is available.</source>
         <translation>Megjelent egy új Decodium kiadás.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9384"/>
+        <location filename="../widgets/mainwindow.cpp" line="9670"/>
         <source>Installed version: %1
 Latest version: %2%3</source>
         <translation>Telepített verzió:%1Legújabb verzió:%2%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9393"/>
+        <location filename="../widgets/mainwindow.cpp" line="9679"/>
         <source>Direct download: %1</source>
         <translation>Közvetlen letöltés:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9397"/>
+        <location filename="../widgets/mainwindow.cpp" line="9683"/>
         <source>Selected asset: %1
 </source>
         <translation>Kiválasztott eszköz:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9401"/>
+        <location filename="../widgets/mainwindow.cpp" line="9687"/>
         <source>Release page: %1</source>
         <translation>Kiadási oldal:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9406"/>
+        <location filename="../widgets/mainwindow.cpp" line="9692"/>
         <source>Download page: %1</source>
         <translation>Letöltési oldal:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9414"/>
+        <location filename="../widgets/mainwindow.cpp" line="9700"/>
         <source>Download</source>
         <translation>Letöltés</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9415"/>
+        <location filename="../widgets/mainwindow.cpp" line="9701"/>
         <source>Remind me later</source>
         <translation>Emlékeztessen később</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9416"/>
+        <location filename="../widgets/mainwindow.cpp" line="9702"/>
         <source>Skip this version</source>
         <translation>Kihagyja ezt a verziót</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9460"/>
-        <location filename="../widgets/mainwindow.cpp" line="9474"/>
-        <location filename="../widgets/mainwindow.cpp" line="9500"/>
+        <location filename="../widgets/mainwindow.cpp" line="9746"/>
+        <location filename="../widgets/mainwindow.cpp" line="9760"/>
+        <location filename="../widgets/mainwindow.cpp" line="9786"/>
         <source>Update check failed.</source>
         <translation>A frissítés ellenőrzése sikertelen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9475"/>
+        <location filename="../widgets/mainwindow.cpp" line="9761"/>
         <source>The release metadata returned by GitHub could not be parsed.</source>
         <translation>A GitHub által visszaadott kiadási metaadatokat nem sikerült elemezni.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9501"/>
+        <location filename="../widgets/mainwindow.cpp" line="9787"/>
         <source>Unable to compare version numbers.</source>
         <translation>Nem lehet összehasonlítani a verziószámokat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9502"/>
+        <location filename="../widgets/mainwindow.cpp" line="9788"/>
         <source>Installed: %1
 Remote tag: %2</source>
         <translation>Telepítve:%1Távoli címke:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9515"/>
+        <location filename="../widgets/mainwindow.cpp" line="9801"/>
         <source>You are up to date.</source>
         <translation>Ön naprakész.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9516"/>
+        <location filename="../widgets/mainwindow.cpp" line="9802"/>
         <source>Installed version: %1</source>
         <translation>Telepített verzió:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9526"/>
+        <location filename="../widgets/mainwindow.cpp" line="9812"/>
         <source>Update available: %1</source>
         <translation>Frissítés elérhető:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10506"/>
+        <location filename="../widgets/mainwindow.cpp" line="10792"/>
         <source>No subprocess diagnostic output was captured.</source>
         <translation>Nem került rögzítésre az alfolyamat diagnosztikai kimenete.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10887"/>
+        <location filename="../widgets/mainwindow.cpp" line="11173"/>
         <source>Load Decodium Certificate</source>
         <translation>Töltse be a Decodium tanúsítványt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10889"/>
+        <location filename="../widgets/mainwindow.cpp" line="11175"/>
         <source>Decodium Certificate (*.decodium);;All files (*)</source>
         <translation>Decodium tanúsítvány (*.decodium);;Minden fájl (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10933"/>
-        <location filename="../widgets/mainwindow.cpp" line="10947"/>
-        <location filename="../widgets/mainwindow.cpp" line="10959"/>
+        <location filename="../widgets/mainwindow.cpp" line="11219"/>
+        <location filename="../widgets/mainwindow.cpp" line="11233"/>
+        <location filename="../widgets/mainwindow.cpp" line="11245"/>
         <source>DXped Certificate Manager</source>
         <translation>DXped tanúsítványkezelő</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10934"/>
+        <location filename="../widgets/mainwindow.cpp" line="11220"/>
         <source>DXpedCertManager.py was not found.
 
 Expected locations:
@@ -8225,63 +8533,63 @@ Várható helyszínek:
 - írható adatkezelő eszközök/</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10948"/>
+        <location filename="../widgets/mainwindow.cpp" line="11234"/>
         <source>Python 3 was not found in PATH.
 Please install Python and try again.</source>
         <translation>A Python 3 nem található a PATH-ban.
 Kérjük, telepítse a Python-t, és próbálja újra.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10960"/>
+        <location filename="../widgets/mainwindow.cpp" line="11246"/>
         <source>Failed to start DXped Certificate Manager.</source>
         <translation>A DXped Certificate Manager indítása nem sikerült.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10964"/>
+        <location filename="../widgets/mainwindow.cpp" line="11250"/>
         <source>DXped Certificate Manager started</source>
         <translation>A DXped Certificate Manager elindult</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10981"/>
-        <location filename="../widgets/mainwindow.cpp" line="20352"/>
+        <location filename="../widgets/mainwindow.cpp" line="11267"/>
+        <location filename="../widgets/mainwindow.cpp" line="20713"/>
         <source>Invalid Certificate</source>
         <translation>Érvénytelen tanúsítvány</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10982"/>
+        <location filename="../widgets/mainwindow.cpp" line="11268"/>
         <source>The Decodium certificate file is invalid or the signature verification failed.</source>
         <translation>A Decodium tanúsítványfájl érvénytelen, vagy az aláírás ellenőrzése sikertelen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11008"/>
+        <location filename="../widgets/mainwindow.cpp" line="11294"/>
         <source>Decodium certificate loaded but expired: %1 (%2)</source>
         <translation>Decodium tanúsítvány betöltve, de lejárt:%1(%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11014"/>
-        <location filename="../widgets/mainwindow.cpp" line="20361"/>
+        <location filename="../widgets/mainwindow.cpp" line="11300"/>
+        <location filename="../widgets/mainwindow.cpp" line="20722"/>
         <source>Certificate Expired</source>
         <translation>Tanúsítvány lejárt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11015"/>
+        <location filename="../widgets/mainwindow.cpp" line="11301"/>
         <source>The Decodium certificate for %1 expired on %2.</source>
         <translation>A%1Decodium tanúsítványa lejárt a következő napon:%2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11027"/>
+        <location filename="../widgets/mainwindow.cpp" line="11313"/>
         <source>Decodium certificate loaded for %1, current callsign is %2</source>
         <translation>Decodium tanúsítvány betöltve a%1számára, az aktuális hívójel:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11033"/>
-        <location filename="../widgets/mainwindow.cpp" line="11053"/>
-        <location filename="../widgets/mainwindow.cpp" line="20383"/>
+        <location filename="../widgets/mainwindow.cpp" line="11319"/>
+        <location filename="../widgets/mainwindow.cpp" line="11339"/>
+        <location filename="../widgets/mainwindow.cpp" line="20744"/>
         <source>Certificate Loaded</source>
         <translation>Tanúsítvány betöltve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11034"/>
+        <location filename="../widgets/mainwindow.cpp" line="11320"/>
         <source>Certificate loaded successfully.
 
 Certificate call: %1
@@ -8295,12 +8603,12 @@ The certificate is active, but it does not match the current operator callsign.<
 Tanúsítványhívás:%1Jelenlegi hívás:%2Szint:%3Lejár:%4A tanúsítvány aktív, de nem egyezik az aktuális kezelői hívójellel.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11047"/>
+        <location filename="../widgets/mainwindow.cpp" line="11333"/>
         <source>Decodium certificate active: %1 (%2)</source>
         <translation>Decodium tanúsítvány aktív:%1(%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11054"/>
+        <location filename="../widgets/mainwindow.cpp" line="11340"/>
         <source>Certificate loaded successfully.
 
 Call: %1
@@ -8311,31 +8619,31 @@ Expires: %3</source>
 Hívjon:%1Szint:%2Lejár:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11123"/>
+        <location filename="../widgets/mainwindow.cpp" line="11409"/>
         <source>No Decodium certificate loaded.</source>
         <translation>Nincs Decodium tanúsítvány betöltve.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11127"/>
+        <location filename="../widgets/mainwindow.cpp" line="11413"/>
         <source>Call: %1
 Tier: %2
 Expires: %3</source>
         <translation>Hívjon:%1Szint:%2Lejár:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11132"/>
+        <location filename="../widgets/mainwindow.cpp" line="11418"/>
         <source>
 Path: %1</source>
         <translation>Útvonal:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11135"/>
+        <location filename="../widgets/mainwindow.cpp" line="11421"/>
         <source>
 Current operator: %1</source>
         <translation>Jelenlegi kezelő:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11154"/>
+        <location filename="../widgets/mainwindow.cpp" line="11440"/>
         <source>If you make fair use of any part of WSJT-X under terms of the GNU General Public License, you must display the following copyright notice prominently in your derivative work:
 
 &quot;The algorithms, source code, look-and-feel of WSJT-X and related programs, and protocol specifications for the modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 are Copyright (C) 2001-2025 by one or more of the following authors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</source>
@@ -8344,22 +8652,22 @@ Current operator: %1</source>
 &quot;A WSJT-X és a kapcsolódó programok algoritmusai, forráskódja, megjelenése és működése, valamint az FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 módok protokollspecifikációi a szerzői jogok (C) 2001 Joseph2 vagy több szerzőtől származnak. K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16195"/>
+        <location filename="../widgets/mainwindow.cpp" line="16524"/>
         <source>Async L2: starting queued call %1</source>
         <translation>Async L2: sorba állított hívás indítása%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16197"/>
+        <location filename="../widgets/mainwindow.cpp" line="16526"/>
         <source>Async L2: starting queued call</source>
         <translation>Async L2: sorban álló hívás indítása</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16215"/>
+        <location filename="../widgets/mainwindow.cpp" line="16544"/>
         <source>Please choose another Tx frequency. Decodium v3.0 FT2 Raptor will not knowingly transmit another mode in the WSPR sub-band on 30m.</source>
         <translation>Kérjük, válasszon másik Tx frekvenciát. A Decodium v3.0 FT2 Raptor tudatosan nem sugároz másik módot a WSPR alsávban 30 méteren.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16233"/>
+        <location filename="../widgets/mainwindow.cpp" line="16562"/>
         <source>Please choose another dial frequency.
 Must be 3Khz away from %1.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
@@ -8370,7 +8678,7 @@ A Decodium v3.0 FT2 Raptor nem működik Fox módban
 átfedi a szabványos FT8 alsávokat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16251"/>
+        <location filename="../widgets/mainwindow.cpp" line="16580"/>
         <source>Please choose another dial frequency.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the WSPR sub-bands.</source>
@@ -8379,23 +8687,23 @@ A Decodium v3.0 FT2 Raptor nem működik Fox módban
 átfedve a WSPR alsávokat.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18047"/>
+        <location filename="../widgets/mainwindow.cpp" line="18389"/>
         <source>Async L2: %1 queued, waiting free TX slot</source>
         <translation>Async L2:%1sorban áll, szabad TX slotra vár</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18049"/>
+        <location filename="../widgets/mainwindow.cpp" line="18391"/>
         <source>Async L2: caller queued, waiting free TX slot</source>
         <translation>Async L2: a hívó sorban áll, várakozik szabad TX slot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20266"/>
-        <location filename="../widgets/mainwindow.cpp" line="20279"/>
+        <location filename="../widgets/mainwindow.cpp" line="20627"/>
+        <location filename="../widgets/mainwindow.cpp" line="20640"/>
         <source>DXpedition Certificate Required</source>
         <translation>DXpedition tanúsítvány szükséges</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20267"/>
+        <location filename="../widgets/mainwindow.cpp" line="20628"/>
         <source>To activate DXpedition mode you must load a valid .dxcert certificate for your callsign.
 
 Load certificate now?</source>
@@ -8404,43 +8712,43 @@ Load certificate now?</source>
 Tanúsítvány betöltése most?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20280"/>
+        <location filename="../widgets/mainwindow.cpp" line="20641"/>
         <source>DXpedition mode was not activated because no valid certificate is loaded.</source>
         <translation>A DXpedition mód nem lett aktiválva, mert nincs betöltve érvényes tanúsítvány.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20343"/>
+        <location filename="../widgets/mainwindow.cpp" line="20704"/>
         <source>Load DXpedition Certificate</source>
         <translation>Töltse be a DXpedition tanúsítványt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20345"/>
+        <location filename="../widgets/mainwindow.cpp" line="20706"/>
         <source>DXped Certificate (*.dxcert);;JSON files (*.json);;All files (*)</source>
         <translation>DXped tanúsítvány (*.dxcert);;JSON-fájlok (*.json);;Minden fájl (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20353"/>
+        <location filename="../widgets/mainwindow.cpp" line="20714"/>
         <source>The certificate file is invalid or the signature verification failed.</source>
         <translation>A tanúsítványfájl érvénytelen, vagy az aláírás ellenőrzése sikertelen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20362"/>
+        <location filename="../widgets/mainwindow.cpp" line="20723"/>
         <source>The certificate for %1 is expired or not yet valid.
 Valid from %2 to %3.</source>
         <translation>A%1tanúsítványa lejárt vagy még nem érvényes.%2-től%3-ig érvényes.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20374"/>
+        <location filename="../widgets/mainwindow.cpp" line="20735"/>
         <source>Unauthorized Operator</source>
         <translation>Jogosulatlan kezelő</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20375"/>
+        <location filename="../widgets/mainwindow.cpp" line="20736"/>
         <source>Your callsign %1 is not listed in this certificate for DXpedition %2.</source>
         <translation>Az Ön%1hívójele nem szerepel a DXpedition%2tanúsítványában.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20384"/>
+        <location filename="../widgets/mainwindow.cpp" line="20745"/>
         <source>Certificate loaded successfully.
 
 DXpedition: %1 (%2)
@@ -8455,92 +8763,92 @@ DXpedition:%1(%2)
 Entitás:%3Kezelők:%4Maximális bővítőhelyek:%5Érvényes:%6-%7Ujjlenyomat:%8</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21597"/>
+        <location filename="../widgets/mainwindow.cpp" line="21958"/>
         <source>DX Call field is empty</source>
         <translation>A DX Call mező üres</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21598"/>
+        <location filename="../widgets/mainwindow.cpp" line="21959"/>
         <source>The logger received a manual log request without a DX callsign.</source>
         <translation>A naplózó kézi naplózási kérést kapott DX hívójel nélkül.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21599"/>
+        <location filename="../widgets/mainwindow.cpp" line="21960"/>
         <source>Select a received message or type the DX callsign before logging the QSO.</source>
         <translation>A QSO naplózása előtt válasszon ki egy fogadott üzenetet, vagy írja be a DX hívójelét.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21844"/>
+        <location filename="../widgets/mainwindow.cpp" line="22205"/>
         <source>AutoSpot skipped: invalid DX cluster endpoint</source>
         <translation>Az AutoSpot kihagyva: érvénytelen DX-fürtvégpont</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21845"/>
+        <location filename="../widgets/mainwindow.cpp" line="22206"/>
         <source>SKIP invalid endpoint</source>
         <translation>Érvénytelen végpont KIHAGYÁSA</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21877"/>
+        <location filename="../widgets/mainwindow.cpp" line="22238"/>
         <source>AutoSpot skipped: empty DX cluster host</source>
         <translation>Az AutoSpot kihagyva: üres DX-fürt gazdagép</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21878"/>
+        <location filename="../widgets/mainwindow.cpp" line="22239"/>
         <source>SKIP empty host</source>
         <translation>Üres gazdagép KIHAGYÁSA</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21886"/>
+        <location filename="../widgets/mainwindow.cpp" line="22247"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
         <translation>Az AutoSpot kihagyva:%1: A%2csak olvasható. Írható DX-fürtvégpont konfigurálása.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21906"/>
+        <location filename="../widgets/mainwindow.cpp" line="22267"/>
         <source>AutoSpot skipped: empty MyCall</source>
         <translation>Az AutoSpot kihagyva: üres MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21907"/>
+        <location filename="../widgets/mainwindow.cpp" line="22268"/>
         <source>SKIP empty MyCall</source>
         <translation>KIHAGYJA az üres MyCall-t</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21914"/>
+        <location filename="../widgets/mainwindow.cpp" line="22275"/>
         <source>SUBMIT %1:%2 | %3</source>
         <translation>BENYÚJTÁS%1:%2|%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32827"/>
+        <location filename="../widgets/mainwindow.cpp" line="33245"/>
         <source>Remote caller queued: %1</source>
         <translation>Távoli hívó sorba állítva: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32854"/>
+        <location filename="../widgets/mainwindow.cpp" line="33272"/>
         <source>Remote CW (audio): %1 (%2 WPM)</source>
         <translation>Távoli CW (audió): %1 (%2 WPM)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32862"/>
+        <location filename="../widgets/mainwindow.cpp" line="33280"/>
         <source>CW audio: messaggio vuoto</source>
         <translation>CW audió: üres üzenet</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32871"/>
+        <location filename="../widgets/mainwindow.cpp" line="33289"/>
         <source>CW audio: TX RTTY in corso, riprova</source>
         <translation>CW audió: TX RTTY folyamatban, próbálja újra</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32880"/>
+        <location filename="../widgets/mainwindow.cpp" line="33298"/>
         <source>CW audio: impossibile generare &quot;%1&quot;</source>
         <translation>CW audió: nem hozható létre: &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32895"/>
+        <location filename="../widgets/mainwindow.cpp" line="33313"/>
         <source>CW audio: TX gia&apos; attivo, comando ignorato</source>
         <translation>CW audió: TX már aktív, parancs figyelmen kívül hagyva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32946"/>
+        <location filename="../widgets/mainwindow.cpp" line="33364"/>
         <source>CW audio non disponibile con audio TCI</source>
         <translation>CW audió nem érhető el TCI audióval</translation>
     </message>
@@ -8549,134 +8857,134 @@ Entitás:%3Kezelők:%4Maximális bővítőhelyek:%5Érvényes:%6-%7Ujjlenyomat:%
         <translation type="vanished">A%1fürtcsomópont által elfogadott AutoSpot a%2-n:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22171"/>
+        <location filename="../widgets/mainwindow.cpp" line="22532"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
         <translation>Az AutoSpot elutasítva a%1esetében a%2rendszeren:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22435"/>
+        <location filename="../widgets/mainwindow.cpp" line="22796"/>
         <source>Duplicate log suppressed for %1 (%2 s window)</source>
         <translation>Ismétlődő napló letiltva a%1esetén (%2ablaka)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23046"/>
+        <location filename="../widgets/mainwindow.cpp" line="23407"/>
         <source>%1 baud Baudot terminal. Mark %2 Hz, shift %3 Hz, %4, %5 stop bits. Received text appears above; type the text to send below.</source>
         <translation>%1baud Baudot terminál. Jelölje meg a%2Hz, eltolja a%3Hz,%4,%5stopbiteket. A fogadott szöveg fent jelenik meg; írja be alább a küldendő szöveget.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23050"/>
+        <location filename="../widgets/mainwindow.cpp" line="23411"/>
         <source>reverse</source>
         <translation>fordított</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23050"/>
+        <location filename="../widgets/mainwindow.cpp" line="23411"/>
         <source>normal</source>
         <translation>normál</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23095"/>
+        <location filename="../widgets/mainwindow.cpp" line="23456"/>
         <source>RTTY text contains no encodable Baudot characters</source>
         <translation>Az RTTY szöveg nem tartalmaz kódolható Baudot karaktereket</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23240"/>
+        <location filename="../widgets/mainwindow.cpp" line="23601"/>
         <source>RTTY Received Text</source>
         <translation>RTTY fogadott szöveg</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23241"/>
+        <location filename="../widgets/mainwindow.cpp" line="23602"/>
         <source>RTTY Transmitted Text</source>
         <translation>RTTY által továbbított szöveg</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23310"/>
+        <location filename="../widgets/mainwindow.cpp" line="23671"/>
         <source>Stations calling DXpedition %1</source>
         <translation>A(z) %1 DXpeditiont hívó állomások</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23344"/>
+        <location filename="../widgets/mainwindow.cpp" line="23705"/>
         <source>Show Already Worked</source>
         <translation>A már dolgozott műsor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23346"/>
+        <location filename="../widgets/mainwindow.cpp" line="23707"/>
         <source>Super Fox</source>
         <translation>Szuper Fox</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23364"/>
+        <location filename="../widgets/mainwindow.cpp" line="23725"/>
         <source>Super Hound</source>
         <translation>Super Hound</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23375"/>
+        <location filename="../widgets/mainwindow.cpp" line="23736"/>
         <source>Hound</source>
         <translation>Vadász</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23795"/>
+        <location filename="../widgets/mainwindow.cpp" line="24182"/>
         <source>Tx Messages</source>
         <translation>Tx üzenetek</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24258"/>
-        <location filename="../widgets/mainwindow.cpp" line="24269"/>
-        <location filename="../widgets/mainwindow.cpp" line="24308"/>
-        <location filename="../widgets/mainwindow.cpp" line="24318"/>
-        <location filename="../widgets/mainwindow.cpp" line="31711"/>
-        <location filename="../widgets/mainwindow.cpp" line="31757"/>
+        <location filename="../widgets/mainwindow.cpp" line="24645"/>
+        <location filename="../widgets/mainwindow.cpp" line="24656"/>
+        <location filename="../widgets/mainwindow.cpp" line="24695"/>
+        <location filename="../widgets/mainwindow.cpp" line="24705"/>
+        <location filename="../widgets/mainwindow.cpp" line="32129"/>
+        <location filename="../widgets/mainwindow.cpp" line="32175"/>
         <source>Confirm Erase</source>
         <translation>Törlés megerősítése</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24259"/>
+        <location filename="../widgets/mainwindow.cpp" line="24646"/>
         <source>Are you sure you want to erase file ALL.TXT?</source>
         <translation>Biztos, hogy törölni akarja a ALL.TXT fájlt?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24270"/>
+        <location filename="../widgets/mainwindow.cpp" line="24657"/>
         <source>Are you sure you want to erase the list of Q65 callers?</source>
         <translation>Biztosan törli a Q65 hívók listáját?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24279"/>
-        <location filename="../widgets/mainwindow.cpp" line="27549"/>
+        <location filename="../widgets/mainwindow.cpp" line="24666"/>
+        <location filename="../widgets/mainwindow.cpp" line="27938"/>
         <source>Confirm Reset</source>
         <translation>Reset megerősítése</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24280"/>
+        <location filename="../widgets/mainwindow.cpp" line="24667"/>
         <source>Are you sure you want to erase your contest log?</source>
         <translation>Biztos, hogy törölni akarja a versenynaplót?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24281"/>
+        <location filename="../widgets/mainwindow.cpp" line="24668"/>
         <source>Doing this will remove all QSO records for the current contest. They will be kept in the ADIF log file but will not be available for export in your Cabrillo log.</source>
         <translation>Ezáltal az aktuális verseny összes QSO-rekordja törlődik. Ezek az ADIF log fájlban megmaradnak, de nem exportálhatók a Cabrillo logba.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24301"/>
+        <location filename="../widgets/mainwindow.cpp" line="24688"/>
         <source>Cabrillo Log saved</source>
         <translation>Cabrillo Log mentve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30022"/>
+        <location filename="../widgets/mainwindow.cpp" line="30440"/>
         <source>Embedded WSPR decoder failed: %1</source>
         <translation>A beágyazott WSPR-dekódoló meghibásodott:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30157"/>
+        <location filename="../widgets/mainwindow.cpp" line="30575"/>
         <source>SuperFox TX generation failed.</source>
         <translation>A SuperFox TX generálása sikertelen.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30786"/>
-        <location filename="../widgets/mainwindow.cpp" line="30844"/>
+        <location filename="../widgets/mainwindow.cpp" line="31204"/>
+        <location filename="../widgets/mainwindow.cpp" line="31262"/>
         <source>Cannot write decodium_log_config.ini file</source>
         <translation>A decodium_log_config.ini fájl nem írható</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31891"/>
+        <location filename="../widgets/mainwindow.cpp" line="32309"/>
         <source>Call sign and LOTW password are required.
 
 Enter these in Settings at the Reporting tab.</source>
@@ -8685,98 +8993,98 @@ Enter these in Settings at the Reporting tab.</source>
 Adja meg ezeket a Beállításokban a Jelentések lapon.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31899"/>
+        <location filename="../widgets/mainwindow.cpp" line="32317"/>
         <source>Upload QSOs to LOTW first, and *wait* for LOTW to update.</source>
         <translation>Először töltsd fel a QSO-kat a LOTW-ra, és *várd meg* a LOTW frissítését.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31916"/>
+        <location filename="../widgets/mainwindow.cpp" line="32334"/>
         <source>Downloading from LOTW...</source>
         <translation>Letöltés a LOTW-ról...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32008"/>
+        <location filename="../widgets/mainwindow.cpp" line="32426"/>
         <source>Download QSOs from LOTW succeeded.</source>
         <translation>Sikerült a QSO-k letöltése a LOTW-ról.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32021"/>
+        <location filename="../widgets/mainwindow.cpp" line="32439"/>
         <source>Download QSOs from LOTW failed.</source>
         <translation>A QSO-k letöltése a LOTW-ról nem sikerült.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32096"/>
-        <location filename="../widgets/mainwindow.cpp" line="32108"/>
-        <location filename="../widgets/mainwindow.cpp" line="32131"/>
+        <location filename="../widgets/mainwindow.cpp" line="32514"/>
+        <location filename="../widgets/mainwindow.cpp" line="32526"/>
+        <location filename="../widgets/mainwindow.cpp" line="32549"/>
         <source>Unable to open file</source>
         <translation>A fájl nem nyitható meg</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32167"/>
+        <location filename="../widgets/mainwindow.cpp" line="32585"/>
         <source>Download QSLs from LOTW succeeded.</source>
         <translation>A QSL-ek letöltése a LOTW webhelyről sikerült.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32174"/>
+        <location filename="../widgets/mainwindow.cpp" line="32592"/>
         <source>Download QSLs from LOTW failed.</source>
         <translation>A QSL-ek letöltése a LOTW webhelyről nem sikerült.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32195"/>
+        <location filename="../widgets/mainwindow.cpp" line="32613"/>
         <source>No QSOs to upload to LOTW</source>
         <translation>Nincs feltölthető QSO a LOTW-ra</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32239"/>
+        <location filename="../widgets/mainwindow.cpp" line="32657"/>
         <source>Upload to LOTW Error</source>
         <translation>Feltöltés LOTW-ba Hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32247"/>
+        <location filename="../widgets/mainwindow.cpp" line="32665"/>
         <source>Uploading to LOTW...</source>
         <translation>Feltöltés a LOTW-ra...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32344"/>
+        <location filename="../widgets/mainwindow.cpp" line="32762"/>
         <source>LOTW process error</source>
         <translation>LOTW folyamathiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32415"/>
+        <location filename="../widgets/mainwindow.cpp" line="32833"/>
         <source>Network Error - Refusing redirect for credentialed LOTW request:
 &apos;%1&apos;</source>
         <translation>Hálózati hiba – Hitelesítő adatokkal ellátott LOTW-kérés átirányításának elutasítása:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32424"/>
+        <location filename="../widgets/mainwindow.cpp" line="32842"/>
         <source>Network Error - SSL/TLS support not installed, cannot fetch:
 &apos;%1&apos;</source>
         <translation>Hálózati hiba – az SSL/TLS támogatás nincs telepítve, nem lehet letölteni:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32434"/>
+        <location filename="../widgets/mainwindow.cpp" line="32852"/>
         <source>Network Error - Too many redirects:
 &apos;%1&apos;</source>
         <translation>Hálózati hiba – Túl sok átirányítás:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32448"/>
+        <location filename="../widgets/mainwindow.cpp" line="32866"/>
         <source>Network Error:
 %1</source>
         <translation>Hálózati hiba:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32455"/>
+        <location filename="../widgets/mainwindow.cpp" line="32873"/>
         <source>File System Error - Cannot commit changes to:
 &quot;%1&quot;</source>
         <translation>Fájlrendszer-hiba – Nem lehet változtatásokat végrehajtani a következőkben:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32484"/>
+        <location filename="../widgets/mainwindow.cpp" line="32902"/>
         <source>File System Error - Cannot open file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -8785,7 +9093,7 @@ Error(%2): %3</source>
 Hiba (%2):%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32492"/>
+        <location filename="../widgets/mainwindow.cpp" line="32910"/>
         <source>File System Error - Cannot write to file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -8794,17 +9102,17 @@ Error(%2): %3</source>
 Hiba (%2):%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32555"/>
+        <location filename="../widgets/mainwindow.cpp" line="32973"/>
         <source>Unable to open incremental log file</source>
         <translation>Nem lehet megnyitni a növekményes naplófájlt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32711"/>
+        <location filename="../widgets/mainwindow.cpp" line="33129"/>
         <source>Remote waterfall stream enabled</source>
         <translation>Távoli vízesés patak engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32712"/>
+        <location filename="../widgets/mainwindow.cpp" line="33130"/>
         <source>Remote waterfall stream disabled</source>
         <translation>A távoli vízesés patak letiltva</translation>
     </message>
@@ -8813,309 +9121,309 @@ Hiba (%2):%3</translation>
         <translation type="vanished">Távoli FT2 hívó várólistán:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32997"/>
+        <location filename="../widgets/mainwindow.cpp" line="33415"/>
         <source>Remote mode request ignored: RTTY is hidden in this release</source>
         <translation>Távoli mód kérése figyelmen kívül hagyva: Az RTTY rejtett ebben a kiadásban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33003"/>
+        <location filename="../widgets/mainwindow.cpp" line="33421"/>
         <source>Remote mode set: %1</source>
         <translation>Távirányító üzemmód beállítása:%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33049"/>
+        <location filename="../widgets/mainwindow.cpp" line="33467"/>
         <source>Remote band ignored: invalid band &quot;%1&quot;</source>
         <translation>Távoli sáv figyelmen kívül hagyva: érvénytelen sáv &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33053"/>
+        <location filename="../widgets/mainwindow.cpp" line="33471"/>
         <source>Remote band set: 160m</source>
         <translation>Távszalag készlet: 160m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33054"/>
+        <location filename="../widgets/mainwindow.cpp" line="33472"/>
         <source>Remote band set: 80m</source>
         <translation>Távszalag készlet: 80m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33055"/>
+        <location filename="../widgets/mainwindow.cpp" line="33473"/>
         <source>Remote band set: 60m</source>
         <translation>Távszalag készlet: 60m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33056"/>
+        <location filename="../widgets/mainwindow.cpp" line="33474"/>
         <source>Remote band set: 40m</source>
         <translation>Távszalag készlet: 40m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33057"/>
+        <location filename="../widgets/mainwindow.cpp" line="33475"/>
         <source>Remote band set: 30m</source>
         <translation>Távszalag készlet: 30m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33058"/>
+        <location filename="../widgets/mainwindow.cpp" line="33476"/>
         <source>Remote band set: 20m</source>
         <translation>Távszalag készlet: 20m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33059"/>
+        <location filename="../widgets/mainwindow.cpp" line="33477"/>
         <source>Remote band set: 17m</source>
         <translation>Távszalag készlet: 17m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33060"/>
+        <location filename="../widgets/mainwindow.cpp" line="33478"/>
         <source>Remote band set: 15m</source>
         <translation>Távszalag készlet: 15m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33061"/>
+        <location filename="../widgets/mainwindow.cpp" line="33479"/>
         <source>Remote band set: 12m</source>
         <translation>Távszalag készlet: 12m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33062"/>
+        <location filename="../widgets/mainwindow.cpp" line="33480"/>
         <source>Remote band set: 10m</source>
         <translation>Távszalag készlet: 10m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33063"/>
+        <location filename="../widgets/mainwindow.cpp" line="33481"/>
         <source>Remote band set: 6m</source>
         <translation>Távszalag készlet: 6m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33064"/>
+        <location filename="../widgets/mainwindow.cpp" line="33482"/>
         <source>Remote band set: 2m</source>
         <translation>Távszalag készlet: 2m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33065"/>
+        <location filename="../widgets/mainwindow.cpp" line="33483"/>
         <source>Remote band set: 70cm</source>
         <translation>Távoli pánt készlet: 70 cm</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33067"/>
+        <location filename="../widgets/mainwindow.cpp" line="33485"/>
         <source>Remote band ignored: unsupported band &quot;%1&quot;</source>
         <translation>Távoli sáv figyelmen kívül hagyva: nem támogatott sáv &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33133"/>
+        <location filename="../widgets/mainwindow.cpp" line="33549"/>
         <source>Remote dial frequency set: %1 MHz</source>
         <translation>Távoli dial frekvencia beállítva: %1 MHz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33152"/>
+        <location filename="../widgets/mainwindow.cpp" line="33568"/>
         <source>Remote Rx frequency set: %1 Hz</source>
         <translation>Távoli Rx frekvencia beállítása:%1Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33170"/>
+        <location filename="../widgets/mainwindow.cpp" line="33586"/>
         <source>Remote Tx frequency set: %1 Hz</source>
         <translation>Távoli Tx frekvencia beállítása:%1Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33256"/>
+        <location filename="../widgets/mainwindow.cpp" line="33672"/>
         <source>Remote TX enabled</source>
         <translation>Távoli TX engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33256"/>
+        <location filename="../widgets/mainwindow.cpp" line="33672"/>
         <source>Remote TX disabled</source>
         <translation>Távoli TX letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33273"/>
+        <location filename="../widgets/mainwindow.cpp" line="33689"/>
         <source>Remote Auto CQ enabled</source>
         <translation>Távoli Auto CQ engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33273"/>
+        <location filename="../widgets/mainwindow.cpp" line="33689"/>
         <source>Remote Auto CQ disabled</source>
         <translation>Távoli Auto CQ letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33299"/>
+        <location filename="../widgets/mainwindow.cpp" line="33715"/>
         <source>Remote AutoSpot enabled</source>
         <translation>A távoli AutoSpot engedélyezve van</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33299"/>
+        <location filename="../widgets/mainwindow.cpp" line="33715"/>
         <source>Remote AutoSpot disabled</source>
         <translation>A távoli AutoSpot letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33300"/>
+        <location filename="../widgets/mainwindow.cpp" line="33716"/>
         <source>AutoSpot enabled</source>
         <translation>AutoSpot engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33300"/>
+        <location filename="../widgets/mainwindow.cpp" line="33716"/>
         <source>AutoSpot disabled</source>
         <translation>Az AutoSpot letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33318"/>
+        <location filename="../widgets/mainwindow.cpp" line="33734"/>
         <source>Remote Monitoring ignored: cannot enable while transmitting</source>
         <translation>Távfelügyelet figyelmen kívül hagyva: átvitel közben nem engedélyezhető</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33332"/>
+        <location filename="../widgets/mainwindow.cpp" line="33748"/>
         <source>Remote Monitoring enabled</source>
         <translation>Távfelügyelet engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33332"/>
+        <location filename="../widgets/mainwindow.cpp" line="33748"/>
         <source>Remote Monitoring disabled</source>
         <translation>A távfelügyelet letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33344"/>
+        <location filename="../widgets/mainwindow.cpp" line="33760"/>
         <source>Remote Async L2 ignored: not in FT2 mode</source>
         <translation>Távoli Async L2 figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33352"/>
+        <location filename="../widgets/mainwindow.cpp" line="33768"/>
         <source>Remote Async L2 ignored: mandatory in FT2 mode</source>
         <translation>Távoli Async L2 figyelmen kívül hagyva: kötelező FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33356"/>
+        <location filename="../widgets/mainwindow.cpp" line="33772"/>
         <source>Remote Async L2 enabled (mandatory in FT2)</source>
         <translation>Remote Async L2 engedélyezve (kötelező az FT2-ben)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33368"/>
+        <location filename="../widgets/mainwindow.cpp" line="33784"/>
         <source>Remote Dual Carrier ignored: not in FT2 mode</source>
         <translation>Távoli Dual Carrier figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33372"/>
+        <location filename="../widgets/mainwindow.cpp" line="33788"/>
         <source>Remote Dual Carrier enabled</source>
         <translation>A Remote Dual Carrier engedélyezve van</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33372"/>
+        <location filename="../widgets/mainwindow.cpp" line="33788"/>
         <source>Remote Dual Carrier disabled</source>
         <translation>A távoli kettős hordozó le van tiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33384"/>
+        <location filename="../widgets/mainwindow.cpp" line="33800"/>
         <source>Remote Alt 1/2 ignored: not available in FT2 mode</source>
         <translation>Távoli Alt 1/2 figyelmen kívül hagyva: nem elérhető FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33388"/>
+        <location filename="../widgets/mainwindow.cpp" line="33804"/>
         <source>Remote Alt 1/2 enabled</source>
         <translation>Távoli Alt 1/2 engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33388"/>
+        <location filename="../widgets/mainwindow.cpp" line="33804"/>
         <source>Remote Alt 1/2 disabled</source>
         <translation>Távoli Alt 1/2 letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33400"/>
+        <location filename="../widgets/mainwindow.cpp" line="33816"/>
         <source>Remote Manual TX ignored: not in FT2 mode</source>
         <translation>Távoli kézi TX figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33404"/>
+        <location filename="../widgets/mainwindow.cpp" line="33820"/>
         <source>Remote Manual TX enabled</source>
         <translation>Távoli kézi TX engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33404"/>
+        <location filename="../widgets/mainwindow.cpp" line="33820"/>
         <source>Remote Manual TX disabled</source>
         <translation>Távoli kézi TX letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33416"/>
+        <location filename="../widgets/mainwindow.cpp" line="33832"/>
         <source>Remote Speedy ignored: not in FT2 mode</source>
         <translation>Remote Speedy figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33420"/>
+        <location filename="../widgets/mainwindow.cpp" line="33836"/>
         <source>Remote Speedy enabled</source>
         <translation>Remote Speedy engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33420"/>
+        <location filename="../widgets/mainwindow.cpp" line="33836"/>
         <source>Remote Speedy disabled</source>
         <translation>Remote Speedy letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33432"/>
+        <location filename="../widgets/mainwindow.cpp" line="33848"/>
         <source>Remote D-CW ignored: not in FT2 mode</source>
         <translation>Távoli D-CW figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33436"/>
+        <location filename="../widgets/mainwindow.cpp" line="33852"/>
         <source>Remote D-CW enabled</source>
         <translation>Távoli D-CW engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33436"/>
+        <location filename="../widgets/mainwindow.cpp" line="33852"/>
         <source>Remote D-CW disabled</source>
         <translation>Távoli D-CW letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33448"/>
+        <location filename="../widgets/mainwindow.cpp" line="33864"/>
         <source>Remote Quick QSO ignored: not in FT2 mode</source>
         <translation>Távoli Gyors QSO figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33452"/>
+        <location filename="../widgets/mainwindow.cpp" line="33868"/>
         <source>Remote Quick QSO enabled</source>
         <translation>Távoli gyors QSO engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33452"/>
+        <location filename="../widgets/mainwindow.cpp" line="33868"/>
         <source>Remote Quick QSO disabled</source>
         <translation>A távoli gyors QSO letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33464"/>
+        <location filename="../widgets/mainwindow.cpp" line="33880"/>
         <source>Remote QSO profile ignored: not in FT2 mode</source>
         <translation>Távoli QSO profil figyelmen kívül hagyva: nincs FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33475"/>
+        <location filename="../widgets/mainwindow.cpp" line="33891"/>
         <source>Remote QSO profile ignored: unsupported FT2 count %1</source>
         <translation>Távoli QSO profil figyelmen kívül hagyva: nem támogatott FT2 count%1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33480"/>
+        <location filename="../widgets/mainwindow.cpp" line="33896"/>
         <source>Remote QSO profile set to %1 msg</source>
         <translation>A távoli QSO-profil beállítása%1msg</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24319"/>
+        <location filename="../widgets/mainwindow.cpp" line="24706"/>
         <source>Are you sure you want to erase the WSPR hashtable?</source>
         <translation>Biztos, hogy törölni akarja a WSPR hash-táblázatot?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22169"/>
+        <location filename="../widgets/mainwindow.cpp" line="22530"/>
         <source>AutoSpot submitted to cluster node for %1 on %2:%3</source>
         <translation>AutoSpot beküldve a cluster csomópontra ehhez: %1, itt: %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24338"/>
+        <location filename="../widgets/mainwindow.cpp" line="24725"/>
         <source>ChronoGPS not found</source>
         <translation>ChronoGPS nem található</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24339"/>
+        <location filename="../widgets/mainwindow.cpp" line="24726"/>
         <source>ChronoGPS.exe was not found in the application directory.
 Please ensure ChronoGPS.exe is in the same folder as Decodium.</source>
         <translation>A ChronoGPS.exe nem található az alkalmazáskönyvtárban.
 Győződjön meg arról, hogy a ChronoGPS.exe ugyanabban a mappában van, mint a Decodium.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24833"/>
+        <location filename="../widgets/mainwindow.cpp" line="25215"/>
         <source>%1 W</source>
         <translation>%1W</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24852"/>
+        <location filename="../widgets/mainwindow.cpp" line="25234"/>
         <source>SWR &gt; 2.5 !!!
 
 Transmission was stopped
@@ -9128,132 +9436,132 @@ Az átvitel leállt
 Ellenőrizze az antennát</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24969"/>
+        <location filename="../widgets/mainwindow.cpp" line="25351"/>
         <source>CAT disconnected, reconnecting (%1/3)...</source>
         <translation>CAT leválasztva, újracsatlakozás (%1/3)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25519"/>
+        <location filename="../widgets/mainwindow.cpp" line="25901"/>
         <source>Tune digital gain </source>
         <translation>Hangolás digitális erősítése </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25521"/>
+        <location filename="../widgets/mainwindow.cpp" line="25903"/>
         <source>Transmit digital gain </source>
         <translation>Adás digitális erősítése </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25551"/>
+        <location filename="../widgets/mainwindow.cpp" line="25933"/>
         <source>Prefixes</source>
         <translation>Prefixek</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26673"/>
+        <location filename="../widgets/mainwindow.cpp" line="27062"/>
         <source>Network Error</source>
         <translation>Hálózati hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26674"/>
+        <location filename="../widgets/mainwindow.cpp" line="27063"/>
         <source>Error: %1
 UDP server %2:%3</source>
         <translation>Hiba: %1
 UDP szerver %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="26846"/>
+        <location filename="../widgets/mainwindow.cpp" line="27235"/>
         <source>File Error</source>
         <translation>Fájl hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27140"/>
+        <location filename="../widgets/mainwindow.cpp" line="27529"/>
         <source>Phase Training Disabled</source>
         <translation>Gyakorlási fázis letiltva</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27143"/>
+        <location filename="../widgets/mainwindow.cpp" line="27532"/>
         <source>Phase Training Enabled</source>
         <translation>Gyakorlási fázis engedélyezve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27290"/>
+        <location filename="../widgets/mainwindow.cpp" line="27679"/>
         <source> WD:0m </source>
         <translation>WD: 0 m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27293"/>
+        <location filename="../widgets/mainwindow.cpp" line="27682"/>
         <source> Runaway Tx watchdog </source>
         <translation>Runaway Tx őrkutya</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27310"/>
+        <location filename="../widgets/mainwindow.cpp" line="27699"/>
         <source> WD:%1m </source>
         <translation>WD:%1m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27560"/>
-        <location filename="../widgets/mainwindow.cpp" line="27563"/>
+        <location filename="../widgets/mainwindow.cpp" line="27949"/>
+        <location filename="../widgets/mainwindow.cpp" line="27952"/>
         <source>Free Text Message</source>
         <translation>Ingyenes szöveges üzenet</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27561"/>
-        <location filename="../widgets/mainwindow.cpp" line="27564"/>
+        <location filename="../widgets/mainwindow.cpp" line="27950"/>
+        <location filename="../widgets/mainwindow.cpp" line="27953"/>
         <source>Message:</source>
         <translation>Üzenet:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27582"/>
+        <location filename="../widgets/mainwindow.cpp" line="27971"/>
         <source>Directional calls not yet supported in SuperFox mode</source>
         <translation>Az irányított hívások SuperFox módban még nem támogatottak</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27601"/>
+        <location filename="../widgets/mainwindow.cpp" line="27990"/>
         <source>TOTP: No seed entered in fox configuration to generate verification code.</source>
         <translation>TOTP: Nincs vetőmag a róka konfigurációjában az ellenőrző kód generálásához.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29389"/>
+        <location filename="../widgets/mainwindow.cpp" line="29789"/>
         <source>Async L2 is mandatory in FT2 mode</source>
         <translation>Az Async L2 kötelező FT2 módban</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30150"/>
+        <location filename="../widgets/mainwindow.cpp" line="30568"/>
         <source>TOTP SF: seed not long enough.</source>
         <translation>TOTP SF: a vetőmag nem elég hosszú.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30284"/>
+        <location filename="../widgets/mainwindow.cpp" line="30702"/>
         <source>Unable to open log file</source>
         <translation>Nem lehet megnyitni a naplófájlt</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31712"/>
+        <location filename="../widgets/mainwindow.cpp" line="32130"/>
         <source>Are you sure you want to erase the Tx Log?</source>
         <translation>Biztos benne, hogy törölni akarja a Tx-naplót?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31737"/>
+        <location filename="../widgets/mainwindow.cpp" line="32155"/>
         <source>&quot;%1&quot; added to Ignore List</source>
         <translation>&quot;%1&quot; hozzáadva a figyelmen kívül hagyó listához</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31758"/>
+        <location filename="../widgets/mainwindow.cpp" line="32176"/>
         <source>Are you sure you want to erase the Ignore List?</source>
         <translation>Biztosan törli a figyelmen kívül hagyó listát?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27374"/>
-        <location filename="../widgets/mainwindow.cpp" line="28961"/>
+        <location filename="../widgets/mainwindow.cpp" line="27763"/>
+        <location filename="../widgets/mainwindow.cpp" line="29352"/>
         <source>Log File Error</source>
         <translation>Napló fájl hiba</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24309"/>
+        <location filename="../widgets/mainwindow.cpp" line="24696"/>
         <source>Are you sure you want to erase file decodium_log.adi?</source>
         <translation>Biztosan törli a decodium_log.adi fájlt?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27550"/>
+        <location filename="../widgets/mainwindow.cpp" line="27939"/>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Biztosan törli a QSO-sorokat?</translation>
     </message>
@@ -9519,26 +9827,26 @@ UDP szerver %2:%3</translation>
         <translation>a fürt nem adott vissza adatokat</translation>
     </message>
     <message>
-        <location filename="../DecodiumPropagationManager.cpp" line="176"/>
         <location filename="../Network/Cloudlog.cpp" line="75"/>
-        <location filename="../widgets/DXClusterWindow.cpp" line="465"/>
+        <location filename="../DecodiumPropagationManager.cpp" line="176"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="42"/>
+        <location filename="../widgets/DXClusterWindow.cpp" line="465"/>
         <source>empty reply</source>
         <translation>üres válasz</translation>
     </message>
     <message>
-        <location filename="../DecodiumPropagationManager.cpp" line="182"/>
         <location filename="../Network/Cloudlog.cpp" line="82"/>
-        <location filename="../widgets/DXClusterWindow.cpp" line="472"/>
+        <location filename="../DecodiumPropagationManager.cpp" line="182"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="49"/>
+        <location filename="../widgets/DXClusterWindow.cpp" line="472"/>
         <source>reply too large</source>
         <translation>túl nagy a válasz</translation>
     </message>
     <message>
-        <location filename="../DecodiumPropagationManager.cpp" line="188"/>
         <location filename="../Network/Cloudlog.cpp" line="89"/>
-        <location filename="../widgets/DXClusterWindow.cpp" line="479"/>
+        <location filename="../DecodiumPropagationManager.cpp" line="188"/>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="56"/>
+        <location filename="../widgets/DXClusterWindow.cpp" line="479"/>
         <source>reply exceeds limit</source>
         <translation>válasz meghaladja a határt</translation>
     </message>
@@ -9618,33 +9926,33 @@ UDP szerver %2:%3</translation>
         <translation>titkos eszköz törlés sikertelen</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22575"/>
         <location filename="../DecodiumDxCluster.cpp" line="896"/>
-        <location filename="../widgets/mainwindow.cpp" line="22214"/>
         <source>timeout waiting for cluster response</source>
         <translation>időtúllépés a fürt válaszára várva</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22576"/>
         <location filename="../DecodiumDxCluster.cpp" line="897"/>
-        <location filename="../widgets/mainwindow.cpp" line="22215"/>
         <source>timeout waiting for cluster response: %1</source>
         <translation>időtúllépés a fürt válaszára várva:%1</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22610"/>
         <location filename="../DecodiumDxCluster.cpp" line="932"/>
-        <location filename="../widgets/mainwindow.cpp" line="22249"/>
         <source>cluster verification response exceeded the safety limit</source>
         <translation>a cluster ellenőrzési válasz túllépte a biztonsági korlátot</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22717"/>
         <location filename="../DecodiumDxCluster.cpp" line="1030"/>
         <location filename="../DecodiumDxCluster.cpp" line="1050"/>
-        <location filename="../widgets/mainwindow.cpp" line="22356"/>
         <source>published in show/dx</source>
         <translation>közzétéve a show/dx-ben</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22722"/>
         <location filename="../DecodiumDxCluster.cpp" line="1033"/>
-        <location filename="../widgets/mainwindow.cpp" line="22361"/>
         <source>node accepted the command; show/dx did not echo it yet</source>
         <translation>a csomópont elfogadta a parancsot; a show/dx még nem visszhangozta</translation>
     </message>
@@ -9657,14 +9965,14 @@ UDP szerver %2:%3</translation>
         <translation type="vanished">node elfogadta a parancsot, de a folt nem látható a show/dx-ben:%1</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22747"/>
         <location filename="../DecodiumDxCluster.cpp" line="1059"/>
-        <location filename="../widgets/mainwindow.cpp" line="22386"/>
         <source>connection closed before cluster confirmation</source>
         <translation>a kapcsolat lezárva a fürt megerősítése előtt</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="22748"/>
         <location filename="../DecodiumDxCluster.cpp" line="1060"/>
-        <location filename="../widgets/mainwindow.cpp" line="22387"/>
         <source>connection closed before cluster confirmation: %1</source>
         <translation>kapcsolat lezárva a fürt megerősítése előtt:%1</translation>
     </message>
@@ -9806,74 +10114,74 @@ A letöltött fájl meghaladja a%1MiB korlátot:%2</translation>
         <translation>UDP socket hiba</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22283"/>
+        <location filename="../DecodiumBridge.cpp" line="24186"/>
         <source>Invalid frequency</source>
         <translation>Érvénytelen frekvencia</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22285"/>
+        <location filename="../DecodiumBridge.cpp" line="24188"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Érvénytelen dátum/idő. Használjon ISO formátumot vagy yyyy-MM-dd HH:mm formátumot.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22287"/>
+        <location filename="../DecodiumBridge.cpp" line="24190"/>
         <source>Invalid frequency row</source>
         <translation>Érvénytelen frekvencia sor</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22346"/>
+        <location filename="../DecodiumBridge.cpp" line="24249"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>A JSON frekvenciafájl értelmezése sikertelen: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22354"/>
+        <location filename="../DecodiumBridge.cpp" line="24257"/>
         <source>No frequencies were found</source>
         <translation>Nem található frekvencia</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22360"/>
-        <location filename="../DecodiumBridge.cpp" line="22462"/>
-        <location filename="../DecodiumBridge.cpp" line="22489"/>
+        <location filename="../DecodiumBridge.cpp" line="24263"/>
+        <location filename="../DecodiumBridge.cpp" line="24365"/>
+        <location filename="../DecodiumBridge.cpp" line="24392"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>A frekvenciafájl túl sok sort tartalmaz (%1, korlát %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22401"/>
+        <location filename="../DecodiumBridge.cpp" line="24304"/>
         <source>Frequency file does not exist</source>
         <translation>A frekvenciafájl nem létezik</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22407"/>
+        <location filename="../DecodiumBridge.cpp" line="24310"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>A frekvenciafájl túl nagy (%1 bájt, korlát %2 bájt)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22417"/>
+        <location filename="../DecodiumBridge.cpp" line="24320"/>
         <source>Cannot open frequency file: %1</source>
         <translation>A frekvenciafájl nem nyitható meg: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22427"/>
+        <location filename="../DecodiumBridge.cpp" line="24330"/>
         <source>No valid working frequencies found</source>
         <translation>Nem található érvényes munkafrekvencia</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22441"/>
+        <location filename="../DecodiumBridge.cpp" line="24344"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Nem érvényes frekvenciafájl: hibás fájl magic</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22448"/>
+        <location filename="../DecodiumBridge.cpp" line="24351"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Nem érvényes frekvenciafájl: a verzió túl új</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22456"/>
+        <location filename="../DecodiumBridge.cpp" line="24359"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>Nem érvényes frekvenciafájl: a sorszám nem olvasható</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="22483"/>
+        <location filename="../DecodiumBridge.cpp" line="24386"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Nem érvényes frekvenciafájl: a tartalom sérült</translation>
     </message>
@@ -9913,42 +10221,56 @@ A letöltött fájl meghaladja a%1MiB korlátot:%2</translation>
         <translation>AutoSpot elutasítva ehhez: %1, itt: %2:%3</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="70"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="72"/>
         <source>Ham Radio Deluxe accetta la connessione TCP, ma non risponde al protocollo HRD. Verifica che HRD Rig Control sia avviato, che la radio sia gia&apos; connessa in HRD e che il server TCP/Remote sia abilitato sulla porta 7809.</source>
         <translation>A Ham Radio Deluxe elfogadja a TCP kapcsolatot, de nem válaszol a HRD protokollra. Ellenőrizze, hogy a HRD Rig Control el van-e indítva, hogy a rádió már csatlakozik-e a HRD-ben, és hogy a TCP/Remote szerver engedélyezve van-e a 7809-es porton.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="91"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="93"/>
         <source>Porta seriale occupata da un altro software (probabilmente OmniRig, WSJT-X, FLDigi o un terminale seriale). Chiudi il programma che sta usando la porta e riprova.</source>
         <translation>A soros portot egy másik szoftver foglalja (valószínűleg OmniRig, WSJT-X, FLDigi vagy egy soros terminál). Zárja be a portot használó programot, és próbálja újra.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="96"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="98"/>
         <source>Porta %1 occupata da un altro software (probabilmente OmniRig, WSJT-X, FLDigi o un terminale seriale). Chiudi il programma che sta usando la porta e riprova.</source>
         <translation>A(z) %1 portot egy másik szoftver foglalja (valószínűleg OmniRig, WSJT-X, FLDigi vagy egy soros terminál). Zárja be a portot használó programot, és próbálja újra.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="115"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="117"/>
         <source>Porta seriale CAT non disponibile. Attendi che Windows enumeri la radio e riprova.</source>
         <translation>A CAT soros port nem érhető el. Várja meg, amíg a Windows felsorolja a rádiót, és próbálja újra.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="117"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="119"/>
         <source>Porta %1 non disponibile. Attendi che Windows enumeri la radio e riprova.</source>
         <translation>A(z) %1 port nem érhető el. Várja meg, amíg a Windows felsorolja a rádiót, és próbálja újra.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="132"/>
-        <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
-        <translation>A CAT kommunikáció megszakadt a riggel. Ellenőrizze az USB kábelt, a COM portot, a baud rate-et, és hogy a rig be van-e kapcsolva. (hamlib trace: %1)</translation>
+        <location filename="../DecodiumTransceiverManager.cpp" line="133"/>
+        <source>Hamlib Yaesu/NewCAT: il rig non risponde alla query CAT. Verifica porta COM, baud rate CAT della radio, handshake RTS/DTR, CAT TOT e che nessun altro software stia usando la porta.</source>
+        <translation>Hamlib Yaesu/NewCAT: a rádió nem válaszol a CAT-lekérdezésre. Ellenőrizd a COM-portot, a rádió CAT baud rate-jét, az RTS/DTR kézfogást, a CAT TOT értéket, és hogy más szoftver nem használja-e a portot.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="179"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="140"/>
+        <source>Comunicazione CAT in timeout. Verifica cavo USB, porta COM, baud rate, handshake RTS/DTR e che il rig sia acceso e non usato da altri software.</source>
+        <translation>A CAT kommunikáció túllépte az időt. Ellenőrizd az USB-kábelt, a COM-portot, a baud rate-et, az RTS/DTR kézfogást, és hogy a rádió be van-e kapcsolva, és nem használja-e más szoftver.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="156"/>
+        <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. Dettagli tecnici nel diagnostic log.</source>
+        <translation>Megszakadt a CAT kommunikáció a rádióval. Ellenőrizd az USB-kábelt, a COM-portot, a baud rate-et, és hogy a rádió be van-e kapcsolva. Technikai részletek a diagnosztikai naplóban.</translation>
+    </message>
+    <message>
+        <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
+        <translation type="vanished">A CAT kommunikáció megszakadt a riggel. Ellenőrizze az USB kábelt, a COM portot, a baud rate-et, és hogy a rig be van-e kapcsolva. (hamlib trace: %1)</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="203"/>
         <source>CAT disabilitato per test RX/recording: la seriale resta disponibile per JTDX.</source>
         <translation>CAT letiltva RX/felvétel teszthez: a soros port továbbra is elérhető a JTDX számára.</translation>
     </message>
     <message>
-        <location filename="../DecodiumTransceiverManager.cpp" line="181"/>
+        <location filename="../DecodiumTransceiverManager.cpp" line="205"/>
         <source>CAT disabilitato da variabile d&apos;ambiente DECODIUM_DISABLE_CAT.</source>
         <translation>CAT letiltva a DECODIUM_DISABLE_CAT környezeti változó által.</translation>
     </message>
@@ -10617,7 +10939,7 @@ Hiba(%2): %3</translation>
     <name>SettingsDialog</name>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1391"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1469"/>
         <source>Settings</source>
         <translation>Beállítások</translation>
     </message>
@@ -10659,461 +10981,461 @@ Hiba(%2): %3</translation>
         <translation>Munkafrekvenciák mentése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="725"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="731"/>
         <source>Auto</source>
         <translation>Auto</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1136"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
         <source>Transmitted Message</source>
         <translation>Átvitt üzenet</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1137"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1215"/>
         <source>My Callsign</source>
         <translation>Saját hívójel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1138"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1216"/>
         <source>New DXCC on Band</source>
         <translation>Új DXCC sávon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1217"/>
         <source>New DXCC</source>
         <translation>Új DXCC</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1140"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1218"/>
         <source>New Continent on Band</source>
         <translation>Új kontinens sávon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1141"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1219"/>
         <source>New Continent</source>
         <translation>Új kontinens</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1142"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1220"/>
         <source>New CQ Zone on Band</source>
         <translation>Új CQ zóna sávon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1143"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1221"/>
         <source>New CQ Zone</source>
         <translation>Új CQ zóna</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1144"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1222"/>
         <source>New ITU Zone on Band</source>
         <translation>Új ITU zóna sávon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1145"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1223"/>
         <source>New ITU Zone</source>
         <translation>Új ITU zóna</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1224"/>
         <source>New Grid on Band</source>
         <translation>Új grid sávon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1147"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1225"/>
         <source>New Grid</source>
         <translation>Új grid</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1148"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1226"/>
         <source>New Callsign on Band</source>
         <translation>Új hívójel sávon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1149"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1227"/>
         <source>New Callsign</source>
         <translation>Új hívójel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1150"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1228"/>
         <source>LoTW marker</source>
         <translation>LoTW jelölő</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1229"/>
         <source>CQ in Message</source>
         <translation>CQ az üzenetben</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1152"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1230"/>
         <source>DX Entity</source>
         <translation>DX entitás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1231"/>
         <source>73 / RR73</source>
         <translation>73 / RR73</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1154"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1232"/>
         <source>B4 (Worked)</source>
         <translation>B4 (Dolgozva)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1155"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1233"/>
         <source>Normal decodes</source>
         <translation>Normál dekódolások</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1422"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1500"/>
         <source>Changes are applied immediately where supported.</source>
         <translation>A módosítások azonnal érvénybe lépnek, ahol támogatott.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1438"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1516"/>
         <source>Close</source>
         <translation>Bezárás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Station</source>
         <translation>Állomás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Radio</source>
         <translation>Rádió</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Audio</source>
         <translation>Hang</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>TX</source>
         <translation>TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Display</source>
         <translation>Kijelző</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Decode</source>
         <translation>Dekódolás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Reporting</source>
         <translation>Jelentés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Colors</source>
         <translation>Színek</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Advanced</source>
         <translation>Speciális</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Alerts</source>
         <translation>Riasztások</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Filters</source>
         <translation>Szűrők</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1180"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1258"/>
         <source>Choose Decoded Font</source>
         <translation>Dekódolt betűtípus kiválasztása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1180"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1258"/>
         <source>Choose Font</source>
         <translation>Betűtípus kiválasztása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1188"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1266"/>
         <source>Search:</source>
         <translation>Keresés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1198"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1276"/>
         <source>filter by name</source>
         <translation>szűrés név szerint</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
         <source>Monospaced fonts:</source>
         <translation>Fix szélességű betűtípusok:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
         <source>Fonts:</source>
         <translation>Betűtípusok:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1262"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1340"/>
         <source>Selected:</source>
         <translation>Kiválasztva:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1350"/>
         <source>Size:</source>
         <translation>Méret:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1335"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1413"/>
         <source>Cancel</source>
         <translation>Mégse</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1340"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1418"/>
         <source>Apply</source>
         <translation>Alkalmaz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Frequencies</source>
         <translation>Frekvenciák</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>UI Buttons</source>
         <translation>UI gombok</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1868"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2077"/>
         <source>Search radio, model or brand...</source>
         <translation>Rádió, modell vagy márka keresése...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1605"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1683"/>
         <source>STATION INFO</source>
         <translation>ÁLLOMÁS INFO</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1608"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1686"/>
         <source>Station Name:</source>
         <translation>Állomás neve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4634"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4670"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4843"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4879"/>
         <source>Choose</source>
         <translation>Válassza</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4144"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4353"/>
         <source>2x Tone Spacing:</source>
         <translation>2x hangtávolság:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5538"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5747"/>
         <source>4-digit Grids:</source>
         <translation>4 karakteres lokátorok:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4158"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4367"/>
         <source>4x Tone Spacing:</source>
         <translation>4x hangtávolság:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5989"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6198"/>
         <source>ADIF TCP</source>
         <translation>ADIF TCP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4820"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5029"/>
         <source>ALIGNMENT</source>
         <translation>IGAZÍTÁS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8076"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8289"/>
         <source>ALWAYS PASS</source>
         <translation>MINDIG MEGADJA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5167"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5376"/>
         <source>AP Decode:</source>
         <translation>AP dekódolás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5363"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5620"/>
         <source>API Key:</source>
         <translation>API kulcs:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5352"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
         <source>API URL:</source>
         <translation>API URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7809"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8022"/>
         <source>AUDIO ALERTS</source>
         <translation>AUDIO ALERTS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2715"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2924"/>
         <source>AUDIO DEVICES</source>
         <translation>AUDIO ESZKÖZÖK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3088"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3297"/>
         <source>AUTO SEQUENCE</source>
         <translation>AUTOMATIKUS SZEKVENCIA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5961"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6170"/>
         <source>Accept UDP:</source>
         <translation>UDP elfogadása:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5874"/>
         <source>Access token:</source>
         <translation>Hozzáférési token:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7710"/>
         <source>Activity:</source>
         <translation>Tevékenység:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5055"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5264"/>
         <source>Aggressive:</source>
         <translation>Agresszív:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7812"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8025"/>
         <source>Alerts Enabled:</source>
         <translation>Figyelmeztetések engedélyezve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4840"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5049"/>
         <source>Align Steps 2:</source>
         <translation>Igazítsa a 2. lépést:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4830"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5039"/>
         <source>Align Steps:</source>
         <translation>Igazítás lépései:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4823"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5032"/>
         <source>Align:</source>
         <translation>Igazítás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5766"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5828"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5896"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5975"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6037"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6105"/>
         <source>All interfaces</source>
         <translation>Minden interfész</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3019"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3228"/>
         <source>Allow TX QSY:</source>
         <translation>TX QSY engedélyezése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7415"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7628"/>
         <source>Alt Erase Btn:</source>
         <translation>Alt Erase Btn:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4179"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4388"/>
         <source>Alt F1-F6 Bind:</source>
         <translation>Alt F1-F6 kötés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8119"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8332"/>
         <source>Always Pass 10:</source>
         <translation>Mindig át kell adni a 10-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8123"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8336"/>
         <source>Always Pass 11:</source>
         <translation>Mindig adja át a 11-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8126"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8339"/>
         <source>Always Pass 12:</source>
         <translation>Mindig adja át a 12-t:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8088"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8301"/>
         <source>Always Pass 1:</source>
         <translation>Mindig adja át az 1-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1990"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2199"/>
         <source>Refresh serial ports</source>
         <translation>Soros portok frissítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2090"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2299"/>
         <source>HRD Radio:</source>
         <translation>HRD rádió:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2308"/>
         <source>Strict match (abort if configured radio is not current in HRD)</source>
         <translation>Szigorú egyezés (megszakítás, ha a beállított rádió nem az aktuális a HRD-ben)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2509"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2718"/>
         <source>SWR max:</source>
         <translation>SWR max:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2737"/>
         <source>Connecting...</source>
         <translation>Csatlakozás...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2576"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2785"/>
         <source>ALC AUTO CALIBRATION</source>
         <translation>ALC AUTOMATIKUS KALIBRÁLÁS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2591"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2800"/>
         <source>ALC target:</source>
         <translation>ALC cél:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2597"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2806"/>
         <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
         <translation>ALC skála 0-100. FT8/adat: jellemzően 15-25. A &gt;60 értékek a PA túlvezérlését kockáztatják.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2647"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2856"/>
         <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio&apos;s ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
         <translation>Egy hangoló vivőt sugároz, és automatikusan beállítja a TX audió szintet, amíg a rádió ALC-je eléri a célt. Egyszeri. Csatlakoztatott Hamlib CAT szükséges.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2651"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2860"/>
         <source>Cancel calibration</source>
         <translation>Kalibrálás megszakítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2652"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2861"/>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>ALC kalibrálása (vivőt sugároz)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2875"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3084"/>
         <source>Auto RX level active</source>
         <translation>Auto RX szint aktív</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2876"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3085"/>
         <source>Auto RX level disabled</source>
         <translation>Auto RX szint letiltva</translation>
     </message>
@@ -11146,7 +11468,7 @@ Hiba(%2): %3</translation>
         <translation type="vanished">erős partnerek korai zárása BE · slot-vég kihagyása BE (minimális késleltetés) · MAM multi-stream BE (2 stream, kísérleti) · teljes dekódolás AutoCQ BE · caller retries 3 · partner-memory BE · conservative KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3048"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3257"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
         <translation>CPU-korlátozott (Decodium Console / mini PC)</translation>
     </message>
@@ -11159,12 +11481,12 @@ Hiba(%2): %3</translation>
         <translation type="vanished">● aktív</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3172"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3381"/>
         <source>Resume QSO on partner reply:</source>
         <translation>QSO folytatása a partner válaszára:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3195"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3404"/>
         <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
 
 Applies only to FT8/FT4/FT2 and only to the saved QSO state.
@@ -11177,17 +11499,17 @@ Csak FT8/FT4/FT2-re és csak a mentett QSO állapotra vonatkozik.
 Alapértelmezett: KI (= a Halt alapból teljesen leállítja a szekvenciát).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3234"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3443"/>
         <source>FT2 UTILITY</source>
         <translation>FT2 SEGÉDESZKÖZ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3239"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3448"/>
         <source>FT2: signoff retries (73/RR73):</source>
         <translation>FT2: signoff próbálkozások (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3260"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3469"/>
         <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner&apos;s ack before logging and closing.
 
 Default: 4 (~28s).
@@ -11206,12 +11528,12 @@ Magasabb = türelmesebb gyenge/QSB partnerekkel.
 Nem érinti az FT8/FT4-et.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3265"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3474"/>
         <source>FT4: signoff retries (73/RR73):</source>
         <translation>FT4: signoff próbálkozások (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3495"/>
         <source>How many times to repeat the final 73/RR73 in FT4.
 
 Default: 4 (~30s).
@@ -11228,12 +11550,12 @@ Növelje 6-8-ra gyenge/QSB partnerekhez (a korábbi automatikus weak/conservativ
 Nem érinti az FT2/FT8-at.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3291"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3500"/>
         <source>FT8: signoff retries (73/RR73):</source>
         <translation>FT8: signoff próbálkozások (73/RR73):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3312"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3521"/>
         <source>How many times to repeat the final 73/RR73 in FT8.
 
 Default: 3 (~45s).
@@ -11250,12 +11572,12 @@ Növelje 6-8-ra gyenge/QSB partnerekhez (a korábbi automatikus weak/conservativ
 Nem érinti az FT2/FT4-et.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3317"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3526"/>
         <source>Weak-partner signoff boost (FT2/4/8):</source>
         <translation>Signoff-erősítés gyenge partnerekhez (FT2/4/8):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3336"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3545"/>
         <source>When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.
 
 Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.</source>
@@ -11264,12 +11586,12 @@ Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 
 Alapértelmezetten KI = változatlan viselkedés. FT2/FT4/FT8 esetén érvényes, mindig legfeljebb 8-ra korlátozva, és továbbra is a TX watchdog által behatárolva.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3339"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3548"/>
         <source>  weak SNR threshold (dB):</source>
         <translation>  gyenge SNR küszöb (dB):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3362"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3571"/>
         <source>A partner whose SNR is at or below this value is treated as &apos;weak&apos; and receives the extra signoff retries.
 
 Default: -15 dB.</source>
@@ -11278,12 +11600,12 @@ Default: -15 dB.</source>
 Alapértelmezett: -15 dB.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3365"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3574"/>
         <source>  extra signoff retries:</source>
         <translation>  további signoff újrapróbálkozások:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3388"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3597"/>
         <source>How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.
 
 Default: +3 (capped so the total never exceeds 8).</source>
@@ -11292,12 +11614,12 @@ Default: +3 (capped so the total never exceeds 8).</source>
 Alapértelmezett: +3 (úgy korlátozva, hogy az összeg soha ne haladja meg a 8-at).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3393"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3602"/>
         <source>Post-log RRR re-engage guard (FT2):</source>
         <translation>Naplózás utáni RRR újrakapcsolódás-védelem (FT2):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3412"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3621"/>
         <source>When ON, after a QSO is logged (&apos;partner left&apos;) stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).
 
 A few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.</source>
@@ -11306,12 +11628,12 @@ A few courtesy repeats are still allowed (see max), then suppressed within the 3
 Néhány udvariassági ismétlés továbbra is megengedett (lásd max.), majd a 30 másodperces várakozási időn belül elnyomva. Alapértelmezetten KI. Csak FT2.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3415"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3624"/>
         <source>  courtesy RRR max:</source>
         <translation>  udvariassági RRR max.:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3438"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3647"/>
         <source>How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.
 
 0 = suppress immediately. Default: 1.</source>
@@ -11320,12 +11642,12 @@ Néhány udvariassági ismétlés továbbra is megengedett (lásd max.), majd a 
 0 = azonnali elnyomás. Alapértelmezett: 1.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3443"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3652"/>
         <source>Immediate TX on click (1.0.283 style):</source>
         <translation>Azonnali TX kattintásra (1.0.283 stílus):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3465"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3674"/>
         <source>Restores the &apos;TX starts IMMEDIATELY on double-click&apos; behaviour of 1.0.283.
 
 • FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
@@ -11344,12 +11666,12 @@ Alapértelmezett: KI (= biztonságos upstream viselkedés).
 Engedélyezze, ha zavarja, hogy 1 ciklust kell várnia a kattintás után.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3470"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3679"/>
         <source>Log RR73 even if partner leaves (FT2):</source>
         <translation>RR73 naplózása akkor is, ha a partner elmegy (FT2):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3492"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3701"/>
         <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
 
 Matches TX5/73 and sync mode behaviour.
@@ -11362,12 +11684,12 @@ Megegyezik a TX5/73 és sync mód viselkedésével.
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3706"/>
         <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
         <translation>FT8: gyors szekvenciák (WSJT-X/JTDX stílus):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3519"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3728"/>
         <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
 
 Two changes:
@@ -11388,12 +11710,12 @@ BIZTONSÁG: CPU terhelés alatt a meglévő határoló a türelmet ≥900ms-re k
 Alapértelmezett: KI (= konzervatív upstream viselkedés, maximális dekódolási megbízhatóság).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3524"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3733"/>
         <source>FT2: conservative TX window (no truncated frames):</source>
         <translation>FT2: konzervatív TX ablak (nincs csonkolt frame):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3546"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3755"/>
         <source>Controls how late in a slot the async FT2 TX may start.
 
 • ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can&apos;t decode. Calm, Decodium-3.0-style stability.
@@ -11408,12 +11730,12 @@ Enable OFF only if you want maximum reactivity and accept occasional non-decodab
 A KI-t csak akkor engedélyezze, ha maximális reaktivitást szeretne, és elfogadja az alkalmankénti nem-dekódolható késői TX-et.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3551"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3760"/>
         <source>FT2: manual one-shot disarm (1.0.300+):</source>
         <translation>FT2: kézi egylövéses lefegyverzés (1.0.300+):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3573"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3782"/>
         <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don&apos;t decode in the first RX period the QSO is lost (= &apos;TX1 stops without completing&apos;).
 
 When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until &apos;Caller Retries&apos; is reached — better for weak-signal QSOs (Pasquale&apos;s case).
@@ -11426,12 +11748,12 @@ Ha KI (alapértelmezett ezen a forkon, pre-1.0.300): a TX1 ismétlődik, amíg e
 Csak akkor engedélyezze, ha olyan állomásokra kattint duplán, amelyek következetesen az első próbálkozásra válaszolnak.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3578"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3787"/>
         <source>Caller retries (max TX repeats per step):</source>
         <translation>Caller retries (max TX ismétlés lépésenként):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3601"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3810"/>
         <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn&apos;t reply.
 
 Default: 10.
@@ -11456,12 +11778,12 @@ Magasabb (15-20) = türelem gyenge DX-hez / gyenge terjedéshez.
 Megjegyzés: ha az &apos;FT2 kézi egylövéses lefegyverzés&apos; KI (alapértelmezett), ez állítja le a TX1 örök hurkolását.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3815"/>
         <source>Caller retries hard cap (even with watchdog):</source>
         <translation>Hívó újrapróbálkozások kemény korlátja (watchdoggal is):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3628"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3837"/>
         <source>When ON, the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled.
 
 Default OFF (1.0.438 behaviour): when the TX Watchdog is ON it takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration.
@@ -11474,32 +11796,32 @@ Alapértelmezetten KI (1.0.438 viselkedés): ha a TX Watchdog be van kapcsolva, 
 Engedélyezd a TX-ismétlések kemény korlátozásához a watchdogtól függetlenül.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3633"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3842"/>
         <source>FT2 state transition census (log only):</source>
         <translation>FT2 állapotátmenet-számlálás (csak napló):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3655"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3864"/>
         <source>Diagnostic only (off by default): logs every FT2 QSO state transition (from/to/progress) to the diagnostic log, to empirically map the real sequencer state machine. No behaviour change at all - it only writes log lines. Used to design future deterministic-transition guards safely.</source>
         <translation>Csak diagnosztika (alapértelmezetten kikapcsolva): minden FT2 QSO-állapotátmenetet (honnan/hová/előrehaladás) a diagnosztikai naplóba ír, hogy empirikusan feltérképezze a tényleges szekvenszer-állapotgépet. Egyáltalán nem változtat a viselkedésen – csak naplósorokat ír. A jövőbeli determinisztikus átmeneti védelmek biztonságos megtervezésére szolgál.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3660"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3869"/>
         <source>Adaptive async TX timing (experimental):</source>
         <translation>Adaptív aszinkron TX-időzítés (kísérleti):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3682"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3891"/>
         <source>Experimental, off by default. Makes the FT2 async-TX timing gates (RMS-quiet, decode-quiet, anti-collision jitter) adapt to channel occupancy: a bit more reactive when the channel is clear, more conservative when it is crowded. With this OFF the timing is byte-identical to the standard behaviour. It never transmits before hearing the partner.</source>
         <translation>Kísérleti, alapértelmezetten kikapcsolva. Az FT2 aszinkron TX-időzítési kapuit (RMS-csend, dekódolási csend, ütközésgátló jitter) a csatorna foglaltságához igazítja: kissé reaktívabb, ha a csatorna szabad, és óvatosabb, ha zsúfolt. KIKAPCSOLVA az időzítés bájtról bájtra azonos a szabványos viselkedéssel. Sosem ad le adást, mielőtt hallaná a partnert.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3690"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3899"/>
         <source>Conservative FT2 (weak-signal mode):</source>
         <translation>Conservative FT2 (gyenge jel mód):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3711"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3920"/>
         <source>Anti-QSB tuning:
   • Ghost filter -24 dB instead of -22
   • Retry cap extended SNR-adaptive (+2..+4 extra)
@@ -11514,12 +11836,12 @@ Default: OFF — enable it if you have weak DX partners or marginal propagation.
 Alapértelmezett: KI — engedélyezze, ha gyenge DX partnerei vannak vagy gyenge a terjedés.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3716"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3925"/>
         <source>FT2: full decode in AutoCQ:</source>
         <translation>FT2: teljes dekódolás AutoCQ-ban:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3946"/>
         <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
 
 Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
@@ -11532,12 +11854,12 @@ Segít a gyenge válaszadók hallásában. CPU terhelés alatt egyébként autom
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3742"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3951"/>
         <source>FT2: close strong partners earlier:</source>
         <translation>FT2: erős partnerek korábbi zárása:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3763"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3972"/>
         <source>If a STRONG partner (SNR &gt; 0 dB) doesn&apos;t send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
 
 Weak partners keep the extra anti-QSB repetitions.
@@ -11550,12 +11872,12 @@ A gyenge partnerek megtartják az extra anti-QSB ismétléseket.
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3768"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3977"/>
         <source>FT2: adaptive decode (CPU saver):</source>
         <translation>FT2: adaptív dekódolás (CPU megtakarítás):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3789"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3998"/>
         <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn&apos;t re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
 
 When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
@@ -11572,12 +11894,12 @@ Főként szerény gépeken hasznos.
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3794"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4003"/>
         <source>FT2: narrow reply decode (experimental):</source>
         <translation>FT2: szűk válasz-dekódolás (kísérleti):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3815"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4024"/>
         <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
 
 The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
@@ -11590,12 +11912,12 @@ A válasz korábban dekódolódik a slotban (kevesebb CPU próbálkozásonként)
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3820"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4029"/>
         <source>FT2: AP cache rescue (experimental):</source>
         <translation>FT2: AP cache mentés (kísérleti):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3841"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4050"/>
         <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
 
 Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
@@ -11608,12 +11930,12 @@ Biztonsági kapu: az AP-cache-mentett sorok megjelennek/auditálódnak, de nem v
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3846"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4055"/>
         <source>FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):</source>
         <translation>FT2: redundáns slot-végi dekódolás kihagyása (csökkenti az aggancs késleltetését):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3870"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4079"/>
         <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
 
 Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
@@ -11630,12 +11952,12 @@ Költség: az async által már lefedett slotoknál elveszíti a teljes slot-vé
 Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3877"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4086"/>
         <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
         <translation>FT2/FT8 MAM multi-stream (MSHV, kísérleti):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3901"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4110"/>
         <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
 
 This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
@@ -11648,12 +11970,12 @@ Ez egy TOVÁBBI MAM opció: a MAM (Multi-Answer Mode) vagy AutoCQ aktívnak kell
 KÍSÉRLETI. Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3906"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4115"/>
         <source>MAM multi-stream: max stream simultanei:</source>
         <translation>MAM multi-stream: max egyidejű stream:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3934"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4143"/>
         <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
 
 Range 2-5. Default: 3.
@@ -11666,12 +11988,12 @@ Tartomány 2-5. Alapértelmezett: 3.
 A magasabb értékek több CPU-t igényelnek az átfedő audió streamek generálásához. Csak akkor engedélyezve, ha a MAM multi-stream aktív.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3939"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4148"/>
         <source>FT2 partner-memory (anti-QSB):</source>
         <translation>FT2 partner-memory (anti-QSB):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3961"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4170"/>
         <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
 
 Requires Conservative FT2 active.
@@ -11684,12 +12006,12 @@ Aktív Conservative FT2 szükséges.
 Alapértelmezett: KI (opt-in az 1.0.186 visszavonása után — szigorú kapu + [FT2WS-F] log). Automatikusan letiltva, ha a Conservative KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3966"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4175"/>
         <source>FT2 TX2 re-send on stall:</source>
         <translation>FT2 TX2 újraküldés elakadáskor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3988"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4197"/>
         <source>If you&apos;re in TX3 (R+report) and the partner doesn&apos;t reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
 
 Helps with weak partners that didn&apos;t ack the first time. Capped to 1 re-send per QSO (no loops).
@@ -11702,47 +12024,47 @@ Segít gyenge partnereknél, akik nem nyugtáztak elsőre. QSO-nként 1 újrakü
 Aktív Conservative FT2 szükséges. Alapértelmezett: BE Conservative alatt.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3996"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4205"/>
         <source>Smooth decode flow:</source>
         <translation>Smooth decode flow:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4017"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4226"/>
         <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
         <translation>Az FT8/FT4 dekódolásokat a végső periódus-végi kötegből folyamatos streamingbe teríti animált fade-del (~100 ms soronként). Az FT2 async változatlan, mert már streamel. Alapértelmezett: BE; auto-visszaesés, ha UI elakadásokat észlel szerény gépeken. Tiltsa le a régi köteges viselkedéshez.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4026"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4235"/>
         <source>TX Watchdog Mode:</source>
         <translation>TX Watchdog mód:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4029"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4238"/>
         <source>Time</source>
         <translation>Idő</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4029"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4238"/>
         <source>Count</source>
         <translation>Darab</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4049"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4258"/>
         <source>TX Watchdog Time (min):</source>
         <translation>TX Watchdog idő (perc):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4067"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4276"/>
         <source>TX Watchdog Count:</source>
         <translation>TX Watchdog darabszám:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4086"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4295"/>
         <source>Log QSO at watchdog timeout:</source>
         <translation>QSO naplózása a watchdog időtúllépésekor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4097"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4306"/>
         <source>When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress &gt;= ROGER_REPORT), the QSO is logged instead of abandoned.
 
 Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).</source>
@@ -11751,77 +12073,77 @@ Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the 
 Alapértelmezetten KI = 1.0.445 viselkedés (csak halasztott pillanatkép, csak akkor állítható vissza, ha a partner újraküldi a 73-at; kézi QSO esetén elvész).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4210"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4419"/>
         <source>ASPETTO / TEMA</source>
         <translation>MEGJELENÉS / TÉMA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4213"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4422"/>
         <source>Theme:</source>
         <translation>Téma:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4241"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4450"/>
         <source>Accent:</source>
         <translation>Kiemelés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4278"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4487"/>
         <source>Density:</source>
         <translation>Sűrűség:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4319"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4528"/>
         <source>DX-Pedition Workspace (3-column tactical layout)</source>
         <translation>DX-Pedition Workspace (3 oszlopos taktikai elrendezés)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4334"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4543"/>
         <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
         <translation>Alternatív egypaneles operátor nézet DX pile-up-okhoz optimalizálva: egy taktikai 3 oszlopos műszerfal (Cluster / Waterfall / TX) a klasszikus munkaterület helyett. Opt-in, alapértelmezett KI: a standard elrendezés változatlan, ha le van tiltva.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4338"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4547"/>
         <source>UI Scale:</source>
         <translation>UI méret:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4370"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4579"/>
         <source>↻ restart to apply</source>
         <translation>↻ újraindítás az alkalmazáshoz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4377"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
         <source>BANDE OPERATIVE</source>
         <translation>OPERATÍV SÁVOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4380"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4589"/>
         <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
         <translation>Kattintson a sávok megjelenítéséhez/elrejtéséhez a kiválasztóban. A kijelöletlen sávok eltűnnek a HF / V-U / SHF sávból.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4409"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4618"/>
         <source>visible (click to hide)</source>
         <translation>látható (kattintson az elrejtéshez)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4409"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4618"/>
         <source>hidden (click to show)</source>
         <translation>rejtett (kattintson a megjelenítéshez)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4418"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4627"/>
         <source>UI — PERFORMANCE</source>
         <translation>UI — TELJESÍTMÉNY</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4422"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4631"/>
         <source>UI Quality preset:</source>
         <translation>UI minőség előbeállítás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4439"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4648"/>
         <source>Low = no effects (modest PCs).
 Medium = light animations.
 High = all available animations.
@@ -11834,32 +12156,26 @@ High = minden elérhető animáció.
 Alapértelmezett: Medium.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4444"/>
         <source>Priorità processo:</source>
-        <translation>Folyamat prioritás:</translation>
+        <translation type="vanished">Folyamat prioritás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4449"/>
         <source>Normale</source>
-        <translation>Normál</translation>
+        <translation type="vanished">Normál</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4449"/>
         <source>Sopra il normale</source>
-        <translation>Normál felett</translation>
+        <translation type="vanished">Normál felett</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4449"/>
         <source>Alta (consigliata)</source>
-        <translation>Magas (ajánlott)</translation>
+        <translation type="vanished">Magas (ajánlott)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4449"/>
         <source>Tempo reale ⚠️</source>
-        <translation>Valós idejű ⚠️</translation>
+        <translation type="vanished">Valós idejű ⚠️</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4458"/>
         <source>Priorità di scheduling CPU del processo (Windows).
 
 Normale / Sopra il normale (default) = sicure.
@@ -11867,7 +12183,7 @@ Alta = più fluidità per audio/decode, rischio basso (consigliata se noti scatt
 Tempo reale ⚠️ = massima fluidità MA può rendere il PC non responsivo (mouse/tastiera) e richiede privilegi amministratore (senza admin Windows la declassa ad Alta).
 
 Se non sei sicuro usa &apos;Alta&apos;.</source>
-        <translation>A folyamat CPU ütemezési prioritása (Windows).
+        <translation type="vanished">A folyamat CPU ütemezési prioritása (Windows).
 
 Normál / Normál felett (alapértelmezett) = biztonságos.
 Magas = nagyobb folyékonyság az audióhoz/dekódoláshoz, alacsony kockázat (ajánlott, ha akadozást észlel).
@@ -11876,12 +12192,12 @@ Valós idejű ⚠️ = maximális folyékonyság DE a PC-t nem reagálóvá tehe
 Ha nem biztos benne, használja a &apos;Magas&apos;-at.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4463"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4672"/>
         <source>UI Style (restart):</source>
         <translation>UI stílus (újraindítás):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4486"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4695"/>
         <source>QML Quick Controls style (requires restart):
 • Material (recommended) — Google Material 3, customizable, Decodium&apos;s historical default
 • FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
@@ -11894,12 +12210,12 @@ Ha nem biztos benne, használja a &apos;Magas&apos;-at.</translation>
 • Fusion — semleges, többplatformos desktop</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4497"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4706"/>
         <source>Frameless pop-out:</source>
         <translation>Keret nélküli pop-out:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4510"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4719"/>
         <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
 
 Windows 11 aesthetic.
@@ -11912,12 +12228,12 @@ Windows 11 esztétika.
 Alapértelmezett: KI. Az ablak bezárását és újranyitását igényli.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4515"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4724"/>
         <source>Detach Full Spectrum:</source>
         <translation>Full Spectrum leválasztása:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4737"/>
         <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
 
 Reduces stalls on modest PCs.
@@ -11930,27 +12246,24 @@ Csökkenti az elakadásokat szerény gépeken.
 Alapértelmezett: KI. Újraindítást igényel.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4533"/>
         <source>Schermo intero:</source>
-        <translation>Teljes képernyő:</translation>
+        <translation type="vanished">Teljes képernyő:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4537"/>
         <source>Attiva (F11)</source>
-        <translation>Aktiválás (F11)</translation>
+        <translation type="vanished">Aktiválás (F11)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4542"/>
         <source>Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.</source>
-        <translation>Teljes képernyőre viszi a Decodiumot. Kilépés: F11, Esc, vagy a ✕ gomb felül. Nem mentődik: újraindításkor visszatér a normál ablakhoz.</translation>
+        <translation type="vanished">Teljes képernyőre viszi a Decodiumot. Kilépés: F11, Esc, vagy a ✕ gomb felül. Nem mentődik: újraindításkor visszatér a normál ablakhoz.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4547"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
         <source>Spectrum FPS cap:</source>
         <translation>Spektrum FPS korlát:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4776"/>
         <source>Maximum frame rate of the embedded waterfall/panadapter.
 
   • 15 = modest PCs
@@ -11967,22 +12280,19 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
 Amikor a Full Spectrum le van választva, a külön render szál 30 fps-t tart anélkül, hogy érintené a dekódert.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4573"/>
         <source>Eventi CPU pressure:</source>
-        <translation>CPU pressure események:</translation>
+        <translation type="vanished">CPU pressure események:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4587"/>
         <source>totale=%1 · severi=%2 (sessione)</source>
-        <translation>összesen=%1 · súlyosak=%2 (munkamenet)</translation>
+        <translation type="vanished">összesen=%1 · súlyosak=%2 (munkamenet)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4590"/>
         <source>totale=0 · severi=0</source>
-        <translation>összesen=0 · súlyosak=0</translation>
+        <translation type="vanished">összesen=0 · súlyosak=0</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4600"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4809"/>
         <source>cpuPressure event counters for the current session.
 
 Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
@@ -11991,118 +12301,118 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
 A súlyosak (≥1100ms vagy 4+ rövid elakadás csomója) a legerősebb jel: ha ≥5-öt lát egy óra használat után, csökkentse az UI minőséget Low-ra vagy a Spektrum FPS korlátot 15-re.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4694"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4903"/>
         <source>US State:</source>
         <translation>US State:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4708"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7285"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7306"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7494"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7517"/>
         <source>Updating...</source>
         <translation>Frissítés...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4709"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4918"/>
         <source>%1 calls</source>
         <translation>%1 hívás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4710"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7308"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4919"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7496"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7519"/>
         <source>Not loaded</source>
         <translation>Nincs betöltve</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4719"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6340"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6539"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4928"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6549"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6748"/>
         <source>Update</source>
         <translation>Frissítés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4735"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4944"/>
         <source>Waterfall Calls:</source>
         <translation>Waterfall hívások:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4743"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4952"/>
         <source>FS Dist:</source>
         <translation>FS táv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4751"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4960"/>
         <source>FS Az:</source>
         <translation>FS Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4759"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4968"/>
         <source>RX Freq:</source>
         <translation>RX frekv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4767"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4976"/>
         <source>RX Dist:</source>
         <translation>RX táv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4775"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4984"/>
         <source>RX Az:</source>
         <translation>RX Az:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4870"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5079"/>
         <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
         <translation>TÁVOLI WEB SZERVER (iPad / mobil PWA)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4873"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
         <source>Abilita Web Server:</source>
         <translation>Web szerver engedélyezése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4893"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
         <source>Porta TCP:</source>
         <translation>TCP port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4904"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5113"/>
         <source>URL accesso:</source>
         <translation>Hozzáférési URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4915"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4942"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5151"/>
         <source>DECODE LIST DISPLAY</source>
         <translation>DEKÓDOLÁSI LISTA MEGJELENÍTÉSE</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4945"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5154"/>
         <source>Colored period separator:</source>
         <translation>Színes periódus elválasztó:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4959"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5168"/>
         <source>Newest first:</source>
         <translation>Legújabb elöl:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5115"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5324"/>
         <source>CQ filter:</source>
         <translation>CQ szűrő:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5190"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
         <source>Deep decode in TX:</source>
         <translation>Mély dekódolás TX-ben:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5202"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
         <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
 
 Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it&apos;s pure decode-list, not auto-seq).
@@ -12115,836 +12425,931 @@ Helyreállítja a harmadik felek állomásait, amelyeket a gyors pass kihagyna m
 Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5386"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5595"/>
         <source>QRZ LOGBOOK</source>
         <translation>QRZ NAPLÓKÖNYV</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5400"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5609"/>
         <source>Replace duplicates:</source>
         <translation>Duplikátumok cseréje:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5433"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5642"/>
         <source>Testing...</source>
         <translation>Tesztelés...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5433"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7820"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5642"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8033"/>
         <source>Test</source>
         <translation>Teszt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5446"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5655"/>
         <source>Testing QRZ API key...</source>
         <translation>QRZ API-kulcs tesztelése...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5895"/>
         <source>Client ID:</source>
         <translation>Client ID:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5708"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5917"/>
         <source>Preset:</source>
         <translation>Előbeállítás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5852"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6061"/>
         <source>Tertiary UDP:</source>
         <translation>Harmadlagos UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5860"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6069"/>
         <source>Tertiary Server:</source>
         <translation>Harmadlagos szerver:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5870"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6079"/>
         <source>Tertiary Port:</source>
         <translation>Harmadlagos port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5881"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6090"/>
         <source>Tertiary TTL:</source>
         <translation>Harmadlagos TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5893"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6102"/>
         <source>Tertiary Interface:</source>
         <translation>Harmadlagos interfész:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5914"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6123"/>
         <source>Tertiary ADIF:</source>
         <translation>Harmadlagos ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5927"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6136"/>
         <source>N1MM / EasyLog</source>
         <translation>N1MM / EasyLog</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5930"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6139"/>
         <source>Enable N1MM:</source>
         <translation>N1MM engedélyezése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5938"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6147"/>
         <source>N1MM Port:</source>
         <translation>N1MM port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5950"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6159"/>
         <source>N1MM Server:</source>
         <translation>N1MM szerver:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6048"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6257"/>
         <source>FREQUENCY CALIBRATION</source>
         <translation>FREKVENCIA KALIBRÁLÁS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6056"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6265"/>
         <source>Refresh</source>
         <translation>Frissítés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6082"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6291"/>
         <source>Slope:</source>
         <translation>Meredekség:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6100"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6309"/>
         <source>ppm</source>
         <translation>ppm</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6102"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6311"/>
         <source>Intercept:</source>
         <translation>Metszéspont:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6120"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6329"/>
         <source>Hz</source>
         <translation>Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6139"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6348"/>
         <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
         <translation>Kalibrálás visszaállítása (meredekség=0, metszéspont=0). A frekvencia korrekció nélkül íródik a rigbe (gyors útvonal).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6360"/>
         <source>Preview correzione:</source>
         <translation>Korrekció előnézet:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6162"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6371"/>
         <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
         <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6177"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6386"/>
         <source>WORKING FREQUENCIES</source>
         <translation>MUNKAFREKVENCIÁK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6185"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1881"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6394"/>
         <source>Load</source>
         <translation>Betöltés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6194"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6403"/>
         <source>Merge</source>
         <translation>Egyesítés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6203"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6412"/>
         <source>Save as</source>
         <translation>Mentés másként</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6212"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6421"/>
         <source>Defaults</source>
         <translation>Alapértékek</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6242"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6451"/>
         <source>Region:</source>
         <translation>Régió:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6257"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6466"/>
         <source>Freq MHz:</source>
         <translation>Frekv MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6277"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6405"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6486"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6614"/>
         <source>Pref</source>
         <translation>Pref</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6495"/>
         <source>Description:</source>
         <translation>Leírás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6300"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6509"/>
         <source>Start:</source>
         <translation>Kezdet:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6311"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6520"/>
         <source>End:</source>
         <translation>Vég:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6330"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6530"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6539"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6739"/>
         <source>Add</source>
         <translation>Hozzáadás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6351"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6549"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1913"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6560"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6758"/>
         <source>Delete</source>
         <translation>Törlés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6361"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1744"/>
+        <source>WSPR Power:</source>
+        <translation>WSPR teljesítmény:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1827"/>
+        <source>Profile:</source>
+        <translation>Profil:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1851"/>
+        <source>No profile</source>
+        <translation>Nincs profil</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1871"/>
+        <source>Profile name</source>
+        <translation>Profil neve</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1892"/>
+        <source>Save</source>
+        <translation>Mentés</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6570"/>
         <source>New</source>
         <translation>Új</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6402"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4653"/>
+        <source>Process priority:</source>
+        <translation>Folyamat prioritása:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4658"/>
+        <source>Above normal</source>
+        <translation>Normál felett</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4658"/>
+        <source>High (recommended)</source>
+        <translation>Magas (ajánlott)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4658"/>
+        <source>Realtime ⚠️</source>
+        <translation>Valós idejű ⚠️</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4667"/>
+        <source>CPU scheduling priority for the Decodium process (Windows).
+
+Normal / Above normal (default) = safe.
+High = smoother audio/decode with low risk (recommended if you notice stutters).
+Realtime ⚠️ = maximum scheduling priority, but it can make the PC unresponsive (mouse/keyboard) and requires administrator privileges. Without admin rights Windows downgrades it to High.
+
+If unsure, use High.</source>
+        <translation>A Decodium folyamat CPU-ütemezési prioritása (Windows).
+
+Normál / Normál felett (alapértelmezett) = biztonságos.
+Magas = simább hang/dekódolás alacsony kockázattal (ajánlott, ha akadozást tapasztalsz).
+Valós idejű ⚠️ = maximális ütemezési prioritás, de a gép nem reagálóvá válhat (egér/billentyűzet), és rendszergazdai jogosultságot igényel. Rendszergazdai jogok nélkül a Windows Magasra fokozza le.
+
+Ha bizonytalan vagy, használd a Magas beállítást.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4742"/>
+        <source>Full screen:</source>
+        <translation>Teljes képernyő:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4746"/>
+        <source>Enable (F11)</source>
+        <translation>Bekapcsolás (F11)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4751"/>
+        <source>Switch Decodium to full screen. To exit: F11, Esc, or the top ✕ button. This is not saved: Decodium starts in normal window mode after restart.</source>
+        <translation>A Decodium teljes képernyőre váltása. Kilépés: F11, Esc vagy a felső ✕ gomb. Ez nem kerül mentésre: újraindítás után a Decodium normál ablak módban indul.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4782"/>
+        <source>CPU pressure:</source>
+        <translation>CPU-terhelés:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4796"/>
+        <source>events: total=%1 · severe=%2 (session)</source>
+        <translation>események: összesen=%1 · súlyos=%2 (munkamenet)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4799"/>
+        <source>events: total=0 · severe=0</source>
+        <translation>események: összesen=0 · súlyos=0</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6611"/>
         <source>IARU Region</source>
         <translation>IARU régió</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6403"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6612"/>
         <source>Mode</source>
         <translation>Mód</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6404"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6613"/>
         <source>Frequency</source>
         <translation>Frekvencia</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6406"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6615"/>
         <source>Description</source>
         <translation>Leírás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6407"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6616"/>
         <source>Start Date/Time</source>
         <translation>Kezdő dátum/idő</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6408"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6617"/>
         <source>End Date/Time</source>
         <translation>Záró dátum/idő</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6461"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6670"/>
         <source>STATION INFORMATION</source>
         <translation>ÁLLOMÁS INFORMÁCIÓK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6468"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6677"/>
         <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
         <translation>A sáveltolás a transverter/állomás frekvenciaeltolása az adott sávra; használjon 0.000000-t, ha nincs használatban.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6492"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6701"/>
         <source>Band:</source>
         <translation>Sáv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6709"/>
         <source>Offset MHz:</source>
         <translation>Eltolás MHz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6579"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6788"/>
         <source>Band</source>
         <translation>Sáv</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6580"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6789"/>
         <source>Offset</source>
         <translation>Eltolás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6581"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6790"/>
         <source>Antenna Description</source>
         <translation>Antenna leírás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6700"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6909"/>
         <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
         <translation>Használja ezt a konkrét dekódolási színt. Ha KI, ez a kategória a megosztott alapértelmezett színt használja.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6813"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7022"/>
         <source>BG:</source>
         <translation>BG:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6827"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7036"/>
         <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
         <translation>Színezi a sor HÁTTERÉT (a szöveg mellett) ehhez a kategóriához. KI = nincs egyéni háttér.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6913"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7122"/>
         <source>Decode Boost:</source>
         <translation>Decode Boost:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6940"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7149"/>
         <source>Visual contrast only; it does not change decoder sensitivity.</source>
         <translation>Csak vizuális kontraszt; nem módosítja a dekóder érzékenységét.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6991"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7200"/>
         <source>COLORI INTERFACCIA (sfondo + testo)</source>
         <translation>INTERFÉSZ SZÍNEK (háttér + szöveg)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6996"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7205"/>
         <source>Usa colori personalizzati:</source>
         <translation>Egyéni színek használata:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7003"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7212"/>
         <source>(sovrascrive sfondo e testo del tema)</source>
         <translation>(felülírja a téma hátterét és szövegét)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7010"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7219"/>
         <source>Background:</source>
         <translation>Háttér:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7239"/>
         <source>Text:</source>
         <translation>Szöveg:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7122"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7331"/>
         <source>Download CALL3.TXT...</source>
         <translation>CALL3.TXT letöltése...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7244"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7453"/>
         <source>Direct Visual:</source>
         <translation>Direct Visual:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7250"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7459"/>
         <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
         <translation>Gyors vizuális panadapter. Régi módban egy második audió rögzítést nyithat meg; normál módban csak a vizuális frissítési sebességet növeli. Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7255"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7464"/>
         <source>Low CPU:</source>
         <translation>Low CPU:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7264"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7473"/>
         <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
         <translation>Profil lassú gépekhez: maximum 2 FT szál, lassabb waterfall, csökkentett korai/mély dekódolás. Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7269"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7478"/>
         <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
         <translation>Csökkenti az FT szálakat, a waterfall frissítést és a QML renderelést monitor/TX közben.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7280"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7489"/>
         <source>DATA UPDATES</source>
         <translation>ADATFRISSÍTÉSEK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7283"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7492"/>
         <source>LotW Users:</source>
         <translation>LoTW felhasználók:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7495"/>
         <source>%1 users</source>
         <translation>%1 felhasználó</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7296"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7317"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7506"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7529"/>
         <source>Force Update</source>
         <translation>Kötelező frissítés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7304"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7515"/>
         <source>US States:</source>
         <translation>US States:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7307"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7518"/>
         <source>%1 calls, %2 locators</source>
         <translation>%1 hívás, %2 lokátor</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7620"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7833"/>
         <source>RF self-calibration:</source>
         <translation>RF önkalibrálás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7625"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7838"/>
         <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
         <translation>A fogadott dekódolási DT értékeket csak másodlagos idő-szinkron tippként használja, miután az NTP/HTTPS már rögzült. Alapértelmezett: KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7630"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7843"/>
         <source>Secondary hint only; it cannot create the first time lock.</source>
         <translation>Csak másodlagos tipp; nem hozhatja létre az első idő-rögzítést.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7638"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7851"/>
         <source>ADV DECODING</source>
         <translation>HALADÓ DEKÓDOLÁS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7641"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7854"/>
         <source>Auto Mode:</source>
         <translation>Auto mód:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7645"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7858"/>
         <source>AUTO - enable the 3 technologies when needed</source>
         <translation>AUTO - a 3 technológia engedélyezése szükség esetén</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7658"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7871"/>
         <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
         <translation>Ha BE, az alábbi 3 funkció automatikusan kezelt. Trigger: Neural+Turbo, amikor a dekódolások &lt; 2/slot 4 sloton át. Coherent, amikor a Q65 SNR &lt; -22 dB.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7666"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7879"/>
         <source>Live state:</source>
         <translation>Élő állapot:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7668"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7881"/>
         <source>Neural</source>
         <translation>Neural</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7670"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7883"/>
         <source>Turbo</source>
         <translation>Turbo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7672"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7885"/>
         <source>Coherent</source>
         <translation>Coherent</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7676"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7889"/>
         <source>Coherent Avg:</source>
         <translation>Coherent Avg:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7681"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7894"/>
         <source>Coherent Average (Q65/JT65)</source>
         <translation>Coherent Average (Q65/JT65)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7695"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7908"/>
         <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
         <translation>Többslotos átlagolást halmoz a Q65/JT65 dekódolásokhoz (+1-3 dB)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7702"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7915"/>
         <source>Neural Sync:</source>
         <translation>Neural Sync:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7707"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7920"/>
         <source>Neural Sync (FT8 OSD decoder)</source>
         <translation>Neural Sync (FT8 OSD dekóder)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7721"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7934"/>
         <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
         <translation>OSD-tudatos FT8 dekódolást kényszerít (+2-3 dB határos jeleknél)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7728"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7941"/>
         <source>Turbo Feedback:</source>
         <translation>Turbo Feedback:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7733"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7946"/>
         <source>Turbo Feedback (extended LDPC iterations)</source>
         <translation>Turbo Feedback (kiterjesztett LDPC iterációk)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7747"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7960"/>
         <source>Extended LDPC iterations for marginal decode recovery</source>
         <translation>Kiterjesztett LDPC iterációk a határos dekódolás helyreállításához</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8091"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8304"/>
         <source>Always Pass 2:</source>
         <translation>Mindig passz 2:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8095"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8308"/>
         <source>Always Pass 3:</source>
         <translation>Mindig adja át a 3-at:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8098"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8311"/>
         <source>Always Pass 4:</source>
         <translation>Mindig adja át a 4-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8102"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8315"/>
         <source>Always Pass 5:</source>
         <translation>Mindig adja át az 5-öt:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8105"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8318"/>
         <source>Always Pass 6:</source>
         <translation>Mindig adja át a 6-ot:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8109"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8322"/>
         <source>Always Pass 7:</source>
         <translation>Mindig adja át a 7-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8112"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8325"/>
         <source>Always Pass 8:</source>
         <translation>Mindig adja át a 8-at:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8116"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8329"/>
         <source>Always Pass 9:</source>
         <translation>Mindig adja át a 9-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8264"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8477"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Monitor (MON / STOP)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8265"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8478"/>
         <source>Setup (⚙)</source>
         <translation>Setup (⚙)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8271"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8484"/>
         <source>Layout (window reset)</source>
         <translation>Elrendezés (ablak visszaállítás)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8272"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8485"/>
         <source>History (decode history)</source>
         <translation>Előzmények (dekódolási előzmények)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8274"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8487"/>
         <source>Async FT2 (A)</source>
         <translation>Async FT2 (A)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8276"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8489"/>
         <source>DX Cluster (toolbar)</source>
         <translation>DX Cluster (eszköztár)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8277"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8490"/>
         <source>World Clock</source>
         <translation>World Clock</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8281"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8494"/>
         <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
         <translation>Mutassa vagy rejtse el az UI gombokat tetszése szerint. A változások azonnaliak és automatikusan mentődnek.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8287"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8500"/>
         <source>TOP TOOLBAR</source>
         <translation>FELSŐ ESZKÖZTÁR</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8306"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8519"/>
         <source>TOOLBAR BUTTON ORDER</source>
         <translation>ESZKÖZTÁR GOMBSORREND</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8310"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8523"/>
         <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
         <translation>Húzza a felső eszköztár gombjait (hosszú nyomás) az átrendezésükhöz. Használja az alábbi gombot az alapértelmezett sorrend visszaállításához.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8328"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8541"/>
         <source>Restore default button order</source>
         <translation>Alapértelmezett gombsorrend visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8358"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8571"/>
         <source>Restore default TX panel order</source>
         <translation>Alapértelmezett TX panel sorrend visszaállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1642"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6512"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1720"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6721"/>
         <source>Antenna:</source>
         <translation>Antenna:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5675"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5884"/>
         <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
         <translation>Az alkalmazás újraindítása szükséges. A LAN/WAN esetén használjon legalább 12 karakterből álló tokent.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7202"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7411"/>
         <source>Auto Astro:</source>
         <translation>Auto Astro:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1645"/>
         <source>Auto Grid:</source>
         <translation>Automatikus lokátor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5517"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5726"/>
         <source>Auto Log:</source>
         <translation>Automatikus napló:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3107"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3316"/>
         <source>Auto Sequence:</source>
         <translation>Automatikus sorrend:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5178"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5387"/>
         <source>Avg Decode:</source>
         <translation>Átl. dekódolás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2918"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3127"/>
         <source>AzEl Directory:</source>
         <translation>AzEl címtár:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6900"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7109"/>
         <source>B4 Strikethrough:</source>
         <translation>B4 Áthúzás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1799"/>
         <source>BACKEND CAT</source>
         <translation>HÁTTÉR CAT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7326"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7539"/>
         <source>BEHAVIOR</source>
         <translation>VISELKEDÉS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7965"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8178"/>
         <source>BLACKLIST</source>
         <translation>FEKETELISTA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1689"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1802"/>
         <source>Backend:</source>
         <translation>Háttér:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2938"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3147"/>
         <source>Band TX Memory:</source>
         <translation>Sáv TX memória:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2945"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3154"/>
         <source>Band Tune Mem:</source>
         <translation>Band Tune Mem:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1995"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2204"/>
         <source>Baud Rate:</source>
         <translation>Átviteli sebesség:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7066"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7275"/>
         <source>Black Level:</source>
         <translation>Fekete szint:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8009"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8222"/>
         <source>Blacklist 10:</source>
         <translation>10. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8013"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8226"/>
         <source>Blacklist 11:</source>
         <translation>11. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8016"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8229"/>
         <source>Blacklist 12:</source>
         <translation>12. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7978"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8191"/>
         <source>Blacklist 1:</source>
         <translation>1. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7981"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8194"/>
         <source>Blacklist 2:</source>
         <translation>2. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7985"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8198"/>
         <source>Blacklist 3:</source>
         <translation>3. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7988"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8201"/>
         <source>Blacklist 4:</source>
         <translation>4. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7992"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8205"/>
         <source>Blacklist 5:</source>
         <translation>5. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7995"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8208"/>
         <source>Blacklist 6:</source>
         <translation>6. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7999"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8212"/>
         <source>Blacklist 7:</source>
         <translation>7. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8002"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8215"/>
         <source>Blacklist 8:</source>
         <translation>8. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8006"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8219"/>
         <source>Blacklist 9:</source>
         <translation>9. feketelista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6982"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7191"/>
         <source>Blue Calls:</source>
         <translation>Kék hívójelek:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1294"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6797"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1372"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7006"/>
         <source>Bold</source>
         <translation>Félkövér</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="873"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="879"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2973"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
         <source>Both</source>
         <translation>Sztereo</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1766"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1975"/>
         <source>CAT CONTROL</source>
         <translation>CAT VEZÉRLÉS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2029"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2238"/>
         <source>CI-V Addr:</source>
         <translation>CI-V Cím:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5337"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5546"/>
         <source>CLOUDLOG</source>
         <translation>CLOUDLOG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7494"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7707"/>
         <source>CONTEST</source>
         <translation>VERSENY</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5104"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5313"/>
         <source>CQ Only:</source>
         <translation>Csak CQ:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7909"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8122"/>
         <source>CQ Zone Band:</source>
         <translation>CQ zónasáv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7842"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8055"/>
         <source>CQ in Msg:</source>
         <translation>CQ üzenetben:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4120"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4329"/>
         <source>CW ID</source>
         <translation>CW azonosító</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4130"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4339"/>
         <source>CW ID Interval (min):</source>
         <translation>CW ID intervallum (perc):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4123"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4332"/>
         <source>CW ID after 73:</source>
         <translation>CW azonosító 73 után:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8225"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8438"/>
         <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
         <translation>A Wait &amp;amp; Pounce a szűrt CQ dekódolásokat figyeli, de csak akkor indít választ, ha a TX/CQ-t az operátor már élesítette.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8227"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8440"/>
         <source>W&amp;P Filters Only:</source>
         <translation>W&amp;amp;P csak szűrők:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8235"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8448"/>
         <source>Calling Only:</source>
         <translation>Csak hívó állomások:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2486"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2695"/>
         <source>Check SWR:</source>
         <translation>Ellenőrizze a SWR-et:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7398"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7611"/>
         <source>Clear DX Call:</source>
         <translation>DX hívójel törlése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7389"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7602"/>
         <source>Clear DX Grid:</source>
         <translation>DX lokátor törlése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4811"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5020"/>
         <source>Click TX:</source>
         <translation>Kattintson a TX lehetőségre:</translation>
     </message>
@@ -12965,7 +13370,7 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Színes DX entitás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7281"/>
         <source>Color Gain:</source>
         <translation>Színerősítés:</translation>
     </message>
@@ -12974,131 +13379,131 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Saját hívójel színe:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1749"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2528"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5295"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1958"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2737"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5504"/>
         <source>Connect</source>
         <translation>Csatlakozás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1743"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1952"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5495"/>
         <source>Connected</source>
         <translation>Csatlakozva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7528"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7741"/>
         <source>Contest Name:</source>
         <translation>Verseny neve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5545"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5754"/>
         <source>Contest Only:</source>
         <translation>Csak verseny:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7078"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7287"/>
         <source>Contrast:</source>
         <translation>Kontraszt:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7573"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7786"/>
         <source>Custom Server:</source>
         <translation>Egyedi szerver:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7085"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7294"/>
         <source>DATA DOWNLOAD</source>
         <translation>ADAT LETÖLTÉS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6647"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6856"/>
         <source>DECODE COLORS</source>
         <translation>SZÍNEK DEKÓDOLÁSA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5101"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5310"/>
         <source>DECODE FILTERS</source>
         <translation>SZŰRŐK DEKÓDOLÁSA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4968"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5177"/>
         <source>DECODE PARAMETERS</source>
         <translation>PARAMÉTEREK DEKÓDOLÁSA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4892"/>
         <source>DECODES</source>
         <translation>DEKÓDOL</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2483"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2692"/>
         <source>DIAGNOSTICS</source>
         <translation>DIAGNOSZTIKA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2899"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3108"/>
         <source>DIRECTORY</source>
         <translation>KÖNYVTÁR</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5245"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5454"/>
         <source>DX CLUSTER</source>
         <translation>DX CLUSTER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7932"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8145"/>
         <source>DX Call/Grid:</source>
         <translation>DX hívójel/lokátor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2306"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2515"/>
         <source>Data Bits:</source>
         <translation>Adatbitek:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5492"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5701"/>
         <source>Days Upload:</source>
         <translation>Feltöltés napjai:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4971"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5180"/>
         <source>Decode Depth:</source>
         <translation>Dekódolási mélység:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5022"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5231"/>
         <source>Decode at 52s:</source>
         <translation>Dekódolás 52 másodperccel:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4645"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4854"/>
         <source>Decoded Font:</source>
         <translation>Dekódolt betűtípus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4974"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5183"/>
         <source>Deep</source>
         <translation>Mély</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5156"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5365"/>
         <source>Deep Search:</source>
         <translation>Mély keresés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="657"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="861"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="663"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="867"/>
         <source>Default</source>
         <translation>Alapértelmezett</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5090"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5299"/>
         <source>Degrade S/N:</source>
         <translation>Csökkent S/N:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5326"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5535"/>
         <source>Detail:</source>
         <translation>Részlet:</translation>
     </message>
@@ -13107,1012 +13512,1013 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Közvetlen napló QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3198"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3407"/>
         <source>Disable TX after 73:</source>
         <translation>TX letiltása 73 után:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1749"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2536"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5315"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1958"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2745"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5524"/>
         <source>Disconnect</source>
         <translation>Leválasztás</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1743"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5286"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1952"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5495"/>
         <source>Disconnected</source>
         <translation>Lekapcsolva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7122"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7331"/>
         <source>Download CALL3.TXT</source>
         <translation>Töltse le a CALL3.TXT-et</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7583"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7796"/>
         <source>Empty = automatic public servers</source>
         <translation>Üres = automatikus nyilvános szerverek</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7556"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7769"/>
         <source>Enable NTP:</source>
         <translation>NTP engedélyezése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5992"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6201"/>
         <source>Enable TCP ADIF:</source>
         <translation>TCP ADIF engedélyezése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5340"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5389"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5620"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7968"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8024"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8079"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5549"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5598"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5829"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8181"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8237"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8292"/>
         <source>Enabled:</source>
         <translation>Engedélyezve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7381"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7594"/>
         <source>Erase Band Act:</source>
         <translation>Erase Band Act:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5046"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5255"/>
         <source>Erasure Patterns:</source>
         <translation>Törlési minták:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2262"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2471"/>
         <source>CAT keep-alive:</source>
         <translation>CAT keep-alive:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2270"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2479"/>
         <source>Light polling for interface activity LEDs</source>
         <translation>Könnyű lekérdezés a felület aktivitásjelző LED-jeihez</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3239"/>
         <source>READY PROFILES</source>
         <translation>KÉSZENLÉTI PROFILOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3042"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3251"/>
         <source>Balanced (daily QSO) - default</source>
         <translation>Kiegyensúlyozott (napi QSO) – alapértelmezett</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3043"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3252"/>
         <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
         <translation>Conservative BE · full decode AutoCQ BE · close strong partners BE · adaptive decode BE · AP cache mentés BE · skip end-slot KI · MAM KI · partner memory BE · TX2 resend BE · smooth flow BE · caller retries 5.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3044"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3253"/>
         <source>Weak-signal / DX hunting</source>
         <translation>Gyenge jel / DX vadászat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3045"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3254"/>
         <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
         <translation>Mint a Kiegyensúlyozott, de: caller retries 7 · adaptive decode KI (maximális érzékenység) · AP cache mentés BE (elfogad néhány hamis pozitívat) · skip end-slot KI (ne veszítse el a késői dekódolásokat).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3046"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3255"/>
         <source>Contest / high density</source>
         <translation>Contest / nagy sűrűség</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3047"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3256"/>
         <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
         <translation>close strong partners BE · skip end-slot BE (minimális késleltetés) · MAM multi-stream BE (2 stream, kísérleti) · full decode AutoCQ BE · caller retries 3 · partner memory BE · conservative KI.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3049"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3258"/>
         <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
         <translation>adaptive decode BE · MAM KI · full decode AutoCQ KI · smooth flow BE · a többi alapértelmezett értéken. A watchdog változatlan.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3072"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3281"/>
         <source>● active</source>
         <translation>● aktív</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7513"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7726"/>
         <source>FD Exchange:</source>
         <translation>FD csere:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8131"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8344"/>
         <source>EXCLUDE TERRITORY</source>
         <translation>TERÜLET KIZÁRÁSA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8134"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8347"/>
         <source>Europe:</source>
         <translation>Európa:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8142"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8355"/>
         <source>Africa:</source>
         <translation>Afrika:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8151"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8364"/>
         <source>Oceania:</source>
         <translation>Óceánia:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8159"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8372"/>
         <source>Asia:</source>
         <translation>Ázsia:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8168"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8381"/>
         <source>North America:</source>
         <translation>Észak-Amerika:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8176"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8389"/>
         <source>South America:</source>
         <translation>Dél-Amerika:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8186"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8399"/>
         <source>FILTER OPTIONS</source>
         <translation>SZŰRŐ OPCIÓK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8189"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8402"/>
         <source>Worked on Band:</source>
         <translation>Sávon már összeköttetve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8198"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8411"/>
         <source>Hide stations already worked on the current band.</source>
         <translation>Az aktuális sávon már összeköttetett állomások elrejtése.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8201"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8414"/>
         <source>Worked Today:</source>
         <translation>Ma már összeköttetve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8210"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8423"/>
         <source>Hide stations already logged today in UTC.</source>
         <translation>A ma UTC szerint már naplózott állomások elrejtése.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4606"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4815"/>
         <source>FONT</source>
         <translation>FONT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2971"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3180"/>
         <source>FREQUENCY AND TIMING</source>
         <translation>FREKVENCIA ÉS IDŐZÍTÉS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="841"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="847"/>
         <source>Fake It</source>
         <translation>Szimulál</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4974"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5183"/>
         <source>Fast</source>
         <translation>Gyors</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7713"/>
         <source>Field Day</source>
         <translation>Mezőnap</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2990"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3199"/>
         <source>First (:00/:30)</source>
         <translation>Első (:00/:30)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4609"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4818"/>
         <source>Font:</source>
         <translation>Betűtípus:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7351"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7564"/>
         <source>Force Call 1st:</source>
         <translation>Hívójel először kényszerítése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2370"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2579"/>
         <source>Force DTR:</source>
         <translation>Kényszer DTR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2392"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2601"/>
         <source>Force RTS:</source>
         <translation>Kényszer RTS:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7713"/>
         <source>Fox</source>
         <translation>Fox</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7452"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7665"/>
         <source>Fox Mode:</source>
         <translation>Fox mód:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="877"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="883"/>
         <source>Front/Mic</source>
         <translation>Előlap/Mic</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1665"/>
         <source>Full</source>
         <translation>Tele</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4795"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5004"/>
         <source>Greyline:</source>
         <translation>Szürkevonal:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6948"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7157"/>
         <source>HIGHLIGHTING</source>
         <translation>KIEMELT</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6975"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7184"/>
         <source>HL Blue:</source>
         <translation>HL kék:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6960"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7169"/>
         <source>HL Orange:</source>
         <translation>HL narancs:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5627"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5836"/>
         <source>HTTP port:</source>
         <translation>HTTP port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1806"/>
         <source>Hamlib (300+ radios)</source>
         <translation>Hamlib (300+ rádió)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2542"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2751"/>
         <source>Hamlib:</source>
         <translation>Hamlib:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2345"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2554"/>
         <source>Handshake:</source>
         <translation>Kézfogás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="663"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="669"/>
         <source>Hardware</source>
         <translation>Hardver</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7227"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7436"/>
         <source>High DPI:</source>
         <translation>Magas DPI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5000"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5209"/>
         <source>High Freq (Hz):</source>
         <translation>Magas frekvencia (Hz):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6951"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7160"/>
         <source>Highlight 73:</source>
         <translation>73. kiemelés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2064"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2273"/>
         <source>Host:Port:</source>
         <translation>Host:Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7713"/>
         <source>Hound</source>
         <translation>Vadász</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7463"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7676"/>
         <source>Hound Mode:</source>
         <translation>Hound mód:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1574"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1652"/>
         <source>IARU Region:</source>
         <translation>IARU régió:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7924"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8137"/>
         <source>ITU Zone Band:</source>
         <translation>ITU zónasáv:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7535"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7748"/>
         <source>Indiv Name:</source>
         <translation>Egyéni név:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2761"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2970"/>
         <source>Input Channel:</source>
         <translation>Bemeneti csatorna:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2741"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2950"/>
         <source>Input Device:</source>
         <translation>Beviteli eszköz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5763"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5972"/>
         <source>Interface Used:</source>
         <translation>Használt interfész:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1301"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1379"/>
         <source>Italic</source>
         <translation>Dőlt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5043"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5252"/>
         <source>JT65 VHF/UHF</source>
         <translation>JT65 VHF/UHF</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2817"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3026"/>
         <source>LEVELS</source>
         <translation>SZINTEK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5503"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5712"/>
         <source>LOGGING</source>
         <translation>NAPLÓZÁS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5464"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5673"/>
         <source>LOTW</source>
         <translation>LOTW</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7445"/>
         <source>Larger Tab:</source>
         <translation>Nagyobb lap:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7614"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7827"/>
         <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
         <translation>Hagyja üresen a szervert a pool.ntp.org, az Apple, a Cloudflare és a Google automatikus használatához.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="869"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="875"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2973"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
         <source>Left</source>
         <translation>Balra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5744"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5953"/>
         <source>Listen Port:</source>
         <translation>Hallgató port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5530"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5739"/>
         <source>Log as RTTY:</source>
         <translation>Bejelentkezés RTTY néven:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5467"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5676"/>
         <source>LotW Enabled:</source>
         <translation>LotW engedélyezve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4988"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5197"/>
         <source>Low Freq (Hz):</source>
         <translation>Alacsony frekvencia (Hz):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5081"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5290"/>
         <source>Low Sidelobes</source>
         <translation>Alacsony oldalsó</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4785"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4994"/>
         <source>MAP AND DISTANCE</source>
         <translation>TÉRKÉP ÉS TÁVOLSÁG</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3425"/>
         <source>MSK/Q65 TX until 73:</source>
         <translation>MSK/Q65 TX 73-ig:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4803"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5012"/>
         <source>Map All Msgs:</source>
         <translation>Összes üzenet feltérképezése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5081"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5290"/>
         <source>Max Sensitivity</source>
         <translation>Max érzékenység</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4788"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4997"/>
         <source>Miles:</source>
         <translation>Mérföldek:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2441"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6249"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6458"/>
         <source>Mode:</source>
         <translation>Mód:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7193"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7402"/>
         <source>Monitor Last:</source>
         <translation>Monitor utolsó:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7184"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7393"/>
         <source>Monitor OFF:</source>
         <translation>Monitor KI:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="867"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="873"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2973"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
         <source>Mono</source>
         <translation>Mono</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5753"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5962"/>
         <source>Multicast TTL:</source>
         <translation>Multicast (többcímű) TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5135"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5344"/>
         <source>My Call Only:</source>
         <translation>Csak saját hívójel:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1544"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7849"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1622"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8062"/>
         <source>My Call:</source>
         <translation>Saját hívójel:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1555"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1633"/>
         <source>My Grid:</source>
         <translation>Saját lokátor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7543"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7756"/>
         <source>NCCC Sprint:</source>
         <translation>NCCC Sprint:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5223"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5432"/>
         <source>NETWORK SERVICES</source>
         <translation>HÁLÓZATI SZOLGÁLTATÁSOK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7553"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7766"/>
         <source>NTP TIME SYNC</source>
         <translation>NTP IDŐSZINK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1693"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1806"/>
         <source>Native (15 radios)</source>
         <translation>Natív (15 rádió)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7902"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8115"/>
         <source>New CQ Zone:</source>
         <translation>Új CQ zóna:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7894"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8107"/>
         <source>New Cont Band:</source>
         <translation>Új Cont Band:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7887"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8100"/>
         <source>New Continent:</source>
         <translation>Új kontinens:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7864"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8077"/>
         <source>New DXCC Band:</source>
         <translation>Új DXCC szalag:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7857"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8070"/>
         <source>New DXCC:</source>
         <translation>Új DXCC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7879"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8092"/>
         <source>New Grid Band:</source>
         <translation>Új lokátor sávon:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7872"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8085"/>
         <source>New Grid:</source>
         <translation>Új lokátor:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7917"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8130"/>
         <source>New ITU Zone:</source>
         <translation>Új ITU zóna:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7423"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7636"/>
         <source>No Btn Color:</source>
         <translation>Nincs Btn szín:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5328"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5537"/>
         <source>No message</source>
         <translation>Nincs üzenet</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5485"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5694"/>
         <source>Non-QSL&apos;d:</source>
         <translation>Non-QSL&apos;d:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="659"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="842"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="859"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7500"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="665"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="848"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="865"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7713"/>
         <source>None</source>
         <translation>Nincs</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4974"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4658"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5183"/>
         <source>Normal</source>
         <translation>Normál</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5971"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6180"/>
         <source>Notify Request:</source>
         <translation>Értesítési kérés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1462"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1540"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7435"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7648"/>
         <source>OPERATING MODE</source>
         <translation>ÜZEMMÓD</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7755"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7968"/>
         <source>OTP</source>
         <translation>OTP</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7758"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7971"/>
         <source>OTP Enabled:</source>
         <translation>OTP engedélyezve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7773"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7986"/>
         <source>OTP Interval:</source>
         <translation>OTP intervallum:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7765"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7978"/>
         <source>OTP Seed:</source>
         <translation>OTP vetőmag:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7782"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7995"/>
         <source>OTP URL:</source>
         <translation>OTP URL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="865"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4029"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="871"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4238"/>
         <source>Off</source>
         <translation>Le</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="863"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="869"/>
         <source>On</source>
         <translation>Be</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1595"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1673"/>
         <source>Op Call:</source>
         <translation>Operátor hívójele:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2556"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2765"/>
         <source>Open Hamlib update</source>
         <translation>Nyissa meg a Hamlib frissítést</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6967"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7176"/>
         <source>Orange Calls:</source>
         <translation>Narancs hívójelek:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2799"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3008"/>
         <source>Output Channel:</source>
         <translation>Kimeneti csatorna:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2779"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2988"/>
         <source>Output Device:</source>
         <translation>Kimeneti eszköz:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2935"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3144"/>
         <source>POWER MEMORY</source>
         <translation>TELJESÍTMÉNY MEMÓRIA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5226"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5435"/>
         <source>PSK Reporter:</source>
         <translation>PSK Reporter:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2169"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2378"/>
         <source>PTT Method:</source>
         <translation>PTT módszer:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2216"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2425"/>
         <source>PTT Port:</source>
         <translation>PTT port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2498"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2707"/>
         <source>PWR and SWR:</source>
         <translation>PWR és SWR:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7050"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7259"/>
         <source>Palette:</source>
         <translation>Paletta:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5477"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5686"/>
         <source>Password:</source>
         <translation>Jelszó:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2247"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2456"/>
         <source>Poll Interval (s):</source>
         <translation>Szavazási időköz(ek):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5262"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5471"/>
         <source>Port:</source>
         <translation>Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1654"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1732"/>
         <source>Power (W):</source>
         <translation>Teljesítmény (W):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7219"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7428"/>
         <source>Progress Red:</source>
         <translation>Haladás piros:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5506"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5715"/>
         <source>Prompt to Log:</source>
         <translation>Naplózás kérése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7939"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8152"/>
         <source>QSY Message:</source>
         <translation>QSY Üzenet:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1619"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1697"/>
         <source>QTH:</source>
         <translation>QTH:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7343"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7556"/>
         <source>Quick Call:</source>
         <translation>Gyors hívás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3149"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3358"/>
         <source>Quick QSO:</source>
         <translation>Gyors QSO:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5580"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5789"/>
         <source>RECORDING</source>
         <translation>FELVÉTEL</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5617"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5826"/>
         <source>REMOTE WEB DASHBOARD (LAN)</source>
         <translation>TÁVOLI WEB-IRÁNYÍTÓPULT (LAN)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7520"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7733"/>
         <source>RTTY Exchange:</source>
         <translation>RTTY csere:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5013"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5222"/>
         <source>RX Bandwidth:</source>
         <translation>RX Sávszélesség:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2820"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3029"/>
         <source>RX Input Level:</source>
         <translation>RX bemeneti szint:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2153"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2362"/>
         <source>RX/TX via TCI</source>
         <translation>RX/TX TCI-n keresztül</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7406"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7619"/>
         <source>RX&gt;TX after QSO:</source>
         <translation>RX&gt;TX a QSO után:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="875"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="881"/>
         <source>Rear/Data</source>
         <translation>Hátsó/Adat</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5583"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5792"/>
         <source>Record RX:</source>
         <translation>RX rekord:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5593"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5802"/>
         <source>Record TX:</source>
         <translation>TX rekord:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5669"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5878"/>
         <source>Required for LAN/WAN</source>
         <translation>LAN/WAN-hez szükséges</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4641"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4677"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6124"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6774"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4850"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4886"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6333"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6983"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5979"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6188"/>
         <source>Restore Win:</source>
         <translation>Win visszaállítása:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="839"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="845"/>
         <source>Rig</source>
         <translation>Rig</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1631"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1709"/>
         <source>Rig Info:</source>
         <translation>A szerelvény adatai:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1769"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1978"/>
         <source>Rig:</source>
         <translation>Szerszám:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="871"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2764"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2802"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="877"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2973"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3011"/>
         <source>Right</source>
         <translation>Jobbra</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2291"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2500"/>
         <source>SERIAL PARAMETERS</source>
         <translation>SOROZAT PARAMÉTEREK</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5075"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5284"/>
         <source>SIDELOBE CONTROL</source>
         <translation>SIDELOBE CONTROL</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7047"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7256"/>
         <source>SPECTRUM</source>
         <translation>SPEKTRUM</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2414"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2623"/>
         <source>SPLIT OPERATION</source>
         <translation>OSZTOTT MŰVELET</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7167"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7376"/>
         <source>STARTUP</source>
         <translation>INDÍTÁS</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1541"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1619"/>
         <source>STATION DETAILS</source>
         <translation>ÁLLOMÁS RÉSZLETEI</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2902"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3111"/>
         <source>Save Directory:</source>
         <translation>Könyvtár mentése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2990"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3199"/>
         <source>Second (:15/:45)</source>
         <translation>Második (:15/:45)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5843"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6052"/>
         <source>Secondary ADIF:</source>
         <translation>Másodlagos ADIF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5825"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6034"/>
         <source>Secondary Interface:</source>
         <translation>Másodlagos interfész:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5806"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6015"/>
         <source>Secondary Port:</source>
         <translation>Másodlagos port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5798"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6007"/>
         <source>Secondary Server:</source>
         <translation>Másodlagos szerver:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5815"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6024"/>
         <source>Secondary TTL:</source>
         <translation>Másodlagos TTL:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5790"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5999"/>
         <source>Secondary UDP:</source>
         <translation>Másodlagos UDP:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5781"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5990"/>
         <source>Send ADIF:</source>
         <translation>ADIF küldése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3128"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3337"/>
         <source>Send RR73:</source>
         <translation>RR73 küldése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1921"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2130"/>
         <source>Serial Port:</source>
         <translation>COM Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5727"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5936"/>
         <source>Server Name:</source>
         <translation>Szerver neve:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5734"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5943"/>
         <source>Server Port:</source>
         <translation>Szerver port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5248"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5457"/>
         <source>Server:</source>
         <translation>Szerver:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4686"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4895"/>
         <source>Show DXCC:</source>
         <translation>DXCC megjelenítése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7482"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7695"/>
         <source>Show OTP:</source>
         <translation>OTP megjelenítése:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5078"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5287"/>
         <source>Sidelobe Mode:</source>
         <translation>Sidelobe mód:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5030"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5239"/>
         <source>Single Decode:</source>
         <translation>Egyszeri dekódolás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5555"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5764"/>
         <source>Spec Op Cmts:</source>
         <translation>Spec Op Cmts:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2417"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2626"/>
         <source>Split:</source>
         <translation>Felosztás:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5374"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5583"/>
         <source>Station ID:</source>
         <translation>Állomásazonosító:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1739"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5279"/>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5425"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1948"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5488"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5634"/>
         <source>Status:</source>
         <translation>Állapot:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2326"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2535"/>
         <source>Stop Bits:</source>
         <translation>Stop bitek:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7474"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7687"/>
         <source>SuperFox:</source>
         <translation>SuperFox:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7598"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7811"/>
         <source>Sync Now</source>
         <translation>Szinkronizálás most</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2470"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2679"/>
         <source>TCI Audio</source>
         <translation>TCI Audio</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2145"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2354"/>
         <source>TCI Audio:</source>
         <translation>TCI audio:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2119"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2328"/>
         <source>TCI Host:Port:</source>
         <translation>TCI gazdagép: Port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6000"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6209"/>
         <source>TCP Port:</source>
         <translation>TCP port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6012"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6221"/>
         <source>TCP Server:</source>
         <translation>TCP szerver:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5236"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5445"/>
         <source>TCP/IP:</source>
         <translation>TCP/IP:</translation>
     </message>
@@ -14121,42 +14527,42 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">TERÜLET</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4141"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>TONE SPACING</source>
         <translation>TONE SZÁMKÖR</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2454"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2663"/>
         <source>TX Audio Src:</source>
         <translation>TX Audio Src:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2467"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2676"/>
         <source>TX Audio:</source>
         <translation>TX Hang:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3004"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3213"/>
         <source>TX Delay (s):</source>
         <translation>TX Késleltetés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2974"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3183"/>
         <source>TX Frequency:</source>
         <translation>TX Frekvencia:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4727"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4936"/>
         <source>TX Msg to RX:</source>
         <translation>TX üzenet a RX számára:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2880"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3089"/>
         <source>TX Output Level:</source>
         <translation>TX kimeneti szint:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2987"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3196"/>
         <source>TX Slot:</source>
         <translation>TX Slot:</translation>
     </message>
@@ -14181,172 +14587,172 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">4. terület:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1733"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1942"/>
         <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
         <translation>Tipp: zárja be a OmniRig-et a Windows tálcaikonjáról, majd nyomja meg újra a Csatlakozás gombot.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4099"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4308"/>
         <source>Tune Watchdog (s):</source>
         <translation>Tune Watchdog(ok):</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5065"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5274"/>
         <source>Two-Pass:</source>
         <translation>Két bérlet:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1665"/>
         <source>Type 1 prefix</source>
         <translation>Írja be az 1-es előtagot</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1585"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1663"/>
         <source>Type 2 Msg Gen:</source>
         <translation>Type 2 Msg Gen:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1587"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1665"/>
         <source>Type 2 prefix</source>
         <translation>2. típusú előtag</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5683"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5892"/>
         <source>UDP SERVER</source>
         <translation>UDP SZERVER</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5657"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5866"/>
         <source>Username:</source>
         <translation>Felhasználónév:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7360"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7573"/>
         <source>VHF/UHF:</source>
         <translation>VHF/UHF:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4023"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4232"/>
         <source>WATCHDOG</source>
         <translation>ŐRKUTYA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8021"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8234"/>
         <source>WHITELIST</source>
         <translation>FEHÉRLISTA</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5650"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5859"/>
         <source>WS bind:</source>
         <translation>WS kötés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5637"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5846"/>
         <source>WS socket port:</source>
         <translation>WS aljzat port:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5604"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5813"/>
         <source>WSPR Upload:</source>
         <translation>WSPR Feltöltés:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8213"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8426"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Várjon és ugorjon:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7372"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7585"/>
         <source>Wait Features:</source>
         <translation>Várakozás jellemzői:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8064"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8277"/>
         <source>Whitelist 10:</source>
         <translation>10. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8068"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8281"/>
         <source>Whitelist 11:</source>
         <translation>11. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8071"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8284"/>
         <source>Whitelist 12:</source>
         <translation>12. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8033"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8246"/>
         <source>Whitelist 1:</source>
         <translation>1. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8036"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8249"/>
         <source>Whitelist 2:</source>
         <translation>2. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8040"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8253"/>
         <source>Whitelist 3:</source>
         <translation>3. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8043"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8256"/>
         <source>Whitelist 4:</source>
         <translation>4. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8047"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8260"/>
         <source>Whitelist 5:</source>
         <translation>5. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8050"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8263"/>
         <source>Whitelist 6:</source>
         <translation>6. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8054"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8267"/>
         <source>Whitelist 7:</source>
         <translation>7. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8057"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8270"/>
         <source>Whitelist 8:</source>
         <translation>8. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8061"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8274"/>
         <source>Whitelist 9:</source>
         <translation>9. engedélyezőlista:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2567"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2776"/>
         <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
         <translation>Windows: DLL frissítve a Hamlib webhelyről. macOS/Linux: hivatalos dokumentáció és kiadások.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5570"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5779"/>
         <source>ZZ00:</source>
         <translation>ZZ00:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5146"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5355"/>
         <source>Zap:</source>
         <translation>Zap:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5562"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5771"/>
         <source>dB in Cmts:</source>
         <translation>dB cm-ben:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7210"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7419"/>
         <source>kHz no k:</source>
         <translation>kHz no k:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2726"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2935"/>
         <source>↻  Refresh</source>
         <translation>↻  Frissítés</translation>
     </message>
@@ -14378,84 +14784,88 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Nem sikerült inicializálni a hangforrás eszközt.</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="480"/>
+        <location filename="../Audio/soundin.cpp" line="628"/>
         <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
         <translation>Audió RX bemenet megnyitási hiba: a Qt nem tudta megnyitni a kiválasztott bemeneti eszközt. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="484"/>
+        <location filename="../Audio/soundin.cpp" line="632"/>
         <source>Audio RX input read error: Qt reported an I/O failure while reading samples. %1</source>
         <translation>Audió RX bemenet olvasási hiba: a Qt I/O hibát jelentett a minták olvasása közben. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="488"/>
+        <location filename="../Audio/soundin.cpp" line="636"/>
         <source>Audio RX input fatal error: the selected input device is not usable now. %1</source>
         <translation>Audió RX bemenet végzetes hiba: a kiválasztott bemeneti eszköz most nem használható. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="494"/>
+        <location filename="../Audio/soundin.cpp" line="642"/>
         <source>Audio RX input underrun: capture fell behind but will continue. %1</source>
         <translation>Audió RX bemenet underrun: a rögzítés lemaradt, de folytatódik. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="649"/>
+        <location filename="../Audio/soundin.cpp" line="809"/>
         <source>Audio RX format unsupported: device=&quot;%1&quot; does not accept requested=%2; preferred=%3; selected-channel=%4</source>
         <translation>Audió RX formátum nem támogatott: device=&quot;%1&quot; nem fogadja el a requested=%2-t; preferred=%3; selected-channel=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="706"/>
+        <location filename="../Audio/soundin.cpp" line="877"/>
+        <source>Audio RX pull stream could not be started: input device=&quot;%1&quot;</source>
+        <translation>Az RX audió pull-adatfolyam nem indítható el: bemeneti eszköz=&quot;%1&quot;</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="910"/>
         <source>Audio RX sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
         <translation>Audió RX sink inicializálás sikertelen: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="888"/>
+        <location filename="../Audio/soundin.cpp" line="1092"/>
         <source>Idle</source>
         <translation>Inaktív</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="410"/>
-        <location filename="../Audio/soundin.cpp" line="893"/>
-        <location filename="../Audio/soundin.cpp" line="897"/>
+        <location filename="../Audio/soundin.cpp" line="558"/>
+        <location filename="../Audio/soundin.cpp" line="1097"/>
+        <location filename="../Audio/soundin.cpp" line="1101"/>
         <source>Receiving</source>
         <translation>Felvétel</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="327"/>
+        <location filename="../Audio/soundin.cpp" line="443"/>
         <source>Native macOS AudioQueue input requires PCM Int16 format, got %1</source>
         <translation>A natív macOS AudioQueue bemenet PCM Int16 formátumot igényel, érkezett: %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="334"/>
+        <location filename="../Audio/soundin.cpp" line="451"/>
         <source>Native macOS AudioQueue sink initialization failed: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</source>
         <translation>A natív macOS AudioQueue sink inicializálása sikertelen: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="361"/>
         <source>Native macOS AudioQueue input open failed for &quot;%1&quot;: %2</source>
-        <translation>A natív macOS AudioQueue bemenet megnyitása sikertelen ehhez: &quot;%1&quot;: %2</translation>
+        <translation type="vanished">A natív macOS AudioQueue bemenet megnyitása sikertelen ehhez: &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="379"/>
+        <location filename="../Audio/soundin.cpp" line="523"/>
         <source>Native macOS AudioQueue buffer allocation failed for &quot;%1&quot;: %2</source>
         <translation>A natív macOS AudioQueue puffer lefoglalása sikertelen ehhez: &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="388"/>
+        <location filename="../Audio/soundin.cpp" line="533"/>
         <source>Native macOS AudioQueue buffer enqueue failed for &quot;%1&quot;: %2</source>
         <translation>A natív macOS AudioQueue puffer sorba állítása sikertelen ehhez: &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="399"/>
+        <location filename="../Audio/soundin.cpp" line="545"/>
         <source>Native macOS AudioQueue input start failed for &quot;%1&quot;: %2</source>
         <translation>A natív macOS AudioQueue bemenet indítása sikertelen ehhez: &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="897"/>
+        <location filename="../Audio/soundin.cpp" line="1101"/>
         <source>Suspended</source>
         <translation>Felfüggesztve</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="903"/>
+        <location filename="../Audio/soundin.cpp" line="1107"/>
         <source>Audio RX input stopped with error: device=&quot;%1&quot;, state=%2</source>
         <translation>Audió RX bemenet leállt hibával: device=&quot;%1&quot;, state=%2</translation>
     </message>
@@ -14468,7 +14878,7 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Hiba</translation>
     </message>
     <message>
-        <location filename="../Audio/soundin.cpp" line="910"/>
+        <location filename="../Audio/soundin.cpp" line="1114"/>
         <source>Stopped</source>
         <translation>Leállítva</translation>
     </message>
@@ -14504,87 +14914,87 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Nincs audió kimeneti eszköz konfigurálva.</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="251"/>
+        <location filename="../Audio/soundout.cpp" line="248"/>
         <source>Audio TX output open error: Qt could not open the selected output device. %1</source>
         <translation>Audió TX kimenet megnyitási hiba: a Qt nem tudta megnyitni a kiválasztott kimeneti eszközt. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="254"/>
+        <location filename="../Audio/soundout.cpp" line="251"/>
         <source>Audio TX output write error: Qt reported an I/O failure while writing samples. %1</source>
         <translation>Audió TX kimenet írási hiba: a Qt I/O hibát jelentett a minták írása közben. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="258"/>
+        <location filename="../Audio/soundout.cpp" line="255"/>
         <source>Audio TX output underrun: the audio sink fell behind but will continue. %1</source>
         <translation>Audió TX kimenet underrun: az audió sink lemaradt, de folytatódik. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="262"/>
+        <location filename="../Audio/soundout.cpp" line="259"/>
         <source>Audio TX output fatal error: the selected output device is not usable now. %1</source>
         <translation>Audió TX kimenet végzetes hiba: a kiválasztott kimeneti eszköz most nem használható. %1</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="355"/>
+        <location filename="../Audio/soundout.cpp" line="359"/>
         <source>Audio TX format invalid: device=&quot;%1&quot;, requested=%2, preferred=%3</source>
         <translation>Audió TX formátum érvénytelen: device=&quot;%1&quot;, requested=%2, preferred=%3</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="362"/>
+        <location filename="../Audio/soundout.cpp" line="366"/>
         <source>TX audio: device does not natively support %1 Hz / Int16 (preferred: %2 Hz / %3 ch) – relying on Qt/CoreAudio conversion</source>
         <translation>TX audió: az eszköz natívan nem támogatja a %1 Hz / Int16-ot (preferred: %2 Hz / %3 ch) – Qt/CoreAudio konverzióra támaszkodva</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="391"/>
+        <location filename="../Audio/soundout.cpp" line="395"/>
         <source>Audio TX output device is not configured: select an output device in Settings &gt; Audio.</source>
         <translation>Az audió TX kimeneti eszköz nincs konfigurálva: válasszon egy kimeneti eszközt a Beállítások &gt; Audió alatt.</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="423"/>
+        <location filename="../Audio/soundout.cpp" line="427"/>
         <source>Audio TX output start failed: Qt did not return a writable sink device. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
         <translation>Audió TX kimenet indítás sikertelen: a Qt nem adott vissza írható sink eszközt. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="635"/>
+        <location filename="../Audio/soundout.cpp" line="651"/>
         <source>Audio TX output write error: Qt rejected buffered audio data. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
         <translation>Audió TX kimenet írási hiba: a Qt elutasította a pufferelt audió adatokat. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="687"/>
+        <location filename="../Audio/soundout.cpp" line="703"/>
         <source>Audio TX source read error: generated TX audio source was closed before playback completed. device=&quot;%1&quot;, format=%2</source>
         <translation>Audió TX forrás olvasási hiba: a generált TX audió forrás bezárult, mielőtt a lejátszás befejeződött volna. device=&quot;%1&quot;, format=%2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="696"/>
+        <location filename="../Audio/soundout.cpp" line="712"/>
         <source>Audio TX source read error: Decodium could not read generated TX audio before writing it. device=&quot;%1&quot;, format=%2</source>
         <translation>Audió TX forrás olvasási hiba: a Decodium nem tudta olvasni a generált TX audiót az írása előtt. device=&quot;%1&quot;, format=%2</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="716"/>
+        <location filename="../Audio/soundout.cpp" line="732"/>
         <source>Audio TX output write error: Qt rejected generated TX audio data. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</source>
         <translation>Audió TX kimenet írási hiba: a Qt elutasította a generált TX audió adatokat. device=&quot;%1&quot;, format=%2, state=%3, qt-error=%4</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="755"/>
+        <location filename="../Audio/soundout.cpp" line="771"/>
         <source>Idle</source>
         <translation>Inaktív</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="758"/>
+        <location filename="../Audio/soundout.cpp" line="774"/>
         <source>Sending</source>
         <translation>Elküldve</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="761"/>
+        <location filename="../Audio/soundout.cpp" line="777"/>
         <source>Suspended</source>
         <translation>Felfüggesztve</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="766"/>
+        <location filename="../Audio/soundout.cpp" line="782"/>
         <source>TX output stopped while parked</source>
         <translation>A TX kimenet leállt parkolás közben</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="771"/>
+        <location filename="../Audio/soundout.cpp" line="787"/>
         <source>Audio TX output stopped with error: device=&quot;%1&quot;, state=%2</source>
         <translation>Audió TX kimenet leállt hibával: device=&quot;%1&quot;, state=%2</translation>
     </message>
@@ -14597,7 +15007,7 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <translation type="vanished">Hiba</translation>
     </message>
     <message>
-        <location filename="../Audio/soundout.cpp" line="775"/>
+        <location filename="../Audio/soundout.cpp" line="791"/>
         <source>Stopped</source>
         <translation>Leállítva</translation>
     </message>
@@ -14679,14 +15089,14 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="472"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="477"/>
         <source>ALC meter 0..100
 &gt;60 = excessive ALC (TX power too high)</source>
         <translation>ALC mérő 0..100
 &gt;60 = túlzott ALC (a TX teljesítmény túl magas)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/StatusBar.qml" line="473"/>
+        <location filename="../qml/decodium/components/StatusBar.qml" line="478"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
         <translation>Az ALC-t a Hamlib nem jelenti ehhez a rig/backendhez</translation>
     </message>
@@ -15052,7 +15462,7 @@ Call CQ automatically until a reply is received</source>
 CQ automatikus hivasa valaszig</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1081"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1220"/>
         <source>TX slot
 1st: :00/:30
 2nd: :15/:45</source>
@@ -15081,51 +15491,51 @@ CQ automatikus hivasa valaszig</translation>
         <translation type="vanished">FT2 aszinkron mod - szinuszhullam: zold=RX, piros=TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="275"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
         <source>Potenza TX</source>
         <translation>TX teljesítmény</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="826"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="965"/>
         <source>Multi-Answer Mode (MAM) - right-click opens the window (default OFF)</source>
         <translation>Multi-Answer Mode (MAM) - jobb kattintás megnyitja az ablakot (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="856"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="995"/>
         <source>Deep Search: deeper weak-signal search using known callsigns (default OFF)</source>
         <translation>Deep Search: mélyebb gyenge-jel keresés ismert hívójelek használatával (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="881"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1020"/>
         <source>A priori decode (AP): uses known information to recover weak signals (default OFF)</source>
         <translation>A priori decode (AP): ismert információkat használ gyenge jelek helyreállításához (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="906"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1045"/>
         <source>Automatic QSO sequencing (default OFF)</source>
         <translation>Automatikus QSO szekvenciálás (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="931"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1070"/>
         <source>Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)</source>
         <translation>Quick QSO: kihagyja a TX1-et és a TX2-vel kezd (közvetlen report) (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="958"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1097"/>
         <source>Enable TX
 Right button + mouse wheel: adjust TX power</source>
         <translation>TX engedélyezése
 Jobb gomb + egérgörgő: TX teljesítmény beállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="993"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1132"/>
         <source>Lock the TX frequency
 (Hold Tx Freq)</source>
         <translation>A TX frekvencia zárolása
 (Hold Tx Freq)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1019"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1158"/>
         <source>Repeated Auto CQ
 Automatically calls CQ until a reply arrives (default OFF)</source>
         <translation>Ismételt Auto CQ
@@ -15146,14 +15556,14 @@ Nyissa meg a közvetlen hívójel-hívó panelt
 újrapróbálkozással, időtúllépéssel és periódus-vezérléssel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1052"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1191"/>
         <source>Active call: %1 (missed target %2/%3)
 Click to open the panel</source>
         <translation>Aktív hívás: %1 (elvétett cél %2/%3)
 Kattintson a panel megnyitásához</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1194"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
 with missed-target limit, timeout, and period control</source>
@@ -15162,112 +15572,111 @@ Nyissa meg a közvetlen hívójel-hívó panelt
 elvétett cél korlátjával, időtúllépéssel és periódus-vezérléssel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1108"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1247"/>
         <source>Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)</source>
         <translation>Auto CQ: a TX/RX fázisokat váltogatja ismételt megválaszolatlan CQ-k után (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1134"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1273"/>
         <source>Stop TX</source>
         <translation>TX leállítása</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1161"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1300"/>
         <source>Clear DX, reports, and TX1-TX5</source>
         <translation>DX, reportok és TX1-TX5 törlése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1186"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1325"/>
         <source>Tune (transmits the tuning carrier)</source>
         <translation>Tune (a hangoló vivőt sugározza)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1221"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1360"/>
         <source>Filtro CQ attivo (%1). Click: cambia livello / spegne.</source>
         <translation>CQ szűrő aktív (%1). Kattintás: szint váltása / kikapcsolás.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1223"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1362"/>
         <source>Filtro CQ spento. Click: mostra solo CQ, poi cicla 73 / RR73 / RRR.</source>
         <translation>CQ szűrő kikapcsolva. Kattintás: csak CQ megjelenítése, majd ciklikusan 73 / RR73 / RRR.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1255"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1394"/>
         <source>Async FT2 mode - sine wave: green=RX, red=TX (default OFF)</source>
         <translation>Async FT2 mód - szinuszhullám: zöld=RX, piros=TX (alapértelmezett KI)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1270"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1409"/>
         <source>Hound mode active</source>
         <translation>Hound mód aktív</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1294"/>
         <source>Wait &amp; Pounce active</source>
-        <translation>Wait &amp;amp; Pounce aktív</translation>
+        <translation type="vanished">Wait &amp;amp; Pounce aktív</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1819"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1946"/>
         <source>Cancel</source>
         <translation>Mégse</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1824"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1951"/>
         <source>Standard</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1833"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1960"/>
         <source>Apply</source>
         <translation>Alkalmaz</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1890"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2017"/>
         <source>Conferma registrazione QSO</source>
         <translation>QSO naplózás megerősítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1925"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2052"/>
         <source>Locatore (es. JN71) — inseribile a mano</source>
         <translation>Locator (pl. JN71) — kézzel beírható</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1947"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2074"/>
         <source>Start UTC:</source>
         <translation>Kezdő UTC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1967"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2094"/>
         <source>End UTC:</source>
         <translation>Záró UTC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2015"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2142"/>
         <source>Sat Mode:</source>
         <translation>Muhu. mod:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2026"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2153"/>
         <source>DX Cluster:</source>
         <translation>DX cluster:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2040"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2167"/>
         <source>Spot al cluster</source>
         <translation>Spot a clusterre</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2040"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2167"/>
         <source>Cluster non connesso</source>
         <translation>Cluster nincs csatlakozva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2230"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2357"/>
         <source>TX%1 disabled (right-click -&gt; menu to re-enable)</source>
         <translation>TX%1 letiltva (jobb kattintás -&gt; menü az újraengedélyezéshez)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2231"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2358"/>
         <source>Click: send now
 Right-click: menu (Edit / Skip TX%1)
 Long-press: edit message</source>
@@ -15276,17 +15685,17 @@ Jobb kattintás: menü (Szerkesztés / TX%1 kihagyása)
 Hosszú nyomás: üzenet szerkesztése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2248"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2375"/>
         <source>Modifica messaggio TX%1</source>
         <translation>TX%1 üzenet szerkesztése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2255"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2382"/>
         <source>Riabilita TX%1</source>
         <translation>TX%1 újraengedélyezése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2255"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2382"/>
         <source>Salta TX%1 (skip auto-seq)</source>
         <translation>TX%1 kihagyása (auto-seq kihagyás)</translation>
     </message>
@@ -15299,35 +15708,78 @@ Hosszú nyomás: üzenet szerkesztése</translation>
         <translation type="vanished">Cluster nincs csatlakoztatva</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2057"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2184"/>
         <source>Close</source>
         <translation>Bezaras</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2083"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2210"/>
         <source>Add</source>
         <translation>Hozzaadas</translation>
     </message>
 </context>
 <context>
+    <name>UpdateDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="14"/>
+        <source>Update available</source>
+        <translation>Frissítés érhető el</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="42"/>
+        <source>Decodium %1 is available</source>
+        <translation>A Decodium %1 elérhető</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="51"/>
+        <source>You are running %1.</source>
+        <translation>Jelenleg a(z) %1 fut.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="58"/>
+        <source>What&apos;s new:</source>
+        <translation>Újdonságok:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="104"/>
+        <source>Decodium will close and the installer will start. Your settings and QSO log are kept.</source>
+        <translation>A Decodium bezárul, és elindul a telepítő. A beállításaid és a QSO-naplód megmaradnak.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="116"/>
+        <source>Skip this version</source>
+        <translation>Verzió kihagyása</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="125"/>
+        <source>Later</source>
+        <translation>Később</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="132"/>
+        <source>Update now</source>
+        <translation>Frissítés most</translation>
+    </message>
+</context>
+<context>
     <name>Waterfall</name>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="795"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="806"/>
         <source>Hide</source>
         <translation>Elrejtés</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="818"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="829"/>
         <source>Hide waterfall controls</source>
         <translation>Waterfall vezérlők elrejtése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="1866"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1880"/>
         <source>Mostra controlli</source>
         <translation>Vezérlők megjelenítése</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="1928"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1942"/>
         <source>Show waterfall controls</source>
         <translation>Waterfall vezérlők megjelenítése</translation>
     </message>
