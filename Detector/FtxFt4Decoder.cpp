@@ -72,7 +72,6 @@ using Complex = std::complex<float>;
 
 extern "C"
 {
-  void ftx_ft8_stage4_apply_hash_seed_cache_c ();
   void ftx_getcandidates4_c (float const* dd, float fa, float fb, float syncmin, float nfqso,
                              int maxcand, float* savg, float* candidate, int* ncand,
                              float* sbase);
@@ -763,7 +762,11 @@ void append_ft4_harvest_grid_candidates (int depth, int nfa, int nfb, bool inclu
     {
       return;
     }
-  if (!ft4_harvest_grid_enabled () || depth < 3)
+  // The exhaustive 25 Hz grid is a depth-4 feature. Enabling it at depth 3
+  // makes the nominal live pass exceed FT4's 7.5 s slot on otherwise healthy
+  // 8-thread systems. The bridge only selects depth 4 on machines with enough
+  // execution headroom, while depth 3 retains its lower sync threshold and OSD.
+  if (!ft4_harvest_grid_enabled () || depth < 4)
     {
       return;
     }
@@ -1452,11 +1455,10 @@ void run_ft4_decode (short const* iwave,
   char hiscall_c[13];
   fill_c_string_13 (mycall_c, mycall);
   fill_c_string_13 (hiscall_c, hiscall);
-  // Keep the pack77 hash table alive across FT4 candidates/slots. The legacy
-  // reset clears call->hash history and turns compound calls back into <...>.
-  // set_context only updates my/dx calls, matching the FT8 live path.
+  // Keep the pack77 hash table alive across FT4 candidates/slots. Each hash is
+  // inserted directly by the worker, so replaying the complete cache here is
+  // redundant and can block the shared runtime for seconds on Windows.
   legacy_pack77_set_context_c (mycall_c, hiscall_c);
-  ftx_ft8_stage4_apply_hash_seed_cache_c ();
 
   Ft4ApSetup const ap_setup = build_ap_setup (mycall, hiscall);
   std::array<int, 29> const mcq = contest_mcq (ncontest);

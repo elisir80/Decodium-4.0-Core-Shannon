@@ -92,11 +92,18 @@ ApplicationWindow {
         if (mainLoadStatus === Component.Ready) {
             componentStatusPoller.stop()
             if (!mainWindowObject) {
-                mainWindowObject = mainComponent.createObject(null)
+                // Keep Main hidden until C++ applies the graphics configuration.
+                // The engine objectCreated hook only sees this BootLoader window.
+                mainWindowObject = mainComponent.createObject(null, { "visible": false })
                 if (!mainWindowObject) {
                     mainLoadStatus = Component.Error
                     console.log("BootLoader: Main.qml createObject(null) failed")
                     return
+                }
+                if (bridge && typeof bridge.configureQuickWindowGraphics === "function") {
+                    var graphicsConfigured = bridge.configureQuickWindowGraphics(mainWindowObject)
+                    console.log("BootLoader: Main window graphics configured before show="
+                                + graphicsConfigured)
                 }
                 if (mainWindowObject.closing) {
                     mainWindowObject.closing.connect(function() { Qt.quit() })
@@ -232,8 +239,12 @@ ApplicationWindow {
         repeat: false
         onTriggered: {
             console.log("BootLoader: starting Main.qml load at +" + bootWindow.bootElapsedMs() + " ms")
-            if (bridge && bridge.notifyMainQmlLoadStarted)
-                bridge.notifyMainQmlLoadStarted()
+            try {
+                if (bridge)
+                    bridge.notifyMainQmlLoadStarted()
+            } catch (e) {
+                console.log("BootLoader: notifyMainQmlLoadStarted failed: " + e)
+            }
             bootWindow.mainLoadElapsedSeconds = 0
             bootWindow.mainLoadStartedMs = Date.now()
             bootWindow.mainComponent = Qt.createComponent("Main.qml", Component.Asynchronous)

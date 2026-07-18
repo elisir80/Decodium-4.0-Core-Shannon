@@ -3,9 +3,10 @@
 
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
 #include <deque>
-#include <future>
 #include <mutex>
+#include <thread>
 
 #include <QCoreApplication>
 #include <QDate>
@@ -36,7 +37,6 @@ extern "C"
 {
   void legacy_pack77_save_hash_call_c (char const c13[13], int* n10, int* n12, int* n22);
   void ftx_ft8_stage4_seed_hash_call_c (char const* call);
-  void ftx_ft8_stage4_apply_hash_seed_cache_c ();
   void ftx_ft4_decode_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nfa, int* nfb,
                          int* ndepth, int* lapcqonly, int* ncontest,
                          char const* mycall, char const* hiscall,
@@ -64,6 +64,8 @@ namespace
   constexpr int kFt4HashSeedPriorityMonths {2};
   constexpr int kFt4HashSeedCacheVersion {1};
   constexpr qint64 kFt4HashSeedCacheMaxBytes {1024 * 1024};
+  constexpr int kFt4HashSeedApplyBatchCalls {64};
+  constexpr qint64 kFt4HashSeedApplyBudgetMs {25};
   char constexpr kFt4DspStageEnv[] {"DECODIUM_FT4_CPP_DSP_STAGE"};
   [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
@@ -752,26 +754,76 @@ namespace
   struct HashSeedAsyncState
   {
     std::mutex mutex;
+    std::condition_variable workAvailable;
+    bool workerStarted {false};
     bool initialStarted {false};
+    bool initialRequested {false};
+    bool initialReady {false};
     bool initialApplied {false};
-    std::future<HashSeedSnapshot> initialFuture;
+    HashSeedSnapshot initialCompleted;
     qint64 lastRefreshStartMs {0};
-    std::future<HashSeedSnapshot> refreshFuture;
+    bool refreshRequested {false};
+    bool refreshReady {false};
+    HashSeedSnapshot refreshCompleted;
+    std::deque<QString> pendingCalls;
   };
 
   HashSeedAsyncState& hash_seed_async_state ()
   {
-    // The scan runs on std::async. A function-static future can block and execute
-    // during C++ static destruction, while Qt is already closing down.
+    // The state and detached worker intentionally live until process exit.
+    // Joining while Qt globals are being torn down could block on log I/O.
     static HashSeedAsyncState* state = new HashSeedAsyncState;
     return *state;
   }
 
-  template<typename T>
-  bool future_ready (std::future<T>& future)
+  void start_hash_seed_worker_locked (HashSeedAsyncState& state)
   {
-    using namespace std::chrono_literals;
-    return future.valid () && future.wait_for (0ms) == std::future_status::ready;
+    if (state.workerStarted)
+      {
+        return;
+      }
+    state.workerStarted = true;
+    std::thread ([&state] {
+      QThread::currentThread ()->setObjectName (QStringLiteral ("FT4HashSeedWorker"));
+      QThread::currentThread ()->setPriority (QThread::LowPriority);
+
+      for (;;)
+        {
+          bool collectInitial = false;
+          bool collectRefresh = false;
+          {
+            std::unique_lock<std::mutex> lock {state.mutex};
+            state.workAvailable.wait (lock, [&state] {
+              return state.initialRequested || state.refreshRequested;
+            });
+            if (state.initialRequested)
+              {
+                state.initialRequested = false;
+                collectInitial = true;
+              }
+            else if (state.refreshRequested)
+              {
+                state.refreshRequested = false;
+                collectRefresh = true;
+              }
+          }
+
+          if (collectInitial)
+            {
+              HashSeedSnapshot snapshot = collect_initial_hash_seed_snapshot ();
+              std::lock_guard<std::mutex> lock {state.mutex};
+              state.initialCompleted = std::move (snapshot);
+              state.initialReady = true;
+            }
+          else if (collectRefresh)
+            {
+              HashSeedSnapshot snapshot = collect_hash_seed_refresh_snapshot ();
+              std::lock_guard<std::mutex> lock {state.mutex};
+              state.refreshCompleted = std::move (snapshot);
+              state.refreshReady = true;
+            }
+        }
+    }).detach ();
   }
 
   void seed_hash_calls (QStringList const& calls)
@@ -781,10 +833,6 @@ namespace
         QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
         legacy_pack77_save_hash_call_c (field.constData (), nullptr, nullptr, nullptr);
         ftx_ft8_stage4_seed_hash_call_c (field.constData ());
-      }
-    if (!calls.isEmpty ())
-      {
-        ftx_ft8_stage4_apply_hash_seed_cache_c ();
       }
   }
 
@@ -800,10 +848,11 @@ namespace
       {
         return;
       }
+    start_hash_seed_worker_locked (state);
     state.initialStarted = true;
-    state.initialFuture = std::async (std::launch::async, [] {
-      return collect_initial_hash_seed_snapshot ();
-    });
+    state.initialRequested = true;
+    state.lastRefreshStartMs = QDateTime::currentMSecsSinceEpoch ();
+    state.workAvailable.notify_one ();
   }
 
   void apply_ready_ft4_pack77_hash_seed_collection ()
@@ -817,10 +866,15 @@ namespace
     {
       HashSeedAsyncState& state = hash_seed_async_state ();
       std::lock_guard<std::mutex> lock {state.mutex};
-      if (!state.initialApplied && future_ready (state.initialFuture))
+      if (!state.initialApplied && state.initialReady)
         {
-          snapshot = state.initialFuture.get ();
+          snapshot = std::move (state.initialCompleted);
+          state.initialReady = false;
           state.initialApplied = true;
+          for (QString const& call : snapshot.calls)
+            {
+              state.pendingCalls.push_back (call);
+            }
           haveSnapshot = true;
         }
     }
@@ -829,7 +883,6 @@ namespace
         return;
       }
 
-    seed_hash_calls (snapshot.calls);
     if (!snapshot.calls.isEmpty ())
       {
         LOG_INFO ("FT4 pack77 hash seed initialized: calls=" << snapshot.calls.size ()
@@ -851,12 +904,9 @@ namespace
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
     HashSeedAsyncState& state = hash_seed_async_state ();
     std::lock_guard<std::mutex> lock {state.mutex};
-    if (state.refreshFuture.valid ())
+    if (!state.initialApplied || !state.pendingCalls.empty ()
+        || state.refreshRequested || state.refreshReady)
       {
-        if (!future_ready (state.refreshFuture))
-          {
-            return;
-          }
         return;
       }
     if (state.lastRefreshStartMs > 0
@@ -864,10 +914,10 @@ namespace
       {
         return;
       }
+    start_hash_seed_worker_locked (state);
     state.lastRefreshStartMs = nowMs;
-    state.refreshFuture = std::async (std::launch::async, [] {
-      return collect_hash_seed_refresh_snapshot ();
-    });
+    state.refreshRequested = true;
+    state.workAvailable.notify_one ();
   }
 
   void apply_ready_ft4_hash_context_refresh ()
@@ -881,9 +931,14 @@ namespace
     {
       HashSeedAsyncState& state = hash_seed_async_state ();
       std::lock_guard<std::mutex> lock {state.mutex};
-      if (future_ready (state.refreshFuture))
+      if (state.refreshReady)
         {
-          snapshot = state.refreshFuture.get ();
+          snapshot = std::move (state.refreshCompleted);
+          state.refreshReady = false;
+          for (QString const& call : snapshot.calls)
+            {
+              state.pendingCalls.push_back (call);
+            }
           haveSnapshot = true;
         }
     }
@@ -892,7 +947,44 @@ namespace
         return;
       }
 
-    seed_hash_calls (snapshot.calls);
+  }
+
+  void apply_pending_ft4_hash_seed_calls ()
+  {
+    QElapsedTimer timer;
+    timer.start ();
+    int applied = 0;
+    while (applied < kFt4HashSeedApplyBatchCalls
+           && timer.elapsed () < kFt4HashSeedApplyBudgetMs)
+      {
+        QString call;
+        {
+          HashSeedAsyncState& state = hash_seed_async_state ();
+          std::lock_guard<std::mutex> lock {state.mutex};
+          if (state.pendingCalls.empty ())
+            {
+              break;
+            }
+          // Seed the newest calls first; they are the useful ones for live traffic.
+          call = std::move (state.pendingCalls.back ());
+          state.pendingCalls.pop_back ();
+        }
+        QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
+        legacy_pack77_save_hash_call_c (field.constData (), nullptr, nullptr, nullptr);
+        ftx_ft8_stage4_seed_hash_call_c (field.constData ());
+        ++applied;
+      }
+
+    if (timer.elapsed () >= 50)
+      {
+        HashSeedAsyncState& state = hash_seed_async_state ();
+        std::lock_guard<std::mutex> lock {state.mutex};
+        qInfo().noquote ()
+            << "[HASHMETRIC] ft4_seed_batch"
+            << "applied=" << applied
+            << "elapsed_ms=" << timer.elapsed ()
+            << "remaining=" << state.pendingCalls.size ();
+      }
   }
 
   void seed_ft4_pack77_hashes_from_rows (QStringList const& rows)
@@ -1042,7 +1134,7 @@ void FT4DecodeWorker::decode (DecodeRequest const& request)
     }
   apply_ready_ft4_pack77_hash_seed_collection ();
   apply_ready_ft4_hash_context_refresh ();
-  ftx_ft8_stage4_apply_hash_seed_cache_c ();
+  apply_pending_ft4_hash_seed_calls ();
 
   short int iwave[kFt4SampleCount] {};
   int const copyCount = std::min (static_cast<int>(request.audio.size ()), static_cast<int>(kFt4SampleCount));

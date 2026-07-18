@@ -120,6 +120,8 @@ private:
     class QTimer* m_budgetTimer {nullptr};
     int m_budgetRowsPerCycle {48};
     bool m_budgetTargetActive {false};
+    bool m_completedNonEmptySnapshot {false};
+    qint64 m_budgetStepExpectedAtMs {0};
 
     static QString decodeMatchKey(QVariantMap const& entry);
     void applyBudgetedStep();

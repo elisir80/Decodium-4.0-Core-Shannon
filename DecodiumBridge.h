@@ -1114,6 +1114,10 @@ public:
     Q_INVOKABLE void clearDecodeList();
     Q_INVOKABLE void clearDecodes() { clearDecodeList(); }
     Q_INVOKABLE void clearRxDecodes();
+    // QML may instantiate the Live Map lazily or in a detached window. Keep
+    // an explicit consumer-ready handshake so contact signals are replayed
+    // instead of being lost while the visual item is unavailable.
+    Q_INVOKABLE void setWorldMapConsumerReady(QObject* consumer, bool ready);
     Q_INVOKABLE void processDecodeDoubleClick(const QString& message, const QString& timeStr,
                                               const QString& db, int audioFreq);
 
@@ -1163,6 +1167,7 @@ public:
     Q_INVOKABLE QVariantList runSelfCheck();
     Q_INVOKABLE void openDiagnosticLog() const;
     Q_INVOKABLE void requestSafeGraphicsNextLaunch(const QString& reason = QString());
+    Q_INVOKABLE bool configureQuickWindowGraphics(QObject* windowObject);
     Q_INVOKABLE void notifyMainQmlLoadStarted();
     Q_INVOKABLE void notifyMainQmlReady();
 
@@ -2016,6 +2021,9 @@ private:
     bool m_preserveFrequencyOnModeChange {false};
     bool m_shuttingDown {false};
     bool m_mainQmlReady {false};
+    qint64 m_mainQmlAsyncLoadStartedMs {0};
+    qint64 m_ft8StartupEarlyDecodeGuardUntilMs {0};
+    bool m_ft8StartupPressureSlotDeferred {false};
     std::shared_ptr<std::atomic_bool> m_mainQmlAsyncLoadDone;
     bool m_startupServicesStarted {false};
     bool m_lastSuccessfulCatConnected {false};
@@ -2263,6 +2271,7 @@ private:
     QSet<QString> m_worldMapClearedDecodeKeys;
     QVector<QVariantMap> m_deferredWorldMapFeedQueue;
     QSet<QString> m_deferredWorldMapFeedKeys;
+    QSet<QObject*> m_worldMapReadyConsumers;
     bool m_worldMapFeedFlushScheduled {false};
     bool m_worldMapFullReplayDeferred {false};
     bool m_worldMapDeferredLogActive {false};
@@ -2720,6 +2729,14 @@ private:
     QSet<QString> m_legacyPrunedBandMirrorKeys;
     QSet<QString> m_legacyClearedRxMirrorKeys;
     QSet<QString> m_clearedRxDecodeKeys;
+    // Native decoder duplicate lookup. The old path rebuilt this set by
+    // scanning the last 300 decode rows for every FT8/FT4 callback.
+    QSet<QString> m_nativeDecodeDedupKeys;
+    QQueue<QString> m_nativeDecodeDedupOrder;
+    quint64 m_nativeDecodeDedupSessionId {0};
+    // Signal RX is append-oriented; retain an index instead of scanning every
+    // displayed row to suppress a mirrored duplicate.
+    QSet<QString> m_rxDecodeMirrorKeys;
     struct LegacyDecodeSecondaryWork {
         QVariantMap entry;
         QString source;
@@ -2728,6 +2745,21 @@ private:
     QQueue<LegacyDecodeSecondaryWork> m_legacyDecodeSecondaryQueue;
     QSet<QString> m_legacyDecodeSecondaryPendingKeys;
     bool m_legacyDecodeSecondaryDrainScheduled {false};
+    struct NativeDecodeSecondaryWork {
+        QVariantMap entry;
+        QString rawRow;
+        quint64 serial {0};
+        QString key;
+        bool publishPsk {false};
+        bool updateActiveStation {false};
+        bool updateWorldMap {false};
+        bool sendUdp {false};
+        bool playAlert {false};
+        bool reportDecodeTiming {false};
+    };
+    QQueue<NativeDecodeSecondaryWork> m_nativeDecodeSecondaryQueue;
+    QSet<QString> m_nativeDecodeSecondaryPendingKeys;
+    bool m_nativeDecodeSecondaryDrainScheduled {false};
     bool m_skipNextLegacyBandModelSnapshot {false};
     bool m_skipNextLegacyRxModelSnapshot {false};
     QVariantList m_pendingLegacyFullSpectrumDelta;
@@ -3550,6 +3582,13 @@ private:
                                         QString const& source);
     void scheduleLegacyDecodeSecondaryDrain(int delayMs = 12);
     void drainLegacyDecodeSecondaryWork();
+    void queueNativeDecodeSecondaryWork(NativeDecodeSecondaryWork work);
+    void scheduleNativeDecodeSecondaryDrain(int delayMs = 12);
+    void drainNativeDecodeSecondaryWork();
+    void resetNativeDecodeDedupIndex();
+    void ensureNativeDecodeDedupIndex();
+    void rememberNativeDecodeDedupKey(const QString& key);
+    void rebuildRxDecodeMirrorIndex();
     bool applyLegacyBandModelDelta(QVariantList const& entries);
     bool applyLegacyRxModelDelta(QVariantList const& entries);
     void queueLegacyFullSpectrumModelDelta(QVariantList const& entries);
@@ -3573,8 +3612,11 @@ private:
     void appendRxDecodeEntry(const QVariantMap& entry);
     void rebuildRxDecodeList();
     bool worldMapFeedEnabled() const;
+    bool worldMapConsumerReady() const;
     QString worldMapFeedEntryKey(const QVariantMap& entry) const;
-    bool worldMapEntryFreshEnough(const QVariantMap& entry, QString* reason = nullptr) const;
+    bool worldMapEntryFreshEnough(const QVariantMap& entry,
+                                  int maxAgeSeconds = 120,
+                                  QString* reason = nullptr) const;
     bool visualFeedsDeferredForTx() const;
     void queueWorldMapEntryForReplay(const QVariantMap& entry,
                                      bool skipClearedFeedEntry,
@@ -3584,7 +3626,9 @@ private:
     void scheduleDeferredWorldMapFeedFlush(int delayMs = 600);
     void flushDeferredWorldMapFeed();
     void resetWorldMapDisplayFromCurrentDecodes();
-    void replayWorldMapEntry(const QVariantMap& entry, bool skipClearedFeedEntry = false);
+    void replayWorldMapEntry(const QVariantMap& entry,
+                             bool skipClearedFeedEntry = false,
+                             int maxAgeSeconds = 120);
     void emitCurrentWorldMapQsoPath();
     void markWorldMapQsoClosed(const QString& call, const QString& reason = QString());
     void clearWorldMapClosedQso(const QString& call);

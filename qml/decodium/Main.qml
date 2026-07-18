@@ -32,6 +32,9 @@ ApplicationWindow {
     title: "Decodium 4.0 — " + (bridge ? bridge.mode : "") + " — " + (bridge ? bridge.callsign : "")
     property bool windowStateRestoreInProgress: true
     readonly property bool txVisualActive: !!(bridge && (bridge.transmitting || bridge.tuning))
+    readonly property bool startupVisualStagingEnabled: Qt.platform.os === "windows"
+    property bool startupWaterfallVisualReady: !startupVisualStagingEnabled
+    property bool startupLiveMapVisualReady: !startupVisualStagingEnabled
     property bool decodePanelLayoutSaved: false
     property int savedPeriod1PanelWidth: 400
     property int savedRxFreqPanelWidth: 400
@@ -45,6 +48,59 @@ ApplicationWindow {
 
     function startupLog(phase) {
         console.log("Main.qml startup +" + startupElapsedMs() + " ms: " + phase)
+    }
+
+    function startupVisualStageCanRun(stage) {
+        if (!startupVisualStagingEnabled || !bridge)
+            return true
+        if (bridge.transmitting || bridge.tuning)
+            return false
+        // Do not let a long first decode keep the normal dashboard hidden.
+        // Prefer a quiet FT slot, but guarantee that both visuals appear.
+        var deadlineMs = stage === "waterfall" ? 5000 : 7500
+        if (startupElapsedMs() >= deadlineMs)
+            return true
+        var mode = String(bridge.mode || "").toUpperCase()
+        if (mode === "FT8") {
+            var progress = Number(bridge.periodProgress || 0)
+            return progress >= 8 && progress <= 22
+        }
+        return true
+    }
+
+    function maybeFinishStartupWaterfallVisualStage(reason) {
+        if (startupWaterfallVisualReady)
+            return
+        if (!startupVisualStageCanRun("waterfall")) {
+            startupWaterfallStageRetryTimer.restart()
+            return
+        }
+        finishStartupWaterfallVisualStage(reason)
+    }
+
+    function maybeFinishStartupLiveMapVisualStage(reason) {
+        if (startupLiveMapVisualReady)
+            return
+        if (!startupWaterfallVisualReady || !startupVisualStageCanRun("livemap")) {
+            startupLiveMapStageRetryTimer.restart()
+            return
+        }
+        finishStartupLiveMapVisualStage(reason)
+    }
+
+    function finishStartupWaterfallVisualStage(reason) {
+        if (startupWaterfallVisualReady)
+            return
+        startupWaterfallVisualReady = true
+        startupLog("waterfall visual stage ready" + (reason ? " (" + reason + ")" : ""))
+        syncSpectrumVisibility()
+    }
+
+    function finishStartupLiveMapVisualStage(reason) {
+        if (startupLiveMapVisualReady)
+            return
+        startupLiveMapVisualReady = true
+        startupLog("live map visual stage ready" + (reason ? " (" + reason + ")" : ""))
     }
 
     function availableScreenGeometries() {
@@ -377,6 +433,12 @@ ApplicationWindow {
         Qt.callLater(applyClassicColumnOrder)
         bridge.notifyMainQmlReady()
         startupLog("bridge notified ready")
+        if (startupVisualStagingEnabled) {
+            startupLog("visual startup staging armed")
+            startupWaterfallStageTimer.restart()
+            startupLiveMapStageTimer.restart()
+        }
+        firstUseWarmupTimer.restart()
         console.log("Main.qml window shown at " + x + "," + y + " size " + width + "x" + height)
     }
 
@@ -399,15 +461,51 @@ ApplicationWindow {
     }
     Timer {
         id: firstUseWarmupTimer
-        interval: 2500
+        interval: 30000
         repeat: false
-        running: true
+        running: false
         onTriggered: {
+            if (bridge && (bridge.monitoring || bridge.transmitting || bridge.tuning || bridge.decoding)) {
+                interval = 10000
+                restart()
+                return
+            }
             if (bridge && bridge.warmLogCacheAsync)
                 bridge.warmLogCacheAsync()
-            if (settingsDialog && settingsDialog.warmUpPopup)
-                settingsDialog.warmUpPopup()
+            // Do not instantiate the 600 KB SettingsDialog just to warm it up.
+            // If the user already opened it, warming its internal popups is cheap.
+            var settings = settingsDialogLoader.item
+            if (settings && settings.warmUpPopup)
+                settings.warmUpPopup()
         }
+    }
+    Timer {
+        id: startupWaterfallStageTimer
+        interval: 1200
+        repeat: false
+        running: false
+        onTriggered: maybeFinishStartupWaterfallVisualStage("timer")
+    }
+    Timer {
+        id: startupWaterfallStageRetryTimer
+        interval: 1000
+        repeat: false
+        running: false
+        onTriggered: maybeFinishStartupWaterfallVisualStage("safe-slot")
+    }
+    Timer {
+        id: startupLiveMapStageTimer
+        interval: 3500
+        repeat: false
+        running: false
+        onTriggered: maybeFinishStartupLiveMapVisualStage("timer")
+    }
+    Timer {
+        id: startupLiveMapStageRetryTimer
+        interval: 1000
+        repeat: false
+        running: false
+        onTriggered: maybeFinishStartupLiveMapVisualStage("safe-slot")
     }
     // Funzione helper chiamabile da qualsiasi parte del QML
     function scheduleSave() {
@@ -453,8 +551,9 @@ ApplicationWindow {
     }
 
     function persistSettingsDialogIfOpen() {
-        if (settingsDialog && settingsDialog.visible && settingsDialog.persistSettingsNow)
-            settingsDialog.persistSettingsNow()
+        var settings = settingsDialogLoader.item
+        if (settings && settings.visible && settings.persistSettingsNow)
+            settings.persistSettingsNow()
     }
 
     function restoreFloatingWindowState(windowRef, key, detachedPropName, minimizedPropName) {
@@ -593,7 +692,7 @@ ApplicationWindow {
         console.log("Main window closing - shutting down application")
         // Close all floating windows
         if (waterfallWindow) waterfallWindow.close()
-        if (logWindow) logWindow.close()
+        if (logWindowLoader.item) logWindowLoader.item.close()
         closeLoaded(astroWindowLoader)
         closeLoaded(macroDialogLoader)
         if (txPanelFloatingWindow) txPanelFloatingWindow.close()
@@ -966,10 +1065,22 @@ ApplicationWindow {
             shutdownLoader(devOverlayLoader)
         if (typeof bugReportDialogLoader !== "undefined")
             shutdownLoader(bugReportDialogLoader)
+        if (typeof settingsDialogLoader !== "undefined")
+            shutdownLoader(settingsDialogLoader)
+        if (typeof logWindowLoader !== "undefined")
+            shutdownLoader(logWindowLoader)
+        if (typeof mamWindowLoader !== "undefined")
+            shutdownLoader(mamWindowLoader)
+        if (typeof infoDialogLoader !== "undefined")
+            shutdownLoader(infoDialogLoader)
+        if (typeof callDialogLoader !== "undefined")
+            shutdownLoader(callDialogLoader)
+        if (typeof historyDialogLoader !== "undefined")
+            shutdownLoader(historyDialogLoader)
     }
     function syncSpectrumVisibility() {
         if (bridge)
-            bridge.spectrumVisible = waterfallPanelVisible
+            bridge.spectrumVisible = waterfallPanelVisible && startupWaterfallVisualReady
     }
     onWaterfallPanelVisibleChanged: {
         persistUiSetting("uiWaterfallPanelVisible", waterfallPanelVisible)
@@ -1912,12 +2023,31 @@ ApplicationWindow {
             loader.item.close()
     }
 
-    function openLogWindow() { logWindow.open() }
+    function openLogWindow() {
+        runWhenLoaded(logWindowLoader, function(item) { item.open() })
+    }
     function openMacroDialog() { runWhenLoaded(macroDialogLoader, function(item) { item.open() }) }
     function openAstroWindow() { runWhenLoaded(astroWindowLoader, function(item) { item.open() }) }
-    function openSettingsDialog() { settingsDialog.open() }
+    function openSettingsDialog() {
+        runWhenLoaded(settingsDialogLoader, function(item) { item.open() })
+    }
     function openSettingsTab(tabIndex) {
-        settingsDialog.openTab(tabIndex)
+        runWhenLoaded(settingsDialogLoader, function(item) { item.openTab(tabIndex) })
+    }
+    function openMamWindow() {
+        runWhenLoaded(mamWindowLoader, function(item) { item.open() })
+    }
+    function openInfoDialog(tabIndex) {
+        runWhenLoaded(infoDialogLoader, function(item) {
+            item.currentTab = tabIndex
+            item.open()
+        })
+    }
+    function openCallDialog() {
+        runWhenLoaded(callDialogLoader, function(item) { item.show() })
+    }
+    function openHistoryDialog() {
+        runWhenLoaded(historyDialogLoader, function(item) { item.show() })
     }
 
     function chooseWavFileForDecode() {
@@ -4633,8 +4763,7 @@ ApplicationWindow {
                             readonly property real prefWidth: 68
                             readonly property string tip: qsTr("Decode history (Ctrl+Shift+H)")
                             function activate(mouse) {
-                                if (typeof historyDialogInstance !== 'undefined')
-                                    historyDialogInstance.show()
+                                mainWindow.openHistoryDialog()
                             }
                             radius: 3
                             color: hovered ? Qt.rgba(58/255, 157/255, 255/255, 0.20) : "transparent"
@@ -6584,9 +6713,11 @@ ApplicationWindow {
                             anchors.bottom: parent.bottom
                             anchors.margins: 4
                             visible: mainWindow.waterfallPanelVisible && !waterfallDetached
+                                     && mainWindow.startupWaterfallVisualReady
                             // active NON dipende dal parent: il re-parent dello swap NON lo
                             // cambia -> Loader mai ricaricato -> PanadapterItem/feed PCM vivi.
                             active: mainWindow.waterfallPanelVisible && !waterfallDetached
+                                    && mainWindow.startupWaterfallVisualReady
                             // 1.0.175 — Carica off-thread come gia' fa il
                             // detached (Loader asynchronous:true a r.8304),
                             // per evitare stallo del main thread sul mount
@@ -6601,7 +6732,8 @@ ApplicationWindow {
                             Waterfall {
                                 id: waterfallDisplayEmbedded
                                 anchors.fill: parent
-                                visible: mainWindow.waterfallPanelVisible && !waterfallDetached
+                            visible: mainWindow.waterfallPanelVisible && !waterfallDetached
+                                     && mainWindow.startupWaterfallVisualReady
                                 showControls: true
                                 minFreq: 0
                                 maxFreq: 3200
@@ -8191,27 +8323,26 @@ NumberAnimation {
                                             if (!followTail) return
                                             forceTailFollow()
                                         }
-	                                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
-	                                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
-	                                        // pattern allineato a DecodeList.qml:243-251.
+	                                        // Keep decode-row motion on the GUI animation path. On Windows/D3D,
+	                                        // first-use render-thread Animators can force a multi-second GPU sync.
 	                                        // 1.0.255: !mainWindow.compactToggling -> disabilita displaced
 	                                        // animations durante toggle compact (height change su tutti i
 	                                        // delegate causa blink di 100ms).
 	                                        add: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
+	                                            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        addDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        moveDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        removeDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 
                                         ScrollBar.vertical: ScrollBar {
@@ -8838,24 +8969,22 @@ NumberAnimation {
                                         model: !rxFreqDetached
                                                ? ((bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes)
                                                : null
-	                                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
-	                                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
-	                                        // pattern allineato a DecodeList.qml:243-251.
+	                                        // Preserve the fade/slide without starting render-thread Animators.
 	                                        add: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
+NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                                        }
 	                                        addDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        moveDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 	                                        removeDisplaced: Transition {
 	                                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                                        }
 
                                         ScrollBar.vertical: ScrollBar {
@@ -9000,7 +9129,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                             Loader {
                                 id: liveMapEmbeddedLoader
                                 anchors.fill: parent
-                                active: liveMapPanelHost.visible
+                                active: liveMapPanelHost.visible && mainWindow.startupLiveMapVisualReady
                                 asynchronous: true
                                 sourceComponent: liveMapEmbeddedComponent
                             }
@@ -9016,7 +9145,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                                 anchors.topMargin: 6
                                 width: 16
                                 height: 16
-                                active: liveMapPanelHost.visible
+                                active: liveMapPanelHost.visible && mainWindow.startupLiveMapVisualReady
                                 sourceComponent: colDragHandleComponent
                                 onLoaded: if (item) item.panelId = "livemap"
                             }
@@ -9531,8 +9660,8 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
 	                                              : ft2LinkInlineLoader.item
                             showAsyncIcon: mainWindow.asyncIconVisible
                             visible: !txPanelDetached
-                            onMamWindowRequested: mamWindow.open()
-                            onCallRequested: callDialogInstance.show()
+                            onMamWindowRequested: mainWindow.openMamWindow()
+                            onCallRequested: mainWindow.openCallDialog()
                             onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()
 
                             // Maniglia di drag colonna (Stadio 2) — overlay sull'angolo
@@ -9693,7 +9822,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
                     mainWindow.openLogWindow()
                 })
                 item.requestOpenMam.connect(function() {
-                    mamWindow.open()
+                    mainWindow.openMamWindow()
                 })
                 // 1.0.345 — MACRO + CAT dalla DX-Pedition.
                 item.requestOpenMacro.connect(function() {
@@ -10069,8 +10198,21 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         }
     }
 
-    LogWindow {
-        id: logWindow
+    Loader {
+        id: logWindowLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/LogWindow.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: LogWindow")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
     }
 
     Loader {
@@ -10107,9 +10249,26 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         }
     }
 
-    SettingsDialog {
-        id: settingsDialog
-        onFullScreenRequested: mainWindow.toggleFullScreen()
+    Loader {
+        id: settingsDialogLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/SettingsDialog.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: SettingsDialog")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
+    }
+    Connections {
+        target: settingsDialogLoader.item
+        ignoreUnknownSignals: true
+        function onFullScreenRequested() { mainWindow.toggleFullScreen() }
     }
 
     // 1.0.195 — QSY Quick Picker (F2 shortcut). Lazy Loader async per evitare
@@ -10165,7 +10324,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
     Shortcut {
         sequence: "Ctrl+Shift+H"
         context: Qt.ApplicationShortcut
-        onActivated: { if (historyDialogInstance) historyDialogInstance.show() }
+        onActivated: mainWindow.openHistoryDialog()
     }
 
     // 1.0.308 (#10) — scorciatoie operative: erano documentate nell'Info dialog (KEYBOARD
@@ -10505,24 +10664,76 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
     }
 
     // Info Dialog
-    InfoDialog {
-        id: infoDialog
+    Loader {
+        id: infoDialogLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/InfoDialog.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: InfoDialog")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
     }
 
     // MAM Window - Multi-Answer Mode
-    MamWindow {
-        id: mamWindow
-        engine: bridge
+    Loader {
+        id: mamWindowLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/MamWindow.qml"
+        property var pendingAction: null
+        onLoaded: {
+            item.engine = bridge
+            console.log("Lazy component loaded: MamWindow")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
     }
 
     // 1.0.262 — CALL Dialog (chiamata diretta a target callsign con retry/timeout)
-    CallDialog {
-        id: callDialogInstance
+    Loader {
+        id: callDialogLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/CallDialog.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: CallDialog")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
     }
 
     // 1.0.268 (Phase 5.3) — Decode History Dialog (esplora DB SQLite)
-    DecodeHistoryDialog {
-        id: historyDialogInstance
+    Loader {
+        id: historyDialogLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/DecodeHistoryDialog.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: DecodeHistoryDialog")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
     }
 
     // Auto-open MAM window when MAM mode is enabled
@@ -10530,7 +10741,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         target: bridge
         function onMultiAnswerModeChanged() {
             if (bridge.multiAnswerMode) {
-                mamWindow.open()
+                mainWindow.openMamWindow()
             }
         }
     }
@@ -10602,7 +10813,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
         MenuItem {
             text: qsTr("About Decodium")
             icon.source: ""
-            onTriggered: { infoDialog.currentTab = 0; infoDialog.open() }
+            onTriggered: mainWindow.openInfoDialog(0)
 
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -10618,7 +10829,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
 
         MenuItem {
             text: qsTr("Useful Links...")
-            onTriggered: { infoDialog.currentTab = 4; infoDialog.open() }
+            onTriggered: mainWindow.openInfoDialog(4)
 
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -10690,7 +10901,7 @@ YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easi
 
         MenuItem {
             text: qsTr("MAM Window...")
-            onTriggered: mamWindow.open()
+            onTriggered: mainWindow.openMamWindow()
 
             background: Rectangle {
                 color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -13103,24 +13314,22 @@ NumberAnimation {
                             if (!followTail) return
                             forceTailFollow()
                         }
-	                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
-	                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
-	                        // pattern allineato a DecodeList.qml:243-251.
+	                        // Preserve the fade/slide without starting render-thread Animators.
 	                        add: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
+	                            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        addDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        moveDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        removeDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
                         ScrollBar.vertical: ScrollBar {
                             policy: ScrollBar.AsNeeded
@@ -13708,24 +13917,22 @@ NumberAnimation {
                         model: rxFreqDetached && rxFreqFloatingWindow.visible
                                ? ((bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : decodePanel.rxDecodes)
                                : null
-	                        // 1.0.186: Animator (render thread) + gate uiQuality !== Low.
-	                        // OpacityAnimator/YAnimator non si fermano durante stall main thread,
-	                        // pattern allineato a DecodeList.qml:243-251.
+	                        // Preserve the fade/slide without starting render-thread Animators.
 	                        add: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            OpacityAnimator { from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
+	                            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100; easing.type: Easing.OutQuad }
 	                        }
 	                        addDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        moveDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
 	                        removeDisplaced: Transition {
 	                            enabled: bridge && bridge.smoothDecodeFlow && bridge.uiQuality !== "Low" && !mainWindow.compactToggling
-	                            YAnimator { duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
+	                            NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100 : 0; easing.type: Easing.OutQuad }
 	                        }
                         ScrollBar.vertical: ScrollBar {
                             policy: ScrollBar.AsNeeded
@@ -14115,8 +14322,8 @@ NumberAnimation {
 	                                      : ft2LinkInlineLoader.item
                     showAsyncIcon: mainWindow.asyncIconVisible
                     handleLogPrompt: false
-                    onMamWindowRequested: mamWindow.open()
-                    onCallRequested: callDialogInstance.show()
+                    onMamWindowRequested: mainWindow.openMamWindow()
+                    onCallRequested: mainWindow.openCallDialog()
                     onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()
                 }
             }

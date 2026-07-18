@@ -24,7 +24,7 @@ enum class DiagCategory
 //
 // The Boost.Log system (constructor/destructor) is preserved.
 // The diagnostic system is ADDITIONAL and writes to its own file
-// (decodium_diagnostic.log) using QFile/QMutex for thread safety.
+// (decodium_diagnostic.log) through a single asynchronous writer thread.
 //
 class DecodiumLogging final
 {
@@ -65,6 +65,10 @@ public:
   // Flush pending diagnostic writes for live troubleshooting tails.
   static void flushDiagnosticLog ();
 
+  // Request a flush without blocking the GUI thread. Intended for high-rate
+  // operational traces such as FT2-Link RX/TX diagnostics.
+  static void requestDiagnosticFlush ();
+
   // Read the last N lines from the diagnostic log
   static QStringList readLastLines (int n = 200);
 
@@ -75,6 +79,7 @@ public:
   static void installCrashHandler ();
 
 private:
+  static void shutdownDiagnosticLog ();
   QtMessageHandler previous_qt_message_handler_ {nullptr};
   static DecodiumLogging* s_instance;
 };

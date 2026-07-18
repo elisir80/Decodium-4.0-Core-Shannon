@@ -22,6 +22,7 @@
 #include <QtGlobal>
 #include <QDir>
 #include <QFile>
+#include <QHash>
 #include <QTextStream>
 #include <QString>
 #include <QStandardPaths>
@@ -273,6 +274,7 @@ DecodiumLogging::~DecodiumLogging ()
   ::qInstallMessageHandler (previous_qt_message_handler_);
   previous_qt_message_handler_ = nullptr;
   LOG_INFO ("Log Finish");
+  shutdownDiagnosticLog ();
   auto core = logging::core::get ();
   core->flush ();
   core->remove_all_sinks ();
@@ -290,19 +292,15 @@ DecodiumLogging::~DecodiumLogging ()
 #include <QAudioDevice>
 #include <QAudioFormat>
 #include <QCoreApplication>
+#include <QQueue>
+#include <QThread>
+#include <QWaitCondition>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
 #include <csignal>
 
 DecodiumLogging* DecodiumLogging::s_instance = nullptr;
-static QMutex g_diagMutex;
-static QFile* g_diagFile = nullptr;
-// 1.0.312 — guard di ri-entranza per-thread. Una qWarning interna di QFile emessa
-// mentre teniamo g_diagMutex (es. durante la rotazione a 5MB) verrebbe instradata dal
-// Qt message handler di nuovo qui (qtMsgHandler → L → DIAG_INFO → diag) sullo STESSO
-// thread → ri-lock di un QMutex non-ricorsivo = DEADLOCK che congelava il log a 5MB.
-static thread_local bool g_inDiag = false;
 
 // IU8LMC - risolto UNA VOLTA SOLA. OrganizationName/ApplicationName cambiano a
 // runtime (DecodiumLegacyBackend azzera l'org per il backend legacy e poi la
@@ -317,6 +315,203 @@ static QString diagDir()
     return dir;
 }
 static QString diagPath() { return QDir(diagDir()).absoluteFilePath("decodium_diagnostic.log"); }
+
+class DiagnosticLogWriter final : public QThread
+{
+public:
+    enum class CommandType { Write, Flush, Reopen, Stop };
+
+    struct Command {
+        CommandType type {CommandType::Write};
+        QByteArray line;
+        QByteArray fingerprint;
+        bool forceFlush {false};
+        quint64 sequence {0};
+    };
+
+    void enqueue(QByteArray line, QByteArray fingerprint, bool forceFlush)
+    {
+        submit({CommandType::Write, std::move(line), std::move(fingerprint), forceFlush, 0}, false);
+    }
+
+    void requestFlush()
+    {
+        submit({CommandType::Flush, {}, {}, false, 0}, false);
+    }
+
+    void flushAndWait()
+    {
+        submit({CommandType::Flush, {}, {}, false, 0}, true);
+    }
+
+    void reopenAndWait()
+    {
+        submit({CommandType::Reopen, {}, {}, false, 0}, true);
+    }
+
+    void shutdown()
+    {
+        quint64 sequence = 0;
+        {
+            QMutexLocker lock(&m_mutex);
+            // The writer is a function-local static. It must be stopped while
+            // Qt is still alive; otherwise QThread's static destructor aborts
+            // the process if the worker is waiting for another command.
+            m_acceptingCommands = false;
+            if (!m_started) {
+                return;
+            }
+            sequence = ++m_nextSequence;
+            m_queue.enqueue({CommandType::Stop, {}, {}, true, sequence});
+            m_workReady.wakeOne();
+            while (m_completedSequence < sequence) {
+                m_drained.wait(&m_mutex);
+            }
+        }
+        wait();
+    }
+
+protected:
+    void run() override
+    {
+        QFile file;
+        QHash<QByteArray, qint64> recentFingerprintTimes;
+
+        auto closeFile = [&file]() {
+            if (file.isOpen()) {
+                file.flush();
+                file.close();
+            }
+        };
+        auto openFile = [&file]() -> bool {
+            if (file.isOpen()) {
+                return true;
+            }
+            QDir().mkpath(diagDir());
+            file.setFileName(diagPath());
+            return file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+        };
+        auto rotateIfNeeded = [&file, &closeFile]() -> bool {
+            if (!file.isOpen() || file.size() <= 5 * 1024 * 1024) {
+                return file.isOpen();
+            }
+            closeFile();
+            QDir const dir(diagDir());
+            QFile::remove(dir.absoluteFilePath(QStringLiteral("decodium_diagnostic.3.log")));
+            QFile::rename(dir.absoluteFilePath(QStringLiteral("decodium_diagnostic.2.log")),
+                          dir.absoluteFilePath(QStringLiteral("decodium_diagnostic.3.log")));
+            QFile::rename(dir.absoluteFilePath(QStringLiteral("decodium_diagnostic.1.log")),
+                          dir.absoluteFilePath(QStringLiteral("decodium_diagnostic.2.log")));
+            bool const rotated = QFile::rename(diagPath(),
+                                                dir.absoluteFilePath(QStringLiteral("decodium_diagnostic.1.log")));
+            file.setFileName(diagPath());
+            QIODevice::OpenMode const mode = QIODevice::WriteOnly | QIODevice::Text
+                | (rotated ? QIODevice::Append : QIODevice::Truncate);
+            return file.open(mode);
+        };
+
+        bool stopRequested = false;
+        while (!stopRequested) {
+            Command command;
+            {
+                QMutexLocker lock(&m_mutex);
+                while (m_queue.isEmpty()) {
+                    m_workReady.wait(&m_mutex);
+                }
+                command = m_queue.dequeue();
+            }
+
+            if (command.type == CommandType::Write) {
+                qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+                auto const recentIt = recentFingerprintTimes.constFind(command.fingerprint);
+                bool const duplicate = !command.fingerprint.isEmpty()
+                    && recentIt != recentFingerprintTimes.constEnd()
+                    && nowMs - recentIt.value() < 1000;
+                if (!duplicate && openFile() && rotateIfNeeded()) {
+                    file.write(command.line);
+                    if (recentFingerprintTimes.size() >= 2048) {
+                        recentFingerprintTimes.clear();
+                    }
+                    if (!command.fingerprint.isEmpty()) {
+                        recentFingerprintTimes.insert(command.fingerprint, nowMs);
+                    }
+                }
+                if (command.forceFlush && file.isOpen()) {
+                    file.flush();
+                }
+            } else if (command.type == CommandType::Flush) {
+                if (file.isOpen()) {
+                    file.flush();
+                }
+            } else if (command.type == CommandType::Reopen) {
+                closeFile();
+            } else if (command.type == CommandType::Stop) {
+                closeFile();
+                stopRequested = true;
+            }
+
+            {
+                QMutexLocker lock(&m_mutex);
+                if (command.type == CommandType::Flush) {
+                    m_asyncFlushQueued = false;
+                }
+                m_completedSequence = qMax(m_completedSequence, command.sequence);
+                m_drained.wakeAll();
+            }
+        }
+
+        QMutexLocker lock(&m_mutex);
+        m_started = false;
+        m_drained.wakeAll();
+    }
+
+private:
+    void submit(Command command, bool waitForCompletion)
+    {
+        QMutexLocker lock(&m_mutex);
+        if (!m_acceptingCommands) {
+            return;
+        }
+        // FT2-Link and the decoder can generate many diagnostic rows in one
+        // event-loop turn. One pending asynchronous flush is enough to make
+        // those rows visible without growing a second queue of flush commands.
+        if (command.type == CommandType::Flush && !waitForCompletion && m_asyncFlushQueued) {
+            return;
+        }
+        if (!m_started) {
+            m_started = true;
+            start(QThread::LowPriority);
+        }
+        command.sequence = ++m_nextSequence;
+        quint64 const sequence = command.sequence;
+        if (command.type == CommandType::Flush && !waitForCompletion) {
+            m_asyncFlushQueued = true;
+        }
+        m_queue.enqueue(std::move(command));
+        m_workReady.wakeOne();
+        if (waitForCompletion) {
+            while (m_completedSequence < sequence) {
+                m_drained.wait(&m_mutex);
+            }
+        }
+    }
+
+    QMutex m_mutex;
+    QWaitCondition m_workReady;
+    QWaitCondition m_drained;
+    QQueue<Command> m_queue;
+    quint64 m_nextSequence {0};
+    quint64 m_completedSequence {0};
+    bool m_asyncFlushQueued {false};
+    bool m_started {false};
+    bool m_acceptingCommands {true};
+};
+
+static DiagnosticLogWriter& diagnosticLogWriter()
+{
+    static DiagnosticLogWriter writer;
+    return writer;
+}
 
 static QString diagSampleFormatName(QAudioFormat::SampleFormat format)
 {
@@ -346,20 +541,19 @@ DecodiumLogging* DecodiumLogging::instance() { return s_instance; }
 QString DecodiumLogging::diagnosticLogPath() { return diagPath(); }
 
 void DecodiumLogging::reopenDiagnosticLog() {
-    QMutexLocker lock(&g_diagMutex);
-    if (g_diagFile) {
-        g_diagFile->flush();
-        g_diagFile->close();
-        delete g_diagFile;
-        g_diagFile = nullptr;
-    }
+    diagnosticLogWriter().reopenAndWait();
 }
 
 void DecodiumLogging::flushDiagnosticLog() {
-    QMutexLocker lock(&g_diagMutex);
-    if (g_diagFile) {
-        g_diagFile->flush();
-    }
+    diagnosticLogWriter().flushAndWait();
+}
+
+void DecodiumLogging::requestDiagnosticFlush() {
+    diagnosticLogWriter().requestFlush();
+}
+
+void DecodiumLogging::shutdownDiagnosticLog() {
+    diagnosticLogWriter().shutdown();
 }
 
 QString DecodiumLogging::categoryToString(DiagCategory cat) {
@@ -373,54 +567,21 @@ QString DecodiumLogging::categoryToString(DiagCategory cat) {
 }
 
 void DecodiumLogging::diag(DiagCategory cat, const QString& message) {
-    // 1.0.312 — se siamo già dentro diag() su questo thread (ri-entranza via Qt message
-    // handler), scarta il messaggio invece di ri-lockare g_diagMutex → niente deadlock.
-    if (g_inDiag) return;
-    g_inDiag = true;
-    struct ReentryGuard { ~ReentryGuard() { g_inDiag = false; } } reentryGuard;
-
-    QMutexLocker lock(&g_diagMutex);
-    if (!g_diagFile) {
-        QDir().mkpath(diagDir());
-        g_diagFile = new QFile(diagPath());
-        if (!g_diagFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
-            delete g_diagFile; g_diagFile = nullptr; return;
-        }
-    }
-    if (g_diagFile->size() > 5*1024*1024) {
-        g_diagFile->close(); delete g_diagFile; g_diagFile = nullptr;
-        QDir d(diagDir());
-        // Cascata: ogni rename libera la destinazione del successivo (Windows-safe).
-        QFile::remove(d.absoluteFilePath("decodium_diagnostic.3.log"));
-        QFile::rename(d.absoluteFilePath("decodium_diagnostic.2.log"), d.absoluteFilePath("decodium_diagnostic.3.log"));
-        QFile::rename(d.absoluteFilePath("decodium_diagnostic.1.log"), d.absoluteFilePath("decodium_diagnostic.2.log"));
-        bool const rotated = QFile::rename(diagPath(), d.absoluteFilePath("decodium_diagnostic.1.log"));
-        g_diagFile = new QFile(diagPath());
-        // 1.0.312 — se la rotazione del .log corrente è fallita (lock/permessi), il file
-        // è ancora ~5MB: aprilo in TRUNCATE per non congelare MAI il logger (si perde il
-        // vecchio contenuto, ma la scrittura riparte sempre).
-        QIODevice::OpenMode const mode = QIODevice::WriteOnly | QIODevice::Text
-            | (rotated ? QIODevice::Append : QIODevice::Truncate);
-        if (!g_diagFile->open(mode)) {
-            delete g_diagFile; g_diagFile = nullptr; return;
-        }
-    }
-    QString line = QString("[%1] [%2] %3\n").arg(
-        QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss.zzz"),
-        DecodiumLogging::categoryToString(cat), message);
-    g_diagFile->write(line.toUtf8());
-    // 1.0.225 — flush() solo per WARN/ERR/CAT critical paths. Pre-1.0.225
-    // ogni linea (~100/sec durante TX) faceva fsync su disco = 5-30ms su
-    // HDD/AV. Buffer del file system flusha automaticamente entro ~1s, e
-    // le linee INFO/DEBUG/AUDIO/DECODE/TX/QML possono attendere quel
-    // flush implicito. Solo ERR/WARN richiedono fsync immediato per
-    // diagnostic post-mortem dopo crash.
-    if (cat == DiagCategory::WARNING || cat == DiagCategory::ERR) {
-        g_diagFile->flush();
-    }
+    QString const category = categoryToString(cat);
+    QByteArray const fingerprint = category.toUtf8() + '\x1f' + message.toUtf8();
+    QString const line = QStringLiteral("[%1] [%2] %3\n").arg(
+        QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz")),
+        category,
+        message);
+    // QFile, rotation and flush all run on one low-priority writer thread.
+    // This keeps decode/UI callbacks independent of disk, AV and network-home
+    // filesystem latency while preserving line order in the diagnostic log.
+    diagnosticLogWriter().enqueue(line.toUtf8(), fingerprint,
+                                  cat == DiagCategory::WARNING || cat == DiagCategory::ERR);
 }
 
 QStringList DecodiumLogging::readLastLines(int n) {
+    flushDiagnosticLog();
     QFile f(diagPath());
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) return {};
     QStringList all; QTextStream in(&f);
@@ -476,5 +637,13 @@ void DecodiumLogging::installCrashHandler() {
 #else
     signal(SIGSEGV, signalHandler); signal(SIGABRT, signalHandler);
 #endif
+    // main_qml.cpp uses the static diagnostic API without constructing a
+    // DecodiumLogging instance. Tie the writer lifetime to QApplication so it
+    // is joined before C++ static destruction reaches QThread::~QThread().
+    if (auto* app = QCoreApplication::instance()) {
+        QObject::connect(app, &QCoreApplication::aboutToQuit, app, []() {
+            DecodiumLogging::shutdownDiagnosticLog();
+        }, Qt::DirectConnection);
+    }
     std::set_terminate([]() { DecodiumLogging::diag(DiagCategory::ERR, "std::terminate()"); std::abort(); });
 }

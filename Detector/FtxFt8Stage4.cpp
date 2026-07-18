@@ -6631,6 +6631,17 @@ void plan_ft8_ldpc_decode (Ft8Request const& request, float f1, float sync, int 
           norder = overrideNOrder;
         }
     }
+  if (request.nzhsym >= 50
+      && request.ndepth <= 2
+      && !request.supplemental
+      && request.nft8cycles <= 1
+      && request.nft8rxfsens <= 1)
+    {
+      // Live fast passes are latency guards, not the place for expensive OSD.
+      // A single OSD-heavy LDPC attempt can ignore the outer Stage4 deadline
+      // for seconds on slower Windows hosts, starving the next FT8 cycle.
+      maxosd = -1;
+    }
   if (request.ndepth >= 4
       && pass_iaptype > 0
 	      && request.nzhsym < 47

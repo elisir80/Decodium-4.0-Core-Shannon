@@ -63,12 +63,19 @@ Rectangle {
         rebuildTimer.restart()
     }
 
+    function updateConsumerReady() {
+        if (!engine || !engine.setWorldMapConsumerReady)
+            return
+        engine.setWorldMapConsumerReady(root, !!root.visible && !!worldMap)
+    }
+
     function initializeMap() {
         if (!worldMap)
             return
         worldMap.setActive(visible)
         root.syncMapSettings()
         root.syncTxState()
+        root.updateConsumerReady()
         if (visible)
             root.scheduleRebuild()
     }
@@ -102,9 +109,14 @@ Rectangle {
         // ad altri tab/pop-out chiusi).
         root.initializeMap()
     }
+    Component.onDestruction: {
+        if (engine && engine.setWorldMapConsumerReady)
+            engine.setWorldMapConsumerReady(root, false)
+    }
     onVisibleChanged: {
         if (worldMap)
             worldMap.setActive(visible)
+        root.updateConsumerReady()
         if (visible) scheduleRebuild()
     }
 
@@ -337,6 +349,7 @@ Rectangle {
                 sourceComponent: root.gpuLiveMapEnabled ? gpuWorldMapComponent : painterWorldMapComponent
                 onLoaded: root.initializeMap()
                 onStatusChanged: {
+                    root.updateConsumerReady()
                     if (status === Loader.Error && root.gpuLiveMapEnabled) {
                         console.warn("Live Map GPU component failed to load; falling back to CPU WorldMapItem")
                         root.gpuLiveMapEnabled = false

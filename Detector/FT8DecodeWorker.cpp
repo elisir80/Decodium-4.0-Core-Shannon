@@ -4,9 +4,10 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <deque>
-#include <future>
 #include <mutex>
+#include <thread>
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -78,6 +79,9 @@ namespace
   constexpr qint64 kHashSeedRefreshIntervalMs {10000};
   constexpr int kHashSeedRefreshMaxFiles {10};
   constexpr qint64 kHashSeedRefreshSoftBudgetMs {350};
+  constexpr int kHashSeedApplyBatchCalls {64};
+  constexpr qint64 kHashSeedApplyBudgetMs {25};
+  constexpr int kHashSeedRefreshApplyMaxCalls {128};
   constexpr int kExternalA7SeedLimit {96};
   constexpr int kExternalA7PairSeedLimit {48};
   constexpr int kExternalA7InsertLimit {104};
@@ -1165,34 +1169,6 @@ namespace
     return paths;
   }
 
-  void log_hash_seed_probe (QStringList const& calls)
-  {
-    QString probesText =
-        qEnvironmentVariable (QByteArrayLiteral ("DECODIUM_FT8_HASHDBG_CALLS"));
-    if (probesText.trimmed ().isEmpty ())
-      {
-        return;
-      }
-    QStringList results;
-    static QRegularExpression const splitRx {QStringLiteral (R"([,\s;]+)")};
-    for (QString probe : probesText.split (splitRx, Qt::SkipEmptyParts))
-      {
-        probe = probe.trimmed ().toUpper ();
-        if (!probe.isEmpty ())
-          {
-            results.append (probe + QLatin1Char ('=')
-                            + (calls.contains (probe)
-                                   ? QStringLiteral ("1")
-                                   : QStringLiteral ("0")));
-          }
-      }
-    if (!results.isEmpty ())
-      {
-        LOG_INFO ("FT8 pack77 hash seed probes: "
-                  << results.join (QLatin1Char (' ')).toStdString ());
-      }
-  }
-
   bool external_known_cq_seed_enabled ();
   bool external_known_cq_source_allowed (QString const& path);
   bool external_a7_seed_enabled ();
@@ -1298,31 +1274,90 @@ namespace
   struct HashSeedAsyncState
   {
     std::mutex mutex;
+    std::condition_variable workAvailable;
+    bool workerStarted {false};
     bool initialStarted {false};
+    bool initialRequested {false};
+    bool initialReady {false};
     bool initialApplied {false};
-    std::future<HashSeedSnapshot> initialFuture;
+    HashSeedSnapshot initialCompleted;
+    HashSeedSnapshot initialPending;
+    int initialPendingRemaining {0};
     qint64 lastRefreshStartMs {0};
-    std::future<HashContextRefresh> refreshFuture;
+    bool refreshRequested {false};
+    bool refreshReady {false};
+    int refreshNutc {0};
+    HashContextRefresh refreshCompleted;
   };
 
   HashSeedAsyncState& hash_seed_async_state ()
   {
-    // Keep async futures out of C++ static destruction; shutdown can otherwise
-    // block here while Qt globals are already being torn down.
+    // The state and its detached worker intentionally live until process exit.
+    // Joining while Qt globals are being torn down could block on log I/O.
     static HashSeedAsyncState* state = new HashSeedAsyncState;
     return *state;
   }
 
-  template<typename T>
-  bool future_ready (std::future<T>& future)
+  void start_hash_seed_worker_locked (HashSeedAsyncState& state)
   {
-    using namespace std::chrono_literals;
-    return future.valid () && future.wait_for (0ms) == std::future_status::ready;
+    if (state.workerStarted)
+      {
+        return;
+      }
+    state.workerStarted = true;
+    std::thread ([&state] {
+      QThread::currentThread ()->setObjectName (QStringLiteral ("FT8HashSeedWorker"));
+      QThread::currentThread ()->setPriority (QThread::LowPriority);
+
+      for (;;)
+        {
+          bool collectInitial = false;
+          bool collectRefresh = false;
+          int refreshNutc = 0;
+          {
+            std::unique_lock<std::mutex> lock {state.mutex};
+            state.workAvailable.wait (lock, [&state] {
+              return state.initialRequested || state.refreshRequested;
+            });
+            if (state.initialRequested)
+              {
+                state.initialRequested = false;
+                collectInitial = true;
+              }
+            else if (state.refreshRequested)
+              {
+                state.refreshRequested = false;
+                refreshNutc = state.refreshNutc;
+                collectRefresh = true;
+              }
+          }
+
+          if (collectInitial)
+            {
+              HashSeedSnapshot snapshot = collect_initial_hash_seed_snapshot ();
+              std::lock_guard<std::mutex> lock {state.mutex};
+              state.initialCompleted = std::move (snapshot);
+              state.initialReady = true;
+            }
+          else if (collectRefresh)
+            {
+              HashContextRefresh refresh =
+                  collect_hash_context_refresh_snapshot (refreshNutc);
+              std::lock_guard<std::mutex> lock {state.mutex};
+              state.refreshCompleted = std::move (refresh);
+              state.refreshReady = true;
+            }
+        }
+    }).detach ();
   }
 
   void start_ft8_pack77_hash_seed_collection_once ()
   {
     if (hash_seed_shutdown_requested ())
+      {
+        return;
+      }
+    if (qEnvironmentVariableIntValue ("DECODIUM_DISABLE_FT8_HASH_LOG_REFRESH") > 0)
       {
         return;
       }
@@ -1332,10 +1367,10 @@ namespace
       {
         return;
       }
+    start_hash_seed_worker_locked (state);
     state.initialStarted = true;
-    state.initialFuture = std::async (std::launch::async, [] {
-      return collect_initial_hash_seed_snapshot ();
-    });
+    state.initialRequested = true;
+    state.workAvailable.notify_one ();
   }
 
   void apply_ready_ft8_pack77_hash_seed_collection ()
@@ -1344,36 +1379,74 @@ namespace
       {
         return;
       }
-    HashSeedSnapshot snapshot;
-    bool haveSnapshot = false;
+    bool haveCompletedSnapshot = false;
+    int collectedCalls = 0;
+    int collectedFiles = 0;
+    qint64 collectionElapsedMs = 0;
     {
       HashSeedAsyncState& state = hash_seed_async_state ();
       std::lock_guard<std::mutex> lock {state.mutex};
-      if (!state.initialApplied && future_ready (state.initialFuture))
+      if (!state.initialApplied && state.initialReady)
         {
-          snapshot = state.initialFuture.get ();
+          state.initialPending = std::move (state.initialCompleted);
+          state.initialReady = false;
+          state.initialPendingRemaining = state.initialPending.calls.size ();
           state.initialApplied = true;
-          haveSnapshot = true;
+          collectedCalls = state.initialPending.calls.size ();
+          collectedFiles = state.initialPending.filesRead;
+          collectionElapsedMs = state.initialPending.elapsedMs;
+          haveCompletedSnapshot = true;
         }
     }
-    if (!haveSnapshot)
+
+    QElapsedTimer applyTimer;
+    applyTimer.start ();
+    int applied = 0;
+    qint64 slowestCallMs = 0;
+    while (applied < kHashSeedApplyBatchCalls
+           && applyTimer.elapsed () < kHashSeedApplyBudgetMs)
       {
-        return;
+        QString call;
+        {
+          HashSeedAsyncState& state = hash_seed_async_state ();
+          std::lock_guard<std::mutex> lock {state.mutex};
+          if (!state.initialApplied || state.initialPendingRemaining <= 0)
+            {
+              break;
+            }
+          // Apply newest calls first; they are the useful ones for live traffic.
+          call = state.initialPending.calls.at (--state.initialPendingRemaining);
+        }
+        QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
+        qint64 const callStartMs = applyTimer.elapsed ();
+        ftx_ft8_stage4_seed_hash_call_c (field.constData ());
+        slowestCallMs = std::max (slowestCallMs,
+                                  applyTimer.elapsed () - callStartMs);
+        ++applied;
       }
 
-    for (QString const& call : snapshot.calls)
+    if (applied > 0)
       {
-        QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
-        ftx_ft8_stage4_seed_hash_call_c (field.constData ());
-      }
-    if (snapshot.filesRead > 0 && !snapshot.calls.isEmpty ())
-      {
-        LOG_INFO ("FT8 pack77 hash seed initialized: calls=" << snapshot.calls.size ()
-                  << " files=" << snapshot.filesRead
-                  << " elapsed_ms=" << snapshot.elapsedMs
-                  << " sources="
-                  << snapshot.sources.join (QStringLiteral (",")).toStdString ());
-        log_hash_seed_probe (snapshot.calls);
+        HashSeedAsyncState& state = hash_seed_async_state ();
+        std::lock_guard<std::mutex> lock {state.mutex};
+        if (haveCompletedSnapshot || applyTimer.elapsed () >= 50
+            || state.initialPendingRemaining == 0)
+          {
+            qInfo().noquote ()
+                << "[HASHMETRIC] initial_seed_batch"
+                << "collected=" << (haveCompletedSnapshot ? 1 : 0)
+                << "collected_calls=" << collectedCalls
+                << "collected_files=" << collectedFiles
+                << "collection_ms=" << collectionElapsedMs
+                << "applied=" << applied
+                << "elapsed_ms=" << applyTimer.elapsed ()
+                << "slowest_call_ms=" << slowestCallMs
+                << "remaining=" << state.initialPendingRemaining;
+          }
+        if (state.initialPendingRemaining == 0)
+          {
+            state.initialPending = {};
+          }
       }
   }
 
@@ -1450,15 +1523,19 @@ namespace
       {
         return;
       }
+    if (qEnvironmentVariableIntValue ("DECODIUM_DISABLE_FT8_HASH_LOG_REFRESH") > 0)
+      {
+        return;
+      }
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch ();
     HashSeedAsyncState& state = hash_seed_async_state ();
     std::lock_guard<std::mutex> lock {state.mutex};
-    if (state.refreshFuture.valid ())
+    if (!state.initialApplied || state.initialPendingRemaining > 0)
       {
-        if (!future_ready (state.refreshFuture))
-          {
-            return;
-          }
+        return;
+      }
+    if (state.refreshRequested || state.refreshReady)
+      {
         return;
       }
     if (state.lastRefreshStartMs > 0
@@ -1466,10 +1543,11 @@ namespace
       {
         return;
       }
+    start_hash_seed_worker_locked (state);
     state.lastRefreshStartMs = nowMs;
-    state.refreshFuture = std::async (std::launch::async, [currentNutc] {
-      return collect_hash_context_refresh_snapshot (currentNutc);
-    });
+    state.refreshNutc = currentNutc;
+    state.refreshRequested = true;
+    state.workAvailable.notify_one ();
   }
 
   void apply_ready_ft8_hash_context_refresh ()
@@ -1483,9 +1561,10 @@ namespace
     {
       HashSeedAsyncState& state = hash_seed_async_state ();
       std::lock_guard<std::mutex> lock {state.mutex};
-      if (future_ready (state.refreshFuture))
+      if (state.refreshReady)
         {
-          refresh = state.refreshFuture.get ();
+          refresh = std::move (state.refreshCompleted);
+          state.refreshReady = false;
           haveRefresh = true;
         }
     }
@@ -1494,8 +1573,12 @@ namespace
         return;
       }
 
-    for (QString const& call : refresh.calls)
+    int const refreshCallCount = static_cast<int> (refresh.calls.size ());
+    int const firstRefreshCall =
+        std::max (0, refreshCallCount - kHashSeedRefreshApplyMaxCalls);
+    for (int i = firstRefreshCall; i < refreshCallCount; ++i)
       {
+        QString const& call = refresh.calls.at (i);
         QByteArray const field = call.toLatin1 ().leftJustified (13, ' ', true);
         ftx_ft8_stage4_seed_hash_call_c (field.constData ());
       }
@@ -1761,15 +1844,22 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
+  bool const pressureLimitedRequest = request.cpuPressureLimited;
+  // A live deadline is not evidence of CPU pressure.  Fast hosts must retain
+  // their requested parallelism and decode profile; only the bridge's measured
+  // pressure signal is allowed to reduce work for slower or overloaded hosts.
+  int const effectiveRequestedThreadLimit =
+      pressureLimitedRequest ? std::min (request.threadCount, 2) : request.threadCount;
+  int const effectiveDepth =
+      pressureLimitedRequest ? std::min (request.ndepth, 2) : request.ndepth;
+  bool const effectiveApEnabled =
+      !pressureLimitedRequest && request.lft8apon;
   decodium::decode::applyCurrentDecodeWorkerPriority ();
-  int const reservedThreadLimit = decodium::decode::threadLimitWithUiReserve (request.threadCount);
+  int const reservedThreadLimit = decodium::decode::threadLimitWithUiReserve (effectiveRequestedThreadLimit);
   apply_decode_thread_limit (reservedThreadLimit);
   int const activeThreads = active_decode_thread_limit ();
   decodium::decode::applyOpenMpDecodeWorkerPriority (activeThreads);
   set_ft8_stage4_cancel (false);
-  bool const pressureLimitedRequest =
-      request.maxDecodeMs > 0
-      && request.maxDecodeMs < 7000;
   start_ft8_pack77_hash_seed_collection_once ();
   if (!pressureLimitedRequest)
     {
@@ -1788,13 +1878,31 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
       return;
     }
   qint64 const hashPrepStartMs = totalTimer.elapsed ();
+  qint64 initialHashPrepMs = 0;
+  qint64 refreshHashPrepMs = 0;
   if (!pressureLimitedRequest)
     {
+      qint64 const initialHashPrepStartMs = totalTimer.elapsed ();
       apply_ready_ft8_pack77_hash_seed_collection ();
+      initialHashPrepMs = totalTimer.elapsed () - initialHashPrepStartMs;
+      qint64 const refreshHashPrepStartMs = totalTimer.elapsed ();
       apply_ready_ft8_hash_context_refresh ();
-      ftx_ft8_stage4_apply_hash_seed_cache_c ();
+      refreshHashPrepMs = totalTimer.elapsed () - refreshHashPrepStartMs;
+      // Every seed call is applied directly and the pack77 context deliberately
+      // persists across candidates and slots. Replaying the whole cache here is
+      // redundant and, on Windows, can block the shared runtime for many seconds.
     }
   qint64 const hashPrepMs = totalTimer.elapsed () - hashPrepStartMs;
+  if (hashPrepMs >= 50)
+    {
+      qInfo().noquote ()
+          << "[HASHMETRIC] decode_prep"
+          << "serial=" << request.serial
+          << "total_ms=" << hashPrepMs
+          << "initial_ms=" << initialHashPrepMs
+          << "refresh_ms=" << refreshHashPrepMs
+          << "replay=disabled";
+    }
   ftx_ft8_stage4_set_deadline_ms_c (ft8_stage4_deadline_ms_from_now (request.maxDecodeMs));
   // The promoted C++ Stage4 path still avoids the full JTDX ft8b subpass
   // engine, but a second candidate cycle with RX-frequency sensitivity 2
@@ -1803,25 +1911,31 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   constexpr bool effectiveLowThresholds {false};
   bool const effectiveSubpass {request.subpass};  // F0: era hardcoded false; ora pilotato dal toggle ft8SubpassHarvest
   bool const pressureConstrainedProfile =
-      request.threadCount <= 2 || (request.maxDecodeMs > 0 && request.maxDecodeMs < 7000);
+      pressureLimitedRequest || request.threadCount <= 2;
   bool const fullLiveDecode =
-      request.ndepth >= 3
+      effectiveDepth >= 3
       && !request.supplemental
       && !pressureConstrainedProfile
       && request.maxDecodeMs >= 7000;
   int const effectiveCycles = fullLiveDecode ? 2 : 1;
   int const effectiveRxFreqSensitivity = fullLiveDecode ? 2 : 1;
+  int const effectiveCandidateThin =
+      pressureLimitedRequest ? std::min (qBound (1, request.ncandthin, 100), 20)
+                             : qBound (1, request.ncandthin, 100);
   ftx_ft8_stage4_set_decode_options_c (effectiveLowThresholds ? 1 : 0,
                                        effectiveSubpass ? 1 : 0,
                                        effectiveCycles,
                                        effectiveRxFreqSensitivity,
-                                       qBound (1, request.ncandthin, 100));
+                                       effectiveCandidateThin);
   // In the full live pass, request the Stage4 focused-window rescue without
   // promoting the whole-band decode to depth 4 or enabling global OSD.
   bool const fullLiveFocusedRescue = fullLiveDecode;
   bool const supplementalRequested =
-      request.supplemental || request.ndepth >= 4 || fullLiveFocusedRescue;
-  bool const osdSupplementalRequested = request.supplemental || request.ndepth >= 4;
+      !pressureLimitedRequest
+      && (request.supplemental || effectiveDepth >= 4 || fullLiveFocusedRescue);
+  bool const osdSupplementalRequested =
+      !pressureLimitedRequest
+      && (request.supplemental || effectiveDepth >= 4);
   ftx_ft8_stage4_set_supplemental_c (supplementalRequested ? 1 : 0);
   // Harvest subpass: dig FRESH (reset slot state, a7 preserved) so the
   // parallelized subpass re-scans for weak signals, not the deep residual.
@@ -1832,9 +1946,10 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   ftx_ft8_stage4_set_decode_syncmin_c (effectiveSubpass ? 2 : -1);
   // Turbo Feedback: estende belief-propagation a 50 iter (default 30).
   ftx_ft8_stage4_set_ldpc_max_iter_c (request.turboFeedbackEnabled ? 50 : 30);
-  bool const wantOsd = request.osdFollowup
-                       || (osdSupplementalRequested && request.ndepth >= 3)
-                       || request.neuralSyncEnabled;
+  bool const wantOsd = !pressureLimitedRequest
+                       && (request.osdFollowup
+                           || (osdSupplementalRequested && effectiveDepth >= 3)
+                           || request.neuralSyncEnabled);
   if (osdSupplementalRequested && request.ndepth >= 4)
     {
       ftx_ft8_stage4_set_ldpc_osd_c (3, 4);
@@ -1870,11 +1985,11 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   int nfa = qBound (0, request.nfa, 5000);
   int nfb = qMax (nfa + 50, qBound (0, request.nfb, 5000));
   int nzhsym = qBound (41, request.nzhsym, 50);
-  int ndepth = qBound (1, request.ndepth, 4);
+  int ndepth = qBound (1, effectiveDepth, 4);
   float emedelay = request.emedelay;
   int ncontest = qBound (0, request.ncontest, 16);
   int nagain = request.nagain ? 1 : 0;
-  int lft8apon = request.lft8apon ? 1 : 0;
+  int lft8apon = effectiveApEnabled ? 1 : 0;
   int ltry_a8 = (nzhsym == 41 || request.lmultift8 != 0) ? 1 : 0;
   int lapcqonly = request.lapcqonly ? 1 : 0;
   int napwid = qBound (0, request.napwid, 200);
@@ -1936,12 +2051,12 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27 pressure_limited=%28")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
                  .arg (totalMs)
-                 .arg (request.threadCount)
+                 .arg (effectiveRequestedThreadLimit)
                  .arg (activeThreads)
                  .arg (request.audio.size ())
                  .arg (nout)
@@ -1960,10 +2075,11 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (request.maxDecodeMs)
                  .arg (pressureConstrainedProfile ? 1 : 0)
                  .arg (hashPrepMs)
-                 .arg (pressureLimitedRequest ? 0 : 1)
-                 .arg (qBound (1, request.ncandthin, 100))
+                 .arg (0)
+                 .arg (effectiveCandidateThin)
                  .arg (current_thread_id_hex ())
-                 .arg (ftx_ft8_freqpart_bins_used_c ());
+                 .arg (ftx_ft8_freqpart_bins_used_c ())
+                 .arg (pressureLimitedRequest ? 1 : 0);
     }
   Q_EMIT decodeReady (request.serial, rows);
   Q_EMIT decodedEntriesReady (request.serial, entries);

@@ -1,6 +1,9 @@
 #include "DecodeListModel.h"
+#include "DecodiumLogging.hpp"
 
 #include <QScopeGuard>
+#include <QElapsedTimer>
+#include <QDateTime>
 #include <QSet>
 #include <QTimer>
 
@@ -400,6 +403,8 @@ void DecodeListModel::scheduleBudgetedStep()
                 this, &DecodeListModel::applyBudgetedStep);
     }
     if (m_budgetTargetActive && !m_budgetTimer->isActive()) {
+        m_budgetStepExpectedAtMs = QDateTime::currentMSecsSinceEpoch()
+            + m_budgetTimer->interval();
         m_budgetTimer->start();
     }
 }
@@ -527,15 +532,34 @@ void DecodeListModel::appendEntriesBudgeted(QVariantList const& newEntries,
 
 void DecodeListModel::applyBudgetedStep()
 {
+#ifdef Q_OS_WIN
+    qint64 const enteredAtMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const lateMs = m_budgetStepExpectedAtMs > 0
+        ? qMax<qint64>(0, enteredAtMs - m_budgetStepExpectedAtMs)
+        : 0;
+    QElapsedTimer totalTimer;
+    totalTimer.start();
+#endif
+    m_budgetStepExpectedAtMs = 0;
+
     if (!hasPendingBudgetedUpdate()) {
         bool const completedSnapshot = m_budgetTargetActive;
         clearBudgetedTarget();
-        if (completedSnapshot) emit snapshotApplied();
+        if (completedSnapshot) {
+            if (!m_entries.isEmpty()) m_completedNonEmptySnapshot = true;
+            emit snapshotApplied();
+        }
         return;
     }
 
     int const oldCount = m_entries.size();
     int const newCount = m_budgetTargetEntries.size();
+    // A row budget alone is not stable across GPUs, QML delegates and
+    // machines. Bound the synchronous model work as well; the next 16 ms
+    // timer tick continues exactly where this one stopped.
+    static constexpr qint64 kBudgetedStepMaxMs = 4;
+    QElapsedTimer stepBudget;
+    stepBudget.start();
     int const commonLimit = qMin(oldCount, newCount);
 
     int commonPrefix = 0;
@@ -557,9 +581,14 @@ void DecodeListModel::applyBudgetedStep()
     int rowsChanged = 0;
 
     if (oldMiddleCount > 0 && newMiddleCount > 0) {
-        int const replaceCount = std::min({m_budgetRowsPerCycle,
-                                           oldMiddleCount,
-                                           newMiddleCount});
+        int replaceCount = 0;
+        int const maxReplace = std::min({m_budgetRowsPerCycle,
+                                         oldMiddleCount,
+                                         newMiddleCount});
+        while (replaceCount < maxReplace
+               && (replaceCount == 0 || stepBudget.elapsed() < kBudgetedStepMaxMs)) {
+            ++replaceCount;
+        }
         for (int i = 0; i < replaceCount; ++i) {
             int const row = commonPrefix + i;
             m_entries[row] = m_budgetTargetEntries.at(row);
@@ -569,9 +598,27 @@ void DecodeListModel::applyBudgetedStep()
                          index(commonPrefix + replaceCount - 1));
         rowsChanged = replaceCount;
     } else if (newMiddleCount > 0) {
-        int const insertCount = qMin(m_budgetRowsPerCycle, newMiddleCount);
+        // beginInsertRows/endInsertRows can wake many QML delegates. Keep
+        // insertion chunks deliberately small even on high-core desktops.
+        int insertCap = 12;
+#ifdef Q_OS_WIN
+        // The first FT8 snapshot fans out to multiple animated ListViews. On
+        // Windows, creating twelve delegates per model in the same scene-graph
+        // turn can monopolize the GUI for seconds. Stagger only this initial
+        // population; later incremental updates retain the normal throughput.
+        if (!m_completedNonEmptySnapshot) {
+            insertCap = 1;
+        }
+#endif
+        int const insertCount = qMin(qMin(m_budgetRowsPerCycle, newMiddleCount), insertCap);
+#ifdef Q_OS_WIN
+        qint64 const beforeBeginUs = totalTimer.nsecsElapsed() / 1000;
+#endif
         beginInsertRows(QModelIndex(), commonPrefix,
                         commonPrefix + insertCount - 1);
+#ifdef Q_OS_WIN
+        qint64 const afterBeginUs = totalTimer.nsecsElapsed() / 1000;
+#endif
         for (int i = 0; i < insertCount; ++i) {
             int const sourceRow = commonPrefix + i;
             m_entries.insert(commonPrefix + i,
@@ -579,10 +626,31 @@ void DecodeListModel::applyBudgetedStep()
             m_entryKeys.insert(commonPrefix + i,
                                m_budgetTargetKeys.at(sourceRow));
         }
+#ifdef Q_OS_WIN
+        qint64 const beforeEndUs = totalTimer.nsecsElapsed() / 1000;
+#endif
         endInsertRows();
+#ifdef Q_OS_WIN
+        qint64 const afterEndUs = totalTimer.nsecsElapsed() / 1000;
+#endif
         rowsChanged = insertCount;
+#ifdef Q_OS_WIN
+        if (!m_completedNonEmptySnapshot || lateMs >= 90 || afterEndUs >= 25000) {
+            DIAG_INFO(QStringLiteral("[MODELSTEP] model=%1 old=%2 target=%3 inserted=%4 late_ms=%5 begin_us=%6 mutate_us=%7 end_us=%8 total_us=%9 pending=%10")
+                          .arg(objectName().isEmpty() ? QStringLiteral("unnamed") : objectName())
+                          .arg(oldCount)
+                          .arg(newCount)
+                          .arg(insertCount)
+                          .arg(lateMs)
+                          .arg(afterBeginUs - beforeBeginUs)
+                          .arg(beforeEndUs - afterBeginUs)
+                          .arg(afterEndUs - beforeEndUs)
+                          .arg(afterEndUs)
+                          .arg(hasPendingBudgetedUpdate()));
+        }
+#endif
     } else if (oldMiddleCount > 0) {
-        int const removeCount = qMin(m_budgetRowsPerCycle, oldMiddleCount);
+        int const removeCount = qMin(qMin(m_budgetRowsPerCycle, oldMiddleCount), 12);
         beginRemoveRows(QModelIndex(), commonPrefix,
                         commonPrefix + removeCount - 1);
         m_entries.remove(commonPrefix, removeCount);
@@ -594,7 +662,11 @@ void DecodeListModel::applyBudgetedStep()
         int regionStart = -1;
         int regionEnd = -1;
         QVector<QPair<int, int>> changedRegions;
-        for (int i = 0; i < newCount && rowsChanged < m_budgetRowsPerCycle; ++i) {
+        for (int i = 0;
+             i < newCount
+             && rowsChanged < m_budgetRowsPerCycle
+             && (rowsChanged == 0 || stepBudget.elapsed() < kBudgetedStepMaxMs);
+             ++i) {
             if (m_entries.at(i) == m_budgetTargetEntries.at(i)) {
                 if (regionStart >= 0) {
                     changedRegions.append(qMakePair(regionStart, regionEnd));
@@ -617,6 +689,7 @@ void DecodeListModel::applyBudgetedStep()
 
     if (rowsChanged <= 0 || !hasPendingBudgetedUpdate()) {
         clearBudgetedTarget();
+        if (!m_entries.isEmpty()) m_completedNonEmptySnapshot = true;
         emit snapshotApplied();
         return;
     }
