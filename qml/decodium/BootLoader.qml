@@ -18,7 +18,7 @@ ApplicationWindow {
     minimumHeight: 500
     x: centeredBootX()
     y: centeredBootY()
-    title: "Decodium 4.0 — Loading..."
+    title: qsTr("Decodium 4.0 — Loading...")
     color: "#1a1a2e"
     property int mainLoadElapsedSeconds: 0
     property double mainLoadStartedMs: 0

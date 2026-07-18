@@ -319,57 +319,13 @@ Searched paths:
 Searched paths:
 %1</translation>
     </message>
+</context>
+<context>
+    <name>AstroWindow</name>
     <message>
-        <source>Form</source>
-        <translation type="vanished">Forma</translation>
-    </message>
-    <message>
-        <source>Pointing Tests</source>
-        <translation type="vanished">Tēmēšanas testi</translation>
-    </message>
-    <message>
-        <source>6</source>
-        <translation type="vanished">6</translation>
-    </message>
-    <message>
-        <source>1</source>
-        <translation type="vanished">1</translation>
-    </message>
-    <message>
-        <source>2, 5</source>
-        <translation type="vanished">2, 5</translation>
-    </message>
-    <message>
-        <source>3</source>
-        <translation type="vanished">3</translation>
-    </message>
-    <message>
-        <source>4</source>
-        <translation type="vanished">4</translation>
-    </message>
-    <message>
-        <source>Offset   </source>
-        <translation type="vanished">Nobīde   </translation>
-    </message>
-    <message>
-        <source>  deg</source>
-        <translation type="vanished">  grādi</translation>
-    </message>
-    <message>
-        <source>   s</source>
-        <translation type="vanished">   s</translation>
-    </message>
-    <message>
-        <source>Dwell   </source>
-        <translation type="vanished">Aizture   </translation>
-    </message>
-    <message>
-        <source>Auto Cycle</source>
-        <translation type="vanished">Automātiskais cikls</translation>
-    </message>
-    <message>
-        <source>On Off</source>
-        <translation type="vanished">Ieslēgts/izslēgts</translation>
+        <location filename="../qml/decodium/components/AstroWindow.qml" line="121"/>
+        <source>🌙 Astronomical Data</source>
+        <translation>🌙 Astronomiskie dati</translation>
     </message>
 </context>
 <context>
@@ -388,13 +344,6 @@ Searched paths:
         <location filename="../widgets/asyncmodewidget.cpp" line="84"/>
         <source>Hide Widget</source>
         <translation>Hide Widget</translation>
-    </message>
-</context>
-<context>
-    <name>BandMap</name>
-    <message>
-        <source>Form</source>
-        <translation type="vanished">Forma</translation>
     </message>
 </context>
 <context>
@@ -431,54 +380,11 @@ Searched paths:
     </message>
 </context>
 <context>
-    <name>BeaconsModel</name>
+    <name>BootLoader</name>
     <message>
-        <source>Client</source>
-        <translation type="vanished">Klients</translation>
-    </message>
-    <message>
-        <source>Time</source>
-        <translation type="vanished">Laiks</translation>
-    </message>
-    <message>
-        <source>Snr</source>
-        <translation type="vanished">SNR</translation>
-    </message>
-    <message>
-        <source>DT</source>
-        <translation type="vanished">DT</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation type="vanished">Frekvence</translation>
-    </message>
-    <message>
-        <source>Drift</source>
-        <translation type="vanished">Dreifs</translation>
-    </message>
-    <message>
-        <source>Grid</source>
-        <translation type="vanished">Lauciņš</translation>
-    </message>
-    <message>
-        <source>Power</source>
-        <translation type="vanished">Jauda</translation>
-    </message>
-    <message>
-        <source>Live</source>
-        <translation type="vanished">Tiešraide</translation>
-    </message>
-    <message>
-        <source>Callsign</source>
-        <translation type="vanished">Izsaukums</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation type="vanished">nē</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation type="vanished">jā</translation>
+        <location filename="../qml/decodium/BootLoader.qml" line="21"/>
+        <source>Decodium 4.0 — Loading...</source>
+        <translation>Decodium 4.0 — Ielādē...</translation>
     </message>
 </context>
 <context>
@@ -646,10 +552,6 @@ Searched paths:
 <context>
     <name>CAboutDlg</name>
     <message>
-        <source>About Decodium v3.0 FT2 &quot;Raptor&quot;</source>
-        <translation type="vanished">About Decodium v3.0 FT2 &quot;Raptor&quot;</translation>
-    </message>
-    <message>
         <location filename="../widgets/about.ui" line="9"/>
         <source>About Decodium</source>
         <translation>About Decodium</translation>
@@ -658,14 +560,6 @@ Searched paths:
         <location filename="../widgets/about.ui" line="60"/>
         <source>OK</source>
         <translation>OK</translation>
-    </message>
-    <message>
-        <source>About MAP65</source>
-        <translation type="vanished">Par MAP65</translation>
-    </message>
-    <message>
-        <source>About QMAP</source>
-        <translation type="vanished">Par QMAP</translation>
     </message>
 </context>
 <context>
@@ -742,33 +636,29 @@ Searched paths:
         <translation>Tiešais izsaukums</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
-        <source>ATTIVA</source>
-        <translation>AKTĪVS</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
-        <source>⏳ ARMATO</source>
-        <translation>⏳ UZLĀDĒTS</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="201"/>
         <source>Target callsign</source>
         <translation>Mērķa izsaukums</translation>
     </message>
     <message>
-        <source>Tentativi max</source>
-        <translation type="vanished">Maks. mēģinājumi</translation>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
+        <source>⏳ ARMED</source>
+        <translation>⏳ SAGATAVOTS</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="187"/>
+        <source>ACTIVE</source>
+        <translation>AKTĪVS</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="231"/>
-        <source>Max chiamate a vuoto</source>
-        <translation>Maks. izsaukumi bez atbildes</translation>
+        <source>Max unanswered calls</source>
+        <translation>Maks. neatbildētu izsaukumu</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="232"/>
-        <source>Timeout totale (s)</source>
-        <translation>Kopējais noildze (s)</translation>
+        <source>Total timeout (s)</source>
+        <translation>Kopējais noildzes laiks (s)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="247"/>
@@ -803,56 +693,48 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="420"/>
-        <source>DX-watch armato — non chiama subito: aspetta che il target sia decodificato</source>
-        <translation>DX-watch ir uzlādēts — nezvana uzreiz: gaida, līdz mērķis tiek dekodēts</translation>
+        <source>DX-watch armed — doesn&apos;t call immediately: waits for the target to be decoded</source>
+        <translation>DX-watch sagatavots — neizsauc uzreiz: gaida, līdz mērķis tiek dekodēts</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="429"/>
-        <source>Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation>Atkārtota uzlāde: ja mērķis pazūd, atgriežas klausīšanās režīmā (maks. 3 reizes, pēc tam manuāla apturēšana)</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="463"/>
-        <source>A vuoto %1 / %2</source>
-        <translation>Bez atbildes %1 / %2</translation>
-    </message>
-    <message>
-        <source>Re-arm: a tentativo senza QSO torna in ascolto (max 3 volte, poi Halt manuale)</source>
-        <translation type="vanished">Atkārtota uzlāde: pēc mēģinājuma bez QSO atgriežas klausīšanās režīmā (maks. 3 reizes, pēc tam manuāla apturēšana)</translation>
+        <source>Re-arm: if the target disappears, go back to listening (max 3 times, then manual Halt)</source>
+        <translation>Atkārtoti sagatavot: ja mērķis pazūd, atgriezties klausīšanās režīmā (maks. 3 reizes, tad manuāls Halt)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="455"/>
-        <source>⏳ In ascolto: aspetto %1 in decodifica…</source>
-        <translation>⏳ Klausos: gaidu %1 dekodēšanu…</translation>
+        <source>⏳ Listening: waiting for %1 to be decoded…</source>
+        <translation>⏳ Klausās: gaida, līdz %1 tiek dekodēts…</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="456"/>
-        <source>Stato: chiamando %1</source>
-        <translation>Statuss: izsaucu %1</translation>
+        <source>Status: calling %1</source>
+        <translation>Statuss: izsauc %1</translation>
     </message>
     <message>
-        <source>Tentativo %1 / %2</source>
-        <translation type="vanished">Mēģinājums %1 / %2</translation>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="463"/>
+        <source>Unanswered %1 / %2</source>
+        <translation>Neatbildēts %1 / %2</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="480"/>
-        <source>AutoCQ generico (pulsante ACQ)</source>
-        <translation>Vispārīgs AutoCQ (poga ACQ)</translation>
+        <source>Generic AutoCQ (ACQ button)</source>
+        <translation>Vispārīgs AutoCQ (ACQ poga)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="489"/>
-        <source>Max chiamate CQ (0=∞)</source>
-        <translation>Maks. CQ izsaukumi (0=∞)</translation>
+        <source>Max CQ calls (0=∞)</source>
+        <translation>Maks. CQ izsaukumu (0=∞)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
+        <source>Close</source>
+        <translation>Aizvērt</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="505"/>
         <source>Pausa fra cicli CQ (s)</source>
         <translation>Pauze starp CQ cikliem (s)</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
-        <source>Chiudi</source>
-        <translation>Aizvērt</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="552"/>
@@ -874,74 +756,62 @@ Searched paths:
     </message>
 </context>
 <context>
-    <name>ClientWidget</name>
+    <name>CatSettingsDialog</name>
     <message>
-        <source>&amp;Erase Band Activity</source>
-        <translation type="vanished">&amp;Dzēst joslu aktivitāti</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="8"/>
+        <source>CAT - Radio Settings</source>
+        <translation>CAT - Radio iestatījumi</translation>
     </message>
     <message>
-        <source>Erase &amp;Rx Frequency</source>
-        <translation type="vanished">Dzēst &amp;Rx frekvenci</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="35"/>
+        <source>⚙ CAT — Radio Settings</source>
+        <translation>⚙ CAT — Radio iestatījumi</translation>
     </message>
     <message>
-        <source>Erase &amp;Both</source>
-        <translation type="vanished">Dzēst &amp;abas</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="114"/>
+        <source>Search radio...</source>
+        <translation>Meklēt radio...</translation>
     </message>
     <message>
-        <source>&amp;Gen Msgs</source>
-        <translation type="vanished">&amp;Ģen. ziņojumus</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="169"/>
+        <source>Serial port:</source>
+        <translation>Seriālais ports:</translation>
     </message>
     <message>
-        <source>Free text:</source>
-        <translation type="vanished">Brīvs teksts:</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="215"/>
+        <source>Refresh ports</source>
+        <translation>Atsvaidzināt portus</translation>
     </message>
     <message>
-        <source>Temporary grid:</source>
-        <translation type="vanished">Pagaidu lauciņš:</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="228"/>
+        <source>Speed (baud):</source>
+        <translation>Ātrums (bodi):</translation>
     </message>
     <message>
-        <source>Configuration name:</source>
-        <translation type="vanished">Konfigurācijas nosaukums:</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="292"/>
+        <source>Auto-connect CAT on startup</source>
+        <translation>Automātiski savienot CAT startējot</translation>
     </message>
     <message>
-        <source>Mode:</source>
-        <translation type="vanished">Režīms:</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="318"/>
+        <source>Start audio on connect</source>
+        <translation>Sākt audio, kad savienots</translation>
     </message>
     <message>
-        <source>Submode:</source>
-        <translation type="vanished">Apakšrežīms:</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="354"/>
+        <source>Not connected</source>
+        <translation>Nav savienots</translation>
     </message>
     <message>
-        <source>Fast mode:</source>
-        <translation type="vanished">Ātrais režīms:</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="366"/>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="386"/>
+        <source>Disconnect</source>
+        <translation>Atvienot</translation>
     </message>
     <message>
-        <source>T/R period:</source>
-        <translation type="vanished">T/R periods:</translation>
-    </message>
-    <message>
-        <source>Rx DF:</source>
-        <translation type="vanished">Rx DF:</translation>
-    </message>
-    <message>
-        <source>Freq. Tol:</source>
-        <translation type="vanished">Frekv. piel.:</translation>
-    </message>
-    <message>
-        <source>DX call:</source>
-        <translation type="vanished">DX izsaukums:</translation>
-    </message>
-    <message>
-        <source>DX grid:</source>
-        <translation type="vanished">DX lauciņš:</translation>
-    </message>
-    <message>
-        <source>&amp;Auto Off</source>
-        <translation type="vanished">&amp;Auto izslēgts</translation>
-    </message>
-    <message>
-        <source>&amp;Halt Tx</source>
-        <translation type="vanished">&amp;Apturēt Tx</translation>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="366"/>
+        <source>Connect</source>
+        <translation>Savienot</translation>
     </message>
 </context>
 <context>
@@ -962,25 +832,6 @@ Please check your log.</translation>
         <location filename="../Network/Cloudlog.cpp" line="306"/>
         <source>Reason: %1</source>
         <translation>Reason: %1</translation>
-    </message>
-</context>
-<context>
-    <name>ColorDialog</name>
-    <message>
-        <source>Eyedropper</source>
-        <translation type="vanished">Pipete</translation>
-    </message>
-    <message>
-        <source>Hue</source>
-        <translation type="vanished">Tonis</translation>
-    </message>
-    <message>
-        <source>Alpha</source>
-        <translation type="vanished">Alfa</translation>
-    </message>
-    <message>
-        <source>Color</source>
-        <translation type="vanished">Krāsa</translation>
     </message>
 </context>
 <context>
@@ -1084,25 +935,6 @@ Please check your log.</translation>
         <location filename="../widgets/colorhighlighting.ui" line="330"/>
         <source>New ITU Zone on Band</source>
         <translation>New ITU Zone on Band</translation>
-    </message>
-</context>
-<context>
-    <name>ColorInputs</name>
-    <message>
-        <source>Hex</source>
-        <translation type="vanished">Hex</translation>
-    </message>
-    <message>
-        <source>RGB</source>
-        <translation type="vanished">RGB</translation>
-    </message>
-    <message>
-        <source>HSV</source>
-        <translation type="vanished">HSV</translation>
-    </message>
-    <message>
-        <source>HSL</source>
-        <translation type="vanished">HSL</translation>
     </message>
 </context>
 <context>
@@ -1730,20 +1562,6 @@ Reverted Hamlib will be used after restart</translation>
     </message>
 </context>
 <context>
-    <name>CopyAction</name>
-    <message>
-        <source>Copy</source>
-        <translation type="vanished">Kopēt</translation>
-    </message>
-</context>
-<context>
-    <name>CutAction</name>
-    <message>
-        <source>Cut</source>
-        <translation type="vanished">Izgriezt</translation>
-    </message>
-</context>
-<context>
     <name>DXClusterWindow</name>
     <message>
         <location filename="../widgets/DXClusterWindow.cpp" line="492"/>
@@ -1966,6 +1784,14 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="543"/>
         <source>DX Lab Suite Commander sent an unrecognized frequency</source>
         <translation>DX Lab Suite Commander sent an unrecognized frequency</translation>
+    </message>
+</context>
+<context>
+    <name>DecoSyncPanel</name>
+    <message>
+        <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="54"/>
+        <source>DecoSyncTime not available</source>
+        <translation>DecoSyncTime nav pieejams</translation>
     </message>
 </context>
 <context>
@@ -2203,94 +2029,48 @@ or contact DXLab support at DXLab@groups.io.</translation>
     </message>
 </context>
 <context>
-    <name>DecodesModel</name>
+    <name>DecodeWindow</name>
     <message>
-        <source>Client</source>
-        <translation type="vanished">Klients</translation>
-    </message>
-    <message>
-        <source>Time</source>
-        <translation type="vanished">Laiks</translation>
-    </message>
-    <message>
-        <source>Snr</source>
-        <translation type="vanished">SNR</translation>
-    </message>
-    <message>
-        <source>DT</source>
-        <translation type="vanished">DT</translation>
-    </message>
-    <message>
-        <source>DF</source>
-        <translation type="vanished">DF</translation>
-    </message>
-    <message>
-        <source>Md</source>
-        <translation type="vanished">Md</translation>
-    </message>
-    <message>
-        <source>Confidence</source>
-        <translation type="vanished">Ticamība</translation>
-    </message>
-    <message>
-        <source>Live</source>
-        <translation type="vanished">Tiešraide</translation>
-    </message>
-    <message>
-        <source>Message</source>
-        <translation type="vanished">Ziņojums</translation>
-    </message>
-    <message>
-        <source>low</source>
-        <translation type="vanished">zems</translation>
-    </message>
-    <message>
-        <source>high</source>
-        <translation type="vanished">augsts</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation type="vanished">nē</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation type="vanished">jā</translation>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1330"/>
+        <location filename="../qml/decodium/components/DecodeWindow.qml" line="1878"/>
+        <source>── PERIOD ──</source>
+        <translation>── PERIODS ──</translation>
     </message>
 </context>
 <context>
     <name>DecodiumBridge</name>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27517"/>
+        <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX nav startēts</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="27518"/>
+        <location filename="../DecodiumBridge.cpp" line="28718"/>
         <source>Nominativo compresso non risolto</source>
         <translation>Saspiestais izsaukums nav atrisināts</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="31529"/>
+        <location filename="../DecodiumBridge.cpp" line="32729"/>
         <source>AutoCQ fermato</source>
         <translation>AutoCQ apturēts</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="31530"/>
+        <location filename="../DecodiumBridge.cpp" line="32730"/>
         <source>Chiamata diretta ricevuta, ma il nominativo non e&apos; risolto</source>
         <translation>Saņemts tiešais izsaukums, bet izsaukums nav atrisināts</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="36831"/>
+        <location filename="../DecodiumBridge.cpp" line="38151"/>
         <source>Map selection: %1 %2</source>
         <translation>Kartes atlase: %1 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="36832"/>
+        <location filename="../DecodiumBridge.cpp" line="38152"/>
         <source>Map selection: %1</source>
         <translation>Kartes atlase: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="44439"/>
+        <location filename="../DecodiumBridge.cpp" line="46183"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Atjauninājumu pārbaude šajā būvējumā ir atspējota.</translation>
     </message>
@@ -2743,13 +2523,6 @@ or contact DXLab support at DXLab@groups.io.</translation>
     </message>
 </context>
 <context>
-    <name>DeleteAction</name>
-    <message>
-        <source>Delete</source>
-        <translation type="vanished">Dzēst</translation>
-    </message>
-</context>
-<context>
     <name>Designer</name>
     <message>
         <location filename="../WFPalette.cpp" line="189"/>
@@ -2789,337 +2562,6 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../WSPR/WSPRBandHopping.cpp" line="116"/>
         <source>Gray time:</source>
         <translation>Gray time:</translation>
-    </message>
-</context>
-<context>
-    <name>DialogSndCard</name>
-    <message>
-        <source>Setup / Options</source>
-        <translation type="vanished">Iestatīšana / opcijas</translation>
-    </message>
-    <message>
-        <source>Station</source>
-        <translation type="vanished">Stacija</translation>
-    </message>
-    <message>
-        <source>My Call:</source>
-        <translation type="vanished">Mans izsaukums:</translation>
-    </message>
-    <message>
-        <source>My Grid:</source>
-        <translation type="vanished">Mans lauciņš:</translation>
-    </message>
-    <message>
-        <source>ID Interval (min):</source>
-        <translation type="vanished">ID intervāls (min):</translation>
-    </message>
-    <message>
-        <source>PTT Port:</source>
-        <translation type="vanished">PTT ports:</translation>
-    </message>
-    <message>
-        <source>Astro Font Size:</source>
-        <translation type="vanished">Astro fonta izmērs:</translation>
-    </message>
-    <message>
-        <source>K1JT</source>
-        <translation type="vanished">K1JT</translation>
-    </message>
-    <message>
-        <source>FN20qi</source>
-        <translation type="vanished">FN20qi</translation>
-    </message>
-    <message>
-        <source>None</source>
-        <translation type="vanished">Nav</translation>
-    </message>
-    <message>
-        <source>COM1</source>
-        <translation type="vanished">COM1</translation>
-    </message>
-    <message>
-        <source>COM2</source>
-        <translation type="vanished">COM2</translation>
-    </message>
-    <message>
-        <source>COM3</source>
-        <translation type="vanished">COM3</translation>
-    </message>
-    <message>
-        <source>COM4</source>
-        <translation type="vanished">COM4</translation>
-    </message>
-    <message>
-        <source>COM5</source>
-        <translation type="vanished">COM5</translation>
-    </message>
-    <message>
-        <source>COM6</source>
-        <translation type="vanished">COM6</translation>
-    </message>
-    <message>
-        <source>COM7</source>
-        <translation type="vanished">COM7</translation>
-    </message>
-    <message>
-        <source>COM8</source>
-        <translation type="vanished">COM8</translation>
-    </message>
-    <message>
-        <source>COM9</source>
-        <translation type="vanished">COM9</translation>
-    </message>
-    <message>
-        <source>COM10</source>
-        <translation type="vanished">COM10</translation>
-    </message>
-    <message>
-        <source>COM11</source>
-        <translation type="vanished">COM11</translation>
-    </message>
-    <message>
-        <source>COM12</source>
-        <translation type="vanished">COM12</translation>
-    </message>
-    <message>
-        <source>COM13</source>
-        <translation type="vanished">COM13</translation>
-    </message>
-    <message>
-        <source>DXCC:</source>
-        <translation type="vanished">DXCC:</translation>
-    </message>
-    <message>
-        <source>Timeout (min):</source>
-        <translation type="vanished">Noildze (min):</translation>
-    </message>
-    <message>
-        <source>Fcal (Hz):</source>
-        <translation type="vanished">Fcal (Hz):</translation>
-    </message>
-    <message>
-        <source>Fadd (MHz)</source>
-        <translation type="vanished">Fadd (MHz)</translation>
-    </message>
-    <message>
-        <source>PJ9</source>
-        <translation type="vanished">PJ9</translation>
-    </message>
-    <message>
-        <source>0.0</source>
-        <translation type="vanished">0.0</translation>
-    </message>
-    <message>
-        <source>Antennas:</source>
-        <translation type="vanished">Antenas:</translation>
-    </message>
-    <message>
-        <source>Xpol</source>
-        <translation type="vanished">Xpol</translation>
-    </message>
-    <message>
-        <source>+</source>
-        <translation type="vanished">+</translation>
-    </message>
-    <message>
-        <source>x</source>
-        <translation type="vanished">x</translation>
-    </message>
-    <message>
-        <source>Dphi:</source>
-        <translation type="vanished">Dphi:</translation>
-    </message>
-    <message>
-        <source>Save Directory:</source>
-        <translation type="vanished">Saglabāšanas mape:</translation>
-    </message>
-    <message>
-        <source>C:\Users\joe\wsjt\map65\save</source>
-        <translation type="vanished">C:\Users\joe\wsjt\map65\save</translation>
-    </message>
-    <message>
-        <source>AzEl Directory:</source>
-        <translation type="vanished">AzEl mape:</translation>
-    </message>
-    <message>
-        <source>C:\Users\joe\wsjt\map65</source>
-        <translation type="vanished">C:\Users\joe\wsjt\map65</translation>
-    </message>
-    <message>
-        <source>Editor command:</source>
-        <translation type="vanished">Redaktora komanda:</translation>
-    </message>
-    <message>
-        <source>notepad</source>
-        <translation type="vanished">notepad</translation>
-    </message>
-    <message>
-        <source>I/O Devices</source>
-        <translation type="vanished">I/O ierīces</translation>
-    </message>
-    <message>
-        <source>Input Source (Rx, Baseband)</source>
-        <translation type="vanished">Ievades avots (Rx, pamatjosla)</translation>
-    </message>
-    <message>
-        <source>SoundCard</source>
-        <translation type="vanished">Skaņas karte</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="vanished">Tīkls</translation>
-    </message>
-    <message>
-        <source>Swap I/Q</source>
-        <translation type="vanished">Apmainīt I/Q</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjust to scale digital I/Q data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pielāgojiet, lai mērogotu digitālos I/Q datus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>  dB</source>
-        <translation type="vanished">  dB</translation>
-    </message>
-    <message>
-        <source>Gain  </source>
-        <translation type="vanished">Pastiprinājums  </translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation type="vanished">Ports</translation>
-    </message>
-    <message>
-        <source>Dev Ch API      Name</source>
-        <translation type="vanished">Ierīce Kan. API      Nosaukums</translation>
-    </message>
-    <message>
-        <source>Sample Rate</source>
-        <translation type="vanished">Iztveršanas frekvence</translation>
-    </message>
-    <message>
-        <source>96000 Hz</source>
-        <translation type="vanished">96000 Hz</translation>
-    </message>
-    <message>
-        <source>95238 Hz</source>
-        <translation type="vanished">95238 Hz</translation>
-    </message>
-    <message>
-        <source>Output Device (Tx Audio)</source>
-        <translation type="vanished">Izvades ierīce (Tx audio)</translation>
-    </message>
-    <message>
-        <source>Colors</source>
-        <translation type="vanished">Krāsas</translation>
-    </message>
-    <message>
-        <source>Choose colors for Band Map and Messages Windows</source>
-        <translation type="vanished">Izvēlieties krāsas joslu kartes un ziņojumu logiem</translation>
-    </message>
-    <message>
-        <source>Red</source>
-        <translation type="vanished">Sarkana</translation>
-    </message>
-    <message>
-        <source>Green</source>
-        <translation type="vanished">Zaļa</translation>
-    </message>
-    <message>
-        <source>Blue</source>
-        <translation type="vanished">Zila</translation>
-    </message>
-    <message>
-        <source>Background</source>
-        <translation type="vanished">Fons</translation>
-    </message>
-    <message>
-        <source>Newest</source>
-        <translation type="vanished">Jaunākais</translation>
-    </message>
-    <message>
-        <source> K1ABC</source>
-        <translation type="vanished"> K1ABC</translation>
-    </message>
-    <message>
-        <source>2nd</source>
-        <translation type="vanished">2.</translation>
-    </message>
-    <message>
-        <source>3rd</source>
-        <translation type="vanished">3.</translation>
-    </message>
-    <message>
-        <source>Oldest</source>
-        <translation type="vanished">Vecākais</translation>
-    </message>
-    <message>
-        <source>Color Selector</source>
-        <translation type="vanished">Krāsu atlasītājs</translation>
-    </message>
-    <message>
-        <source>Si570 Control</source>
-        <translation type="vanished">Si570 vadība</translation>
-    </message>
-    <message>
-        <source>LO Selection:</source>
-        <translation type="vanished">LO atlase:</translation>
-    </message>
-    <message>
-        <source>IQ+, Generic Si570</source>
-        <translation type="vanished">IQ+, vispārīgs Si570</translation>
-    </message>
-    <message>
-        <source>IQ+  Rx/XT</source>
-        <translation type="vanished">IQ+  Rx/XT</translation>
-    </message>
-    <message>
-        <source>Rx frequency multiplier:</source>
-        <translation type="vanished">Rx frekvences reizinātājs:</translation>
-    </message>
-    <message>
-        <source>Tx Offset (MHz):</source>
-        <translation type="vanished">Tx nobīde (MHz):</translation>
-    </message>
-    <message>
-        <source>Tx frequency multiplier:</source>
-        <translation type="vanished">Tx frekvences reizinātājs:</translation>
-    </message>
-    <message>
-        <source>Frequency correction (ppm):</source>
-        <translation type="vanished">Frekvences korekcija (ppm):</translation>
-    </message>
-    <message>
-        <source>Initialize IQ+  on startup</source>
-        <translation type="vanished">Inicializēt IQ+ palaišanas laikā</translation>
-    </message>
-    <message>
-        <source>LiveCQ</source>
-        <translation type="vanished">LiveCQ</translation>
-    </message>
-    <message>
-        <source>LiveCQ URL</source>
-        <translation type="vanished">LiveCQ URL</translation>
-    </message>
-    <message>
-        <source>Other</source>
-        <translation type="vanished">Cits</translation>
-    </message>
-    <message>
-        <source>Official QMAP URL</source>
-        <translation type="vanished">Oficiālais QMAP URL</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation type="vanished">Iestatījumi</translation>
-    </message>
-    <message>
-        <source>Highlight My Call:</source>
-        <translation type="vanished">Izcelt manu izsaukumu:</translation>
-    </message>
-    <message>
-        <source>Input from Linrad or SDR Console</source>
-        <translation type="vanished">Ievade no Linrad vai SDR Console</translation>
     </message>
 </context>
 <context>
@@ -3232,468 +2674,26 @@ Error: %2 - %3</translation>
     </message>
 </context>
 <context>
-    <name>DockWidget</name>
+    <name>DxPeditionWorkspace</name>
     <message>
-        <source>Buttons</source>
-        <translation type="vanished">Pogas</translation>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="255"/>
+        <source>UTC · OPER IU8LMC</source>
+        <translation>UTC · OPER IU8LMC</translation>
     </message>
     <message>
-        <source>Enabled</source>
-        <translation type="vanished">Iespējots</translation>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="584"/>
+        <source>Full Spectrum · Decode</source>
+        <translation>Full Spectrum · Dekodēšana</translation>
     </message>
     <message>
-        <source>Disabled</source>
-        <translation type="vanished">Atspējots</translation>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="615"/>
+        <source>Signal RX · QSO Lock</source>
+        <translation>Signal RX · QSO fiksācija</translation>
     </message>
     <message>
-        <source>This is a tool tip</source>
-        <translation type="vanished">Šī ir rīka padoms</translation>
-    </message>
-    <message>
-        <source>This is a status tip</source>
-        <translation type="vanished">Šis ir statusa padoms</translation>
-    </message>
-    <message>
-        <source>This is &quot;what is this&quot;</source>
-        <translation type="vanished">Šis ir &quot;kas tas ir&quot;</translation>
-    </message>
-    <message>
-        <source>PushButton</source>
-        <translation type="vanished">Spiedpoga</translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation type="vanished">Labi</translation>
-    </message>
-    <message>
-        <source>Checked</source>
-        <translation type="vanished">Atzīmēts</translation>
-    </message>
-    <message>
-        <source>Unchecked</source>
-        <translation type="vanished">Neatzīmēts</translation>
-    </message>
-    <message>
-        <source>ToolButton</source>
-        <translation type="vanished">Rīka poga</translation>
-    </message>
-    <message>
-        <source>Tool</source>
-        <translation type="vanished">Rīks</translation>
-    </message>
-    <message>
-        <source>RadioButton</source>
-        <translation type="vanished">Radio poga</translation>
-    </message>
-    <message>
-        <source>CheckBox</source>
-        <translation type="vanished">Izvēles rūtiņa</translation>
-    </message>
-    <message>
-        <source>CommandLinkButton</source>
-        <translation type="vanished">Komandsaites poga</translation>
-    </message>
-    <message>
-        <source>Command</source>
-        <translation type="vanished">Komanda</translation>
-    </message>
-    <message>
-        <source>ButtonBox</source>
-        <translation type="vanished">Pogu lodziņš</translation>
-    </message>
-    <message>
-        <source>Inside DockWidget</source>
-        <translation type="vanished">Doka logrīkā</translation>
-    </message>
-    <message>
-        <source>Tristate</source>
-        <translation type="vanished">Trīsstāvokļu</translation>
-    </message>
-    <message>
-        <source>Containers - No Tabs</source>
-        <translation type="vanished">Konteineri — bez cilnēm</translation>
-    </message>
-    <message>
-        <source>MDI Area</source>
-        <translation type="vanished">MDI apgabals</translation>
-    </message>
-    <message>
-        <source>GroupBox</source>
-        <translation type="vanished">Grupas lodziņš</translation>
-    </message>
-    <message>
-        <source>Inside GroupBox</source>
-        <translation type="vanished">Grupas lodziņā</translation>
-    </message>
-    <message>
-        <source>Inside Stacked Page 1</source>
-        <translation type="vanished">Sakrautajā 1. lapā</translation>
-    </message>
-    <message>
-        <source>Inside Stacked Page 2</source>
-        <translation type="vanished">Sakrautajā 2. lapā</translation>
-    </message>
-    <message>
-        <source>Frame</source>
-        <translation type="vanished">Rāmis</translation>
-    </message>
-    <message>
-        <source>Inside Frame</source>
-        <translation type="vanished">Rāmī</translation>
-    </message>
-    <message>
-        <source>Widget</source>
-        <translation type="vanished">Logrīks</translation>
-    </message>
-    <message>
-        <source>Subwindow</source>
-        <translation type="vanished">Apakšlogs</translation>
-    </message>
-    <message>
-        <source>Inside MDI Area 1</source>
-        <translation type="vanished">MDI 1. apgabalā</translation>
-    </message>
-    <message>
-        <source>Inside MDI Area 2 </source>
-        <translation type="vanished">MDI 2. apgabalā </translation>
-    </message>
-    <message>
-        <source>Inside Widget</source>
-        <translation type="vanished">Logrīkā</translation>
-    </message>
-    <message>
-        <source>ScroolArea</source>
-        <translation type="vanished">Ritināšanas apgabals</translation>
-    </message>
-    <message>
-        <source>Inside ScroolArea</source>
-        <translation type="vanished">Ritināšanas apgabalā</translation>
-    </message>
-    <message>
-        <source>ScroolArea </source>
-        <translation type="vanished">Ritināšanas apgabals </translation>
-    </message>
-    <message>
-        <source>Inside ScroolArea </source>
-        <translation type="vanished">Ritināšanas apgabalā </translation>
-    </message>
-    <message>
-        <source>ToolBox</source>
-        <translation type="vanished">Rīku lodziņš</translation>
-    </message>
-    <message>
-        <source>Page 1</source>
-        <translation type="vanished">1. lapa</translation>
-    </message>
-    <message>
-        <source>Inside ToolBox Page 1</source>
-        <translation type="vanished">Rīku lodziņa 1. lapā</translation>
-    </message>
-    <message>
-        <source>Page 2</source>
-        <translation type="vanished">2. lapa</translation>
-    </message>
-    <message>
-        <source>Inside ToolBox Page 2</source>
-        <translation type="vanished">Rīku lodziņa 2. lapā</translation>
-    </message>
-    <message>
-        <source>Stacked</source>
-        <translation type="vanished">Sakrauts</translation>
-    </message>
-    <message>
-        <source>Containers - Tabs</source>
-        <translation type="vanished">Konteineri — cilnes</translation>
-    </message>
-    <message>
-        <source>Tab 1</source>
-        <translation type="vanished">1. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget North Closable Tab 1</source>
-        <translation type="vanished">Cilņu logrīka ziemeļu aizverama 1. cilne</translation>
-    </message>
-    <message>
-        <source>Tab 2</source>
-        <translation type="vanished">2. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget North Closable Tab 2</source>
-        <translation type="vanished">Cilņu logrīka ziemeļu aizverama 2. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget West Tab 1</source>
-        <translation type="vanished">Cilņu logrīka rietumu 1. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget West Tab 2</source>
-        <translation type="vanished">Cilņu logrīka rietumu 2. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget East Tab 1</source>
-        <translation type="vanished">Cilņu logrīka austrumu 1. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget East Tab 2</source>
-        <translation type="vanished">Cilņu logrīka austrumu 2. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget South Closable Tab 1</source>
-        <translation type="vanished">Cilņu logrīka dienvidu aizverama 1. cilne</translation>
-    </message>
-    <message>
-        <source>Inside TabWidget South Closable Tab 2</source>
-        <translation type="vanished">Cilņu logrīka dienvidu aizverama 2. cilne</translation>
-    </message>
-    <message>
-        <source>Displays</source>
-        <translation type="vanished">Displeji</translation>
-    </message>
-    <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Testing&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Test&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Label</source>
-        <translation type="vanished">Etiķete</translation>
-    </message>
-    <message>
-        <source>Testing</source>
-        <translation type="vanished">Testēšana</translation>
-    </message>
-    <message>
-        <source>TextBrowser</source>
-        <translation type="vanished">Teksta pārlūks</translation>
-    </message>
-    <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Testing&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Test&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>GraphicsView</source>
-        <translation type="vanished">Grafikas skats</translation>
-    </message>
-    <message>
-        <source>CalendarWidget</source>
-        <translation type="vanished">Kalendāra logrīks</translation>
-    </message>
-    <message>
-        <source>LCDNumber</source>
-        <translation type="vanished">LCD numurs</translation>
-    </message>
-    <message>
-        <source>ProgressBar</source>
-        <translation type="vanished">Progresa josla</translation>
-    </message>
-    <message>
-        <source>Line - H</source>
-        <translation type="vanished">Līnija — H</translation>
-    </message>
-    <message>
-        <source>Line - V</source>
-        <translation type="vanished">Līnija — V</translation>
-    </message>
-    <message>
-        <source>Inputs - Fields</source>
-        <translation type="vanished">Ievades — lauki</translation>
-    </message>
-    <message>
-        <source>FontComboBox</source>
-        <translation type="vanished">Fonta kombinētais lodziņš</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;ComboBox&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Kombinētais lodziņš&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>ComboBoxEditable</source>
-        <translation type="vanished">Rediģējams kombinētais lodziņš</translation>
-    </message>
-    <message>
-        <source>Second option</source>
-        <translation type="vanished">Otra opcija</translation>
-    </message>
-    <message>
-        <source>LineEdit</source>
-        <translation type="vanished">Rindas rediģēšana</translation>
-    </message>
-    <message>
-        <source>TextEdit</source>
-        <translation type="vanished">Teksta rediģēšana</translation>
-    </message>
-    <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;TextEdit&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Cantarell&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Teksta rediģēšana&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>PlainTextEdit</source>
-        <translation type="vanished">Vienkārša teksta rediģēšana</translation>
-    </message>
-    <message>
-        <source>SpinBox</source>
-        <translation type="vanished">Skaitļa lodziņš</translation>
-    </message>
-    <message>
-        <source>DoubleSpinBox</source>
-        <translation type="vanished">Decimālskaitļa lodziņš</translation>
-    </message>
-    <message>
-        <source>TimeEdit</source>
-        <translation type="vanished">Laika rediģēšana</translation>
-    </message>
-    <message>
-        <source>DateEdit</source>
-        <translation type="vanished">Datuma rediģēšana</translation>
-    </message>
-    <message>
-        <source>TimeDateEdit</source>
-        <translation type="vanished">Laika/datuma rediģēšana</translation>
-    </message>
-    <message>
-        <source>Inputs - No Fields</source>
-        <translation type="vanished">Ievades — bez laukiem</translation>
-    </message>
-    <message>
-        <source>VerticalSlider</source>
-        <translation type="vanished">Vertikāls slīdnis</translation>
-    </message>
-    <message>
-        <source>HorizontalSlider</source>
-        <translation type="vanished">Horizontāls slīdnis</translation>
-    </message>
-    <message>
-        <source>VerticalScroolBar</source>
-        <translation type="vanished">Vertikāla ritjosla</translation>
-    </message>
-    <message>
-        <source>Dial</source>
-        <translation type="vanished">Ciparnīca</translation>
-    </message>
-    <message>
-        <source>ComboBox A</source>
-        <translation type="vanished">Kombinētais lodziņš A</translation>
-    </message>
-    <message>
-        <source>ComboBox B</source>
-        <translation type="vanished">Kombinētais lodziņš B</translation>
-    </message>
-    <message>
-        <source>ComboBox C</source>
-        <translation type="vanished">Kombinētais lodziņš C</translation>
-    </message>
-    <message>
-        <source>HorizontalScroolBar</source>
-        <translation type="vanished">Horizontāla ritjosla</translation>
-    </message>
-    <message>
-        <source>ComboBox</source>
-        <translation type="vanished">Kombinētais lodziņš</translation>
-    </message>
-    <message>
-        <source>Views</source>
-        <translation type="vanished">Skati</translation>
-    </message>
-    <message>
-        <source>ListView</source>
-        <translation type="vanished">Saraksta skats</translation>
-    </message>
-    <message>
-        <source>TreeView</source>
-        <translation type="vanished">Koka skats</translation>
-    </message>
-    <message>
-        <source>TableView</source>
-        <translation type="vanished">Tabulas skats</translation>
-    </message>
-    <message>
-        <source>ColunmView</source>
-        <translation type="vanished">Kolonnu skats</translation>
-    </message>
-    <message>
-        <source>Widgets</source>
-        <translation type="vanished">Logrīki</translation>
-    </message>
-    <message>
-        <source>ListWidget</source>
-        <translation type="vanished">Saraksta logrīks</translation>
-    </message>
-    <message>
-        <source>New Item</source>
-        <translation type="vanished">Jauns vienums</translation>
-    </message>
-    <message>
-        <source>TreeWidget</source>
-        <translation type="vanished">Koka logrīks</translation>
-    </message>
-    <message>
-        <source>New Column</source>
-        <translation type="vanished">Jauna kolonna</translation>
-    </message>
-    <message>
-        <source>New Subitem</source>
-        <translation type="vanished">Jauns apakšvienums</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation type="vanished">Tests</translation>
-    </message>
-    <message>
-        <source>TableWidget</source>
-        <translation type="vanished">Tabulas logrīks</translation>
-    </message>
-    <message>
-        <source>New Row</source>
-        <translation type="vanished">Jauna rinda</translation>
-    </message>
-    <message>
-        <source>1.23</source>
-        <translation type="vanished">1.23</translation>
-    </message>
-    <message>
-        <source>Hello</source>
-        <translation type="vanished">Sveiki</translation>
-    </message>
-    <message>
-        <source>1,45</source>
-        <translation type="vanished">1,45</translation>
-    </message>
-    <message>
-        <source>Olá</source>
-        <translation type="vanished">Olá</translation>
-    </message>
-    <message>
-        <source>12/12/2012</source>
-        <translation type="vanished">12/12/2012</translation>
-    </message>
-    <message>
-        <source>Oui</source>
-        <translation type="vanished">Oui</translation>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="657"/>
+        <source>Log · QSO Entry</source>
+        <translation>Log · QSO ieraksts</translation>
     </message>
 </context>
 <context>
@@ -4034,27 +3034,6 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>FileDialog</name>
-    <message>
-        <source>Overwrite file?</source>
-        <translation type="vanished">Pārrakstīt failu?</translation>
-    </message>
-    <message>
-        <source>“%1” already exists.
-Do you want to replace it?</source>
-        <translation type="vanished">“%1” jau eksistē.
-Vai vēlaties to aizstāt?</translation>
-    </message>
-    <message>
-        <source>File name</source>
-        <translation type="vanished">Faila nosaukums</translation>
-    </message>
-    <message>
-        <source>Filter</source>
-        <translation type="vanished">Filtrs</translation>
-    </message>
-</context>
-<context>
     <name>FileDownload</name>
     <message>
         <location filename="../Network/FileDownload.cpp" line="291"/>
@@ -4112,56 +3091,6 @@ Error: %2</source>
 Cannot open file:
 %1
 Error: %2</translation>
-    </message>
-</context>
-<context>
-    <name>FontDialog</name>
-    <message>
-        <source>Writing System</source>
-        <translation type="vanished">Rakstības sistēma</translation>
-    </message>
-</context>
-<context>
-    <name>FontDialogContent</name>
-    <message>
-        <source>Family</source>
-        <translation type="vanished">Saime</translation>
-    </message>
-    <message>
-        <source>Font family</source>
-        <translation type="vanished">Fonta saime</translation>
-    </message>
-    <message>
-        <source>Style</source>
-        <translation type="vanished">Stils</translation>
-    </message>
-    <message>
-        <source>Font style</source>
-        <translation type="vanished">Fonta stils</translation>
-    </message>
-    <message>
-        <source>Size</source>
-        <translation type="vanished">Izmērs</translation>
-    </message>
-    <message>
-        <source>Font point size</source>
-        <translation type="vanished">Fonta punktu izmērs</translation>
-    </message>
-    <message>
-        <source>Effects</source>
-        <translation type="vanished">Efekti</translation>
-    </message>
-    <message>
-        <source>Underline</source>
-        <translation type="vanished">Pasvītrojums</translation>
-    </message>
-    <message>
-        <source>Strikeout</source>
-        <translation type="vanished">Pārsvītrojums</translation>
-    </message>
-    <message>
-        <source>Sample</source>
-        <translation type="vanished">Paraugs</translation>
     </message>
 </context>
 <context>
@@ -4686,10 +3615,6 @@ Error: %2</translation>
         <translation>setting current VFO mode</translation>
     </message>
     <message>
-        <source>setting VFOB mode</source>
-        <translation type="vanished">setting VFOB mode</translation>
-    </message>
-    <message>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="1251"/>
         <location filename="../Transceiver/HamlibTransceiver.cpp" line="1320"/>
         <source>setting/unsetting split mode</source>
@@ -4793,6 +3718,34 @@ Error: %2</translation>
     </message>
 </context>
 <context>
+    <name>InfoDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="713"/>
+        <source>Open Settings</source>
+        <translation>Atvērt iestatījumus</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="714"/>
+        <source>Open Log</source>
+        <translation>Atvērt žurnālu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="715"/>
+        <source>Open Macros</source>
+        <translation>Atvērt makro</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="717"/>
+        <source>Reset windows Layout</source>
+        <translation>Atiestatīt logu izkārtojumu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="718"/>
+        <source>Compact Full Spectrum</source>
+        <translation>Kompakts Full Spectrum</translation>
+    </message>
+</context>
+<context>
     <name>IonosphericForecastWindow</name>
     <message>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="69"/>
@@ -4855,32 +3808,42 @@ Error: %2</translation>
 <context>
     <name>LiveMapPanel</name>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="180"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="192"/>
         <source>Zoom out</source>
         <translation>Attālināt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="210"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="222"/>
         <source>Zoom in</source>
         <translation>Pietuvināt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="240"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="252"/>
         <source>Reset view (auto-fit)</source>
         <translation>Atiestatīt skatu (auto pielāgošana)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="281"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="293"/>
         <source>Toggle day/night greyline overlay</source>
         <translation>Pārslēgt dienas/nakts pelēkās līnijas pārklājumu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="311"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="308"/>
+        <source>Dock</source>
+        <translation>Piestiprināt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="308"/>
+        <source>Detach</source>
+        <translation>Atdalīt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="323"/>
         <source>Dock Live Map</source>
         <translation>Piedokot tiešraides karti</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="311"/>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="323"/>
         <source>Detach Live Map</source>
         <translation>Atvienot tiešraides karti</translation>
     </message>
@@ -5268,6 +4231,66 @@ Error: %2</translation>
         <source>Esporta file ADIF</source>
         <translation>Eksportēt ADIF failu</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="323"/>
+        <source>e.g. 9H1SR or AMICO</source>
+        <translation>piem. 9H1SR vai AMICO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="351"/>
+        <source>Delete logbook</source>
+        <translation>Dzēst žurnālu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="362"/>
+        <source>You are about to delete the selected logbook.</source>
+        <translation>Jūs gatavojaties dzēst atlasīto žurnālu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="380"/>
+        <source>Also delete the ADIF file from disk</source>
+        <translation>Dzēst arī ADIF failu no diska</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="385"/>
+        <source>Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.</source>
+        <translation>Neatgriezeniska darbība: .adi fails tiks dzēsts. Ja šis ir pēdējais žurnāls, Decodium izveidos jaunu tukšu žurnālu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="386"/>
+        <source>The .adi file will remain on disk; only the association with Decodium will be removed.</source>
+        <translation>.adi fails paliks diskā; tiks noņemta tikai saistība ar Decodium.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="407"/>
+        <source>Confirm deletion</source>
+        <translation>Apstiprināt dzēšanu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="416"/>
+        <source>Delete the QSO with %1?</source>
+        <translation>Dzēst QSO ar %1?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="646"/>
+        <source>Search callsign, locator...</source>
+        <translation>Meklēt callsign, locator...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1053"/>
+        <source>✓ Save</source>
+        <translation>✓ Saglabāt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1082"/>
+        <source>✕ Delete</source>
+        <translation>✕ Dzēst</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
+        <source>Cancel</source>
+        <translation>Atcelt</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -5300,280 +4323,433 @@ Error: %2</translation>
         <source>Carica logbook ADIF</source>
         <translation>Ielādēt ADIF žurnālu</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="241"/>
+        <source>e.g. 9H1SR or AMICO</source>
+        <translation>piem. 9H1SR vai AMICO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="269"/>
+        <source>Delete logbook</source>
+        <translation>Dzēst žurnālu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="280"/>
+        <source>You are about to delete the selected logbook.</source>
+        <translation>Jūs gatavojaties dzēst atlasīto žurnālu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="298"/>
+        <source>Also delete the ADIF file from disk</source>
+        <translation>Dzēst arī ADIF failu no diska</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="303"/>
+        <source>Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.</source>
+        <translation>Neatgriezeniska darbība: .adi fails tiks dzēsts. Ja šis ir pēdējais žurnāls, Decodium izveidos jaunu tukšu žurnālu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="304"/>
+        <source>The .adi file will remain on disk; only the association with Decodium will be removed.</source>
+        <translation>.adi fails paliks diskā; tiks noņemta tikai saistība ar Decodium.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="325"/>
+        <source>Confirm deletion</source>
+        <translation>Apstiprināt dzēšanu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="334"/>
+        <source>Delete the QSO with %1?</source>
+        <translation>Dzēst QSO ar %1?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="447"/>
+        <source>Search...</source>
+        <translation>Meklēt...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="783"/>
+        <source>✓ Save</source>
+        <translation>✓ Saglabāt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="808"/>
+        <source>✕ Delete</source>
+        <translation>✕ Dzēst</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LogWindowContent.qml" line="827"/>
+        <source>Cancel</source>
+        <translation>Atcelt</translation>
+    </message>
+</context>
+<context>
+    <name>MacroDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="95"/>
+        <source>⌨️ TX Macro Configuration</source>
+        <translation>⌨️ TX makro konfigurācija</translation>
+    </message>
 </context>
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10574"/>
+        <location filename="../qml/decodium/Main.qml" line="10814"/>
         <source>About Decodium</source>
         <translation>About Decodium</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10591"/>
+        <location filename="../qml/decodium/Main.qml" line="10831"/>
         <source>Useful Links...</source>
         <translation>Useful Links...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10615"/>
-        <location filename="../qml/decodium/Main.qml" line="11493"/>
+        <location filename="../qml/decodium/Main.qml" line="10855"/>
+        <location filename="../qml/decodium/Main.qml" line="11733"/>
         <source>Keyboard Shortcuts</source>
         <translation>Keyboard Shortcuts</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10631"/>
+        <location filename="../qml/decodium/Main.qml" line="10871"/>
         <source>SWL Mode (RX Only)</source>
         <translation>SWL Mode (RX Only)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10647"/>
+        <location filename="../qml/decodium/Main.qml" line="10887"/>
         <source>Multi-Answer Mode</source>
         <translation>Multi-Answer Mode</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10663"/>
+        <location filename="../qml/decodium/Main.qml" line="10903"/>
         <source>MAM Window...</source>
         <translation>MAM Window...</translation>
     </message>
     <message>
-        <source>Open ALL.TXT Folder</source>
-        <translation type="vanished">Open ALL.TXT Folder</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10703"/>
-        <location filename="../qml/decodium/Main.qml" line="11338"/>
+        <location filename="../qml/decodium/Main.qml" line="10943"/>
+        <location filename="../qml/decodium/Main.qml" line="11578"/>
         <source>TX Watchdog</source>
         <translation>TX Watchdog</translation>
     </message>
     <message>
-        <source>Split Mode</source>
-        <translation type="vanished">Split Mode</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10719"/>
-        <location filename="../qml/decodium/Main.qml" line="11415"/>
+        <location filename="../qml/decodium/Main.qml" line="10959"/>
+        <location filename="../qml/decodium/Main.qml" line="11655"/>
         <source>Contest Mode</source>
         <translation>Contest Mode</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11449"/>
+        <location filename="../qml/decodium/Main.qml" line="11689"/>
         <source>Rule: 1 point per worked station</source>
         <translation>Noteikums: 1 punkts par sakaru ar staciju</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10759"/>
+        <location filename="../qml/decodium/Main.qml" line="10999"/>
         <source>CQ Only</source>
         <translation>CQ Only</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10775"/>
+        <location filename="../qml/decodium/Main.qml" line="5293"/>
+        <source>Search city...</source>
+        <translation>Meklēt pilsētu...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9233"/>
+        <source>Detach</source>
+        <translation>Atdalīt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9245"/>
+        <source>Detach the DX Cluster to a window</source>
+        <translation>Atdalīt DX Cluster atsevišķā logā</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9876"/>
+        <source>Bring all floating windows back into the main window
+and re-center Decodium on the primary monitor?
+
+The saved coordinates will be cleared.</source>
+        <translation>Atgriezt visus peldošos logus galvenajā logā
+un pārcentrēt Decodium uz galvenā monitora?
+
+Saglabātās koordinātas tiks notīrītas.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9946"/>
+        <source>The legacy radio backend reported a problem.</source>
+        <translation>Vecā radio aizmugursistēma ziņoja par problēmu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9966"/>
+        <location filename="../qml/decodium/Main.qml" line="10585"/>
+        <source>Hide details</source>
+        <translation>Slēpt detaļas</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9966"/>
+        <location filename="../qml/decodium/Main.qml" line="10585"/>
+        <source>Show details</source>
+        <translation>Rādīt detaļas</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10919"/>
+        <source>Open ALL.TXT folder</source>
+        <translation>Atvērt ALL.TXT mapi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11015"/>
         <source>My Call Only</source>
         <translation>My Call Only</translation>
     </message>
     <message>
-        <source>ZAP Mode</source>
-        <translation type="vanished">ZAP Mode</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10799"/>
+        <location filename="../qml/decodium/Main.qml" line="11039"/>
         <source>Deep Search</source>
         <translation>Deep Search</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10815"/>
+        <location filename="../qml/decodium/Main.qml" line="11055"/>
         <source>Avg Decode</source>
         <translation>Avg Decode</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10849"/>
+        <location filename="../qml/decodium/Main.qml" line="11089"/>
         <source>VHF/UHF Features</source>
         <translation>VHF/UHF Features</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10873"/>
+        <location filename="../qml/decodium/Main.qml" line="11113"/>
         <source>Record RX</source>
         <translation>Record RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10889"/>
+        <location filename="../qml/decodium/Main.qml" line="11129"/>
         <source>Record TX</source>
         <translation>Record TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10959"/>
+        <location filename="../qml/decodium/Main.qml" line="11199"/>
         <source>Report a problem...</source>
         <translation>Ziņot par problēmu...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10975"/>
+        <location filename="../qml/decodium/Main.qml" line="11215"/>
         <source>Checking...</source>
         <translation>Notiek pārbaude...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10975"/>
+        <location filename="../qml/decodium/Main.qml" line="11215"/>
         <source>Check for updates...</source>
         <translation>Meklēt atjauninājumus...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12688"/>
+        <location filename="../qml/decodium/Main.qml" line="11258"/>
+        <source>Show clock</source>
+        <translation>Rādīt pulksteni</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11757"/>
+        <source>F9: toggle RX-only 1st/2nd</source>
+        <translation>F9: pārslēgt RX-only 1./2.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11758"/>
+        <source>Escape: Halt (immediate TX stop)</source>
+        <translation>Escape: Halt (tūlītēja TX apturēšana)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11768"/>
+        <source>Ctrl+A: toggle Auto Sequence</source>
+        <translation>Ctrl+A: pārslēgt automātisko secību</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11770"/>
+        <source>Ctrl+Z: toggle ZAP mode</source>
+        <translation>Ctrl+Z: pārslēgt ZAP režīmu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11780"/>
+        <source>Alt+L: log the current QSO</source>
+        <translation>Alt+L: reģistrēt pašreizējo QSO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11781"/>
+        <source>Alt+M: clear the decode list (Monitor)</source>
+        <translation>Alt+M: notīrīt dekodēšanas sarakstu (Monitor)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11782"/>
+        <source>Alt+S: stop TX</source>
+        <translation>Alt+S: apturēt TX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12539"/>
+        <source>⌨️ TX Macro Configuration</source>
+        <translation>⌨️ TX makro konfigurācija</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12928"/>
         <source>decodes</source>
         <translation>decodes</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="13421"/>
+        <location filename="../qml/decodium/Main.qml" line="13660"/>
         <source>msgs</source>
         <translation>msgs</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="12702"/>
-        <location filename="../qml/decodium/Main.qml" line="13436"/>
+        <location filename="../qml/decodium/Main.qml" line="12942"/>
+        <location filename="../qml/decodium/Main.qml" line="13675"/>
         <source>Clear</source>
         <translation>Clear</translation>
     </message>
     <message>
-        <source>Schermo intero</source>
-        <translation type="vanished">Pilnekrāna režīms</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="1924"/>
+        <location filename="../qml/decodium/Main.qml" line="2054"/>
         <source>Open WAV file for decoding</source>
         <translation>Atvērt WAV failu dekodēšanai</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1926"/>
+        <location filename="../qml/decodium/Main.qml" line="2056"/>
         <source>File WAV (*.wav)</source>
         <translation>WAV faili (*.wav)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1926"/>
+        <location filename="../qml/decodium/Main.qml" line="2056"/>
         <source>All files (*)</source>
         <translation>Visi faili (*)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1934"/>
+        <location filename="../qml/decodium/Main.qml" line="2064"/>
         <source>Select folder with WAV files</source>
         <translation>Atlasiet mapi ar WAV failiem</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="3925"/>
+        <location filename="../qml/decodium/Main.qml" line="3456"/>
+        <source>Valid range: 100-5000 Hz</source>
+        <translation>Derīgs diapazons: 100-5000 Hz</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="3539"/>
+        <source>Dock the Waterfall here</source>
+        <translation>Piestiprināt Waterfall šeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4055"/>
         <source>Click: sync NTP now to align DT (FT8/FT4)</source>
         <translation>Klikšķis: sinhronizēt NTP tagad, lai izlīdzinātu DT (FT8/FT4)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4008"/>
+        <location filename="../qml/decodium/Main.qml" line="4138"/>
         <source>Auto RX level active</source>
         <translation>Automātiskais RX līmenis aktīvs</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4009"/>
+        <location filename="../qml/decodium/Main.qml" line="4139"/>
         <source>Auto RX level disabled</source>
         <translation>Automātiskais RX līmenis atspējots</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4502"/>
+        <location filename="../qml/decodium/Main.qml" line="4293"/>
+        <source>Gallager — deep dig for weak signals.
+Enables a second decoding pass (LDPC subpass
+parallelized across cores, named after R. Gallager, father of LDPC)
+that recovers near-noise stations missed by the normal decode.
+Requires a multi-core CPU: on old PCs it may burden the audio
+→ in that case leave it off.</source>
+        <translation>Gallager — dziļa vāju signālu meklēšana.
+Iespējo otro dekodēšanas piegājienu (LDPC apakšpiegājiens,
+paralelizēts pa kodoliem, nosaukts R. Gallagera, LDPC tēva, vārdā),
+kas atgūst trokšņa tuvumā esošās stacijas, ko parastā dekodēšana palaiž garām.
+Nepieciešams daudzkodolu CPU: vecos datoros tas var noslogot audio
+→ šādā gadījumā atstājiet izslēgtu.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4632"/>
         <source>Click: open a WAV file
 Right-click: decode a folder</source>
         <translation>Klikšķis: atvērt WAV failu
 Labais klikšķis: dekodēt mapi</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4602"/>
+        <location filename="../qml/decodium/Main.qml" line="4732"/>
         <source>Reset layout (Ctrl+Shift+L)</source>
         <translation>Atiestatīt izkārtojumu (Ctrl+Shift+L)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4634"/>
+        <location filename="../qml/decodium/Main.qml" line="4764"/>
         <source>Decode history (Ctrl+Shift+H)</source>
         <translation>Dekodēšanas vēsture (Ctrl+Shift+H)</translation>
     </message>
     <message>
-        <source>Bilanciato</source>
-        <translation type="vanished">Līdzsvarots</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="4729"/>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
         <source>Weak-signal / DX</source>
         <translation>Vāja signāla / DX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4729"/>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
         <source>Contest</source>
         <translation>Sacensības</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4729"/>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
         <source>CPU-limited</source>
         <translation>CPU ierobežots</translation>
     </message>
     <message>
-        <source>Profili…</source>
-        <translation type="vanished">Profili…</translation>
-    </message>
-    <message>
-        <source>Profili pronti — applicano in blocco i toggle FT2/decode. Dettagli in Setup → FT2.</source>
-        <translation type="vanished">Gatavie profili — pa blokiem lieto FT2/dekodēšanas pārslēdzējus. Detaļas sadaļā Iestatīšana → FT2.</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="4973"/>
+        <location filename="../qml/decodium/Main.qml" line="5102"/>
         <source>Drag to reposition the clock</source>
         <translation>Velciet, lai pārvietotu pulksteni</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5164"/>
-        <source>Cerca città...</source>
-        <translation>Meklēt pilsētu...</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="5272"/>
+        <location filename="../qml/decodium/Main.qml" line="5401"/>
         <source>Type a city name</source>
         <translation>Ievadiet pilsētas nosaukumu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5272"/>
+        <location filename="../qml/decodium/Main.qml" line="5401"/>
         <source>No matching city</source>
         <translation>Nav atbilstošas pilsētas</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5307"/>
+        <location filename="../qml/decodium/Main.qml" line="5436"/>
         <source>Analog clock</source>
         <translation>Analogais pulkstenis</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5311"/>
+        <location filename="../qml/decodium/Main.qml" line="5440"/>
         <source>Digital clock</source>
         <translation>Digitālais pulkstenis</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5315"/>
+        <location filename="../qml/decodium/Main.qml" line="5444"/>
         <source>City labels</source>
         <translation>Pilsētu etiķetes</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5322"/>
+        <location filename="../qml/decodium/Main.qml" line="5451"/>
         <source>Hide clock</source>
         <translation>Slēpt pulksteni</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5370"/>
+        <location filename="../qml/decodium/Main.qml" line="5499"/>
         <source>Restore Waterfall</source>
         <translation>Atjaunot ūdenskritumu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5422"/>
+        <location filename="../qml/decodium/Main.qml" line="5551"/>
         <source>Restore QSO Log</source>
         <translation>Atjaunot QSO žurnālu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5474"/>
+        <location filename="../qml/decodium/Main.qml" line="5603"/>
         <source>Restore astronomical data</source>
         <translation>Atjaunot astronomiskos datus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5531"/>
+        <location filename="../qml/decodium/Main.qml" line="5660"/>
         <source>Restore Live Map</source>
         <translation>Atjaunot tiešraides karti</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5672"/>
+        <location filename="../qml/decodium/Main.qml" line="5801"/>
         <source>DX Cluster
 Left-click: open and connect
 Right-click: disconnect</source>
@@ -5582,323 +4758,310 @@ Kreisais klikšķis: atvērt un savienot
 Labais klikšķis: atvienot</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5749"/>
+        <location filename="../qml/decodium/Main.qml" line="5878"/>
         <source>Disable filter bypass</source>
         <translation>Atspējot filtru apiešanu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5750"/>
+        <location filename="../qml/decodium/Main.qml" line="5879"/>
         <source>Bypass CQ/My Call and setup filters</source>
         <translation>Apiet CQ/Mana izsaukuma un iestatījumu filtrus</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5797"/>
+        <location filename="../qml/decodium/Main.qml" line="5926"/>
         <source>Restore Macro configuration</source>
         <translation>Atjaunot makro konfigurāciju</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5849"/>
+        <location filename="../qml/decodium/Main.qml" line="5978"/>
         <source>Restore Rig Control</source>
         <translation>Atjaunot radio vadību</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5902"/>
+        <location filename="../qml/decodium/Main.qml" line="6031"/>
         <source>Restore Full Spectrum</source>
         <translation>Atjaunot pilno spektru</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="5954"/>
+        <location filename="../qml/decodium/Main.qml" line="6083"/>
         <source>Restore Period 2</source>
         <translation>Atjaunot 2. periodu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6005"/>
+        <location filename="../qml/decodium/Main.qml" line="6134"/>
         <source>Restore Signal RX</source>
         <translation>Atjaunot signāla RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6057"/>
+        <location filename="../qml/decodium/Main.qml" line="6186"/>
         <source>Restore TX panel</source>
         <translation>Atjaunot TX paneli</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="6312"/>
+        <location filename="../qml/decodium/Main.qml" line="6441"/>
         <source>Clock</source>
         <translation>Pulkstenis</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7820"/>
-        <location filename="../qml/decodium/Main.qml" line="8618"/>
-        <location filename="../qml/decodium/Main.qml" line="12746"/>
-        <location filename="../qml/decodium/Main.qml" line="13480"/>
+        <location filename="../qml/decodium/Main.qml" line="6656"/>
+        <source>Dock Waterfall</source>
+        <translation>Piestiprināt Waterfall</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6656"/>
+        <source>Waterfall detached</source>
+        <translation>Waterfall atdalīts</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6664"/>
+        <source>Use Dock to re-attach it</source>
+        <translation>Izmantojiet Piestiprināt, lai to atkal pievienotu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7794"/>
+        <location filename="../qml/decodium/Main.qml" line="8627"/>
+        <location filename="../qml/decodium/Main.qml" line="9608"/>
+        <source>Drag the window here</source>
+        <translation>Velciet logu šeit</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7979"/>
+        <location filename="../qml/decodium/Main.qml" line="8777"/>
+        <location filename="../qml/decodium/Main.qml" line="12986"/>
+        <location filename="../qml/decodium/Main.qml" line="13719"/>
         <source>Return to normal row height</source>
         <translation>Atgriezties uz parasto rindas augstumu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7821"/>
-        <location filename="../qml/decodium/Main.qml" line="8619"/>
-        <location filename="../qml/decodium/Main.qml" line="12747"/>
-        <location filename="../qml/decodium/Main.qml" line="13481"/>
+        <location filename="../qml/decodium/Main.qml" line="7980"/>
+        <location filename="../qml/decodium/Main.qml" line="8778"/>
+        <location filename="../qml/decodium/Main.qml" line="12987"/>
+        <location filename="../qml/decodium/Main.qml" line="13720"/>
         <source>Compact rows (2x visible decodes)</source>
         <translation>Kompaktas rindas (2x redzamas dekodēšanas)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="7851"/>
+        <location filename="../qml/decodium/Main.qml" line="8010"/>
         <source>Detach Full Spectrum</source>
         <translation>Atvienot pilno spektru</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8398"/>
+        <location filename="../qml/decodium/Main.qml" line="8028"/>
+        <location filename="../qml/decodium/Main.qml" line="13048"/>
+        <source>◀  Move left</source>
+        <translation>◀  Pārvietot pa kreisi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8029"/>
+        <location filename="../qml/decodium/Main.qml" line="13049"/>
+        <source>Move right  ▶</source>
+        <translation>Pārvietot pa labi  ▶</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8030"/>
+        <location filename="../qml/decodium/Main.qml" line="13050"/>
+        <source>Hide this column</source>
+        <translation>Slēpt šo kolonnu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8036"/>
+        <location filename="../qml/decodium/Main.qml" line="13056"/>
+        <source>✓  Message</source>
+        <translation>✓  Ziņojums</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8041"/>
+        <location filename="../qml/decodium/Main.qml" line="13061"/>
+        <source>Newest on top</source>
+        <translation>Jaunākie augšā</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8043"/>
+        <location filename="../qml/decodium/Main.qml" line="13063"/>
+        <source>Reset columns</source>
+        <translation>Atiestatīt kolonnas</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8557"/>
         <source>Go to the latest decode</source>
         <translation>Pāriet uz jaunāko dekodēšanu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8584"/>
+        <location filename="../qml/decodium/Main.qml" line="8743"/>
         <source>Clear Signal RX</source>
         <translation>Notīrīt signāla RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="8649"/>
+        <location filename="../qml/decodium/Main.qml" line="8808"/>
         <source>Detach Signal RX</source>
         <translation>Atvienot signāla RX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9075"/>
-        <source>Stacca</source>
-        <translation>Atvienot</translation>
+        <location filename="../qml/decodium/Main.qml" line="14804"/>
+        <source>Insert into layout:</source>
+        <translation>Ievietot izkārtojumā:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9087"/>
-        <source>Stacca il DX Cluster in finestra</source>
-        <translation>Atvienot DX Cluster atsevišķā logā</translation>
+        <location filename="../qml/decodium/Main.qml" line="14811"/>
+        <source>◧ next to Full Spectrum</source>
+        <translation>◧ blakus Full Spectrum</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9349"/>
+        <location filename="../qml/decodium/Main.qml" line="14812"/>
+        <source>◧ next to Signal RX</source>
+        <translation>◧ blakus Signal RX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9507"/>
         <source>Drag to swap the column</source>
         <translation>Velciet, lai apmainītu kolonnu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9560"/>
+        <location filename="../qml/decodium/Main.qml" line="9718"/>
         <source>Detach TX panel</source>
         <translation>Atvienot TX paneli</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9702"/>
+        <location filename="../qml/decodium/Main.qml" line="9860"/>
         <source>Reset Layout</source>
         <translation>Atiestatīt izkārtojumu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="9718"/>
-        <source>Riportare tutte le finestre flottanti dentro la finestra principale
-e ricentrare Decodium sul monitor principale?
-
-Le coordinate salvate verranno cancellate.</source>
-        <translation>Atgriezt visus peldošos logus galvenajā logā
-un atkārtoti centrēt Decodium uz galvenā monitora?
-
-Saglabātās koordinātes tiks dzēstas.</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10019"/>
+        <location filename="../qml/decodium/Main.qml" line="10177"/>
         <source>Notifica</source>
         <translation>Paziņojums</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10679"/>
-        <source>Apri cartella ALL.TXT</source>
-        <translation>Atvērt ALL.TXT mapi</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10743"/>
+        <location filename="../qml/decodium/Main.qml" line="10983"/>
         <source>Bypass Filters</source>
         <translation>Apiet filtrus</translation>
     </message>
     <message>
-        <source>Update checks disabled</source>
-        <translation type="vanished">Atjauninājumu pārbaude atspējota</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10990"/>
+        <location filename="../qml/decodium/Main.qml" line="11230"/>
         <source>Esporta Cabrillo...</source>
         <translation>Eksportēt Cabrillo...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11018"/>
-        <source>Mostra orologio</source>
-        <translation>Rādīt pulksteni</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="11033"/>
-        <source>Mostra DX Cluster</source>
-        <translation>Rādīt DX Cluster</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="11048"/>
-        <source>Mostra PSK Reporter</source>
-        <translation>Rādīt PSK Reporter</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="11200"/>
+        <location filename="../qml/decodium/Main.qml" line="11440"/>
         <source>Waterfall / Panadapter</source>
         <translation>Ūdenskritums / panadapteris</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11245"/>
+        <location filename="../qml/decodium/Main.qml" line="11485"/>
         <source>DecoSyncTime Monitor</source>
         <translation>DecoSyncTime monitors</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11823"/>
-        <location filename="../qml/decodium/Main.qml" line="12772"/>
-        <location filename="../qml/decodium/Main.qml" line="13494"/>
-        <location filename="../qml/decodium/Main.qml" line="13507"/>
-        <location filename="../qml/decodium/Main.qml" line="14041"/>
+        <location filename="../qml/decodium/Main.qml" line="12063"/>
+        <location filename="../qml/decodium/Main.qml" line="13012"/>
+        <location filename="../qml/decodium/Main.qml" line="13733"/>
+        <location filename="../qml/decodium/Main.qml" line="13746"/>
+        <location filename="../qml/decodium/Main.qml" line="14279"/>
         <source>Dock</source>
         <translation>Dock</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="14050"/>
+        <location filename="../qml/decodium/Main.qml" line="14288"/>
         <source>Dock TX panel</source>
         <translation>Piedokot TX paneli</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="14566"/>
-        <source>Inserisci nel layout:</source>
-        <translation>Ievietot izkārtojumā:</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="14573"/>
-        <source>◧ accanto a Full Spectrum</source>
-        <translation>◧ blakus pilnajam spektram</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="14574"/>
-        <source>◧ accanto a Signal RX</source>
-        <translation>◧ blakus signāla RX</translation>
-    </message>
-    <message>
-        <source>Dock TX Panel</source>
-        <translation type="vanished">Dock TX Panel</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="10832"/>
+        <location filename="../qml/decodium/Main.qml" line="11072"/>
         <source>Hide ASYNC icon</source>
         <translation>Hide ASYNC icon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10833"/>
+        <location filename="../qml/decodium/Main.qml" line="11073"/>
         <source>Show ASYNC icon</source>
         <translation>Show ASYNC icon</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10913"/>
+        <location filename="../qml/decodium/Main.qml" line="11153"/>
         <source>Alert on CQ</source>
         <translation>Alert on CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10934"/>
+        <location filename="../qml/decodium/Main.qml" line="11174"/>
         <source>Color Highlighting...</source>
         <translation>Color Highlighting...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="10946"/>
+        <location filename="../qml/decodium/Main.qml" line="11186"/>
         <source>QSY...</source>
         <translation>QSY...</translation>
     </message>
     <message>
-        <source>Update Decodium v%1</source>
-        <translation type="vanished">Update Decodium v%1</translation>
-    </message>
-    <message>
-        <source>Check for Updates</source>
-        <translation type="vanished">Check for Updates</translation>
-    </message>
-    <message>
-        <source>Export Cabrillo...</source>
-        <translation type="vanished">Export Cabrillo...</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="11002"/>
+        <location filename="../qml/decodium/Main.qml" line="11242"/>
         <source>cty.dat downloading...</source>
         <translation>cty.dat downloading...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11002"/>
+        <location filename="../qml/decodium/Main.qml" line="11242"/>
         <source>Update cty.dat</source>
         <translation>Update cty.dat</translation>
     </message>
     <message>
-        <source>Show Clock</source>
-        <translation type="vanished">Show Clock</translation>
-    </message>
-    <message>
+        <location filename="../qml/decodium/Main.qml" line="11273"/>
         <source>Show DX Cluster</source>
-        <translation type="vanished">Show DX Cluster</translation>
+        <translation>Show DX Cluster</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11288"/>
         <source>Show PSK Reporter</source>
-        <translation type="vanished">Show PSK Reporter</translation>
+        <translation>Show PSK Reporter</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11172"/>
+        <location filename="../qml/decodium/Main.qml" line="11412"/>
         <source>Time Sync Panel</source>
         <translation>Time Sync Panel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11186"/>
+        <location filename="../qml/decodium/Main.qml" line="11426"/>
         <source>Active Stations</source>
         <translation>Active Stations</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11215"/>
+        <location filename="../qml/decodium/Main.qml" line="11455"/>
         <source>Live Map</source>
         <translation>Live Map</translation>
     </message>
     <message>
-        <source>Fox Mode (Caller Queue)</source>
-        <translation type="vanished">Fox Mode (Caller Queue)</translation>
-    </message>
-    <message>
-        <source>Hound Mode</source>
-        <translation type="vanished">Hound Mode</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/Main.qml" line="11230"/>
+        <location filename="../qml/decodium/Main.qml" line="11470"/>
         <source>Astro / EME</source>
         <translation>Astro / EME</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11259"/>
+        <location filename="../qml/decodium/Main.qml" line="11499"/>
         <source>DX Cluster Panel</source>
         <translation>DX Cluster Panel</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="11273"/>
+        <location filename="../qml/decodium/Main.qml" line="11513"/>
         <source>Alert on My Call</source>
         <translation>Alert on My Call</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4729"/>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
         <source>Balanced</source>
         <translation>Līdzsvarots</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="892"/>
+        <location filename="../qml/decodium/Main.qml" line="991"/>
         <source>Full screen</source>
         <translation>Pilnekrāns</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="1883"/>
+        <location filename="../qml/decodium/Main.qml" line="1994"/>
         <source>Decodium is up to date (%1).</source>
         <translation>Decodium ir aktuāls (%1).</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4730"/>
+        <location filename="../qml/decodium/Main.qml" line="4859"/>
         <source>Profiles...</source>
         <translation>Profili...</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/Main.qml" line="4735"/>
+        <location filename="../qml/decodium/Main.qml" line="4864"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
         <translation>Gatavie profili: kopā lieto FT2/dekodēšanas pārslēdzējus. Detaļas sadaļā Setup -&gt; TX.</translation>
     </message>
@@ -5907,15 +5070,15 @@ Saglabātās koordinātes tiks dzēstas.</translation>
     <name>MainWindow</name>
     <message>
         <location filename="../widgets/mainwindow.ui" line="52"/>
-        <location filename="../widgets/mainwindow.cpp" line="10511"/>
-        <location filename="../widgets/mainwindow.cpp" line="10514"/>
-        <location filename="../widgets/mainwindow.cpp" line="23137"/>
-        <location filename="../widgets/mainwindow.cpp" line="23254"/>
-        <location filename="../widgets/mainwindow.cpp" line="23338"/>
-        <location filename="../widgets/mainwindow.cpp" line="23674"/>
-        <location filename="../widgets/mainwindow.cpp" line="23922"/>
-        <location filename="../widgets/mainwindow.cpp" line="23986"/>
-        <location filename="../widgets/mainwindow.cpp" line="24181"/>
+        <location filename="../widgets/mainwindow.cpp" line="10583"/>
+        <location filename="../widgets/mainwindow.cpp" line="10586"/>
+        <location filename="../widgets/mainwindow.cpp" line="23273"/>
+        <location filename="../widgets/mainwindow.cpp" line="23390"/>
+        <location filename="../widgets/mainwindow.cpp" line="23474"/>
+        <location filename="../widgets/mainwindow.cpp" line="23810"/>
+        <location filename="../widgets/mainwindow.cpp" line="24058"/>
+        <location filename="../widgets/mainwindow.cpp" line="24122"/>
+        <location filename="../widgets/mainwindow.cpp" line="24317"/>
         <source>Band Activity</source>
         <translation>Band Activity</translation>
     </message>
@@ -5927,13 +5090,13 @@ Saglabātās koordinātes tiks dzēstas.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="195"/>
-        <location filename="../widgets/mainwindow.cpp" line="10515"/>
-        <location filename="../widgets/mainwindow.cpp" line="23138"/>
-        <location filename="../widgets/mainwindow.cpp" line="23253"/>
-        <location filename="../widgets/mainwindow.cpp" line="23337"/>
-        <location filename="../widgets/mainwindow.cpp" line="23669"/>
-        <location filename="../widgets/mainwindow.cpp" line="23923"/>
-        <location filename="../widgets/mainwindow.cpp" line="23987"/>
+        <location filename="../widgets/mainwindow.cpp" line="10587"/>
+        <location filename="../widgets/mainwindow.cpp" line="23274"/>
+        <location filename="../widgets/mainwindow.cpp" line="23389"/>
+        <location filename="../widgets/mainwindow.cpp" line="23473"/>
+        <location filename="../widgets/mainwindow.cpp" line="23805"/>
+        <location filename="../widgets/mainwindow.cpp" line="24059"/>
+        <location filename="../widgets/mainwindow.cpp" line="24123"/>
         <source>Rx Frequency</source>
         <translation>Rx Frequency</translation>
     </message>
@@ -6192,10 +5355,6 @@ Saglabātās koordinātes tiks dzēstas.</translation>
         <location filename="../widgets/mainwindow.ui" line="5877"/>
         <source>Q65</source>
         <translation>Q65</translation>
-    </message>
-    <message>
-        <source>About Decodium v3.0 SE KP5</source>
-        <translation type="vanished">About Decodium v3.0 SE KP5</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5373"/>
@@ -6547,7 +5706,7 @@ Not available to nonstandard callsign holders.</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="1650"/>
-        <location filename="../widgets/mainwindow.cpp" line="23709"/>
+        <location filename="../widgets/mainwindow.cpp" line="23845"/>
         <source>Fox</source>
         <translation>Fox</translation>
     </message>
@@ -6995,10 +6154,10 @@ list. The list can be maintained in Settings (F2).</translation>
         <location filename="../widgets/mainwindow.ui" line="3138"/>
         <location filename="../widgets/mainwindow.ui" line="3145"/>
         <location filename="../widgets/mainwindow.ui" line="4208"/>
-        <location filename="../widgets/mainwindow.cpp" line="6644"/>
-        <location filename="../widgets/mainwindow.cpp" line="21319"/>
-        <location filename="../widgets/mainwindow.cpp" line="24425"/>
-        <location filename="../widgets/mainwindow.cpp" line="27333"/>
+        <location filename="../widgets/mainwindow.cpp" line="6716"/>
+        <location filename="../widgets/mainwindow.cpp" line="21455"/>
+        <location filename="../widgets/mainwindow.cpp" line="24561"/>
+        <location filename="../widgets/mainwindow.cpp" line="27484"/>
         <source>Random</source>
         <translation>Random</translation>
     </message>
@@ -7547,145 +6706,9 @@ list. The list can be maintained in Settings (F2).</translation>
         <translation>QPushButton { background-color: #cc0000; color: #ffffff; font-weight: bold; font-size: 16px; border-radius: 6px; padding: 4px 16px; min-height: 28px; } QPushButton:hover { background-color: #ff2222; } QPushButton:pressed { background-color: #990000; }</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle monitoring On/Off. &lt;br/&gt;Yellow when saving .qm files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pārslēgt monitorēšanu ieslēgtu/izslēgtu. &lt;br/&gt;Dzeltens, saglabājot .qm failus.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>1296.080</source>
-        <translation type="vanished">1296.080</translation>
-    </message>
-    <message>
-        <source>Fadd</source>
-        <translation type="vanished">Fadd</translation>
-    </message>
-    <message>
-        <source> 2023 Feb 02
-01:23:45 </source>
-        <translation type="vanished"> 2023. g. 2. feb.
-01:23:45 </translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select offset announced by calling station, or use commonly used value for the band in use. Manually set WSJT-X TX and RX offset to same value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Atlasiet izsaucošās stacijas paziņoto nobīdi vai izmantojiet izmantotajai joslai parasto vērtību. Manuāli iestatiet WSJT-X TX un RX nobīdi uz vienādu vērtību.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source> Hz</source>
-        <translation type="vanished"> Hz</translation>
-    </message>
-    <message>
-        <source>Offset </source>
-        <translation type="vanished">Nobīde </translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Decode most recent Rx period&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dekodēt jaunāko Rx periodu&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase window&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dzēst logu&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../widgets/mainwindow.ui" line="2520"/>
         <source>Maximum drift rate in units of symbol rate per transmission.</source>
         <translation>Maximum drift rate in units of symbol rate per transmission.</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set a manually entered Fadd value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Iestatīt manuāli ievadītu Fadd vērtību.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Set</source>
-        <translation type="vanished">Iestatīt</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add a manually entered Fadd value to the file &amp;quot;fadd.txt&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pievienot manuāli ievadītu Fadd vērtību failam &amp;quot;fadd.txt&amp;quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>      UTC                   Frx              Fsked             DT           dB       Q65-     Message</source>
-        <translation type="vanished">      UTC                   Frx              Fsked             DT           dB       Q65-     Ziņojums</translation>
-    </message>
-    <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>About QMAP</source>
-        <translation type="vanished">Par QMAP</translation>
-    </message>
-    <message>
-        <source>Wideband Waterfall</source>
-        <translation type="vanished">Platjoslas ūdenskritums</translation>
-    </message>
-    <message>
-        <source>Delete all *.iq and *.qm files in SaveDir</source>
-        <translation type="vanished">Dzēst visus *.iq un *.qm failus mapē SaveDir</translation>
-    </message>
-    <message>
-        <source>Q65-60A</source>
-        <translation type="vanished">Q65-60A</translation>
-    </message>
-    <message>
-        <source>Q65-60B</source>
-        <translation type="vanished">Q65-60B</translation>
-    </message>
-    <message>
-        <source>Q65-60C</source>
-        <translation type="vanished">Q65-60C</translation>
-    </message>
-    <message>
-        <source>Q65-60D</source>
-        <translation type="vanished">Q65-60D</translation>
-    </message>
-    <message>
-        <source>Q65-60E</source>
-        <translation type="vanished">Q65-60E</translation>
-    </message>
-    <message>
-        <source>Settings ...</source>
-        <translation type="vanished">Iestatījumi ...</translation>
-    </message>
-    <message>
-        <source>Quick-Start Guide to WSJT-X 2.7 and QMAP</source>
-        <translation type="vanished">WSJT-X 2.7 un QMAP ātrās palaišanas ceļvedis</translation>
-    </message>
-    <message>
-        <source>Continuous Waterfall</source>
-        <translation type="vanished">Nepārtraukts ūdenskritums</translation>
-    </message>
-    <message>
-        <source>Also Q65-30x</source>
-        <translation type="vanished">Arī Q65-30x</translation>
-    </message>
-    <message>
-        <source>Export .wav file at fQSO (60 s)</source>
-        <translation type="vanished">Eksportēt .wav failu pie fQSO (60 s)</translation>
-    </message>
-    <message>
-        <source>Export .wav file at fQSO (30 s, second part)</source>
-        <translation type="vanished">Eksportēt .wav failu pie fQSO (30 s, otrā daļa)</translation>
-    </message>
-    <message>
-        <source>Export .wav file at fQSO (30 s, first part)</source>
-        <translation type="vanished">Eksportēt .wav failu pie fQSO (30 s, pirmā daļa)</translation>
-    </message>
-    <message>
-        <source>Fadd controls</source>
-        <translation type="vanished">Fadd vadīklas</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="2526"/>
@@ -8206,125 +7229,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Save</translation>
     </message>
     <message>
-        <source>MainWindow</source>
-        <translation type="vanished">Galvenais logs</translation>
-    </message>
-    <message>
-        <source>Issue #115 - Tabs scroller buttons</source>
-        <translation type="vanished">Issue #115 - Cilņu ritināšanas pogas</translation>
-    </message>
-    <message>
-        <source>Tab 1</source>
-        <translation type="vanished">1. cilne</translation>
-    </message>
-    <message>
-        <source>Issue #123 - Missing borders</source>
-        <translation type="vanished">Issue #123 - Trūkst apmaļu</translation>
-    </message>
-    <message>
-        <source>TextLabel</source>
-        <translation type="vanished">Teksta etiķete</translation>
-    </message>
-    <message>
-        <source>Inside tab, outside frame</source>
-        <translation type="vanished">Cilnē, ārpus rāmja</translation>
-    </message>
-    <message>
-        <source>Inside tab and frame</source>
-        <translation type="vanished">Cilnē un rāmī</translation>
-    </message>
-    <message>
-        <source>Tab 2</source>
-        <translation type="vanished">2. cilne</translation>
-    </message>
-    <message>
-        <source>Page</source>
-        <translation type="vanished">Lapa</translation>
-    </message>
-    <message>
-        <source>Issue #112 - Hyperlinks color</source>
-        <translation type="vanished">Issue #112 - Hipersaišu krāsa</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/112&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Hyperlink Example&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#7d7d7d;&quot;&gt;CSS for the documents (RichText) is not the same as the application. We cannot change the internal content CSS, e.g., hyperlinks. We suggest you use the middle tons (0-255, use 125), so this works for both white and dark theme (this color). The original color is the blue link on top.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;https://github.com/ColinDuquesnoy/QDarkStyleSheet/issues/112&quot;&gt;&lt;span style=&quot; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;Hipersaites piemērs&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#7d7d7d;&quot;&gt;Dokumentu (RichText) CSS nav tāds pats kā lietotnei. Mēs nevaram mainīt iekšējā satura CSS, piem., hipersaites. Iesakām izmantot vidējos toņus (0-255, izmantojiet 125), lai tas darbotos gan gaišai, gan tumšai tēmai (šī krāsa). Sākotnējā krāsa ir zilā saite augšpusē.&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Inside Central Widget</source>
-        <translation type="vanished">Centrālajā logrīkā</translation>
-    </message>
-    <message>
-        <source>Menu</source>
-        <translation type="vanished">Izvēlne</translation>
-    </message>
-    <message>
-        <source>Menu Sub</source>
-        <translation type="vanished">Apakšizvēlne</translation>
-    </message>
-    <message>
-        <source>Menu Delayed</source>
-        <translation type="vanished">Aizkavēta izvēlne</translation>
-    </message>
-    <message>
-        <source>Menu Sub Delayed</source>
-        <translation type="vanished">Aizkavēta apakšizvēlne</translation>
-    </message>
-    <message>
-        <source>Menu Checkable</source>
-        <translation type="vanished">Atzīmējama izvēlne</translation>
-    </message>
-    <message>
-        <source>About QDarkStyle</source>
-        <translation type="vanished">Par QDarkStyle</translation>
-    </message>
-    <message>
         <location filename="../widgets/mainwindow.ui" line="5269"/>
         <source>Help</source>
         <translation>Help</translation>
-    </message>
-    <message>
-        <source>Tool bar actions</source>
-        <translation type="vanished">Rīkjoslas darbības</translation>
-    </message>
-    <message>
-        <source>Tool bar actions delayed</source>
-        <translation type="vanished">Aizkavētas rīkjoslas darbības</translation>
-    </message>
-    <message>
-        <source>Tool bar action checkable</source>
-        <translation type="vanished">Atzīmējama rīkjoslas darbība</translation>
-    </message>
-    <message>
-        <source>Action A</source>
-        <translation type="vanished">Darbība A</translation>
-    </message>
-    <message>
-        <source>Action A Sub</source>
-        <translation type="vanished">Darbība A apakš</translation>
-    </message>
-    <message>
-        <source>Action B Sub</source>
-        <translation type="vanished">Darbība B apakš</translation>
-    </message>
-    <message>
-        <source>Action Delayed A</source>
-        <translation type="vanished">Aizkavēta darbība A</translation>
-    </message>
-    <message>
-        <source>Action Delayed Sub A</source>
-        <translation type="vanished">Aizkavēta apakšdarbība A</translation>
-    </message>
-    <message>
-        <source>Action Checkable A</source>
-        <translation type="vanished">Atzīmējama darbība A</translation>
-    </message>
-    <message>
-        <source>Action Checkable Sub A Checked</source>
-        <translation type="vanished">Atzīmējama apakšdarbība A atzīmēta</translation>
-    </message>
-    <message>
-        <source>Action Checkable Sub A Unchecked</source>
-        <translation type="vanished">Atzīmējama apakšdarbība A neatzīmēta</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5297"/>
@@ -8397,147 +7304,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>Ctrl+O</translation>
     </message>
     <message>
-        <source>SpecJT   by K1JT</source>
-        <translation type="vanished">SpecJT   no K1JT</translation>
-    </message>
-    <message>
-        <source>   Freq        DF      Pol         UTC           DT         dB                                                                     RC       DS       TxPol</source>
-        <translation type="vanished">   Frekv.      DF      Pol         UTC           DT         dB                                                                     RC       DS       TxPol</translation>
-    </message>
-    <message>
-        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Courier New&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&amp;Auto is OFF</source>
-        <translation type="vanished">&amp;Auto ir IZSL.</translation>
-    </message>
-    <message>
-        <source>St&amp;op Tx</source>
-        <translation type="vanished">Ap&amp;turēt Tx</translation>
-    </message>
-    <message>
-        <source>&amp;GenStdMsgs</source>
-        <translation type="vanished">&amp;Ģen. std. ziņojumus</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;DX Grid&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;DX lauciņš&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source> 2014 Dec 02
-01:23:45 </source>
-        <translation type="vanished"> 2014. g. 2. dec.
-01:23:45 </translation>
-    </message>
-    <message>
-        <source>Tx first</source>
-        <translation type="vanished">Tx vispirms</translation>
-    </message>
-    <message>
-        <source>Tx Q65  $</source>
-        <translation type="vanished">Tx Q65  $</translation>
-    </message>
-    <message>
-        <source>Set Tx Freq</source>
-        <translation type="vanished">Iestatīt Tx frekvenci</translation>
-    </message>
-    <message>
-        <source>Maximum drift rate in units of symbol rate per transmissiion.</source>
-        <translation type="vanished">Maksimālais dreifa ātrums simbolu ātruma vienībās uz vienu pārraidi.</translation>
-    </message>
-    <message>
-        <source>NB</source>
-        <translation type="vanished">NB</translation>
-    </message>
-    <message>
-        <source>500</source>
-        <translation type="vanished">500</translation>
-    </message>
-    <message>
-        <source>Tol</source>
-        <translation type="vanished">Piel.</translation>
-    </message>
-    <message>
-        <source>Tx1</source>
-        <translation type="vanished">Tx1</translation>
-    </message>
-    <message>
-        <source>Tx2</source>
-        <translation type="vanished">Tx2</translation>
-    </message>
-    <message>
-        <source>Tx3</source>
-        <translation type="vanished">Tx3</translation>
-    </message>
-    <message>
-        <source>Tx4</source>
-        <translation type="vanished">Tx4</translation>
-    </message>
-    <message>
-        <source>Tx5</source>
-        <translation type="vanished">Tx5</translation>
-    </message>
-    <message>
-        <source>Setup</source>
-        <translation type="vanished">Iestatīšana</translation>
-    </message>
-    <message>
-        <source>Waterfall palette</source>
-        <translation type="vanished">Ūdenskrituma palete</translation>
-    </message>
-    <message>
-        <source>Options</source>
-        <translation type="vanished">Opcijas</translation>
-    </message>
-    <message>
-        <source>F2</source>
-        <translation type="vanished">F2</translation>
-    </message>
-    <message>
-        <source>About MAP65</source>
-        <translation type="vanished">Par MAP65</translation>
-    </message>
-    <message>
-        <source>Ctrl+F1</source>
-        <translation type="vanished">Ctrl+F1</translation>
-    </message>
-    <message>
-        <source>Astro Data</source>
-        <translation type="vanished">Astro dati</translation>
-    </message>
-    <message>
-        <source>Shift+F10</source>
-        <translation type="vanished">Shift+F10</translation>
-    </message>
-    <message>
-        <source>Band Map</source>
-        <translation type="vanished">Joslu karte</translation>
-    </message>
-    <message>
-        <source>Messages</source>
-        <translation type="vanished">Ziņojumi</translation>
-    </message>
-    <message>
-        <source>Wide Waterfall</source>
-        <translation type="vanished">Platais ūdenskritums</translation>
-    </message>
-    <message>
         <location filename="../widgets/mainwindow.ui" line="5414"/>
         <source>Open next in directory</source>
         <translation>Open next in directory</translation>
-    </message>
-    <message>
-        <source>F6</source>
-        <translation type="vanished">F6</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5419"/>
@@ -8548,182 +7317,6 @@ p, li { white-space: pre-wrap; }
         <location filename="../widgets/mainwindow.ui" line="5422"/>
         <source>Shift+F6</source>
         <translation>Shift+F6</translation>
-    </message>
-    <message>
-        <source>Delete all *.tf2 and *.iq files in SaveDir</source>
-        <translation type="vanished">Dzēst visus *.tf2 un *.iq failus mapē SaveDir</translation>
-    </message>
-    <message>
-        <source>Erase Band Map and Messages</source>
-        <translation type="vanished">Dzēst joslu karti un ziņojumus</translation>
-    </message>
-    <message>
-        <source>Erase map65_rx.log</source>
-        <translation type="vanished">Dzēst map65_rx.log</translation>
-    </message>
-    <message>
-        <source>Linrad</source>
-        <translation type="vanished">Linrad</translation>
-    </message>
-    <message>
-        <source>CuteSDR</source>
-        <translation type="vanished">CuteSDR</translation>
-    </message>
-    <message>
-        <source>Find Delta Phi</source>
-        <translation type="vanished">Atrast Delta Phi</translation>
-    </message>
-    <message>
-        <source>F4 sets Tx6</source>
-        <translation type="vanished">F4 iestata Tx6</translation>
-    </message>
-    <message>
-        <source>Only EME calls</source>
-        <translation type="vanished">Tikai EME izsaukumi</translation>
-    </message>
-    <message>
-        <source>No shorthand decodes if Tx1</source>
-        <translation type="vanished">Nav saīsinātu dekodēšanu, ja Tx1</translation>
-    </message>
-    <message>
-        <source>No Deep Search</source>
-        <translation type="vanished">Nav dziļās meklēšanas</translation>
-    </message>
-    <message>
-        <source>Normal Deep Search</source>
-        <translation type="vanished">Parastā dziļā meklēšana</translation>
-    </message>
-    <message>
-        <source>Aggressive Deep Search</source>
-        <translation type="vanished">Agresīva dziļā meklēšana</translation>
-    </message>
-    <message>
-        <source>50</source>
-        <translation type="vanished">50</translation>
-    </message>
-    <message>
-        <source>144</source>
-        <translation type="vanished">144</translation>
-    </message>
-    <message>
-        <source>222</source>
-        <translation type="vanished">222</translation>
-    </message>
-    <message>
-        <source>432</source>
-        <translation type="vanished">432</translation>
-    </message>
-    <message>
-        <source>1296</source>
-        <translation type="vanished">1296</translation>
-    </message>
-    <message>
-        <source>2304</source>
-        <translation type="vanished">2304</translation>
-    </message>
-    <message>
-        <source>Online User&apos;s Guide</source>
-        <translation type="vanished">Tiešsaistes lietotāja ceļvedis</translation>
-    </message>
-    <message>
-        <source>F1</source>
-        <translation type="vanished">F1</translation>
-    </message>
-    <message>
-        <source>Available suffixes and add-on-prefixes</source>
-        <translation type="vanished">Pieejamie sufiksi un pievienojamie prefiksi</translation>
-    </message>
-    <message>
-        <source>Erase map65_tx.log</source>
-        <translation type="vanished">Dzēst map65_tx.log</translation>
-    </message>
-    <message>
-        <source>JT65A</source>
-        <translation type="vanished">JT65A</translation>
-    </message>
-    <message>
-        <source>JT65B</source>
-        <translation type="vanished">JT65B</translation>
-    </message>
-    <message>
-        <source>JT65C</source>
-        <translation type="vanished">JT65C</translation>
-    </message>
-    <message>
-        <source>I/Q Calibration</source>
-        <translation type="vanished">I/Q kalibrēšana</translation>
-    </message>
-    <message>
-        <source>Adjust Rx I/Q Calibration</source>
-        <translation type="vanished">Pielāgot Rx I/Q kalibrēšanu</translation>
-    </message>
-    <message>
-        <source>Apply Rx I/Q Calibration</source>
-        <translation type="vanished">Lietot Rx I/Q kalibrēšanu</translation>
-    </message>
-    <message>
-        <source>AFMHot</source>
-        <translation type="vanished">AFMHot</translation>
-    </message>
-    <message>
-        <source>Blue</source>
-        <translation type="vanished">Zila</translation>
-    </message>
-    <message>
-        <source>FUNcube Dongle Settings</source>
-        <translation type="vanished">FUNcube Dongle iestatījumi</translation>
-    </message>
-    <message>
-        <source>Edit wsjt.log</source>
-        <translation type="vanished">Rediģēt wsjt.log</translation>
-    </message>
-    <message>
-        <source>Alt+Shift+E</source>
-        <translation type="vanished">Alt+Shift+E</translation>
-    </message>
-    <message>
-        <source>Tx Tune</source>
-        <translation type="vanished">Tx noskaņošana</translation>
-    </message>
-    <message>
-        <source>Alt+T</source>
-        <translation type="vanished">Alt+T</translation>
-    </message>
-    <message>
-        <source>Decode Q65 near QSO frequency</source>
-        <translation type="vanished">Dekodēt Q65 tuvu QSO frekvencei</translation>
-    </message>
-    <message>
-        <source>Q65A</source>
-        <translation type="vanished">Q65A</translation>
-    </message>
-    <message>
-        <source>Q65B</source>
-        <translation type="vanished">Q65B</translation>
-    </message>
-    <message>
-        <source>No JT65</source>
-        <translation type="vanished">Nav JT65</translation>
-    </message>
-    <message>
-        <source>No Q65</source>
-        <translation type="vanished">Nav Q65</translation>
-    </message>
-    <message>
-        <source>Q65C</source>
-        <translation type="vanished">Q65C</translation>
-    </message>
-    <message>
-        <source>Q65D</source>
-        <translation type="vanished">Q65D</translation>
-    </message>
-    <message>
-        <source>Q65E</source>
-        <translation type="vanished">Q65E</translation>
-    </message>
-    <message>
-        <source>Q65 Sensitivity in MAP65 3.0</source>
-        <translation type="vanished">Q65 jutība MAP65 3.0</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5427"/>
@@ -9400,187 +7993,175 @@ p, li { white-space: pre-wrap; }
         <translation>Quick-Start Guide to WSJT-X 2.5.0 and MAP65 3.0</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2470"/>
-        <location filename="../widgets/mainwindow.cpp" line="25369"/>
+        <location filename="../widgets/mainwindow.cpp" line="2480"/>
+        <location filename="../widgets/mainwindow.cpp" line="25505"/>
         <source>Rig Control Error</source>
         <translation>Rig Control Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2595"/>
-        <location filename="../widgets/mainwindow.cpp" line="17750"/>
-        <location filename="../widgets/mainwindow.cpp" line="27170"/>
+        <location filename="../widgets/mainwindow.cpp" line="2605"/>
+        <location filename="../widgets/mainwindow.cpp" line="17886"/>
+        <location filename="../widgets/mainwindow.cpp" line="27321"/>
         <source>Receiving</source>
         <translation>Receiving</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2950"/>
-        <location filename="../widgets/mainwindow.cpp" line="25370"/>
+        <location filename="../widgets/mainwindow.cpp" line="2990"/>
+        <location filename="../widgets/mainwindow.cpp" line="25506"/>
         <source>Do you want to reconfigure the radio interface?</source>
         <translation>Do you want to reconfigure the radio interface?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3714"/>
+        <location filename="../widgets/mainwindow.cpp" line="3754"/>
         <source>Error Loading LotW Users Data</source>
         <translation>Error Loading LotW Users Data</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3800"/>
+        <location filename="../widgets/mainwindow.cpp" line="3840"/>
         <source>Error Writing WAV File</source>
         <translation>Error Writing WAV File</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3835"/>
+        <location filename="../widgets/mainwindow.cpp" line="3875"/>
         <source>Enumerating audio devices</source>
         <translation>Enumerating audio devices</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3856"/>
+        <location filename="../widgets/mainwindow.cpp" line="3896"/>
         <source>Configurations...</source>
         <translation>Configurations...</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
-        <location filename="../widgets/mainwindow.cpp" line="3956"/>
-        <location filename="../widgets/mainwindow.cpp" line="23242"/>
-        <location filename="../widgets/mainwindow.cpp" line="23329"/>
-        <location filename="../widgets/mainwindow.cpp" line="23339"/>
-        <location filename="../widgets/mainwindow.cpp" line="23661"/>
-        <location filename="../widgets/mainwindow.cpp" line="23675"/>
-        <location filename="../widgets/mainwindow.cpp" line="23829"/>
-        <location filename="../widgets/mainwindow.cpp" line="23830"/>
-        <location filename="../widgets/mainwindow.cpp" line="23904"/>
-        <location filename="../widgets/mainwindow.cpp" line="23905"/>
-        <location filename="../widgets/mainwindow.cpp" line="23911"/>
-        <location filename="../widgets/mainwindow.cpp" line="23912"/>
-        <location filename="../widgets/mainwindow.cpp" line="24054"/>
-        <location filename="../widgets/mainwindow.cpp" line="24055"/>
-        <location filename="../widgets/mainwindow.cpp" line="24172"/>
-        <location filename="../widgets/mainwindow.cpp" line="24173"/>
-        <location filename="../widgets/mainwindow.cpp" line="26184"/>
-        <location filename="../widgets/mainwindow.cpp" line="26187"/>
-        <location filename="../widgets/mainwindow.cpp" line="26192"/>
-        <location filename="../widgets/mainwindow.cpp" line="26195"/>
+        <location filename="../widgets/mainwindow.cpp" line="3996"/>
+        <location filename="../widgets/mainwindow.cpp" line="23378"/>
+        <location filename="../widgets/mainwindow.cpp" line="23465"/>
+        <location filename="../widgets/mainwindow.cpp" line="23475"/>
+        <location filename="../widgets/mainwindow.cpp" line="23797"/>
+        <location filename="../widgets/mainwindow.cpp" line="23811"/>
+        <location filename="../widgets/mainwindow.cpp" line="23965"/>
+        <location filename="../widgets/mainwindow.cpp" line="23966"/>
+        <location filename="../widgets/mainwindow.cpp" line="24040"/>
+        <location filename="../widgets/mainwindow.cpp" line="24041"/>
+        <location filename="../widgets/mainwindow.cpp" line="24047"/>
+        <location filename="../widgets/mainwindow.cpp" line="24048"/>
+        <location filename="../widgets/mainwindow.cpp" line="24190"/>
+        <location filename="../widgets/mainwindow.cpp" line="24191"/>
+        <location filename="../widgets/mainwindow.cpp" line="24308"/>
+        <location filename="../widgets/mainwindow.cpp" line="24309"/>
+        <location filename="../widgets/mainwindow.cpp" line="26320"/>
+        <location filename="../widgets/mainwindow.cpp" line="26323"/>
+        <location filename="../widgets/mainwindow.cpp" line="26328"/>
+        <location filename="../widgets/mainwindow.cpp" line="26331"/>
         <source>Message</source>
         <translation>Message</translation>
     </message>
     <message>
-        <source>Error removing &quot;%1&quot;</source>
-        <translation type="vanished">Error removing &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <source>Click OK to retry</source>
-        <translation type="vanished">Click OK to retry</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="6726"/>
-        <location filename="../widgets/mainwindow.cpp" line="24135"/>
+        <location filename="../widgets/mainwindow.cpp" line="6798"/>
+        <location filename="../widgets/mainwindow.cpp" line="24271"/>
         <source>Improper mode</source>
         <translation>Improper mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7082"/>
-        <location filename="../widgets/mainwindow.cpp" line="28774"/>
+        <location filename="../widgets/mainwindow.cpp" line="7154"/>
+        <location filename="../widgets/mainwindow.cpp" line="28925"/>
         <source>File Open Error</source>
         <translation>File Open Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7083"/>
-        <location filename="../widgets/mainwindow.cpp" line="27236"/>
-        <location filename="../widgets/mainwindow.cpp" line="27760"/>
-        <location filename="../widgets/mainwindow.cpp" line="28775"/>
-        <location filename="../widgets/mainwindow.cpp" line="29349"/>
+        <location filename="../widgets/mainwindow.cpp" line="7155"/>
+        <location filename="../widgets/mainwindow.cpp" line="27387"/>
+        <location filename="../widgets/mainwindow.cpp" line="27911"/>
+        <location filename="../widgets/mainwindow.cpp" line="28926"/>
+        <location filename="../widgets/mainwindow.cpp" line="29500"/>
         <source>Cannot open &quot;%1&quot; for append: %2</source>
         <translation>Cannot open &quot;%1&quot; for append: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="7390"/>
+        <location filename="../widgets/mainwindow.cpp" line="7462"/>
         <source>Error saving c2 file</source>
         <translation>Error saving c2 file</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8369"/>
-        <location filename="../widgets/mainwindow.cpp" line="8372"/>
+        <location filename="../widgets/mainwindow.cpp" line="8441"/>
+        <location filename="../widgets/mainwindow.cpp" line="8444"/>
         <source>Error in Sound Input</source>
         <translation>Error in Sound Input</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8381"/>
-        <location filename="../widgets/mainwindow.cpp" line="8384"/>
+        <location filename="../widgets/mainwindow.cpp" line="8453"/>
+        <location filename="../widgets/mainwindow.cpp" line="8456"/>
         <source>Error in Sound Output</source>
         <translation>Error in Sound Output</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9106"/>
-        <location filename="../widgets/mainwindow.cpp" line="10507"/>
+        <location filename="../widgets/mainwindow.cpp" line="9178"/>
+        <location filename="../widgets/mainwindow.cpp" line="10579"/>
         <source>Single-Period Decodes</source>
         <translation>Single-Period Decodes</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9107"/>
-        <location filename="../widgets/mainwindow.cpp" line="10508"/>
+        <location filename="../widgets/mainwindow.cpp" line="9179"/>
+        <location filename="../widgets/mainwindow.cpp" line="10580"/>
         <source>Average Decodes</source>
         <translation>Average Decodes</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10238"/>
+        <location filename="../widgets/mainwindow.cpp" line="10310"/>
         <source>Change Operator</source>
         <translation>Change Operator</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10238"/>
+        <location filename="../widgets/mainwindow.cpp" line="10310"/>
         <source>New operator:</source>
         <translation>New operator:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10474"/>
+        <location filename="../widgets/mainwindow.cpp" line="10546"/>
         <source>Status File Error</source>
         <translation>Status File Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10475"/>
-        <location filename="../widgets/mainwindow.cpp" line="21124"/>
+        <location filename="../widgets/mainwindow.cpp" line="10547"/>
+        <location filename="../widgets/mainwindow.cpp" line="21260"/>
         <source>Cannot open &quot;%1&quot; for writing: %2</source>
         <translation>Cannot open &quot;%1&quot; for writing: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10512"/>
+        <location filename="../widgets/mainwindow.cpp" line="10584"/>
         <source>Decodes containing My Call</source>
         <translation>Decodes containing My Call</translation>
     </message>
     <message>
-        <source>Error in SoundIn</source>
-        <translation type="vanished">Kļūda SoundIn</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="10795"/>
+        <location filename="../widgets/mainwindow.cpp" line="10867"/>
         <source>Subprocess Error</source>
         <translation>Subprocess Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10796"/>
+        <location filename="../widgets/mainwindow.cpp" line="10868"/>
         <source>Subprocess failed with exit code %1</source>
         <translation>Subprocess failed with exit code %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10798"/>
-        <location filename="../widgets/mainwindow.cpp" line="10844"/>
+        <location filename="../widgets/mainwindow.cpp" line="10870"/>
+        <location filename="../widgets/mainwindow.cpp" line="10916"/>
         <source>Running: %1
 %2</source>
         <translation>Running: %1
 %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10843"/>
+        <location filename="../widgets/mainwindow.cpp" line="10915"/>
         <source>Subprocess error</source>
         <translation>Subprocess error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10968"/>
+        <location filename="../widgets/mainwindow.cpp" line="11040"/>
         <source>Reference spectrum saved</source>
         <translation>Reference spectrum saved</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11057"/>
+        <location filename="../widgets/mainwindow.cpp" line="11129"/>
         <source>It is very important to avoid audio harmonics and distorted audio signals.
 This is usually achieved by the following step-by-step approach:
 
@@ -9629,22 +8210,22 @@ If possible, check your transmission from time to time with a webSDR
 to ensure the signal is clean and not distorted.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11073"/>
+        <location filename="../widgets/mainwindow.cpp" line="11145"/>
         <source>&lt;b&gt;Recommended Audio Settings&lt;/b&gt;</source>
         <translation>&lt;b&gt;Recommended Audio Settings&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11137"/>
+        <location filename="../widgets/mainwindow.cpp" line="11209"/>
         <source>Invalid data in fmt.all at line %1</source>
         <translation>Invalid data in fmt.all at line %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11143"/>
+        <location filename="../widgets/mainwindow.cpp" line="11215"/>
         <source>Good Calibration Solution</source>
         <translation>Good Calibration Solution</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11144"/>
+        <location filename="../widgets/mainwindow.cpp" line="11216"/>
         <source>&lt;pre&gt;%1%L2 ±%L3 ppm
 %4%L5 ±%L6 Hz
 
@@ -9657,37 +8238,37 @@ to ensure the signal is clean and not distorted.</translation>
 %9%L10 Hz&lt;/pre&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11158"/>
+        <location filename="../widgets/mainwindow.cpp" line="11230"/>
         <source>Delete Calibration Measurements</source>
         <translation>Delete Calibration Measurements</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11159"/>
+        <location filename="../widgets/mainwindow.cpp" line="11231"/>
         <source>The &quot;fmt.all&quot; file will be renamed as &quot;fmt.bak&quot;</source>
         <translation>The &quot;fmt.all&quot; file will be renamed as &quot;fmt.bak&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11883"/>
+        <location filename="../widgets/mainwindow.cpp" line="11955"/>
         <source>No data read from disk. Wrong file format?</source>
         <translation>No data read from disk. Wrong file format?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11890"/>
+        <location filename="../widgets/mainwindow.cpp" line="11962"/>
         <source>Confirm Delete</source>
         <translation>Confirm Delete</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11891"/>
+        <location filename="../widgets/mainwindow.cpp" line="11963"/>
         <source>Are you sure you want to delete all *.wav and *.c2 files in &quot;%1&quot;?</source>
         <translation>Are you sure you want to delete all *.wav and *.c2 files in &quot;%1&quot;?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11928"/>
+        <location filename="../widgets/mainwindow.cpp" line="12000"/>
         <source>Keyboard Shortcuts</source>
         <translation>Keyboard Shortcuts</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11930"/>
+        <location filename="../widgets/mainwindow.cpp" line="12002"/>
         <source>&lt;table cellspacing=1&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
   &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
@@ -9789,33 +8370,33 @@ to ensure the signal is clean and not distorted.</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11990"/>
+        <location filename="../widgets/mainwindow.cpp" line="12062"/>
         <source>Special Mouse Commands</source>
         <translation>Special Mouse Commands</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="12729"/>
+        <location filename="../widgets/mainwindow.cpp" line="12801"/>
         <source>No more files to open.</source>
         <translation>No more files to open.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="14216"/>
+        <location filename="../widgets/mainwindow.cpp" line="14302"/>
         <source>Embedded WSPR decoder unavailable.</source>
         <translation>Embedded WSPR decoder unavailable.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16319"/>
-        <location filename="../widgets/mainwindow.cpp" line="27806"/>
+        <location filename="../widgets/mainwindow.cpp" line="16455"/>
+        <location filename="../widgets/mainwindow.cpp" line="27957"/>
         <source>Spotting to PSK Reporter unavailable</source>
         <translation>Spotting to PSK Reporter unavailable</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16548"/>
+        <location filename="../widgets/mainwindow.cpp" line="16684"/>
         <source>WSPR Guard Band</source>
         <translation>WSPR Guard Band</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11992"/>
+        <location filename="../widgets/mainwindow.cpp" line="12064"/>
         <source>&lt;table cellpadding=5&gt;
   &lt;tr&gt;
     &lt;th align=&quot;right&quot;&gt;Click on&lt;/th&gt;
@@ -10041,13 +8622,13 @@ to ensure the signal is clean and not distorted.</translation>
 &lt;/table&gt;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16567"/>
-        <location filename="../widgets/mainwindow.cpp" line="16584"/>
+        <location filename="../widgets/mainwindow.cpp" line="16703"/>
+        <location filename="../widgets/mainwindow.cpp" line="16720"/>
         <source>Fox Mode warning</source>
         <translation>Fox Mode warning</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18439"/>
+        <location filename="../widgets/mainwindow.cpp" line="18575"/>
         <source>This station transmits in the same time slot as you do.
 
 You must not start a QSO if both stations Tx even/1st
@@ -10064,7 +8645,7 @@ Click the MSK144 mode button to re-enable the Tx even/1st
 checkbox, or choose another station.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="19082"/>
+        <location filename="../widgets/mainwindow.cpp" line="19218"/>
         <source>Should you switch to EU VHF Contest mode?
 
 To do so, check &apos;Special operating activity&apos; and
@@ -10075,332 +8656,328 @@ To do so, check &apos;Special operating activity&apos; and
 &apos;EU VHF Contest&apos; on the Settings | Advanced tab.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="19101"/>
+        <location filename="../widgets/mainwindow.cpp" line="19237"/>
         <source>Should you switch to ARRL Field Day mode?</source>
         <translation>Should you switch to ARRL Field Day mode?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="19106"/>
+        <location filename="../widgets/mainwindow.cpp" line="19242"/>
         <source>Should you switch to RTTY contest mode?</source>
         <translation>Should you switch to RTTY contest mode?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21086"/>
-        <location filename="../widgets/mainwindow.cpp" line="21105"/>
-        <location filename="../widgets/mainwindow.cpp" line="21123"/>
-        <location filename="../widgets/mainwindow.cpp" line="21150"/>
+        <location filename="../widgets/mainwindow.cpp" line="21222"/>
+        <location filename="../widgets/mainwindow.cpp" line="21241"/>
+        <location filename="../widgets/mainwindow.cpp" line="21259"/>
+        <location filename="../widgets/mainwindow.cpp" line="21286"/>
         <source>Add to CALL3.TXT</source>
         <translation>Add to CALL3.TXT</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21087"/>
+        <location filename="../widgets/mainwindow.cpp" line="21223"/>
         <source>Please enter a valid grid locator</source>
         <translation>Please enter a valid grid locator</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21106"/>
+        <location filename="../widgets/mainwindow.cpp" line="21242"/>
         <source>Cannot open &quot;%1&quot; for read/write: %2</source>
         <translation>Cannot open &quot;%1&quot; for read/write: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21148"/>
+        <location filename="../widgets/mainwindow.cpp" line="21284"/>
         <source>%1
 is already in CALL3.TXT, do you wish to replace it?</source>
         <translation>%1
 is already in CALL3.TXT, do you wish to replace it?</translation>
     </message>
     <message>
-        <source>Warning:  DX Call field is empty.</source>
-        <translation type="vanished">Warning:  DX Call field is empty.</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="3305"/>
-        <location filename="../widgets/mainwindow.cpp" line="22803"/>
+        <location filename="../widgets/mainwindow.cpp" line="3345"/>
+        <location filename="../widgets/mainwindow.cpp" line="22939"/>
         <source>Log file error</source>
         <translation>Log file error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="1230"/>
-        <location filename="../widgets/mainwindow.cpp" line="29811"/>
+        <location filename="../widgets/mainwindow.cpp" line="1240"/>
+        <location filename="../widgets/mainwindow.cpp" line="29962"/>
         <source>Async L2 Mode On</source>
         <translation>Async L2 Mode On</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2879"/>
+        <location filename="../widgets/mainwindow.cpp" line="2919"/>
         <source>Language</source>
         <translation>Language</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2919"/>
+        <location filename="../widgets/mainwindow.cpp" line="2959"/>
         <source>Language changed</source>
         <translation>Language changed</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2920"/>
+        <location filename="../widgets/mainwindow.cpp" line="2960"/>
         <source>Please restart the application for the language change to take effect.</source>
         <translation>Please restart the application for the language change to take effect.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="2975"/>
+        <location filename="../widgets/mainwindow.cpp" line="3015"/>
         <source>Idle</source>
         <translation>Dīkstāve</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3065"/>
+        <location filename="../widgets/mainwindow.cpp" line="3105"/>
         <source>Error scanning logbook</source>
         <translation>Error scanning logbook</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3070"/>
+        <location filename="../widgets/mainwindow.cpp" line="3110"/>
         <source>Scanned logbook, %1 worked-before records created. CTY: %2</source>
         <translation>Scanned logbook, %1 worked-before records created. CTY: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3300"/>
+        <location filename="../widgets/mainwindow.cpp" line="3340"/>
         <source>Error</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3300"/>
+        <location filename="../widgets/mainwindow.cpp" line="3340"/>
         <source>parts != 4</source>
         <translation>parts != 4</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3305"/>
-        <location filename="../widgets/mainwindow.cpp" line="22804"/>
+        <location filename="../widgets/mainwindow.cpp" line="3345"/>
+        <location filename="../widgets/mainwindow.cpp" line="22940"/>
         <source>Cannot open &quot;%1&quot;</source>
         <translation>Cannot open &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3317"/>
-        <location filename="../widgets/mainwindow.cpp" line="3322"/>
-        <location filename="../widgets/mainwindow.cpp" line="22847"/>
-        <location filename="../widgets/mainwindow.cpp" line="22855"/>
+        <location filename="../widgets/mainwindow.cpp" line="3357"/>
+        <location filename="../widgets/mainwindow.cpp" line="3362"/>
+        <location filename="../widgets/mainwindow.cpp" line="22983"/>
+        <location filename="../widgets/mainwindow.cpp" line="22991"/>
         <source>Error sending log to N1MM</source>
         <translation>Error sending log to N1MM</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3318"/>
-        <location filename="../widgets/mainwindow.cpp" line="22848"/>
+        <location filename="../widgets/mainwindow.cpp" line="3358"/>
+        <location filename="../widgets/mainwindow.cpp" line="22984"/>
         <source>Unable to resolve &quot;%1&quot;: %2</source>
         <translation>Nevar atrisināt &quot;%1&quot;: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3322"/>
-        <location filename="../widgets/mainwindow.cpp" line="22856"/>
+        <location filename="../widgets/mainwindow.cpp" line="3362"/>
+        <location filename="../widgets/mainwindow.cpp" line="22992"/>
         <source>Write returned &quot;%1&quot;</source>
         <translation>Write returned &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3349"/>
+        <location filename="../widgets/mainwindow.cpp" line="3389"/>
         <source>AutoSpot</source>
         <translation>AutoSpot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3351"/>
+        <location filename="../widgets/mainwindow.cpp" line="3391"/>
         <source>Invia spot al cluster configurato dopo il log QSO (73 confermato).</source>
         <translation>Invia spot al cluster configurato dopo il log QSO (73 confermato).</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3389"/>
+        <location filename="../widgets/mainwindow.cpp" line="3429"/>
         <source>Remote Web disabled: invalid configured HTTP port %1</source>
         <translation>Remote Web disabled: invalid configured HTTP port %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3443"/>
+        <location filename="../widgets/mainwindow.cpp" line="3483"/>
         <source>Remote WS: invalid FT2_REMOTE_WS_BIND=&quot;%1&quot; (using 0.0.0.0)</source>
         <translation>Remote WS: invalid FT2_REMOTE_WS_BIND=&quot;%1&quot; (using 0.0.0.0)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3454"/>
+        <location filename="../widgets/mainwindow.cpp" line="3494"/>
         <source>Remote Web disabled: non-loopback bind requires token authentication.</source>
         <translation>Remote Web disabled: non-loopback bind requires token authentication.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3459"/>
+        <location filename="../widgets/mainwindow.cpp" line="3499"/>
         <source>Remote Web disabled: token must be at least 12 characters on LAN/WAN bind.</source>
         <translation>Remote Web disabled: token must be at least 12 characters on LAN/WAN bind.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3543"/>
+        <location filename="../widgets/mainwindow.cpp" line="3583"/>
         <source>Remote HTTP: invalid FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (using default ws+1)</source>
         <translation>Remote HTTP: invalid FT2_REMOTE_HTTP_PORT=&quot;%1&quot; (using default ws+1)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3595"/>
+        <location filename="../widgets/mainwindow.cpp" line="3635"/>
         <source>Remote WS disabled: failed to bind %1:%2</source>
         <translation>Remote WS disabled: failed to bind %1:%2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3601"/>
+        <location filename="../widgets/mainwindow.cpp" line="3641"/>
         <source>Remote Web notice: traffic is plain HTTP/WS. Use only trusted LAN/VPN or a TLS reverse proxy.</source>
         <translation>Remote Web notice: traffic is plain HTTP/WS. Use only trusted LAN/VPN or a TLS reverse proxy.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="3607"/>
+        <location filename="../widgets/mainwindow.cpp" line="3647"/>
         <source>Remote WS disabled: invalid FT2_REMOTE_WS_PORT=&quot;%1&quot;</source>
         <translation>Remote WS disabled: invalid FT2_REMOTE_WS_PORT=&quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5472"/>
+        <location filename="../widgets/mainwindow.cpp" line="5544"/>
         <source>Audio input refreshed after device reconnect.</source>
         <translation>Audio ievade atsvaidzināta pēc ierīces atkārtotas pieslēgšanas.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="5476"/>
-        <location filename="../widgets/mainwindow.cpp" line="5484"/>
+        <location filename="../widgets/mainwindow.cpp" line="5548"/>
+        <location filename="../widgets/mainwindow.cpp" line="5556"/>
         <source>Audio output refreshed after device reconnect.</source>
         <translation>Audio izvade atsvaidzināta pēc ierīces atkārtotas pieslēgšanas.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6346"/>
+        <location filename="../widgets/mainwindow.cpp" line="6418"/>
         <source>Decodium v3.0 FT2 Raptor</source>
         <translation>Decodium v3.0 FT2 Raptor</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="6347"/>
+        <location filename="../widgets/mainwindow.cpp" line="6419"/>
         <source>There must be a callsign in the
  DX Call Box to send QSY Request</source>
         <translation>DX izsaukuma lodziņā jābūt izsaukumam, lai nosūtītu QSY pieprasījumu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="8837"/>
+        <location filename="../widgets/mainwindow.cpp" line="8909"/>
         <source>Audio input resumed after system wake.</source>
         <translation>Audio input resumed after system wake.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9300"/>
+        <location filename="../widgets/mainwindow.cpp" line="9372"/>
         <source>Check for updates...</source>
         <translation>Check for updates...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9384"/>
-        <location filename="../widgets/mainwindow.cpp" line="9825"/>
+        <location filename="../widgets/mainwindow.cpp" line="9456"/>
+        <location filename="../widgets/mainwindow.cpp" line="9897"/>
         <source>Update checks are disabled in this build.</source>
         <translation>Atjauninājumu pārbaude šajā būvējumā ir atspējota.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9403"/>
+        <location filename="../widgets/mainwindow.cpp" line="9475"/>
         <source>An update check is already in progress.</source>
         <translation>An update check is already in progress.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9417"/>
+        <location filename="../widgets/mainwindow.cpp" line="9489"/>
         <source>Checking for updates...</source>
         <translation>Checking for updates...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9668"/>
+        <location filename="../widgets/mainwindow.cpp" line="9740"/>
         <source>A new Decodium release is available.</source>
         <translation>A new Decodium release is available.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9670"/>
+        <location filename="../widgets/mainwindow.cpp" line="9742"/>
         <source>Installed version: %1
 Latest version: %2%3</source>
         <translation>Installed version: %1
 Latest version: %2%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9679"/>
+        <location filename="../widgets/mainwindow.cpp" line="9751"/>
         <source>Direct download: %1</source>
         <translation>Direct download: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9683"/>
+        <location filename="../widgets/mainwindow.cpp" line="9755"/>
         <source>Selected asset: %1
 </source>
         <translation>Selected asset: %1
 </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9687"/>
+        <location filename="../widgets/mainwindow.cpp" line="9759"/>
         <source>Release page: %1</source>
         <translation>Release page: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9692"/>
+        <location filename="../widgets/mainwindow.cpp" line="9764"/>
         <source>Download page: %1</source>
         <translation>Download page: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9700"/>
+        <location filename="../widgets/mainwindow.cpp" line="9772"/>
         <source>Download</source>
         <translation>Download</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9701"/>
+        <location filename="../widgets/mainwindow.cpp" line="9773"/>
         <source>Remind me later</source>
         <translation>Remind me later</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9702"/>
+        <location filename="../widgets/mainwindow.cpp" line="9774"/>
         <source>Skip this version</source>
         <translation>Skip this version</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9746"/>
-        <location filename="../widgets/mainwindow.cpp" line="9760"/>
-        <location filename="../widgets/mainwindow.cpp" line="9786"/>
+        <location filename="../widgets/mainwindow.cpp" line="9818"/>
+        <location filename="../widgets/mainwindow.cpp" line="9832"/>
+        <location filename="../widgets/mainwindow.cpp" line="9858"/>
         <source>Update check failed.</source>
         <translation>Update check failed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9761"/>
+        <location filename="../widgets/mainwindow.cpp" line="9833"/>
         <source>The release metadata returned by GitHub could not be parsed.</source>
         <translation>The release metadata returned by GitHub could not be parsed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9787"/>
+        <location filename="../widgets/mainwindow.cpp" line="9859"/>
         <source>Unable to compare version numbers.</source>
         <translation>Unable to compare version numbers.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9788"/>
+        <location filename="../widgets/mainwindow.cpp" line="9860"/>
         <source>Installed: %1
 Remote tag: %2</source>
         <translation>Installed: %1
 Remote tag: %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9801"/>
+        <location filename="../widgets/mainwindow.cpp" line="9873"/>
         <source>You are up to date.</source>
         <translation>You are up to date.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9802"/>
+        <location filename="../widgets/mainwindow.cpp" line="9874"/>
         <source>Installed version: %1</source>
         <translation>Installed version: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="9812"/>
+        <location filename="../widgets/mainwindow.cpp" line="9884"/>
         <source>Update available: %1</source>
         <translation>Update available: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="10792"/>
+        <location filename="../widgets/mainwindow.cpp" line="10864"/>
         <source>No subprocess diagnostic output was captured.</source>
         <translation>No subprocess diagnostic output was captured.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11173"/>
+        <location filename="../widgets/mainwindow.cpp" line="11245"/>
         <source>Load Decodium Certificate</source>
         <translation>Load Decodium Certificate</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11175"/>
+        <location filename="../widgets/mainwindow.cpp" line="11247"/>
         <source>Decodium Certificate (*.decodium);;All files (*)</source>
         <translation>Decodium Certificate (*.decodium);;All files (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11219"/>
-        <location filename="../widgets/mainwindow.cpp" line="11233"/>
-        <location filename="../widgets/mainwindow.cpp" line="11245"/>
+        <location filename="../widgets/mainwindow.cpp" line="11291"/>
+        <location filename="../widgets/mainwindow.cpp" line="11305"/>
+        <location filename="../widgets/mainwindow.cpp" line="11317"/>
         <source>DXped Certificate Manager</source>
         <translation>DXped Certificate Manager</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11220"/>
+        <location filename="../widgets/mainwindow.cpp" line="11292"/>
         <source>DXpedCertManager.py was not found.
 
 Expected locations:
@@ -10415,63 +8992,63 @@ Expected locations:
 - writable data dir tools/</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11234"/>
+        <location filename="../widgets/mainwindow.cpp" line="11306"/>
         <source>Python 3 was not found in PATH.
 Please install Python and try again.</source>
         <translation>Python 3 was not found in PATH.
 Please install Python and try again.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11246"/>
+        <location filename="../widgets/mainwindow.cpp" line="11318"/>
         <source>Failed to start DXped Certificate Manager.</source>
         <translation>Failed to start DXped Certificate Manager.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11250"/>
+        <location filename="../widgets/mainwindow.cpp" line="11322"/>
         <source>DXped Certificate Manager started</source>
         <translation>DXped Certificate Manager started</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11267"/>
-        <location filename="../widgets/mainwindow.cpp" line="20713"/>
+        <location filename="../widgets/mainwindow.cpp" line="11339"/>
+        <location filename="../widgets/mainwindow.cpp" line="20849"/>
         <source>Invalid Certificate</source>
         <translation>Invalid Certificate</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11268"/>
+        <location filename="../widgets/mainwindow.cpp" line="11340"/>
         <source>The Decodium certificate file is invalid or the signature verification failed.</source>
         <translation>The Decodium certificate file is invalid or the signature verification failed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11294"/>
+        <location filename="../widgets/mainwindow.cpp" line="11366"/>
         <source>Decodium certificate loaded but expired: %1 (%2)</source>
         <translation>Decodium certificate loaded but expired: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11300"/>
-        <location filename="../widgets/mainwindow.cpp" line="20722"/>
+        <location filename="../widgets/mainwindow.cpp" line="11372"/>
+        <location filename="../widgets/mainwindow.cpp" line="20858"/>
         <source>Certificate Expired</source>
         <translation>Certificate Expired</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11301"/>
+        <location filename="../widgets/mainwindow.cpp" line="11373"/>
         <source>The Decodium certificate for %1 expired on %2.</source>
         <translation>The Decodium certificate for %1 expired on %2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11313"/>
+        <location filename="../widgets/mainwindow.cpp" line="11385"/>
         <source>Decodium certificate loaded for %1, current callsign is %2</source>
         <translation>Decodium certificate loaded for %1, current callsign is %2</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11319"/>
-        <location filename="../widgets/mainwindow.cpp" line="11339"/>
-        <location filename="../widgets/mainwindow.cpp" line="20744"/>
+        <location filename="../widgets/mainwindow.cpp" line="11391"/>
+        <location filename="../widgets/mainwindow.cpp" line="11411"/>
+        <location filename="../widgets/mainwindow.cpp" line="20880"/>
         <source>Certificate Loaded</source>
         <translation>Certificate Loaded</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11320"/>
+        <location filename="../widgets/mainwindow.cpp" line="11392"/>
         <source>Certificate loaded successfully.
 
 Certificate call: %1
@@ -10490,12 +9067,12 @@ Expires: %4
 The certificate is active, but it does not match the current operator callsign.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11333"/>
+        <location filename="../widgets/mainwindow.cpp" line="11405"/>
         <source>Decodium certificate active: %1 (%2)</source>
         <translation>Decodium certificate active: %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11340"/>
+        <location filename="../widgets/mainwindow.cpp" line="11412"/>
         <source>Certificate loaded successfully.
 
 Call: %1
@@ -10508,12 +9085,12 @@ Tier: %2
 Expires: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11409"/>
+        <location filename="../widgets/mainwindow.cpp" line="11481"/>
         <source>No Decodium certificate loaded.</source>
         <translation>No Decodium certificate loaded.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11413"/>
+        <location filename="../widgets/mainwindow.cpp" line="11485"/>
         <source>Call: %1
 Tier: %2
 Expires: %3</source>
@@ -10522,21 +9099,21 @@ Tier: %2
 Expires: %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11418"/>
+        <location filename="../widgets/mainwindow.cpp" line="11490"/>
         <source>
 Path: %1</source>
         <translation>
 Path: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11421"/>
+        <location filename="../widgets/mainwindow.cpp" line="11493"/>
         <source>
 Current operator: %1</source>
         <translation>
 Current operator: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="11440"/>
+        <location filename="../widgets/mainwindow.cpp" line="11512"/>
         <source>If you make fair use of any part of WSJT-X under terms of the GNU General Public License, you must display the following copyright notice prominently in your derivative work:
 
 &quot;The algorithms, source code, look-and-feel of WSJT-X and related programs, and protocol specifications for the modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 are Copyright (C) 2001-2025 by one or more of the following authors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</source>
@@ -10545,158 +9122,57 @@ Current operator: %1</translation>
 &quot;The algorithms, source code, look-and-feel of WSJT-X and related programs, and protocol specifications for the modes FSK441, FST4, FT8, JT4, JT6M, JT9, JT65, JTMS, QRA64, Q65, MSK144 are Copyright (C) 2001-2025 by one or more of the following authors: Joseph Taylor, K1JT; Bill Somerville, G4WJS; Steven Franke, K9AN; Nico Palermo, IV3NWV; Greg Beam, KI7MT; Michael Black, W9MDB; Edson Pereira, PY2SDR; Philip Karn, KA9Q; Uwe Risse, DG2YCB; Brian Moran, N9ADG; Roger Rehr, W3SZ; and other members of the WSJT Development Group.&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33245"/>
+        <location filename="../widgets/mainwindow.cpp" line="33667"/>
         <source>Remote caller queued: %1</source>
         <translation>Attālais izsaucējs rindā: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33272"/>
+        <location filename="../widgets/mainwindow.cpp" line="33694"/>
         <source>Remote CW (audio): %1 (%2 WPM)</source>
         <translation>Remote CW (audio): %1 (%2 WPM)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33280"/>
+        <location filename="../widgets/mainwindow.cpp" line="33702"/>
         <source>CW audio: messaggio vuoto</source>
         <translation>CW audio: tukšs ziņojums</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33289"/>
+        <location filename="../widgets/mainwindow.cpp" line="33711"/>
         <source>CW audio: TX RTTY in corso, riprova</source>
         <translation>CW audio: notiek RTTY TX, mēģiniet vēlreiz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33298"/>
+        <location filename="../widgets/mainwindow.cpp" line="33720"/>
         <source>CW audio: impossibile generare &quot;%1&quot;</source>
         <translation>CW audio: nevar ģenerēt &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33313"/>
+        <location filename="../widgets/mainwindow.cpp" line="33735"/>
         <source>CW audio: TX gia&apos; attivo, comando ignorato</source>
         <translation>CW audio: TX jau aktīvs, komanda ignorēta</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33364"/>
+        <location filename="../widgets/mainwindow.cpp" line="33786"/>
         <source>CW audio non disponibile con audio TCI</source>
         <translation>CW audio nav pieejams ar TCI audio</translation>
     </message>
     <message>
-        <source>&lt;table cellspacing=1&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F1  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Copyright Notice&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F1  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;About Decodium v3.0 FT2 Raptor&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F2       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open settings window (Alt: transmit Tx2)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F3       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Display keyboard shortcuts (Alt: transmit Tx3)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F4       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Clear DX Call, DX Grid, Tx messages 1-4 (Alt: transmit Tx4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+F4   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Exit program&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F5       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Display special mouse commands (Alt: transmit Tx5)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F6       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open next file in directory (Alt: toggle &quot;Call 1st&quot;)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F6 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Decode all remaining files in directory&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F7       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Display Message Averaging window&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F11      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Rx frequency down 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F11 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move identical Rx and Tx frequencies down 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F11 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Tx frequency down 60 Hz (FT8) or 90 Hz (FT4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+Shift+F11 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move dial frequency down 1000 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F12      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Rx frequency up 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F12 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move identical Rx and Tx frequencies up 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F12 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Tx frequency up 60 Hz (FT8) or 90 Hz (FT4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+Shift+F12 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move dial frequency up 1000 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+1-6  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set now transmission to this number on Tab 1&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctl+1-6  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set next transmission to this number on Tab 1&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+A    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Clear Active Stations for QMAP&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+B    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle &quot;Best S+P&quot; status&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+C    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle &quot;Call 1st&quot; checkbox&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+D    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Decode again at QSO frequency&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+D  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Full decode (both windows)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+E   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Turn on TX even/1st&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+E  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Turn off TX even/1st&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+E    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Erase&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Edit the free text message box&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+G    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Generate standard messages&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+H    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Halt Tx&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+I   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Add Dx Call to the Ignore List&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+L   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Lookup callsign in database, generate standard messages&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+M    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Monitor&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+N    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle &quot;Enable Tx&quot;&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+O   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open a .wav file&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+O    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Change operator&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+Q    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open &quot;Log QSO&quot; window&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+R   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set Tx4 message to RRR (not in FT4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+R    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set Tx4 message to RR73&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+Shift+R  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Refresh Active Stations window&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+S    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop monitoring&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+T    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle Tune status&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+Z    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Clear hung decoder status&lt;/td&gt;&lt;/tr&gt;
-
-&lt;/table&gt;</source>
-        <extracomment>Keyboard shortcuts help window contents</extracomment>
-        <translation type="vanished">&lt;table cellspacing=1&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Esc      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop Tx, abort QSO, clear next-call queue&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F1       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Online User&apos;s Guide (Alt: transmit Tx6)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F1  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Copyright Notice&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F1  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;About Decodium v3.0 FT2 Raptor&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F2       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open settings window (Alt: transmit Tx2)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F3       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Display keyboard shortcuts (Alt: transmit Tx3)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F4       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Clear DX Call, DX Grid, Tx messages 1-4 (Alt: transmit Tx4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+F4   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Exit program&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F5       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Display special mouse commands (Alt: transmit Tx5)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F6       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open next file in directory (Alt: toggle &quot;Call 1st&quot;)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F6 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Decode all remaining files in directory&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F7       &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Display Message Averaging window&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F11      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Rx frequency down 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F11 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move identical Rx and Tx frequencies down 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F11 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Tx frequency down 60 Hz (FT8) or 90 Hz (FT4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+Shift+F11 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move dial frequency down 1000 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;F12      &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Rx frequency up 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F12 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move identical Rx and Tx frequencies up 1 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+F12 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move Tx frequency up 60 Hz (FT8) or 90 Hz (FT4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+Shift+F12 &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Move dial frequency up 1000 Hz&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+1-6  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set now transmission to this number on Tab 1&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctl+1-6  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set next transmission to this number on Tab 1&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+A    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Clear Active Stations for QMAP&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+B    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle &quot;Best S+P&quot; status&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+C    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle &quot;Call 1st&quot; checkbox&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+D    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Decode again at QSO frequency&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+D  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Full decode (both windows)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+E   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Turn on TX even/1st&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Shift+E  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Turn off TX even/1st&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+E    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Erase&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+F   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Edit the free text message box&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+G    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Generate standard messages&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+H    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Halt Tx&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+I   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Add Dx Call to the Ignore List&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+L   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Lookup callsign in database, generate standard messages&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+M    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Monitor&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+N    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle &quot;Enable Tx&quot;&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+O   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open a .wav file&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+O    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Change operator&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+Q    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Open &quot;Log QSO&quot; window&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+R   &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set Tx4 message to RRR (not in FT4)&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+R    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Set Tx4 message to RR73&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Ctrl+Shift+R  &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Refresh Active Stations window&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+S    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Stop monitoring&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+T    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Toggle Tune status&lt;/td&gt;&lt;/tr&gt;
-  &lt;tr&gt;&lt;td&gt;&lt;b&gt;Alt+Z    &lt;/b&gt;&lt;/td&gt;&lt;td&gt;Clear hung decoder status&lt;/td&gt;&lt;/tr&gt;
-
-&lt;/table&gt;</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="16524"/>
+        <location filename="../widgets/mainwindow.cpp" line="16660"/>
         <source>Async L2: starting queued call %1</source>
         <translation>Async L2: starting queued call %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16526"/>
+        <location filename="../widgets/mainwindow.cpp" line="16662"/>
         <source>Async L2: starting queued call</source>
         <translation>Async L2: starting queued call</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16544"/>
+        <location filename="../widgets/mainwindow.cpp" line="16680"/>
         <source>Please choose another Tx frequency. Decodium v3.0 FT2 Raptor will not knowingly transmit another mode in the WSPR sub-band on 30m.</source>
         <translation>Please choose another Tx frequency. Decodium v3.0 FT2 Raptor will not knowingly transmit another mode in the WSPR sub-band on 30m.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16562"/>
+        <location filename="../widgets/mainwindow.cpp" line="16698"/>
         <source>Please choose another dial frequency.
 Must be 3Khz away from %1.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
@@ -10707,7 +9183,7 @@ Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the standard FT8 sub-bands.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="16580"/>
+        <location filename="../widgets/mainwindow.cpp" line="16716"/>
         <source>Please choose another dial frequency.
 Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the WSPR sub-bands.</source>
@@ -10716,23 +9192,23 @@ Decodium v3.0 FT2 Raptor will not operate in Fox mode
 overlapping the WSPR sub-bands.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18389"/>
+        <location filename="../widgets/mainwindow.cpp" line="18525"/>
         <source>Async L2: %1 queued, waiting free TX slot</source>
         <translation>Async L2: %1 queued, waiting free TX slot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="18391"/>
+        <location filename="../widgets/mainwindow.cpp" line="18527"/>
         <source>Async L2: caller queued, waiting free TX slot</source>
         <translation>Async L2: caller queued, waiting free TX slot</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20627"/>
-        <location filename="../widgets/mainwindow.cpp" line="20640"/>
+        <location filename="../widgets/mainwindow.cpp" line="20763"/>
+        <location filename="../widgets/mainwindow.cpp" line="20776"/>
         <source>DXpedition Certificate Required</source>
         <translation>DXpedition Certificate Required</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20628"/>
+        <location filename="../widgets/mainwindow.cpp" line="20764"/>
         <source>To activate DXpedition mode you must load a valid .dxcert certificate for your callsign.
 
 Load certificate now?</source>
@@ -10741,44 +9217,44 @@ Load certificate now?</source>
 Load certificate now?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20641"/>
+        <location filename="../widgets/mainwindow.cpp" line="20777"/>
         <source>DXpedition mode was not activated because no valid certificate is loaded.</source>
         <translation>DXpedition mode was not activated because no valid certificate is loaded.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20704"/>
+        <location filename="../widgets/mainwindow.cpp" line="20840"/>
         <source>Load DXpedition Certificate</source>
         <translation>Load DXpedition Certificate</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20706"/>
+        <location filename="../widgets/mainwindow.cpp" line="20842"/>
         <source>DXped Certificate (*.dxcert);;JSON files (*.json);;All files (*)</source>
         <translation>DXped Certificate (*.dxcert);;JSON files (*.json);;All files (*)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20714"/>
+        <location filename="../widgets/mainwindow.cpp" line="20850"/>
         <source>The certificate file is invalid or the signature verification failed.</source>
         <translation>The certificate file is invalid or the signature verification failed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20723"/>
+        <location filename="../widgets/mainwindow.cpp" line="20859"/>
         <source>The certificate for %1 is expired or not yet valid.
 Valid from %2 to %3.</source>
         <translation>The certificate for %1 is expired or not yet valid.
 Valid from %2 to %3.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20735"/>
+        <location filename="../widgets/mainwindow.cpp" line="20871"/>
         <source>Unauthorized Operator</source>
         <translation>Unauthorized Operator</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20736"/>
+        <location filename="../widgets/mainwindow.cpp" line="20872"/>
         <source>Your callsign %1 is not listed in this certificate for DXpedition %2.</source>
         <translation>Your callsign %1 is not listed in this certificate for DXpedition %2.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="20745"/>
+        <location filename="../widgets/mainwindow.cpp" line="20881"/>
         <source>Certificate loaded successfully.
 
 DXpedition: %1 (%2)
@@ -10797,178 +9273,174 @@ Valid: %6 to %7
 Fingerprint: %8</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22205"/>
+        <location filename="../widgets/mainwindow.cpp" line="22341"/>
         <source>AutoSpot skipped: invalid DX cluster endpoint</source>
         <translation>AutoSpot skipped: invalid DX cluster endpoint</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22206"/>
+        <location filename="../widgets/mainwindow.cpp" line="22342"/>
         <source>SKIP invalid endpoint</source>
         <translation>SKIP invalid endpoint</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22238"/>
+        <location filename="../widgets/mainwindow.cpp" line="22374"/>
         <source>AutoSpot skipped: empty DX cluster host</source>
         <translation>AutoSpot skipped: empty DX cluster host</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22239"/>
+        <location filename="../widgets/mainwindow.cpp" line="22375"/>
         <source>SKIP empty host</source>
         <translation>SKIP empty host</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22247"/>
+        <location filename="../widgets/mainwindow.cpp" line="22383"/>
         <source>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</source>
         <translation>AutoSpot skipped: %1:%2 is read-only. Configure a writable DX cluster endpoint.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22267"/>
+        <location filename="../widgets/mainwindow.cpp" line="22403"/>
         <source>AutoSpot skipped: empty MyCall</source>
         <translation>AutoSpot skipped: empty MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22268"/>
+        <location filename="../widgets/mainwindow.cpp" line="22404"/>
         <source>SKIP empty MyCall</source>
         <translation>SKIP empty MyCall</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22275"/>
+        <location filename="../widgets/mainwindow.cpp" line="22411"/>
         <source>SUBMIT %1:%2 | %3</source>
         <translation>SUBMIT %1:%2 | %3</translation>
     </message>
     <message>
-        <source>AutoSpot accepted by cluster node for %1 on %2:%3</source>
-        <translation type="vanished">AutoSpot accepted by cluster node for %1 on %2:%3</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="22532"/>
+        <location filename="../widgets/mainwindow.cpp" line="22668"/>
         <source>AutoSpot rejected for %1 on %2:%3</source>
         <translation>AutoSpot rejected for %1 on %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22796"/>
+        <location filename="../widgets/mainwindow.cpp" line="22932"/>
         <source>Duplicate log suppressed for %1 (%2 s window)</source>
         <translation>Duplicate log suppressed for %1 (%2 s window)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23407"/>
+        <location filename="../widgets/mainwindow.cpp" line="23543"/>
         <source>%1 baud Baudot terminal. Mark %2 Hz, shift %3 Hz, %4, %5 stop bits. Received text appears above; type the text to send below.</source>
         <translation>%1 baud Baudot terminal. Mark %2 Hz, shift %3 Hz, %4, %5 stop bits. Received text appears above; type the text to send below.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23411"/>
+        <location filename="../widgets/mainwindow.cpp" line="23547"/>
         <source>reverse</source>
         <translation>reverse</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23411"/>
+        <location filename="../widgets/mainwindow.cpp" line="23547"/>
         <source>normal</source>
         <translation>normal</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23456"/>
+        <location filename="../widgets/mainwindow.cpp" line="23592"/>
         <source>RTTY text contains no encodable Baudot characters</source>
         <translation>RTTY text contains no encodable Baudot characters</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23601"/>
+        <location filename="../widgets/mainwindow.cpp" line="23737"/>
         <source>RTTY Received Text</source>
         <translation>RTTY Received Text</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23602"/>
+        <location filename="../widgets/mainwindow.cpp" line="23738"/>
         <source>RTTY Transmitted Text</source>
         <translation>RTTY Transmitted Text</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23671"/>
+        <location filename="../widgets/mainwindow.cpp" line="23807"/>
         <source>Stations calling DXpedition %1</source>
         <translation>Stations calling DXpedition %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23705"/>
+        <location filename="../widgets/mainwindow.cpp" line="23841"/>
         <source>Show Already Worked</source>
         <translation>Show Already Worked</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23707"/>
+        <location filename="../widgets/mainwindow.cpp" line="23843"/>
         <source>Super Fox</source>
         <translation>Super Fox</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23725"/>
+        <location filename="../widgets/mainwindow.cpp" line="23861"/>
         <source>Super Hound</source>
         <translation>Super Hound</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="23736"/>
+        <location filename="../widgets/mainwindow.cpp" line="23872"/>
         <source>Hound</source>
         <translation>Hound</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24182"/>
+        <location filename="../widgets/mainwindow.cpp" line="24318"/>
         <source>Tx Messages</source>
         <translation>Tx Messages</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24645"/>
-        <location filename="../widgets/mainwindow.cpp" line="24656"/>
-        <location filename="../widgets/mainwindow.cpp" line="24695"/>
-        <location filename="../widgets/mainwindow.cpp" line="24705"/>
-        <location filename="../widgets/mainwindow.cpp" line="32129"/>
-        <location filename="../widgets/mainwindow.cpp" line="32175"/>
+        <location filename="../widgets/mainwindow.cpp" line="24781"/>
+        <location filename="../widgets/mainwindow.cpp" line="24792"/>
+        <location filename="../widgets/mainwindow.cpp" line="24831"/>
+        <location filename="../widgets/mainwindow.cpp" line="24841"/>
+        <location filename="../widgets/mainwindow.cpp" line="32551"/>
+        <location filename="../widgets/mainwindow.cpp" line="32597"/>
         <source>Confirm Erase</source>
         <translation>Confirm Erase</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24646"/>
+        <location filename="../widgets/mainwindow.cpp" line="24782"/>
         <source>Are you sure you want to erase file ALL.TXT?</source>
         <translation>Are you sure you want to erase file ALL.TXT?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24657"/>
+        <location filename="../widgets/mainwindow.cpp" line="24793"/>
         <source>Are you sure you want to erase the list of Q65 callers?</source>
         <translation>Are you sure you want to erase the list of Q65 callers?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24666"/>
-        <location filename="../widgets/mainwindow.cpp" line="27938"/>
+        <location filename="../widgets/mainwindow.cpp" line="24802"/>
+        <location filename="../widgets/mainwindow.cpp" line="28089"/>
         <source>Confirm Reset</source>
         <translation>Confirm Reset</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24667"/>
+        <location filename="../widgets/mainwindow.cpp" line="24803"/>
         <source>Are you sure you want to erase your contest log?</source>
         <translation>Are you sure you want to erase your contest log?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24668"/>
+        <location filename="../widgets/mainwindow.cpp" line="24804"/>
         <source>Doing this will remove all QSO records for the current contest. They will be kept in the ADIF log file but will not be available for export in your Cabrillo log.</source>
         <translation>Doing this will remove all QSO records for the current contest. They will be kept in the ADIF log file but will not be available for export in your Cabrillo log.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24688"/>
+        <location filename="../widgets/mainwindow.cpp" line="24824"/>
         <source>Cabrillo Log saved</source>
         <translation>Cabrillo Log saved</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30440"/>
+        <location filename="../widgets/mainwindow.cpp" line="30862"/>
         <source>Embedded WSPR decoder failed: %1</source>
         <translation>Embedded WSPR decoder failed: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30575"/>
+        <location filename="../widgets/mainwindow.cpp" line="30997"/>
         <source>SuperFox TX generation failed.</source>
         <translation>SuperFox TX ģenerēšana neizdevās.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="31204"/>
-        <location filename="../widgets/mainwindow.cpp" line="31262"/>
+        <location filename="../widgets/mainwindow.cpp" line="31626"/>
+        <location filename="../widgets/mainwindow.cpp" line="31684"/>
         <source>Cannot write decodium_log_config.ini file</source>
         <translation>Nevar ierakstīt decodium_log_config.ini failu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32309"/>
+        <location filename="../widgets/mainwindow.cpp" line="32731"/>
         <source>Call sign and LOTW password are required.
 
 Enter these in Settings at the Reporting tab.</source>
@@ -10977,99 +9449,99 @@ Enter these in Settings at the Reporting tab.</source>
 Enter these in Settings at the Reporting tab.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32317"/>
+        <location filename="../widgets/mainwindow.cpp" line="32739"/>
         <source>Upload QSOs to LOTW first, and *wait* for LOTW to update.</source>
         <translation>Upload QSOs to LOTW first, and *wait* for LOTW to update.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32334"/>
+        <location filename="../widgets/mainwindow.cpp" line="32756"/>
         <source>Downloading from LOTW...</source>
         <translation>Downloading from LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32426"/>
+        <location filename="../widgets/mainwindow.cpp" line="32848"/>
         <source>Download QSOs from LOTW succeeded.</source>
         <translation>Download QSOs from LOTW succeeded.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32439"/>
+        <location filename="../widgets/mainwindow.cpp" line="32861"/>
         <source>Download QSOs from LOTW failed.</source>
         <translation>Download QSOs from LOTW failed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32514"/>
-        <location filename="../widgets/mainwindow.cpp" line="32526"/>
-        <location filename="../widgets/mainwindow.cpp" line="32549"/>
+        <location filename="../widgets/mainwindow.cpp" line="32936"/>
+        <location filename="../widgets/mainwindow.cpp" line="32948"/>
+        <location filename="../widgets/mainwindow.cpp" line="32971"/>
         <source>Unable to open file</source>
         <translation>Unable to open file</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32585"/>
+        <location filename="../widgets/mainwindow.cpp" line="33007"/>
         <source>Download QSLs from LOTW succeeded.</source>
         <translation>Download QSLs from LOTW succeeded.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32592"/>
+        <location filename="../widgets/mainwindow.cpp" line="33014"/>
         <source>Download QSLs from LOTW failed.</source>
         <translation>Download QSLs from LOTW failed.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32613"/>
+        <location filename="../widgets/mainwindow.cpp" line="33035"/>
         <source>No QSOs to upload to LOTW</source>
         <translation>No QSOs to upload to LOTW</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32657"/>
+        <location filename="../widgets/mainwindow.cpp" line="33079"/>
         <source>Upload to LOTW Error</source>
         <translation>Upload to LOTW Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32665"/>
+        <location filename="../widgets/mainwindow.cpp" line="33087"/>
         <source>Uploading to LOTW...</source>
         <translation>Uploading to LOTW...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32762"/>
+        <location filename="../widgets/mainwindow.cpp" line="33184"/>
         <source>LOTW process error</source>
         <translation>LOTW process error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32833"/>
+        <location filename="../widgets/mainwindow.cpp" line="33255"/>
         <source>Network Error - Refusing redirect for credentialed LOTW request:
 &apos;%1&apos;</source>
         <translation>Network Error - Refusing redirect for credentialed LOTW request:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32842"/>
+        <location filename="../widgets/mainwindow.cpp" line="33264"/>
         <source>Network Error - SSL/TLS support not installed, cannot fetch:
 &apos;%1&apos;</source>
         <translation>Network Error - SSL/TLS support not installed, cannot fetch:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32852"/>
+        <location filename="../widgets/mainwindow.cpp" line="33274"/>
         <source>Network Error - Too many redirects:
 &apos;%1&apos;</source>
         <translation>Network Error - Too many redirects:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32866"/>
+        <location filename="../widgets/mainwindow.cpp" line="33288"/>
         <source>Network Error:
 %1</source>
         <translation>Network Error:
 %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32873"/>
+        <location filename="../widgets/mainwindow.cpp" line="33295"/>
         <source>File System Error - Cannot commit changes to:
 &quot;%1&quot;</source>
         <translation>File System Error - Cannot commit changes to:
 &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32902"/>
+        <location filename="../widgets/mainwindow.cpp" line="33324"/>
         <source>File System Error - Cannot open file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -11078,7 +9550,7 @@ Error(%2): %3</source>
 Error(%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32910"/>
+        <location filename="../widgets/mainwindow.cpp" line="33332"/>
         <source>File System Error - Cannot write to file:
 &quot;%1&quot;
 Error(%2): %3</source>
@@ -11087,343 +9559,339 @@ Error(%2): %3</source>
 Error(%2): %3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32973"/>
+        <location filename="../widgets/mainwindow.cpp" line="33395"/>
         <source>Unable to open incremental log file</source>
         <translation>Unable to open incremental log file</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33129"/>
+        <location filename="../widgets/mainwindow.cpp" line="33551"/>
         <source>Remote waterfall stream enabled</source>
         <translation>Remote waterfall stream enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33130"/>
+        <location filename="../widgets/mainwindow.cpp" line="33552"/>
         <source>Remote waterfall stream disabled</source>
         <translation>Remote waterfall stream disabled</translation>
     </message>
     <message>
-        <source>Remote FT2 caller queued: %1</source>
-        <translation type="vanished">Remote FT2 caller queued: %1</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="33415"/>
+        <location filename="../widgets/mainwindow.cpp" line="33837"/>
         <source>Remote mode request ignored: RTTY is hidden in this release</source>
         <translation>Remote mode request ignored: RTTY is hidden in this release</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33421"/>
+        <location filename="../widgets/mainwindow.cpp" line="33843"/>
         <source>Remote mode set: %1</source>
         <translation>Remote mode set: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33467"/>
+        <location filename="../widgets/mainwindow.cpp" line="33889"/>
         <source>Remote band ignored: invalid band &quot;%1&quot;</source>
         <translation>Remote band ignored: invalid band &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33471"/>
+        <location filename="../widgets/mainwindow.cpp" line="33893"/>
         <source>Remote band set: 160m</source>
         <translation>Remote band set: 160m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33472"/>
+        <location filename="../widgets/mainwindow.cpp" line="33894"/>
         <source>Remote band set: 80m</source>
         <translation>Remote band set: 80m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33473"/>
+        <location filename="../widgets/mainwindow.cpp" line="33895"/>
         <source>Remote band set: 60m</source>
         <translation>Remote band set: 60m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33474"/>
+        <location filename="../widgets/mainwindow.cpp" line="33896"/>
         <source>Remote band set: 40m</source>
         <translation>Remote band set: 40m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33475"/>
+        <location filename="../widgets/mainwindow.cpp" line="33897"/>
         <source>Remote band set: 30m</source>
         <translation>Remote band set: 30m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33476"/>
+        <location filename="../widgets/mainwindow.cpp" line="33898"/>
         <source>Remote band set: 20m</source>
         <translation>Remote band set: 20m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33477"/>
+        <location filename="../widgets/mainwindow.cpp" line="33899"/>
         <source>Remote band set: 17m</source>
         <translation>Remote band set: 17m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33478"/>
+        <location filename="../widgets/mainwindow.cpp" line="33900"/>
         <source>Remote band set: 15m</source>
         <translation>Remote band set: 15m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33479"/>
+        <location filename="../widgets/mainwindow.cpp" line="33901"/>
         <source>Remote band set: 12m</source>
         <translation>Remote band set: 12m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33480"/>
+        <location filename="../widgets/mainwindow.cpp" line="33902"/>
         <source>Remote band set: 10m</source>
         <translation>Remote band set: 10m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33481"/>
+        <location filename="../widgets/mainwindow.cpp" line="33903"/>
         <source>Remote band set: 6m</source>
         <translation>Remote band set: 6m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33482"/>
+        <location filename="../widgets/mainwindow.cpp" line="33904"/>
         <source>Remote band set: 2m</source>
         <translation>Remote band set: 2m</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33483"/>
+        <location filename="../widgets/mainwindow.cpp" line="33905"/>
         <source>Remote band set: 70cm</source>
         <translation>Remote band set: 70cm</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33485"/>
+        <location filename="../widgets/mainwindow.cpp" line="33907"/>
         <source>Remote band ignored: unsupported band &quot;%1&quot;</source>
         <translation>Remote band ignored: unsupported band &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33549"/>
+        <location filename="../widgets/mainwindow.cpp" line="33971"/>
         <source>Remote dial frequency set: %1 MHz</source>
         <translation>Attālā ciparnīcas frekvence iestatīta: %1 MHz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33568"/>
+        <location filename="../widgets/mainwindow.cpp" line="33990"/>
         <source>Remote Rx frequency set: %1 Hz</source>
         <translation>Remote Rx frequency set: %1 Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33586"/>
+        <location filename="../widgets/mainwindow.cpp" line="34008"/>
         <source>Remote Tx frequency set: %1 Hz</source>
         <translation>Remote Tx frequency set: %1 Hz</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33672"/>
+        <location filename="../widgets/mainwindow.cpp" line="34094"/>
         <source>Remote TX enabled</source>
         <translation>Remote TX enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33672"/>
+        <location filename="../widgets/mainwindow.cpp" line="34094"/>
         <source>Remote TX disabled</source>
         <translation>Remote TX disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33689"/>
+        <location filename="../widgets/mainwindow.cpp" line="34111"/>
         <source>Remote Auto CQ enabled</source>
         <translation>Remote Auto CQ enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33689"/>
+        <location filename="../widgets/mainwindow.cpp" line="34111"/>
         <source>Remote Auto CQ disabled</source>
         <translation>Remote Auto CQ disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33715"/>
+        <location filename="../widgets/mainwindow.cpp" line="34137"/>
         <source>Remote AutoSpot enabled</source>
         <translation>Remote AutoSpot enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33715"/>
+        <location filename="../widgets/mainwindow.cpp" line="34137"/>
         <source>Remote AutoSpot disabled</source>
         <translation>Remote AutoSpot disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33716"/>
+        <location filename="../widgets/mainwindow.cpp" line="34138"/>
         <source>AutoSpot enabled</source>
         <translation>AutoSpot enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33716"/>
+        <location filename="../widgets/mainwindow.cpp" line="34138"/>
         <source>AutoSpot disabled</source>
         <translation>AutoSpot disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33734"/>
+        <location filename="../widgets/mainwindow.cpp" line="34156"/>
         <source>Remote Monitoring ignored: cannot enable while transmitting</source>
         <translation>Remote Monitoring ignored: cannot enable while transmitting</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33748"/>
+        <location filename="../widgets/mainwindow.cpp" line="34170"/>
         <source>Remote Monitoring enabled</source>
         <translation>Remote Monitoring enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33748"/>
+        <location filename="../widgets/mainwindow.cpp" line="34170"/>
         <source>Remote Monitoring disabled</source>
         <translation>Remote Monitoring disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33760"/>
+        <location filename="../widgets/mainwindow.cpp" line="34182"/>
         <source>Remote Async L2 ignored: not in FT2 mode</source>
         <translation>Remote Async L2 ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33768"/>
+        <location filename="../widgets/mainwindow.cpp" line="34190"/>
         <source>Remote Async L2 ignored: mandatory in FT2 mode</source>
         <translation>Remote Async L2 ignored: mandatory in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33772"/>
+        <location filename="../widgets/mainwindow.cpp" line="34194"/>
         <source>Remote Async L2 enabled (mandatory in FT2)</source>
         <translation>Remote Async L2 enabled (mandatory in FT2)</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33784"/>
+        <location filename="../widgets/mainwindow.cpp" line="34206"/>
         <source>Remote Dual Carrier ignored: not in FT2 mode</source>
         <translation>Remote Dual Carrier ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33788"/>
+        <location filename="../widgets/mainwindow.cpp" line="34210"/>
         <source>Remote Dual Carrier enabled</source>
         <translation>Remote Dual Carrier enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33788"/>
+        <location filename="../widgets/mainwindow.cpp" line="34210"/>
         <source>Remote Dual Carrier disabled</source>
         <translation>Remote Dual Carrier disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33800"/>
+        <location filename="../widgets/mainwindow.cpp" line="34222"/>
         <source>Remote Alt 1/2 ignored: not available in FT2 mode</source>
         <translation>Remote Alt 1/2 ignored: not available in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33804"/>
+        <location filename="../widgets/mainwindow.cpp" line="34226"/>
         <source>Remote Alt 1/2 enabled</source>
         <translation>Remote Alt 1/2 enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33804"/>
+        <location filename="../widgets/mainwindow.cpp" line="34226"/>
         <source>Remote Alt 1/2 disabled</source>
         <translation>Remote Alt 1/2 disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33816"/>
+        <location filename="../widgets/mainwindow.cpp" line="34238"/>
         <source>Remote Manual TX ignored: not in FT2 mode</source>
         <translation>Remote Manual TX ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33820"/>
+        <location filename="../widgets/mainwindow.cpp" line="34242"/>
         <source>Remote Manual TX enabled</source>
         <translation>Remote Manual TX enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33820"/>
+        <location filename="../widgets/mainwindow.cpp" line="34242"/>
         <source>Remote Manual TX disabled</source>
         <translation>Remote Manual TX disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33832"/>
+        <location filename="../widgets/mainwindow.cpp" line="34254"/>
         <source>Remote Speedy ignored: not in FT2 mode</source>
         <translation>Remote Speedy ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33836"/>
+        <location filename="../widgets/mainwindow.cpp" line="34258"/>
         <source>Remote Speedy enabled</source>
         <translation>Remote Speedy enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33836"/>
+        <location filename="../widgets/mainwindow.cpp" line="34258"/>
         <source>Remote Speedy disabled</source>
         <translation>Remote Speedy disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33848"/>
+        <location filename="../widgets/mainwindow.cpp" line="34270"/>
         <source>Remote D-CW ignored: not in FT2 mode</source>
         <translation>Remote D-CW ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33852"/>
+        <location filename="../widgets/mainwindow.cpp" line="34274"/>
         <source>Remote D-CW enabled</source>
         <translation>Remote D-CW enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33852"/>
+        <location filename="../widgets/mainwindow.cpp" line="34274"/>
         <source>Remote D-CW disabled</source>
         <translation>Remote D-CW disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33864"/>
+        <location filename="../widgets/mainwindow.cpp" line="34286"/>
         <source>Remote Quick QSO ignored: not in FT2 mode</source>
         <translation>Remote Quick QSO ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33868"/>
+        <location filename="../widgets/mainwindow.cpp" line="34290"/>
         <source>Remote Quick QSO enabled</source>
         <translation>Remote Quick QSO enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33868"/>
+        <location filename="../widgets/mainwindow.cpp" line="34290"/>
         <source>Remote Quick QSO disabled</source>
         <translation>Remote Quick QSO disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33880"/>
+        <location filename="../widgets/mainwindow.cpp" line="34302"/>
         <source>Remote QSO profile ignored: not in FT2 mode</source>
         <translation>Remote QSO profile ignored: not in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33891"/>
+        <location filename="../widgets/mainwindow.cpp" line="34313"/>
         <source>Remote QSO profile ignored: unsupported FT2 count %1</source>
         <translation>Remote QSO profile ignored: unsupported FT2 count %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="33896"/>
+        <location filename="../widgets/mainwindow.cpp" line="34318"/>
         <source>Remote QSO profile set to %1 msg</source>
         <translation>Remote QSO profile set to %1 msg</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24706"/>
+        <location filename="../widgets/mainwindow.cpp" line="24842"/>
         <source>Are you sure you want to erase the WSPR hashtable?</source>
         <translation>Are you sure you want to erase the WSPR hashtable?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21958"/>
+        <location filename="../widgets/mainwindow.cpp" line="22094"/>
         <source>DX Call field is empty</source>
         <translation>DX izsaukuma lauks ir tukšs</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21959"/>
+        <location filename="../widgets/mainwindow.cpp" line="22095"/>
         <source>The logger received a manual log request without a DX callsign.</source>
         <translation>Žurnāls saņēma manuālu žurnalēšanas pieprasījumu bez DX izsaukuma.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="21960"/>
+        <location filename="../widgets/mainwindow.cpp" line="22096"/>
         <source>Select a received message or type the DX callsign before logging the QSO.</source>
         <translation>Pirms QSO žurnalēšanas atlasiet saņemtu ziņojumu vai ievadiet DX izsaukumu.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22530"/>
+        <location filename="../widgets/mainwindow.cpp" line="22666"/>
         <source>AutoSpot submitted to cluster node for %1 on %2:%3</source>
         <translation>AutoSpot iesniegts klastera mezglam priekš %1 uz %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24725"/>
+        <location filename="../widgets/mainwindow.cpp" line="24861"/>
         <source>ChronoGPS not found</source>
         <translation>ChronoGPS not found</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24726"/>
+        <location filename="../widgets/mainwindow.cpp" line="24862"/>
         <source>ChronoGPS.exe was not found in the application directory.
 Please ensure ChronoGPS.exe is in the same folder as Decodium.</source>
         <translation>ChronoGPS.exe was not found in the application directory.
 Please ensure ChronoGPS.exe is in the same folder as Decodium.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25215"/>
+        <location filename="../widgets/mainwindow.cpp" line="25351"/>
         <source>%1 W</source>
         <translation>%1 W</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25234"/>
+        <location filename="../widgets/mainwindow.cpp" line="25370"/>
         <source>SWR &gt; 2.5 !!!
 
 Transmission was stopped
@@ -11436,138 +9904,134 @@ Transmission was stopped
 Check your antenna</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25351"/>
+        <location filename="../widgets/mainwindow.cpp" line="25487"/>
         <source>CAT disconnected, reconnecting (%1/3)...</source>
         <translation>CAT disconnected, reconnecting (%1/3)...</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25901"/>
+        <location filename="../widgets/mainwindow.cpp" line="26037"/>
         <source>Tune digital gain </source>
         <translation>Tune digital gain </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25903"/>
+        <location filename="../widgets/mainwindow.cpp" line="26039"/>
         <source>Transmit digital gain </source>
         <translation>Transmit digital gain </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="25933"/>
+        <location filename="../widgets/mainwindow.cpp" line="26069"/>
         <source>Prefixes</source>
         <translation>Prefixes</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27062"/>
+        <location filename="../widgets/mainwindow.cpp" line="27213"/>
         <source>Network Error</source>
         <translation>Network Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27063"/>
+        <location filename="../widgets/mainwindow.cpp" line="27214"/>
         <source>Error: %1
 UDP server %2:%3</source>
         <translation>Error: %1
 UDP server %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27235"/>
+        <location filename="../widgets/mainwindow.cpp" line="27386"/>
         <source>File Error</source>
         <translation>File Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27529"/>
+        <location filename="../widgets/mainwindow.cpp" line="27680"/>
         <source>Phase Training Disabled</source>
         <translation>Phase Training Disabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27532"/>
+        <location filename="../widgets/mainwindow.cpp" line="27683"/>
         <source>Phase Training Enabled</source>
         <translation>Phase Training Enabled</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27679"/>
+        <location filename="../widgets/mainwindow.cpp" line="27830"/>
         <source> WD:0m </source>
         <translation> WD:0m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27682"/>
+        <location filename="../widgets/mainwindow.cpp" line="27833"/>
         <source> Runaway Tx watchdog </source>
         <translation> Runaway Tx watchdog </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27699"/>
+        <location filename="../widgets/mainwindow.cpp" line="27850"/>
         <source> WD:%1m </source>
         <translation> WD:%1m </translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27949"/>
-        <location filename="../widgets/mainwindow.cpp" line="27952"/>
+        <location filename="../widgets/mainwindow.cpp" line="28100"/>
+        <location filename="../widgets/mainwindow.cpp" line="28103"/>
         <source>Free Text Message</source>
         <translation>Free Text Message</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27950"/>
-        <location filename="../widgets/mainwindow.cpp" line="27953"/>
+        <location filename="../widgets/mainwindow.cpp" line="28101"/>
+        <location filename="../widgets/mainwindow.cpp" line="28104"/>
         <source>Message:</source>
         <translation>Message:</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27971"/>
+        <location filename="../widgets/mainwindow.cpp" line="28122"/>
         <source>Directional calls not yet supported in SuperFox mode</source>
         <translation>Directional calls not yet supported in SuperFox mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27990"/>
+        <location filename="../widgets/mainwindow.cpp" line="28141"/>
         <source>TOTP: No seed entered in fox configuration to generate verification code.</source>
         <translation>TOTP: No seed entered in fox configuration to generate verification code.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="29789"/>
+        <location filename="../widgets/mainwindow.cpp" line="29940"/>
         <source>Async L2 is mandatory in FT2 mode</source>
         <translation>Async L2 is mandatory in FT2 mode</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30568"/>
+        <location filename="../widgets/mainwindow.cpp" line="30990"/>
         <source>TOTP SF: seed not long enough.</source>
         <translation>TOTP SF: seed not long enough.</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="30702"/>
+        <location filename="../widgets/mainwindow.cpp" line="31124"/>
         <source>Unable to open log file</source>
         <translation>Unable to open log file</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32130"/>
+        <location filename="../widgets/mainwindow.cpp" line="32552"/>
         <source>Are you sure you want to erase the Tx Log?</source>
         <translation>Are you sure you want to erase the Tx Log?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32155"/>
+        <location filename="../widgets/mainwindow.cpp" line="32577"/>
         <source>&quot;%1&quot; added to Ignore List</source>
         <translation>&quot;%1&quot; added to Ignore List</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="32176"/>
+        <location filename="../widgets/mainwindow.cpp" line="32598"/>
         <source>Are you sure you want to erase the Ignore List?</source>
         <translation>Are you sure you want to erase the Ignore List?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27763"/>
-        <location filename="../widgets/mainwindow.cpp" line="29352"/>
+        <location filename="../widgets/mainwindow.cpp" line="27914"/>
+        <location filename="../widgets/mainwindow.cpp" line="29503"/>
         <source>Log File Error</source>
         <translation>Log File Error</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="24696"/>
+        <location filename="../widgets/mainwindow.cpp" line="24832"/>
         <source>Are you sure you want to erase file decodium_log.adi?</source>
         <translation>Are you sure you want to erase file decodium_log.adi?</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="27939"/>
+        <location filename="../widgets/mainwindow.cpp" line="28090"/>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Are you sure you want to clear the QSO queues?</translation>
-    </message>
-    <message>
-        <source>QCustomPlot plot examples</source>
-        <translation type="vanished">QCustomPlot diagrammu piemēri</translation>
     </message>
 </context>
 <context>
@@ -11579,13 +10043,13 @@ UDP server %2:%3</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/MamPanel.qml" line="399"/>
-        <source>Doppio-click su una stazione per aggiungerla alla lista.</source>
+        <source>Double-click a station to add it to the list.</source>
         <translation>Veiciet dubultklikšķi uz stacijas, lai pievienotu to sarakstam.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/MamPanel.qml" line="459"/>
-        <source>Nessuno stream attivo</source>
-        <translation>Nav aktīvas plūsmas</translation>
+        <source>No active stream</source>
+        <translation>Nav aktīvas straumes</translation>
     </message>
 </context>
 <context>
@@ -11597,161 +10061,8 @@ UDP server %2:%3</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/MamWindow.qml" line="532"/>
-        <source>Nessuno stream attivo</source>
-        <translation>Nav aktīvas plūsmas</translation>
-    </message>
-</context>
-<context>
-    <name>MessageAggregatorMainWindow</name>
-    <message>
-        <source>Time On</source>
-        <translation type="vanished">Sākuma laiks</translation>
-    </message>
-    <message>
-        <source>Time Off</source>
-        <translation type="vanished">Beigu laiks</translation>
-    </message>
-    <message>
-        <source>Callsign</source>
-        <translation type="vanished">Izsaukums</translation>
-    </message>
-    <message>
-        <source>Grid</source>
-        <translation type="vanished">Lauciņš</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Nosaukums</translation>
-    </message>
-    <message>
-        <source>Frequency</source>
-        <translation type="vanished">Frekvence</translation>
-    </message>
-    <message>
-        <source>Mode</source>
-        <translation type="vanished">Režīms</translation>
-    </message>
-    <message>
-        <source>Sent</source>
-        <translation type="vanished">Nosūtīts</translation>
-    </message>
-    <message>
-        <source>Rec&apos;d</source>
-        <translation type="vanished">Saņemts</translation>
-    </message>
-    <message>
-        <source>Power</source>
-        <translation type="vanished">Jauda</translation>
-    </message>
-    <message>
-        <source>Operator</source>
-        <translation type="vanished">Operators</translation>
-    </message>
-    <message>
-        <source>My Call</source>
-        <translation type="vanished">Mans izsaukums</translation>
-    </message>
-    <message>
-        <source>My Grid</source>
-        <translation type="vanished">Mans lauciņš</translation>
-    </message>
-    <message>
-        <source>Exch Sent</source>
-        <translation type="vanished">Apmaiņa nosūtīta</translation>
-    </message>
-    <message>
-        <source>Exch Rcvd</source>
-        <translation type="vanished">Apmaiņa saņemta</translation>
-    </message>
-    <message>
-        <source>Prop</source>
-        <translation type="vanished">Izplat.</translation>
-    </message>
-    <message>
-        <source>Satellite</source>
-        <translation type="vanished">Satelīts</translation>
-    </message>
-    <message>
-        <source>Sat Mode</source>
-        <translation type="vanished">Sat. režīms</translation>
-    </message>
-    <message>
-        <source>RX Frequency</source>
-        <translation type="vanished">RX frekvence</translation>
-    </message>
-    <message>
-        <source>Comments</source>
-        <translation type="vanished">Komentāri</translation>
-    </message>
-    <message>
-        <source>&amp;Add callsign</source>
-        <translation type="vanished">&amp;Pievienot izsaukumu</translation>
-    </message>
-    <message>
-        <source>&amp;Delete callsign</source>
-        <translation type="vanished">&amp;Dzēst izsaukumu</translation>
-    </message>
-    <message>
-        <source>&amp;Highlight last only</source>
-        <translation type="vanished">&amp;Izcelt tikai pēdējo</translation>
-    </message>
-    <message>
-        <source>&amp;Background colour</source>
-        <translation type="vanished">&amp;Fona krāsa</translation>
-    </message>
-    <message>
-        <source>&amp;Foreground colour</source>
-        <translation type="vanished">&amp;Priekšplāna krāsa</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation type="vanished">&amp;Fails</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation type="vanished">I&amp;ziet</translation>
-    </message>
-    <message>
-        <source>Exit the application</source>
-        <translation type="vanished">Iziet no lietotnes</translation>
-    </message>
-    <message>
-        <source>&amp;View</source>
-        <translation type="vanished">&amp;Skats</translation>
-    </message>
-    <message>
-        <source>Port number:</source>
-        <translation type="vanished">Porta numurs:</translation>
-    </message>
-    <message>
-        <source>Multicast Group (blank for unicast server):</source>
-        <translation type="vanished">Multiraides grupa (tukšs unikāstes serverim):</translation>
-    </message>
-    <message>
-        <source>Network interfaces:</source>
-        <translation type="vanished">Tīkla saskarnes:</translation>
-    </message>
-    <message>
-        <source>Server Details</source>
-        <translation type="vanished">Servera informācija</translation>
-    </message>
-    <message>
-        <source>Calls of Interest</source>
-        <translation type="vanished">Interesējošie izsaukumi</translation>
-    </message>
-    <message>
-        <source>Select background color</source>
-        <translation type="vanished">Atlasiet fona krāsu</translation>
-    </message>
-    <message>
-        <source>Select foreground color</source>
-        <translation type="vanished">Atlasiet priekšplāna krāsu</translation>
-    </message>
-    <message>
-        <source>Network Error:
-%1</source>
-        <translation type="vanished">Tīkla kļūda:
-%1</translation>
+        <source>No active stream</source>
+        <translation>Nav aktīvas straumes</translation>
     </message>
 </context>
 <context>
@@ -11766,36 +10077,6 @@ UDP server %2:%3</translation>
         <location filename="../widgets/messageaveraging.ui" line="29"/>
         <source>   UTC  Sync    DT  Freq   </source>
         <translation>   UTC  Sync    DT  Freq   </translation>
-    </message>
-</context>
-<context>
-    <name>MessageDialog</name>
-    <message>
-        <source>Hide Details...</source>
-        <translation type="vanished">Slēpt informāciju...</translation>
-    </message>
-    <message>
-        <source>Show Details...</source>
-        <translation type="vanished">Rādīt informāciju...</translation>
-    </message>
-</context>
-<context>
-    <name>Messages</name>
-    <message>
-        <source>Dialog</source>
-        <translation type="vanished">Dialoglodziņš</translation>
-    </message>
-    <message>
-        <source> Freq     DF     Pol     UTC       dB</source>
-        <translation type="vanished"> Frekv.   DF     Pol     UTC       dB</translation>
-    </message>
-    <message>
-        <source>CQ* Only</source>
-        <translation type="vanished">Tikai CQ*</translation>
-    </message>
-    <message>
-        <source>CQ Only</source>
-        <translation type="vanished">Tikai CQ</translation>
     </message>
 </context>
 <context>
@@ -11905,29 +10186,11 @@ UDP server %2:%3</translation>
     </message>
 </context>
 <context>
-    <name>OmniRigTransceiver</name>
+    <name>PSKReporterPanel</name>
     <message>
-        <source>OmniRig: unrecognized mode</source>
-        <translation type="vanished">OmniRig: neatpazīts režīms</translation>
-    </message>
-    <message>
-        <source>Failed to start OmniRig COM server</source>
-        <translation type="vanished">Neizdevās palaist OmniRig COM serveri</translation>
-    </message>
-    <message>
-        <source>OmniRig COM/OLE error: %1 at %2: %3 (%4)</source>
-        <translation type="vanished">OmniRig COM/OLE kļūda: %1 pie %2: %3 (%4)</translation>
-    </message>
-    <message>
-        <source>OmniRig: don&apos;t know how to set rig frequency</source>
-        <translation type="vanished">OmniRig: nezina, kā iestatīt radio frekvenci</translation>
-    </message>
-</context>
-<context>
-    <name>PasteAction</name>
-    <message>
-        <source>Paste</source>
-        <translation type="vanished">Ielīmēt</translation>
+        <location filename="../qml/decodium/components/PSKReporterPanel.qml" line="133"/>
+        <source>updating…</source>
+        <translation>atjaunina…</translation>
     </message>
 </context>
 <context>
@@ -12021,26 +10284,26 @@ UDP server %2:%3</translation>
         <translation>cluster returned no data</translation>
     </message>
     <message>
-        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <location filename="../DecodiumPropagationManager.cpp" line="176"/>
-        <location filename="../widgets/IonosphericForecastWindow.cpp" line="42"/>
+        <location filename="../Network/Cloudlog.cpp" line="75"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="465"/>
+        <location filename="../widgets/IonosphericForecastWindow.cpp" line="42"/>
         <source>empty reply</source>
         <translation>empty reply</translation>
     </message>
     <message>
-        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <location filename="../DecodiumPropagationManager.cpp" line="182"/>
-        <location filename="../widgets/IonosphericForecastWindow.cpp" line="49"/>
+        <location filename="../Network/Cloudlog.cpp" line="82"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="472"/>
+        <location filename="../widgets/IonosphericForecastWindow.cpp" line="49"/>
         <source>reply too large</source>
         <translation>reply too large</translation>
     </message>
     <message>
-        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <location filename="../DecodiumPropagationManager.cpp" line="188"/>
-        <location filename="../widgets/IonosphericForecastWindow.cpp" line="56"/>
+        <location filename="../Network/Cloudlog.cpp" line="89"/>
         <location filename="../widgets/DXClusterWindow.cpp" line="479"/>
+        <location filename="../widgets/IonosphericForecastWindow.cpp" line="56"/>
         <source>reply exceeds limit</source>
         <translation>reply exceeds limit</translation>
     </message>
@@ -12155,53 +10418,45 @@ UDP server %2:%3</translation>
         <translation>AutoSpot noraidīts priekš %1 uz %2:%3</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22575"/>
         <location filename="../DecodiumDxCluster.cpp" line="896"/>
+        <location filename="../widgets/mainwindow.cpp" line="22711"/>
         <source>timeout waiting for cluster response</source>
         <translation>timeout waiting for cluster response</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22576"/>
         <location filename="../DecodiumDxCluster.cpp" line="897"/>
+        <location filename="../widgets/mainwindow.cpp" line="22712"/>
         <source>timeout waiting for cluster response: %1</source>
         <translation>timeout waiting for cluster response: %1</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22610"/>
         <location filename="../DecodiumDxCluster.cpp" line="932"/>
+        <location filename="../widgets/mainwindow.cpp" line="22746"/>
         <source>cluster verification response exceeded the safety limit</source>
         <translation>klastera pārbaudes atbilde pārsniedza drošības ierobežojumu</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22717"/>
         <location filename="../DecodiumDxCluster.cpp" line="1030"/>
         <location filename="../DecodiumDxCluster.cpp" line="1050"/>
+        <location filename="../widgets/mainwindow.cpp" line="22853"/>
         <source>published in show/dx</source>
         <translation>publicēts sadaļā show/dx</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22722"/>
         <location filename="../DecodiumDxCluster.cpp" line="1033"/>
+        <location filename="../widgets/mainwindow.cpp" line="22858"/>
         <source>node accepted the command; show/dx did not echo it yet</source>
         <translation>mezgls pieņēma komandu; show/dx to vēl neatkārtoja</translation>
     </message>
     <message>
-        <source>node accepted the command but the spot is not visible in show/dx</source>
-        <translation type="vanished">node accepted the command but the spot is not visible in show/dx</translation>
-    </message>
-    <message>
-        <source>node accepted the command but the spot is not visible in show/dx: %1</source>
-        <translation type="vanished">node accepted the command but the spot is not visible in show/dx: %1</translation>
-    </message>
-    <message>
-        <location filename="../widgets/mainwindow.cpp" line="22747"/>
         <location filename="../DecodiumDxCluster.cpp" line="1059"/>
+        <location filename="../widgets/mainwindow.cpp" line="22883"/>
         <source>connection closed before cluster confirmation</source>
         <translation>connection closed before cluster confirmation</translation>
     </message>
     <message>
-        <location filename="../widgets/mainwindow.cpp" line="22748"/>
         <location filename="../DecodiumDxCluster.cpp" line="1060"/>
+        <location filename="../widgets/mainwindow.cpp" line="22884"/>
         <source>connection closed before cluster confirmation: %1</source>
         <translation>connection closed before cluster confirmation: %1</translation>
     </message>
@@ -12235,74 +10490,74 @@ Downloaded file exceeds limit of %1 MiB:
 %2</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24186"/>
+        <location filename="../DecodiumBridge.cpp" line="25386"/>
         <source>Invalid frequency</source>
         <translation>Nederīga frekvence</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24188"/>
+        <location filename="../DecodiumBridge.cpp" line="25388"/>
         <source>Invalid date/time. Use ISO format or yyyy-MM-dd HH:mm.</source>
         <translation>Nederīgs datums/laiks. Izmantojiet ISO formātu vai yyyy-MM-dd HH:mm.</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24190"/>
+        <location filename="../DecodiumBridge.cpp" line="25390"/>
         <source>Invalid frequency row</source>
         <translation>Nederīga frekvences rinda</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24249"/>
+        <location filename="../DecodiumBridge.cpp" line="25449"/>
         <source>Failed to parse JSON frequencies file: %1</source>
         <translation>Neizdevās parsēt JSON frekvenču failu: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24257"/>
+        <location filename="../DecodiumBridge.cpp" line="25457"/>
         <source>No frequencies were found</source>
         <translation>Frekvences netika atrastas</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24263"/>
-        <location filename="../DecodiumBridge.cpp" line="24365"/>
-        <location filename="../DecodiumBridge.cpp" line="24392"/>
+        <location filename="../DecodiumBridge.cpp" line="25463"/>
+        <location filename="../DecodiumBridge.cpp" line="25565"/>
+        <location filename="../DecodiumBridge.cpp" line="25592"/>
         <source>Frequency file contains too many rows (%1, limit %2)</source>
         <translation>Frekvenču fails satur pārāk daudz rindu (%1, ierobežojums %2)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24304"/>
+        <location filename="../DecodiumBridge.cpp" line="25504"/>
         <source>Frequency file does not exist</source>
         <translation>Frekvenču fails neeksistē</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24310"/>
+        <location filename="../DecodiumBridge.cpp" line="25510"/>
         <source>Frequency file is too large (%1 bytes, limit %2 bytes)</source>
         <translation>Frekvenču fails ir pārāk liels (%1 baiti, ierobežojums %2 baiti)</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24320"/>
+        <location filename="../DecodiumBridge.cpp" line="25520"/>
         <source>Cannot open frequency file: %1</source>
         <translation>Nevar atvērt frekvenču failu: %1</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24330"/>
+        <location filename="../DecodiumBridge.cpp" line="25530"/>
         <source>No valid working frequencies found</source>
         <translation>Nav atrastas derīgas darba frekvences</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24344"/>
+        <location filename="../DecodiumBridge.cpp" line="25544"/>
         <source>Not a valid frequencies file: incorrect file magic</source>
         <translation>Nederīgs frekvenču fails: nepareizs faila magiskais paraksts</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24351"/>
+        <location filename="../DecodiumBridge.cpp" line="25551"/>
         <source>Not a valid frequencies file: version is too new</source>
         <translation>Nederīgs frekvenču fails: versija ir pārāk jauna</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24359"/>
+        <location filename="../DecodiumBridge.cpp" line="25559"/>
         <source>Not a valid frequencies file: cannot read row count</source>
         <translation>Nederīgs frekvenču fails: nevar nolasīt rindu skaitu</translation>
     </message>
     <message>
-        <location filename="../DecodiumBridge.cpp" line="24386"/>
+        <location filename="../DecodiumBridge.cpp" line="25586"/>
         <source>Not a valid frequencies file: contents corrupt</source>
         <translation>Nederīgs frekvenču fails: saturs ir bojāts</translation>
     </message>
@@ -12345,10 +10600,6 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../DecodiumTransceiverManager.cpp" line="156"/>
         <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. Dettagli tecnici nel diagnostic log.</source>
         <translation>Pārtrūka CAT sakari ar rāciju. Pārbaudiet USB kabeli, COM portu, bodu ātrumu un to, vai rācija ir ieslēgta. Tehniskā informācija diagnostikas žurnālā.</translation>
-    </message>
-    <message>
-        <source>Comunicazione CAT interrotta con il rig. Verifica cavo USB, porta COM, baud rate e che il rig sia acceso. (trace hamlib: %1)</source>
-        <translation type="vanished">CAT sakari ar radio pārtraukti. Pārbaudiet USB kabeli, COM portu, bodu ātrumu un vai radio ir ieslēgts. (hamlib pēdas: %1)</translation>
     </message>
     <message>
         <location filename="../DecodiumTransceiverManager.cpp" line="203"/>
@@ -12469,10 +10720,6 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../Network/MessageClient.cpp" line="219"/>
         <source>UDP socket error</source>
         <translation>UDP ligzdas kļūda</translation>
-    </message>
-    <message>
-        <source>Unexpected error</source>
-        <translation type="vanished">Negaidīta kļūda</translation>
     </message>
 </context>
 <context>
@@ -12917,13 +11164,13 @@ netiks rādītas!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="82"/>
-        <source>QSY a preset Working Frequencies</source>
-        <translation>QSY uz iepriekš iestatītām darba frekvencēm</translation>
+        <source>QSY to Working Frequencies preset</source>
+        <translation>QSY uz Darba frekvenču sākotnējo iestatījumu</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="89"/>
-        <source>%1 preset · %2 visibili</source>
-        <translation>%1 priekšiestatījumi · %2 redzami</translation>
+        <source>%1 presets · %2 visible</source>
+        <translation>%1 sākotnējie iestatījumi · %2 redzami</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
@@ -12942,12 +11189,12 @@ netiks rādītas!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="213"/>
-        <source>Click su un preset per fare QSY · F2 per riaprire</source>
-        <translation>Klikšķiniet uz priekšiestatījuma, lai veiktu QSY · F2, lai atkārtoti atvērtu</translation>
+        <source>Click a preset to QSY · F2 to reopen</source>
+        <translation>Noklikšķiniet uz sākotnējā iestatījuma, lai veiktu QSY · F2, lai atkārtoti atvērtu</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="220"/>
-        <source>Chiudi</source>
+        <source>Close</source>
         <translation>Aizvērt</translation>
     </message>
 </context>
@@ -12992,13 +11239,6 @@ netiks rādītas!</translation>
         <location filename="../widgets/RTTYTerminalWidget.cpp" line="71"/>
         <source>Send RTTY</source>
         <translation>Send RTTY</translation>
-    </message>
-</context>
-<context>
-    <name>RedoAction</name>
-    <message>
-        <source>Redo</source>
-        <translation type="vanished">Atkārtot</translation>
     </message>
 </context>
 <context>
@@ -13094,6 +11334,109 @@ Error(%2): %3</translation>
     </message>
 </context>
 <context>
+    <name>RigControlDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="13"/>
+        <source>CAT — Transceiver Settings</source>
+        <translation>CAT — Uztvērēja-raidītāja iestatījumi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="86"/>
+        <source>CAT — Transceiver Control</source>
+        <translation>CAT — Uztvērēja-raidītāja vadība</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="114"/>
+        <source>Not connected</source>
+        <translation>Nav savienots</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="153"/>
+        <source>CAT active</source>
+        <translation>CAT aktīvs</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="153"/>
+        <source>CAT not connected</source>
+        <translation>CAT nav savienots</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="217"/>
+        <source>The backend can only be changed when the radio is disconnected.</source>
+        <translation>Aizmugursistēmu var mainīt tikai tad, kad radio ir atvienots.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="239"/>
+        <source>
+Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
+        <translation>
+Padoms: aizveriet OmniRig no Windows sistēmas teknes ikonas, pēc tam vēlreiz nospiediet Savienot.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="301"/>
+        <source>Rig name…</source>
+        <translation>Radio nosaukums…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="309"/>
+        <source>Choose…</source>
+        <translation>Izvēlēties…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="319"/>
+        <source>Select Transceiver</source>
+        <translation>Izvēlēties uztvērēju-raidītāju</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="328"/>
+        <source>⚙  Choose Transceiver (%1 available)</source>
+        <translation>⚙  Izvēlēties uztvērēju-raidītāju (%1 pieejami)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="337"/>
+        <source>Filter by name (e.g. Icom, Yaesu, FT-991…)</source>
+        <translation>Filtrēt pēc nosaukuma (piem. Icom, Yaesu, FT-991…)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="372"/>
+        <source>Cancel</source>
+        <translation>Atcelt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="536"/>
+        <source>Connect on startup</source>
+        <translation>Savienot startējot</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="542"/>
+        <source>Start monitor</source>
+        <translation>Sākt monitoru</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="707"/>
+        <source>▶  Connect</source>
+        <translation>▶  Savienot</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="740"/>
+        <source>■  Disconnect</source>
+        <translation>■  Atvienot</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
+        <source>Close</source>
+        <translation>Aizvērt</translation>
+    </message>
+</context>
+<context>
+    <name>RigControlDialogContent</name>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="145"/>
+        <source>Search radio...</source>
+        <translation>Meklēt radio...</translation>
+    </message>
+</context>
+<context>
     <name>SampleDownloader::impl</name>
     <message>
         <location filename="../SampleDownloader.cpp" line="91"/>
@@ -13140,20 +11483,6 @@ Error(%2): %3</translation>
         <location filename="../SampleDownloader.cpp" line="132"/>
         <source>Invalid URL format</source>
         <translation>Invalid URL format</translation>
-    </message>
-</context>
-<context>
-    <name>SelectAllAction</name>
-    <message>
-        <source>Select All</source>
-        <translation type="vanished">Atlasīt visu</translation>
-    </message>
-</context>
-<context>
-    <name>Server</name>
-    <message>
-        <source>Network Error: %1</source>
-        <translation type="vanished">Tīkla kļūda: %1</translation>
     </message>
 </context>
 <context>
@@ -13275,10 +11604,6 @@ Error(%2): %3</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1227"/>
         <source>New Callsign</source>
         <translation>Jauns izsaukums</translation>
-    </message>
-    <message>
-        <source>LoTW User</source>
-        <translation type="vanished">LoTW lietotājs</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1229"/>
@@ -13665,45 +11990,9 @@ Error(%2): %3</translation>
         <translation>Automātiskais RX līmenis atspējots</translation>
     </message>
     <message>
-        <source>PROFILI PRONTI</source>
-        <translation type="vanished">GATAVIE PROFILI</translation>
-    </message>
-    <message>
-        <source>Bilanciato (QSO quotidiano) — default</source>
-        <translation type="vanished">Līdzsvarots (ikdienas QSO) — noklusējums</translation>
-    </message>
-    <message>
-        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · salta fine-slot OFF · MAM OFF · partner-memory ON · TX2 re-send ON · smooth flow ON · caller retries 5.</source>
-        <translation type="vanished">Piesardzīgs ON · pilna dekodēšana AutoCQ ON · agrāka spēcīgu partneru noslēgšana ON · adaptīvā dekodēšana ON · AP keša glābšana ON · izlaist slota beigas OFF · MAM OFF · partnera atmiņa ON · TX2 atkārtota sūtīšana ON · plūstoša plūsma ON · izsaucēja atkārtojumi 5.</translation>
-    </message>
-    <message>
-        <source>Weak-signal / caccia DX</source>
-        <translation type="vanished">Vājš signāls / DX medības</translation>
-    </message>
-    <message>
-        <source>Come Bilanciato, ma: caller retries 7 · adaptive decode OFF (massima sensibilità) · AP cache rescue ON (accetta qualche falso) · salta fine-slot OFF (non perdere decode tardivi).</source>
-        <translation type="vanished">Tāpat kā Līdzsvarots, bet: izsaucēja atkārtojumi 7 · adaptīvā dekodēšana OFF (maksimāla jutība) · AP keša glābšana ON (pieņem dažus viltus) · izlaist slota beigas OFF (nezaudēt vēlīnās dekodēšanas).</translation>
-    </message>
-    <message>
-        <source>Contest / alta densità</source>
-        <translation type="vanished">Sacensības / augsts blīvums</translation>
-    </message>
-    <message>
-        <source>close strong partners ON · salta fine-slot ON (latenza minima) · MAM multi-stream ON (2 stream, sperimentale) · full decode AutoCQ ON · caller retries 3 · partner-memory ON · conservative OFF.</source>
-        <translation type="vanished">agrāka spēcīgu partneru noslēgšana ON · izlaist slota beigas ON (minimāla aizture) · MAM vairākplūsmu ON (2 plūsmas, eksperimentāli) · pilna dekodēšana AutoCQ ON · izsaucēja atkārtojumi 3 · partnera atmiņa ON · piesardzīgs OFF.</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3257"/>
         <source>CPU-limited (Decodium Console / mini PC)</source>
         <translation>CPU ierobežots (Decodium Console / mini PC)</translation>
-    </message>
-    <message>
-        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · resto ai valori predefiniti. Watchdog invariati.</source>
-        <translation type="vanished">adaptīvā dekodēšana ON · MAM OFF · pilna dekodēšana AutoCQ OFF · plūstoša plūsma ON · pārējais pie noklusējuma vērtībām. Watchdog nemainīts.</translation>
-    </message>
-    <message>
-        <source>● attivo</source>
-        <translation type="vanished">● aktīvs</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3381"/>
@@ -14137,11 +12426,6 @@ Drošības vārti: AP-keša izglābtās rindas tiek rādītas/auditētas, bet t�
 Noklusējums: IZSL.</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4055"/>
-        <source>FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):</source>
-        <translation>FT2: izlaist lieko slota beigu dekodēšanu (samazina aizķeršanās aizturi):</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4079"/>
         <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
 
@@ -14363,42 +12647,6 @@ Augsts = visas pieejamās animācijas.
 Noklusējums: Vidējs.</translation>
     </message>
     <message>
-        <source>Priorità processo:</source>
-        <translation type="vanished">Procesa prioritāte:</translation>
-    </message>
-    <message>
-        <source>Normale</source>
-        <translation type="vanished">Normāla</translation>
-    </message>
-    <message>
-        <source>Sopra il normale</source>
-        <translation type="vanished">Virs normālas</translation>
-    </message>
-    <message>
-        <source>Alta (consigliata)</source>
-        <translation type="vanished">Augsta (ieteicama)</translation>
-    </message>
-    <message>
-        <source>Tempo reale ⚠️</source>
-        <translation type="vanished">Reālais laiks ⚠️</translation>
-    </message>
-    <message>
-        <source>Priorità di scheduling CPU del processo (Windows).
-
-Normale / Sopra il normale (default) = sicure.
-Alta = più fluidità per audio/decode, rischio basso (consigliata se noti scatti).
-Tempo reale ⚠️ = massima fluidità MA può rendere il PC non responsivo (mouse/tastiera) e richiede privilegi amministratore (senza admin Windows la declassa ad Alta).
-
-Se non sei sicuro usa &apos;Alta&apos;.</source>
-        <translation type="vanished">Procesa CPU plānošanas prioritāte (Windows).
-
-Normāla / Virs normālas (noklusējums) = drošas.
-Augsta = lielāka plūstamība audio/dekodēšanai, zems risks (ieteicama, ja pamanāt aizķeršanos).
-Reālais laiks ⚠️ = maksimāla plūstamība, BET var padarīt PC nereaģējošu (pele/tastatūra) un prasa administratora tiesības (bez administratora Windows to pazemina līdz Augstai).
-
-Ja neesat pārliecināts, izmantojiet &apos;Augsta&apos;.</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4672"/>
         <source>UI Style (restart):</source>
         <translation>UI stils (restarts):</translation>
@@ -14453,18 +12701,6 @@ Samazina aizķeršanos vājākos PC.
 Noklusējums: IZSL. Nepieciešams restarts.</translation>
     </message>
     <message>
-        <source>Schermo intero:</source>
-        <translation type="vanished">Pilnekrāna režīms:</translation>
-    </message>
-    <message>
-        <source>Attiva (F11)</source>
-        <translation type="vanished">Aktivizēt (F11)</translation>
-    </message>
-    <message>
-        <source>Porta Decodium a schermo intero. Per uscire: F11, Esc, oppure il pulsante ✕ in alto. Non viene memorizzato: al riavvio torni alla finestra normale.</source>
-        <translation type="vanished">Pārslēdz Decodium pilnekrāna režīmā. Lai izietu: F11, Esc vai poga ✕ augšpusē. Netiek saglabāts: pēc restartēšanas atgriežas parastajā logā.</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
         <source>Spectrum FPS cap:</source>
         <translation>Spektra FPS ierobežojums:</translation>
@@ -14485,18 +12721,6 @@ When Full Spectrum is detached the separate render thread holds 30 fps without a
   • 30 = moderns aparatūra
 
 Kad pilnais spektrs ir atvienots, atsevišķais renderēšanas pavediens notur 30 fps, neietekmējot dekoderu.</translation>
-    </message>
-    <message>
-        <source>Eventi CPU pressure:</source>
-        <translation type="vanished">CPU slodzes notikumi:</translation>
-    </message>
-    <message>
-        <source>totale=%1 · severi=%2 (sessione)</source>
-        <translation type="vanished">kopā=%1 · nopietni=%2 (sesija)</translation>
-    </message>
-    <message>
-        <source>totale=0 · severi=0</source>
-        <translation type="vanished">kopā=0 · nopietni=0</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4809"/>
@@ -14572,6 +12796,12 @@ Nopietnie (≥1100ms vai 4+ īsu aizķeršanos uzliesmojums) ir spēcīgākais s
         <translation>Iespējot tīmekļa serveri:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5096"/>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5116"/>
+        <source>(not active)</source>
+        <translation>(nav aktīvs)</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5102"/>
         <source>Porta TCP:</source>
         <translation>TCP ports:</translation>
@@ -14585,6 +12815,11 @@ Nopietnie (≥1100ms vai 4+ īsu aizķeršanos uzliesmojums) ir spēcīgākais s
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5124"/>
         <source></source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5127"/>
+        <source>📱 Open Remote for iPad</source>
+        <translation>📱 Atvērt Remote priekš iPad</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5151"/>
@@ -14874,6 +13109,11 @@ QSO laikā tērē papildu CPU. Noklusējums: IZSL.</translation>
         <translation>Jauns</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4055"/>
+        <source>FT2: skip redundant end-slot decode (reduces lock-in latency):</source>
+        <translation>FT2: izlaist lieko slota beigu dekodēšanu (samazina fiksācijas aizkavi):</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4653"/>
         <source>Process priority:</source>
         <translation>Procesa prioritāte:</translation>
@@ -15016,11 +13256,6 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <translation>BG:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7036"/>
-        <source>Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.</source>
-        <translation>Iekrāso rindas FONU (papildus tekstam) šai kategorijai. OFF = nav pielāgota fona.</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7122"/>
         <source>Decode Boost:</source>
         <translation>Dekodēšanas pastiprinājums:</translation>
@@ -15041,11 +13276,6 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <translation>Izmantot pielāgotas krāsas:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7212"/>
-        <source>(sovrascrive sfondo e testo del tema)</source>
-        <translation>(pārraksta tēmas fonu un tekstu)</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7219"/>
         <source>Background:</source>
         <translation>Fons:</translation>
@@ -15056,9 +13286,24 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <translation>Teksts:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7318"/>
+        <source>Checking cty.dat...</source>
+        <translation>Pārbauda cty.dat...</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7331"/>
         <source>Download CALL3.TXT...</source>
         <translation>Lejupielādēt CALL3.TXT...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7342"/>
+        <source>Downloading CALL3.TXT...</source>
+        <translation>Lejupielādē CALL3.TXT...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7350"/>
+        <source>After clicking, a message with the outcome or error appears here.</source>
+        <translation>Pēc noklikšķināšanas šeit parādās ziņojums ar rezultātu vai kļūdu.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7453"/>
@@ -15571,29 +13816,9 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <translation>Click TX:</translation>
     </message>
     <message>
-        <source>Color 73:</source>
-        <translation type="vanished">Color 73:</translation>
-    </message>
-    <message>
-        <source>Color B4:</source>
-        <translation type="vanished">Color B4:</translation>
-    </message>
-    <message>
-        <source>Color CQ:</source>
-        <translation type="vanished">Color CQ:</translation>
-    </message>
-    <message>
-        <source>Color DX Entity:</source>
-        <translation type="vanished">Color DX Entity:</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7281"/>
         <source>Color Gain:</source>
         <translation>Color Gain:</translation>
-    </message>
-    <message>
-        <source>Color My Call:</source>
-        <translation type="vanished">Color My Call:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1958"/>
@@ -15725,10 +13950,6 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <translation>Detail:</translation>
     </message>
     <message>
-        <source>Direct Log QSO:</source>
-        <translation type="vanished">Direct Log QSO:</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3407"/>
         <source>Disable TX after 73:</source>
         <translation>Disable TX after 73:</translation>
@@ -15785,6 +14006,16 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5255"/>
         <source>Erasure Patterns:</source>
         <translation>Erasure Patterns:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7036"/>
+        <source>Colors the row BACKGROUND (in addition to the text) for this category. OFF = no custom background.</source>
+        <translation>Iekrāso rindas FONU (papildus tekstam) šai kategorijai. OFF = nav pielāgota fona.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7212"/>
+        <source>(overrides theme background and text)</source>
+        <translation>(aizstāj motīva fonu un tekstu)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7726"/>
@@ -16685,10 +14916,6 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <translation>TCP/IP:</translation>
     </message>
     <message>
-        <source>TERRITORY</source>
-        <translation type="vanished">TERRITORY</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4350"/>
         <source>TONE SPACING</source>
         <translation>TONE SPACING</translation>
@@ -16727,26 +14954,6 @@ Ja neesat pārliecināts, izmantojiet Augsta.</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3196"/>
         <source>TX Slot:</source>
         <translation>TX Slot:</translation>
-    </message>
-    <message>
-        <source>TX Watchdog (min):</source>
-        <translation type="vanished">TX Watchdog (min):</translation>
-    </message>
-    <message>
-        <source>Territory 1:</source>
-        <translation type="vanished">Territory 1:</translation>
-    </message>
-    <message>
-        <source>Territory 2:</source>
-        <translation type="vanished">Territory 2:</translation>
-    </message>
-    <message>
-        <source>Territory 3:</source>
-        <translation type="vanished">Territory 3:</translation>
-    </message>
-    <message>
-        <source>Territory 4:</source>
-        <translation type="vanished">Territory 4:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1942"/>
@@ -16983,45 +15190,7 @@ Noklusējums: IZSL.</translation>
     </message>
 </context>
 <context>
-    <name>SideBar</name>
-    <message>
-        <source>Add Favorite</source>
-        <translation type="vanished">Pievienot izlasei</translation>
-    </message>
-</context>
-<context>
-    <name>SoundInThread</name>
-    <message>
-        <source>UDP Socket bind failed.</source>
-        <translation type="vanished">UDP ligzdas piesaiste neizdevās.</translation>
-    </message>
-</context>
-<context>
     <name>SoundInput</name>
-    <message>
-        <source>An error opening the audio input device has occurred.</source>
-        <translation type="vanished">An error opening the audio input device has occurred.</translation>
-    </message>
-    <message>
-        <source>An error occurred during read from the audio input device.</source>
-        <translation type="vanished">An error occurred during read from the audio input device.</translation>
-    </message>
-    <message>
-        <source>Non-recoverable error, audio input device not usable at this time.</source>
-        <translation type="vanished">Non-recoverable error, audio input device not usable at this time.</translation>
-    </message>
-    <message>
-        <source>Requested input audio format is not valid.</source>
-        <translation type="vanished">Requested input audio format is not valid.</translation>
-    </message>
-    <message>
-        <source>Requested input audio format is not supported on device.</source>
-        <translation type="vanished">Requested input audio format is not supported on device.</translation>
-    </message>
-    <message>
-        <source>Failed to initialize audio sink device</source>
-        <translation type="vanished">Failed to initialize audio sink device</translation>
-    </message>
     <message>
         <location filename="../Audio/soundin.cpp" line="628"/>
         <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
@@ -17080,10 +15249,6 @@ Noklusējums: IZSL.</translation>
         <translation>Natīvā macOS AudioQueue uztvērēja inicializācija neizdevās: input device=&quot;%1&quot;, requested=%2, selected-channel=%3</translation>
     </message>
     <message>
-        <source>Native macOS AudioQueue input open failed for &quot;%1&quot;: %2</source>
-        <translation type="vanished">Natīvās macOS AudioQueue ievades atvēršana neizdevās priekš &quot;%1&quot;: %2</translation>
-    </message>
-    <message>
         <location filename="../Audio/soundin.cpp" line="523"/>
         <source>Native macOS AudioQueue buffer allocation failed for &quot;%1&quot;: %2</source>
         <translation>Natīvā macOS AudioQueue bufera piešķiršana neizdevās priekš &quot;%1&quot;: %2</translation>
@@ -17109,14 +15274,6 @@ Noklusējums: IZSL.</translation>
         <translation>Audio RX ievade apstājās ar kļūdu: ierīce=&quot;%1&quot;, stāvoklis=%2</translation>
     </message>
     <message>
-        <source>Interrupted</source>
-        <translation type="vanished">Interrupted</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation type="vanished">Error</translation>
-    </message>
-    <message>
         <location filename="../Audio/soundin.cpp" line="1114"/>
         <source>Stopped</source>
         <translation>Stopped</translation>
@@ -17124,34 +15281,6 @@ Noklusējums: IZSL.</translation>
 </context>
 <context>
     <name>SoundOutput</name>
-    <message>
-        <source>An error opening the audio output device has occurred.</source>
-        <translation type="vanished">An error opening the audio output device has occurred.</translation>
-    </message>
-    <message>
-        <source>An error occurred during write to the audio output device.</source>
-        <translation type="vanished">An error occurred during write to the audio output device.</translation>
-    </message>
-    <message>
-        <source>Audio output underrun</source>
-        <translation type="vanished">Audio output underrun</translation>
-    </message>
-    <message>
-        <source>Non-recoverable error, audio output device not usable at this time.</source>
-        <translation type="vanished">Non-recoverable error, audio output device not usable at this time.</translation>
-    </message>
-    <message>
-        <source>Requested output audio format is not valid.</source>
-        <translation type="vanished">Requested output audio format is not valid.</translation>
-    </message>
-    <message>
-        <source>Requested output audio format is not supported on device.</source>
-        <translation type="vanished">Requested output audio format is not supported on device.</translation>
-    </message>
-    <message>
-        <source>No audio output device configured.</source>
-        <translation type="vanished">No audio output device configured.</translation>
-    </message>
     <message>
         <location filename="../Audio/soundout.cpp" line="248"/>
         <source>Audio TX output open error: Qt could not open the selected output device. %1</source>
@@ -17238,14 +15367,6 @@ Noklusējums: IZSL.</translation>
         <translation>Audio TX izvade apstājās ar kļūdu: ierīce=&quot;%1&quot;, stāvoklis=%2</translation>
     </message>
     <message>
-        <source>Interrupted</source>
-        <translation type="vanished">Interrupted</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation type="vanished">Error</translation>
-    </message>
-    <message>
         <location filename="../Audio/soundout.cpp" line="791"/>
         <source>Stopped</source>
         <translation>Stopped</translation>
@@ -17267,6 +15388,16 @@ Noklusējums: IZSL.</translation>
         <location filename="../qml/decodium/components/SplashScreen.qml" line="233"/>
         <source>Start  ▶</source>
         <translation>Sākt  ▶</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="255"/>
+        <source>Named after Robert G. Gallager · Father of LDPC Codes</source>
+        <translation>Nosaukts Roberta G. Gallagera vārdā · LDPC kodu tēvs</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="262"/>
+        <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
+        <translation>© 2024-2026 IU8LMC  ·  GPL atvērtais kods  ·  Balstīts uz WSJT-X, ko izstrādāja K1JT u.c. &amp; WSJT-X by K1JT</translation>
     </message>
 </context>
 <context>
@@ -17470,10 +15601,6 @@ Noklusējums: IZSL.</translation>
         <translation>TCI websocket error: %1</translation>
     </message>
     <message>
-        <source>TCI SDR is not switched on</source>
-        <translation type="vanished">TCI SDR is not switched on</translation>
-    </message>
-    <message>
         <location filename="../Transceiver/TCITransceiver.cpp" line="921"/>
         <source>TCI could not be opened</source>
         <translation>TCI could not be opened</translation>
@@ -17661,47 +15788,7 @@ Noklusējums: IZSL.</translation>
 <context>
     <name>TxPanel</name>
     <message>
-        <source>Multi-Answer Mode (right-click=window)</source>
-        <translation type="vanished">Multi-Answer Mode (right-click=window)</translation>
-    </message>
-    <message>
-        <source>Deep Search</source>
-        <translation type="vanished">Deep Search</translation>
-    </message>
-    <message>
-        <source>A-Priori Decoding</source>
-        <translation type="vanished">A-Priori Decoding</translation>
-    </message>
-    <message>
-        <source>SWL Mode (Listen Only)</source>
-        <translation type="vanished">SWL Mode (Listen Only)</translation>
-    </message>
-    <message>
-        <source>Auto Sequence</source>
-        <translation type="vanished">Auto Sequence</translation>
-    </message>
-    <message>
-        <source>Quick QSO - skip TX1 and start from TX2 (direct report)</source>
-        <translation type="vanished">Quick QSO - skip TX1 and start from TX2 (direct report)</translation>
-    </message>
-    <message>
-        <source>Enable TX</source>
-        <translation type="vanished">Enable TX</translation>
-    </message>
-    <message>
-        <source>Lock TX frequency
-(Hold Tx Freq)</source>
-        <translation type="vanished">Lock TX frequency
-(Hold Tx Freq)</translation>
-    </message>
-    <message>
-        <source>Auto CQ Repeat
-Call CQ automatically until a reply is received</source>
-        <translation type="vanished">Auto CQ Repeat
-Call CQ automatically until a reply is received</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1220"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1230"/>
         <source>TX slot
 1st: :00/:30
 2nd: :15/:45</source>
@@ -17710,99 +15797,100 @@ Call CQ automatically until a reply is received</translation>
 2nd: :15/:45</translation>
     </message>
     <message>
-        <source>Auto CQ: alternate TX/RX phases after repeated CQ without reply</source>
-        <translation type="vanished">Auto CQ: alternate TX/RX phases after repeated CQ without reply</translation>
-    </message>
-    <message>
-        <source>Tune</source>
-        <translation type="vanished">Tune</translation>
-    </message>
-    <message>
-        <source>Clear DX, reports and TX1-TX5</source>
-        <translation type="vanished">Clear DX, reports and TX1-TX5</translation>
-    </message>
-    <message>
-        <source>Halt TX</source>
-        <translation type="vanished">Halt TX</translation>
-    </message>
-    <message>
-        <source>FT2 Async Mode - sine wave: green=RX, red=TX</source>
-        <translation type="vanished">FT2 Async Mode - sine wave: green=RX, red=TX</translation>
-    </message>
-    <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
         <source>Potenza TX</source>
         <translation>TX jauda</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="965"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="975"/>
         <source>Multi-Answer Mode (MAM) - right-click opens the window (default OFF)</source>
         <translation>Vairākatbilžu režīms (MAM) - labais klikšķis atver logu (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="995"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1005"/>
         <source>Deep Search: deeper weak-signal search using known callsigns (default OFF)</source>
         <translation>Dziļā meklēšana: dziļāka vāja signāla meklēšana, izmantojot zināmus izsaukumus (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1020"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1030"/>
         <source>A priori decode (AP): uses known information to recover weak signals (default OFF)</source>
         <translation>A priori dekodēšana (AP): izmanto zināmu informāciju, lai atgūtu vājus signālus (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1045"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1055"/>
         <source>Automatic QSO sequencing (default OFF)</source>
         <translation>Automātiska QSO secības veidošana (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1070"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1080"/>
         <source>Quick QSO: skips TX1 and starts from TX2 (direct report) (default OFF)</source>
         <translation>Ātrais QSO: izlaiž TX1 un sāk no TX2 (tiešais ziņojums) (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1097"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1107"/>
         <source>Enable TX
 Right button + mouse wheel: adjust TX power</source>
         <translation>Iespējot TX
 Labā poga + peles ritenītis: pielāgot TX jaudu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1132"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1142"/>
         <source>Lock the TX frequency
 (Hold Tx Freq)</source>
         <translation>Bloķēt TX frekvenci
 (Turēt Tx frekv.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1158"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1168"/>
         <source>Repeated Auto CQ
 Automatically calls CQ until a reply arrives (default OFF)</source>
         <translation>Atkārtots Auto CQ
 Automātiski izsauc CQ, līdz pienāk atbilde (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <source>Active call: %1 (attempt %2/%3)
-Click to open the panel</source>
-        <translation type="vanished">Aktīvais izsaukums: %1 (mēģinājums %2/%3)
-Klikšķiniet, lai atvērtu paneli</translation>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1370"/>
+        <source>CQ filter active (%1). Click: change level / turn off.</source>
+        <translation>CQ filtrs aktīvs (%1). Klikšķis: mainīt līmeni / izslēgt.</translation>
     </message>
     <message>
-        <source>Direct call (CALL)
-Open the direct callsign call panel
-with retry, timeout, and period control</source>
-        <translation type="vanished">Tiešais izsaukums (CALL)
-Atver tiešā izsaukuma izsaukšanas paneli
-ar atkārtojumu, noildzes un perioda vadību</translation>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1371"/>
+        <source>CQ only</source>
+        <translation>Tikai CQ</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1191"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1372"/>
+        <source>CQ filter off. Click: show only CQ, then cycle 73 / RR73 / RRR.</source>
+        <translation>CQ filtrs izslēgts. Klikšķis: rādīt tikai CQ, pēc tam cikls 73 / RR73 / RRR.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2062"/>
+        <source>Locator (e.g. JN71) — enter manually</source>
+        <translation>Locator (piem. JN71) — ievadiet manuāli</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2385"/>
+        <source>Edit TX%1 message</source>
+        <translation>Rediģēt TX%1 ziņojumu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2392"/>
+        <source>Re-enable TX%1</source>
+        <translation>Atkārtoti iespējot TX%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2392"/>
+        <source>Skip TX%1 (skip auto-seq)</source>
+        <translation>Izlaist TX%1 (izlaist auto-secību)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1201"/>
         <source>Active call: %1 (missed target %2/%3)
 Click to open the panel</source>
         <translation>Aktīvais izsaukums: %1 (nesasniegts mērķis %2/%3)
 Klikšķiniet, lai atvērtu paneli</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1194"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1204"/>
         <source>Direct call (CALL)
 Open the direct callsign call panel
 with missed-target limit, timeout, and period control</source>
@@ -17811,111 +15899,82 @@ Atver tiešā izsaukuma izsaukšanas paneli
 ar nesasniegta mērķa ierobežojumu, noildzes un perioda vadību</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1247"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1257"/>
         <source>Auto CQ: alternates TX/RX phases after repeated unanswered CQs (default OFF)</source>
         <translation>Auto CQ: maina TX/RX fāzes pēc atkārtotiem neatbildētiem CQ (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1273"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1283"/>
         <source>Stop TX</source>
         <translation>Apturēt TX</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1300"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1310"/>
         <source>Clear DX, reports, and TX1-TX5</source>
         <translation>Notīrīt DX, ziņojumus un TX1-TX5</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1325"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1335"/>
         <source>Tune (transmits the tuning carrier)</source>
         <translation>Noskaņot (pārraida noskaņošanas nesējsignālu)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1360"/>
-        <source>Filtro CQ attivo (%1). Click: cambia livello / spegne.</source>
-        <translation>CQ filtrs aktīvs (%1). Klikšķis: maina līmeni / izslēdz.</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1362"/>
-        <source>Filtro CQ spento. Click: mostra solo CQ, poi cicla 73 / RR73 / RRR.</source>
-        <translation>CQ filtrs izslēgts. Klikšķis: rāda tikai CQ, tad cikliski 73 / RR73 / RRR.</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1394"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1404"/>
         <source>Async FT2 mode - sine wave: green=RX, red=TX (default OFF)</source>
         <translation>Async FT2 režīms - sinusoīda: zaļš=RX, sarkans=TX (noklusēti IZSL.)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1409"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1419"/>
         <source>Hound mode active</source>
         <translation>Hound režīms aktīvs</translation>
     </message>
     <message>
-        <source>Wait &amp; Pounce active</source>
-        <translation type="vanished">Wait &amp; Pounce aktīvs</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1946"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1956"/>
         <source>Cancel</source>
         <translation>Atcelt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1951"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1961"/>
         <source>Standard</source>
         <translation>Standarta</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="1960"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="1970"/>
         <source>Apply</source>
         <translation>Lietot</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2017"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
         <source>Conferma registrazione QSO</source>
         <translation>Apstiprināt QSO reģistrēšanu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2052"/>
-        <source>Locatore (es. JN71) — inseribile a mano</source>
-        <translation>Lokators (piem., JN71) — ievadāms manuāli</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2074"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2084"/>
         <source>Start UTC:</source>
         <translation>Sākums UTC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2094"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2104"/>
         <source>End UTC:</source>
         <translation>Beigas UTC:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2142"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2152"/>
         <source>Sat Mode:</source>
         <translation>Sat Mode:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2153"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2163"/>
         <source>DX Cluster:</source>
         <translation>DX Cluster:</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2167"/>
-        <source>Spot al cluster</source>
-        <translation>Spots uz klasteri</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2167"/>
-        <source>Cluster non connesso</source>
-        <translation>Klasteris nav savienots</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2357"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2367"/>
         <source>TX%1 disabled (right-click -&gt; menu to re-enable)</source>
         <translation>TX%1 atspējots (labais klikšķis -&gt; izvēlne, lai atkārtoti iespējotu)</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2358"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2368"/>
         <source>Click: send now
 Right-click: menu (Edit / Skip TX%1)
 Long-press: edit message</source>
@@ -17924,126 +15983,24 @@ Labais klikšķis: izvēlne (Rediģēt / Izlaist TX%1)
 Ilgs nospiediens: rediģēt ziņojumu</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2375"/>
-        <source>Modifica messaggio TX%1</source>
-        <translation>Rediģēt TX%1 ziņojumu</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2382"/>
-        <source>Riabilita TX%1</source>
-        <translation>Atkārtoti iespējot TX%1</translation>
-    </message>
-    <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2382"/>
-        <source>Salta TX%1 (skip auto-seq)</source>
-        <translation>Izlaist TX%1 (izlaist auto-seq)</translation>
-    </message>
-    <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2177"/>
         <source>Spot to cluster</source>
-        <translation type="vanished">Spot to cluster</translation>
+        <translation>Spot to cluster</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2177"/>
         <source>Cluster not connected</source>
-        <translation type="vanished">Cluster not connected</translation>
+        <translation>Cluster not connected</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2184"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2194"/>
         <source>Close</source>
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/TxPanel.qml" line="2210"/>
+        <location filename="../qml/decodium/components/TxPanel.qml" line="2220"/>
         <source>Add</source>
         <translation>Add</translation>
-    </message>
-</context>
-<context>
-    <name>TxTune</name>
-    <message>
-        <source>Tx Tune</source>
-        <translation type="vanished">Tx noskaņošana</translation>
-    </message>
-    <message>
-        <source>Tx Power:</source>
-        <translation type="vanished">Tx jauda:</translation>
-    </message>
-    <message>
-        <source>Enable Tx I/Q Adjustment</source>
-        <translation type="vanished">Iespējot Tx I/Q pielāgošanu</translation>
-    </message>
-    <message>
-        <source>I/Q Amplitude:</source>
-        <translation type="vanished">I/Q amplitūda:</translation>
-    </message>
-    <message>
-        <source>Fine:</source>
-        <translation type="vanished">Smalki:</translation>
-    </message>
-    <message>
-        <source>I/Q Phase:</source>
-        <translation type="vanished">I/Q fāze:</translation>
-    </message>
-    <message>
-        <source>1.0000</source>
-        <translation type="vanished">1.0000</translation>
-    </message>
-    <message>
-        <source>0.000</source>
-        <translation type="vanished">0.000</translation>
-    </message>
-    <message>
-        <source>Tune</source>
-        <translation type="vanished">Noskaņot</translation>
-    </message>
-    <message>
-        <source>100 %</source>
-        <translation type="vanished">100 %</translation>
-    </message>
-</context>
-<context>
-    <name>UDPDaemon</name>
-    <message>
-        <source>Print the available network interfaces.</source>
-        <translation type="vanished">Drukāt pieejamās tīkla saskarnes.</translation>
-    </message>
-    <message>
-        <source>Where &lt;PORT&gt; is the UDP service port number to listen on.
-The default service port is 2237.</source>
-        <translation type="vanished">Kur &lt;PORT&gt; ir UDP pakalpojuma porta numurs, kuru klausīties.
-Noklusējuma pakalpojuma ports ir 2237.</translation>
-    </message>
-    <message>
-        <source>PORT</source>
-        <translation type="vanished">PORT</translation>
-    </message>
-    <message>
-        <source>Where &lt;GROUP&gt; is the multicast group to join.
-The default is a unicast server listening on all interfaces.</source>
-        <translation type="vanished">Kur &lt;GROUP&gt; ir multiraides grupa, kurai pievienoties.
-Noklusējums ir unikāstes serveris, kas klausās visās saskarnēs.</translation>
-    </message>
-    <message>
-        <source>GROUP</source>
-        <translation type="vanished">GROUP</translation>
-    </message>
-    <message>
-        <source>Where &lt;INTERFACE&gt; is the network interface name to join on.
-This option can be passed more than once to specify multiple network interfaces
-The default is use just the loop back interface.</source>
-        <translation type="vanished">Kur &lt;INTERFACE&gt; ir tīkla saskarnes nosaukums, kurai pievienoties.
-Šo opciju var norādīt vairākas reizes, lai norādītu vairākas tīkla saskarnes
-Noklusējums ir izmantot tikai cilpas saskarni.</translation>
-    </message>
-    <message>
-        <source>INTERFACE</source>
-        <translation type="vanished">INTERFACE</translation>
-    </message>
-</context>
-<context>
-    <name>UndoAction</name>
-    <message>
-        <source>Undo</source>
-        <translation type="vanished">Atsaukt</translation>
     </message>
 </context>
 <context>
@@ -18092,22 +16049,29 @@ Noklusējums ir izmantot tikai cilpas saskarni.</translation>
 <context>
     <name>Waterfall</name>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="806"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="811"/>
         <source>Hide</source>
         <translation>Slēpt</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="829"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="834"/>
         <source>Hide waterfall controls</source>
         <translation>Slēpt ūdenskrituma vadīklas</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="1880"/>
-        <source>Mostra controlli</source>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1839"/>
+        <source>4096-bin panadapter · SmartSDR style
+Click MONITOR to start</source>
+        <translation>4096 nodalījumu panadapteris · SmartSDR stils
+Noklikšķiniet MONITOR, lai sāktu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1885"/>
+        <source>Show controls</source>
         <translation>Rādīt vadīklas</translation>
     </message>
     <message>
-        <location filename="../qml/decodium/components/Waterfall.qml" line="1942"/>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="1947"/>
         <source>Show waterfall controls</source>
         <translation>Rādīt ūdenskrituma vadīklas</translation>
     </message>
@@ -18118,56 +16082,6 @@ Noklusējums ir izmantot tikai cilpas saskarni.</translation>
         <location filename="../widgets/widegraph.ui" line="14"/>
         <source>Dialog</source>
         <translation>Dialog</translation>
-    </message>
-    <message>
-        <source>Rx:  144.118.200
-Tx:  144.127.317</source>
-        <translation type="vanished">Rx:  144.118.200
-Tx:  144.127.317</translation>
-    </message>
-    <message>
-        <source> kHz</source>
-        <translation type="vanished"> kHz</translation>
-    </message>
-    <message>
-        <source>Offset </source>
-        <translation type="vanished">Nobīde </translation>
-    </message>
-    <message>
-        <source>Span </source>
-        <translation type="vanished">Diapazons </translation>
-    </message>
-    <message>
-        <source>Gain </source>
-        <translation type="vanished">Pastiprin. </translation>
-    </message>
-    <message>
-        <source>Zero </source>
-        <translation type="vanished">Nulle </translation>
-    </message>
-    <message>
-        <source>Auto Zero</source>
-        <translation type="vanished">Auto nulle</translation>
-    </message>
-    <message>
-        <source>2D Spectrum</source>
-        <translation type="vanished">2D spektrs</translation>
-    </message>
-    <message>
-        <source>Lock Tx=Rx Freq</source>
-        <translation type="vanished">Bloķēt Tx=Rx frekv.</translation>
-    </message>
-    <message>
-        <source>Force Center Freq (MHz)</source>
-        <translation type="vanished">Piespiest centra frekv. (MHz)</translation>
-    </message>
-    <message>
-        <source>1296.065</source>
-        <translation type="vanished">1296.065</translation>
-    </message>
-    <message>
-        <source>Set Rx Freq</source>
-        <translation type="vanished">Iestatīt Rx frekv.</translation>
     </message>
     <message>
         <location filename="../widgets/widegraph.ui" line="525"/>
@@ -18397,10 +16311,6 @@ Tx:  144.127.317</translation>
         <source>Read Palette</source>
         <translation>Read Palette</translation>
     </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Center freq:   1296.065.000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Centra frekv.:   1296.065.000&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
 </context>
 <context>
     <name>WorkedBefore</name>
@@ -18465,10 +16375,6 @@ Tx:  144.127.317</translation>
 </context>
 <context>
     <name>configuration_dialog</name>
-    <message>
-        <source>Settings</source>
-        <translation type="vanished">Settings</translation>
-    </message>
     <message>
         <location filename="../Configuration.ui" line="30"/>
         <source>Genera&amp;l</source>
@@ -20310,10 +18216,6 @@ Right click for insert and delete options.</translation>
         <translation>UDP Listen Port:</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 2238. 0 = porta casuale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Porta fissa su cui Decodium ascolta comandi UDP in ingresso (es. da DecoAlert). Default 2238. 0 = porta casuale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <location filename="../Configuration.ui" line="2543"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this enabled Decodium v3.0 SE KP5 will accept certain requests back from a UDP server that receives decode messages.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;With this enabled Decodium v3.0 SE KP5 will accept certain requests back from a UDP server that receives decode messages.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
@@ -20369,10 +18271,6 @@ Right click for insert and delete options.</translation>
         <location filename="../Configuration.ui" line="3005"/>
         <source>Highlight blue:</source>
         <translation>Highlight blue:</translation>
-    </message>
-    <message>
-        <source>http://lotw.arrl.org/lotw-user-activity.csv</source>
-        <translation type="vanished">http://lotw.arrl.org/lotw-user-activity.csv</translation>
     </message>
     <message>
         <location filename="../Configuration.ui" line="3155"/>
@@ -20982,110 +18880,6 @@ Right click for insert and delete options.</translation>
         <location filename="../main.cpp" line="471"/>
         <source>path: &quot;%1&quot;</source>
         <translation>path: &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <source>Shared memory error</source>
-        <translation type="vanished">Shared memory error</translation>
-    </message>
-    <message>
-        <source>Unable to create shared memory segment</source>
-        <translation type="vanished">Unable to create shared memory segment</translation>
-    </message>
-    <message>
-        <source>List the available audio input devices</source>
-        <translation type="vanished">Uzskaitīt pieejamās audio ievades ierīces</translation>
-    </message>
-    <message>
-        <source>List the available audio output devices</source>
-        <translation type="vanished">Uzskaitīt pieejamās audio izvades ierīces</translation>
-    </message>
-    <message>
-        <source>Record from &lt;start-time&gt; seconds, default start immediately</source>
-        <translation type="vanished">Ierakstīt no &lt;start-time&gt; sekundēm, pēc noklusējuma sākt nekavējoties</translation>
-    </message>
-    <message>
-        <source>start-time</source>
-        <translation type="vanished">sākuma-laiks</translation>
-    </message>
-    <message>
-        <source>Recording &lt;duration&gt; seconds</source>
-        <translation type="vanished">Ieraksta &lt;duration&gt; sekundes</translation>
-    </message>
-    <message>
-        <source>duration</source>
-        <translation type="vanished">ilgums</translation>
-    </message>
-    <message>
-        <source>Save output as &lt;output-file&gt;</source>
-        <translation type="vanished">Saglabāt izvadi kā &lt;output-file&gt;</translation>
-    </message>
-    <message>
-        <source>output-file</source>
-        <translation type="vanished">izvades-fails</translation>
-    </message>
-    <message>
-        <source>Playback &lt;input-file&gt;</source>
-        <translation type="vanished">Atskaņot &lt;input-file&gt;</translation>
-    </message>
-    <message>
-        <source>input-file</source>
-        <translation type="vanished">ievades-fails</translation>
-    </message>
-    <message>
-        <source>Overwrite existing file</source>
-        <translation type="vanished">Pārrakstīt esošo failu</translation>
-    </message>
-    <message>
-        <source>Record at &lt;sample-rate&gt;, default 48000 Hz</source>
-        <translation type="vanished">Ierakstīt ar &lt;sample-rate&gt;, pēc noklusējuma 48000 Hz</translation>
-    </message>
-    <message>
-        <source>sample-rate</source>
-        <translation type="vanished">iztveršanas-frekvence</translation>
-    </message>
-    <message>
-        <source>Record &lt;num&gt; channels, default 2</source>
-        <translation type="vanished">Ierakstīt &lt;num&gt; kanālus, pēc noklusējuma 2</translation>
-    </message>
-    <message>
-        <source>num</source>
-        <translation type="vanished">skaits</translation>
-    </message>
-    <message>
-        <source>Record from &lt;device-number&gt;</source>
-        <translation type="vanished">Ierakstīt no &lt;device-number&gt;</translation>
-    </message>
-    <message>
-        <source>device-number</source>
-        <translation type="vanished">ierīces-numurs</translation>
-    </message>
-    <message>
-        <source>Playback to &lt;device-number&gt;</source>
-        <translation type="vanished">Atskaņot uz &lt;device-number&gt;</translation>
-    </message>
-    <message>
-        <source>Playback &lt;category-name&gt;</source>
-        <translation type="vanished">Atskaņot &lt;category-name&gt;</translation>
-    </message>
-    <message>
-        <source>category-name</source>
-        <translation type="vanished">kategorijas-nosaukums</translation>
-    </message>
-    <message>
-        <source>use notify signals every &lt;interval&gt; milliseconds, zero to use a timer</source>
-        <translation type="vanished">izmantot paziņojuma signālus ik pēc &lt;interval&gt; milisekundēm, nulle, lai izmantotu taimeri</translation>
-    </message>
-    <message>
-        <source>interval</source>
-        <translation type="vanished">intervāls</translation>
-    </message>
-    <message>
-        <source>audio buffer size &lt;frames&gt;</source>
-        <translation type="vanished">audio bufera izmērs &lt;frames&gt;</translation>
-    </message>
-    <message>
-        <source>frames</source>
-        <translation type="vanished">kadri</translation>
     </message>
 </context>
 <context>

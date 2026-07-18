@@ -305,7 +305,7 @@ Rectangle {
 
                     Text {
                         anchors.centerIn: parent
-                        text: root.detached ? "Aggancia" : "Stacca"
+                        text: root.detached ? qsTr("Dock") : qsTr("Detach")
                         font.pixelSize: 10
                         font.bold: true
                         color: liveMapDetachMA.containsMouse ? secondaryCyan : textSecondary

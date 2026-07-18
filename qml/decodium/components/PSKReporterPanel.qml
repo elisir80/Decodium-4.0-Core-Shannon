@@ -130,7 +130,7 @@ Item {
             Item { Layout.fillWidth: true }
             Text {
                 visible: !!(root.bridge && root.bridge.pskHeardByFetching)
-                text: "updating…"
+                text: qsTr("updating…")
                 color: root.cAccent
                 font.pixelSize: 9; font.italic: true
                 Layout.alignment: Qt.AlignVCenter

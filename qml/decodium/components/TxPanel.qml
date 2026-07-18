@@ -1367,9 +1367,9 @@ Item {
                                 readonly property string lbl: "CQ" + (filterOn ? ["", "·73", "·RR73", "·RRR"][lvl] : "")
                                 readonly property real prefWidth: txPanel.toolbarActionWidth(lbl, "▾")
                                 readonly property string tip: filterOn
-                                    ? qsTr("Filtro CQ attivo (%1). Click: cambia livello / spegne.")
-                                          .arg(["solo CQ", "CQ+73", "CQ+73+RR73", "CQ+73+RR73+RRR"][lvl])
-                                    : qsTr("Filtro CQ spento. Click: mostra solo CQ, poi cicla 73 / RR73 / RRR.")
+                                    ? qsTr("CQ filter active (%1). Click: change level / turn off.")
+                                          .arg([qsTr("CQ only"), "CQ+73", "CQ+73+RR73", "CQ+73+RR73+RRR"][lvl])
+                                    : qsTr("CQ filter off. Click: show only CQ, then cycle 73 / RR73 / RRR.")
                                 function activate(mouse) {
                                     if (!engine) return
                                     if (!engine.filterCqOnly) { engine.filterCqOnly = true; engine.cqFilterLevel = 0 }
@@ -2059,7 +2059,7 @@ Item {
                     selectionColor: accentGreen
                     font.pixelSize: 14
                     selectByMouse: true
-                    placeholderText: qsTr("Locatore (es. JN71) — inseribile a mano")
+                    placeholderText: qsTr("Locator (e.g. JN71) — enter manually")
                     onTextEdited: {
                         var up = text.toUpperCase()
                         if (up !== text) { var p = cursorPosition; text = up; cursorPosition = p }
@@ -2174,7 +2174,7 @@ Item {
 
                     Text {
                         Layout.fillWidth: true
-                        text: txPanel.logClusterSpotAvailable ? qsTr("Spot al cluster") : qsTr("Cluster non connesso")
+                        text: txPanel.logClusterSpotAvailable ? qsTr("Spot to cluster") : qsTr("Cluster not connected")
                         color: txPanel.logClusterSpotAvailable ? textPrimary : textSecondary
                         font.pixelSize: 13
                         elide: Text.ElideRight
@@ -2382,14 +2382,14 @@ Item {
         Menu {
             id: txButtonContextMenu
             MenuItem {
-                text: qsTr("Modifica messaggio TX%1").arg(txNum)
+                text: qsTr("Edit TX%1 message").arg(txNum)
                 height: 32
                 onTriggered: editRequested(txNum, message)
                 contentItem: Text { text: parent.text; color: textPrimary; font.pixelSize: 12; leftPadding: 10; verticalAlignment: Text.AlignVCenter }
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : "transparent" }
             }
             MenuItem {
-                text: txButton.isDisabled ? qsTr("Riabilita TX%1").arg(txNum) : qsTr("Salta TX%1 (skip auto-seq)").arg(txNum)
+                text: txButton.isDisabled ? qsTr("Re-enable TX%1").arg(txNum) : qsTr("Skip TX%1 (skip auto-seq)").arg(txNum)
                 height: 32
                 onTriggered: if (bridge) bridge.setTxDisabled(txNum, !txButton.isDisabled)
                 contentItem: Text { text: parent.text; color: textPrimary; font.pixelSize: 12; leftPadding: 10; verticalAlignment: Text.AlignVCenter }

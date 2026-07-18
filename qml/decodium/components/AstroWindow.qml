@@ -118,7 +118,7 @@ Dialog {
             spacing: 10
 
             Text {
-                text: "🌙 Astronomical Data"
+                text: qsTr("🌙 Astronomical Data")
                 font.pixelSize: 18
                 font.bold: true
                 color: secondaryCyan

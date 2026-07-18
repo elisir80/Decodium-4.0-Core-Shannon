@@ -92,7 +92,7 @@ Dialog {
             spacing: 10
 
             Text {
-                text: "⌨️ TX Macro Configuration"
+                text: qsTr("⌨️ TX Macro Configuration")
                 font.pixelSize: 18
                 font.bold: true
                 color: secondaryCyan

@@ -252,14 +252,14 @@ Rectangle {
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Named after Robert G. Gallager · Father of LDPC Codes"
+            text: qsTr("Named after Robert G. Gallager · Father of LDPC Codes")
             font.pixelSize: 10; font.italic: true
             color: Qt.rgba(0.53, 0.6, 0.67, 0.7)
         }
 
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. & WSJT-X by K1JT"
+            text: qsTr("© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. & WSJT-X by K1JT")
             font.pixelSize: 10
             color: Qt.rgba(0.53, 0.6, 0.67, 0.5)
         }

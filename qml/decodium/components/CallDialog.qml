@@ -184,7 +184,7 @@ Window {
                             Text {
                                 id: stateLabel
                                 anchors.centerIn: parent
-                                text: parent.armed ? qsTr("⏳ ARMATO") : qsTr("ATTIVA")
+                                text: parent.armed ? qsTr("⏳ ARMED") : qsTr("ACTIVE")
                                 color: parent.armed ? callDialog.cOrange : callDialog.cGreen
                                 font.pixelSize: 11
                                 font.bold: true
@@ -228,8 +228,8 @@ Window {
                 columnSpacing: 12
                 rowSpacing: 8
 
-                Text { text: qsTr("Max chiamate a vuoto"); color: callDialog.cMuted; font.pixelSize: 12 }
-                Text { text: qsTr("Timeout totale (s)"); color: callDialog.cMuted; font.pixelSize: 12 }
+                Text { text: qsTr("Max unanswered calls"); color: callDialog.cMuted; font.pixelSize: 12 }
+                Text { text: qsTr("Total timeout (s)"); color: callDialog.cMuted; font.pixelSize: 12 }
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -417,7 +417,7 @@ Window {
                 DecoCheck {
                     id: armedCheck
                     Layout.fillWidth: true
-                    text: qsTr("DX-watch armato — non chiama subito: aspetta che il target sia decodificato")
+                    text: qsTr("DX-watch armed — doesn't call immediately: waits for the target to be decoded")
                     checked: bridge && bridge.armedWatchEnabled
                     enabled: !bridge || !bridge.targetCallActive
                     onToggled: if (bridge) bridge.armedWatchEnabled = checked
@@ -426,7 +426,7 @@ Window {
                     id: reArmCheck
                     Layout.fillWidth: true
                     Layout.leftMargin: 18
-                    text: qsTr("Re-arm: se il target sparisce torna in ascolto (max 3 volte, poi Halt manuale)")
+                    text: qsTr("Re-arm: if the target disappears, go back to listening (max 3 times, then manual Halt)")
                     checked: bridge && bridge.armedReArm
                     enabled: armedCheck.checked && (!bridge || !bridge.targetCallActive)
                     opacity: enabled ? 1.0 : 0.5
@@ -452,15 +452,15 @@ Window {
                     Text {
                         readonly property bool armed: bridge && bridge.targetCallArmedWaiting
                         text: armed
-                              ? qsTr("⏳ In ascolto: aspetto %1 in decodifica…").arg(bridge ? bridge.targetCallSign : "")
-                              : qsTr("Stato: chiamando %1").arg(bridge ? bridge.targetCallSign : "")
+                              ? qsTr("⏳ Listening: waiting for %1 to be decoded…").arg(bridge ? bridge.targetCallSign : "")
+                              : qsTr("Status: calling %1").arg(bridge ? bridge.targetCallSign : "")
                         color: armed ? callDialog.cOrange : callDialog.cAccent
                         font.bold: true
                         font.pixelSize: 13
                     }
                     Text {
                         visible: !(bridge && bridge.targetCallArmedWaiting)
-                        text: bridge ? qsTr("A vuoto %1 / %2").arg(bridge.targetCallRetryCount).arg(
+                        text: bridge ? qsTr("Unanswered %1 / %2").arg(bridge.targetCallRetryCount).arg(
                                   bridge.targetCallMaxRetries === 0 ? qsTr("∞") : bridge.targetCallMaxRetries) : ""
                         color: callDialog.cText
                         font.pixelSize: 12
@@ -477,7 +477,7 @@ Window {
                 Layout.fillWidth: true
                 spacing: 4
                 Text {
-                    text: qsTr("AutoCQ generico (pulsante ACQ)")
+                    text: qsTr("Generic AutoCQ (ACQ button)")
                     color: callDialog.cMuted
                     font.pixelSize: 11
                     font.italic: true
@@ -486,7 +486,7 @@ Window {
                     Layout.fillWidth: true
                     spacing: 8
                     Text {
-                        text: qsTr("Max chiamate CQ (0=∞)")
+                        text: qsTr("Max CQ calls (0=∞)")
                         color: callDialog.cMuted
                         font.pixelSize: 12
                         Layout.preferredWidth: 180
@@ -526,7 +526,7 @@ Window {
                 spacing: 8
 
                 Button {
-                    text: qsTr("Chiudi")
+                    text: qsTr("Close")
                     Layout.preferredWidth: 90
                     onClicked: callDialog.close()
                     background: Rectangle {

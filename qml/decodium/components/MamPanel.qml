@@ -396,7 +396,7 @@ Item {
                     Text {
                         width: parent.width
                         wrapMode: Text.WordWrap
-                        text: qsTr("Doppio-click su una stazione per aggiungerla alla lista.")
+                        text: qsTr("Double-click a station to add it to the list.")
                         font.pixelSize: 10
                         font.italic: true
                         opacity: 0.7
@@ -456,7 +456,7 @@ Item {
 
                     Text {
                         visible: mamPanel.engine ? mamPanel.engine.mamActiveSlotCount === 0 : true
-                        text: qsTr("Nessuno stream attivo")
+                        text: qsTr("No active stream")
                         font.pixelSize: 11
                         color: mamPanel.textSecondary
                     }

@@ -4052,7 +4052,7 @@ Dialog {
 
                                 // 1.0.355 — FT2: salta decode ridondante di fine-slot
                                 Text {
-                                    text: qsTr("FT2: salta decode ridondante di fine-slot (riduce latenza aggancio):")
+                                    text: qsTr("FT2: skip redundant end-slot decode (reduces lock-in latency):")
                                     color: textSecondary
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
@@ -5093,7 +5093,7 @@ Dialog {
                                     bridge.stopWebServer()
                                     bridge.setSetting("WebServerEnabled", false)
                                 }
-                                webServerUrlLabel.text = bridge.webServerUrl() || "(non attivo)"
+                                webServerUrlLabel.text = bridge.webServerUrl() || qsTr("(not active)")
                             }
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
@@ -5113,7 +5113,7 @@ Dialog {
                         Text { text: qsTr("URL accesso:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 160 }
                         Text {
                             id: webServerUrlLabel
-                            text: bridge.webServerUrl() || "(non attivo)"
+                            text: bridge.webServerUrl() || qsTr("(not active)")
                             color: bridge.webServerRunning() ? accentGreen : textSecondary
                             font.pixelSize: 12
                             font.family: decodiumMonoFontFamily
@@ -5124,7 +5124,7 @@ Dialog {
                         Text { text: qsTr(""); Layout.preferredWidth: 160 }
                         Button {
                             // PWA remote: apre l'URL locale autenticato in browser.
-                            text: "📱 Apri Remote per iPad"
+                            text: qsTr("📱 Open Remote for iPad")
                             enabled: bridge.webServerRunning()
                             Layout.columnSpan: 3
                             onClicked: {
@@ -7033,7 +7033,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("Colora lo SFONDO della riga (oltre al testo) per questa categoria. OFF = nessuno sfondo personalizzato.")
+                                    ToolTip.text: qsTr("Colors the row BACKGROUND (in addition to the text) for this category. OFF = no custom background.")
                                 }
                                 Rectangle {
                                     width: 60
@@ -7209,7 +7209,7 @@ Dialog {
                                 indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                                 contentItem: Text { text: ""; leftPadding: 24 }
                             }
-                            Text { text: qsTr("(sovrascrive sfondo e testo del tema)"); color: textSecondary; font.pixelSize: 10; Layout.fillWidth: true; elide: Text.ElideRight }
+                            Text { text: qsTr("(overrides theme background and text)"); color: textSecondary; font.pixelSize: 10; Layout.fillWidth: true; elide: Text.ElideRight }
                         }
 
                         RowLayout {
@@ -7315,7 +7315,7 @@ Dialog {
                                     hoverEnabled: true
                                     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     onClicked: {
-                                        dataDownloadStatus = "Verifica cty.dat..."
+                                        dataDownloadStatus = qsTr("Checking cty.dat...")
                                         dataDownloadIsError = false
                                         bridge.checkCtyDatUpdate()
                                     }
@@ -7339,7 +7339,7 @@ Dialog {
                                     hoverEnabled: true
                                     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     onClicked: {
-                                        dataDownloadStatus = "Download CALL3.TXT in corso..."
+                                        dataDownloadStatus = qsTr("Downloading CALL3.TXT...")
                                         dataDownloadIsError = false
                                         bridge.downloadCall3Txt()
                                     }
@@ -7347,7 +7347,7 @@ Dialog {
                             }
                         }
                         Text {
-                            text: dataDownloadStatus.length > 0 ? dataDownloadStatus : "Dopo il click compare qui un messaggio con esito o errore."
+                            text: dataDownloadStatus.length > 0 ? dataDownloadStatus : qsTr("After clicking, a message with the outcome or error appears here.")
                             color: dataDownloadIsError ? "#ff5555" : (dataDownloadStatus.length > 0 ? secondaryCyan : textSecondary)
                             font.pixelSize: 11
                             wrapMode: Text.Wrap

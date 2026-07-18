@@ -238,7 +238,7 @@ Rectangle {
             DecoTextField {
                 id: newLogbookNameField
                 Layout.fillWidth: true
-                placeholderText: "es. 9H1SR oppure AMICO"
+                placeholderText: qsTr("e.g. 9H1SR or AMICO")
                 selectByMouse: true
                 color: textPrimary
             }
@@ -266,7 +266,7 @@ Rectangle {
 
     Dialog {
         id: deleteLogbookDialog
-        title: "Cancella logbook"
+        title: qsTr("Delete logbook")
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
@@ -277,7 +277,7 @@ Rectangle {
             spacing: 10
             Label {
                 Layout.fillWidth: true
-                text: "Stai per cancellare il logbook selezionato."
+                text: qsTr("You are about to delete the selected logbook.")
                 color: accentOrange
                 font.pixelSize: 13
                 font.bold: true
@@ -295,13 +295,13 @@ Rectangle {
             CheckBox {
                 id: deleteLogbookFileCheck
                 checked: true
-                text: "Cancella anche il file ADIF dal disco"
+                text: qsTr("Also delete the ADIF file from disk")
             }
             Label {
                 Layout.fillWidth: true
                 text: deleteLogbookFileCheck.checked
-                      ? "Operazione distruttiva: il file .adi verra' eliminato. Se questo e' l'ultimo logbook, Decodium creera' un nuovo logbook vuoto."
-                      : "Il file .adi restera' sul disco; verra' rimossa solo l'associazione da Decodium."
+                      ? qsTr("Destructive operation: the .adi file will be deleted. If this is the last logbook, Decodium will create a new empty logbook.")
+                      : qsTr("The .adi file will remain on disk; only the association with Decodium will be removed.")
                 color: textSecondary
                 font.pixelSize: 10
                 wrapMode: Text.WordWrap
@@ -322,7 +322,7 @@ Rectangle {
     // Delete confirmation dialog
     Dialog {
         id: deleteConfirmDialog
-        title: "Conferma eliminazione"
+        title: qsTr("Confirm deletion")
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Yes | Dialog.No
@@ -331,7 +331,7 @@ Rectangle {
         property string deleteDateTime: ""
 
         Label {
-            text: "Eliminare il QSO con " + deleteConfirmDialog.deleteCall + "?"
+            text: qsTr("Delete the QSO with %1?").arg(deleteConfirmDialog.deleteCall)
             font.pixelSize: 13
         }
 
@@ -444,7 +444,7 @@ Rectangle {
                         Text { text: "\uD83D\uDD0D"; font.pixelSize: 10; color: textSecondary }
                         DecoTextField {
                             id: searchField; Layout.fillWidth: true
-                            placeholderText: "Cerca..."
+                            placeholderText: qsTr("Search...")
                             font.pixelSize: 10; font.family: decodiumMonoFontFamily
                             color: textPrimary; placeholderTextColor: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
                             onTextChanged: { clearSelection(); refreshLog() }
@@ -780,7 +780,7 @@ Rectangle {
                             color: saveFloatMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.4) : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.2)
                             border.color: accentGreen
                             Behavior on color { ColorAnimation { duration: 150 } }
-                            Text { id: saveLabelF; anchors.centerIn: parent; text: "\u2713 Salva"; font.pixelSize: 9; font.bold: true; color: accentGreen }
+                            Text { id: saveLabelF; anchors.centerIn: parent; text: qsTr("\u2713 Save"); font.pixelSize: 9; font.bold: true; color: accentGreen }
                             MouseArea {
                                 id: saveFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                 onClicked: {
@@ -805,7 +805,7 @@ Rectangle {
                             color: deleteFloatMA.containsMouse ? Qt.rgba(1, 0, 0, 0.3) : Qt.rgba(1, 0, 0, 0.1)
                             border.color: "#d32f2f"
                             Behavior on color { ColorAnimation { duration: 150 } }
-                            Text { id: deleteLabelF; anchors.centerIn: parent; text: "\u2715 Elimina"; font.pixelSize: 9; font.bold: true; color: "#d32f2f" }
+                            Text { id: deleteLabelF; anchors.centerIn: parent; text: qsTr("\u2715 Delete"); font.pixelSize: 9; font.bold: true; color: "#d32f2f" }
                             MouseArea {
                                 id: deleteFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                 onClicked: {
@@ -824,7 +824,7 @@ Rectangle {
                             color: cancelFloatMA.containsMouse ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.05)
                             border.color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
                             Behavior on color { ColorAnimation { duration: 150 } }
-                            Text { id: cancelLabelF; anchors.centerIn: parent; text: "Annulla"; font.pixelSize: 9; color: textSecondary }
+                            Text { id: cancelLabelF; anchors.centerIn: parent; text: qsTr("Cancel"); font.pixelSize: 9; color: textSecondary }
                             MouseArea { id: cancelFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: clearSelection() }
                         }
                     }

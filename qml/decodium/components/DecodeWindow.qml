@@ -1327,7 +1327,7 @@ Component.onCompleted: {
                                 Text {
                                     visible: parent.isPeriodSeparator
                                     anchors.centerIn: parent
-                                    text: "── PERIODO ──"
+                                    text: qsTr("── PERIOD ──")
                                     color: "#ff8080"
                                     font.pixelSize: 10
                                     font.bold: true
@@ -1875,7 +1875,7 @@ Component.onCompleted: {
                                 Text {
                                     visible: parent.isPeriodSeparator
                                     anchors.centerIn: parent
-                                    text: "── PERIODO ──"
+                                    text: qsTr("── PERIOD ──")
                                     color: "#ff8080"
                                     font.pixelSize: 10
                                     font.bold: true

@@ -1836,7 +1836,7 @@ Item {
                 Text {
                     id: startText
                     anchors.centerIn: parent
-                    text: "4096-bin panadapter · SmartSDR style\nClick MONITOR to start"
+                    text: qsTr("4096-bin panadapter · SmartSDR style\nClick MONITOR to start")
                     font.pixelSize: 12
                     color: "#B4B4B4"
                     horizontalAlignment: Text.AlignHCenter
@@ -1882,7 +1882,7 @@ Item {
                 font.bold: true
             }
             Text {
-                text: qsTr("Mostra controlli")
+                text: qsTr("Show controls")
                 color: accentCyan
                 font.pixelSize: 11
                 font.bold: true

@@ -252,7 +252,7 @@ Item {
                         }
                     }
                     Text {
-                        text: "UTC · OPER IU8LMC"
+                        text: qsTr("UTC · OPER IU8LMC")
                         color: workspace.cTextDim
                         font.pixelSize: 10; font.letterSpacing: 1.0
                         horizontalAlignment: Text.AlignRight
@@ -581,7 +581,7 @@ Item {
                 DxPanel {
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 120
-                    title: "Full Spectrum · Decode"
+                    title: qsTr("Full Spectrum · Decode")
                     meta: "live"
                     live: true
                     Loader {
@@ -612,7 +612,7 @@ Item {
                 DxPanel {
                     SplitView.preferredHeight: 350
                     SplitView.minimumHeight: 160
-                    title: "Signal RX · QSO Lock"
+                    title: qsTr("Signal RX · QSO Lock")
                     meta: "live"
                     live: true
                     Loader {
@@ -654,7 +654,7 @@ Item {
                 DxPanel {
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 100
-                    title: "Log · QSO Entry"
+                    title: qsTr("Log · QSO Entry")
                     meta: "live"
                     Loader {
                         anchors.fill: parent

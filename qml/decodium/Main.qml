@@ -3453,7 +3453,7 @@ ApplicationWindow {
             }
 
             Text {
-                text: "Range valido: 100-5000 Hz"
+                text: qsTr("Valid range: 100-5000 Hz")
                 font.pixelSize: 11
                 color: textSecondary
             }
@@ -3536,7 +3536,7 @@ ApplicationWindow {
 
         Text {
             anchors.centerIn: parent
-            text: "Aggancia qui la Waterfall"
+            text: qsTr("Dock the Waterfall here")
             color: secondaryCyan
             font.pixelSize: 16
             font.bold: true
@@ -4290,7 +4290,7 @@ ApplicationWindow {
                                 }
 
                                 ToolTip.visible: gallagerMA.containsMouse
-                                ToolTip.text: "Gallager — scavo profondo dei segnali deboli.\nAttiva un secondo passaggio di decodifica (subpass LDPC\nparallelizzato sui core, dal nome di R. Gallager, padre dell'LDPC)\nche recupera stazioni vicine al rumore perse dal decode normale.\nRichiede una CPU multi-core: su PC datati può appesantire l'audio\n→ in tal caso lascialo spento."
+                                ToolTip.text: qsTr("Gallager — deep dig for weak signals.\nEnables a second decoding pass (LDPC subpass\nparallelized across cores, named after R. Gallager, father of LDPC)\nthat recovers near-noise stations missed by the normal decode.\nRequires a multi-core CPU: on old PCs it may burden the audio\n→ in that case leave it off.")
                             }
                         }
                     }
@@ -5290,7 +5290,7 @@ ApplicationWindow {
 		                                        anchors.margins: 10
 		                                        height: 34
 		                                        text: worldClock.citySearchText
-		                                        placeholderText: qsTr("Cerca città...")
+		                                        placeholderText: qsTr("Search city...")
 		                                        placeholderTextColor: textSecondary
 	                                        color: textPrimary
 		                                        selectionColor: secondaryCyan
@@ -6653,7 +6653,7 @@ ApplicationWindow {
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-	                            text: waterfallPanel.isDockHighlighted ? "Aggancia Waterfall" : "Waterfall staccata"
+	                            text: waterfallPanel.isDockHighlighted ? qsTr("Dock Waterfall") : qsTr("Waterfall detached")
                                 color: waterfallPanel.isDockHighlighted ? secondaryCyan : textSecondary
                                 font.pixelSize: waterfallPanel.isDockHighlighted ? 16 : 12
                                 font.bold: waterfallPanel.isDockHighlighted
@@ -6661,7 +6661,7 @@ ApplicationWindow {
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-	                                text: "Usa Aggancia per riagganciarla"
+	                                text: qsTr("Use Dock to re-attach it")
                                 color: textSecondary
                                 font.pixelSize: 10
                                 visible: !waterfallPanel.isDockHighlighted
@@ -7791,7 +7791,7 @@ ApplicationWindow {
 
                                     Text {
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        text: "Trascina la finestra qui"
+                                        text: qsTr("Drag the window here")
                                         color: textSecondary
                                         font.pixelSize: 10
                                         visible: !period1DockHighlighted
@@ -8025,22 +8025,22 @@ ApplicationWindow {
                                     Menu {
                                         id: fsHeaderMenuEmbedded
                                         property string targetId: ""
-                                        MenuItem { text: "◀  Sposta a sinistra"; enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, -1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, -1) }
-                                        MenuItem { text: "Sposta a destra  ▶"; enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, 1) }
-                                        MenuItem { text: "Nascondi questa colonna"; enabled: mainWindow.fsColMeta(fsHeaderMenuEmbedded.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuEmbedded.targetId, false) }
+                                        MenuItem { text: qsTr("◀  Move left"); enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, -1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, -1) }
+                                        MenuItem { text: qsTr("Move right  ▶"); enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, 1) }
+                                        MenuItem { text: qsTr("Hide this column"); enabled: mainWindow.fsColMeta(fsHeaderMenuEmbedded.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuEmbedded.targetId, false) }
                                         MenuSeparator {}
                                         MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + "UTC";     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
                                         MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + "dB";      onTriggered: mainWindow.fsToggleColumnVisible("db") }
                                         MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + "DT";      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
                                         MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + "Freq";    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
-                                        MenuItem { text: "✓  Message"; enabled: false }
+                                        MenuItem { text: qsTr("✓  Message"); enabled: false }
                                         MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + "Dist";    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
                                         MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + "DXCC";    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
                                         MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + "Az";      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
                                         MenuSeparator {}
-                                        MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + "Più recenti in alto"; onTriggered: mainWindow.fsToggleNewestFirst() }
+                                        MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + qsTr("Newest on top"); onTriggered: mainWindow.fsToggleNewestFirst() }
                                         MenuSeparator {}
-                                        MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
+                                        MenuItem { text: qsTr("Reset columns"); onTriggered: mainWindow.fsResetColumns() }
                                     }
 
                                     RowLayout {
@@ -8624,7 +8624,7 @@ NumberAnimation {
 
                                     Text {
                                         anchors.horizontalCenter: parent.horizontalCenter
-                                        text: "Trascina la finestra qui"
+                                        text: qsTr("Drag the window here")
                                         color: textSecondary
                                         font.pixelSize: 10
                                         visible: !rxFreqDockHighlighted
@@ -9230,7 +9230,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                                     Text {
                                         id: dxcDetachLabel
                                         anchors.centerIn: parent
-                                        text: "⤢ " + qsTr("Stacca")
+                                        text: "⤢ " + qsTr("Detach")
                                         font.pixelSize: 11
                                         font.bold: true
                                         color: dxcDetachMA.containsMouse ? bgDeep : textPrimary
@@ -9242,7 +9242,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: mainWindow.detachDxClusterPanel()
                                         ToolTip.visible: containsMouse
-                                        ToolTip.text: qsTr("Stacca il DX Cluster in finestra")
+                                        ToolTip.text: qsTr("Detach the DX Cluster to a window")
                                     }
                                 }
                             }
@@ -9605,7 +9605,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: "Trascina la finestra qui"
+                            text: qsTr("Drag the window here")
                             color: textSecondary
                             font.pixelSize: 10
                             visible: !txPanelDockHighlighted
@@ -9873,7 +9873,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
             Text {
                 anchors.fill: parent
-                text: qsTr("Riportare tutte le finestre flottanti dentro la finestra principale\ne ricentrare Decodium sul monitor principale?\n\nLe coordinate salvate verranno cancellate.")
+                text: qsTr("Bring all floating windows back into the main window\nand re-center Decodium on the primary monitor?\n\nThe saved coordinates will be cleared.")
                 color: textPrimary
                 wrapMode: Text.WordWrap
                 verticalAlignment: Text.AlignVCenter
@@ -9943,7 +9943,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     }
 
                     Text {
-                        text: "Il backend radio legacy ha segnalato un problema."
+                        text: qsTr("The legacy radio backend reported a problem.")
                         font.pixelSize: 11
                         color: textSecondary
                     }
@@ -9963,7 +9963,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             }
 
             Button {
-                text: rigErrorDetailsVisible ? "Nascondi dettagli" : "Mostra dettagli"
+                text: rigErrorDetailsVisible ? qsTr("Hide details") : qsTr("Show details")
                 Layout.alignment: Qt.AlignLeft
                 onClicked: rigErrorDetailsVisible = !rigErrorDetailsVisible
 
@@ -10582,7 +10582,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
             Button {
                 visible: warningDialogDetails.length > 0
-                text: warningDialogDetailsVisible ? "Nascondi dettagli" : "Mostra dettagli"
+                text: warningDialogDetailsVisible ? qsTr("Hide details") : qsTr("Show details")
                 Layout.alignment: Qt.AlignLeft
                 onClicked: warningDialogDetailsVisible = !warningDialogDetailsVisible
 
@@ -10916,7 +10916,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         MenuItem {
-            text: "📂 " + qsTr("Apri cartella ALL.TXT")
+            text: "📂 " + qsTr("Open ALL.TXT folder")
             onTriggered: bridge.openAllTxtFolder()
 
             background: Rectangle {
@@ -11255,7 +11255,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 	        MenuSeparator { contentItem: Rectangle { implicitHeight: 1; color: glassBorder } }
 
 		        MenuItem {
-		            text: (worldClock.showWorldClock ? "✓ " : "☐ ") + qsTr("Mostra orologio")
+		            text: (worldClock.showWorldClock ? "✓ " : "☐ ") + qsTr("Show clock")
 		            onTriggered: worldClock.setClockVisible(!worldClock.showWorldClock)
 		            background: Rectangle {
 	                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -11270,7 +11270,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		        }
 
 		        MenuItem {
-		            text: (dxClusterToolbarVisible ? "✓ " : "☐ ") + qsTr("Mostra DX Cluster")
+		            text: (dxClusterToolbarVisible ? "✓ " : "☐ ") + qsTr("Show DX Cluster")
 		            onTriggered: mainWindow.setDxClusterToolbarVisible(!dxClusterToolbarVisible)
 		            background: Rectangle {
 		                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -11285,7 +11285,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		        }
 
 		        MenuItem {
-		            text: (pskReporterToolbarVisible ? "✓ " : "☐ ") + qsTr("Mostra PSK Reporter")
+		            text: (pskReporterToolbarVisible ? "✓ " : "☐ ") + qsTr("Show PSK Reporter")
 		            onTriggered: mainWindow.setPskReporterToolbarVisible(!pskReporterToolbarVisible)
 		            background: Rectangle {
 		                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
@@ -11754,8 +11754,8 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 color: accentOrange
             }
             Text { text: "F1 - F7: Select TX1 - TX7"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "F9: attiva/disattiva solo RX 1º/2º"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Escape: Halt (stop TX immediato)"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("F9: toggle RX-only 1st/2nd"); font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Escape: Halt (immediate TX stop)"); font.pixelSize: 12; color: textPrimary }
 
             Rectangle { height: 1; width: parent.width - 40; color: glassBorder }
 
@@ -11765,9 +11765,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 font.bold: true
                 color: secondaryCyan
             }
-            Text { text: "Ctrl+A: attiva/disattiva Sequenza automatica"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Ctrl+A: toggle Auto Sequence"); font.pixelSize: 12; color: textPrimary }
             Text { text: "Ctrl+G: Generate all TX messages"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Ctrl+Z: attiva/disattiva modalità ZAP"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Ctrl+Z: toggle ZAP mode"); font.pixelSize: 12; color: textPrimary }
 
             Rectangle { height: 1; width: parent.width - 40; color: glassBorder }
 
@@ -11777,9 +11777,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 font.bold: true
                 color: successGreen
             }
-            Text { text: "Alt+L: registra il QSO corrente"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Alt+M: svuota la lista decodifiche (Monitor)"; font.pixelSize: 12; color: textPrimary }
-            Text { text: "Alt+S: ferma la TX"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Alt+L: log the current QSO"); font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Alt+M: clear the decode list (Monitor)"); font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Alt+S: stop TX"); font.pixelSize: 12; color: textPrimary }
         }
 
         footer: DialogButtonBox {
@@ -12536,7 +12536,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         spacing: 12
 
                         Text { text: "⋮⋮"; font.pixelSize: 14; color: textSecondary }
-                        Text { text: "⌨️ TX Macro Configuration"; font.pixelSize: 16; font.bold: true; color: secondaryCyan }
+                        Text { text: qsTr("⌨️ TX Macro Configuration"); font.pixelSize: 16; font.bold: true; color: secondaryCyan }
                         Item { Layout.fillWidth: true }
 
                         Rectangle {
@@ -13045,22 +13045,22 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     Menu {
                         id: fsHeaderMenuFloating
                         property string targetId: ""
-                        MenuItem { text: "◀  Sposta a sinistra"; enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, -1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, -1) }
-                        MenuItem { text: "Sposta a destra  ▶"; enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, 1) }
-                        MenuItem { text: "Nascondi questa colonna"; enabled: mainWindow.fsColMeta(fsHeaderMenuFloating.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuFloating.targetId, false) }
+                        MenuItem { text: qsTr("◀  Move left"); enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, -1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, -1) }
+                        MenuItem { text: qsTr("Move right  ▶"); enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, 1) }
+                        MenuItem { text: qsTr("Hide this column"); enabled: mainWindow.fsColMeta(fsHeaderMenuFloating.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuFloating.targetId, false) }
                         MenuSeparator {}
                         MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + "UTC";     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
                         MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + "dB";      onTriggered: mainWindow.fsToggleColumnVisible("db") }
                         MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + "DT";      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
                         MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + "Freq";    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
-                        MenuItem { text: "✓  Message"; enabled: false }
+                        MenuItem { text: qsTr("✓  Message"); enabled: false }
                         MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + "Dist";    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
                         MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + "DXCC";    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
                         MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + "Az";      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
                         MenuSeparator {}
-                        MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + "Più recenti in alto"; onTriggered: mainWindow.fsToggleNewestFirst() }
+                        MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + qsTr("Newest on top"); onTriggered: mainWindow.fsToggleNewestFirst() }
                         MenuSeparator {}
-                        MenuItem { text: "Reset colonne"; onTriggered: mainWindow.fsResetColumns() }
+                        MenuItem { text: qsTr("Reset columns"); onTriggered: mainWindow.fsResetColumns() }
                     }
 
                     RowLayout {
@@ -14801,15 +14801,15 @@ NumberAnimation {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 8
                     Text {
-                        text: qsTr("Inserisci nel layout:")
+                        text: qsTr("Insert into layout:")
                         color: textPrimary
                         font.pixelSize: 11
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     Repeater {
                         model: [
-                            { ref: "fullspectrum", label: qsTr("◧ accanto a Full Spectrum") },
-                            { ref: "signalrx",     label: qsTr("◧ accanto a Signal RX") }
+                            { ref: "fullspectrum", label: qsTr("◧ next to Full Spectrum") },
+                            { ref: "signalrx",     label: qsTr("◧ next to Signal RX") }
                         ]
                         delegate: Rectangle {
                             required property var modelData

@@ -51,7 +51,7 @@ Rectangle {
     }
 
     function buildStatusText() {
-        if (!bridge.decoSyncTime) return "DecoSyncTime non disponibile"
+        if (!bridge.decoSyncTime) return qsTr("DecoSyncTime not available")
         var ds = bridge.decoSyncTime
         var parts = []
         parts.push("Lock: " + (ds.kalmanHasLock() ? "SI" : "NO"))

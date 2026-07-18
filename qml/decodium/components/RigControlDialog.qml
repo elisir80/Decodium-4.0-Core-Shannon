@@ -10,7 +10,7 @@ import QtQuick.Layouts
 
 Dialog {
     id: rigDialog
-    title: "CAT — Impostazioni Transceiver"
+    title: qsTr("CAT — Transceiver Settings")
     modal: true
     width: 760
     height: 720
@@ -83,7 +83,7 @@ Dialog {
                 spacing: 2
 
                 Text {
-                    text: "CAT — Controllo Transceiver"
+                    text: qsTr("CAT — Transceiver Control")
                     font.pixelSize: 16
                     font.bold: true
                     color: secondaryCyan
@@ -111,7 +111,7 @@ Dialog {
                 }
             }
             Text {
-                text: bridge.catConnected ? bridge.catRigName : "Non connesso"
+                text: bridge.catConnected ? bridge.catRigName : qsTr("Not connected")
                 font.pixelSize: 13
                 color: bridge.catConnected ? accentGreen : "#f44336"
             }
@@ -150,7 +150,7 @@ Dialog {
                 anchors.fill: parent; anchors.margins: 12; spacing: 12
                 Rectangle { width: 12; height: 12; radius: 6; color: bridge.catConnected ? accentGreen : "#f44336" }
                 Text {
-                    text: bridge.catConnected ? "CAT attivo" : "CAT non connesso"
+                    text: bridge.catConnected ? qsTr("CAT active") : qsTr("CAT not connected")
                     font.pixelSize: 12; font.bold: true
                     color: bridge.catConnected ? accentGreen : "#f44336"
                 }
@@ -214,7 +214,7 @@ Dialog {
             }
 
             Text {
-                text: "Il backend si cambia solo a radio scollegata."
+                text: qsTr("The backend can only be changed when the radio is disconnected.")
                 color: textSecondary
                 font.pixelSize: 10
                 opacity: 0.6
@@ -236,7 +236,7 @@ Dialog {
                     wrapMode: Text.WordWrap
                     color: textPrimary
                     font.pixelSize: 11
-                    text: bridge.lastCatError + "\nSuggerimento: chiudi OmniRig dalla tray icon di Windows, poi premi di nuovo Connetti."
+                    text: bridge.lastCatError + qsTr("\nTip: close OmniRig from the Windows tray icon, then press Connect again.")
                 }
             }
         }
@@ -298,7 +298,7 @@ Dialog {
                             leftPadding: 8
                             text: bridge.catManager.rigName
                             color: textPrimary; font.pixelSize: controlFontSize
-                            placeholderText: "Nome rig…"
+                            placeholderText: qsTr("Rig name…")
                             background: Rectangle { color: bgMedium; border.color: activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onEditingFinished: bridge.catManager.setRigName(text.trim())
                         }
@@ -306,7 +306,7 @@ Dialog {
                         Button {
                             implicitWidth: 88; implicitHeight: controlHeight
                             padding: 0
-                            text: "Scegli…"
+                            text: qsTr("Choose…")
                             onClicked: rigPickerDialog.open()
                             background: Rectangle { color: parent.hovered ? bgMedium : "transparent"; border.color: secondaryCyan; radius: 4 }
                             contentItem: Text { text: parent.text; color: secondaryCyan; font.pixelSize: 12; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
@@ -316,7 +316,7 @@ Dialog {
                     // ── Dialog separato per la selezione del rig ─────────────
                     Dialog {
                         id: rigPickerDialog
-                        title: "Seleziona Transceiver"
+                        title: qsTr("Select Transceiver")
                         modal: true
                         width: 460; height: 500
                         anchors.centerIn: parent
@@ -325,7 +325,7 @@ Dialog {
                         background: Rectangle { color: Qt.rgba(bgDeep.r,bgDeep.g,bgDeep.b,0.98); border.color: secondaryCyan; border.width: 2; radius: 10 }
                         header: Rectangle {
                             height: 44; color: "transparent"
-                            Text { anchors.centerIn: parent; text: "⚙  Scegli Transceiver (" + rigPickerList.count + " disponibili)"; color: secondaryCyan; font.pixelSize: 13; font.bold: true }
+                            Text { anchors.centerIn: parent; text: qsTr("⚙  Choose Transceiver (%1 available)").arg(rigPickerList.count); color: secondaryCyan; font.pixelSize: 13; font.bold: true }
                         }
 
                         ColumnLayout {
@@ -334,7 +334,7 @@ Dialog {
                             DecoTextField {
                                 id: rigFilterField
                                 Layout.fillWidth: true; implicitHeight: 32
-                                placeholderText: "Filtra per nome (es. Icom, Yaesu, FT-991…)"
+                                placeholderText: qsTr("Filter by name (e.g. Icom, Yaesu, FT-991…)")
                                 leftPadding: 8; color: textPrimary; font.pixelSize: 11
                                 background: Rectangle { color: bgMedium; border.color: activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             }
@@ -369,7 +369,7 @@ Dialog {
 
                             Button {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Annulla"; implicitHeight: 32; implicitWidth: 100
+                                text: qsTr("Cancel"); implicitHeight: 32; implicitWidth: 100
                                 onClicked: rigPickerDialog.close()
                                 background: Rectangle { color: "transparent"; border.color: glassBorder; radius: 4 }
                                 contentItem: Text { text: parent.text; color: textSecondary; font.pixelSize: 11; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
@@ -533,13 +533,13 @@ Dialog {
                     RowLayout {
                         Layout.fillWidth: true; spacing: 16
                         CheckBox {
-                            text: "Connetti all'avvio"
+                            text: qsTr("Connect on startup")
                             checked: bridge.catManager.catAutoConnect
                             onCheckedChanged: bridge.catManager.catAutoConnect = checked
                             contentItem: Text { text: parent.text; leftPadding: 4; color: textPrimary; font.pixelSize: 11; verticalAlignment: Text.AlignVCenter }
                         }
                         CheckBox {
-                            text: "Avvia monitor"
+                            text: qsTr("Start monitor")
                             checked: bridge.catManager.audioAutoStart
                             onCheckedChanged: bridge.catManager.audioAutoStart = checked
                             contentItem: Text { text: parent.text; leftPadding: 4; color: textPrimary; font.pixelSize: 11; verticalAlignment: Text.AlignVCenter }
@@ -704,7 +704,7 @@ Dialog {
             Button {
                 implicitWidth: 150; implicitHeight: 42
                 padding: 0
-                text: "▶  Connetti"
+                text: qsTr("▶  Connect")
                 enabled: !bridge.catConnected
                 onClicked: {
                     bridge.catManager.rigName     = rigNameField.text.trim()
@@ -737,7 +737,7 @@ Dialog {
             Button {
                 implicitWidth: 150; implicitHeight: 42
                 padding: 0
-                text: "■  Disconnetti"
+                text: qsTr("■  Disconnect")
                 enabled: bridge.catConnected
                 onClicked: bridge.catManager.disconnectRig()
                 background: Rectangle {
@@ -755,7 +755,7 @@ Dialog {
             Button {
                 implicitWidth: 100; implicitHeight: 42
                 padding: 0
-                text: "Chiudi"
+                text: qsTr("Close")
                 onClicked: rigDialog.close()
                 background: Rectangle { radius: 8; color: Qt.rgba(1,1,1,0.07); border.color: glassBorder }
                 contentItem: Text {

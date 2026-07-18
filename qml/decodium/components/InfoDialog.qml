@@ -710,12 +710,12 @@ Dialog {
                                         { key: "F3", action: "Auto Sequence On/Off" },
                                         { key: "F4", action: "Log QSO" },
                                         { key: "Esc", action: "Halt TX" },
-                                        { key: "Ctrl+S", action: "Apri Impostazioni" },
-                                        { key: "Ctrl+L", action: "Apri Log" },
-                                        { key: "Ctrl+M", action: "Apri Macro" },
+                                        { key: "Ctrl+S", action: qsTr("Open Settings") },
+                                        { key: "Ctrl+L", action: qsTr("Open Log") },
+                                        { key: "Ctrl+M", action: qsTr("Open Macros") },
                                         { key: "Ctrl+Shift+H", action: "Decode History" },
-                                        { key: "Ctrl+Shift+L", action: "Reset Layout finestre" },
-                                        { key: "Ctrl+Shift+C", action: "Full Spectrum compatto" },
+                                        { key: "Ctrl+Shift+L", action: qsTr("Reset windows Layout") },
+                                        { key: "Ctrl+Shift+C", action: qsTr("Compact Full Spectrum") },
                                         { key: "Ctrl+Shift+F", action: "Dev Overlay" }
                                     ]
 

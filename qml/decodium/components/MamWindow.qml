@@ -529,7 +529,7 @@ Dialog {
 
                         Text {
                             visible: mamWindow.engine ? mamWindow.engine.mamActiveSlotCount === 0 : true
-                            text: qsTr("Nessuno stream attivo")
+                            text: qsTr("No active stream")
                             font.pixelSize: 11
                             color: textSecondary
                         }

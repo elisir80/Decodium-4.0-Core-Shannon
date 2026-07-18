@@ -142,7 +142,7 @@ Rectangle {
                             x: 8
                             width: parent.width - 16
                             height: 34
-                            placeholderText: "Cerca radio..."
+                            placeholderText: qsTr("Search radio...")
                             text: rigCombo.filterText
                             selectByMouse: true
                             color: textPrimary
