@@ -49,6 +49,13 @@ MinVersion=10.0
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 UninstallDisplayIcon={app}\{#AppExeName}
+; 1.0.491 — FIX errore uninstaller "file in uso": senza questo Inno non chiudeva
+; Decodium (ne' i suoi processi Qt / DLL / cache in uso) prima di rimuovere i file,
+; e la disinstallazione (e l'auto-disinstallazione a ogni update) falliva con
+; l'errore di rimozione. Il Restart Manager di Windows ora chiude l'app in modo
+; pulito (e la force-killa se e' bloccata/freezata) prima di install e uninstall.
+CloseApplications=yes
+RestartApplications=no
 ShowLanguageDialog=auto
 WizardStyle=modern
 LicenseFile={#SourceRoot}\COPYING
@@ -58,6 +65,7 @@ LicenseFile={#SourceRoot}\COPYING
 ; Le ultime 3 (cinese sempl./trad., lettone) non sono nel set ufficiale di Inno: i .isl
 ; sono inclusi nel repo sotto installer\languages\ (UTF-8 con BOM, da jrsoftware/issrc).
 Name: "italian";            MessagesFile: "compiler:Languages\Italian.isl"
+Name: "dutch";              MessagesFile: "compiler:Languages\Dutch.isl"
 Name: "english";            MessagesFile: "compiler:Default.isl"
 Name: "catalan";            MessagesFile: "compiler:Languages\Catalan.isl"
 Name: "danish";             MessagesFile: "compiler:Languages\Danish.isl"
@@ -88,6 +96,7 @@ russian.RebootPrompt=Decodium успешно обновлён.%n%nДля опт�
 chinesesimplified.RebootPrompt=Decodium 已成功更新。%n%n为获得最佳性能，强烈建议立即重新启动计算机：音频、CAT 和缓存始终以干净状态启动，可避免更新后出现故障。%n%n现在重新启动吗？（推荐）
 chinesetraditional.RebootPrompt=Decodium 已成功更新。%n%n為獲得最佳效能，強烈建議立即重新啟動電腦：音訊、CAT 與快取始終以乾淨狀態啟動，可避免更新後發生故障。%n%n現在重新啟動嗎？（建議）
 latvian.RebootPrompt=Decodium tika veiksmīgi atjaunināts.%n%nLai nodrošinātu optimālu darbību, ĻOTI IETEICAMS tagad restartēt datoru: audio, CAT un kešatmiņa vienmēr startē tīri, un jūs izvairīsities no kļūdām pēc atjaunināšanas.%n%nVai restartēt tagad? (ieteicams)
+dutch.RebootPrompt=Decodium is succesvol bijgewerkt.%n%nVoor de beste prestaties wordt STERK AANGERADEN om nu de computer opnieuw op te starten: audio, CAT en caches starten altijd schoon en zo voorkomt u storingen na de update.%n%nWilt u nu opnieuw opstarten? (aanbevolen)
 english.RebootCountdown=Decodium updated. The PC will restart in 15 seconds. Save your open work.
 italian.RebootCountdown=Decodium aggiornato. Il PC verrà riavviato tra 15 secondi. Salva il lavoro aperto.
 catalan.RebootCountdown=Decodium actualitzat. L'ordinador es reiniciarà d'aquí a 15 segons. Deseu la feina oberta.
@@ -101,6 +110,7 @@ russian.RebootCountdown=Decodium обновлён. Компьютер перез
 chinesesimplified.RebootCountdown=Decodium 已更新。计算机将在 15 秒后重新启动。请保存正在进行的工作。
 chinesetraditional.RebootCountdown=Decodium 已更新。電腦將在 15 秒後重新啟動。請儲存正在進行的工作。
 latvian.RebootCountdown=Decodium atjaunināts. Dators tiks restartēts pēc 15 sekundēm. Saglabājiet atvērto darbu.
+dutch.RebootCountdown=Decodium bijgewerkt. De pc wordt over 15 seconden opnieuw opgestart. Sla uw geopende werk op.
 ; 1.0.482 — disinstallazione senza residui. Le impostazioni vengono sempre rimosse;
 ; i DATI personali (database QSO, cache, log) solo su conferma esplicita. Il default
 ; e' NO per non far perdere il log a chi disinstalla per sbaglio. Vedi [Code]/CurUninstallStepChanged.
@@ -117,6 +127,7 @@ russian.RemoveDataPrompt=Настройки Decodium удалены.%n%nУдал
 chinesesimplified.RemoveDataPrompt=Decodium 的设置已删除。%n%n是否同时删除您的个人数据：QSO 日志数据库、缓存和日志？%n%n选择“否”可保留您的 QSO 日志（如果打算重新安装 Decodium，建议保留）。
 chinesetraditional.RemoveDataPrompt=Decodium 的設定已刪除。%n%n是否同時刪除您的個人資料：QSO 日誌資料庫、快取與日誌？%n%n選擇「否」可保留您的 QSO 日誌（若打算重新安裝 Decodium，建議保留）。
 latvian.RemoveDataPrompt=Decodium iestatījumi ir noņemti.%n%nVai vēlaties dzēst arī savus personiskos datus: QSO žurnāla datubāzi, kešatmiņu un žurnālus?%n%nIzvēlieties NĒ, lai saglabātu savu QSO žurnālu (ieteicams, ja plānojat Decodium instalēt no jauna).
+dutch.RemoveDataPrompt=De instellingen van Decodium zijn verwijderd.%n%nWilt u ook uw persoonlijke gegevens verwijderen: de QSO-logdatabase, caches en logbestanden?%n%nKies NEE om uw QSO-log te behouden (aanbevolen als u Decodium opnieuw wilt installeren).
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -240,7 +251,21 @@ end;
   Le impostazioni (.ini) vengono rimosse sempre; i DATI personali (database QSO,
   cache, log) solo se l'utente conferma. Default del MsgBox = NO. }
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  ResultCode: Integer;
 begin
+  { 1.0.491 — cintura+bretelle a CloseApplications: PRIMA di rimuovere i file
+    chiudi a forza Decodium e i suoi processi figli (anche se freezato), cosi'
+    nessun file resta bloccato e l'uninstall non fallisce. Vale ANCHE
+    nell'auto-uninstall silenzioso degli update (per questo NON e' sotto la
+    guardia UninstallSilent). }
+  if CurUninstallStep = usUninstall then
+  begin
+    Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#AppExeName} /T',
+         '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exit;
+  end;
+
   if CurUninstallStep <> usPostUninstall then
     Exit;
   if UninstallSilent then

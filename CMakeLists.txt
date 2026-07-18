@@ -1391,6 +1391,7 @@ set (LANGUAGES
   it				# Italian
   ja				# Japanese
   lv				# Latvian
+  nl				# Dutch (Nederlands)
   #no				# Norwegian
   #pt				# Portuguese
   ru				# Russian
