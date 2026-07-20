@@ -105,11 +105,13 @@ jobs:
           set -euo pipefail
           QT_PREFIX_WIN="$(cygpath -w "${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}/${QT_VERSION}/mingw_64")"
           QT_PREFIX="$(cygpath -u "${QT_PREFIX_WIN}")"
+          QT6_DIR="${QT_PREFIX}/lib/cmake/Qt6"
           QMAKE="${QT_PREFIX}/bin/qmake6.exe"
           WINDEPLOYQT="${QT_PREFIX}/bin/windeployqt6.exe"
 
           test -x "${QMAKE}"
           test -x "${WINDEPLOYQT}"
+          test -f "${QT6_DIR}/Qt6Config.cmake"
           qt_reported_version="$("${QMAKE}" -query QT_VERSION)"
           if [[ "${qt_reported_version}" != "${QT_VERSION}" ]]; then
             echo "Expected Qt ${QT_VERSION}, got ${qt_reported_version}" >&2
@@ -118,10 +120,12 @@ jobs:
 
           echo "QT_PREFIX_WIN=${QT_PREFIX_WIN}" >> "${GITHUB_ENV}"
           echo "QT_PREFIX=${QT_PREFIX}" >> "${GITHUB_ENV}"
+          echo "QT6_DIR=${QT6_DIR}" >> "${GITHUB_ENV}"
           echo "QMAKE=${QMAKE}" >> "${GITHUB_ENV}"
           echo "WINDEPLOYQT=${WINDEPLOYQT}" >> "${GITHUB_ENV}"
           echo "${QT_PREFIX_WIN}/bin" >> "${GITHUB_PATH}"
           echo "Qt ${qt_reported_version} verified at ${QT_PREFIX_WIN}"
+          echo "Qt package configuration verified at ${QT6_DIR}/Qt6Config.cmake"
 
       - name: Restore Hamlib cache
         id: hamlib-cache
@@ -204,7 +208,8 @@ jobs:
           set -euo pipefail
           cmake -S . -B build-windows -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="${HAMLIB_PREFIX};${QT_PREFIX}" \
+            -DQt6_DIR="${QT6_DIR}" \
+            -DCMAKE_PREFIX_PATH="${QT_PREFIX};${HAMLIB_PREFIX}" \
             -DHamlib_INCLUDE_DIR="${HAMLIB_INCLUDE_DIR}" \
             -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" \
             -DRIGCTL_EXE="${RIGCTL_EXE}" \
