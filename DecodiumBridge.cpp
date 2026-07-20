@@ -7093,6 +7093,7 @@ void DecodiumBridge::setFt2SignoffRetryCap(int v)
     if (m_ft2SignoffRetryCap == clamped) return;
     m_ft2SignoffRetryCap = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);  // 1.0.493: senza, sotto -config il load rileggeva il valore stale del profilo
     settings.setValue(QStringLiteral("Ft2SignoffRetryCap"), clamped);
     emit ft2SignoffRetryCapChanged();
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT2) = %1").arg(clamped));
@@ -7130,6 +7131,7 @@ void DecodiumBridge::setFt4SignoffRetryCap(int v)
     if (m_ft4SignoffRetryCap == clamped) return;
     m_ft4SignoffRetryCap = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft4SignoffRetryCap"), clamped);
     emit ft4SignoffRetryCapChanged();
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT4) = %1").arg(clamped));
@@ -7142,6 +7144,7 @@ void DecodiumBridge::setFt8SignoffRetryCap(int v)
     if (m_ft8SignoffRetryCap == clamped) return;
     m_ft8SignoffRetryCap = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft8SignoffRetryCap"), clamped);
     emit ft8SignoffRetryCapChanged();
     bridgeLog(QStringLiteral("[FT2WS] Signoff retry cap (FT8) = %1").arg(clamped));
@@ -7153,6 +7156,7 @@ void DecodiumBridge::setFtxWeakSignoffBoost(bool v)
     if (m_ftxWeakSignoffBoost == v) return;
     m_ftxWeakSignoffBoost = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("FtxWeakSignoffBoost"), v);
     emit ftxWeakSignoffBoostChanged();
     bridgeLog(QStringLiteral("[FT2WS] Weak-partner signoff boost (FTX) %1").arg(v ? "ON" : "OFF"));
@@ -7164,6 +7168,7 @@ void DecodiumBridge::setFtxWeakSnrThreshold(int v)
     if (m_ftxWeakSnrThreshold == clamped) return;
     m_ftxWeakSnrThreshold = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("FtxWeakSnrThreshold"), clamped);
     emit ftxWeakSnrThresholdChanged();
     bridgeLog(QStringLiteral("[FT2WS] Weak-partner SNR threshold = %1 dB").arg(clamped));
@@ -7175,6 +7180,7 @@ void DecodiumBridge::setFtxWeakSignoffBonus(int v)
     if (m_ftxWeakSignoffBonus == clamped) return;
     m_ftxWeakSignoffBonus = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("FtxWeakSignoffBonus"), clamped);
     emit ftxWeakSignoffBonusChanged();
     bridgeLog(QStringLiteral("[FT2WS] Weak-partner signoff bonus = +%1").arg(clamped));
@@ -7213,12 +7219,28 @@ void DecodiumBridge::setTxWatchdogLogOnClose(bool v)
     bridgeLog(QStringLiteral("[Watchdog] Log QSO on close at timeout %1").arg(v ? "ON" : "OFF"));
 }
 
-// 1.0.446 - P1-5 opt-in: cap "Caller retries" duro anche con TX watchdog ON.
+// 1.0.326 B2 — Caller retries (1-99). 1.0.493: spostato dall'inline header e reso
+// profile-aware: prima scriveva sempre nella root INI, quindi sotto istanza -config
+// il load rileggeva la copia stale del profilo (spinbox "ignorato" al riavvio).
+void DecodiumBridge::setMaxCallerRetries(int v)
+{
+    int const clamped = qBound(1, v, 99);
+    if (m_maxCallerRetries == clamped) return;
+    m_maxCallerRetries = clamped;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("MaxCallerRetries"), clamped);
+    emit maxCallerRetriesChanged();
+    bridgeLog(QStringLiteral("[FT2WS] Caller retries cap = %1").arg(clamped));
+}
+
+// 1.0.446 - P1-5: cap "Caller retries" duro anche con TX watchdog ON (default ON su fork da 1.0.493).
 void DecodiumBridge::setCallerRetriesAlwaysHard(bool v)
 {
     if (m_callerRetriesAlwaysHard == v) return;
     m_callerRetriesAlwaysHard = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("CallerRetriesAlwaysHard"), v);
     emit callerRetriesAlwaysHardChanged();
     bridgeLog(QStringLiteral("[FT2WS] Caller retries always hard = %1").arg(v ? "ON" : "OFF"));
@@ -31508,6 +31530,15 @@ void DecodiumBridge::checkAndStartPeriodicTx()
         if (!((m_txEnabled || deferredRr73LogOnlyWait || completedFinalTx5Once)
               && signoffPayload
               && localSignoffAlreadyStarted)) {
+            // 1.0.493 — visibilità edge-case: con deferred-log armato ma payload 73 non
+            // riconosciuto per il partner attivo (free-text, hashed call, compound), il ramo
+            // cap signoff sotto non viene MAI raggiunto e TX4/TX5 ripete fino al watchdog.
+            if (m_ft2DeferredLogPending && !signoffPayload
+                && (m_currentTx == 4 || m_currentTx == 5)) {
+                bridgeLog(QStringLiteral("checkAndStartPeriodicTx: signoff cap gate REJECTED payload [%1] per partner %2 (token mismatch) — cap non applicabile su TX%3")
+                              .arg(selectedPayload, activePartner)
+                              .arg(m_currentTx));
+            }
             return false;
         }
 
@@ -33561,8 +33592,10 @@ void DecodiumBridge::loadSettings()
     m_ft2PostLogReengageMax = qBound(0, s.value(QStringLiteral("Ft2PostLogReengageMax"), 1).toInt(), 5);
     // 1.0.446 - P0-3 opt-in: watchdog logga QSO in chiusura (progress>=4). Default OFF.
     m_txWatchdogLogOnClose = s.value(QStringLiteral("TxWatchdogLogOnClose"), false).toBool();
-    // 1.0.446 - P1-5 opt-in: cap Caller-retries duro anche con watchdog ON. Default OFF.
-    m_callerRetriesAlwaysHard = s.value(QStringLiteral("CallerRetriesAlwaysHard"), false).toBool();
+    // 1.0.446 - P1-5: cap Caller-retries duro anche con watchdog ON.
+    // 1.0.493 - default ON su fork: il watchdog (attivo di default) rendeva il cap utente
+    // inefficace in ogni installazione standard ("Caller Retries non funziona").
+    m_callerRetriesAlwaysHard = s.value(QStringLiteral("CallerRetriesAlwaysHard"), true).toBool();
     // 1.0.447 - Fondamenta Fase 1 opt-in: censimento transizioni stato FT2. Default OFF.
     m_ft2TransitionCensus = s.value(QStringLiteral("Ft2TransitionCensus"), false).toBool();
     // 1.0.447 - Leva#6-A opt-in: gate smart-TX adattivi. Default OFF.

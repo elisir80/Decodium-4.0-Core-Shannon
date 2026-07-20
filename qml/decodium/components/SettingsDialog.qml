@@ -3804,10 +3804,22 @@ Dialog {
                                     onValueChanged: if (bridge && bridge.maxCallerRetries !== value) bridge.setMaxCallerRetries(value)
                                     contentItem: TextInput { text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                                    // 1.0.493 — segnale visivo: col watchdog owner (hard cap OFF) questo numero è ignorato
+                                    opacity: (bridge && bridge.txWatchdogMode !== 0 && !bridge.callerRetriesAlwaysHard) ? 0.5 : 1.0
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
                                     ToolTip.text: qsTr("Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn't reply.\n\nDefault: 10.\n\nFT2 (slot 3.75s): 10 retries ≈ 38s of calling.\nFT8 (slot 15s): 10 retries ≈ 150s.\n\nLower (4-6) = less time wasted on stations that don't reply.\nHigher (15-20) = patience for weak DX / marginal propagation.\n\nNote: with 'FT2 manual one-shot disarm' OFF (default) this is what stops TX1 from looping forever.")
+                                }
+                                // 1.0.493 — avviso: watchdog owner del limite → il cap qui sopra è ignorato
+                                Text {
+                                    visible: bridge && bridge.txWatchdogMode !== 0 && !bridge.callerRetriesAlwaysHard
+                                    text: qsTr("⚠ TX Watchdog is active and 'hard cap' below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.")
+                                    color: "#e6a23c"
+                                    font.pixelSize: 11
+                                    wrapMode: Text.WordWrap
+                                    Layout.columnSpan: 4
+                                    Layout.fillWidth: true
                                 }
 
                                 // 1.0.446 - P1-5 opt-in: cap Caller retries duro anche con TX watchdog ON
@@ -3824,7 +3836,7 @@ Dialog {
                                     id: callerRetriesAlwaysHardCheck
                                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                                     Layout.preferredHeight: controlHeight
-                                    checked: bridge ? bridge.callerRetriesAlwaysHard : false
+                                    checked: bridge ? bridge.callerRetriesAlwaysHard : true
                                     onCheckedChanged: {
                                         if (bridge && bridge.callerRetriesAlwaysHard !== checked)
                                             bridge.setCallerRetriesAlwaysHard(checked)
@@ -3834,7 +3846,7 @@ Dialog {
                                     hoverEnabled: true
                                     ToolTip.visible: hovered
                                     ToolTip.delay: 400
-                                    ToolTip.text: qsTr("When ON, the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled.\n\nDefault OFF (1.0.438 behaviour): when the TX Watchdog is ON it takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration.\n\nEnable for a hard limit on TX repeats regardless of the watchdog.")
+                                    ToolTip.text: qsTr("When ON (default), the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.\n\nWhen OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).")
                                 }
 
                                 // 1.0.447 - Fondamenta Fase 1: censimento transizioni di stato FT2 (diagnostico, solo-log)

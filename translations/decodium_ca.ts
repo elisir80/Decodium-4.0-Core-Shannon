@@ -11476,6 +11476,20 @@ Consell: tanqueu l'OmniRig des de la icona de la safata de Windows i torneu a pr
 <context>
     <name>SettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
+        <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ El watchdog TX està actiu i el &apos;límit estricte&apos; de sota està DESACTIVAT: el límit de Reintents del trucador de dalt s&apos;IGNORA fins al temps d&apos;espera del watchdog.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3849"/>
+        <source>When ON (default), the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Quan està activat (per defecte), el límit de &apos;Reintents del trucador&apos; a TX1/TX2 atura la trucada encara que el watchdog TX estigui habilitat — el nombre configurat és un límit estricte real.
+
+Quan està desactivat (comportament upstream 1.0.438): el watchdog TX té prioritat i ignora el límit de reintents del trucador fins al seu propi temps d&apos;espera, de manera que una trucada pot repetir-se durant tota la durada del watchdog (per defecte 6 min).</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1469"/>
         <source>Settings</source>

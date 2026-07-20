@@ -613,7 +613,7 @@ public:
     void setProcessPriority(int v);          // 1.0.388 — implementato in .cpp (SetPriorityClass)
     void applyProcessPriority();             // 1.0.388 — applica m_processPriority al processo
     int  maxCallerRetries()  const { return m_maxCallerRetries; }
-    Q_INVOKABLE void setMaxCallerRetries(int v) { if (m_maxCallerRetries != v) { m_maxCallerRetries = qBound(1, v, 99); emit maxCallerRetriesChanged(); QSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3")).setValue(QStringLiteral("MaxCallerRetries"), m_maxCallerRetries); } } // 1.0.326 B2: persist to Decodium3 store. Q_INVOKABLE: il QML chiama setMaxCallerRetries() come metodo (1.0.383 fix: senza Q_INVOKABLE falliva con TypeError silenzioso → non persisteva, restava sempre 10)
+    Q_INVOKABLE void setMaxCallerRetries(int v); // 1.0.326 B2: persist Decodium3. Q_INVOKABLE: il QML lo chiama come metodo (1.0.383 fix TypeError silenzioso). 1.0.493: impl in .cpp, profile-aware
     int  txDisabledMask() const { return m_txDisabledMask; }
     Q_INVOKABLE bool isTxDisabled(int n) const { return n >= 1 && n <= 6 && (m_txDisabledMask & (1 << (n - 1))); }
     Q_INVOKABLE void setTxDisabled(int n, bool disabled);
@@ -2193,10 +2193,12 @@ private:
     // scambio report bidirezionale completato (m_qsoProgress>=4), logga il QSO invece di
     // abbandonarlo (1.0.445 armava solo il late-snapshot, perso in QSO manuale).
     bool m_txWatchdogLogOnClose {false};
-    // 1.0.446 - P1-5 opt-in (default OFF): quando ON il cap "Caller retries" su TX1/TX2 ferma
-    // la chiamata anche se il TX watchdog e' ON (default 1.0.438: watchdog prioritario, ignora
-    // il cap fino al timeout). Per chi vuole un limite duro di tentativi a prescindere.
-    bool m_callerRetriesAlwaysHard {false};
+    // 1.0.446 - P1-5: quando ON il cap "Caller retries" su TX1/TX2 ferma la chiamata anche
+    // se il TX watchdog e' ON (1.0.438: watchdog prioritario, ignora il cap fino al timeout).
+    // 1.0.493 - default ON su fork: col watchdog attivo di default (6 min) il cap utente non
+    // fermava MAI la chiamata ("Caller Retries non funziona"). Principio 1.0.429: niente
+    // automazione silenziosa che scavalca i settaggi. OFF = comportamento watchdog-priority.
+    bool m_callerRetriesAlwaysHard {true};
     // 1.0.447 - Fondamenta Fase 1 (opt-in, default OFF): logga ogni transizione (from,to,progress,
     // quick) in advanceQsoState per costruire EMPIRICAMENTE la matrice reale dei salti PRIMA di
     // qualunque enforcement canAdvance. Solo-logging, gated FT2+async, byte-identico col toggle OFF.

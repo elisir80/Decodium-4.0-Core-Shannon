@@ -11343,6 +11343,20 @@ Tipp: zárja be az OmniRiget a Windows tálca ikonjából, majd nyomja meg újra
 <context>
     <name>SettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
+        <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ A TX Watchdog aktív, és a lenti &apos;kemény korlát&apos; KI van kapcsolva: a fenti Hívó újrapróbálkozások korlátja a watchdog időtúllépéséig FIGYELMEN KÍVÜL marad.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3849"/>
+        <source>When ON (default), the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Bekapcsolva (alapértelmezés) a &apos;Hívó újrapróbálkozások&apos; korlátja TX1/TX2 esetén leállítja a hívást akkor is, ha a TX Watchdog engedélyezve van — a beállított szám valódi kemény korlát.
+
+Kikapcsolva (upstream 1.0.438 viselkedés): a TX Watchdog elsőbbséget élvez, és a saját időtúllépéséig figyelmen kívül hagyja a hívó újrapróbálkozások korlátját, így egy hívás a teljes watchdog-időtartam alatt ismétlődhet (alapértelmezés: 6 perc).</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1469"/>
         <source>Settings</source>

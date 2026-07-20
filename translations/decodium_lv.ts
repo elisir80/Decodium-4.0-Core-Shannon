@@ -11488,6 +11488,20 @@ Padoms: aizveriet OmniRig no Windows sistēmas teknes ikonas, pēc tam vēlreiz 
 <context>
     <name>SettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
+        <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ TX Watchdog ir aktīvs, un &apos;stingrais ierobežojums&apos; zemāk ir IZSLĒGTS: izsaucēja atkārtojumu ierobežojums augstāk tiek IGNORĒTS līdz watchdog noildzei.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3849"/>
+        <source>When ON (default), the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Kad ieslēgts (noklusējums), &apos;Izsaucēja atkārtojumu&apos; ierobežojums TX1/TX2 aptur izsaukumu pat tad, ja TX Watchdog ir iespējots — iestatītais skaitlis ir īsts stingrais ierobežojums.
+
+Kad izslēgts (upstream 1.0.438 uzvedība): TX Watchdog ir priekšroka, un tas ignorē izsaucēja atkārtojumu ierobežojumu līdz savai noildzei, tāpēc izsaukums var atkārtoties visu watchdog darbības laiku (noklusējums 6 min).</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1469"/>
         <source>Settings</source>

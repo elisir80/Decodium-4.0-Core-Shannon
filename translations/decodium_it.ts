@@ -11502,6 +11502,20 @@ Suggerimento: chiudi OmniRig dall'icona nella tray di Windows, poi premi di nuov
 <context>
     <name>SettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
+        <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ Il watchdog TX è attivo e il &apos;limite rigido&apos; qui sotto è OFF: il limite Tentativi chiamante qui sopra viene IGNORATO fino al timeout del watchdog.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3849"/>
+        <source>When ON (default), the &apos;Caller retries&apos; cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Quando attivo (predefinito), il limite &apos;Tentativi chiamante&apos; su TX1/TX2 interrompe la chiamata anche se il watchdog TX è abilitato — il numero impostato è un vero limite rigido.
+
+Quando OFF (comportamento upstream 1.0.438): il watchdog TX ha la priorità e ignora il limite dei tentativi chiamante fino al proprio timeout, quindi una chiamata può ripetersi per tutta la durata del watchdog (predefinito 6 min).</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1469"/>
         <source>Settings</source>
