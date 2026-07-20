@@ -79,7 +79,7 @@ jobs:
           rm -rf "${QT_SOURCE_DIR}" "${QT_PREFIX}"
           curl -fsSL --retry 3 "${QT_SOURCE_URL}" -o "${QT_SOURCE_ARCHIVE}"
           mkdir -p /tmp
-          tar -xf "${QT_SOURCE_ARCHIVE}" -C "${RUNNER_TEMP}"
+          tar -xf "${QT_SOURCE_ARCHIVE}" -C /tmp
           cd "${QT_SOURCE_DIR}"
           ./configure \
             -prefix "${QT_PREFIX_WIN}" \
