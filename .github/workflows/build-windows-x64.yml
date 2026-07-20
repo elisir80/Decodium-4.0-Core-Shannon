@@ -13,6 +13,7 @@ permissions:
 env:
   QT_VERSION: "6.11.0"
   QT_CACHE_ROOT: ".ci/qt-windows-6.11.0"
+  QT_SOURCE_URL: "https://download.qt.io/official_releases/qt/6.11/6.11.0/single/qt-everywhere-src-6.11.0.tar.xz"
   HAMLIB_TAG: "4.7.0"
   HAMLIB_VERSION: "4.7.0"
 
@@ -44,6 +45,9 @@ jobs:
           install: >-
             git
             make
+            perl
+            python
+            gperf
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-ninja
@@ -60,17 +64,31 @@ jobs:
           path: ${{ env.QT_CACHE_ROOT }}
           key: windows-mingw64-qt-${{ env.QT_VERSION }}-v1
 
-      - name: Install Qt 6.11.0 MinGW
+      - name: Build Qt 6.11.0 MinGW from source
         if: steps.qt-cache.outputs.cache-hit != 'true'
-        shell: pwsh
+        shell: msys2 {0}
         run: |
-          $ErrorActionPreference = 'Stop'
-          $qtRoot = Join-Path $env:GITHUB_WORKSPACE $env:QT_CACHE_ROOT
-          New-Item -ItemType Directory -Force -Path $qtRoot | Out-Null
-          py -m pip install --disable-pip-version-check --quiet --upgrade aqtinstall
-          py -m aqt install-qt windows desktop $env:QT_VERSION win64_mingw `
-            -O $qtRoot `
-            -m qt5compat qtdeclarative qtmultimedia qtserialport qtshadertools qttools qttranslations qtwebsockets
+          set -euo pipefail
+          QT_PREFIX_WIN="$(cygpath -w "${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}/${QT_VERSION}/mingw_64")"
+          QT_PREFIX="$(cygpath -u "${QT_PREFIX_WIN}")"
+          QT_SOURCE_ARCHIVE="${RUNNER_TEMP}/qt-everywhere-src-${QT_VERSION}.tar.xz"
+          QT_SOURCE_DIR="${RUNNER_TEMP}/qt-everywhere-src-${QT_VERSION}"
+
+          rm -rf "${QT_SOURCE_DIR}" "${QT_PREFIX}"
+          curl -fsSL --retry 3 "${QT_SOURCE_URL}" -o "${QT_SOURCE_ARCHIVE}"
+          mkdir -p "${RUNNER_TEMP}"
+          tar -xf "${QT_SOURCE_ARCHIVE}" -C "${RUNNER_TEMP}"
+          cd "${QT_SOURCE_DIR}"
+          ./configure \
+            -prefix "${QT_PREFIX_WIN}" \
+            -release \
+            -opensource \
+            -confirm-license \
+            -nomake tests \
+            -nomake examples \
+            -submodules qtbase,qt5compat,qtdeclarative,qtmultimedia,qtserialport,qtsvg,qtshadertools,qttools,qttranslations,qtwebsockets
+          cmake --build . --parallel "$(nproc)"
+          cmake --install .
 
       - name: Save Qt 6.11 cache
         if: steps.qt-cache.outputs.cache-hit != 'true'
