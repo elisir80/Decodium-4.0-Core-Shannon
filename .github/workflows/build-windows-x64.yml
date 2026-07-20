@@ -71,12 +71,14 @@ jobs:
           set -euo pipefail
           QT_PREFIX_WIN="$(cygpath -w "${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}/${QT_VERSION}/mingw_64")"
           QT_PREFIX="$(cygpath -u "${QT_PREFIX_WIN}")"
-          QT_SOURCE_ARCHIVE="${RUNNER_TEMP}/qt-everywhere-src-${QT_VERSION}.tar.xz"
-          QT_SOURCE_DIR="${RUNNER_TEMP}/qt-everywhere-src-${QT_VERSION}"
+          # RUNNER_TEMP is a Windows path (for example D:\\a\\_temp) and
+          # must not be passed directly to MSYS2 tar as an archive path.
+          QT_SOURCE_ARCHIVE="/tmp/qt-everywhere-src-${QT_VERSION}.tar.xz"
+          QT_SOURCE_DIR="/tmp/qt-everywhere-src-${QT_VERSION}"
 
           rm -rf "${QT_SOURCE_DIR}" "${QT_PREFIX}"
           curl -fsSL --retry 3 "${QT_SOURCE_URL}" -o "${QT_SOURCE_ARCHIVE}"
-          mkdir -p "${RUNNER_TEMP}"
+          mkdir -p /tmp
           tar -xf "${QT_SOURCE_ARCHIVE}" -C "${RUNNER_TEMP}"
           cd "${QT_SOURCE_DIR}"
           ./configure \
