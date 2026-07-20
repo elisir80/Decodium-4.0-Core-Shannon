@@ -8560,9 +8560,12 @@ Dialog {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                // Reset via il canale setting canonico: Main.onSettingValueChanged
-                                // ricostruisce uiToolbarOrder dal default quando il valore è vuoto.
-                                onClicked: if (bridge) bridge.setSetting("uiToolbarOrder", "")
+                                // Reset the toolbar only.  The clock position is
+                                // independent and must not be cleared as a side effect.
+                                onClicked: {
+                                    if (bridge)
+                                        bridge.setSetting("uiToolbarOrder", "")
+                                }
                             }
                         }
 

@@ -1559,14 +1559,23 @@ WideTxAudioPlan buildWideTxAudioPlan (
     std::uint16_t sessionId,
     WideTxAudioPlanOptions const& options)
 {
+  return buildWideTxAudioPlanForFrames (
+      makeWideFrames (options.profile, options.frameType, sessionId, message),
+      options);
+}
+
+WideTxAudioPlan buildWideTxAudioPlanForFrames (
+    std::vector<Frame> const& frames,
+    WideTxAudioPlanOptions const& options)
+{
   WideTxAudioPlan plan;
   plan.profile = options.profile;
   plan.w2300RateMode = options.w2300RateMode;
   plan.sampleRate = options.sampleRate;
 
-  if (message.empty ())
+  if (frames.empty ())
     {
-      plan.error = "FT2-Link TX audio plan message is empty";
+      plan.error = "FT2-Link TX audio plan frame window is empty";
       return plan;
     }
   if (options.sampleRate <= 0.0)
@@ -1581,8 +1590,17 @@ WideTxAudioPlan buildWideTxAudioPlan (
       return plan;
     }
 
-  plan.frames = makeWideFrames (
-      options.profile, options.frameType, sessionId, message);
+  plan.frames = frames;
+  std::size_t payloadBytes = 0u;
+  for (Frame const& frame : plan.frames)
+    {
+      if (frame.profile != options.profile)
+        {
+          plan.error = "FT2-Link TX audio plan frame profile mismatch";
+          return plan;
+        }
+      payloadBytes += frame.payload.size ();
+    }
   std::vector<AudioAckTrace> noAckBursts;
 
   if (options.profile == Profile::Wide2300)
@@ -1635,7 +1653,7 @@ WideTxAudioPlan buildWideTxAudioPlan (
 
   plan.totalSamples = plan.samples.size ();
   plan.throughput = makeThroughputMetrics (options.profile,
-                                           message.size (),
+                                           payloadBytes,
                                            plan.bursts,
                                            noAckBursts,
                                            plan.totalSamples,

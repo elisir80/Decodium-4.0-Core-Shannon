@@ -11,6 +11,8 @@ permissions:
   contents: write
 
 env:
+  QT_VERSION: "6.11.0"
+  QT_CACHE_ROOT: ".ci/qt-windows-6.11.0"
   HAMLIB_TAG: "4.7.0"
   HAMLIB_VERSION: "4.7.0"
 
@@ -50,16 +52,56 @@ jobs:
             mingw-w64-x86_64-fftw
             mingw-w64-x86_64-libusb
             mingw-w64-x86_64-portaudio
-            mingw-w64-x86_64-qt6-5compat
-            mingw-w64-x86_64-qt6-activeqt
-            mingw-w64-x86_64-qt6-base
-            mingw-w64-x86_64-qt6-declarative
-            mingw-w64-x86_64-qt6-multimedia
-            mingw-w64-x86_64-qt6-serialport
-            mingw-w64-x86_64-qt6-svg
-            mingw-w64-x86_64-qt6-tools
-            mingw-w64-x86_64-qt6-translations
-            mingw-w64-x86_64-qt6-websockets
+
+      - name: Restore Qt 6.11 cache
+        id: qt-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.QT_CACHE_ROOT }}
+          key: windows-mingw64-qt-${{ env.QT_VERSION }}-v1
+
+      - name: Install Qt 6.11.0 MinGW
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $qtRoot = Join-Path $env:GITHUB_WORKSPACE $env:QT_CACHE_ROOT
+          New-Item -ItemType Directory -Force -Path $qtRoot | Out-Null
+          py -m pip install --disable-pip-version-check --quiet --upgrade aqtinstall
+          py -m aqt install-qt windows desktop $env:QT_VERSION win64_mingw `
+            -O $qtRoot `
+            -m qt5compat qtdeclarative qtmultimedia qtserialport qtshadertools qttools qttranslations qtwebsockets
+
+      - name: Save Qt 6.11 cache
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.QT_CACHE_ROOT }}
+          key: windows-mingw64-qt-${{ env.QT_VERSION }}-v1
+
+      - name: Verify and export Qt 6.11.0
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+          QT_PREFIX_WIN="$(cygpath -w "${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}/${QT_VERSION}/mingw_64")"
+          QT_PREFIX="$(cygpath -u "${QT_PREFIX_WIN}")"
+          QMAKE="${QT_PREFIX}/bin/qmake6.exe"
+          WINDEPLOYQT="${QT_PREFIX}/bin/windeployqt6.exe"
+
+          test -x "${QMAKE}"
+          test -x "${WINDEPLOYQT}"
+          qt_reported_version="$("${QMAKE}" -query QT_VERSION)"
+          if [[ "${qt_reported_version}" != "${QT_VERSION}" ]]; then
+            echo "Expected Qt ${QT_VERSION}, got ${qt_reported_version}" >&2
+            exit 1
+          fi
+
+          echo "QT_PREFIX_WIN=${QT_PREFIX_WIN}" >> "${GITHUB_ENV}"
+          echo "QT_PREFIX=${QT_PREFIX}" >> "${GITHUB_ENV}"
+          echo "QMAKE=${QMAKE}" >> "${GITHUB_ENV}"
+          echo "WINDEPLOYQT=${WINDEPLOYQT}" >> "${GITHUB_ENV}"
+          echo "${QT_PREFIX_WIN}/bin" >> "${GITHUB_PATH}"
+          echo "Qt ${qt_reported_version} verified at ${QT_PREFIX_WIN}"
 
       - name: Restore Hamlib cache
         id: hamlib-cache
@@ -133,15 +175,16 @@ jobs:
           cmake --version
           ninja --version
           g++ --version
-          qmake6 -v || true
-          /mingw64/bin/windeployqt6.exe --version || /mingw64/bin/windeployqt.exe --version || true
+          "${QMAKE}" -v
+          "${QMAKE}" -query QT_VERSION
+          "${WINDEPLOYQT}" --version
 
       - name: Configure CMake
         run: |
           set -euo pipefail
           cmake -S . -B build-windows -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="${HAMLIB_PREFIX};/mingw64" \
+            -DCMAKE_PREFIX_PATH="${HAMLIB_PREFIX};${QT_PREFIX}" \
             -DHamlib_INCLUDE_DIR="${HAMLIB_INCLUDE_DIR}" \
             -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" \
             -DRIGCTL_EXE="${RIGCTL_EXE}" \
@@ -173,16 +216,12 @@ jobs:
           cp -R sounds "${DIST}/sounds"
           cp -R Palettes "${DIST}/Palettes"
 
-          WINDEPLOYQT="/mingw64/bin/windeployqt6.exe"
-          if [[ ! -x "${WINDEPLOYQT}" ]]; then
-            WINDEPLOYQT="/mingw64/bin/windeployqt.exe"
-          fi
-
-          QT_SHARE_BIN="/mingw64/share/qt6/bin"
+          WINDEPLOYQT="${WINDEPLOYQT}"
+          QT_SHARE_BIN="${QT_PREFIX}/bin"
           QMLIMPORTSCANNER="${QT_SHARE_BIN}/qmlimportscanner.exe"
           if [[ ! -x "${QMLIMPORTSCANNER}" ]]; then
             echo "qmlimportscanner.exe not found under ${QT_SHARE_BIN}" >&2
-            find /mingw64 -maxdepth 4 -iname 'qmlimportscanner*' -print >&2 || true
+            find "${QT_PREFIX}" -maxdepth 4 -iname 'qmlimportscanner*' -print >&2 || true
             exit 1
           fi
           export PATH="${QT_SHARE_BIN}:$PATH"
@@ -194,13 +233,14 @@ jobs:
             --dir "${PWD}/${DIST}"
             "${PWD}/${DIST}/decodium.exe"
           )
-          if [[ ! -f /mingw64/share/qt6/translations/catalogs.json ]]; then
+          if [[ ! -f "${QT_PREFIX}/translations/catalogs.json" ]]; then
             WINDEPLOY_ARGS=(--no-translations "${WINDEPLOY_ARGS[@]}")
           fi
 
           "${WINDEPLOYQT}" "${WINDEPLOY_ARGS[@]}"
 
           SEARCH_DIRS=(
+            "${QT_PREFIX}/bin"
             "/mingw64/bin"
             "${HAMLIB_PREFIX}/bin"
           )
@@ -334,7 +374,7 @@ jobs:
               fi
             done <<< "${required_abis}"
 
-            qt_source="/mingw64/bin/${qt_name}"
+            qt_source="${QT_PREFIX}/bin/${qt_name}"
             if [[ -f "${qt_source}" ]]; then
               qt_hash="$(sha256sum "${qt_dll}" | awk '{print $1}')"
               qt_source_hash="$(sha256sum "${qt_source}" | awk '{print $1}')"

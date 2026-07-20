@@ -426,6 +426,13 @@ ApplicationWindow {
         raise()
         requestActivate()
         startupLog("main window show/raise/requestActivate done")
+        // The clock is re-parented into contentItem during header creation.  At
+        // that point the final window geometry may not exist yet, so apply the
+        // persisted position once more after the first layout pass.
+        Qt.callLater(function() {
+            mainWindow.applyWorldClockSlot()
+            Qt.callLater(mainWindow.applyWorldClockSlot)
+        })
         Qt.callLater(restoreDecodePanelWidths)
         // Stadio 1+2: applica l'ordine pannelli persistito re-parentando i 4 pannelli
         // (3 colonne + TX area) negli slot-host indicati dalla mappa (default = ordine
@@ -686,6 +693,9 @@ ApplicationWindow {
         saveTimer.stop()
         windowStateSaveTimer.stop()
         applicationClosing = true
+        // Keep the last position even when the user closes immediately after
+        // dragging, before the normal settings debounce can run.
+        persistWorldClockPos()
         persistSettingsDialogIfOpen()
         persistWindowLayouts()
         bridge.saveSettings()
@@ -2192,10 +2202,6 @@ ApplicationWindow {
                 mainWindow.uiBtnCatVisible = mainWindow.coerceBool(value, true)
             else if (key === "uiToolbarOrder") {
                 mainWindow.uiToolbarOrder = mainWindow.parseToolbarOrder(String(value || ""))
-                // Il pulsante "Restore default button order" azzera questa chiave:
-                // resetta anche la posizione del World Clock al default (dopo la toolbar).
-                if (String(value || "").length === 0)
-                    mainWindow.resetWorldClockPos()
             }
             else if (key === "uiClassicColumnOrder") {
                 mainWindow.uiClassicColumnOrder = mainWindow.parseClassicColumnOrder(String(value || ""))

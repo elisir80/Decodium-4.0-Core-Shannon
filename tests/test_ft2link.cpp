@@ -2579,6 +2579,54 @@ private Q_SLOTS:
     QVERIFY (rx.message () == payload);
     QCOMPARE (tx.acknowledgedCount (), tx.frameCount ());
   }
+
+  void txAudioPlanCanRebuildOnlyPendingArqWindow ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::OutboundTransfer;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::WideTxAudioPlan;
+    using decodium::ft2link::WideTxAudioPlanOptions;
+
+    std::string text;
+    for (int i = 0; i < 20; ++i)
+      {
+        text += "FT2-Link file ARQ window rebuild test block ";
+      }
+    std::vector<std::uint8_t> const payload = bytesFromString (text);
+    OutboundTransfer tx {Profile::Wide2300, 0x5a5au, payload};
+    tx.setWindowSize (4);
+    tx.setRetryMs (1000);
+
+    std::vector<Frame> const firstWindow = tx.framesToSend (0);
+    QCOMPARE (firstWindow.size (), static_cast<std::size_t> (4));
+
+    tx.handleAckFrame (decodium::ft2link::makeAckFrame (
+        Profile::Wide2300, 0x5a5au, 0u, 0x0003u));
+    std::vector<Frame> const pendingWindow = tx.framesToSend (1000);
+    QVERIFY (!pendingWindow.empty ());
+    for (Frame const& frame : pendingWindow)
+      {
+        QVERIFY (frame.sequence != 0u);
+        QVERIFY (frame.sequence != 1u);
+      }
+
+    WideTxAudioPlanOptions options;
+    options.profile = Profile::Wide2300;
+    options.w2300RateMode = decodium::ft2link::W2300RateMode::Robust;
+    WideTxAudioPlan const plan =
+        decodium::ft2link::buildWideTxAudioPlanForFrames (
+            pendingWindow, options);
+
+    QVERIFY (plan.ok);
+    QCOMPARE (plan.frames.size (), pendingWindow.size ());
+    QCOMPARE (plan.bursts.size (), pendingWindow.size ());
+    QVERIFY (plan.samples.size () > 0u);
+    for (std::size_t i = 0; i < pendingWindow.size (); ++i)
+      {
+        QCOMPARE (plan.frames[i].sequence, pendingWindow[i].sequence);
+      }
+  }
 };
 
 QTEST_MAIN (TestFt2Link)

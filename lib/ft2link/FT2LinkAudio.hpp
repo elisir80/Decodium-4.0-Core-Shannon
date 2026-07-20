@@ -341,6 +341,12 @@ WideTxAudioPlan buildWideTxAudioPlan (
     std::uint16_t sessionId,
     WideTxAudioPlanOptions const& options = WideTxAudioPlanOptions {});
 
+// Builds a burst plan from an already selected ARQ window. This lets the
+// live transport retransmit only frames that are still missing.
+WideTxAudioPlan buildWideTxAudioPlanForFrames (
+    std::vector<Frame> const& frames,
+    WideTxAudioPlanOptions const& options = WideTxAudioPlanOptions {});
+
 }
 }
 

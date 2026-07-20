@@ -7234,8 +7234,47 @@ bool FT2LinkQmlAdapter::transmitApplicationPayloadRadio (
   m_liveOutbound[sessionId] = std::move (outbound);
   m_liveOutboundMessageIndex[sessionId] = messageIndex;
 
-  QVector<float> samples = toSampleVector (m_preparedRadioTxSamples);
-  QVariantMap plan = m_lastRadioTxPlan;
+  std::vector<decodium::ft2link::Frame> initialFrames =
+      m_liveOutbound[sessionId]->framesToSend (nowMs);
+  if (initialFrames.empty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link ARQ initial window is empty"));
+      return false;
+    }
+
+  decodium::ft2link::WideTxAudioPlanOptions initialOptions;
+  initialOptions.profile = session->negotiated.profile;
+  initialOptions.w2300RateMode = currentRateMode;
+  initialOptions.sampleRate = 48000.0;
+  if (initialOptions.profile == Profile::Wide500)
+    {
+      initialOptions.interBurstGapSamples = 48000u;
+    }
+  WideTxAudioPlan const initialPlan =
+      decodium::ft2link::buildWideTxAudioPlanForFrames (
+          initialFrames, initialOptions);
+  if (!initialPlan.ok)
+    {
+      setLastError (initialPlan.error.empty ()
+                    ? QStringLiteral ("FT2-Link ARQ initial window failed")
+                    : QString::fromStdString (initialPlan.error));
+      return false;
+    }
+
+  QVector<float> samples = toGuardedWideSampleVector (
+      initialPlan.samples, initialPlan.sampleRate);
+  QVariantMap plan = radioTxPlanMap (initialPlan, true);
+  plan.insert (QStringLiteral ("arqFrameCount"),
+               static_cast<int> (initialFrames.size ()));
+  QStringList initialSequences;
+  for (decodium::ft2link::Frame const& frame : initialFrames)
+    {
+      initialSequences << QString::number (frame.sequence);
+    }
+  plan.insert (QStringLiteral ("arqSequences"),
+               initialSequences.join (QLatin1Char (',')));
+  m_lastRadioTxPlan = plan;
+  emit radioTxPlanChanged ();
   plan.insert (QStringLiteral ("armed"), true);
   plan.insert (QStringLiteral ("sessionId"), sessionId);
   plan.insert (QStringLiteral ("text"), logTrimmed);
@@ -10496,6 +10535,15 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
         }
 
       transfer->second->handleAckFrame (frame);
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][ARQ] ack session=%1 base=%2 bitmap=0x%3"
+              " acknowledged=%4/%5")
+          .arg (frame.sessionId)
+          .arg (frame.ackBase)
+          .arg (QString::number (frame.ackBitmap, 16).rightJustified (4, QLatin1Char ('0')))
+          .arg (transfer->second->acknowledgedCount ())
+          .arg (transfer->second->frameCount ()));
       if (transfer->second->complete ())
         {
           std::map<std::uint16_t, std::size_t>::const_iterator messageIndex =
@@ -10623,6 +10671,16 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
     }
 
   Frame const ack = inbound->makeAckFrame ();
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][ARQ] rx session=%1 seq=%2 received=%3"
+          " ackBase=%4 bitmap=0x%5 complete=%6")
+      .arg (frame.sessionId)
+      .arg (frame.sequence)
+      .arg (inbound->receivedCount ())
+      .arg (ack.ackBase)
+      .arg (QString::number (ack.ackBitmap, 16).rightJustified (4, QLatin1Char ('0')))
+      .arg (inbound->complete () ? QStringLiteral ("yes") : QStringLiteral ("no")));
   bool const alreadyDelivered =
       m_liveInboundDelivered.find (frame.sessionId) != m_liveInboundDelivered.end ()
       && m_liveInboundDelivered[frame.sessionId];
@@ -21854,10 +21912,19 @@ void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
       ++it->second.attempts;
       QVariantMap retryPlan = it->second.plan;
       QVector<float> retrySamples = it->second.samples;
-      if (it->second.profile == Profile::Wide2300 && it->second.attempts > 1u)
+      std::vector<decodium::ft2link::Frame> retryFrames;
+      std::map<std::uint16_t,
+               std::unique_ptr<decodium::ft2link::OutboundTransfer> >::iterator
+          liveTransfer = m_liveOutbound.find (it->first);
+      if (liveTransfer != m_liveOutbound.end () && liveTransfer->second)
+        {
+          retryFrames = liveTransfer->second->framesToSend (nowMs);
+        }
+
+      if (!retryFrames.empty ())
         {
           decodium::ft2link::WideTxAudioPlanOptions retryOptions;
-          retryOptions.profile = Profile::Wide2300;
+          retryOptions.profile = it->second.profile;
           retryOptions.w2300RateMode = effectiveW2300RateMode (
               it->second.attempts > 4u
               ? W2300RateMode::Ultra
@@ -21867,9 +21934,13 @@ void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
                  ? W2300RateMode::Weak
                  : W2300RateMode::Robust)));
           retryOptions.sampleRate = 48000.0;
+          if (it->second.profile == Profile::Wide500)
+            {
+              retryOptions.interBurstGapSamples = 48000u;
+            }
           WideTxAudioPlan const rebuiltAudioPlan =
-              decodium::ft2link::buildWideTxAudioPlan (
-                  it->second.payload, it->first, retryOptions);
+              decodium::ft2link::buildWideTxAudioPlanForFrames (
+                  retryFrames, retryOptions);
           if (rebuiltAudioPlan.ok)
             {
               retrySamples = toGuardedWideSampleVector (
@@ -21896,6 +21967,23 @@ void FT2LinkQmlAdapter::runLiveOutboundRetryCheck ()
               rebuiltPlan.insert (QStringLiteral ("retryRateAdapted"), true);
               rebuiltPlan.insert (QStringLiteral ("deepRateEnabled"),
                                   m_deepRateEnabled);
+              rebuiltPlan.insert (QStringLiteral ("arqFrameCount"),
+                                  static_cast<int> (retryFrames.size ()));
+              QStringList sequences;
+              for (decodium::ft2link::Frame const& frame : retryFrames)
+                {
+                  sequences << QString::number (frame.sequence);
+                }
+              rebuiltPlan.insert (QStringLiteral ("arqSequences"),
+                                  sequences.join (QLatin1Char (',')));
+              logFt2LinkDiagnostic (
+                  QStringLiteral (
+                      "[Ft2Link][ARQ] retry session=%1 attempt=%2"
+                      " frames=%3 sequences=%4")
+                  .arg (it->first)
+                  .arg (it->second.attempts)
+                  .arg (retryFrames.size ())
+                  .arg (sequences.join (QLatin1Char (','))));
               retryPlan = rebuiltPlan;
             }
           else
