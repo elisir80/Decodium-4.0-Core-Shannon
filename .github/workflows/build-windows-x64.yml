@@ -465,7 +465,7 @@ jobs:
           path: installer-output/*.exe
 
       - name: Publish release assets (unsigned)
-        if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'workflow_dispatch'
+        if: startsWith(github.ref, 'refs/tags/')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
