@@ -24,6 +24,33 @@ int deferredSignoffRetryCapForMode (const QString& mode, int configuredMaxRetrie
                                     int ft8SignoffCap = 3, bool weakBoost = false,
                                     int weakSnrThreshold = -15, int weakBonus = 3);
 
+// ---- Step A2: regole decisionali di advanceQsoState ------------------------
+
+// Bit del TX step nella maschera utente "Tx disabled" (stessa semantica di
+// DecodiumBridge::isTxDisabled).
+bool isTxStepDisabledInMask (int txNum, int txDisabledMask);
+
+enum class TxStepRemapReason
+{
+  None,
+  QuickQsoSkipTx1,       // Quick QSO (Ultra2): TX1 -> TX2
+  Tx1DisabledFallback,   // 1.0.379: Tx1 off utente -> risposta parte da TX2
+};
+
+struct TxStepRemap
+{
+  int txNum;
+  TxStepRemapReason reason;
+};
+
+// Rimappa il TX step RICHIESTO nel TX step EFFETTIVO secondo le regole
+// QuickQSO / Tx1-disabled (ordine e precedenza identici ad advanceQsoState).
+TxStepRemap remapRequestedTxStep (int txNum, bool quickQsoEnabled, int txDisabledMask);
+
+// Mappa TX step -> qsoProgress (2=REPLYING, 3=REPORT, 4=ROGER_REPORT,
+// 5=SIGNOFF, 1=CALLING_CQ). Ritorna -1 per step non validi.
+int qsoProgressForTxStep (int txNum);
+
 }
 }
 

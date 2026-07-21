@@ -8,6 +8,10 @@
 #include "Sequencer/QsoSequencerRules.hpp"
 
 using decodium::seq::deferredSignoffRetryCapForMode;
+using decodium::seq::remapRequestedTxStep;
+using decodium::seq::qsoProgressForTxStep;
+using decodium::seq::isTxStepDisabledInMask;
+using decodium::seq::TxStepRemapReason;
 
 class TestQsoSequencerRules final : public QObject
 {
@@ -57,6 +61,59 @@ private slots:
     QCOMPARE (deferredSignoffRetryCapForMode ("Q65", 10, 127, true), 5);    // conservative +2
     QCOMPARE (deferredSignoffRetryCapForMode ("MSK144", 10, -18, true), 9); // 3+4+2
     QCOMPARE (deferredSignoffRetryCapForMode ("Q65", 10, 5, false, true), 3);  // strong give-up: min(3,4)
+  }
+
+  // ---- Step A2: regole advanceQsoState ----
+
+  void txStepRemapQuickQso ()
+  {
+    auto r = remapRequestedTxStep (1, true, 0);
+    QCOMPARE (r.txNum, 2);
+    QVERIFY (r.reason == TxStepRemapReason::QuickQsoSkipTx1);
+    // QuickQSO ha precedenza sul fallback Tx1-disabled (else-if originale)
+    r = remapRequestedTxStep (1, true, 0b000001);
+    QVERIFY (r.reason == TxStepRemapReason::QuickQsoSkipTx1);
+    // Solo TX1 viene rimappato
+    r = remapRequestedTxStep (3, true, 0);
+    QCOMPARE (r.txNum, 3);
+    QVERIFY (r.reason == TxStepRemapReason::None);
+  }
+
+  void txStepRemapTx1Disabled ()
+  {
+    // 1.0.379: Tx1 off + Tx2 on -> risposta parte da TX2
+    auto r = remapRequestedTxStep (1, false, 0b000001);
+    QCOMPARE (r.txNum, 2);
+    QVERIFY (r.reason == TxStepRemapReason::Tx1DisabledFallback);
+    // Tx1 off MA anche Tx2 off -> nessun fallback (comportamento originale)
+    r = remapRequestedTxStep (1, false, 0b000011);
+    QCOMPARE (r.txNum, 1);
+    QVERIFY (r.reason == TxStepRemapReason::None);
+    // Tutto abilitato -> invariato
+    r = remapRequestedTxStep (1, false, 0);
+    QCOMPARE (r.txNum, 1);
+    QVERIFY (r.reason == TxStepRemapReason::None);
+  }
+
+  void txDisabledMaskBits ()
+  {
+    QVERIFY (isTxStepDisabledInMask (1, 0b000001));
+    QVERIFY (isTxStepDisabledInMask (6, 0b100000));
+    QVERIFY (!isTxStepDisabledInMask (2, 0b000001));
+    QVERIFY (!isTxStepDisabledInMask (0, 0xFF));   // fuori range
+    QVERIFY (!isTxStepDisabledInMask (7, 0xFF));
+  }
+
+  void qsoProgressMap ()
+  {
+    QCOMPARE (qsoProgressForTxStep (1), 2);  // REPLYING
+    QCOMPARE (qsoProgressForTxStep (2), 3);  // REPORT
+    QCOMPARE (qsoProgressForTxStep (3), 4);  // ROGER_REPORT
+    QCOMPARE (qsoProgressForTxStep (4), 5);  // SIGNOFF
+    QCOMPARE (qsoProgressForTxStep (5), 5);  // SIGNOFF
+    QCOMPARE (qsoProgressForTxStep (6), 1);  // CALLING_CQ
+    QCOMPARE (qsoProgressForTxStep (0), -1);
+    QCOMPARE (qsoProgressForTxStep (7), -1);
   }
 };
 

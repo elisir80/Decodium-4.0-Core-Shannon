@@ -63,5 +63,37 @@ int deferredSignoffRetryCapForMode (const QString& mode, int configuredMaxRetrie
     return modeCap;
 }
 
+bool isTxStepDisabledInMask (int txNum, int txDisabledMask)
+{
+    return txNum >= 1 && txNum <= 6 && (txDisabledMask & (1 << (txNum - 1)));
+}
+
+TxStepRemap remapRequestedTxStep (int txNum, bool quickQsoEnabled, int txDisabledMask)
+{
+    // Ordine identico ad advanceQsoState: QuickQSO ha precedenza sul fallback
+    // Tx1-disabled (if / else-if originali).
+    if (txNum == 1 && quickQsoEnabled) {
+        return { 2, TxStepRemapReason::QuickQsoSkipTx1 };
+    }
+    if (txNum == 1 && isTxStepDisabledInMask(1, txDisabledMask)
+        && !isTxStepDisabledInMask(2, txDisabledMask)) {
+        return { 2, TxStepRemapReason::Tx1DisabledFallback };
+    }
+    return { txNum, TxStepRemapReason::None };
+}
+
+int qsoProgressForTxStep (int txNum)
+{
+    switch (txNum) {
+        case 1: return 2; // TX1 (risposta CQ)  → REPLYING (in attesa risposta)
+        case 2: return 3; // TX2 (report)       → REPORT
+        case 3: return 4; // TX3 (R+report)     → ROGER_REPORT
+        case 4: return 5; // TX4 (RR73/RRR)     → SIGNOFF
+        case 5: return 5; // TX5 (73)           → SIGNOFF
+        case 6: return 1; // TX6 (CQ)           → CALLING_CQ
+        default: return -1;
+    }
+}
+
 }
 }

@@ -30776,17 +30776,17 @@ bool DecodiumBridge::advanceQsoState(int txNum)
             }
         }
     }
-    // Quick QSO (Ultra2): salta TX1 → vai diretto a TX2 (come FT2QsoFlowPolicy Ultra2)
-    if (txNum == 1 && m_quickQsoEnabled) {
-        bridgeLog("advanceQsoState: QuickQSO attivo → salta TX1, va a TX2 (Ultra2)");
-        txNum = 2;
-    }
-    // 1.0.379: se TX1 e' disabilitato dall'utente (toggle Tx1), la risposta a un CQ
-    // deve comunque partire da TX2 (come WSJT-X con Tx1 off) invece di essere rifiutata
-    // e bloccare il QSO. Regressione 1.0.375 (advanceQsoState->bool senza fallback).
-    else if (txNum == 1 && isTxDisabled(1) && !isTxDisabled(2)) {
-        bridgeLog("advanceQsoState: TX1 user-disabled -> fallback a TX2 (reply-from-Tx2)");
-        txNum = 2;
+    // Step A2 strangler: regole di remap estratte in Sequencer/QsoSequencerRules
+    // (QuickQSO Ultra2 salta TX1; 1.0.379 fallback Tx1-disabled). Log invariati.
+    {
+        auto const remap = decodium::seq::remapRequestedTxStep(
+            txNum, m_quickQsoEnabled, m_txDisabledMask);
+        if (remap.reason == decodium::seq::TxStepRemapReason::QuickQsoSkipTx1) {
+            bridgeLog("advanceQsoState: QuickQSO attivo → salta TX1, va a TX2 (Ultra2)");
+        } else if (remap.reason == decodium::seq::TxStepRemapReason::Tx1DisabledFallback) {
+            bridgeLog("advanceQsoState: TX1 user-disabled -> fallback a TX2 (reply-from-Tx2)");
+        }
+        txNum = remap.txNum;
     }
 
     // Quick QSO (Ultra2): TX3 contiene "R+report TU" → dopo TX3 il QSO e' finito
@@ -30821,15 +30821,10 @@ bool DecodiumBridge::advanceQsoState(int txNum)
             }
         }
     }
-    int progress = 0;
-    switch (txNum) {
-        case 1: progress = 2; break; // TX1 (risposta CQ)  → REPLYING (in attesa risposta)
-        case 2: progress = 3; break; // TX2 (report)       → REPORT
-        case 3: progress = 4; break; // TX3 (R+report)     → ROGER_REPORT
-        case 4: progress = 5; break; // TX4 (RR73/RRR)     → SIGNOFF
-        case 5: progress = 5; break; // TX5 (73)           → SIGNOFF
-        case 6: progress = 1; break; // TX6 (CQ)           → CALLING_CQ
-        default: return false;
+    // Step A2 strangler: mappa txNum→progress estratta (qsoProgressForTxStep).
+    int const progress = decodium::seq::qsoProgressForTxStep(txNum);
+    if (progress < 0) {
+        return false;
     }
     if (!selectCurrentTxIfAllowed(txNum, QStringLiteral("advanceQsoState"))) {
         return false;
