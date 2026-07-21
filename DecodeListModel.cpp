@@ -4,7 +4,6 @@
 #include <QScopeGuard>
 #include <QElapsedTimer>
 #include <QDateTime>
-#include <QSet>
 #include <QTimer>
 
 #include <algorithm>
@@ -391,6 +390,7 @@ void DecodeListModel::clearBudgetedTarget()
     m_budgetTargetActive = false;
     m_budgetTargetEntries.clear();
     m_budgetTargetKeys.clear();
+    m_budgetTargetKeySet.clear();
 }
 
 void DecodeListModel::scheduleBudgetedStep()
@@ -442,6 +442,11 @@ void DecodeListModel::setEntriesBudgeted(PreparedSnapshot prepared,
     }
     m_budgetTargetEntries = std::move(prepared.entries);
     m_budgetTargetKeys = std::move(prepared.keys);
+    m_budgetTargetKeySet.clear();
+    m_budgetTargetKeySet.reserve(m_budgetTargetKeys.size());
+    for (QString const& key : std::as_const(m_budgetTargetKeys)) {
+        if (!key.isEmpty()) m_budgetTargetKeySet.insert(key);
+    }
     m_budgetTargetActive = true;
 
     if (m_entryKeys.size() != m_entries.size()) {
@@ -482,16 +487,16 @@ void DecodeListModel::appendEntriesBudgeted(QVariantList const& newEntries,
         }
     }
 
-    if (!m_budgetTargetActive) {
+    bool const hadActiveTarget = m_budgetTargetActive;
+    if (!hadActiveTarget) {
         m_budgetTargetEntries = m_entries;
         m_budgetTargetKeys = m_entryKeys;
+        m_budgetTargetKeySet.clear();
+        m_budgetTargetKeySet.reserve(m_budgetTargetKeys.size() + newEntries.size());
+        for (QString const& key : std::as_const(m_budgetTargetKeys)) {
+            if (!key.isEmpty()) m_budgetTargetKeySet.insert(key);
+        }
         m_budgetTargetActive = true;
-    }
-
-    QSet<QString> knownKeys;
-    knownKeys.reserve(m_budgetTargetKeys.size() + newEntries.size());
-    for (QString const& key : std::as_const(m_budgetTargetKeys)) {
-        if (!key.isEmpty()) knownKeys.insert(key);
     }
 
     QVector<QVariantMap> acceptedEntries;
@@ -501,12 +506,15 @@ void DecodeListModel::appendEntriesBudgeted(QVariantList const& newEntries,
     for (QVariant const& value : newEntries) {
         QVariantMap const entry = value.toMap();
         QString const key = decodeMatchKey(entry);
-        if (!key.isEmpty() && knownKeys.contains(key)) continue;
-        if (!key.isEmpty()) knownKeys.insert(key);
+        if (!key.isEmpty() && m_budgetTargetKeySet.contains(key)) continue;
+        if (!key.isEmpty()) m_budgetTargetKeySet.insert(key);
         acceptedEntries.append(entry);
         acceptedKeys.append(key);
     }
-    if (acceptedEntries.isEmpty()) return;
+    if (acceptedEntries.isEmpty()) {
+        if (!hadActiveTarget) clearBudgetedTarget();
+        return;
+    }
 
     if (prepend) {
         QVector<QVariantMap> mergedEntries;
@@ -527,7 +535,7 @@ void DecodeListModel::appendEntriesBudgeted(QVariantList const& newEntries,
     // Se una tranche precedente e gia programmata, il target appena esteso
     // verra drenato da quel timer. Evitiamo due tranche nello stesso frame.
     if (m_budgetTimer && m_budgetTimer->isActive()) return;
-    applyBudgetedStep();
+    scheduleBudgetedStep();
 }
 
 void DecodeListModel::applyBudgetedStep()

@@ -242,8 +242,10 @@ int waterfallHistoryRowsForVisibleHeight(int visibleRows)
 {
     if (visibleRows <= 0)
         return 0;
-    static constexpr int kMinHistoryRows = 256;
-    static constexpr int kHistoryRowsStep = 64;
+    // Retain every visible row, but avoid a permanent 256-row allocation for
+    // compact layouts. Small allocation steps still prevent resize churn.
+    static constexpr int kMinHistoryRows = 128;
+    static constexpr int kHistoryRowsStep = 32;
     int const rows = qMax(kMinHistoryRows, visibleRows);
     return ((rows + kHistoryRowsStep - 1) / kHistoryRowsStep) * kHistoryRowsStep;
 }

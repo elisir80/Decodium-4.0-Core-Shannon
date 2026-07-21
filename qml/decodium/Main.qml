@@ -32,9 +32,13 @@ ApplicationWindow {
     title: "Decodium 4.0 — " + (bridge ? bridge.mode : "") + " — " + (bridge ? bridge.callsign : "")
     property bool windowStateRestoreInProgress: true
     readonly property bool txVisualActive: !!(bridge && (bridge.transmitting || bridge.tuning))
-    readonly property bool startupVisualStagingEnabled: Qt.platform.os === "windows"
+    // Build the expensive visual surfaces after the first interactive frame on
+    // every platform.  The Waterfall loader also owns PanadapterItem, so this
+    // defers palette/scene-graph setup together with the visual itself.
+    readonly property bool startupVisualStagingEnabled: true
     property bool startupWaterfallVisualReady: !startupVisualStagingEnabled
     property bool startupLiveMapVisualReady: !startupVisualStagingEnabled
+    property bool startupSettingsSavePending: false
     property bool decodePanelLayoutSaved: false
     property int savedPeriod1PanelWidth: 400
     property int savedRxFreqPanelWidth: 400
@@ -101,6 +105,10 @@ ApplicationWindow {
             return
         startupLiveMapVisualReady = true
         startupLog("live map visual stage ready" + (reason ? " (" + reason + ")" : ""))
+        if (startupSettingsSavePending) {
+            startupSettingsSavePending = false
+            saveTimer.restart()
+        }
     }
 
     function availableScreenGeometries() {
@@ -516,6 +524,10 @@ ApplicationWindow {
     }
     // Funzione helper chiamabile da qualsiasi parte del QML
     function scheduleSave() {
+        if (startupVisualStagingEnabled && !startupLiveMapVisualReady) {
+            startupSettingsSavePending = true
+            return
+        }
         if (typeof saveTimer !== "undefined" && saveTimer)
             saveTimer.restart()
     }
@@ -1964,8 +1976,8 @@ ApplicationWindow {
     }
 
     // === Dialoghi ===
-    Loader { id: colorDialogLoader; source: "../dialogs/ColorHighlightingDialog.qml"; active: false }
-    Loader { id: qsyDialogLoader;   source: "../dialogs/QSYDialog.qml";              active: false }
+    Loader { id: colorDialogLoader; source: "../dialogs/ColorHighlightingDialog.qml"; active: false; asynchronous: true }
+    Loader { id: qsyDialogLoader;   source: "../dialogs/QSYDialog.qml";              active: false; asynchronous: true }
 
     function openColorDialog() {
         colorDialogLoader.active = true
@@ -1986,7 +1998,7 @@ ApplicationWindow {
     }
 
     // IU8LMC — Aggiornamento: avviso + conferma.
-    Loader { id: updateDialogLoader; source: "components/UpdateDialog.qml"; active: false }
+    Loader { id: updateDialogLoader; source: "components/UpdateDialog.qml"; active: false; asynchronous: true }
 
     function openUpdateDialog() {
         updateDialogLoader.active = true
@@ -6606,8 +6618,11 @@ ApplicationWindow {
                         // NON riscrivere mainWindow.waterfallPanelHeight: romperebbe il binding
                         // di riga 310 e rialimenterebbe il loop che bloccava il resize.
                         if (mainWindow.waterfallPanelVisible && !waterfallDetached && height > 40) {
-                            bridge.uiWaterfallHeight = height
-                            mainWindow.scheduleSave()
+                            var roundedHeight = Math.round(height)
+                            if (Math.abs(bridge.uiWaterfallHeight - roundedHeight) >= 1) {
+                                bridge.uiWaterfallHeight = roundedHeight
+                                mainWindow.scheduleSave()
+                            }
                         }
                     }
 
@@ -7621,6 +7636,7 @@ ApplicationWindow {
 	                                id: ft2LinkInlineLoader
 	                                anchors.fill: parent
 	                                active: mainWindow.ft2LinkModeActive && !mainWindow.ft2LinkPanelDetached
+	                                asynchronous: true
 	                                source: "../panels/FT2LinkPanel.qml"
 	                                onLoaded: {
 	                                    if (item) {
@@ -7938,16 +7954,39 @@ ApplicationWindow {
                                             color: textSecondary
                                         }
 
-                                        Text {
-                                            text: "Clear"
-                                            font.pixelSize: 10
-                                            color: textSecondary
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: bridge.clearDecodes()
-                                            }
-                                        }
+	                                        Rectangle {
+	                                            Layout.preferredWidth: 40
+	                                            Layout.preferredHeight: 18
+	                                            radius: 4
+	                                            color: p1ClearMA.containsMouse
+	                                                ? Qt.rgba(244/255, 67/255, 54/255, 0.25)
+	                                                : "transparent"
+	                                            border.color: p1ClearMA.containsMouse
+	                                                ? bridge.themeManager.ledRed
+	                                                : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.16)
+	                                            border.width: 1
+
+	                                            Text {
+	                                                anchors.centerIn: parent
+	                                                text: qsTr("Clear")
+	                                                font.pixelSize: 10
+	                                                color: p1ClearMA.containsMouse
+	                                                    ? bridge.themeManager.ledRed
+	                                                    : textSecondary
+	                                            }
+
+	                                            MouseArea {
+	                                                id: p1ClearMA
+	                                                anchors.fill: parent
+	                                                hoverEnabled: true
+	                                                cursorShape: Qt.PointingHandCursor
+	                                                onClicked: bridge.clearDecodes()
+	                                            }
+
+	                                            ToolTip.visible: p1ClearMA.containsMouse
+	                                            ToolTip.text: qsTr("Clear Full Spectrum")
+	                                            ToolTip.delay: 500
+	                                        }
 
 	                                        // 1.0.229 — Compact mode toggle Full Spectrum.
 	                                        // Quando ON, row height passa da 26px a 14px:
@@ -14359,6 +14398,7 @@ NumberAnimation {
 	            id: ft2LinkFloatingLoader
 	            anchors.fill: parent
 	            active: mainWindow.ft2LinkModeActive && mainWindow.ft2LinkPanelDetached
+	            asynchronous: true
 	            source: "../panels/FT2LinkPanel.qml"
 	            onLoaded: {
 	                if (item) {
@@ -14531,6 +14571,7 @@ NumberAnimation {
             id: timeSyncLoader
             anchors.fill: parent
             active: timeSyncPanelVisible
+            asynchronous: true
             source: "../panels/TimeSyncPanel.qml"
             onLoaded: {
                 if (item) {
@@ -14613,6 +14654,7 @@ NumberAnimation {
             id: activeStationsLoader
             anchors.fill: parent
             active: activeStationsPanelVisible
+            asynchronous: true
             source: "../panels/ActiveStationsPanel.qml"
         }
 
@@ -14647,6 +14689,7 @@ NumberAnimation {
             id: callerQueueLoader
             anchors.fill: parent
             active: bridge.foxMode && callerQueuePanelVisible
+            asynchronous: true
             source: "../panels/CallerQueuePanel.qml"
         }
 
@@ -14724,6 +14767,7 @@ NumberAnimation {
             id: astroPanelLoader
             anchors.fill: parent
             active: astroPanelVisible
+            asynchronous: true
             source: "../panels/AstroPanel.qml"
         }
 

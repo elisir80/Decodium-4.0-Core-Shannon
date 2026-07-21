@@ -169,7 +169,7 @@ Rectangle {
     readonly property color red: "#ef6f6c"
     readonly property color textPrimary: "#e8eef2"
     readonly property color textSecondary: "#93a7b0"
-    readonly property string mono: typeof decodiumMonoFontFamily !== "undefined" ? decodiumMonoFontFamily : "monospace"
+    readonly property string mono: decodiumMonoFontFamily
 
     color: panelBg
     border.color: Qt.rgba(0.30, 0.80, 0.90, 0.42)

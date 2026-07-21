@@ -15,7 +15,7 @@ Item {
     readonly property color textPrimary: panelReady ? panel.textPrimary : "#e8eef2"
     readonly property color textSecondary: panelReady ? panel.textSecondary : "#93a7b0"
     readonly property color panelBg: panelReady ? panel.panelBg : "#071018"
-    readonly property string mono: panelReady ? panel.mono : "monospace"
+    readonly property string mono: panelReady ? panel.mono : decodiumMonoFontFamily
     readonly property int tabSpacing: 6
     readonly property var tabs: [
         { id: "CHAT", page: 0,  w: 54 },

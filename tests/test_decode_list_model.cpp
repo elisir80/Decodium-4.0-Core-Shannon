@@ -39,6 +39,7 @@ private slots:
     void preparedBudgetedSnapshotDefersFirstChunk();
     void budgetedAppendReachesLatestTarget();
     void incrementalAppendAvoidsSnapshotRebuild();
+    void incrementalAppendDefersAndDeduplicatesPendingRows();
     void incrementalPrependPreservesNewestFirstOrder();
 };
 
@@ -289,6 +290,26 @@ void TestDecodeListModel::incrementalAppendAvoidsSnapshotRebuild()
     QCOMPARE(snapshotSpy.count(), 1);
     QCOMPARE(model.entry(2).value("message").toString(),
              QStringLiteral("CQ C1CCC CC22"));
+}
+
+void TestDecodeListModel::incrementalAppendDefersAndDeduplicatesPendingRows()
+{
+    DecodeListModel model;
+    model.setEntries(rows({decodeRow("120000", "CQ A1AAA AA00")}));
+    QSignalSpy snapshotSpy(&model, &DecodeListModel::snapshotApplied);
+
+    QVariantList const delta = rows({decodeRow("120015", "CQ B1BBB BB11")});
+    model.appendEntriesBudgeted(delta, false, 1);
+    model.appendEntriesBudgeted(delta, false, 1);
+
+    // Appending from a decoder callback only extends the pending target. The
+    // first model/QML notification is delivered on the following timer turn.
+    QCOMPARE(model.rowCount(), 1);
+    QTRY_COMPARE_WITH_TIMEOUT(model.rowCount(), 2, 1000);
+    QVERIFY(!model.hasPendingBudgetedUpdate());
+    QCOMPARE(snapshotSpy.count(), 1);
+    QCOMPARE(model.entry(1).value("message").toString(),
+             QStringLiteral("CQ B1BBB BB11"));
 }
 
 void TestDecodeListModel::incrementalPrependPreservesNewestFirstOrder()
