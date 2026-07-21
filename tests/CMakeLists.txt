@@ -26,6 +26,12 @@ target_link_libraries (test_qt_helpers wsjt_qt wsjt_cxx wsjt_fort Qt6::Test)
 add_test (NAME test_qt_helpers COMMAND $<TARGET_FILE:test_qt_helpers>)
 set_tests_properties (test_qt_helpers PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+add_executable (test_qso_sequencer_rules
+  test_qso_sequencer_rules.cpp
+  ../Sequencer/QsoSequencerRules.cpp)
+target_link_libraries (test_qso_sequencer_rules Qt6::Test Qt6::Core)
+add_test (NAME test_qso_sequencer_rules COMMAND $<TARGET_FILE:test_qso_sequencer_rules>)
+
 add_executable (ft4_stage_compare ft4_stage_compare.cpp)
 target_link_libraries (ft4_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 
