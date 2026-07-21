@@ -28,7 +28,9 @@ set_tests_properties (test_qt_helpers PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURC
 
 add_executable (test_qso_sequencer_rules
   test_qso_sequencer_rules.cpp
-  ../Sequencer/QsoSequencerRules.cpp)
+  ../Sequencer/QsoSequencerRules.cpp
+  ../Sequencer/MessageTokenRules.cpp
+  ../Radio.cpp)
 target_link_libraries (test_qso_sequencer_rules Qt6::Test Qt6::Core)
 add_test (NAME test_qso_sequencer_rules COMMAND $<TARGET_FILE:test_qso_sequencer_rules>)
 

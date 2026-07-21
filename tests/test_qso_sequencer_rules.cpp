@@ -6,6 +6,7 @@
 #include <QtTest>
 
 #include "Sequencer/QsoSequencerRules.hpp"
+#include "Sequencer/MessageTokenRules.hpp"
 
 using decodium::seq::deferredSignoffRetryCapForMode;
 using decodium::seq::remapRequestedTxStep;
@@ -114,6 +115,43 @@ private slots:
     QCOMPARE (qsoProgressForTxStep (6), 1);  // CALLING_CQ
     QCOMPARE (qsoProgressForTxStep (0), -1);
     QCOMPARE (qsoProgressForTxStep (7), -1);
+  }
+
+  // ---- Step A3: famiglia parsing token/messaggi ----
+
+  void baseCallNormalization ()
+  {
+    using decodium::seq::normalizedBaseCall;
+    QCOMPARE (normalizedBaseCall ("IU8LMC"), QString ("IU8LMC"));
+    QCOMPARE (normalizedBaseCall ("iu8lmc/p"), QString ("IU8LMC"));
+    QCOMPARE (normalizedBaseCall ("<IU8LMC>"), QString ("IU8LMC"));
+  }
+
+  void messageContainsCall ()
+  {
+    using decodium::seq::messageContainsCallToken;
+    QVERIFY (messageContainsCallToken ("IK8OLM IU8LMC JN70", "IU8LMC", "IU8LMC"));
+    QVERIFY (messageContainsCallToken ("IK8OLM IU8LMC/P -12", "IU8LMC/P", "IU8LMC"));
+    QVERIFY (!messageContainsCallToken ("CQ IZ0ABC JN61", "IU8LMC", "IU8LMC"));
+  }
+
+  void signoffPayloadDetection ()
+  {
+    using decodium::seq::messageCarries73Payload;
+    using decodium::seq::messageCarries73PayloadForCall;
+    QVERIFY (messageCarries73Payload ("IK8OLM IU8LMC 73"));
+    QVERIFY (messageCarries73Payload ("IK8OLM IU8LMC RR73"));
+    QVERIFY (!messageCarries73Payload ("IK8OLM IU8LMC -15"));
+    QVERIFY (!messageCarries73Payload ("CQ IU8LMC JN70"));
+    QVERIFY (messageCarries73PayloadForCall ("IK8OLM IU8LMC RR73", "IK8OLM", "IK8OLM"));
+    QVERIFY (!messageCarries73PayloadForCall ("IZ0ABC IW0XYZ RR73", "IK8OLM", "IK8OLM"));
+  }
+
+  void directedPeerExtraction ()
+  {
+    using decodium::seq::directedPeerTokenFromMessage;
+    QCOMPARE (directedPeerTokenFromMessage ("IU8LMC IK8OLM -10", "IU8LMC", "IU8LMC"),
+              QString ("IK8OLM"));
   }
 };
 

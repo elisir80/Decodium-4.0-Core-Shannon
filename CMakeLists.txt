@@ -416,6 +416,8 @@ set (wsjtx_CXXSRCS
   DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
+  Sequencer/MessageTokenRules.cpp
+  Sequencer/MessageTokenRules.hpp
   DecodiumSelfCheck.cpp
   DecodiumSelfCheck.hpp
   UsStateDataManager.cpp
@@ -1701,6 +1703,8 @@ add_executable (decodium_qml
   DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
+  Sequencer/MessageTokenRules.cpp
+  Sequencer/MessageTokenRules.hpp
   UsStateDataManager.cpp
   UsStateDataManager.h
   DecodeListModel.cpp
