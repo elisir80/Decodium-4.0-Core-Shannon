@@ -169,8 +169,13 @@ Type: dirifempty; Name: "{app}"
 ; build_mingw64/ annidata = spazzatura di build. Niente DLL wsjtx → sicuro.
 ; Rimosso 'createallsubdirs': senza, Inno NON crea le cartelle che restano vuote
 ; dopo l'esclusione dei contenuti (es. *_autogen) — risolve le "cartelle vuote".
+; 1.0.497 — TAGLIO PESO MORTO (~53MB): 6 codec immagine/video trascinati dal
+; deploy MSYS2 ma ORFANI (verificato con tabella import: nessun file
+; dell'install li carica; imageformats plugin = solo gif/ico/jpeg/svg; 0
+; riferimenti nell'exe). Stesso caso di ffmpeg (--no-ffmpeg). Nessun cambio
+; funzionale: Decodium usa PNG/JPEG/GIF/ICO/SVG, non HEVC/AV1/VP9/JPEG-XL/rsvg.
 Source: "{#BuildDir}\*"; DestDir: "{app}"; \
-  Excludes: "wsjtx*,CMakeFiles\*,deploy\*,deploy_staging\*,map65\*,qmap\*,Testing\*,NVIDIA Corporation\*,.claude\*,build_mingw64\*,CMakeCache.txt,cmake_install.cmake,CTestTestfile.cmake,Makefile,build.ninja,.ninja_*,compile_commands.json,*.obj,*.d,*.a,*.rc,*_autogen\*,.qt\*,tests\*,tools\*,bundle_fixup\*,qrc_*.cpp,qrc_*.cpp.depends,*.qrc.depends,*.cmake,VersionInfo_*.h,VersionResource_*.rc,DartConfiguration.tcl,CPack*.cmake"; \
+  Excludes: "wsjtx*,CMakeFiles\*,deploy\*,deploy_staging\*,map65\*,qmap\*,Testing\*,NVIDIA Corporation\*,.claude\*,build_mingw64\*,CMakeCache.txt,cmake_install.cmake,CTestTestfile.cmake,Makefile,build.ninja,.ninja_*,compile_commands.json,*.obj,*.d,*.a,*.rc,*_autogen\*,.qt\*,tests\*,tools\*,bundle_fixup\*,qrc_*.cpp,qrc_*.cpp.depends,*.qrc.depends,*.cmake,VersionInfo_*.h,VersionResource_*.rc,DartConfiguration.tcl,CPack*.cmake,libx265-215.dll,libaom.dll,librsvg-2-2.dll,libjxl.dll,libvpx-1.dll,libgdk_pixbuf-2.0-0.dll"; \
   Flags: ignoreversion recursesubdirs
 
 ; File licenza fuori dal bundle
