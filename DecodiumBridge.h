@@ -1836,6 +1836,9 @@ private:
     double workingFrequencyForBandMode(const QString& bandLambda, const QString& mode) const;
     void maybeApplyStartupModeFromRigFrequency(double dialFrequency, bool authoritativeRigFrequency = false);
     void runPostQmlStartupServices();
+    void ensureDecodeWorkerForMode(const QString& mode);
+    void loadDxccLookupAsync();
+    void loadWorkedBeforeHistoryAsync();
     qint64 correctedUtcEpochMs() const;
     qint64 correctedUtcMsecsSinceStartOfDay() const;
     QString effectiveAdifLogPath() const;
@@ -2026,6 +2029,11 @@ private:
     bool m_ft8StartupPressureSlotDeferred {false};
     std::shared_ptr<std::atomic_bool> m_mainQmlAsyncLoadDone;
     bool m_startupServicesStarted {false};
+    bool m_dxccLookupLoading {false};
+    bool m_dxccLookupLoadAttempted {false};
+    quint64 m_dxccLookupLoadSerial {0};
+    bool m_workedHistoryLoading {false};
+    bool m_workedHistoryLoaded {false};
     bool m_lastSuccessfulCatConnected {false};
     QString m_lastSuccessfulCatBackend;
     // Limita i retry di startup quando la porta CAT non e' ancora pronta
@@ -2065,11 +2073,13 @@ private:
     // 1.0.257 — Auto-clear separato per le due finestre decode. Full Spectrum
     // conta tutte le righe, Signal RX conta solo i decode RX reali: le righe
     // TX locali sono timeline e non devono cancellare ricezioni precedenti.
-    static constexpr int kDecodeListCap = 250;
-    static constexpr int kDecodeListRetainRows = 180;
-    static constexpr int kRxDecodeListCap = 250;
-    static constexpr int kRxDecodeListRetainRxRows = 180;
-    static constexpr int kRxDecodeListRetainTxRows = 40;
+    // Keep the live QML histories compact. Complete RX history is persisted in
+    // SQLite, so these limits affect only resident models and delegates.
+    static constexpr int kDecodeListCap = 192;
+    static constexpr int kDecodeListRetainRows = 128;
+    static constexpr int kRxDecodeListCap = 192;
+    static constexpr int kRxDecodeListRetainRxRows = 128;
+    static constexpr int kRxDecodeListRetainTxRows = 32;
     void trimDecodeListsIfNeeded();
     void moveLegacyAllTxtCursorToEnd();
     // 1.0.142: throttle per decodeListChanged signal nei path high-frequency
@@ -2574,6 +2584,7 @@ private:
     QTimer* m_asyncDecodeTimer {nullptr};   // FT2 turbo async 100ms
     QTimer* m_legacyStateTimer {nullptr};
     QTimer* m_audioDeviceRefreshTimer {nullptr};
+    QTimer* m_audioBufferReleaseTimer {nullptr};
     QMediaDevices* m_mediaDevices {nullptr};
     bool m_audioDeviceCacheValid {false};
     bool m_audioDeviceCacheDirty {true};
@@ -2736,6 +2747,11 @@ private:
     QSet<QString> m_nativeDecodeDedupKeys;
     QQueue<QString> m_nativeDecodeDedupOrder;
     quint64 m_nativeDecodeDedupSessionId {0};
+    // FT2 async emits overlapping decode batches. Keep its quantized keys in
+    // a bounded index instead of rebuilding a set from the full history.
+    QSet<QString> m_ft2AsyncDecodeDedupKeys;
+    QQueue<QString> m_ft2AsyncDecodeDedupOrder;
+    quint64 m_ft2AsyncDecodeDedupSessionId {0};
     // Signal RX is append-oriented; retain an index instead of scanning every
     // displayed row to suppress a mirrored duplicate.
     QSet<QString> m_rxDecodeMirrorKeys;
@@ -3496,6 +3512,8 @@ private:
                                uint64_t serial);
     void initTxDevices();
     void invalidateTxAudioCache();
+    void scheduleIdleAudioBufferRelease(int delayMs = 120000);
+    void releaseIdleAudioBuffers();
     void scheduleTxAudioPrecompute(int delayMs = 75);
     void precomputeTxAudioForCurrentMessage(const QString& reason);
     bool ensureTxAudioPrepared(const QString& msg, int txAudioFrequency, bool needPcm,
@@ -3549,6 +3567,7 @@ private:
     bool ensureLegacyBackendAvailable();
     void noteFt8AdaptivePeriod(qint64 periodId);
     bool legacyTxBackendRequested() const;
+    bool legacyBackendRequestedForRx() const;
     bool specialOperationRequiresLegacyTx() const;
     bool usingLegacyBackendForTx() const;
     bool usingLegacyBackendForRx() const;
@@ -3590,6 +3609,9 @@ private:
     void resetNativeDecodeDedupIndex();
     void ensureNativeDecodeDedupIndex();
     void rememberNativeDecodeDedupKey(const QString& key);
+    void resetFt2AsyncDecodeDedupIndex();
+    void rememberFt2AsyncDecodeDedupKey(const QString& key);
+    void rememberDecodeDedupEntry(const QVariantMap& entry);
     void rebuildRxDecodeMirrorIndex();
     bool applyLegacyBandModelDelta(QVariantList const& entries);
     bool applyLegacyRxModelDelta(QVariantList const& entries);

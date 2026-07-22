@@ -1593,8 +1593,14 @@ void HamlibTransceiver::do_poll ()
   rmode_t m {RIG_MODE_USB};
   pbwidth_t w {RIG_PASSBAND_NORMAL};
   split_t s {RIG_SPLIT_OFF};
+  bool const tx_active = ptt_on_ || state ().ptt ();
 
-  if (poll_passive_state_
+  // While transmitting, frequency/mode/VFO reads provide no useful UI data:
+  // Decodium already owns the requested TX state. On serial rigs they also
+  // compete with PTT and meter transactions on the same CAT bus. Keep only
+  // the PTT confirmation and explicitly enabled TX telemetry active.
+  if (!tx_active
+      && poll_passive_state_
       && m_->get_vfo_works_
       && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_VFO))
     {
@@ -1604,7 +1610,8 @@ void HamlibTransceiver::do_poll ()
       m_->reversed_ = RIG_VFO_B == v;
     }
 
-  if (poll_passive_state_
+  if (!tx_active
+      && poll_passive_state_
       && (WSJT_RIG_NONE_CAN_SPLIT || !m_->is_dummy_)
       && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_SPLIT_VFO) && m_->split_query_works_)
     {
@@ -1641,10 +1648,11 @@ void HamlibTransceiver::do_poll ()
       frequency_poll_due = false;
     }
 
-  if (frequency_poll_due && m_->freq_query_works_)
+  if (!tx_active && frequency_poll_due && m_->freq_query_works_)
     {
       bool current_frequency_ok = true;
-      // only read if possible and when receiving or simplex
+      // The outer guard limits dial reads to RX; direct VFO addressing is
+      // still used where available.
       if (!state ().ptt () || !state ().split ())
         {
           vfo_t const poll_vfo = frequency_poll_vfo ();
@@ -1696,9 +1704,9 @@ void HamlibTransceiver::do_poll ()
         }
     }
 
-  // only read when receiving or simplex if direct VFO addressing unavailable
-  if (poll_passive_state_
-      && (!state ().ptt () || !state ().split ())
+  // Mode reads are useful in RX only; during TX the requested mode is known.
+  if (!tx_active
+      && poll_passive_state_
       && m_->mode_query_works_)
     {
       // We have to ignore errors here because Yaesu FTdx... rigs can
@@ -1747,9 +1755,8 @@ void HamlibTransceiver::do_poll ()
   // telemetry when actually transmitting (so meters stay responsive), and
   // skip 3 out of 4 RX ticks otherwise — meters can also be updated by
   // schedule_transmit_telemetry_burst when PTT transitions.
-  bool const tx_active_for_meters = ptt_on_ || state ().ptt ();
   bool const telemetry_enabled = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
-  if (telemetry_enabled && !tx_active_for_meters)
+  if (telemetry_enabled && !tx_active)
     {
       ++telemetry_tick_;
       if (telemetry_tick_ < kTelemetrySkipRatio_)

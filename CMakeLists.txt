@@ -813,6 +813,11 @@ if (WIN32 AND ENABLE_OMNIRIG)
       string (REPLACE "\"" "" AXSERVER ${AXSERVER})
       file (TO_CMAKE_PATH ${AXSERVER} AXSERVERSRCS)
       add_compile_definitions (OMNIRIG_AVAILABLE=1)
+      list (APPEND wsjt_qt_CXXSRCS Transceiver/OmniRigTransceiver.cpp)
+      set_property (SOURCE Transceiver/OmniRigTransceiver.cpp APPEND_STRING
+        PROPERTY COMPILE_FLAGS " -include wsjtx_config.h")
+      set_property (SOURCE Transceiver/OmniRigTransceiver.cpp APPEND
+        PROPERTY OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/wsjtx_config.h)
     endif ()
   else ()
     message (WARNING "dumpcpp not found - OmniRig support disabled")

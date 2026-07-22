@@ -587,7 +587,7 @@ void OmniRigTransceiver::handle_params_change (int rig_number, int params)
       if (params & OmniRig::PM_VFOEQUAL)
         {
           auto f = readable_params_ & OmniRig::PM_FREQA ? rig_->FreqA () : rig_->Freq ();
-          auto m = map_mode (rig_->Mode ());
+          auto m = map_mode (static_cast<OmniRig::RigParamX> (rig_->Mode ()));
           CAT_TRACE (QString {"VFOEQUAL f=%1 m=%2"}.arg (f).arg (m));
           update_rx_frequency (f);
           update_other_frequency (f);
@@ -599,7 +599,7 @@ void OmniRigTransceiver::handle_params_change (int rig_number, int params)
           auto f = state ().tx_frequency ();
           update_other_frequency (state ().frequency ());
           update_rx_frequency (f);
-          update_mode (map_mode (rig_->Mode ()));
+          update_mode (map_mode (static_cast<OmniRig::RigParamX> (rig_->Mode ())));
         }
       if (params & OmniRig::PM_SPLITON)
         {

@@ -74,7 +74,7 @@ Item {
             Text {
                 text: root.qCall.length > 0 ? root.qCall : "—"
                 color: root.cAccent
-                font.pixelSize: 26; font.bold: true; font.family: "monospace"
+                font.pixelSize: 26; font.bold: true; font.family: decodiumMonoFontFamily
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -109,7 +109,7 @@ Item {
                         Text {
                             text: !modelData ? "—" : (modelData.v && modelData.v.length > 0 ? modelData.v : "—")
                             color: root.cText
-                            font.pixelSize: 14; font.bold: true; font.family: "monospace"
+                            font.pixelSize: 14; font.bold: true; font.family: decodiumMonoFontFamily
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -141,7 +141,7 @@ Item {
                         return m.length > 0 ? m : "—"
                     }
                     color: root.cCyan
-                    font.pixelSize: 13; font.bold: true; font.family: "monospace"
+                    font.pixelSize: 13; font.bold: true; font.family: decodiumMonoFontFamily
                     elide: Text.ElideRight
                     horizontalAlignment: Text.AlignRight
                     Layout.fillWidth: true

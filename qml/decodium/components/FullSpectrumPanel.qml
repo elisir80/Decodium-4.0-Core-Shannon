@@ -281,15 +281,15 @@ Item {
         RowLayout {
             anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
             spacing: 0
-            Text { text: "UTC"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: "monospace"; Layout.preferredWidth: root.wUtc }
-            Text { text: "dB"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: "monospace"; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDb }
+            Text { text: "UTC"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.preferredWidth: root.wUtc }
+            Text { text: "dB"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDb }
             Item { Layout.preferredWidth: root.gap }
-            Text { text: "DT"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: "monospace"; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDt }
+            Text { text: "DT"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDt }
             Item { Layout.preferredWidth: root.gap }
-            Text { text: "FREQ"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: "monospace"; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wFreq }
+            Text { text: "FREQ"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wFreq }
             Item { Layout.preferredWidth: root.gap }
-            Text { text: "MESSAGE"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: "monospace"; Layout.fillWidth: true }
-            Text { visible: root.wDxcc > 0; text: "DXCC"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: "monospace"; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDxcc }
+            Text { text: "MESSAGE"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.fillWidth: true }
+            Text { visible: root.wDxcc > 0; text: "DXCC"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDxcc }
         }
     }
 
@@ -387,13 +387,13 @@ Item {
                 Text {
                     text: !modelData ? "" : (del.entry.formattedTime || del.entry.time || "")
                     color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cTextDim)
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     Layout.preferredWidth: root.wUtc
                 }
                 Text {
                     text: !modelData ? "" : (del.entry.db || "")
                     color: !modelData ? root.cTextDim : (del.entry.snrColor || (del.entry.isTx ? "#f1c40f" : root.cTextDim))
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     font.bold: !!modelData && del.entry.isTx === true
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: root.wDb
@@ -402,7 +402,7 @@ Item {
                 Text {
                     text: !modelData ? "" : (del.entry.dt || "")
                     color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cTextDim)
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: root.wDt
                 }
@@ -410,7 +410,7 @@ Item {
                 Text {
                     text: !modelData ? "" : (del.entry.freq || "")
                     color: !modelData ? root.cTextDim : (del.entry.isTx ? "#f1c40f" : root.cCyan)
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     font.bold: !!modelData && del.entry.isTx === true
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: root.wFreq
@@ -419,7 +419,7 @@ Item {
                 Text {
                     text: !modelData ? "" : (del.entry.displayMessage || del.entry.message || "")
                     color: root.decodeMessageColor(del.entry)
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     font.bold: root.decodeMessageBold(del.entry)
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -433,7 +433,7 @@ Item {
                         anchors.rightMargin: del.entry.isLotw === true ? 11 : 0
                         text: !modelData ? "" : root.dxccDisplayText(del.entry)
                         color: root.cTextDim
-                        font.pixelSize: root.fSize; font.family: "monospace"
+                        font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                         horizontalAlignment: Text.AlignRight
                         verticalAlignment: Text.AlignVCenter
                         elide: Text.ElideRight

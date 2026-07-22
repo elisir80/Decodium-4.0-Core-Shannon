@@ -203,7 +203,7 @@ Item {
                         text: (workspace.bridge && workspace.bridge.mode ? String(workspace.bridge.mode) : "FT8")
                         color: workspace.cAccent
                         font.pixelSize: 10; font.bold: true
-                        font.family: "monospace"
+                        font.family: decodiumMonoFontFamily
                     }
                 }
 
@@ -227,7 +227,7 @@ Item {
                     }
                     color: workspace.cAccent
                     font.pixelSize: 36; font.bold: true
-                    font.family: "monospace"
+                    font.family: decodiumMonoFontFamily
                 }
 
                 Item { Layout.fillWidth: true }
@@ -241,7 +241,7 @@ Item {
                         property string t: "00:00:00"
                         text: t
                         color: workspace.cAccent
-                        font.pixelSize: 22; font.bold: true; font.family: "monospace"
+                        font.pixelSize: 22; font.bold: true; font.family: decodiumMonoFontFamily
                         Timer {
                             interval: 1000; running: workspace.visible; repeat: true; triggeredOnStart: true
                             onTriggered: {
@@ -374,7 +374,7 @@ Item {
                             anchors.centerIn: parent
                             text: parent.modelData
                             color: parent.active ? workspace.cAccent : workspace.cTextDim
-                            font.pixelSize: 11; font.bold: true; font.family: "monospace"
+                            font.pixelSize: 11; font.bold: true; font.family: decodiumMonoFontFamily
                         }
                         MouseArea {
                             id: bandMA; anchors.fill: parent; hoverEnabled: true
@@ -406,7 +406,7 @@ Item {
                             anchors.centerIn: parent
                             text: parent.modelData
                             color: workspace.cTextDim
-                            font.pixelSize: 10; font.family: "monospace"
+                            font.pixelSize: 10; font.family: decodiumMonoFontFamily
                         }
                     }
                 }

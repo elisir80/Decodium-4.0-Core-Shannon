@@ -7412,15 +7412,7 @@ void DecodiumBridge::setSmoothDecodeFlow(bool v)
     if (!v && !m_pendingDecodeReleaseQueue.isEmpty()) {
         for (auto const& entry : std::as_const(m_pendingDecodeReleaseQueue)) {
             m_decodeList.append(QVariant(entry));
-            if (!entry.value(QStringLiteral("isTx")).toBool()) {
-                if (m_nativeDecodeDedupSessionId != m_decodeSessionId) {
-                    resetNativeDecodeDedupIndex();
-                }
-                rememberNativeDecodeDedupKey(decodeDedupKey(
-                    entry.value(QStringLiteral("time")).toString(),
-                    entry.value(QStringLiteral("freq")).toString(),
-                    entry.value(QStringLiteral("message")).toString()));
-            }
+            rememberDecodeDedupEntry(entry);
             // 1.0.239 (Phase 5.2 fix): hook persistenza + counter anche
             // sul path smooth-flow (vedi appendDecodeMapToList).
             noteDecodeCommitted();
@@ -7428,7 +7420,7 @@ void DecodiumBridge::setSmoothDecodeFlow(bool v)
         }
         m_pendingDecodeReleaseQueue.clear();
         if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
-        trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
+        trimDecodeListsIfNeeded();  // bounded in-memory decode history
         emitDecodeListChangedThrottled();
     }
 }
@@ -7514,15 +7506,7 @@ void DecodiumBridge::setUiStyle(QString const& v)
 void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
 {
     m_decodeList.append(QVariant(entry));
-    if (!entry.value(QStringLiteral("isTx")).toBool()) {
-        if (m_nativeDecodeDedupSessionId != m_decodeSessionId) {
-            resetNativeDecodeDedupIndex();
-        }
-        rememberNativeDecodeDedupKey(decodeDedupKey(
-            entry.value(QStringLiteral("time")).toString(),
-            entry.value(QStringLiteral("freq")).toString(),
-            entry.value(QStringLiteral("message")).toString()));
-    }
+    rememberDecodeDedupEntry(entry);
     trimDecodeListsIfNeeded();
     noteDecodeCommitted();  // 1.0.233 DevOverlay counter (no-op se overlay off)
     // 1.0.238 (Phase 5.2 perf roadmap): write-behind SQLite persistence.
@@ -8059,22 +8043,14 @@ void DecodiumBridge::drainDecodeReleaseQueue()
     for (int i = 0; i < take; ++i) {
         QVariantMap const entry = m_pendingDecodeReleaseQueue.first();
         m_decodeList.append(QVariant(entry));
-        if (!entry.value(QStringLiteral("isTx")).toBool()) {
-            if (m_nativeDecodeDedupSessionId != m_decodeSessionId) {
-                resetNativeDecodeDedupIndex();
-            }
-            rememberNativeDecodeDedupKey(decodeDedupKey(
-                entry.value(QStringLiteral("time")).toString(),
-                entry.value(QStringLiteral("freq")).toString(),
-                entry.value(QStringLiteral("message")).toString()));
-        }
+        rememberDecodeDedupEntry(entry);
         m_pendingDecodeReleaseQueue.removeFirst();
         // 1.0.239 (Phase 5.2 fix): hook persistenza + counter sul path
         // smooth-flow drain chunked (vedi appendDecodeMapToList).
         noteDecodeCommitted();
         persistDecodeHistoryEntry(entry);
     }
-    trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
+    trimDecodeListsIfNeeded();  // bounded in-memory decode history
     emitDecodeListChangedThrottled();
     if (m_pendingDecodeReleaseQueue.isEmpty() && m_decodeReleaseTimer) {
         m_decodeReleaseTimer->stop();
@@ -9042,6 +9018,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
         refreshAudioDeviceCache(QStringLiteral("debounced device refresh"), verboseLog, true);
     });
+    m_audioBufferReleaseTimer = new QTimer(this);
+    m_audioBufferReleaseTimer->setSingleShot(true);
+    connect(m_audioBufferReleaseTimer, &QTimer::timeout,
+            this, &DecodiumBridge::releaseIdleAudioBuffers);
     auto queueAudioDeviceCacheRefresh = [this]() {
         m_audioDeviceCacheDirty = true;
         m_cachedTxOutputDeviceValid = false;
@@ -9297,6 +9277,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         QTimer::singleShot(3000, this, [this]() {
             if (m_useLegacyTxBackend && !ensureLegacyBackendAvailable()) {
                 m_useLegacyTxBackend = false;
+                bridgeLog(QStringLiteral("Legacy RX backend unavailable: enabling the modern decoder fallback"));
+                if (!m_shuttingDown && (m_mainQmlReady || m_startupServicesStarted)) {
+                    ensureDecodeWorkerForMode(m_mode);
+                }
             }
         });
     }
@@ -9556,16 +9540,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // DXCC lookup (cty.dat)
     m_dxccLookup = new DxccLookup();
-    {
-        QString loadedPath;
-        if (reloadDxccLookup(&loadedPath)) {
-            bridgeLog("DXCC: caricato cty.dat da " + loadedPath +
-                      " (" + QString::number(m_dxccLookup->entityCount()) + " entità)");
-            refreshDecodeListDxcc();
-        } else {
-            bridgeLog("DXCC: cty.dat non trovato, DXCC disabilitato finché il file non viene installato o scaricato.");
-        }
-    }
+    bridgeLog(QStringLiteral("DXCC: load deferred until Main.qml ready"));
     m_usStateData = new UsStateDataManager(this);
     connect(m_usStateData, &UsStateDataManager::statusMessage, this, [this](const QString& msg) {
         bridgeLog(msg);
@@ -9884,109 +9859,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             },
             Qt::QueuedConnection);
 
-    // Worker thread for FT8 decoder.
-    // The C++ stage4 path keeps several large FFT/sync work arrays on the
-    // decoder stack; macOS QThread defaults to about 512 KB, which can crash
-    // with SIGBUS/stack guard when the modern FT8 backend is used.
-    m_workerThread = new QThread(this);
-    m_workerThread->setObjectName(QStringLiteral("FT8DecodeWorker"));
-#if defined(Q_OS_LINUX)
-    m_workerThread->setStackSize(16 * 1024 * 1024);
-#else
-    m_workerThread->setStackSize(8 * 1024 * 1024);
-#endif
-    m_ft8Worker = new decodium::ft8::FT8DecodeWorker();
-    m_ft8Worker->moveToThread(m_workerThread);
-    connect(m_ft8Worker, &decodium::ft8::FT8DecodeWorker::decodeReady,
-            this, &DecodiumBridge::onFt8DecodeReady);
-    connect(m_workerThread, &QThread::finished, m_ft8Worker, &QObject::deleteLater);
-    m_workerThread->start(QThread::LowPriority);
-
-    // Worker thread for FT2 decoder — stack 8MB (necessario per stage7 C++)
-    m_workerThreadFt2 = new QThread(this);
-    m_workerThreadFt2->setObjectName(QStringLiteral("FT2DecodeWorker"));
-    m_workerThreadFt2->setStackSize(8 * 1024 * 1024);
-    m_ft2Worker = new decodium::ft2::FT2DecodeWorker();
-    m_ft2Worker->setDecodeEnabled(m_mode == QStringLiteral("FT2"));
-    m_ft2Worker->moveToThread(m_workerThreadFt2);
-    // path sincrono (fine periodo)
-    connect(m_ft2Worker, &decodium::ft2::FT2DecodeWorker::decodeReady,
-            this, &DecodiumBridge::onFt2DecodeReady);
-    // path async turbo (ogni 100ms, senza serial check)
-    connect(m_ft2Worker, &decodium::ft2::FT2DecodeWorker::asyncDecodeReady,
-            this, &DecodiumBridge::onFt2AsyncDecodeReady, Qt::QueuedConnection);
-    connect(m_workerThreadFt2, &QThread::finished, m_ft2Worker, &QObject::deleteLater);
-    m_workerThreadFt2->start(QThread::LowPriority);
-
-    // Worker thread for FT4 decoder
-    m_workerThreadFt4 = new QThread(this);
-    m_workerThreadFt4->setObjectName(QStringLiteral("FT4DecodeWorker"));
-#if defined(Q_OS_LINUX)
-    m_workerThreadFt4->setStackSize(16 * 1024 * 1024);
-#else
-    m_workerThreadFt4->setStackSize(8 * 1024 * 1024);
-#endif
-    m_ft4Worker = new decodium::ft4::FT4DecodeWorker();
-    m_ft4Worker->moveToThread(m_workerThreadFt4);
-    connect(m_ft4Worker, &decodium::ft4::FT4DecodeWorker::decodeReady,
-            this, &DecodiumBridge::onFt4DecodeReady);
-    connect(m_workerThreadFt4, &QThread::finished, m_ft4Worker, &QObject::deleteLater);
-    m_workerThreadFt4->start(QThread::LowPriority);
-
-    // Worker thread for Q65 decoder
-    m_workerThreadQ65 = new QThread(this);
-    m_workerThreadQ65->setObjectName(QStringLiteral("Q65DecodeWorker"));
-    m_q65Worker = new decodium::q65::Q65DecodeWorker();
-    m_q65Worker->moveToThread(m_workerThreadQ65);
-    connect(m_q65Worker, &decodium::q65::Q65DecodeWorker::decodeReady,
-            this, &DecodiumBridge::onQ65DecodeReady);
-    connect(m_workerThreadQ65, &QThread::finished, m_q65Worker, &QObject::deleteLater);
-    m_workerThreadQ65->start(QThread::LowPriority);
-
-    // Worker thread for MSK144 decoder
-    m_workerThreadMsk = new QThread(this);
-    m_workerThreadMsk->setObjectName(QStringLiteral("MSK144DecodeWorker"));
-    m_mskWorker = new decodium::msk144::MSK144DecodeWorker();
-    m_mskWorker->moveToThread(m_workerThreadMsk);
-    connect(m_mskWorker, &decodium::msk144::MSK144DecodeWorker::decodeReady,
-            this, &DecodiumBridge::onMsk144DecodeReady);
-    connect(m_workerThreadMsk, &QThread::finished, m_mskWorker, &QObject::deleteLater);
-    m_workerThreadMsk->start(QThread::LowPriority);
-
-    // Worker thread for WSPR decoder
-    m_workerThreadWspr = new QThread(this);
-    m_workerThreadWspr->setObjectName(QStringLiteral("WSPRDecodeWorker"));
-#if defined(Q_OS_LINUX)
-    m_workerThreadWspr->setStackSize(32 * 1024 * 1024);
-#else
-    m_workerThreadWspr->setStackSize(16 * 1024 * 1024);
-#endif
-    m_wsprWorker = new decodium::wspr::WSPRDecodeWorker();
-    m_wsprWorker->moveToThread(m_workerThreadWspr);
-    connect(m_wsprWorker, &decodium::wspr::WSPRDecodeWorker::decodeReady,
-            this, &DecodiumBridge::onWsprDecodeReady);
-    connect(m_workerThreadWspr, &QThread::finished, m_wsprWorker, &QObject::deleteLater);
-    m_workerThreadWspr->start(QThread::LowPriority);
-
-    // Worker thread for JT65/JT9/JT4 decoder
-    m_workerThreadLegacyJt = new QThread(this);
-    m_workerThreadLegacyJt->setObjectName(QStringLiteral("LegacyJtDecodeWorker"));
-    m_legacyJtWorker = new decodium::legacyjt::LegacyJtDecodeWorker();
-    m_legacyJtWorker->moveToThread(m_workerThreadLegacyJt);
-    connect(m_legacyJtWorker, &decodium::legacyjt::LegacyJtDecodeWorker::decodeReady,
-            this, &DecodiumBridge::onLegacyJtDecodeReady);
-    connect(m_workerThreadLegacyJt, &QThread::finished, m_legacyJtWorker, &QObject::deleteLater);
-    m_workerThreadLegacyJt->start(QThread::LowPriority);
-
-    // Worker thread for FST4/FST4W decoder
-    m_workerThreadFst4 = new QThread(this);
-    m_workerThreadFst4->setObjectName(QStringLiteral("FST4DecodeWorker"));
-    m_fst4Worker = new decodium::fst4::FST4DecodeWorker();
-    m_fst4Worker->moveToThread(m_workerThreadFst4);
-    connect(m_fst4Worker, &decodium::fst4::FST4DecodeWorker::decodeReady,
-            this, &DecodiumBridge::onFst4DecodeReady);
-    connect(m_workerThreadFst4, &QThread::finished, m_fst4Worker, &QObject::deleteLater);
-    m_workerThreadFst4->start(QThread::LowPriority);
+    // Decoder workers are created lazily after the saved mode is known.  This
+    // avoids starting every DSP stack and allocating all of their FFT state
+    // before the first frame; a mode switch creates only the newly selected
+    // worker and keeps already-used workers available for later switches.
+    bridgeLog(QStringLiteral("decoder workers: lazy selected-mode initialization enabled"));
 
     // Period timer: 250ms tick, mode determines how many ticks = 1 period
     m_periodTimer = new QTimer(this);
@@ -10170,33 +10047,8 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
-    if (m_lotwEnabled) {
-        QTimer::singleShot(0, this, [this]() {
-            if (m_lotwEnabled) {
-                updateLotwUsers();
-            }
-        });
-    }
-    if (m_showUsState && m_usStateData) {
-        m_usStateData->ensureLoadedAsync();
-    }
     applyLowCpuRuntimeProfile(QStringLiteral("startup"));
-    // Popola m_workedCalls + m_worked dal log ADIF esistente all'avvio così che
-    // i decode mostrino subito i colori WSJT-X corretti (NewDxcc/Continent/Zone/...
-    // contro il pregresso) invece di marcare tutto come "nuovo".
-    {
-        ParsedAdifDocument doc = loadAdifDocument(ensureAdifLogPath());
-        if (!doc.records.isEmpty()) {
-            rebuildWorkedCallsFromDocument(m_workedCalls, doc.records);
-            rebuildWorkedSetsFromAdifRecords(doc.records);
-            m_qsoCountCache = doc.records.size();
-            bridgeLog(QStringLiteral("Worked-before preload: %1 QSO, %2 DXCC, %3 zone CQ, %4 grid")
-                          .arg(m_qsoCountCache)
-                          .arg(m_worked.dxccEver.size())
-                          .arg(m_worked.cqZoneEver.size())
-                          .arg(m_worked.gridEver.size()));
-        }
-    }
+    bridgeLog(QStringLiteral("Worked-before ADIF preload deferred until DXCC startup task"));
     resetStartupTransientQsoState();
     purgePersistentTransientQsoState();
     m_startupModeAutoPending = true;
@@ -10300,6 +10152,281 @@ bool DecodiumBridge::usingLegacyBackendForRx() const
     return usingLegacyBackendForTx();
 }
 
+bool DecodiumBridge::legacyBackendRequestedForRx() const
+{
+#if defined(Q_OS_MAC)
+    // WSPR is implemented by the modern bridge on macOS. Other digital modes
+    // are owned by the requested legacy backend even while its deferred
+    // construction is still pending.
+    if (m_mode.trimmed().compare(QStringLiteral("WSPR"), Qt::CaseInsensitive) == 0) {
+        return false;
+    }
+    return legacyTxBackendRequested();
+#else
+    return usingLegacyBackendForRx();
+#endif
+}
+
+void DecodiumBridge::ensureDecodeWorkerForMode(const QString& mode)
+{
+    if (m_shuttingDown) {
+        return;
+    }
+
+    QString normalizedMode = canonicalApplicationDecodeMode(mode);
+    if (normalizedMode.isEmpty()) {
+        normalizedMode = mode.trimmed();
+    }
+    QString const upperMode = normalizedMode.toUpper();
+    QElapsedTimer elapsed;
+    elapsed.start();
+    QString workerName;
+
+    if (upperMode == QStringLiteral("FT8") && !m_ft8Worker) {
+        m_workerThread = new QThread(this);
+        m_workerThread->setObjectName(QStringLiteral("FT8DecodeWorker"));
+#if defined(Q_OS_LINUX)
+        m_workerThread->setStackSize(16 * 1024 * 1024);
+#else
+        m_workerThread->setStackSize(8 * 1024 * 1024);
+#endif
+        m_ft8Worker = new decodium::ft8::FT8DecodeWorker();
+        m_ft8Worker->moveToThread(m_workerThread);
+        connect(m_ft8Worker, &decodium::ft8::FT8DecodeWorker::decodeReady,
+                this, &DecodiumBridge::onFt8DecodeReady);
+        connect(m_workerThread, &QThread::finished, m_ft8Worker, &QObject::deleteLater);
+        m_workerThread->start(QThread::LowPriority);
+        workerName = QStringLiteral("FT8");
+    } else if (upperMode == QStringLiteral("FT2") && !m_ft2Worker) {
+        m_workerThreadFt2 = new QThread(this);
+        m_workerThreadFt2->setObjectName(QStringLiteral("FT2DecodeWorker"));
+        m_workerThreadFt2->setStackSize(8 * 1024 * 1024);
+        m_ft2Worker = new decodium::ft2::FT2DecodeWorker();
+        m_ft2Worker->setDecodeEnabled(true);
+        m_ft2Worker->moveToThread(m_workerThreadFt2);
+        connect(m_ft2Worker, &decodium::ft2::FT2DecodeWorker::decodeReady,
+                this, &DecodiumBridge::onFt2DecodeReady);
+        connect(m_ft2Worker, &decodium::ft2::FT2DecodeWorker::asyncDecodeReady,
+                this, &DecodiumBridge::onFt2AsyncDecodeReady, Qt::QueuedConnection);
+        connect(m_workerThreadFt2, &QThread::finished, m_ft2Worker, &QObject::deleteLater);
+        m_workerThreadFt2->start(QThread::LowPriority);
+        workerName = QStringLiteral("FT2");
+    } else if (upperMode == QStringLiteral("FT4") && !m_ft4Worker) {
+        m_workerThreadFt4 = new QThread(this);
+        m_workerThreadFt4->setObjectName(QStringLiteral("FT4DecodeWorker"));
+#if defined(Q_OS_LINUX)
+        m_workerThreadFt4->setStackSize(16 * 1024 * 1024);
+#else
+        m_workerThreadFt4->setStackSize(8 * 1024 * 1024);
+#endif
+        m_ft4Worker = new decodium::ft4::FT4DecodeWorker();
+        m_ft4Worker->moveToThread(m_workerThreadFt4);
+        connect(m_ft4Worker, &decodium::ft4::FT4DecodeWorker::decodeReady,
+                this, &DecodiumBridge::onFt4DecodeReady);
+        connect(m_workerThreadFt4, &QThread::finished, m_ft4Worker, &QObject::deleteLater);
+        m_workerThreadFt4->start(QThread::LowPriority);
+        workerName = QStringLiteral("FT4");
+    } else if (upperMode.startsWith(QStringLiteral("Q65")) && !m_q65Worker) {
+        m_workerThreadQ65 = new QThread(this);
+        m_workerThreadQ65->setObjectName(QStringLiteral("Q65DecodeWorker"));
+        m_q65Worker = new decodium::q65::Q65DecodeWorker();
+        m_q65Worker->moveToThread(m_workerThreadQ65);
+        connect(m_q65Worker, &decodium::q65::Q65DecodeWorker::decodeReady,
+                this, &DecodiumBridge::onQ65DecodeReady);
+        connect(m_workerThreadQ65, &QThread::finished, m_q65Worker, &QObject::deleteLater);
+        m_workerThreadQ65->start(QThread::LowPriority);
+        workerName = QStringLiteral("Q65");
+    } else if (upperMode == QStringLiteral("MSK144") && !m_mskWorker) {
+        m_workerThreadMsk = new QThread(this);
+        m_workerThreadMsk->setObjectName(QStringLiteral("MSK144DecodeWorker"));
+        m_mskWorker = new decodium::msk144::MSK144DecodeWorker();
+        m_mskWorker->moveToThread(m_workerThreadMsk);
+        connect(m_mskWorker, &decodium::msk144::MSK144DecodeWorker::decodeReady,
+                this, &DecodiumBridge::onMsk144DecodeReady);
+        connect(m_workerThreadMsk, &QThread::finished, m_mskWorker, &QObject::deleteLater);
+        m_workerThreadMsk->start(QThread::LowPriority);
+        workerName = QStringLiteral("MSK144");
+    } else if (upperMode == QStringLiteral("WSPR") && !m_wsprWorker) {
+        m_workerThreadWspr = new QThread(this);
+        m_workerThreadWspr->setObjectName(QStringLiteral("WSPRDecodeWorker"));
+#if defined(Q_OS_LINUX)
+        m_workerThreadWspr->setStackSize(32 * 1024 * 1024);
+#else
+        m_workerThreadWspr->setStackSize(16 * 1024 * 1024);
+#endif
+        m_wsprWorker = new decodium::wspr::WSPRDecodeWorker();
+        m_wsprWorker->moveToThread(m_workerThreadWspr);
+        connect(m_wsprWorker, &decodium::wspr::WSPRDecodeWorker::decodeReady,
+                this, &DecodiumBridge::onWsprDecodeReady);
+        connect(m_workerThreadWspr, &QThread::finished, m_wsprWorker, &QObject::deleteLater);
+        m_workerThreadWspr->start(QThread::LowPriority);
+        workerName = QStringLiteral("WSPR");
+    } else if ((upperMode == QStringLiteral("JT65")
+                || upperMode == QStringLiteral("JT9")
+                || upperMode == QStringLiteral("JT4"))
+               && !m_legacyJtWorker) {
+        m_workerThreadLegacyJt = new QThread(this);
+        m_workerThreadLegacyJt->setObjectName(QStringLiteral("LegacyJtDecodeWorker"));
+        m_legacyJtWorker = new decodium::legacyjt::LegacyJtDecodeWorker();
+        m_legacyJtWorker->moveToThread(m_workerThreadLegacyJt);
+        connect(m_legacyJtWorker, &decodium::legacyjt::LegacyJtDecodeWorker::decodeReady,
+                this, &DecodiumBridge::onLegacyJtDecodeReady);
+        connect(m_workerThreadLegacyJt, &QThread::finished,
+                m_legacyJtWorker, &QObject::deleteLater);
+        m_workerThreadLegacyJt->start(QThread::LowPriority);
+        workerName = QStringLiteral("LegacyJT");
+    } else if (upperMode.startsWith(QStringLiteral("FST4")) && !m_fst4Worker) {
+        m_workerThreadFst4 = new QThread(this);
+        m_workerThreadFst4->setObjectName(QStringLiteral("FST4DecodeWorker"));
+        m_fst4Worker = new decodium::fst4::FST4DecodeWorker();
+        m_fst4Worker->moveToThread(m_workerThreadFst4);
+        connect(m_fst4Worker, &decodium::fst4::FST4DecodeWorker::decodeReady,
+                this, &DecodiumBridge::onFst4DecodeReady);
+        connect(m_workerThreadFst4, &QThread::finished, m_fst4Worker, &QObject::deleteLater);
+        m_workerThreadFst4->start(QThread::LowPriority);
+        workerName = QStringLiteral("FST4");
+    }
+
+    if (!workerName.isEmpty()) {
+        bridgeLog(QStringLiteral("decoder worker initialized lazily: requested=%1 worker=%2 elapsed_ms=%3")
+                      .arg(normalizedMode, workerName)
+                      .arg(elapsed.elapsed()));
+    }
+}
+
+void DecodiumBridge::loadDxccLookupAsync()
+{
+    if (m_shuttingDown || !m_dxccLookup || m_dxccLookup->isLoaded()
+        || m_dxccLookupLoading || m_dxccLookupLoadAttempted) {
+        return;
+    }
+
+    m_dxccLookupLoading = true;
+    m_dxccLookupLoadAttempted = true;
+    quint64 const serial = ++m_dxccLookupLoadSerial;
+    QStringList const candidates = ctyDatSearchPaths();
+    QPointer<DecodiumBridge> self(this);
+    auto* task = QRunnable::create([self, candidates, serial]() {
+        QElapsedTimer elapsed;
+        elapsed.start();
+        auto lookup = std::make_shared<DxccLookup>();
+        QString loadedPath;
+        for (QString const& path : candidates) {
+            if (QFile::exists(path) && lookup->loadCtyDat(path)) {
+                loadedPath = path;
+                break;
+            }
+        }
+        qint64 const elapsedMs = elapsed.elapsed();
+        if (!self) {
+            return;
+        }
+        QMetaObject::invokeMethod(self, [self, serial, lookup = std::move(lookup),
+                                         loadedPath, elapsedMs]() mutable {
+            if (!self || serial != self->m_dxccLookupLoadSerial) {
+                return;
+            }
+            self->m_dxccLookupLoading = false;
+            if (!loadedPath.isEmpty() && lookup->isLoaded()) {
+                *self->m_dxccLookup = std::move(*lookup);
+                bridgeLog(QStringLiteral("DXCC async loaded %1 entities from %2 in %3 ms")
+                              .arg(self->m_dxccLookup->entityCount())
+                              .arg(loadedPath)
+                              .arg(elapsedMs));
+                self->refreshDecodeListDxcc();
+            } else {
+                bridgeLog(QStringLiteral("DXCC async load finished without cty.dat in %1 ms")
+                              .arg(elapsedMs));
+            }
+            self->loadWorkedBeforeHistoryAsync();
+        }, Qt::QueuedConnection);
+    });
+    task->setAutoDelete(true);
+    QThreadPool::globalInstance()->start(task, -1);
+}
+
+void DecodiumBridge::loadWorkedBeforeHistoryAsync()
+{
+    if (m_shuttingDown || m_workedHistoryLoading || m_workedHistoryLoaded) {
+        return;
+    }
+    if (!m_dxccLookupLoadAttempted) {
+        loadDxccLookupAsync();
+        return;
+    }
+    if (m_dxccLookupLoading) {
+        return;
+    }
+
+    QString const path = ensureAdifLogPath();
+    m_workedHistoryLoading = true;
+    QPointer<DecodiumBridge> self(this);
+    auto* task = QRunnable::create([self, path]() {
+        QElapsedTimer elapsed;
+        elapsed.start();
+        ParsedAdifDocument document = loadAdifDocument(path);
+        QFileInfo const parsedInfo(path);
+        qint64 const parsedSize = parsedInfo.exists() ? parsedInfo.size() : -1;
+        qint64 const parsedModifiedMs = parsedInfo.exists()
+            ? parsedInfo.lastModified().toMSecsSinceEpoch()
+            : -1;
+        qint64 const elapsedMs = elapsed.elapsed();
+        if (!self) {
+            return;
+        }
+        QMetaObject::invokeMethod(self, [self, path, document = std::move(document),
+                                         parsedSize, parsedModifiedMs, elapsedMs]() mutable {
+            if (!self) {
+                return;
+            }
+            self->m_workedHistoryLoading = false;
+            QString const activePath = self->effectiveAdifLogPath();
+            if (QDir::cleanPath(activePath) != QDir::cleanPath(path)) {
+                bridgeLog(QStringLiteral("Worked-before async preload profile changed; retrying old=%1 new=%2")
+                              .arg(path, activePath));
+                QTimer::singleShot(100, self.data(), [self]() {
+                    if (self) {
+                        self->loadWorkedBeforeHistoryAsync();
+                    }
+                });
+                return;
+            }
+            QFileInfo const currentInfo(path);
+            qint64 const currentSize = currentInfo.exists() ? currentInfo.size() : -1;
+            qint64 const currentModifiedMs = currentInfo.exists()
+                ? currentInfo.lastModified().toMSecsSinceEpoch()
+                : -1;
+            if (currentSize != parsedSize || currentModifiedMs != parsedModifiedMs) {
+                bridgeLog(QStringLiteral("Worked-before async preload changed during read; retrying path=%1")
+                              .arg(path));
+                QTimer::singleShot(100, self.data(), [self]() {
+                    if (self) {
+                        self->loadWorkedBeforeHistoryAsync();
+                    }
+                });
+                return;
+            }
+
+            rebuildWorkedCallsFromDocument(self->m_workedCalls, document.records);
+            self->rebuildWorkedSetsFromAdifRecords(document.records);
+            self->m_qsoCountCache = document.records.size();
+            self->m_workedHistoryLoaded = true;
+            self->invalidateQsoSearchCache();
+            self->refreshDecodeListDxcc();
+            emit self->qsoCountChanged();
+            emit self->workedCountChanged();
+            bridgeLog(QStringLiteral("Worked-before async preload: %1 QSO, %2 DXCC, %3 zone CQ, %4 grid in %5 ms")
+                          .arg(self->m_qsoCountCache)
+                          .arg(self->m_worked.dxccEver.size())
+                          .arg(self->m_worked.cqZoneEver.size())
+                          .arg(self->m_worked.gridEver.size())
+                          .arg(elapsedMs));
+        }, Qt::QueuedConnection);
+    });
+    task->setAutoDelete(true);
+    QThreadPool::globalInstance()->start(task, -1);
+}
+
 void DecodiumBridge::notifyMainQmlReady()
 {
 #ifdef Q_OS_WIN
@@ -10343,6 +10470,25 @@ void DecodiumBridge::runPostQmlStartupServices()
     m_startupServicesStarted = true;
     bridgeLog(QStringLiteral("startup services: starting after Main.qml ready"));
 
+    if (!legacyBackendRequestedForRx()) {
+        ensureDecodeWorkerForMode(m_mode);
+    } else {
+        bridgeLog(QStringLiteral("decoder worker startup delegated to legacy RX backend: mode=%1 state=%2")
+                      .arg(m_mode,
+                           legacyBackendAvailable() ? QStringLiteral("ready")
+                                                    : QStringLiteral("pending")));
+    }
+
+    // These tasks do file I/O and parsing on the global low-priority pool.
+    // Starting them after the first QML frame keeps startup interactive while
+    // still completing enrichment before the first normal decode period.
+    loadDxccLookupAsync();
+    QTimer::singleShot(900, this, [this]() {
+        if (!m_shuttingDown) {
+            loadWorldMapCall3Cache();
+        }
+    });
+
     scheduleAudioDeviceRefresh(1800, false);
     QTimer::singleShot(8000, this, [this]() {
         if (!m_shuttingDown && !m_audioDeviceCacheValid) {
@@ -10350,7 +10496,7 @@ void DecodiumBridge::runPostQmlStartupServices()
         }
     });
 
-    QTimer::singleShot(300, this, [this]() {
+    QTimer::singleShot(2200, this, [this]() {
         if (m_shuttingDown) {
             return;
         }
@@ -10364,7 +10510,33 @@ void DecodiumBridge::runPostQmlStartupServices()
         initUdpMessageClient();
     });
 
-    QTimer::singleShot(700, this, [this]() {
+    QTimer::singleShot(1500, this, [this]() {
+        if (m_shuttingDown || !m_pskReporter) {
+            return;
+        }
+        refreshPskReporterLocalStation();
+        m_pskReporter->setEnabled(m_pskReporterEnabled);
+        bridgeLog(QStringLiteral("PSK Reporter startup stage: enabled=%1")
+                      .arg(m_pskReporterEnabled ? 1 : 0));
+    });
+
+    QTimer::singleShot(2500, this, [this]() {
+        if (m_shuttingDown) {
+            return;
+        }
+        if (m_showUsState && m_usStateData) {
+            m_usStateData->ensureLoadedAsync();
+        }
+    });
+
+    QTimer::singleShot(3500, this, [this]() {
+        if (m_shuttingDown || !m_lotwEnabled) {
+            return;
+        }
+        updateLotwUsers();
+    });
+
+    QTimer::singleShot(3000, this, [this]() {
         if (m_shuttingDown || !m_dxCluster || m_callsign.isEmpty()) {
             return;
         }
@@ -12055,6 +12227,65 @@ void DecodiumBridge::rememberNativeDecodeDedupKey(const QString& key)
     }
 }
 
+void DecodiumBridge::resetFt2AsyncDecodeDedupIndex()
+{
+    m_ft2AsyncDecodeDedupKeys.clear();
+    m_ft2AsyncDecodeDedupOrder.clear();
+    m_ft2AsyncDecodeDedupSessionId = m_decodeSessionId;
+}
+
+void DecodiumBridge::rememberFt2AsyncDecodeDedupKey(const QString& key)
+{
+    if (key.isEmpty() || m_ft2AsyncDecodeDedupKeys.contains(key)) {
+        return;
+    }
+
+    static constexpr int kFt2AsyncDecodeDedupCapacity = 768;
+    m_ft2AsyncDecodeDedupKeys.insert(key);
+    m_ft2AsyncDecodeDedupOrder.enqueue(key);
+    while (m_ft2AsyncDecodeDedupOrder.size() > kFt2AsyncDecodeDedupCapacity) {
+        m_ft2AsyncDecodeDedupKeys.remove(m_ft2AsyncDecodeDedupOrder.dequeue());
+    }
+}
+
+void DecodiumBridge::rememberDecodeDedupEntry(const QVariantMap& entry)
+{
+    if (entry.value(QStringLiteral("isTx")).toBool()) {
+        return;
+    }
+    if (entry.contains(QStringLiteral("decodeSessionId"))) {
+        quint64 const entrySessionId = entry.value(QStringLiteral("decodeSessionId")).toULongLong();
+        if (entrySessionId != 0 && entrySessionId != m_decodeSessionId) {
+            return;
+        }
+    }
+    if (entry.value(QStringLiteral("message")).toString().trimmed().isEmpty()) {
+        return;
+    }
+
+    if (m_nativeDecodeDedupSessionId != m_decodeSessionId) {
+        resetNativeDecodeDedupIndex();
+    }
+    rememberNativeDecodeDedupKey(decodeDedupKey(
+        entry.value(QStringLiteral("time")).toString(),
+        entry.value(QStringLiteral("freq")).toString(),
+        entry.value(QStringLiteral("message")).toString()));
+
+    QString const mode = entry.value(QStringLiteral("mode"), m_mode)
+                             .toString().trimmed().toUpper();
+    if (mode != QLatin1String("FT2")) {
+        return;
+    }
+    if (m_ft2AsyncDecodeDedupSessionId != m_decodeSessionId) {
+        resetFt2AsyncDecodeDedupIndex();
+    }
+    rememberFt2AsyncDecodeDedupKey(decodeDedupKeyFt2Async(
+        entry.value(QStringLiteral("time")).toString(),
+        entry.value(QStringLiteral("freq")).toString(),
+        entry.value(QStringLiteral("message")).toString(),
+        entry.value(QStringLiteral("timestamp")).toLongLong()));
+}
+
 void DecodiumBridge::ensureNativeDecodeDedupIndex()
 {
     if (m_nativeDecodeDedupSessionId == m_decodeSessionId
@@ -12462,10 +12693,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                                    .arg(m_rxDecodeList.size()));
 
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
-        QString loadedPath;
-        if (reloadDxccLookup(&loadedPath)) {
-            bridgeLog("DXCC: caricato on-demand da " + loadedPath + " durante il mirror del backend legacy");
-        }
+        loadDxccLookupAsync();
     }
 
     auto feedMamQueueFromEntries = [this](QVariantList const& entries) {
@@ -13468,7 +13696,7 @@ void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
     if (!key.isEmpty()) {
         m_rxDecodeMirrorKeys.insert(key);
     }
-    trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
+    trimDecodeListsIfNeeded();  // bounded in-memory decode history
     emitRxDecodeListChangedThrottled(true);
     trace.addDetail(QStringLiteral("new_rx_rows=%1 emit_pending=1").arg(m_rxDecodeList.size()));
 }
@@ -15553,6 +15781,9 @@ void DecodiumBridge::setMode(const QString& v) {
         }
 
         m_mode = normalizedMode;
+        if ((m_mainQmlReady || m_startupServicesStarted) && !legacyBackendRequestedForRx()) {
+            ensureDecodeWorkerForMode(m_mode);
+        }
         if (m_ft2Worker) {
             m_ft2Worker->setDecodeEnabled(m_mode == QStringLiteral("FT2"));
         }
@@ -18391,6 +18622,8 @@ void DecodiumBridge::startRx()
     m_monitorRequested = true;
     if (m_monitoring) { bridgeLog("startRx: already monitoring, skip"); return; }
     ++m_decodeSessionId;
+    resetNativeDecodeDedupIndex();
+    resetFt2AsyncDecodeDedupIndex();
     m_ft8StartupPressureSlotDeferred = false;
     quint64 const monitorSessionId = ++m_periodTimerSessionId;
 
@@ -18453,6 +18686,8 @@ void DecodiumBridge::startRx()
         return;
     }
 
+    ensureDecodeWorkerForMode(m_mode);
+
     updatePeriodTicksMax();
     m_legacyPcmSpectrumFeed = false;
     m_monitoring = true;
@@ -18504,6 +18739,7 @@ void DecodiumBridge::stopRx()
             }
         }
         bridgeLog("stopRx: not monitoring, skip");
+        scheduleIdleAudioBufferRelease(30000);
         return;
     }
     ++m_periodTimerSessionId;
@@ -18520,10 +18756,11 @@ void DecodiumBridge::stopRx()
         m_spectrumBuf.clear();
         m_lastPanadapterData.clear();
         m_wfRingPos = 0;
-        resetRxPeriodAccumulation(true);
+        resetRxPeriodAccumulation(false);
         resetTimeSyncDecodeMetrics();
         m_legacyBackend->setMonitoring(false);
         syncLegacyBackendState();
+        scheduleIdleAudioBufferRelease(30000);
         emit statusMessage("RX fermato");
         return;
     }
@@ -18535,11 +18772,12 @@ void DecodiumBridge::stopRx()
     m_asyncDecodeTimer->stop();
     m_asyncDecodePending = false;
     stopAudioCapture();
-    resetRxPeriodAccumulation(true);
+    resetRxPeriodAccumulation(false);
     resetTimeSyncDecodeMetrics();
 
     m_decoding = false;
     emit decodingChanged();
+    scheduleIdleAudioBufferRelease(30000);
     emit statusMessage("RX fermato");
 }
 
@@ -18783,6 +19021,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
         restoreTxAudioSchedulingBoost(reason);
         resumeRxAudioAfterTx(reason);
         resumeNonAudioTxWork(reason);
+        scheduleIdleAudioBufferRelease(180000);
         resumeMs = phaseTimer.elapsed();
         txTimelineLog(QStringLiteral("[TX-TL] tx_finish_ft2link reason=%1 total_ms=%2 ptt_off_ms=%3 sound_finish_ms=%4 cleanup_ms=%5 resume_ms=%6 was_transmitting=%7")
                       .arg(reason)
@@ -18810,6 +19049,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     phaseTimer.start();
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
+    scheduleIdleAudioBufferRelease(180000);
     resumeMs = phaseTimer.elapsed();
     txTimelineLog(QStringLiteral("[TX-TL] tx_finish reason=%1 total_ms=%2 ptt_off_ms=%3 sound_finish_ms=%4 cleanup_ms=%5 resume_ms=%6 bridge_legacy=%7 was_transmitting=%8")
                   .arg(reason)
@@ -18881,6 +19121,95 @@ static QAudioDevice findOutputDevice(const QString& name,
 void DecodiumBridge::invalidateTxAudioCache()
 {
     m_txAudioCache = TxAudioCache {};
+}
+
+void DecodiumBridge::scheduleIdleAudioBufferRelease(int delayMs)
+{
+    if (!m_audioBufferReleaseTimer) {
+        return;
+    }
+
+    int const boundedDelayMs = qBound(5000, delayMs, 300000);
+    m_audioBufferReleaseTimer->start(boundedDelayMs);
+}
+
+void DecodiumBridge::releaseIdleAudioBuffers()
+{
+    bool const txPathActive = m_transmitting
+        || m_tuning
+        || m_bridgeAudioLegacyTxActive
+        || m_ft2LinkTxActive
+        || m_txPcmBuffer != nullptr;
+    if (txPathActive) {
+        scheduleIdleAudioBufferRelease(30000);
+        return;
+    }
+
+    qint64 releasedCapacityBytes = 0;
+    auto accountShortVector = [&releasedCapacityBytes](QVector<short> const& buffer) {
+        releasedCapacityBytes += static_cast<qint64>(buffer.capacity())
+            * static_cast<qint64>(sizeof(short));
+    };
+    auto accountFloatVector = [&releasedCapacityBytes](QVector<float> const& buffer) {
+        releasedCapacityBytes += static_cast<qint64>(buffer.capacity())
+            * static_cast<qint64>(sizeof(float));
+    };
+
+    accountFloatVector(m_txAudioCache.wave);
+    releasedCapacityBytes += m_txAudioCache.pcm.capacity();
+    invalidateTxAudioCache();
+
+    releasedCapacityBytes += m_txPcmData.capacity();
+    m_txPcmData.clear();
+    m_txPcmData.squeeze();
+
+    if (m_pendingFt2LinkText.isEmpty() && m_pendingFt2LinkPlan.isEmpty()) {
+        accountFloatVector(m_pendingFt2LinkWave);
+        m_pendingFt2LinkWave.clear();
+        m_pendingFt2LinkWave.squeeze();
+    }
+
+    bool const rxPathIdle = !m_monitoring && !m_monitorRequested;
+    if (rxPathIdle) {
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            accountShortVector(m_audioBuffer);
+            m_audioBuffer.clear();
+            m_audioBuffer.squeeze();
+        }
+        if (!m_pendingTimeSyncDecodeActive) {
+            accountShortVector(m_pendingTimeSyncDecodeAudio);
+            m_pendingTimeSyncDecodeAudio.clear();
+            m_pendingTimeSyncDecodeAudio.squeeze();
+        }
+        if (!m_forcedDecodeAudioSnapshotActive) {
+            accountShortVector(m_forcedDecodeAudioSnapshot);
+            m_forcedDecodeAudioSnapshot.clear();
+            m_forcedDecodeAudioSnapshot.squeeze();
+        }
+        if (!m_ft2LinkModernRxDrainScheduled) {
+            accountShortVector(m_ft2LinkModernRxPending);
+            m_ft2LinkModernRxPending.clear();
+            m_ft2LinkModernRxPending.squeeze();
+        }
+        if (!m_ft2LinkLegacyRxDrainScheduled) {
+            accountShortVector(m_ft2LinkLegacyRxPending);
+            m_ft2LinkLegacyRxPending.clear();
+            m_ft2LinkLegacyRxPending.squeeze();
+        }
+        accountShortVector(m_spectrumBuf);
+        m_spectrumBuf.clear();
+        m_spectrumBuf.squeeze();
+        accountFloatVector(m_lastPanadapterData);
+        m_lastPanadapterData.clear();
+        m_lastPanadapterData.squeeze();
+    }
+
+    if (releasedCapacityBytes >= 64 * 1024) {
+        bridgeLog(QStringLiteral("[AUDIO-MEM] idle buffers released capacity_kib=%1 rx_idle=%2")
+                      .arg(releasedCapacityBytes / 1024)
+                      .arg(rxPathIdle ? 1 : 0));
+    }
 }
 
 QAudioDevice DecodiumBridge::resolveTxOutputDevice(bool* requestedDeviceFound)
@@ -19666,6 +19995,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                           m_txAudioCache.pcm.size(),
                           m_txAudioCache.outputFormat,
                           m_cachedTxOutputDevice);
+                scheduleIdleAudioBufferRelease(180000);
                 return true;
             }
             QElapsedTimer phaseTimer;
@@ -19690,6 +20020,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                           m_txAudioCache.pcm.size(),
                           m_txAudioCache.outputFormat,
                           device);
+                scheduleIdleAudioBufferRelease(180000);
                 return true;
             }
         } else {
@@ -19702,6 +20033,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
                       0,
                       QAudioFormat {},
                       QAudioDevice {});
+            scheduleIdleAudioBufferRelease(180000);
             return true;
         }
     }
@@ -19800,6 +20132,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
               m_txAudioCache.pcm.size(),
               m_txAudioCache.outputFormat,
               device);
+    scheduleIdleAudioBufferRelease(180000);
     return true;
 }
 
@@ -33676,8 +34009,13 @@ void DecodiumBridge::loadSettings()
     // PSK Reporter — aggiorna stazione locale con callsign/grid caricati
     if (m_pskReporter) {
         m_pskReporter->setUseTcpIp(getSetting(QStringLiteral("PSKReporterTCPIP"), false).toBool());
-        m_pskReporter->setEnabled(m_pskReporterEnabled);
         refreshPskReporterLocalStation();
+        if (m_mainQmlReady && m_startupServicesStarted) {
+            m_pskReporter->setEnabled(m_pskReporterEnabled);
+        } else {
+            m_pskReporter->setEnabled(false);
+            bridgeLog(QStringLiteral("PSK Reporter network startup deferred until Main.qml ready"));
+        }
     }
     applyNtpSettings();
     // Garantisce che TX6 (CQ) sia sempre valorizzato dopo il caricamento settings
@@ -37153,8 +37491,7 @@ QString DecodiumBridge::approximateWorldMapGridForCall(const QString& call)
     }
 
     if (!m_dxccLookup->isLoaded()) {
-        QString loadedPath;
-        reloadDxccLookup(&loadedPath);
+        loadDxccLookupAsync();
     }
     if (!m_dxccLookup->isLoaded()) {
         return {};
@@ -38460,10 +38797,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         bridgeLog("  raw[" + QString::number(dbgI) + "]='" + rows[dbgI] + "'");
 
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
-        QString loadedPath;
-        if (reloadDxccLookup(&loadedPath)) {
-            bridgeLog("DXCC: caricato on-demand da " + loadedPath);
-        }
+        loadDxccLookupAsync();
     }
 
     QString const decodeMode = serialMode;
@@ -38694,7 +39028,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 persistDecodeHistoryEntry(e);
             }
             m_pendingDecodeReleaseQueue.clear();
-            trimDecodeListsIfNeeded();  // 1.0.257 auto-clear a 250
+            trimDecodeListsIfNeeded();  // bounded in-memory decode history
             emitDecodeListChangedThrottled();
         }
         m_lastReleaseSerial = static_cast<qint64>(serial);
@@ -39534,10 +39868,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     }
 
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
-        QString loadedPath;
-        if (reloadDxccLookup(&loadedPath)) {
-            bridgeLog("DXCC: caricato on-demand da " + loadedPath);
-        }
+        loadDxccLookupAsync();
     }
 
     // 1.0.304 (#9) — resume-on-reply (FT2-async): l'Halt qui wipa m_dxCall, ma l'arm in
@@ -39710,27 +40041,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         }
     }
 
-    // Costruisci set dei decode già presenti in questa sessione di monitor.
-    // Usa la chiave quantizzata per FT2 async: lo stage7 DSP ri-emette lo stesso
-    // messaggio ogni 100ms con piccolo jitter di freq; con quantizzazione a 20Hz
-    // il primo decode vince e gli successivi vengono scartati come duplicati.
-    QSet<QString> existing;
-    for (const auto& v : m_decodeList) {
-        QVariantMap const prev = v.toMap();
-        if (prev.value("isTx").toBool()) {
-            continue;
-        }
-        if (prev.value("decodeSessionId").toULongLong() != m_decodeSessionId) {
-            continue;
-        }
-        QString const key = decodeDedupKeyFt2Async(prev.value("time").toString(),
-                                                   prev.value("freq").toString(),
-                                                   prev.value("message").toString(),
-                                                   prev.value("timestamp").toLongLong());
-        if (!key.isEmpty()) {
-            existing.insert(key);
-        }
+    // Stage7 emits overlapping batches every 100 ms. The persistent bounded
+    // index makes duplicate lookup O(1); this batch set also suppresses repeats
+    // before accepted rows are committed to the live model.
+    if (m_ft2AsyncDecodeDedupSessionId != m_decodeSessionId) {
+        resetFt2AsyncDecodeDedupIndex();
     }
+    QSet<QString> batchDedupKeys;
 
     bool changed = false;
     int accepted = 0;
@@ -39821,12 +40138,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
                                                         entry.value("freq").toString(),
                                                         msg,
                                                         entry.value("timestamp").toLongLong());
-        bool const duplicate = existing.contains(dedupKey);
+        bool const duplicate = m_ft2AsyncDecodeDedupKeys.contains(dedupKey)
+            || batchDedupKeys.contains(dedupKey);
         if (duplicate) {
             ++duplicatesSkipped;
             continue;
         }
-        existing.insert(dedupKey);
+        batchDedupKeys.insert(dedupKey);
 
         maybeEnqueueMamCallerFromDecode(f);
         maybeQueuePskReporterSpot(entry, msg, isCQ, f[7], f[1], QStringLiteral("FT2"));
@@ -40304,10 +40622,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
     bridgeLog("onLegacyJtDecodeReady: serial=" + QString::number(serial) +
               " rows=" + QString::number(rows.size()) + " mode=" + m_mode);
     if (m_dxccLookup && !m_dxccLookup->isLoaded()) {
-        QString loadedPath;
-        if (reloadDxccLookup(&loadedPath)) {
-            bridgeLog("DXCC: caricato on-demand da " + loadedPath);
-        }
+        loadDxccLookupAsync();
     }
     Q_UNUSED(serial)
     bool changed = false;
@@ -43206,6 +43521,10 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         return;
     }
 
+    // Defensive on-demand path for WAV/offline decode and very early manual
+    // monitor actions that can precede the post-QML startup stage.
+    ensureDecodeWorkerForMode(modeSnapshot);
+
     // Snapshot atomico del buffer audio sotto lock: il callback del sink
     // (DecodiumAudioSink::writeData) può eseguire append() in parallelo da
     // un thread del backend audio. Sfruttiamo il copy-on-write di QVector:
@@ -43785,8 +44104,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.mycall  = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
         req.zapEnabled = m_zapEnabled;
-        QMetaObject::invokeMethod(m_q65Worker, [this, req]() {
-            m_q65Worker->decode(req);
+        auto* worker = m_q65Worker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "MSK144") {
@@ -43801,8 +44126,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.trperiod = effectivePeriodMsForMode(modeSnapshot) / 1000.0;
         req.mycall  = m_callsign.toLocal8Bit();
         req.hiscall = m_dxCall.toLocal8Bit();
-        QMetaObject::invokeMethod(m_mskWorker, [this, req]() {
-            m_mskWorker->decode(req);
+        auto* worker = m_mskWorker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot == "WSPR") {
@@ -43892,8 +44223,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
                           .arg(req.nfb)
                           .arg(req.ndepth));
         }
-        QMetaObject::invokeMethod(m_legacyJtWorker, [this, req]() {
-            m_legacyJtWorker->decode(req);
+        auto* worker = m_legacyJtWorker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else if (modeSnapshot.startsWith("FST4")) {
@@ -43916,8 +44253,14 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
             req.ntrperiod = (dashPos >= 0) ? modeSnapshot.mid(dashPos + 1).toInt() : 15;
         }
         req.iwspr = modeSnapshot.startsWith("FST4W") ? 1 : 0;
-        QMetaObject::invokeMethod(m_fst4Worker, [this, req]() {
-            m_fst4Worker->decode(req);
+        auto* worker = m_fst4Worker;
+        if (!worker) {
+            m_decoding = false;
+            emit decodingChanged();
+            return;
+        }
+        QMetaObject::invokeMethod(worker, [worker, req]() {
+            worker->decode(req);
         }, Qt::QueuedConnection);
 
     } else {
@@ -45222,6 +45565,8 @@ void DecodiumBridge::checkCtyDatUpdate()
                 QString loadedPath;
                 if (reloadDxccLookup(&loadedPath)) {
                     refreshDecodeListDxcc();
+                    m_workedHistoryLoaded = false;
+                    loadWorkedBeforeHistoryAsync();
                     bridgeLog("cty.dat updated and reloaded from " + loadedPath);
                     emit statusMessage("cty.dat aggiornato e caricato: " + loadedPath);
                 } else {
@@ -45402,6 +45747,12 @@ bool DecodiumBridge::reloadDxccLookup(QString* loadedPath)
         loadedPath->clear();
     if (!m_dxccLookup)
         return false;
+
+    // Invalidate an older background startup read before applying an explicit
+    // user-triggered reload (for example after downloading a new cty.dat).
+    ++m_dxccLookupLoadSerial;
+    m_dxccLookupLoading = false;
+    m_dxccLookupLoadAttempted = true;
 
     for (const QString& path : ctyDatSearchPaths()) {
         if (!QFile::exists(path))

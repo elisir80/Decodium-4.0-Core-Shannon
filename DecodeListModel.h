@@ -8,6 +8,7 @@
 #include <QAbstractListModel>
 #include <QByteArray>
 #include <QHash>
+#include <QSet>
 #include <QString>
 #include <QVariantList>
 #include <QVariantMap>
@@ -117,6 +118,7 @@ private:
 
     QVector<QVariantMap> m_budgetTargetEntries;
     QVector<QString> m_budgetTargetKeys;
+    QSet<QString> m_budgetTargetKeySet;
     class QTimer* m_budgetTimer {nullptr};
     int m_budgetRowsPerCycle {48};
     bool m_budgetTargetActive {false};

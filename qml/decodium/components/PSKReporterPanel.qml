@@ -201,7 +201,7 @@ Item {
                                 return root._fmtDistance(Number(root.bridge.pskHeardByMaxKm))
                             }
                             color: root.cAccent
-                            font.pixelSize: 18; font.bold: true; font.family: "monospace"
+                            font.pixelSize: 18; font.bold: true; font.family: decodiumMonoFontFamily
                         }
                         Text {
                             Layout.alignment: Qt.AlignHCenter
@@ -233,10 +233,10 @@ Item {
         RowLayout {
             anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
             spacing: 0
-            Text { text: "CALLSIGN"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: "monospace"; Layout.fillWidth: true }
-            Text { text: "GRID"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: "monospace"; Layout.preferredWidth: 52 }
-            Text { text: "dB"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: "monospace"; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 34 }
-            Text { text: "DISTANCE"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: "monospace"; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 64 }
+            Text { text: "CALLSIGN"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: decodiumMonoFontFamily; Layout.fillWidth: true }
+            Text { text: "GRID"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: decodiumMonoFontFamily; Layout.preferredWidth: 52 }
+            Text { text: "dB"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 34 }
+            Text { text: "DISTANCE"; color: root.cGrid; font.pixelSize: 9; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: 64 }
         }
     }
 
@@ -274,20 +274,20 @@ Item {
                 Text {
                     text: !del.modelData ? "" : String(del.entry.call || "—")
                     color: root.cAccent
-                    font.pixelSize: root.fSize; font.bold: true; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.bold: true; font.family: decodiumMonoFontFamily
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
                 Text {
                     text: !del.modelData ? "" : String(del.entry.grid || "—")
                     color: root.cTextDim
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     Layout.preferredWidth: 52
                 }
                 Text {
                     text: !del.modelData ? "" : root._fmtDb(del.entry.snr)
                     color: root.cText
-                    font.pixelSize: root.fSize; font.family: "monospace"
+                    font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: 34
                 }
@@ -298,7 +298,7 @@ Item {
                         return (km < 0) ? "—" : root._fmtDistance(km) + " " + root._distanceUnit()
                     }
                     color: root.cTextDim
-                    font.pixelSize: root.fSize - 2; font.family: "monospace"
+                    font.pixelSize: root.fSize - 2; font.family: decodiumMonoFontFamily
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: 64
                 }
