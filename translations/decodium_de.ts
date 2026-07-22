@@ -4384,6 +4384,11 @@ Fehler: %2</translation>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7987"/>
+        <source>Clear Full Spectrum</source>
+        <translation>Full Spectrum löschen</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10814"/>
         <source>About Decodium</source>
         <translation>Über Decodium</translation>

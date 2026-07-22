@@ -4380,6 +4380,11 @@ Error: %2</source>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7987"/>
+        <source>Clear Full Spectrum</source>
+        <translation>清除全頻譜</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10814"/>
         <source>About Decodium</source>
         <translation>關於 Decodium</translation>

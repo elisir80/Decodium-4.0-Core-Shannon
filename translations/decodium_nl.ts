@@ -4391,6 +4391,11 @@ Fout: %2</translation>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="7987"/>
+        <source>Clear Full Spectrum</source>
+        <translation>Full Spectrum wissen</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10814"/>
         <source>About Decodium</source>
         <translation>Over Decodium</translation>
