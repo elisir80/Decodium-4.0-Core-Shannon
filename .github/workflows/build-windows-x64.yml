@@ -6,6 +6,11 @@ on:
       - 'v*'
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Optional existing release tag to build and publish (for example v1.0.495)
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -24,7 +29,7 @@ concurrency:
 jobs:
   build-windows-x64:
     runs-on: windows-2022
-    timeout-minutes: 120
+    timeout-minutes: 240
 
     defaults:
       run:
@@ -182,11 +187,15 @@ jobs:
           "${HAMLIB_PREFIX}/bin/rigctl" --version
 
       - name: Resolve build version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           set -euo pipefail
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             APP_VERSION="${GITHUB_REF#refs/tags/}"
             APP_VERSION="${APP_VERSION#v}"
+          elif [[ -n "${RELEASE_TAG}" ]]; then
+            APP_VERSION="${RELEASE_TAG#v}"
           else
             APP_VERSION="0.0.0-ci.${GITHUB_RUN_NUMBER}"
           fi
@@ -465,13 +474,14 @@ jobs:
           path: installer-output/*.exe
 
       - name: Publish release assets (unsigned)
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tag = "${{ github.ref_name }}"
+          $tag = if ($env:RELEASE_TAG) { $env:RELEASE_TAG } else { "${{ github.ref_name }}" }
           $repo = "${{ github.repository }}"
           $assets = Get-ChildItem -Path "installer-output" -Filter "*.exe"
           if (-not $assets) {
