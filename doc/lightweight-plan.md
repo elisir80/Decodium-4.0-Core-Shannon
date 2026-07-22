@@ -24,7 +24,16 @@ Un unico interruttore `LowEndMode` che orchestra le leve esistenti:
   GPU/RAM). Restano attivabili a mano.
 - **Attivazione**: toggle in Impostazioni + offerta al primo avvio.
 
-## Fase 3 — Installer a componenti (disco, scelta utente)
+## Fase 3 — Installer a componenti (✅ 1.0.497)
+
+`[Types]`: Completa / Leggera (PC lenti) / Personalizzata. `[Components]`:
+`sounds` (suoni ~3,5 MB) e `langs` (12 lingue extra + qt_*.qm non-base, ~10 MB).
+Inglese/italiano sempre installati. NB: il Setup.exe resta un superset (tutti i
+file compressi dentro); la deselezione risparmia sul DISCO INSTALLATO, non sul
+download (quello l'ha ridotto la Fase 1: Setup 77,6 → 67 MB). Live Map / FT2-Link
+/ modi = compilati nell'exe, non componentizzabili (→ Modalità PC lento runtime).
+
+### Note storiche
 
 Inno Setup `[Types]` (Completa / Leggera / Personalizzata) + `[Components]`.
 NB: FT2-Link e i modi sono COMPILATI nell'exe (90 MB) → non rimovibili come

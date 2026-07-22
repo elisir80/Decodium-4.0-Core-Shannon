@@ -132,6 +132,20 @@ dutch.RemoveDataPrompt=De instellingen van Decodium zijn verwijderd.%n%nWilt u o
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
+; 1.0.497 Fase 3 alleggerimento — installer modulare. NB: Live Map, Full
+; Spectrum, FT2-Link e i modi extra sono COMPILATI nell'exe → non rimovibili
+; come file (per quelli vale la Modalità PC lento a runtime). I componenti qui
+; rimuovono solo ASSET: suoni e pacchetti-lingua aggiuntivi. Inglese e italiano
+; (lingue base del fork) restano sempre installati.
+[Types]
+Name: "full";   Description: "Completa (tutte le 14 lingue e i suoni)"
+Name: "lite";   Description: "Leggera per PC lenti (solo inglese/italiano, senza suoni)"
+Name: "custom"; Description: "Personalizzata"; Flags: iscustom
+
+[Components]
+Name: "sounds"; Description: "Suoni di avviso (CQ, chiamata, band, ecc. ~3,5 MB)"; Types: full custom
+Name: "langs";  Description: "Lingue aggiuntive oltre inglese/italiano (~10 MB)"; Types: full custom
+
 [InstallDelete]
 ; 1.0.428 — PULIZIA OBBLIGATORIA della cartella di installazione: rimuove tutto il
 ; contenuto della versione precedente PRIMA di copiare i nuovi file (in aggiunta
@@ -174,9 +188,35 @@ Type: dirifempty; Name: "{app}"
 ; dell'install li carica; imageformats plugin = solo gif/ico/jpeg/svg; 0
 ; riferimenti nell'exe). Stesso caso di ffmpeg (--no-ffmpeg). Nessun cambio
 ; funzionale: Decodium usa PNG/JPEG/GIF/ICO/SVG, non HEVC/AV1/VP9/JPEG-XL/rsvg.
+; 1.0.497 Fase 3 — bundle base (SEMPRE installato): esclude anche suoni e
+; lingue-extra, che vengono ri-aggiunti sotto come componenti opzionali. Le
+; lingue base inglese/italiano (decodium_en/it.qm) NON sono escluse qui → sempre
+; presenti; solo i .qm delle altre 12 lingue e i qt_*.qm non-base sono opzionali.
 Source: "{#BuildDir}\*"; DestDir: "{app}"; \
-  Excludes: "wsjtx*,CMakeFiles\*,deploy\*,deploy_staging\*,map65\*,qmap\*,Testing\*,NVIDIA Corporation\*,.claude\*,build_mingw64\*,CMakeCache.txt,cmake_install.cmake,CTestTestfile.cmake,Makefile,build.ninja,.ninja_*,compile_commands.json,*.obj,*.d,*.a,*.rc,*_autogen\*,.qt\*,tests\*,tools\*,bundle_fixup\*,qrc_*.cpp,qrc_*.cpp.depends,*.qrc.depends,*.cmake,VersionInfo_*.h,VersionResource_*.rc,DartConfiguration.tcl,CPack*.cmake,libx265-215.dll,libaom.dll,librsvg-2-2.dll,libjxl.dll,libvpx-1.dll,libgdk_pixbuf-2.0-0.dll"; \
+  Excludes: "wsjtx*,CMakeFiles\*,deploy\*,deploy_staging\*,map65\*,qmap\*,Testing\*,NVIDIA Corporation\*,.claude\*,build_mingw64\*,CMakeCache.txt,cmake_install.cmake,CTestTestfile.cmake,Makefile,build.ninja,.ninja_*,compile_commands.json,*.obj,*.d,*.a,*.rc,*_autogen\*,.qt\*,tests\*,tools\*,bundle_fixup\*,qrc_*.cpp,qrc_*.cpp.depends,*.qrc.depends,*.cmake,VersionInfo_*.h,VersionResource_*.rc,DartConfiguration.tcl,CPack*.cmake,libx265-215.dll,libaom.dll,librsvg-2-2.dll,libjxl.dll,libvpx-1.dll,libgdk_pixbuf-2.0-0.dll,sounds\*,decodium_ca.qm,decodium_da.qm,decodium_de.qm,decodium_es.qm,decodium_fr.qm,decodium_hu.qm,decodium_ja.qm,decodium_lv.qm,decodium_nl.qm,decodium_ru.qm,decodium_zh.qm,decodium_zh_TW.qm,translations\qt_*.qm"; \
   Flags: ignoreversion recursesubdirs
+
+; Lingue base (sempre): i qt_*.qm inglese/italiano ri-aggiunti (gli altri sono nel componente 'langs')
+Source: "{#BuildDir}\translations\qt_en.qm"; DestDir: "{app}\translations"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\translations\qt_it.qm"; DestDir: "{app}\translations"; Flags: ignoreversion skipifsourcedoesntexist
+
+; COMPONENTE 'sounds' — suoni di avviso (~3,5 MB)
+Source: "{#BuildDir}\sounds\*"; DestDir: "{app}\sounds"; Components: sounds; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist
+
+; COMPONENTE 'langs' — lingue aggiuntive: .qm Decodium delle altre 12 lingue + qt_*.qm non-base
+Source: "{#BuildDir}\decodium_ca.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_da.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_de.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_es.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_fr.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_hu.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_ja.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_lv.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_nl.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_ru.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_zh.qm";    DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\decodium_zh_TW.qm"; DestDir: "{app}"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
+Source: "{#BuildDir}\translations\qt_*.qm"; DestDir: "{app}\translations"; Excludes: "qt_en.qm,qt_it.qm"; Components: langs; Flags: ignoreversion skipifsourcedoesntexist
 
 ; File licenza fuori dal bundle
 Source: "{#SourceRoot}\COPYING"; DestDir: "{app}"; DestName: "COPYING.txt"; Flags: ignoreversion skipifsourcedoesntexist
