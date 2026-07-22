@@ -13868,6 +13868,40 @@ void DecodiumBridge::setLowCpuModeEnabled(bool enabled)
                        : QStringLiteral("Low CPU mode disattiva"));
 }
 
+// 1.0.497 — Modalità PC lento (master). Orchestra in blocco le leve runtime che
+// contano su hardware datato: grafica OpenGL (persistita per l'avvio, letta in
+// main_qml), low-CPU, thread FT bassi, priorità Normale, profilo decode 'cpu'.
+// Le Live Map/Full Spectrum le nasconde il QML leggendo lowEndMode. La grafica
+// richiede riavvio: lo comunichiamo con un toast.
+void DecodiumBridge::setLowEndMode(bool enabled)
+{
+    if (m_lowEndMode == enabled) {
+        return;
+    }
+    m_lowEndMode = enabled;
+    // LowEndMode è una scelta per-MACCHINA (la grafica va forzata in main_qml
+    // prima che il profilo -config sia noto): scrivi sempre nella ROOT, così lo
+    // startup probe la trova a prescindere dal profilo attivo.
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    s.setValue(QStringLiteral("LowEndMode"), m_lowEndMode);
+    s.sync();
+
+    if (m_lowEndMode) {
+        setLowCpuModeEnabled(true);
+        setFtThreadsAuto(false);
+        if (m_ftThreads > 4) setFtThreads(4);
+        setProcessPriority(0);            // Normale: niente preempt su hw debole
+        applyReadyProfile(QStringLiteral("cpu"));
+        emit statusMessage(QStringLiteral("Modalità PC lento attiva. Riavvia Decodium per applicare la grafica OpenGL (più stabile su GPU vecchie)."));
+    } else {
+        setLowCpuModeEnabled(false);
+        emit statusMessage(QStringLiteral("Modalità PC lento disattivata. Riavvia per tornare alla grafica automatica."));
+    }
+
+    emit lowEndModeChanged();
+    emit settingValueChanged(QStringLiteral("LowEndMode"), m_lowEndMode);
+}
+
 // ---------------------------------------------------------------------------
 // Worked-before tracking (per band / DXCC / zone / grid)
 // ---------------------------------------------------------------------------
@@ -33910,6 +33944,11 @@ void DecodiumBridge::loadSettings()
     }
     m_lowCpuModeEnabled = s.value(QStringLiteral("LowCpuMode"),
                                   s.value(QStringLiteral("lowCpuModeEnabled"), false)).toBool();
+    // 1.0.497 Modalità PC lento: sempre da ROOT (per-macchina, come lo startup probe in main_qml)
+    {
+        QSettings rootS(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        m_lowEndMode = rootS.value(QStringLiteral("LowEndMode"), false).toBool();
+    }
     // Default 'hamlib' per nuove installazioni: copre 400+ radio (incluso ICOM
     // CI-V completo) con molti meno problemi di compatibilita' rispetto al path
     // nativo che supporta solo comandi ASCII Kenwood/Yaesu. Gli utenti esistenti

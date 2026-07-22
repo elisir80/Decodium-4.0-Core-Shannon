@@ -7473,6 +7473,21 @@ Dialog {
                                     contentItem: Text { text: ""; leftPadding: 24 }
                                 }
 
+                                // 1.0.497 — Modalità PC lento (master): un solo interruttore per hardware vecchio
+                                Text { text: qsTr("Slow-PC mode:"); color: textSecondary; font.pixelSize: 12; font.bold: true; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }
+                                CheckBox {
+                                    Layout.preferredWidth: advancedStartupGrid.checkWidth; Layout.preferredHeight: controlHeight
+                                    checked: bridge.lowEndMode
+                                    onToggled: {
+                                        bridge.lowEndMode = checked
+                                        settingsDialog.scheduleSettingsPersist()
+                                    }
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.")
+                                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                    contentItem: Text { text: ""; leftPadding: 24 }
+                                }
+
                                 Text { text: qsTr("Low CPU:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }
                                 CheckBox {
                                     Layout.preferredWidth: advancedStartupGrid.checkWidth; Layout.preferredHeight: controlHeight

@@ -257,6 +257,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int    ftThreads            READ ftThreads            WRITE setFtThreads NOTIFY ftThreadsChanged)
     Q_PROPERTY(bool   ftThreadsAuto        READ ftThreadsAuto        WRITE setFtThreadsAuto NOTIFY ftThreadsChanged)
     Q_PROPERTY(bool   lowCpuModeEnabled    READ lowCpuModeEnabled    WRITE setLowCpuModeEnabled NOTIFY lowCpuModeEnabledChanged)
+    // 1.0.497 — Modalità PC lento: master toggle che orchestra le leve runtime
+    // (grafica OpenGL all'avvio, lowCpuMode, thread bassi, priorità normale,
+    // profilo cpu). La grafica richiede riavvio (letta in main_qml).
+    Q_PROPERTY(bool   lowEndMode           READ lowEndMode           WRITE setLowEndMode NOTIFY lowEndModeChanged)
 
     // === PSK REPORTER ===
     Q_PROPERTY(bool       pskSearchFound      READ pskSearchFound      NOTIFY pskSearchFoundChanged)
@@ -766,6 +770,8 @@ public:
     Q_INVOKABLE void setFtThreadsAuto(bool enabled);
     Q_INVOKABLE void cycleFtThreads();
     bool   lowCpuModeEnabled()    const { return m_lowCpuModeEnabled; }
+    bool   lowEndMode()           const { return m_lowEndMode; }
+    Q_INVOKABLE void setLowEndMode(bool enabled);
     Q_INVOKABLE void setLowCpuModeEnabled(bool enabled);
 
     // PSK Reporter
@@ -1682,6 +1688,7 @@ signals:
     void turboIterationsChanged();
     void ftThreadsChanged();
     void lowCpuModeEnabledChanged();
+    void lowEndModeChanged();
     void alertOnCqChanged();
     void alertOnMyCallChanged();
     void recordRxEnabledChanged();
@@ -2416,6 +2423,7 @@ private:
     int         m_ftThreads {3};
     bool        m_ftThreadsAuto {true};
     bool        m_lowCpuModeEnabled {false};
+    bool        m_lowEndMode {false};   // 1.0.497 — Modalità PC lento (master)
     double m_fontScale {1.08};
     int m_nfa {200}, m_nfb {4000}, m_ndepth {3}, m_ncontest {0};
     bool m_singleDecode {false};

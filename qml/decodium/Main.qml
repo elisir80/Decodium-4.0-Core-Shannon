@@ -1171,7 +1171,9 @@ ApplicationWindow {
     property bool dxClusterToolbarVisible:    settingBool("uiDxClusterToolbarVisible", true)
     property bool pskReporterToolbarVisible: settingBool("uiPskReporterToolbarVisible", true)
     property bool asyncIconVisible:           settingBool("uiAsyncIconVisible", true)
-    property bool liveMapPanelVisible:        settingBool("WorldMapDisplayed", true)
+    // 1.0.497 — in Modalità PC lento la Live Map (render mondo GPU, il pannello
+    // più pesante) parte NASCOSTA di default; resta riattivabile a mano.
+    property bool liveMapPanelVisible:        settingBool("WorldMapDisplayed", !(bridge && bridge.lowEndMode))
     property bool decoSyncMonitorVisible:     settingBool("uiDecoSyncMonitorVisible", false)
 
     // === Visibilità pulsanti UI (tab "Pulsanti UI" in Settings) — default tutti visibili ===

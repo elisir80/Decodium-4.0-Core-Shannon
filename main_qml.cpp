@@ -945,6 +945,24 @@ int main(int argc, char* argv[])
             || backend == "null";
     };
 
+    // 1.0.497 — Modalità PC lento (Fase 2 alleggerimento): se l'utente l'ha
+    // attivata, e non ha già forzato un backend a mano, forza OpenGL. Sulle GPU
+    // vecchie D3D12 va in device-loss (caso Danilo/Pasquale); OpenGL è stabile e
+    // più leggero. Letto qui, prima di QApplication, come UILanguage — QSettings
+    // esplicito non richiede istanza applicativa.
+    {
+        QSettings lowEndProbe(QSettings::IniFormat, QSettings::UserScope,
+                              QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        bool const lowEndMode = lowEndProbe.value(QStringLiteral("LowEndMode"), false).toBool();
+        if (lowEndMode
+            && !qEnvironmentVariableIsSet("DECODIUM_GRAPHICS_BACKEND")
+            && !qEnvironmentVariableIsSet("QSG_RHI_BACKEND")
+            && !qEnvironmentVariableIsSet("QT_QUICK_BACKEND")) {
+            qputenv("DECODIUM_GRAPHICS_BACKEND", "opengl");
+            L("Modalità PC lento attiva: backend grafico forzato a OpenGL");
+        }
+    }
+
     QByteArray const decodiumGraphicsBackend = normalizedBackend("DECODIUM_GRAPHICS_BACKEND");
     if (!decodiumGraphicsBackend.isEmpty()
         && !requestsSoftwareGraphics(decodiumGraphicsBackend)
