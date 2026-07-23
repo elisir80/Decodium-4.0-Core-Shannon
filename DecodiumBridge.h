@@ -2827,17 +2827,18 @@ private:
     QVector<float> m_pendingFt2LinkWave;
     QVariantMap m_pendingFt2LinkPlan;
     QDateTime m_lastTxActivityUtc;
-    QDateTime m_qsoStartedOn;
-    bool    m_logAfterOwn73 {false};
-    bool    m_ft2DeferredLogPending {false};
-    int     m_cqAutoReplyArmSecond {-1};
-    qint64  m_cqAutoReplyArmWallMs {0};
-    int     m_pendingAutoSeqTxAfterActiveTx {0};
-    QString m_pendingAutoSeqPartnerBase;
-    QString m_pendingAutoSeqMessage;
-    QString m_pendingAutoSeqMode;
-    bool    m_quickPeerSignaled {false};
-    bool    m_qsoLogged {false};   // flag anti-doppio log per QSO corrente
+    // 1.0.498 step B3 strangler: deferred/pending sequencing -> QsoSequencerState (reference-alias)
+    QDateTime& m_qsoStartedOn = m_seqState.qsoStartedOn;
+    bool&   m_logAfterOwn73 = m_seqState.logAfterOwn73;
+    bool&   m_ft2DeferredLogPending = m_seqState.ft2DeferredLogPending;
+    int&    m_cqAutoReplyArmSecond = m_seqState.cqAutoReplyArmSecond;
+    qint64& m_cqAutoReplyArmWallMs = m_seqState.cqAutoReplyArmWallMs;
+    int&    m_pendingAutoSeqTxAfterActiveTx = m_seqState.pendingAutoSeqTxAfterActiveTx;
+    QString& m_pendingAutoSeqPartnerBase = m_seqState.pendingAutoSeqPartnerBase;
+    QString& m_pendingAutoSeqMessage = m_seqState.pendingAutoSeqMessage;
+    QString& m_pendingAutoSeqMode = m_seqState.pendingAutoSeqMode;
+    bool&   m_quickPeerSignaled = m_seqState.quickPeerSignaled;
+    bool&   m_qsoLogged = m_seqState.qsoLogged;   // flag anti-doppio log per QSO corrente
     int  m_maxCallerRetries {10};  // invii totali per step prima di fermarsi
     int  m_processPriority {1};    // 1.0.388 — 0=Normale,1=Sopra il normale,2=Alta,3=Tempo reale
     int  m_txDisabledMask {0};     // bitmask: bit N-1 set = TX(N) saltato in auto-seq (1.0.130)

@@ -30,6 +30,19 @@ struct QsoSequencerState
     QString reportReceived {QStringLiteral("-10")};  // report ricevuto (default -10 dB)
     bool    sendRR73 {true};   // true=RR73, false=RRR
 
+    // --- Deferred / pending sequencing (step B3) ---
+    QDateTime qsoStartedOn;               // epoch apertura QSO (per log On)
+    bool    logAfterOwn73 {false};        // logga dopo il nostro 73
+    bool    ft2DeferredLogPending {false};// attesa ack finale prima del log
+    int     cqAutoReplyArmSecond {-1};    // secondo armato per auto-reply a CQ
+    qint64  cqAutoReplyArmWallMs {0};
+    int     pendingAutoSeqTxAfterActiveTx {0};  // TX da eseguire dopo il TX attivo
+    QString pendingAutoSeqPartnerBase;
+    QString pendingAutoSeqMessage;
+    QString pendingAutoSeqMode;
+    bool    quickPeerSignaled {false};
+    bool    qsoLogged {false};            // anti-doppio log per QSO corrente
+
     // --- Blocco "TxController clone" (1° increment step B) ---
     int  nTx73         {0};    // 73/RR73 completati nel QSO corrente
     int  txRetryCount  {0};    // invii di lastNtx senza risposta
