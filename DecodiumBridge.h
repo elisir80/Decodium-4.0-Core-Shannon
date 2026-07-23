@@ -41,6 +41,7 @@ class DxccLookup;
 class DecodiumLegacyBackend;
 #include "DecodiumDiagnostics.h"
 #include "lib/persistence/HashedCallsignCache.h"  // AP hashed-callsign cache for FT2 rescue/audit
+#include "Sequencer/QsoSequencerState.hpp"  // 1.0.498 step B strangler: stato sequencer raggruppato
 class DecodiumPropagationManager;
 class MessageClient;
 class UsStateDataManager;
@@ -2792,18 +2793,24 @@ private:
     QTimer* m_legacyFullSpectrumDeltaTimer {nullptr};
 
     // === GitHub TxController clone ===
-    int  m_nTx73            {0};   // completed 73/RR73 transmissions in current QSO
-    int  m_txRetryCount     {0};   // quante volte abbiamo inviato m_lastNtx senza risposta
-    int  m_lastNtx          {-1};  // ultimo TX number inviato
-    int  m_lastCqPidx       {-1};  // period index dell'ultimo CQ inviato (evita CQ consecutivi)
-    QString m_lastAutoSeqKey;      // deduplicazione autoSequenceStep
-    qint64  m_lastAutoSeqMs {0};   // timestamp ultima deduplicazione
-    QHash<QString, qint64> m_recentDirectedReportDecodeMs;
-    QHash<QString, QString> m_recentDirectedReportDecodeMessage;
-    QString m_lastTransmittedMessage;
-    QString m_autoSeqRogerReportBase;
-    int     m_activeTxNumber {0};
-    QString m_activeTxMessage;
+    // 1.0.498 step B strangler: i 12 campi sotto vivono ora in QsoSequencerState
+    // (Sequencer/QsoSequencerState.hpp), condiviso col core mobile. I membri m_*
+    // sono riferimenti-alias con gli STESSI nomi/default → tutti i call-site nel
+    // .cpp restano invariati. m_seqState va dichiarato PRIMA degli alias (ordine
+    // di costruzione = ordine di dichiarazione).
+    decodium::seq::QsoSequencerState m_seqState;
+    int&  m_nTx73            = m_seqState.nTx73;         // completed 73/RR73 transmissions in current QSO
+    int&  m_txRetryCount     = m_seqState.txRetryCount;  // quante volte abbiamo inviato m_lastNtx senza risposta
+    int&  m_lastNtx          = m_seqState.lastNtx;       // ultimo TX number inviato
+    int&  m_lastCqPidx       = m_seqState.lastCqPidx;    // period index dell'ultimo CQ inviato (evita CQ consecutivi)
+    QString& m_lastAutoSeqKey = m_seqState.lastAutoSeqKey;   // deduplicazione autoSequenceStep
+    qint64&  m_lastAutoSeqMs  = m_seqState.lastAutoSeqMs;    // timestamp ultima deduplicazione
+    QHash<QString, qint64>&  m_recentDirectedReportDecodeMs = m_seqState.recentDirectedReportDecodeMs;
+    QHash<QString, QString>& m_recentDirectedReportDecodeMessage = m_seqState.recentDirectedReportDecodeMessage;
+    QString& m_lastTransmittedMessage = m_seqState.lastTransmittedMessage;
+    QString& m_autoSeqRogerReportBase = m_seqState.autoSeqRogerReportBase;
+    int&     m_activeTxNumber = m_seqState.activeTxNumber;
+    QString& m_activeTxMessage = m_seqState.activeTxMessage;
     // Stato CW-audio (vedi sendCwAudio). m_cwTxActive devia i punti FT-specifici
     // di startTx/ensureTxAudioPrepared/completeTxPlayback verso il percorso CW.
     bool    m_cwTxActive {false};
