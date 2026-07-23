@@ -193,6 +193,47 @@ private slots:
     QVERIFY (!st.ft2DeferredLogPending);
   }
 
+  void planAdvanceDecision ()
+  {
+    // step D: planAdvance replica la DECISIONE di advanceQsoState (remap +
+    // QuickQSO-TX3-signoff + progress), composta dalle stesse primitive del
+    // bridge → equivalente per costruzione. Copre tutti i rami.
+    using decodium::seq::QsoSequencer;
+    using R = decodium::seq::TxStepRemapReason;
+
+    // Normale: TX2 -> progress REPORT(3)
+    auto p = QsoSequencer::planAdvance (2, /*quick*/false, /*mask*/0);
+    QCOMPARE (p.effectiveTxNum, 2); QVERIFY (p.remapReason == R::None);
+    QVERIFY (!p.quickQsoTx3Signoff); QCOMPARE (p.progress, 3); QVERIFY (p.valid);
+
+    // QuickQSO: TX1 -> remap TX2
+    p = QsoSequencer::planAdvance (1, true, 0);
+    QCOMPARE (p.effectiveTxNum, 2); QVERIFY (p.remapReason == R::QuickQsoSkipTx1);
+    QVERIFY (!p.quickQsoTx3Signoff); QCOMPARE (p.progress, 3);
+
+    // Tx1 disabilitato -> fallback TX2
+    p = QsoSequencer::planAdvance (1, false, 0b000001);
+    QCOMPARE (p.effectiveTxNum, 2); QVERIFY (p.remapReason == R::Tx1DisabledFallback);
+
+    // QuickQSO TX3 -> SIGNOFF diretto (progress 5)
+    p = QsoSequencer::planAdvance (3, true, 0);
+    QCOMPARE (p.effectiveTxNum, 3); QVERIFY (p.quickQsoTx3Signoff);
+    QCOMPARE (p.progress, 5); QVERIFY (p.valid);
+
+    // TX3 senza QuickQSO -> ROGER_REPORT(4), NON signoff
+    p = QsoSequencer::planAdvance (3, false, 0);
+    QVERIFY (!p.quickQsoTx3Signoff); QCOMPARE (p.progress, 4);
+
+    // TX4/TX5 -> SIGNOFF(5); TX6 -> CALLING_CQ(1)
+    QCOMPARE (QsoSequencer::planAdvance (4, false, 0).progress, 5);
+    QCOMPARE (QsoSequencer::planAdvance (5, false, 0).progress, 5);
+    QCOMPARE (QsoSequencer::planAdvance (6, false, 0).progress, 1);
+
+    // Step invalido -> valid=false
+    p = QsoSequencer::planAdvance (7, false, 0);
+    QVERIFY (!p.valid); QCOMPARE (p.progress, -1);
+  }
+
   void sequencerSeamWiring ()
   {
     // Il seam è implementabile e QsoSequencer si costruisce su State& + Sink&.
