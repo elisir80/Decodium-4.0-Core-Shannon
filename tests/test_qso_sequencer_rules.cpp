@@ -7,6 +7,29 @@
 
 #include "Sequencer/QsoSequencerRules.hpp"
 #include "Sequencer/MessageTokenRules.hpp"
+#include "Sequencer/QsoSequencerState.hpp"
+#include "Sequencer/ISequencerSink.hpp"
+#include "Sequencer/QsoSequencer.hpp"
+
+// Sink finto per i test: registra le chiamate senza dipendenze desktop.
+// È l'harness che lo step D userà per validare la logica estratta.
+class FakeSink final : public decodium::seq::ISequencerSink
+{
+public:
+    int txCount {0}, haltCount {0}, logCount {0}, stateCount {0}, diagCount {0}, scheduleCount {0};
+    int lastTxNum {-1}, lastAudioFreq {-1}, lastProgress {-1}, lastScheduleMs {-1};
+    QString lastTxMessage, lastHaltReason, lastDxCall, lastDiag;
+
+    void requestTransmit(int txNum, const QString& message, int audioFreqHz) override
+    { ++txCount; lastTxNum = txNum; lastTxMessage = message; lastAudioFreq = audioFreqHz; }
+    void requestHaltTx(const QString& reason) override
+    { ++haltCount; lastHaltReason = reason; }
+    void requestLogQso(decodium::seq::LogQsoReason, bool) override { ++logCount; }
+    void stateChanged(int, int qsoProgress, const QString& dxCall) override
+    { ++stateCount; lastProgress = qsoProgress; lastDxCall = dxCall; }
+    void diag(const QString& line) override { ++diagCount; lastDiag = line; }
+    void scheduleCallback(int delayMs, int) override { ++scheduleCount; lastScheduleMs = delayMs; }
+};
 
 using decodium::seq::deferredSignoffRetryCapForMode;
 using decodium::seq::remapRequestedTxStep;
@@ -152,6 +175,45 @@ private slots:
     using decodium::seq::directedPeerTokenFromMessage;
     QCOMPARE (directedPeerTokenFromMessage ("IU8LMC IK8OLM -10", "IU8LMC", "IU8LMC"),
               QString ("IK8OLM"));
+  }
+
+  // ---- Step C: seam ISequencerSink + QsoSequencer (contratto) ----
+
+  void sequencerStateDefaults ()
+  {
+    // La struct raggruppata (step B/B2/B3) parte con i default storici.
+    decodium::seq::QsoSequencerState st;
+    QCOMPARE (st.currentTx, 1);
+    QCOMPARE (st.qsoProgress, 0);
+    QCOMPARE (st.nTx73, 0);
+    QCOMPARE (st.lastNtx, -1);
+    QCOMPARE (st.reportReceived, QString ("-10"));
+    QVERIFY (st.sendRR73);
+    QVERIFY (!st.qsoLogged);
+    QVERIFY (!st.ft2DeferredLogPending);
+  }
+
+  void sequencerSeamWiring ()
+  {
+    // Il seam è implementabile e QsoSequencer si costruisce su State& + Sink&.
+    decodium::seq::QsoSequencerState st;
+    FakeSink sink;
+    decodium::seq::QsoSequencer seq (st, sink);
+
+    QCOMPARE (&seq.state (), &st);
+    QCOMPARE (&seq.sink (), static_cast<decodium::seq::ISequencerSink*> (&sink));
+
+    // Un sink chiamato via interfaccia registra correttamente (harness step D).
+    decodium::seq::ISequencerSink& s = sink;
+    s.requestTransmit (2, "IK8OLM IU8LMC -05", 1500);
+    s.diag ("test");
+    s.scheduleCallback (250, 0);
+    QCOMPARE (sink.txCount, 1);
+    QCOMPARE (sink.lastTxNum, 2);
+    QCOMPARE (sink.lastAudioFreq, 1500);
+    QCOMPARE (sink.lastTxMessage, QString ("IK8OLM IU8LMC -05"));
+    QCOMPARE (sink.diagCount, 1);
+    QCOMPARE (sink.lastScheduleMs, 250);
   }
 };
 
