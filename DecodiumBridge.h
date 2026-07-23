@@ -2303,13 +2303,18 @@ private:
     int m_periodProgress {0};
     int m_lastPublishedPeriodMilliseconds {0};
     QString m_utcTime;
+    // 1.0.498 step B2 strangler: m_seqState dichiarata QUI (prima del 1° stato
+    // QSO) così gli alias di TUTTI i blocchi (progressione + TxController clone)
+    // possono legarsi. La progressione QSO sotto è reference-alias alla struct.
+    decodium::seq::QsoSequencerState m_seqState;
     QString m_tx1, m_tx2, m_tx3, m_tx4, m_tx5, m_tx6;
-    int m_currentTx {1};
-    QString m_dxCall, m_dxGrid;
-    int m_qsoProgress {0};
-    QString m_reportSent;
-    QString m_reportReceived {"-10"};  // report ricevuto dal partner (default -10 dB)
-    bool    m_sendRR73 {true};         // true=RR73, false=RRR (come mainwindow m_sendRR73)
+    int&    m_currentTx = m_seqState.currentTx;
+    QString& m_dxCall = m_seqState.dxCall;
+    QString& m_dxGrid = m_seqState.dxGrid;
+    int&    m_qsoProgress = m_seqState.qsoProgress;
+    QString& m_reportSent = m_seqState.reportSent;
+    QString& m_reportReceived = m_seqState.reportReceived;  // default -10 dB (nella struct)
+    bool&   m_sendRR73 = m_seqState.sendRR73;               // true=RR73, false=RRR
     int     m_autoCQPeriodsMissed {0}; // periodi CQ senza risposta (watchdog count-based)
     bool m_multiAnswerMode {false};
     bool m_autoSeq          {true};
@@ -2798,7 +2803,6 @@ private:
     // sono riferimenti-alias con gli STESSI nomi/default → tutti i call-site nel
     // .cpp restano invariati. m_seqState va dichiarato PRIMA degli alias (ordine
     // di costruzione = ordine di dichiarazione).
-    decodium::seq::QsoSequencerState m_seqState;
     int&  m_nTx73            = m_seqState.nTx73;         // completed 73/RR73 transmissions in current QSO
     int&  m_txRetryCount     = m_seqState.txRetryCount;  // quante volte abbiamo inviato m_lastNtx senza risposta
     int&  m_lastNtx          = m_seqState.lastNtx;       // ultimo TX number inviato

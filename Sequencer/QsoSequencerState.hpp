@@ -9,6 +9,7 @@
 // modifiche ai call-site; allo step D il QsoSequencer estratto prenderà
 // QsoSequencerState& e i riferimenti-alias spariranno.
 
+#include <QDateTime>
 #include <QHash>
 #include <QString>
 #include <QtGlobal>
@@ -20,6 +21,15 @@ namespace seq
 
 struct QsoSequencerState
 {
+    // --- Progressione QSO (step B2) ---
+    int     currentTx {1};     // 1..6 step FT8 corrente
+    QString dxCall;            // callsign partner corrente
+    QString dxGrid;            // grid partner (se noto)
+    int     qsoProgress {0};   // 0=IDLE 1=CQ 2=REPLY 3=REPORT 4=ROGER 5=SIGNOFF
+    QString reportSent;        // report che invio (da SNR ricevuto)
+    QString reportReceived {QStringLiteral("-10")};  // report ricevuto (default -10 dB)
+    bool    sendRR73 {true};   // true=RR73, false=RRR
+
     // --- Blocco "TxController clone" (1° increment step B) ---
     int  nTx73         {0};    // 73/RR73 completati nel QSO corrente
     int  txRetryCount  {0};    // invii di lastNtx senza risposta
