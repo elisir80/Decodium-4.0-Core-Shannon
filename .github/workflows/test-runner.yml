@@ -7,6 +7,11 @@ on:
       - 'lib/ft2link/**'
       - 'controllers/FT2Link*'
       - 'tests/test_ft2link*'
+      - 'Detector/JT4Decoder.*'
+      - 'Detector/LegacyJtDecodeWorker.*'
+      - 'Modulator/FtxMessageEncoder.*'
+      - 'Modulator/FtxWaveformGenerator.*'
+      - 'tests/test_jt4_roundtrip.cpp'
       - 'CMakeLists.txt'
       - '.github/workflows/test-runner.yml'
   push:
@@ -14,6 +19,11 @@ on:
       - 'lib/ft2link/**'
       - 'controllers/FT2Link*'
       - 'tests/test_ft2link*'
+      - 'Detector/JT4Decoder.*'
+      - 'Detector/LegacyJtDecodeWorker.*'
+      - 'Modulator/FtxMessageEncoder.*'
+      - 'Modulator/FtxWaveformGenerator.*'
+      - 'tests/test_jt4_roundtrip.cpp'
       - 'CMakeLists.txt'
       - '.github/workflows/test-runner.yml'
 
@@ -50,18 +60,18 @@ jobs:
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
 
-      - name: Build FT2-Link tests
+      - name: Build cross-platform modem tests
         run: |
           set -euo pipefail
           cmake --build build-ft2link \
-            --target ft2link_core test_ft2link test_ft2link_qml_adapter \
+            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip \
             --parallel "$(sysctl -n hw.ncpu)"
 
-      - name: Run FT2-Link tests
+      - name: Run cross-platform modem tests
         run: |
           set -euo pipefail
           ctest --test-dir build-ft2link \
-            -R '^(test_ft2link|test_ft2link_qml_adapter)$' \
+            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip)$' \
             --output-on-failure
 
   ft2link-linux:
@@ -115,18 +125,18 @@ jobs:
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
 
-      - name: Build FT2-Link tests
+      - name: Build cross-platform modem tests
         run: |
           set -euo pipefail
           cmake --build build-ft2link \
-            --target ft2link_core test_ft2link test_ft2link_qml_adapter \
+            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip \
             --parallel "$(nproc)"
 
-      - name: Run FT2-Link tests
+      - name: Run cross-platform modem tests
         run: |
           set -euo pipefail
           ctest --test-dir build-ft2link \
-            -R '^(test_ft2link|test_ft2link_qml_adapter)$' \
+            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip)$' \
             --output-on-failure
 
   ft2link-windows:
@@ -190,16 +200,16 @@ jobs:
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
 
-      - name: Build FT2-Link tests
+      - name: Build cross-platform modem tests
         run: |
           set -euo pipefail
           cmake --build build-ft2link \
-            --target ft2link_core test_ft2link test_ft2link_qml_adapter \
+            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip \
             --parallel "$(nproc)"
 
-      - name: Run FT2-Link tests
+      - name: Run cross-platform modem tests
         run: |
           set -euo pipefail
           ctest --test-dir build-ft2link \
-            -R '^(test_ft2link|test_ft2link_qml_adapter)$' \
+            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip)$' \
             --output-on-failure

@@ -1260,8 +1260,14 @@ target_link_libraries (jt9_narrow_compare
   wsjt_qt
 )
 
-add_executable (jt4_compare utils/jt4_compare.cpp)
-link_wsjtx_cycle_group (jt4_compare wsjt_qt wsjt_cxx wsjt_fort)
+if (DECODIUM_JT65_REFERENCE_LIBRARY)
+  add_executable (jt4_compare utils/jt4_compare.cpp)
+  link_wsjtx_cycle_group (jt4_compare wsjt_qt wsjt_cxx wsjt_fort
+                          ${DECODIUM_JT65_REFERENCE_LIBRARY} ${DECODIUM_GFORTRAN_RUNTIME})
+endif ()
+
+add_executable (jt4_wav_decode utils/jt4_wav_decode.cpp)
+target_link_libraries (jt4_wav_decode wsjt_qt wsjt_cxx Qt6::Core)
 
 add_executable (wspr_compare utils/wspr_compare.cpp)
 link_wsjtx_cycle_group (wspr_compare wsjt_qt wsjt_cxx)

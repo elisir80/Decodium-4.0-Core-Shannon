@@ -1804,6 +1804,7 @@ private:
     bool isTimeSyncDecodeMode(const QString& mode) const;
     void resetRxPeriodAccumulation(bool reserveAudioBuffer);
     void armPeriodTimerForCurrentMode(quint64 sessionId, const QString& reason);
+    void maybeDispatchBridgeOwnedJtDecodeFallback();
     int minimumDecodeSamplesForMode(const QString& mode) const;
     void requestRigFrequencyFromBridge(double hz, const QString& reason);
     void schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs = 900);
@@ -2511,6 +2512,9 @@ private:
     quint64 m_decodeSerial {0};
     quint64 m_decodeSessionId {0};
     quint64 m_periodTimerSessionId {0};
+    qint64 m_bridgeOwnedJtFallbackLastSlot {-1};
+    qint64 m_bridgeOwnedJtFallbackLastDispatchMs {0};
+    QString m_bridgeOwnedJtFallbackLastMode;
     // Period timer ticks at 250ms; mode determines how many ticks = 1 period
     int m_periodTicks {0};
     int m_periodTicksMax {60};   // FT8=60 (15s), FT4=30 (7.5s), FT2=15 (3.75s)
@@ -2725,6 +2729,8 @@ private:
     qint64             m_lastFt2LinkLegacyRxTapLogMs {0};
     qint64             m_lastFt2LinkLegacyRxEmitMs {0};
     qint64             m_lastFt2LinkLegacyRxEmitLogMs {0};
+    qint64             m_lastLegacyWaterfallDiagLogMs {0};
+    qint64             m_lastLegacyAudioDiagLogMs {0};
     bool               m_ft2LinkLegacyRxDrainScheduled {false};
     QVector<short>     m_ft2LinkLegacyRxPending;
     QTimer*            m_tuneTimer    {nullptr};

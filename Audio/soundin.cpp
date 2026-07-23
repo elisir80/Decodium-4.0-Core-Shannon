@@ -818,9 +818,21 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
 #if defined(Q_OS_MACOS)
   QString nativeFailureReason;
   bool const virtualMacInput = isVirtualMacAudioInput (device);
-  if (!virtualMacInput)
+  // BlackHole and similar virtual devices can expose a QAudioSource pull stream
+  // that stays alive but returns silence. Prefer the native callback path on
+  // macOS and keep the pull path as an explicit diagnostic fallback.
+  bool const forceNativeVirtual =
+      qEnvironmentVariableIntValue ("DECODIUM_MAC_NATIVE_AUDIO_QUEUE") != 0;
+  bool const forcePullVirtual =
+      qEnvironmentVariableIntValue ("DECODIUM_MAC_QAUDIO_PULL_FOR_VIRTUAL") != 0;
+  bool const tryNativeInput = !forcePullVirtual || !virtualMacInput || forceNativeVirtual;
+  if (tryNativeInput)
     {
-      qDebug() << "SoundInput: trying native macOS AudioQueue input" << device.description();
+      qDebug() << "SoundInput: trying native macOS AudioQueue input"
+               << device.description()
+               << "virtual=" << virtualMacInput
+               << "forced=" << forceNativeVirtual
+               << "pullOverride=" << forcePullVirtual;
       if (startNativeMacInput (device, format, framesPerBuffer, sink, channel,
                                &nativeFailureReason))
         {
@@ -834,9 +846,10 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
     }
   else
     {
-      nativeFailureReason = QStringLiteral ("virtual macOS input uses QAudioSource pull mode");
+      nativeFailureReason = QStringLiteral ("virtual macOS input forced to QAudioSource pull mode");
       qInfo() << "SoundInput: using QAudioSource pull mode for virtual macOS input"
-              << device.description();
+              << device.description()
+              << "because DECODIUM_MAC_QAUDIO_PULL_FOR_VIRTUAL is set";
     }
 #endif
     {
