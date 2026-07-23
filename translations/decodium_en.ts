@@ -4391,6 +4391,20 @@ Error: %2</translation>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>Slow-PC mode</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>Clear Full Spectrum</translation>
@@ -11489,6 +11503,16 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</transl
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>Slow-PC mode:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

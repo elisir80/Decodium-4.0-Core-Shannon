@@ -4380,6 +4380,20 @@ Error: %2</source>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>低速电脑模式</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>如果 Decodium 在这台电脑上运行缓慢或图形卡顿，您可以开启低速电脑模式：它会切换到 OpenGL 图形（在旧显卡上更稳定），降低 CPU 占用，并隐藏占用资源的实时地图。
+
+现在开启吗？您可以随时在设置中更改。</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>清除全频谱</translation>
@@ -11477,6 +11491,16 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>低速电脑模式:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>为老旧/低速电脑提供的一键开关。启用：OpenGL 图形（在老旧 GPU 上稳定，需要重启）、低 CPU 模式、最多 4 个 FT 线程、正常进程优先级、CPU 解码配置，并默认隐藏实时地图／全频谱。默认：关闭。</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

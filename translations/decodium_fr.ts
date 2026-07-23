@@ -4384,6 +4384,20 @@ Erreur&#xa0;: %2</translation>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>Mode PC lent</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>Si Decodium semble lent ou si l&apos;affichage se fige sur cet ordinateur, vous pouvez activer le Mode PC lent&#xa0;: il passe à l&apos;affichage OpenGL (stable sur les cartes graphiques anciennes), allège l&apos;utilisation du CPU et masque la lourde Carte en direct.
+
+L&apos;activer maintenant&#xa0;? Vous pouvez modifier ce réglage à tout moment dans les Paramètres.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>Effacer le Full Spectrum</translation>
@@ -11479,6 +11493,16 @@ Astuce : fermez OmniRig depuis l'icône de la zone de notification de Windows, p
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>Mode PC lent :</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Un seul commutateur pour les PC anciens/lents. Active : graphismes OpenGL (stables sur les anciens GPU, redémarrage requis), mode CPU réduit, 4 threads FT maximum, priorité de processus normale, profil de décodage CPU, et masque Carte en direct / Full Spectrum par défaut. Par défaut : OFF.</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

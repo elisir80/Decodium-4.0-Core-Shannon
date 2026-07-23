@@ -4381,6 +4381,20 @@ Error: %2</source>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>低速PCモード</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>このコンピューターでDecodiumの動作が遅い、またはグラフィックが固まる場合は、低速PCモードをオンにできます。OpenGLグラフィック（古いビデオカードでも安定）に切り替え、CPU使用率を軽減し、重いライブマップを非表示にします。
+
+今すぐオンにしますか？設定でいつでも変更できます。</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>フルスペクトラムをクリア</translation>
@@ -11477,6 +11491,16 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>低速PCモード:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>古い/低速なPC向けの一括スイッチ。有効化する項目: OpenGLグラフィックス（古いGPUで安定、再起動が必要）、低CPUモード、FTスレッド最大4、通常のプロセス優先度、CPUデコードプロファイル。またライブマップ／フルスペクトラムをデフォルトで非表示にします。デフォルト: OFF。</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

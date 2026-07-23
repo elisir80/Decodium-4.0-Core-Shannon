@@ -4380,6 +4380,20 @@ Error: %2</source>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>低速電腦模式</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>如果 Decodium 在這台電腦上執行緩慢或圖形卡頓，您可以開啟低速電腦模式：它會切換到 OpenGL 圖形（在較舊的顯示卡上更穩定），降低 CPU 使用率，並隱藏佔用資源的即時地圖。
+
+現在開啟嗎？您可以隨時在設定中變更。</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>清除全頻譜</translation>
@@ -11477,6 +11491,16 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>低速電腦模式:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>為老舊/低速電腦提供的一鍵開關。啟用：OpenGL 圖形（在老舊 GPU 上穩定，需要重新啟動）、低 CPU 模式、最多 4 個 FT 執行緒、正常處理程序優先權、CPU 解碼設定檔，並預設隱藏即時地圖／全頻譜。預設：關閉。</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

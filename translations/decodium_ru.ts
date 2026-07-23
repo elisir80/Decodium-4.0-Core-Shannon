@@ -4384,6 +4384,20 @@ Error: %2</source>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>Режим медленного ПК</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>Если Decodium работает медленно или графика зависает на этом компьютере, можно включить Режим медленного ПК: он переключается на графику OpenGL (стабильную на старых видеокартах), снижает нагрузку на CPU и скрывает тяжёлую Живую карту.
+
+Включить сейчас? Это можно изменить в любой момент в Настройках.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>Очистить Full Spectrum</translation>
@@ -11491,6 +11505,16 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>Режим медленного ПК:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Один переключатель для старых/медленных ПК. Включает: графику OpenGL (стабильна на старых GPU, требуется перезапуск), режим низкой нагрузки на CPU, максимум 4 потока FT, обычный приоритет процесса, профиль декодирования на CPU и по умолчанию скрывает Живая карта / Full Spectrum. По умолчанию: ВЫКЛ.</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

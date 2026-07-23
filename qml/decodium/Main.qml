@@ -9936,6 +9936,62 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
     }
 
+    // 1.0.498 — Offerta una-tantum della Modalità PC lento. Neutra (non dà del
+    // "vecchio" al PC): la propone e basta, l'utente sceglie. Si mostra una sola
+    // volta (flag LowEndModeOffered) e solo se la modalità non è già attiva.
+    Timer {
+        id: slowPcOfferTimer
+        interval: 5000
+        repeat: false
+        running: !!bridge && !bridge.lowEndMode && !mainWindow.settingBool("LowEndModeOffered", false)
+        onTriggered: {
+            if (bridge && !bridge.lowEndMode && !mainWindow.settingBool("LowEndModeOffered", false))
+                slowPcOfferDialog.open()
+        }
+    }
+
+    Dialog {
+        id: slowPcOfferDialog
+        modal: true
+        width: Math.max(380, Math.min(parent ? parent.width - 48 : 560, 560))
+        implicitWidth: 520
+        implicitHeight: 250
+        anchors.centerIn: parent
+        title: qsTr("Slow-PC mode")
+        standardButtons: Dialog.Yes | Dialog.No
+
+        background: Rectangle {
+            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+            border.color: primaryBlue
+            border.width: 1
+            radius: 8
+        }
+
+        contentItem: Item {
+            implicitWidth: 480
+            implicitHeight: 160
+
+            Text {
+                anchors.fill: parent
+                text: qsTr("If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.\n\nTurn it on now? You can change this anytime in Settings.")
+                color: textPrimary
+                wrapMode: Text.WordWrap
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        onAccepted: {
+            if (bridge) {
+                bridge.lowEndMode = true
+                bridge.setSetting("LowEndModeOffered", true)
+            }
+        }
+        onRejected: {
+            if (bridge)
+                bridge.setSetting("LowEndModeOffered", true)
+        }
+    }
+
     Dialog {
         id: rigErrorDialog
         modal: true

@@ -4399,6 +4399,20 @@ Errore: %2</translation>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>Modalità PC lento</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>Se Decodium risulta lento o la grafica si blocca su questo computer, puoi attivare la Modalità PC lento: passa alla grafica OpenGL (stabile su schede video meno recenti), alleggerisce l&apos;uso della CPU e nasconde la pesante Mappa live.
+
+Attivarla ora? Puoi cambiare questa impostazione in qualsiasi momento nelle Impostazioni.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>Cancella il Full Spectrum</translation>
@@ -11506,6 +11520,16 @@ Suggerimento: chiudi OmniRig dall'icona nella tray di Windows, poi premi di nuov
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>Modalità PC lento:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Un unico interruttore per PC vecchi/lenti. Abilita: grafica OpenGL (stabile su GPU vecchie, richiede riavvio), modalità CPU ridotta, massimo 4 thread FT, priorità di processo normale, profilo di decodifica CPU e nasconde Mappa live / Full Spectrum in modo predefinito. Predefinito: OFF.</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>

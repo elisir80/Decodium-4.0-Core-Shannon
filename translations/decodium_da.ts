@@ -4383,6 +4383,20 @@ Fejl: %2</translation>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>Langsom-PC-tilstand</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>Hvis Decodium føles langsom, eller grafikken fryser på denne computer, kan du slå Langsom-PC-tilstand til: den skifter til OpenGL-grafik (stabil på ældre grafikkort), letter CPU-forbruget og skjuler det tunge Live-kort.
+
+Vil du slå den til nu? Du kan ændre dette når som helst i Indstillinger.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="7987"/>
         <source>Clear Full Spectrum</source>
         <translation>Ryd Full Spectrum</translation>
@@ -11477,6 +11491,16 @@ Tip: luk OmniRig fra Windows-proceslinjeikonet, og tryk derefter på Forbind ige
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>Langsom-PC-tilstand:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>En enkelt kontakt til gamle/langsomme pc'er. Aktiverer: OpenGL-grafik (stabil på gamle GPU'er, kræver genstart), lav CPU-tilstand, maks. 4 FT-tråde, normal procesprioritet, CPU-afkodningsprofil, og skjuler Live-kort / Full Spectrum som standard. Standard: FRA.</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
         <source>⚠ TX Watchdog is active and &apos;hard cap&apos; below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
