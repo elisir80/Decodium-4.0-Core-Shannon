@@ -63,6 +63,10 @@ add_executable (test_tx_pipeline test_tx_pipeline.cpp)
 target_link_libraries (test_tx_pipeline wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_tx_pipeline COMMAND $<TARGET_FILE:test_tx_pipeline>)
 
+add_executable (test_jt4_roundtrip test_jt4_roundtrip.cpp)
+target_link_libraries (test_jt4_roundtrip wsjt_qt wsjt_cxx Qt6::Core)
+add_test (NAME test_jt4_roundtrip COMMAND $<TARGET_FILE:test_jt4_roundtrip>)
+
 add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../DecodiumDxCluster.cpp)
 target_link_libraries (test_dx_cluster_band Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_dx_cluster_band COMMAND $<TARGET_FILE:test_dx_cluster_band>)

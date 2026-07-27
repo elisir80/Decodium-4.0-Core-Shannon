@@ -26,8 +26,10 @@ inline std::mutex& planner_mutex ()
 inline void initialize_planner_thread_safety ()
 {
   static bool const initialized = [] {
+#if FFTW_HAS_THREADS
     fftwf_init_threads ();
     fftwf_make_planner_thread_safe ();
+#endif
     return true;
   } ();
   (void) initialized;

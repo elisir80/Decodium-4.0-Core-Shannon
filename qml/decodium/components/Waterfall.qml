@@ -16,7 +16,7 @@ Item {
 
     property bool showControls: true
     property bool controlsExpanded: true
-    property int  minFreq: 0
+    property int  minFreq: 200
     property int  maxFreq: 3200
     property int  spectrumHeight: 150
     property bool restoringSettings: false

@@ -105,6 +105,48 @@ QString metricMs(qint64 us)
     return QString::number(static_cast<double>(us) / 1000.0, 'f', 2);
 }
 
+struct PanadapterFreqView
+{
+    float dataStart = 0.0f;
+    float dataEnd = 1.0f;
+    float dataRange = 1.0f;
+    float viewStart = 0.0f;
+    float viewRange = 1.0f;
+    bool clipsData = false;
+};
+
+PanadapterFreqView makePanadapterFreqView(float configuredStart,
+                                          float configuredBandwidth,
+                                          float dataFreqMin,
+                                          float dataFreqMax,
+                                          float zoomFactor,
+                                          float panHz)
+{
+    PanadapterFreqView view;
+    view.dataStart = dataFreqMin;
+    view.dataEnd = dataFreqMax;
+    view.dataRange = view.dataEnd - view.dataStart;
+    if (!std::isfinite(view.dataRange) || view.dataRange <= 0.0f)
+        view.dataRange = 1.0f;
+
+    float const baseStart = configuredBandwidth > 0.0f ? configuredStart : view.dataStart;
+    float const baseEnd = configuredBandwidth > 0.0f ? configuredStart + configuredBandwidth : view.dataEnd;
+    float viewportRange = baseEnd - baseStart;
+    if (!std::isfinite(viewportRange) || viewportRange <= 0.0f)
+        viewportRange = view.dataRange;
+    float const safeZoom = qMax(0.01f, zoomFactor);
+    view.viewRange = viewportRange / safeZoom;
+    if (!std::isfinite(view.viewRange) || view.viewRange <= 0.0f)
+        view.viewRange = 1.0f;
+    float const viewCenter = baseStart + viewportRange * 0.5f + panHz;
+    view.viewStart = viewCenter - view.viewRange * 0.5f;
+
+    float const tolHz = qMax(1.0f, view.viewRange * 0.0025f);
+    view.clipsData = view.viewStart < view.dataStart - tolHz
+        || view.viewStart + view.viewRange > view.dataEnd + tolHz;
+    return view;
+}
+
 class ScopeExit
 {
 public:
@@ -2474,7 +2516,6 @@ void PanadapterItem::renderSpectrum()
 
     QPainter p(&m_spectrumImage);
     p.setRenderHint(QPainter::Antialiasing, false);
-    bool const gpuSpectrumGraph = spectrumGraphSupported();
 
     int nBins = m_bins.size();
     float range = m_maxDb - m_minDb;
@@ -2485,16 +2526,17 @@ void PanadapterItem::renderSpectrum()
         return h - 1 - (int)(norm * (h - 2));
     };
 
-    // Sistema di coordinate: usa m_dataFreqMin/Max — stessa base usata dai bin FFT
-    float const baseStart = (m_bandwidth > 0) ? static_cast<float>(m_startFreq) : m_dataFreqMin;
-    float const baseEnd = (m_bandwidth > 0) ? static_cast<float>(m_startFreq + m_bandwidth) : m_dataFreqMax;
-    float viewportRange = baseEnd - baseStart;
-    if (viewportRange <= 0.f) viewportRange = 1.f;
-    float dataRange = m_dataFreqMax - m_dataFreqMin;
-    if (dataRange <= 0.f) dataRange = 1.f;
-    float viewRange  = viewportRange / m_zoomFactor;
-    float viewCenter = baseStart + viewportRange * 0.5f + m_panHz;
-    float viewStart  = viewCenter - viewRange * 0.5f;
+    PanadapterFreqView const freqView = makePanadapterFreqView(
+        static_cast<float>(m_startFreq),
+        static_cast<float>(m_bandwidth),
+        m_dataFreqMin,
+        m_dataFreqMax,
+        m_zoomFactor,
+        static_cast<float>(m_panHz));
+    float const dataRange = freqView.dataRange;
+    float const viewRange = freqView.viewRange;
+    float const viewStart = freqView.viewStart;
+    bool const gpuSpectrumGraph = spectrumGraphSupported() && !freqView.clipsData;
     // fToX: mappa freq → pixel usando le coordinate dei bin reali
     auto fToX = [&](float f) -> int { return (int)((f - viewStart) * w / viewRange); };
     // Anche i BIN devono usare questa stessa mappatura.
@@ -2543,27 +2585,35 @@ void PanadapterItem::renderSpectrum()
     if (!gpuSpectrumGraph) {
         // ── Path spettro ───────────────────────────────────────────────────────
         QPainterPath fillPath, linePath;
-        fillPath.moveTo(0, h);
-        bool first = true;
+        bool inSegment = false;
+        auto closeSegment = [&](int x) {
+            if (!inSegment)
+                return;
+            fillPath.lineTo(qBound(0, x, w), h);
+            fillPath.closeSubpath();
+            inSegment = false;
+        };
         for (int x = 0; x < w; ++x) {
             // Mappa pixel x → frequenza → bin usando il range effettivo dei dati FFT
             float pixFreq = viewStart + (float)x * viewRange / w;
             if (pixFreq < m_dataFreqMin || pixFreq > m_dataFreqMax) {
-                int const y = h - 1;
-                fillPath.lineTo(x, y);
-                if (first) { linePath.moveTo(x, y); first = false; }
-                else        { linePath.lineTo(x, y); }
+                closeSegment(x);
                 continue;
             }
             int bin = (int)((pixFreq - m_dataFreqMin) / dataRange * nBins);
             bin = qBound(0, bin, nBins - 1);
             int y = binToY(m_bins[bin]);
-            fillPath.lineTo(x, y);
-            if (first) { linePath.moveTo(x, y); first = false; }
-            else        { linePath.lineTo(x, y); }
+            if (!inSegment) {
+                fillPath.moveTo(x, h);
+                fillPath.lineTo(x, y);
+                linePath.moveTo(x, y);
+                inSegment = true;
+            } else {
+                fillPath.lineTo(x, y);
+                linePath.lineTo(x, y);
+            }
         }
-        fillPath.lineTo(w, h);
-        fillPath.closeSubpath();
+        closeSegment(w);
 
         // ── Fill spettro: usa la palette selezionata, non sempre il bianco ─────
         QColor fillTopColor = QColor::fromRgb(wfColor(0.82f));
@@ -2590,7 +2640,7 @@ void PanadapterItem::renderSpectrum()
         // ── Peak hold: linea bianca tratteggiata più in alto ──────────────────
         if (m_peakHold && m_peakBins.size() == nBins) {
             QPainterPath pkPath;
-            first = true;
+            bool first = true;
             for (int x = 0; x < w; ++x) {
                 float pixFreq = viewStart + (float)x * viewRange / w;
                 if (pixFreq < m_dataFreqMin || pixFreq > m_dataFreqMax) continue;
@@ -2601,7 +2651,8 @@ void PanadapterItem::renderSpectrum()
                 else        { pkPath.lineTo(x, y); }
             }
             p.setPen(QPen(QColor(255, 255, 255, 90), 1.0, Qt::DotLine));
-            p.drawPath(pkPath);
+            if (!first)
+                p.drawPath(pkPath);
         }
     }
 
@@ -3298,23 +3349,25 @@ void PanadapterItem::updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int 
         return static_cast<float>(h - 1) - norm * static_cast<float>(h - 2);
     };
 
-    float const baseStart = (m_bandwidth > 0) ? static_cast<float>(m_startFreq) : m_dataFreqMin;
-    float const baseEnd = (m_bandwidth > 0) ? static_cast<float>(m_startFreq + m_bandwidth) : m_dataFreqMax;
-    float viewportRange = baseEnd - baseStart;
-    if (viewportRange <= 0.f)
-        viewportRange = 1.f;
-    float dataRange = m_dataFreqMax - m_dataFreqMin;
-    if (dataRange <= 0.f)
-        dataRange = 1.f;
-    float const viewRange = viewportRange / m_zoomFactor;
-    float const viewCenter = baseStart + viewportRange * 0.5f + m_panHz;
-    float const viewStart = viewCenter - viewRange * 0.5f;
+    PanadapterFreqView const freqView = makePanadapterFreqView(
+        static_cast<float>(m_startFreq),
+        static_cast<float>(m_bandwidth),
+        m_dataFreqMin,
+        m_dataFreqMax,
+        m_zoomFactor,
+        static_cast<float>(m_panHz));
+    if (freqView.clipsData) {
+        removeSpectrumGraphNodes(spectrumRoot);
+        return;
+    }
+    float const dataRange = freqView.dataRange;
+    float const viewRange = freqView.viewRange;
+    float const viewStart = freqView.viewStart;
 
     auto yForX = [&](int x, QVector<float> const& values) -> float {
         float const pixFreq = viewStart + static_cast<float>(x) * viewRange / static_cast<float>(w);
-        if (pixFreq < m_dataFreqMin || pixFreq > m_dataFreqMax)
-            return static_cast<float>(h - 1);
-        int bin = static_cast<int>((pixFreq - m_dataFreqMin) / dataRange * nBins);
+        float const clampedFreq = qBound(m_dataFreqMin, pixFreq, m_dataFreqMax);
+        int bin = static_cast<int>((clampedFreq - m_dataFreqMin) / dataRange * nBins);
         bin = qBound(0, bin, nBins - 1);
         return binToY(values[bin]);
     };
@@ -4711,7 +4764,33 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         : qMin(m_spectrumH, h);
 
     bool const shaderSupported = shaderWaterfallSupported();
-    bool const gpuSpectrumGraph = spectrumGraphSupported();
+    PanadapterFreqView const qsgFreqView = makePanadapterFreqView(
+        static_cast<float>(m_startFreq),
+        static_cast<float>(m_bandwidth),
+        m_dataFreqMin,
+        m_dataFreqMax,
+        m_zoomFactor,
+        static_cast<float>(m_panHz));
+    if (qsgFreqView.clipsData) {
+        static std::atomic<qint64> lastRangeClipLogMs {0};
+        qint64 const nowMs = monotonicMs();
+        qint64 previousMs = lastRangeClipLogMs.load(std::memory_order_relaxed);
+        if (nowMs - previousMs >= 30000
+            && lastRangeClipLogMs.compare_exchange_strong(previousMs, nowMs, std::memory_order_relaxed)) {
+            qInfo().noquote()
+                << "[PANDBG] Panadapter spectrum view clipped to data range"
+                << "viewHz=" << QStringLiteral("%1..%2")
+                                 .arg(qsgFreqView.viewStart, 0, 'f', 1)
+                                 .arg(qsgFreqView.viewStart + qsgFreqView.viewRange, 0, 'f', 1)
+                << "dataHz=" << QStringLiteral("%1..%2")
+                                 .arg(qsgFreqView.dataStart, 0, 'f', 1)
+                                 .arg(qsgFreqView.dataEnd, 0, 'f', 1)
+                << "bins=" << m_bins.size()
+                << "gpu_graph=disabled"
+                << "reason=avoid_false_floor_slope";
+        }
+    }
+    bool const gpuSpectrumGraph = spectrumGraphSupported() && !qsgFreqView.clipsData;
     bool const gpuDirectReady =
 #if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB)
         m_gpuDirectTextureReady

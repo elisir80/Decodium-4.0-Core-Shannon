@@ -1789,16 +1789,23 @@ int main(int argc, char* argv[])
         app.setProperty("decodiumLabPassiveWaitPounce", true);
     }
     // Standard FTx lab triggers intentionally bypass slot timing so short
-    // tests can start immediately. JT9 is different: its decoder searches
-    // sync within a 60-second UTC window, so forcing an arbitrary TX start
-    // would create a false decoder failure. Let the bridge schedule JT9 on
-    // the next valid slot instead.
-    bool const labJt9SlotTest = labMode.trimmed().compare(QStringLiteral("JT9"), Qt::CaseInsensitive) == 0;
-    if ((parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) && !labJt9SlotTest) {
+    // tests can start immediately. Legacy minute modes search sync inside a
+    // UTC-aligned 60-second window, so an arbitrary start would create a false
+    // decoder failure. Let the bridge schedule those modes on a valid slot.
+    QString const normalizedLabMode = labMode.trimmed().toUpper();
+    bool const labMinuteSlotTest = normalizedLabMode == QStringLiteral("JT4")
+        || normalizedLabMode == QStringLiteral("JT9")
+        || normalizedLabMode == QStringLiteral("JT65")
+        || normalizedLabMode == QStringLiteral("FST4")
+        || normalizedLabMode == QStringLiteral("FST4W")
+        || normalizedLabMode.startsWith(QStringLiteral("FST4-"))
+        || normalizedLabMode.startsWith(QStringLiteral("FST4W-"));
+    if ((parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) && !labMinuteSlotTest) {
         qputenv("DECODIUM_LAB_FORCE_TX_IMMEDIATE", QByteArrayLiteral("1"));
         qInfo() << "[LAB] immediate TX timing bypass enabled by lab standard TX trigger";
-    } else if (labJt9SlotTest && (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption))) {
-        qInfo() << "[LAB] JT9 TX slot timing preserved for decoder validation";
+    } else if (labMinuteSlotTest && (parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption))) {
+        qInfo() << "[LAB]" << normalizedLabMode
+                << "TX slot timing preserved for decoder validation";
     }
     bool const labNoMonitor = parser.isSet(labNoMonitorOption);
     if (labNoMonitor) {
@@ -2245,6 +2252,7 @@ int main(int argc, char* argv[])
                                                   applyLabRuntimeOverrides,
                                                   labSendTxSlot]() mutable {
             applyLabRuntimeOverrides(QStringLiteral("pre-sendtx"));
+            bridge.resetStandardTxMessages();
             bridge.sendTx(labSendTxSlot);
             qInfo().noquote()
                 << "[LAB] auto SENDTX requested"
