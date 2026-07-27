@@ -70,6 +70,8 @@ improves native macOS audio/panadapter cadence.
   workflows use the same validation contract.
 - Windows packaging copies and verifies required runtime data from the
   maintained source directory before creating the installer.
+- CAT frequency-rejection handling remains source-compatible with Linux
+  distributions that still ship Hamlib 4.5.
 - CMake install rules, local build scripts and AppImage/DMG packaging scripts
   were updated for the new repository layout.
 
@@ -164,6 +166,8 @@ migliora la fluidita' del percorso audio/panadapter nativo macOS.
   lo stesso contratto.
 - Il packaging Windows copia e verifica i dati runtime dalla cartella mantenuta
   prima di creare l'installer.
+- La gestione dei rifiuti CAT durante il cambio frequenza resta compilabile
+  anche sulle distribuzioni Linux che forniscono ancora Hamlib 4.5.
 - Regole CMake, script locali e packaging AppImage/DMG sono stati aggiornati per
   il nuovo layout.
 

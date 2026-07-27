@@ -15,6 +15,8 @@
   inputs that differ from `fork_release_version.txt`.
 - Made required runtime data and matching release notes part of the CI
   contract, and removed the stale hard-coded Windows installer version.
+- Kept CAT frequency rejection handling source-compatible with Linux
+  distributions that still provide Hamlib 4.5.
 - Kept installed runtime filenames unchanged so upgrades preserve application
   lookup behavior on Windows, macOS, and Linux.
 
