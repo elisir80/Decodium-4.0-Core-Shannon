@@ -14,6 +14,7 @@
 #include "DecodiumDxCluster.h"
 #include "DecodiumSelfCheck.hpp"
 #include "Network/MessageClient.hpp"
+#include "Network/UdpClientId.hpp"
 #include "DxccLookup.h"
 #include "DecodiumLegacyBackend.h"
 #include "Network/DecodiumPskReporterLite.h"
@@ -3582,7 +3583,8 @@ static QStringList worldMapCall3CandidatePaths()
                << QDir(appDir).absoluteFilePath(QStringLiteral("../Resources/CALL3.TXT"))
                << QDir::current().absoluteFilePath(QStringLiteral("CALL3.TXT"));
 #ifdef CMAKE_SOURCE_DIR
-    candidates << QDir(QStringLiteral(CMAKE_SOURCE_DIR)).absoluteFilePath(QStringLiteral("CALL3.TXT"));
+    candidates << QDir(QStringLiteral(CMAKE_SOURCE_DIR))
+                      .absoluteFilePath(QStringLiteral("resources/runtime/CALL3.TXT"));
 #endif
     candidates.removeDuplicates();
     return candidates;
@@ -10128,6 +10130,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // Spectrum timer: emette dati FFT per la waterfall (intervallo configurabile)
     m_spectrumTimer = new QTimer(this);
+    m_spectrumTimer->setTimerType(Qt::PreciseTimer);
     {
         QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
         int interval = s.value("spectrumInterval", 20).toInt();
@@ -25254,6 +25257,8 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         QStringLiteral("UDPSecondaryServerPort"),
         QStringLiteral("UDPSecondaryInterface"),
         QStringLiteral("UDPSecondaryTTL"),
+        QStringLiteral("UDPSecondaryQsoLoggedEnabled"),
+        QStringLiteral("UDPSecondaryLoggedAdifEnabled"),
         QStringLiteral("UDPTertiaryEnabled"),
         QStringLiteral("UDPTertiaryServer"),
         QStringLiteral("UDPTertiaryServerPort"),
@@ -26749,7 +26754,8 @@ QStringList DecodiumBridge::satelliteOptions() const
         QDir::current().absoluteFilePath(QStringLiteral("sat.dat"))
     };
 #ifdef CMAKE_SOURCE_DIR
-    candidates << QDir(QStringLiteral(CMAKE_SOURCE_DIR)).absoluteFilePath(QStringLiteral("sat.dat"));
+    candidates << QDir(QStringLiteral(CMAKE_SOURCE_DIR))
+                      .absoluteFilePath(QStringLiteral("resources/runtime/sat.dat"));
 #endif
 
     QSet<QString> seenPaths;
@@ -27037,6 +27043,7 @@ bool DecodiumBridge::isLegacySyncKey(const QString& key) const
         QStringLiteral("UDPSecondaryInterface"),
         QStringLiteral("UDPSecondaryTTL"),
         QStringLiteral("UDPSecondaryLoggedAdifEnabled"),
+        QStringLiteral("UDPSecondaryQsoLoggedEnabled"),
         QStringLiteral("UDPTertiaryEnabled"),
         QStringLiteral("UDPTertiaryServer"),
         QStringLiteral("UDPTertiaryServerPort"),
@@ -27330,25 +27337,20 @@ void DecodiumBridge::initUdpMessageClient()
     bool const n1mmEnabled = getSetting(QStringLiteral("BroadcastToN1MM"), false).toBool();
     QString const n1mmServer = getSetting(QStringLiteral("N1MMServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
     quint16 const n1mmPort = udpPortFromSettingValue(getSetting(QStringLiteral("N1MMServerPort"), 2333), 2333);
-    QString clientId = getSetting(QStringLiteral("UDPClientId"), QStringLiteral("WSJTX")).toString().simplified();
-    if (clientId.isEmpty()) {
-        clientId = QStringLiteral("WSJTX");
-    }
-    if (clientId.size() > 64) {
-        clientId = clientId.left(64).trimmed();
-    }
+    QString const clientId = decodium::network::normalizedUdpClientId(
+        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("WSJTX")).toString());
 
     bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 loggedADIF=%8")
                   .arg(serverName.trimmed(), QString::number(serverPort), QString::number(listenPort),
                        clientId, interfaceText(interfaces), QString::number(ttl),
                        boolText(acceptUdpRequests), boolText(primaryAdifEnabled)));
-    bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=ephemeral interface=%4 ttl=%5 loggedADIF=%6")
+    bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
                   .arg(boolText(secondaryEnabled), secondaryServerName, QString::number(secondaryPort),
-                       interfaceText(secondaryInterfaces), QString::number(secondaryTtl),
+                       clientId, interfaceText(secondaryInterfaces), QString::number(secondaryTtl),
                        boolText(secondaryAdifEnabled)));
-    bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=ephemeral interface=%4 ttl=%5 loggedADIF=%6")
+    bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
                   .arg(boolText(tertiaryEnabled), tertiaryServerName, QString::number(tertiaryPort),
-                       interfaceText(tertiaryInterfaces), QString::number(tertiaryTtl),
+                       clientId, interfaceText(tertiaryInterfaces), QString::number(tertiaryTtl),
                        boolText(tertiaryAdifEnabled)));
     bridgeLog(QStringLiteral("Reporting config: ADIF TCP %1 target=%2:%3")
                   .arg(boolText(adifTcpEnabled), adifTcpServer, QString::number(adifTcpPort)));
@@ -27601,6 +27603,10 @@ void DecodiumBridge::scheduleUdpMessageClientRestart()
     m_udpMessageClientRestartPending = true;
     QTimer::singleShot(150, this, [this]() {
         m_udpMessageClientRestartPending = false;
+        if (usingLegacyBackendForTx() && m_legacyBackend) {
+            m_legacyBackend->refreshUdpReporting();
+            return;
+        }
         shutdownUdpMessageClient();
         initUdpMessageClient();
     });
@@ -41703,10 +41709,9 @@ void DecodiumBridge::onSpectrumTimer()
         int usable = qMin(wfAvail, fftLen);
         if (usable >= 512) {
             highResAvailable = true;
-            // Visual-only workload: keep the safe legacy PCM tap conservative.
-            // It is delivered through the embedded legacy pipeline on the UI
-            // thread, so 66ms can contend with FT8/FT4 period decode bursts.
-            // Direct Visual is opt-in, so let modern audio feeds target ~30 fps.
+            // Visual-only workload: the GPU-direct legacy path has negligible
+            // timer cost and can honor the configured FPS cap. CPU fallback
+            // keeps the conservative cadence used by slower systems.
             bool const directVisualFastFeed = useModernSpectrumFeedWithLegacy();
             metricDirectVisual = directVisualFastFeed;
             // 1.0.186 — FPS cap configurabile (15/20/30 fps). Default 20 fps
@@ -41715,20 +41720,28 @@ void DecodiumBridge::onSpectrumTimer()
             int const fpsCap = qBound(15, m_spectrumFpsCap, 30);
             qint64 const cappedIntervalMs = 1000 / fpsCap;
             bool const deepDecodeVisualLoad = nowMs < m_deepDecodeVisualThrottleUntilMs;
+            bool const acceleratedLegacyVisual =
+                !directVisualFastFeed
+                && m_legacyPcmSpectrumFeed
+                && m_forceGpuPanadapterFft.load()
+                && m_gpuPanadapterFftAvailable.load();
             qint64 minPanadapterIntervalMs = directVisualFastFeed
                 ? (m_legacyPcmSpectrumFeed ? qMax<qint64>(cappedIntervalMs, 66) : cappedIntervalMs)
                 : decodium::decode::legacyPanadapterIntervalMs(
                       deepDecodeVisualLoad,
                       cpuPressureActive(),
-                      cpuPressureSevereActive());
+                      cpuPressureSevereActive(),
+                      acceleratedLegacyVisual,
+                      static_cast<int>(cappedIntervalMs));
             qint64 const monitoringAgeMs =
                 m_monitoringSince.isValid()
                     ? m_monitoringSince.msecsTo(QDateTime::currentDateTimeUtc())
                     : std::numeric_limits<qint64>::max();
             bool const visualStartupWarmup = monitoringAgeMs >= 0 && monitoringAgeMs < 30000;
-            if (visualStartupWarmup)
+            if (visualStartupWarmup && !acceleratedLegacyVisual)
                 minPanadapterIntervalMs = qMax<qint64>(minPanadapterIntervalMs, 100);
-            if (cpuPressureActive() || cpuPressureSevereActive()) {
+            if ((cpuPressureActive() || cpuPressureSevereActive())
+                && !acceleratedLegacyVisual) {
                 minPanadapterIntervalMs = qMax<qint64>(
                     minPanadapterIntervalMs,
                     cpuPressureSevereActive() ? 500 : 250);
@@ -41737,6 +41750,17 @@ void DecodiumBridge::onSpectrumTimer()
                 minPanadapterIntervalMs = qMax<qint64>(
                     minPanadapterIntervalMs,
                     cpuPressureSevereActive() ? 750 : (cpuPressureActive() ? 600 : 500));
+            }
+            // On the GPU-direct macOS path, drive the timer at the effective
+            // cadence instead of polling every 20 ms and discarding ticks.
+            // With a 33 ms cap the old polling pattern delivered on alternating
+            // 20/40 ms boundaries, limiting the visible result to ~25 fps.
+            if (acceleratedLegacyVisual && m_spectrumTimer) {
+                int const preciseInterval =
+                    qBound(10, static_cast<int>(minPanadapterIntervalMs), 750);
+                if (m_spectrumTimer->interval() != preciseInterval) {
+                    m_spectrumTimer->setInterval(preciseInterval);
+                }
             }
             if ((cpuPressureActive() || cpuPressureSevereActive())
                 && nowMs - m_lastPanadapterPressureLogMs > 5000) {
@@ -46462,7 +46486,8 @@ QStringList DecodiumBridge::ctyDatSearchPaths() const
     };
 
 #ifdef CMAKE_SOURCE_DIR
-    paths << QDir(QStringLiteral(CMAKE_SOURCE_DIR)).absoluteFilePath("cty.dat");
+    paths << QDir(QStringLiteral(CMAKE_SOURCE_DIR))
+                 .absoluteFilePath(QStringLiteral("resources/runtime/cty.dat"));
 #endif
 
     QStringList uniquePaths;

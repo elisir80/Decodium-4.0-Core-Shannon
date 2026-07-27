@@ -115,7 +115,7 @@ cp wsjtx jt9 wsprd message_aggregator "$DIST_DIR/bin/"
 strip "$DIST_DIR/bin/"* 2>/dev/null || true
 
 # Data files
-cp "$PROJECT_ROOT/cty.dat" "$DIST_DIR/share/wsjtx/" 2>/dev/null || true
+cp "$PROJECT_ROOT/resources/runtime/cty.dat" "$DIST_DIR/share/wsjtx/" 2>/dev/null || true
 cp -r "$PROJECT_ROOT/sounds" "$DIST_DIR/share/wsjtx/" 2>/dev/null || true
 cp -r "$PROJECT_ROOT/Palettes" "$DIST_DIR/share/wsjtx/" 2>/dev/null || true
 

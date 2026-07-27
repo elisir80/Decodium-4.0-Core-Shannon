@@ -90,8 +90,24 @@ private:
 
 inline int legacyPanadapterIntervalMs(bool deepDecodeActive,
                                       bool pressureActive,
-                                      bool severePressureActive)
+                                      bool severePressureActive,
+                                      bool gpuAccelerated = false,
+                                      int requestedIntervalMs = 50)
 {
+    if (gpuAccelerated) {
+        int const requested = std::clamp(requestedIntervalMs, 33, 66);
+        if (severePressureActive) {
+            return std::max(requested, 125);
+        }
+        if (pressureActive) {
+            return std::max(requested, 66);
+        }
+        if (deepDecodeActive) {
+            return std::max(requested, 50);
+        }
+        return requested;
+    }
+
     if (severePressureActive) {
         return 250;
     }

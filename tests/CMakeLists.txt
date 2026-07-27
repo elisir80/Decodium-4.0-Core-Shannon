@@ -75,6 +75,10 @@ add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../src/services/De
 target_link_libraries (test_dx_cluster_band Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_dx_cluster_band COMMAND $<TARGET_FILE:test_dx_cluster_band>)
 
+add_executable (test_udp_client_id test_udp_client_id.cpp)
+target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Core)
+add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
+
 add_executable (test_ftx_weak_decode test_ftx_weak_decode.cpp)
 target_link_libraries (test_ftx_weak_decode wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_ftx_weak_decode COMMAND $<TARGET_FILE:test_ftx_weak_decode>)

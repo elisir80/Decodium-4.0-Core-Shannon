@@ -102,6 +102,13 @@ void TestFtDecodeThreadBudget::legacyPanadapterCadenceTracksRealLoad()
     QCOMPARE(legacyPanadapterIntervalMs(false, true, false), 180);
     QCOMPARE(legacyPanadapterIntervalMs(true, true, false), 180);
     QCOMPARE(legacyPanadapterIntervalMs(false, true, true), 250);
+
+    QCOMPARE(legacyPanadapterIntervalMs(false, false, false, true, 33), 33);
+    QCOMPARE(legacyPanadapterIntervalMs(false, false, false, true, 50), 50);
+    QCOMPARE(legacyPanadapterIntervalMs(false, false, false, true, 66), 66);
+    QCOMPARE(legacyPanadapterIntervalMs(true, false, false, true, 33), 50);
+    QCOMPARE(legacyPanadapterIntervalMs(false, true, false, true, 33), 66);
+    QCOMPARE(legacyPanadapterIntervalMs(false, true, true, true, 33), 125);
 }
 
 void TestFtDecodeThreadBudget::reservesOneLogicalCoreForUi()

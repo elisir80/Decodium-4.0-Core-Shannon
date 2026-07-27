@@ -63,18 +63,8 @@ jobs:
           INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           set -euo pipefail
-          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && -n "${INPUT_VERSION}" ]]; then
-            VERSION="${INPUT_VERSION}"
-          elif [[ -f fork_release_version.txt ]]; then
-            VERSION="$(tr -d '\r\n' < fork_release_version.txt)"
-          else
-            VERSION="0.0.0-ci-${GITHUB_SHA::7}"
-          fi
-          VERSION="${VERSION#v}"
-          if [[ ! "${VERSION}" =~ ^[0-9]+([.][0-9]+){1,3}([-+._A-Za-z0-9]+)?$ ]]; then
-            echo "Invalid release version: ${VERSION}" >&2
-            exit 1
-          fi
+          VERSION="$(scripts/ci/resolve-release-version.sh "${INPUT_VERSION}")"
+          scripts/ci/validate-repository-layout.sh
           printf 'VERSION=%s\n' "${VERSION}" >> "$GITHUB_ENV"
           echo "Using version: ${VERSION}"
 
@@ -322,17 +312,7 @@ jobs:
           INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           set -euo pipefail
-          VERSION="${INPUT_VERSION}"
-          if [[ -z "${VERSION}" && -f fork_release_version.txt ]]; then
-            VERSION="$(tr -d '\r\n' < fork_release_version.txt)"
-          elif [[ -z "${VERSION}" ]]; then
-            VERSION="0.0.0-ci-${GITHUB_SHA::7}"
-          fi
-          VERSION="${VERSION#v}"
-          if [[ ! "${VERSION}" =~ ^[0-9]+([.][0-9]+){1,3}([-+._A-Za-z0-9]+)?$ ]]; then
-            echo "Invalid release version: ${VERSION}" >&2
-            exit 1
-          fi
+          VERSION="$(scripts/ci/resolve-release-version.sh "${INPUT_VERSION}")"
           RELEASE_REF="v${VERSION}"
           printf 'version=%s\n' "${VERSION}" >> "$GITHUB_OUTPUT"
           printf 'release_ref=%s\n' "${RELEASE_REF}" >> "$GITHUB_OUTPUT"

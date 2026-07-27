@@ -18,6 +18,7 @@
 #include <QCryptographicHash>
 
 #include "NetworkMessage.hpp"
+#include "UdpClientId.hpp"
 #include "qt_helpers.hpp"
 #include "pimpl_impl.hpp"
 #include "revision_utils.hpp"
@@ -233,7 +234,7 @@ public:
         MessageClient * self, QString const& reporting_role)
     : self_ {self}
     , enabled_ {false}
-    , id_ {id}
+    , id_ {decodium::network::normalizedUdpClientId (id)}
     , version_ {version}
     , revision_ {revision}
     , reporting_role_ {reporting_role.trimmed ()}
@@ -1101,6 +1102,8 @@ MessageClient::MessageClient (QString const& id, QString const& version, QString
   m_->set_server (server_name, network_interface_names);
 }
 
+MessageClient::~MessageClient () = default;
+
 QHostAddress MessageClient::server_address () const
 {
   return m_->server_;
@@ -1125,6 +1128,19 @@ void MessageClient::set_TTL (int TTL)
 {
   m_->TTL_ = TTL;
   m_->setSocketOption (QAbstractSocket::MulticastTtlOption, m_->TTL_);
+}
+
+void MessageClient::set_client_id (QString const& id)
+{
+  QString const normalized = decodium::network::normalizedUdpClientId (id);
+  if (normalized == m_->id_)
+    {
+      return;
+    }
+
+  m_->id_ = normalized;
+  m_->last_message_.clear ();
+  m_->heartbeat ();
 }
 
 void MessageClient::set_listen_port (port_type listen_port)

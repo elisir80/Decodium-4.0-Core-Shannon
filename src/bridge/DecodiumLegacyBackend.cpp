@@ -241,7 +241,9 @@ QStringList embeddedLegacySourceDirs()
         dirs << currentDir;
     }
 #ifdef CMAKE_SOURCE_DIR
-    dirs << QDir(QStringLiteral(CMAKE_SOURCE_DIR)).absolutePath();
+    QDir const sourceDir(QStringLiteral(CMAKE_SOURCE_DIR));
+    dirs << sourceDir.absoluteFilePath(QStringLiteral("resources/runtime"));
+    dirs << sourceDir.absolutePath();
 #endif
     dirs.removeDuplicates();
     return dirs;
@@ -1280,6 +1282,13 @@ void DecodiumLegacyBackend::setEmbeddedUiUpdatesEnabled(bool enabled)
 {
     if (m_mainWindow) {
         m_mainWindow->legacySetEmbeddedUiUpdatesEnabled(enabled);
+    }
+}
+
+void DecodiumLegacyBackend::refreshUdpReporting()
+{
+    if (m_mainWindow) {
+        m_mainWindow->refreshLegacyUdpReporting();
     }
 }
 

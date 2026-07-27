@@ -9,11 +9,8 @@ DOCKERFILE="${DOCKERFILE:-${PROJECT_ROOT}/packaging/docker/Dockerfile.ubuntu-x64
 SOURCE_DIR="${SOURCE_DIR:-${PROJECT_ROOT}}"
 OUTPUT_DIR="${OUTPUT_DIR:-${PROJECT_ROOT}/build-intel-output}"
 
-if [[ -n "${VERSION:-}" ]]; then
-  VERSION="${VERSION#v}"
-else
-  VERSION="$(tr -d '\r\n' < "${SOURCE_DIR}/fork_release_version.txt" 2>/dev/null || echo "0.0.0-dev")"
-fi
+VERSION="$("${SOURCE_DIR}/scripts/ci/resolve-release-version.sh" "${VERSION:-}")"
+"${SOURCE_DIR}/scripts/ci/validate-repository-layout.sh"
 
 BUILD_ID="${BUILD_ID:-$$}"
 SOURCE_VOLUME="ft2-intel-source-vol-${BUILD_ID}"

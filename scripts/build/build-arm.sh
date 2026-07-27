@@ -8,11 +8,8 @@ IMAGE_NAME="${IMAGE_NAME:-ft2-trixie-arm}"
 DOCKERFILE="${DOCKERFILE:-${PROJECT_ROOT}/packaging/docker/Dockerfile.trixie-arm}"
 SOURCE_DIR="${SOURCE_DIR:-${PROJECT_ROOT}}"
 OUTPUT_DIR="${OUTPUT_DIR:-${PROJECT_ROOT}/build-arm-output}"
-if [[ -n "${VERSION:-}" ]]; then
-  VERSION="${VERSION#v}"
-else
-  VERSION="$(tr -d '\r\n' < "${SOURCE_DIR}/fork_release_version.txt" 2>/dev/null || echo "0.0.0-dev")"
-fi
+VERSION="$("${SOURCE_DIR}/scripts/ci/resolve-release-version.sh" "${VERSION:-}")"
+"${SOURCE_DIR}/scripts/ci/validate-repository-layout.sh"
 BUILD_ID="${BUILD_ID:-$$}"
 SOURCE_VOLUME="ft2-source-vol-${BUILD_ID}"
 OUTPUT_VOLUME="ft2-build-output-${BUILD_ID}"

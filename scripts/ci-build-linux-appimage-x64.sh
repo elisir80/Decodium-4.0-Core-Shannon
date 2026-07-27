@@ -18,14 +18,8 @@ LINUXDEPLOY_URL="${LINUXDEPLOY_URL:-https://github.com/linuxdeploy/linuxdeploy/r
 LINUXDEPLOY_QT_PLUGIN_URL="${LINUXDEPLOY_QT_PLUGIN_URL:-https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 2)}"
 
-if [[ -z "${VERSION}" ]]; then
-  if [[ -f "${ROOT_DIR}/fork_release_version.txt" ]]; then
-    VERSION="$(tr -d '\r\n' < "${ROOT_DIR}/fork_release_version.txt")"
-  else
-    VERSION="0.0.0-local"
-  fi
-fi
-VERSION="${VERSION#v}"
+VERSION="$("${ROOT_DIR}/scripts/ci/resolve-release-version.sh" "${VERSION}")"
+"${ROOT_DIR}/scripts/ci/validate-repository-layout.sh"
 
 log() {
   printf '\n>>> %s\n' "$*"

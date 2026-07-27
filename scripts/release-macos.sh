@@ -28,20 +28,15 @@ EOF
 }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VERSION_FILE="${REPO_ROOT}/fork_release_version.txt"
 VERSION_RAW=""
 
 if [[ $# -gt 0 && "$1" != --* ]]; then
   VERSION_RAW="$1"
   shift
-elif [[ -f "${VERSION_FILE}" ]]; then
-  VERSION_RAW="$(tr -d '\r\n' < "${VERSION_FILE}")"
-else
-  usage
-  exit 1
 fi
 
-VERSION="${VERSION_RAW#v}"
+VERSION="$("${REPO_ROOT}/scripts/ci/resolve-release-version.sh" "${VERSION_RAW}")"
+"${REPO_ROOT}/scripts/ci/validate-repository-layout.sh"
 
 PUBLISH=0
 REPO="elisir80/Decodium-4.0-Core-Shannon"

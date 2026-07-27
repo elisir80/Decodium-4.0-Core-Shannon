@@ -83,6 +83,27 @@ include (CTest)
 #
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake/Modules ${CMAKE_MODULE_PATH})
 
+set (DECODIUM_RUNTIME_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources/runtime")
+set (DECODIUM_CMAKE_TEMPLATE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CMake/templates")
+set (DECODIUM_PACKAGING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/packaging")
+
+set (DECODIUM_REQUIRED_RUNTIME_FILES
+  ALLCALL7.TXT
+  CALL3.TXT
+  cty.dat
+  cty.dat_copyright.txt
+  eclipse.txt
+  grid.dat
+  sat.dat
+  )
+foreach (required_runtime_file IN LISTS DECODIUM_REQUIRED_RUNTIME_FILES)
+  if (NOT EXISTS "${DECODIUM_RUNTIME_DATA_DIR}/${required_runtime_file}")
+    message (FATAL_ERROR
+      "Required runtime data file is missing: "
+      "${DECODIUM_RUNTIME_DATA_DIR}/${required_runtime_file}")
+  endif ()
+endforeach ()
+
 set (PROJECT_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
 if (NOT PROJECT_ARCHITECTURE)
   # This is supposed to happen already on Windows
@@ -728,7 +749,7 @@ set (all_C_and_CXXSRCS
   )
 
 set (TOP_LEVEL_RESOURCES
-  sat.dat
+  "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
   artwork/ft2logo.png
   contrib/gpl-v3-logo.svg
   artwork/splash.png
@@ -1484,7 +1505,10 @@ add_resources (decodium_RESOURCES "" ${TOP_LEVEL_RESOURCES})
 add_resources (decodium_RESOURCES /Palettes ${PALETTE_FILES})
 add_resources (decodium_RESOURCES /Translations ${QM_FILES})
 
-configure_file (decodium.qrc.in decodium.qrc @ONLY)
+configure_file (
+  "${DECODIUM_CMAKE_TEMPLATE_DIR}/decodium.qrc.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/decodium.qrc"
+  @ONLY)
 
 # UI generation
 qt_wrap_ui (wsjt_qt_GENUISRCS ${wsjt_qt_UISRCS})
@@ -2037,10 +2061,10 @@ add_custom_command (TARGET decodium_qml POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/artwork/maps/world_overlay_2048x1024.png"
     "$<TARGET_FILE_DIR:decodium_qml>/artwork/maps/world_overlay_2048x1024.png"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/sat.dat"
+    "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
     "$<TARGET_FILE_DIR:decodium_qml>/sat.dat"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/cty.dat"
+    "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"
     "$<TARGET_FILE_DIR:decodium_qml>/cty.dat"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/sounds"
@@ -2053,10 +2077,10 @@ if (APPLE)
     COMMAND ${CMAKE_COMMAND} -E remove_directory
       $<TARGET_FILE_DIR:wsjtx>/sounds
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/cty.dat"
+      "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"
       "$<TARGET_FILE_DIR:wsjtx>/../Resources/cty.dat"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/sat.dat"
+      "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
       "$<TARGET_FILE_DIR:wsjtx>/../Resources/sat.dat"
     COMMENT "Refreshing macOS bundle data files"
     )
@@ -2221,24 +2245,22 @@ install (PROGRAMS
   )
 
 install (FILES
-  README
+  README.md
   COPYING
   AUTHORS
-  THANKS
-  NEWS
-  BUGS
+  doc/project/THANKS
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
   #COMPONENT runtime
   )
 
 install (FILES
-  cty.dat
-  CALL3.TXT
-  cty.dat_copyright.txt
-  grid.dat
-  sat.dat
+  "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"
+  "${DECODIUM_RUNTIME_DATA_DIR}/CALL3.TXT"
+  "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat_copyright.txt"
+  "${DECODIUM_RUNTIME_DATA_DIR}/grid.dat"
+  "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
   contrib/Ephemeris/JPLEPH
-  eclipse.txt
+  "${DECODIUM_RUNTIME_DATA_DIR}/eclipse.txt"
   artwork/maps/earth_2048x1024.jpg
   artwork/maps/world_overlay_2048x1024.png
   DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}
@@ -2257,13 +2279,13 @@ install (FILES
 
 if (APPLE)
   install (FILES
-    ALLCALL7.TXT
+    "${DECODIUM_RUNTIME_DATA_DIR}/ALLCALL7.TXT"
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}
     #COMPONENT runtime
     )
 else ()
   install (FILES
-    ALLCALL7.TXT
+    "${DECODIUM_RUNTIME_DATA_DIR}/ALLCALL7.TXT"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     #COMPONENT runtime
     )
@@ -2344,7 +2366,7 @@ add_dependencies (wsjt_qt revisiontag)
 # versioning and configuration
 #
 configure_file (
-  "${CMAKE_CURRENT_SOURCE_DIR}/decodium_config.h.in"
+  "${DECODIUM_CMAKE_TEMPLATE_DIR}/decodium_config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/wsjtx_config.h"
   )
 
@@ -2353,7 +2375,9 @@ if (NOT WIN32 AND NOT APPLE)
   # install a desktop file so wsjtx appears in the application start
   # menu with an icon
   install (
-    FILES wsjtx.desktop message_aggregator.desktop
+    FILES
+      "${DECODIUM_PACKAGING_DIR}/linux/wsjtx.desktop"
+      "${DECODIUM_PACKAGING_DIR}/linux/message_aggregator.desktop"
     DESTINATION share/applications
     #COMPONENT runtime
     )
@@ -2390,7 +2414,8 @@ endif ()
 #
 # packaging
 #
-set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/package_description.txt")
+set (CPACK_PACKAGE_DESCRIPTION_FILE
+  "${DECODIUM_PACKAGING_DIR}/package_description.txt")
 set (CPACK_MONOLITHIC_INSTALL 1)
 set (CPACK_PACKAGE_NAME "decodium")
 set (CPACK_PACKAGE_VERSION_MAJOR ${FORK_RELEASE_VERSION_MAJOR})
@@ -2436,7 +2461,7 @@ set (CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set (CPACK_RPM_PACKAGE_REQUIRES "qt5-qtbase >= 5.9, qt5-qtserialport >= 5.9, qt5-qtmultimedia >= 5.9, qt5-qtwebsockets >= 5.9, qt5-qtsvg >= 5.9, libusbx >= 1.0.22, libgfortran >= 7, libgomp >= 7, fftw-libs-single >= 3.3, boost-log >= 1.62")
 set (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /usr/share/pixmaps /usr/share/applications /usr/share/man /usr/share/man1)
 
-configure_file ("${PROJECT_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
+configure_file ("${DECODIUM_CMAKE_TEMPLATE_DIR}/CMakeCPackOptions.cmake.in"
   "${PROJECT_BINARY_DIR}/CMakeCPackOptions.cmake" @ONLY)
 set (CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/CMakeCPackOptions.cmake")
 

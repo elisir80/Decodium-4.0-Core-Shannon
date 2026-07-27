@@ -349,13 +349,21 @@ cmake --build build --target decodium_qml --parallel
 Il repository include workflow per:
 
 - build Windows x64;
-- build macOS;
 - release macOS Apple Silicon;
+- release macOS Intel;
 - release Linux AppImage Qt 6.11 x86_64;
-- build Linux;
+- release Linux AppImage Qt 6.11 aarch64;
 - test runner.
 
 I workflow si trovano in `.github/workflows`.
+
+La versione viene letta esclusivamente da `fork_release_version.txt`. Tag,
+input manuale del runner e release notes devono corrispondere; il controllo
+locale e CI si esegue con:
+
+```bash
+scripts/ci/validate-repository-layout.sh
+```
 
 ### Troubleshooting rapido
 
@@ -767,13 +775,21 @@ cmake --build build --target decodium_qml --parallel
 The repository includes workflows for:
 
 - Windows x64 builds;
-- macOS builds;
 - macOS Apple Silicon releases;
+- macOS Intel releases;
 - Linux AppImage Qt 6.11 x86_64 releases;
-- Linux builds;
+- Linux AppImage Qt 6.11 aarch64 releases;
 - test runner.
 
 Workflow files are in `.github/workflows`.
+
+The version is read exclusively from `fork_release_version.txt`. Tags, manual
+runner input, and release notes must match. Run the local and CI contract check
+with:
+
+```bash
+scripts/ci/validate-repository-layout.sh
+```
 
 ### Quick Troubleshooting
 

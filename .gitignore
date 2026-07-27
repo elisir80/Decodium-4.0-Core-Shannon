@@ -124,7 +124,6 @@ appverifUI.dll
 # Runtime stubs (auto-generated)
 decodium_common_blocks.c
 decodium_fortran_stubs.cpp
-decodium_qml.rc
 libhamlib-4.def
 fst4w_calls.txt
 

@@ -18,9 +18,13 @@ tools, and generated output in separate locations.
   established DSP, protocol, networking, and legacy widget subsystems.
 - `qml/`: Qt Quick user interface.
 - `artwork/`, `icons/`, `Palettes/`, `sounds/`, `shaders/`: runtime resources.
-- `packaging/`: Windows installer definitions and Docker build environments.
+- `resources/runtime/`: required data files installed with every package.
+- `CMake/templates/`: configured CMake, resource, and package templates.
+- `packaging/`: Windows and Linux desktop packaging definitions, package
+  metadata, and Docker build environments.
 - `scripts/build/`: platform and container build entry points.
-- `scripts/`: CI and release helpers shared by multiple platforms.
+- `scripts/ci/`: repository-layout and release-version validation.
+- `scripts/`: CI, build, and release helpers shared by multiple platforms.
 - `tools/`: diagnostics, analysis, migration, and maintenance utilities.
 - `tests/`: automated tests and compact regression data.
 - `doc/`: user, release, and developer documentation.
@@ -44,9 +48,27 @@ GitHub Actions recreates portable bundles and installers from the source tree.
 
 ## Root directory
 
-The root contains CMake entry points, release metadata, licenses, and installed
-runtime data. New native application sources belong in the matching `src/`
-subsystem instead of restoring the historical flat source layout.
+The root contains only the CMake entry point, release metadata, project
+documentation index, and licence. New native application sources belong in the
+matching `src/` subsystem instead of restoring the historical flat source
+layout. Runtime data must remain under `resources/runtime/`.
+
+## Release contract
+
+`fork_release_version.txt` is the single source of truth for the application
+and package version. Every release requires a matching
+`doc/GITHUB_RELEASE_BODY_<version>.md`.
+
+Run these checks before committing a version change:
+
+```bash
+scripts/ci/resolve-release-version.sh
+scripts/ci/validate-repository-layout.sh
+```
+
+Release workflows reject a manually supplied version or Git tag that differs
+from `fork_release_version.txt`. CMake also stops if a required runtime data
+file is missing.
 
 ## Legacy references
 

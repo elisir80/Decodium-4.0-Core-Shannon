@@ -62,6 +62,24 @@ jobs:
             mingw-w64-x86_64-libusb
             mingw-w64-x86_64-portaudio
 
+      - name: Validate repository contract
+        run: scripts/ci/validate-repository-layout.sh
+
+      - name: Resolve build version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          REQUESTED_VERSION=""
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            REQUESTED_VERSION="${GITHUB_REF}"
+          elif [[ -n "${RELEASE_TAG}" ]]; then
+            REQUESTED_VERSION="${RELEASE_TAG}"
+          fi
+          APP_VERSION="$(scripts/ci/resolve-release-version.sh "${REQUESTED_VERSION}")"
+          echo "APP_VERSION=${APP_VERSION}" >> "${GITHUB_ENV}"
+          echo "INSTALLER_BASENAME=Decodium_${APP_VERSION}_Setup_x64" >> "${GITHUB_ENV}"
+
       - name: Restore Qt 6.11 cache
         id: qt-cache
         uses: actions/cache/restore@v4
@@ -186,22 +204,6 @@ jobs:
           echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig" >> "${GITHUB_ENV}"
           "${HAMLIB_PREFIX}/bin/rigctl" --version
 
-      - name: Resolve build version
-        env:
-          RELEASE_TAG: ${{ inputs.release_tag }}
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            APP_VERSION="${GITHUB_REF#refs/tags/}"
-            APP_VERSION="${APP_VERSION#v}"
-          elif [[ -n "${RELEASE_TAG}" ]]; then
-            APP_VERSION="${RELEASE_TAG#v}"
-          else
-            APP_VERSION="0.0.0-ci.${GITHUB_RUN_NUMBER}"
-          fi
-          echo "APP_VERSION=${APP_VERSION}" >> "${GITHUB_ENV}"
-          echo "INSTALLER_BASENAME=Decodium_${APP_VERSION}_Setup_x64" >> "${GITHUB_ENV}"
-
       - name: Show toolchain versions
         run: |
           set -euo pipefail
@@ -248,11 +250,14 @@ jobs:
           cp build-windows/*.qm "${DIST}/" 2>/dev/null || true
           # These files are required runtime data. Never publish a bundle when
           # one is absent: the previous best-effort copy hid packaging errors.
-          cp cty.dat sat.dat ALLCALL7.TXT "${DIST}/"
+          cp resources/runtime/cty.dat \
+             resources/runtime/sat.dat \
+             resources/runtime/ALLCALL7.TXT \
+             "${DIST}/"
           test -s "${DIST}/cty.dat"
           test -s "${DIST}/sat.dat"
           test -s "${DIST}/ALLCALL7.TXT"
-          test "$(sha256sum cty.dat | awk '{print $1}')" = \
+          test "$(sha256sum resources/runtime/cty.dat | awk '{print $1}')" = \
                "$(sha256sum "${DIST}/cty.dat" | awk '{print $1}')"
           cp -R sounds "${DIST}/sounds"
           cp -R Palettes "${DIST}/Palettes"

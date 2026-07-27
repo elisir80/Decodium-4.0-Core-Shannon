@@ -115,6 +115,7 @@ extern "C" void ftx_ft8_a7_save_c (int jseq, float dt, float freq, char const* m
 #include "revision_utils.hpp"
 #include "qt_helpers.hpp"
 #include "Network/NetworkAccessManager.hpp"
+#include "Network/UdpClientId.hpp"
 #include "Audio/soundout.h"
 #include "Audio/soundin.h"
 #include "Modulator/Modulator.hpp"
@@ -324,6 +325,12 @@ namespace
                                  QString const& fallback = QString {})
   {
     return legacy_runtime_setting (settings, key, fallback).toString ().trimmed ();
+  }
+
+  QString legacy_udp_client_id (QSettings const * settings)
+  {
+    return decodium::network::normalizedUdpClientId (
+      legacy_runtime_string (settings, QStringLiteral ("UDPClientId"), QStringLiteral ("WSJTX")));
   }
 
   quint16 legacy_runtime_udp_port (QSettings const * settings,
@@ -1056,13 +1063,6 @@ static void apply_async_ft2_tdelta (QString& line, qint64 asyncRxStartMs)
     .arg (freq, 4)
     .arg (marker)
     .arg (payload);
-}
-
-static QString udp_client_id_from_application_name ()
-{
-  // Keep WSJT-X compatibility for third-party UDP clients that key off
-  // the traditional application identifier instead of just the schema.
-  return QStringLiteral ("WSJTX");
 }
 
 static QDateTime decode_line_timestamp_for_log (QDateTime fallbackUtc, QString const& message)
@@ -2681,7 +2681,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   m_optimizingProgress {"Optimizing decoder FFTs for your CPU.\n"
       "Please be patient,\n"
       "this may take a few minutes", QString {}, 0, 1, this},
-  m_messageClient {new MessageClient {udp_client_id_from_application_name (),
+  m_messageClient {new MessageClient {legacy_udp_client_id (m_settings),
         version (), revision (),
 	m_config.udp_server_name (), m_config.udp_server_port (),
 	m_config.udp_listen_port (),
@@ -3124,23 +3124,28 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   QStringList const tertiary_udp_interfaces = legacy_runtime_interfaces (m_settings, QStringLiteral ("UDPTertiaryInterface"));
   bool const tertiary_udp_adif_enabled =
     legacy_runtime_bool (m_settings, QStringLiteral ("UDPTertiaryLoggedAdifEnabled"), true);
-  qInfo ().noquote () << QStringLiteral ("Reporting config legacy: UDP primary server=%1:%2 listen=%3 interface=%4 ttl=%5 acceptRequests=%6")
+  QString const udp_client_id = legacy_udp_client_id (m_settings);
+  qInfo ().noquote () << QStringLiteral ("Reporting config legacy: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7")
 	                         .arg (m_config.udp_server_name (),
 	                               QString::number (m_config.udp_server_port ()),
 	                               QString::number (m_config.udp_listen_port ()),
+	                               udp_client_id,
 	                               legacy_reporting_interfaces (m_config.udp_interface_names ()),
 	                               QString::number (m_config.udp_TTL ()),
 	                               legacy_reporting_state (m_config.accept_udp_requests ()));
-  qInfo ().noquote () << QStringLiteral ("Reporting config legacy: UDP secondary %1 server=%2:%3 listen=ephemeral interface=%4 loggedADIF=%5")
+  qInfo ().noquote () << QStringLiteral ("Reporting config legacy: UDP secondary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
                          .arg (legacy_reporting_state (secondary_udp_enabled),
                                legacy_runtime_string (m_settings, QStringLiteral ("UDPSecondaryServer"), m_config.udp_server_name ()),
                                QString::number (legacy_runtime_udp_port (m_settings, QStringLiteral ("UDPSecondaryServerPort"), 2239)),
+                               udp_client_id,
                                legacy_reporting_interfaces (secondary_udp_interfaces),
+                               QString::number (legacy_runtime_ttl (m_settings, QStringLiteral ("UDPSecondaryTTL"), m_config.udp_TTL ())),
                                legacy_reporting_state (secondary_udp_adif_enabled));
-  qInfo ().noquote () << QStringLiteral ("Reporting config legacy: UDP tertiary %1 server=%2:%3 listen=ephemeral interface=%4 ttl=%5 loggedADIF=%6")
+  qInfo ().noquote () << QStringLiteral ("Reporting config legacy: UDP tertiary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
                          .arg (legacy_reporting_state (tertiary_udp_enabled),
                                legacy_runtime_string (m_settings, QStringLiteral ("UDPTertiaryServer"), QStringLiteral ("127.0.0.1")),
                                QString::number (legacy_runtime_udp_port (m_settings, QStringLiteral ("UDPTertiaryServerPort"), 2237)),
+                               udp_client_id,
                                legacy_reporting_interfaces (tertiary_udp_interfaces),
                                QString::number (legacy_runtime_ttl (m_settings, QStringLiteral ("UDPTertiaryTTL"), m_config.udp_TTL ())),
                                legacy_reporting_state (tertiary_udp_adif_enabled));
@@ -3149,6 +3154,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
 	                               m_config.n1mm_server_name (),
 	                               QString::number (m_config.n1mm_server_port ()));
   m_messageClient->enable (m_config.accept_udp_requests ());
+  ensureSecondaryUdpMessageClient ();
   ensureTertiaryUdpMessageClient ();
   connect (m_messageClient, &MessageClient::clear_decodes, [this] (quint8 window) {
       ++window;
@@ -4649,6 +4655,67 @@ MainWindow::~MainWindow()
   reset_qmap_shared_memory ("shutdown");
 }
 
+MessageClient * MainWindow::ensureSecondaryUdpMessageClient() const
+{
+  bool const enabled = legacy_runtime_bool (m_settings, QStringLiteral ("UDPSecondaryEnabled"), true);
+  if (!enabled)
+    {
+      if (m_udpSecondaryMessageClient)
+        {
+          qInfo ().noquote () << QStringLiteral ("Stopping legacy secondary UDP MessageClient");
+          m_udpSecondaryMessageClient->disconnect (this);
+          m_udpSecondaryMessageClient->deleteLater ();
+          m_udpSecondaryMessageClient = nullptr;
+          m_udpSecondaryRuntimeKey.clear ();
+        }
+      return nullptr;
+    }
+
+  QString const client_id = legacy_udp_client_id (m_settings);
+  QString const server_name =
+    legacy_runtime_string (m_settings, QStringLiteral ("UDPSecondaryServer"), m_config.udp_server_name ());
+  quint16 const server_port =
+    legacy_runtime_udp_port (m_settings, QStringLiteral ("UDPSecondaryServerPort"), 2239);
+  int const ttl = legacy_runtime_ttl (m_settings, QStringLiteral ("UDPSecondaryTTL"), m_config.udp_TTL ());
+  QStringList const interfaces = legacy_runtime_interfaces (m_settings, QStringLiteral ("UDPSecondaryInterface"));
+  QString const runtime_key = QStringLiteral ("%1|%2|%3|%4|%5")
+                                .arg (client_id,
+                                      server_name,
+                                      QString::number (server_port),
+                                      QString::number (ttl),
+                                      legacy_reporting_interfaces (interfaces));
+
+  if (m_udpSecondaryMessageClient && m_udpSecondaryRuntimeKey == runtime_key)
+    {
+      return m_udpSecondaryMessageClient;
+    }
+
+  if (m_udpSecondaryMessageClient)
+    {
+      qInfo ().noquote () << QStringLiteral ("Restarting legacy secondary UDP MessageClient");
+      m_udpSecondaryMessageClient->disconnect (this);
+      m_udpSecondaryMessageClient->deleteLater ();
+      m_udpSecondaryMessageClient = nullptr;
+      m_udpSecondaryRuntimeKey.clear ();
+    }
+
+  m_udpSecondaryMessageClient = new MessageClient {client_id,
+      version (), revision (), server_name, server_port, 0, interfaces, ttl,
+      const_cast<MainWindow *> (this), QStringLiteral ("legacy secondary")};
+  m_udpSecondaryMessageClient->enable (false);
+  connect (m_udpSecondaryMessageClient, &MessageClient::error, const_cast<MainWindow *> (this), [] (QString const& msg) {
+    qWarning ().noquote () << QStringLiteral ("Legacy secondary UDP MessageClient error: %1").arg (msg);
+  });
+  m_udpSecondaryRuntimeKey = runtime_key;
+  qInfo ().noquote () << QStringLiteral ("Legacy secondary UDP MessageClient started: server=%1:%2 listen=0 clientId=%3 interface=%4 ttl=%5")
+                         .arg (server_name,
+                               QString::number (server_port),
+                               client_id,
+                               legacy_reporting_interfaces (interfaces),
+                               QString::number (ttl));
+  return m_udpSecondaryMessageClient;
+}
+
 MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
 {
   bool const enabled = legacy_runtime_bool (m_settings, QStringLiteral ("UDPTertiaryEnabled"), false);
@@ -4665,14 +4732,16 @@ MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
       return nullptr;
     }
 
+  QString const client_id = legacy_udp_client_id (m_settings);
   QString const server_name =
     legacy_runtime_string (m_settings, QStringLiteral ("UDPTertiaryServer"), QStringLiteral ("127.0.0.1"));
   quint16 const server_port =
     legacy_runtime_udp_port (m_settings, QStringLiteral ("UDPTertiaryServerPort"), 2237);
   int const ttl = legacy_runtime_ttl (m_settings, QStringLiteral ("UDPTertiaryTTL"), m_config.udp_TTL ());
   QStringList const interfaces = legacy_runtime_interfaces (m_settings, QStringLiteral ("UDPTertiaryInterface"));
-  QString const runtime_key = QStringLiteral ("%1|%2|%3|%4")
-                                .arg (server_name,
+  QString const runtime_key = QStringLiteral ("%1|%2|%3|%4|%5")
+                                .arg (client_id,
+                                      server_name,
                                       QString::number (server_port),
                                       QString::number (ttl),
                                       legacy_reporting_interfaces (interfaces));
@@ -4691,7 +4760,7 @@ MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
       m_udpTertiaryRuntimeKey.clear ();
     }
 
-  m_udpTertiaryMessageClient = new MessageClient {udp_client_id_from_application_name (),
+  m_udpTertiaryMessageClient = new MessageClient {client_id,
       version (), revision (), server_name, server_port, 0, interfaces, ttl,
       const_cast<MainWindow *> (this), QStringLiteral ("legacy tertiary")};
   m_udpTertiaryMessageClient->enable (false);
@@ -4699,12 +4768,50 @@ MessageClient * MainWindow::ensureTertiaryUdpMessageClient() const
     qWarning ().noquote () << QStringLiteral ("Legacy tertiary UDP MessageClient error: %1").arg (msg);
   });
   m_udpTertiaryRuntimeKey = runtime_key;
-  qInfo ().noquote () << QStringLiteral ("Legacy tertiary UDP MessageClient started: server=%1:%2 listen=0 interface=%3 ttl=%4")
+  qInfo ().noquote () << QStringLiteral ("Legacy tertiary UDP MessageClient started: server=%1:%2 listen=0 clientId=%3 interface=%4 ttl=%5")
                          .arg (server_name,
                                QString::number (server_port),
+                               client_id,
                                legacy_reporting_interfaces (interfaces),
                                QString::number (ttl));
   return m_udpTertiaryMessageClient;
+}
+
+void MainWindow::refreshLegacyUdpReporting()
+{
+  if (m_settings)
+    {
+      m_settings->sync ();
+    }
+  QString const client_id = legacy_udp_client_id (m_settings);
+  QString const server_name =
+    legacy_runtime_string (m_settings, QStringLiteral ("UDPServer"), m_config.udp_server_name ());
+  quint16 const server_port =
+    legacy_runtime_udp_port (m_settings, QStringLiteral ("UDPServerPort"), m_config.udp_server_port ());
+  quint16 const listen_port =
+    legacy_runtime_udp_port (m_settings, QStringLiteral ("UDPListenPort"), m_config.udp_listen_port ());
+  int const ttl = legacy_runtime_ttl (m_settings, QStringLiteral ("UDPTTL"), m_config.udp_TTL ());
+  QStringList const interfaces = legacy_runtime_interfaces (m_settings, QStringLiteral ("UDPInterface"));
+  bool const accept_requests =
+    legacy_runtime_bool (m_settings, QStringLiteral ("AcceptUDPRequests"), m_config.accept_udp_requests ());
+
+  m_messageClient->set_client_id (client_id);
+  m_messageClient->set_server_port (server_port);
+  m_messageClient->set_TTL (ttl);
+  m_messageClient->set_listen_port (listen_port);
+  m_messageClient->set_server (server_name, interfaces);
+  m_messageClient->enable (accept_requests);
+
+  ensureSecondaryUdpMessageClient ();
+  ensureTertiaryUdpMessageClient ();
+  qInfo ().noquote () << QStringLiteral ("Legacy UDP reporting refreshed: primary=%1:%2 listen=%3 clientId=%4 secondary=%5 tertiary=%6")
+                         .arg (server_name,
+                               QString::number (server_port),
+                               QString::number (listen_port),
+                               client_id,
+                               legacy_reporting_state (nullptr != m_udpSecondaryMessageClient),
+                               legacy_reporting_state (nullptr != m_udpTertiaryMessageClient));
+  statusUpdate ();
 }
 
 QString MainWindow::legacyCallsign() const
@@ -16496,6 +16603,14 @@ void MainWindow::on_EraseButton_clicked ()
 void MainWindow::band_activity_cleared ()
 {
   m_messageClient->decodes_cleared ();
+  if (auto * client = ensureSecondaryUdpMessageClient ())
+    {
+      client->decodes_cleared ();
+    }
+  if (auto * client = ensureTertiaryUdpMessageClient ())
+    {
+      client->decodes_cleared ();
+    }
   m_decodeDedupeCache.clear ();
   m_decodeDedupeLastPruneMs = 0;
   m_asyncDedupeSet.clear ();
@@ -22951,7 +23066,13 @@ void MainWindow::acceptQSO (QDateTime const& QSO_date_off, QString const& call, 
 	        client->logged_ADIF (ADIF);
 	      }
 	    };
-	    send_qso_logged (m_messageClient, true);
+	    send_qso_logged (
+	      m_messageClient,
+	      legacy_runtime_bool (m_settings, QStringLiteral ("UDPPrimaryLoggedAdifEnabled"), true));
+	    if (legacy_runtime_bool (m_settings, QStringLiteral ("UDPSecondaryQsoLoggedEnabled"), false))
+	      {
+	        send_qso_logged (ensureSecondaryUdpMessageClient (), false);
+	      }
 	    send_qso_logged (ensureTertiaryUdpMessageClient (),
 	                     legacy_runtime_bool (m_settings, QStringLiteral ("UDPTertiaryLoggedAdifEnabled"), true));
 	
@@ -27065,6 +27186,7 @@ void MainWindow::publishDecodeTransport (bool is_new, DecodedText const& decoded
 	                        , m_diskData);
 	      };
 	      send_decode (m_messageClient);
+	      send_decode (ensureSecondaryUdpMessageClient ());
 	      send_decode (ensureTertiaryUdpMessageClient ());
 	    }
 
@@ -27186,6 +27308,7 @@ void MainWindow::enqueueDecode (DecodedText decoded_text, bool modifier, bool au
 	                                , dist);
 	      };
 	      send_enqueue_decode (m_messageClient);
+	      send_enqueue_decode (ensureSecondaryUdpMessageClient ());
 	      send_enqueue_decode (ensureTertiaryUdpMessageClient ());
 	    }
 }
@@ -27204,6 +27327,7 @@ void MainWindow::postWSPRDecode (bool is_new, QStringList parts)
 	                         , m_diskData);
 	  };
 	  send_wspr_decode (m_messageClient);
+	  send_wspr_decode (ensureSecondaryUdpMessageClient ());
 	  send_wspr_decode (ensureTertiaryUdpMessageClient ());
 }
 
@@ -27769,6 +27893,7 @@ void MainWindow::statusUpdate () const
 	                           m_config.miles());  //avt 5/7/24
 	  };
 	  send_status (m_messageClient);
+	  send_status (ensureSecondaryUdpMessageClient ());
 	  send_status (ensureTertiaryUdpMessageClient ());
 	}
 

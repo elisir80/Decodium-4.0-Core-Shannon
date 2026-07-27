@@ -119,6 +119,7 @@ public:
     void setSpecialOperationActivity(int activity);
     void setSuperFoxEnabled(bool enabled);
     void setEmbeddedUiUpdatesEnabled(bool enabled);
+    void refreshUdpReporting();
 
 Q_SIGNALS:
     void waterfallRowReady(QByteArray const& rowLevels,

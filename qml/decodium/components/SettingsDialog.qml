@@ -5116,6 +5116,8 @@ Dialog {
                             id: webServerPortField
                             text: String(bridge.getSetting("WebServerPort", 8080))
                             Layout.preferredWidth: 80
+                            leftPadding: 8
+                            rightPadding: 8
                             validator: IntValidator { bottom: 1024; top: 65535 }
                             color: textPrimary
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 3 }
@@ -6482,6 +6484,8 @@ Dialog {
                                         color: textPrimary
                                         font.pixelSize: controlFontSize
                                         horizontalAlignment: TextInput.AlignRight
+                                        leftPadding: 8
+                                        rightPadding: 8
                                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: 120
@@ -6725,6 +6729,8 @@ Dialog {
                                         color: textPrimary
                                         font.pixelSize: controlFontSize
                                         horizontalAlignment: TextInput.AlignRight
+                                        leftPadding: 8
+                                        rightPadding: 8
                                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                                         Layout.preferredWidth: 146
                                         implicitHeight: controlHeight
@@ -6972,6 +6978,8 @@ Dialog {
                                     enabled: decodeColorRow.colorEnabled
                                     opacity: enabled ? 1.0 : 0.55
                                     selectByMouse: true
+                                    leftPadding: 8
+                                    rightPadding: 8
                                     implicitHeight: controlHeight
                                     Layout.preferredWidth: 110
                                     color: settingsDialog.validHexColor(text) ? textPrimary : "#ff5555"
@@ -7099,6 +7107,8 @@ Dialog {
                                     enabled: decodeColorRow.bgEnabled
                                     opacity: enabled ? 1.0 : 0.55
                                     selectByMouse: true
+                                    leftPadding: 8
+                                    rightPadding: 8
                                     implicitHeight: controlHeight
                                     Layout.preferredWidth: 90
                                     color: settingsDialog.validHexColor(text) ? textPrimary : "#ff5555"
