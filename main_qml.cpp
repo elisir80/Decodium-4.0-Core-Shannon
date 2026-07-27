@@ -1795,7 +1795,11 @@ int main(int argc, char* argv[])
     QString const normalizedLabMode = labMode.trimmed().toUpper();
     bool const labMinuteSlotTest = normalizedLabMode == QStringLiteral("JT4")
         || normalizedLabMode == QStringLiteral("JT9")
-        || normalizedLabMode == QStringLiteral("JT65");
+        || normalizedLabMode == QStringLiteral("JT65")
+        || normalizedLabMode == QStringLiteral("FST4")
+        || normalizedLabMode == QStringLiteral("FST4W")
+        || normalizedLabMode.startsWith(QStringLiteral("FST4-"))
+        || normalizedLabMode.startsWith(QStringLiteral("FST4W-"));
     if ((parser.isSet(labSendTxMsOption) || parser.isSet(labSendTxPlanOption)) && !labMinuteSlotTest) {
         qputenv("DECODIUM_LAB_FORCE_TX_IMMEDIATE", QByteArrayLiteral("1"));
         qInfo() << "[LAB] immediate TX timing bypass enabled by lab standard TX trigger";

@@ -3724,9 +3724,11 @@ private:
         if (normalizedMode=="FST4-120") return 120000;
         if (normalizedMode=="FST4-300") return 300000;
         if (normalizedMode=="FST4-900") return 900000;
+        if (normalizedMode=="FST4-1800") return 1800000;
         if (normalizedMode=="FST4W-120") return 120000;
         if (normalizedMode=="FST4W-300") return 300000;
         if (normalizedMode=="FST4W-900") return 900000;
+        if (normalizedMode=="FST4W-1800") return 1800000;
         return 15000;  // FT8 default
     }
     void updateSoundOutputDevice();

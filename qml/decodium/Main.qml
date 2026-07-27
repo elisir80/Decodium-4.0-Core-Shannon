@@ -6816,7 +6816,7 @@ ApplicationWindow {
                             visible: mainWindow.waterfallPanelVisible && !waterfallDetached
                                      && mainWindow.startupWaterfallVisualReady
                                 showControls: true
-                                minFreq: 0
+                                minFreq: 200
                                 maxFreq: 3200
                                 spectrumHeight: 150
                                 // 1.0.178 — Rimosso layer.enabled FBO (1.0.175):
@@ -12213,7 +12213,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                             Text {
                                 text: waterfallDetachedLoader.item
                                       ? waterfallDetachedLoader.item.minFreq + "-" + waterfallDetachedLoader.item.maxFreq + " Hz"
-                                      : "0-3200 Hz"
+                                      : "200-3200 Hz"
                                 font.pixelSize: 10
                                 font.family: decodiumMonoFontFamily
                                 color: textSecondary
@@ -12299,7 +12299,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         id: waterfallDisplayDetached
                         visible: mainWindow.waterfallPanelVisible && waterfallDetached
                         showControls: true
-                        minFreq: 0
+                        minFreq: 200
                         maxFreq: 3200
                         spectrumHeight: 150
 
