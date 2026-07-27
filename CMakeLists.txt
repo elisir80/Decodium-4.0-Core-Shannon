@@ -240,23 +240,35 @@ endif ()
 #
 # Project sources
 #
+set (DECODIUM_SOURCE_DIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/app
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/bridge
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/models
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/radio
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/security
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/services
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
+  )
+include_directories (${DECODIUM_SOURCE_DIRS})
+
 set (fort_qt_CXXSRCS
   lib/shmem.cpp
   )
 
 set (wsjt_qt_CXXSRCS
-  helper_functions.cpp
-  SecureSettings.cpp
-  qt_helpers.cpp
+  src/core/helper_functions.cpp
+  src/security/SecureSettings.cpp
+  src/core/qt_helpers.cpp
   widgets/MessageBox.cpp
-  MetaDataRegistry.cpp
+  src/app/MetaDataRegistry.cpp
   Network/NetworkServerLookup.cpp
-  revision_utils.cpp
-  L10nLoader.cpp
-  WFPalette.cpp
-  Radio.cpp
-  RadioMetaType.cpp
-  NonInheritingProcess.cpp
+  src/core/revision_utils.cpp
+  src/app/L10nLoader.cpp
+  src/ui/WFPalette.cpp
+  src/radio/Radio.cpp
+  src/radio/RadioMetaType.cpp
+  src/core/NonInheritingProcess.cpp
   models/IARURegions.cpp
   models/Bands.cpp
   models/Modes.cpp
@@ -268,7 +280,7 @@ set (wsjt_qt_CXXSRCS
   item_delegates/ForeignKeyDelegate.cpp
   item_delegates/MessageItemDelegate.cpp
   validators/LiveFrequencyValidator.cpp
-  GetUserId.cpp
+  src/app/GetUserId.cpp
   Audio/AudioDevice.cpp
   Transceiver/Transceiver.cpp
   Transceiver/TransceiverBase.cpp
@@ -286,17 +298,17 @@ set (wsjt_qt_CXXSRCS
   widgets/HintedSpinBox.cpp
   widgets/RestrictedSpinBox.cpp
   widgets/HelpTextWindow.cpp
-  SampleDownloader.cpp
+  src/services/SampleDownloader.cpp
   SampleDownloader/DirectoryDelegate.cpp
   SampleDownloader/Directory.cpp
   SampleDownloader/FileNode.cpp
   SampleDownloader/RemoteFile.cpp
-  DisplayManual.cpp
-  MultiSettings.cpp
+  src/ui/DisplayManual.cpp
+  src/app/MultiSettings.cpp
   validators/MaidenheadLocatorValidator.cpp
   validators/CallsignValidator.cpp
   widgets/SplashScreen.cpp
-  EqualizationToolsDialog.cpp
+  src/ui/EqualizationToolsDialog.cpp
   Detector/FtxFt8Stage4.cpp
   Detector/FST4DecodeWorker.cpp
   widgets/DoubleClickablePushButton.cpp
@@ -352,7 +364,7 @@ set (wsjt_qt_CXXSRCS
   Detector/Conv232Compat.cpp
   Detector/IndexSortCompat.cpp
   Modulator/WsprLegacyCompat.cpp
-  otpgenerator.cpp
+  src/core/otpgenerator.cpp
   )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread")
@@ -363,7 +375,7 @@ set (wsjt_qtmm_CXXSRCS
   )
 
 set (wsjtx_CXXSRCS
-  DecodiumLogging.cpp
+  src/bridge/DecodiumLogging.cpp
   logbook/logbook.cpp
   Network/PSKReporter.cpp
   Modulator/Modulator.cpp
@@ -384,7 +396,7 @@ set (wsjtx_CXXSRCS
   widgets/logqso.cpp
   widgets/displaytext.cpp
   Decoder/decodedtext.cpp
-  getfile.cpp
+  src/core/getfile.cpp
   Audio/soundout.cpp
   Audio/soundin.cpp
   widgets/meterwidget.cpp
@@ -407,48 +419,48 @@ set (wsjtx_CXXSRCS
   Modulator/RTTYModulator.cpp
   Detector/RTTYDetector.cpp
   Decoder/BaudotDecoder.cpp
-  DecodiumCertificate.cpp
+  src/security/DecodiumCertificate.cpp
   WSPR/WsprTxScheduler.cpp
   widgets/mainwindow.cpp
-  Configuration.cpp
-  main.cpp
-  DecodiumBridge.cpp
-  DecodiumBridge.h
+  src/app/Configuration.cpp
+  src/app/main.cpp
+  src/bridge/DecodiumBridge.cpp
+  src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
   Sequencer/MessageTokenRules.cpp
   Sequencer/MessageTokenRules.hpp
-  DecodiumSelfCheck.cpp
-  DecodiumSelfCheck.hpp
-  UsStateDataManager.cpp
-  UsStateDataManager.h
+  src/app/DecodiumSelfCheck.cpp
+  src/app/DecodiumSelfCheck.hpp
+  src/services/UsStateDataManager.cpp
+  src/services/UsStateDataManager.h
   lib/persistence/DecodeHistoryWorker.cpp
   lib/persistence/DecodeHistoryWorker.h
-  DecodeListModel.cpp
-  DecodeListModel.h
+  src/models/DecodeListModel.cpp
+  src/models/DecodeListModel.h
   controllers/FT2LinkQmlAdapter.cpp
   controllers/FT2LinkQmlAdapter.hpp
-  DecodiumDiagnostics.cpp
-  DecodiumDiagnostics.h
-  DecodiumLegacyBackend.cpp
-  DecodiumLegacyBackend.h
-  DecodiumPropagationManager.cpp
-  DecodiumPropagationManager.h
-  DecodiumAudioSink.h
+  src/bridge/DecodiumDiagnostics.cpp
+  src/bridge/DecodiumDiagnostics.h
+  src/bridge/DecodiumLegacyBackend.cpp
+  src/bridge/DecodiumLegacyBackend.h
+  src/services/DecodiumPropagationManager.cpp
+  src/services/DecodiumPropagationManager.h
+  src/bridge/DecodiumAudioSink.h
   controllers/ActiveStationsModel.cpp
   controllers/ActiveStationsModel.hpp
-  DecodiumThemeManager.cpp
-  DecodiumThemeManager.h
-  DecodiumSubManagers.cpp
-  DecodiumSubManagers.h
-  DecodiumCatManager.cpp
-  DecodiumCatManager.h
-  DecodiumOmniRigManager.cpp
-  DecodiumOmniRigManager.h
-  DecodiumTransceiverManager.cpp
-  DecodiumTransceiverManager.h
-  DecodiumAlertManager.cpp
-  DecodiumAlertManager.h
+  src/ui/DecodiumThemeManager.cpp
+  src/ui/DecodiumThemeManager.h
+  src/bridge/DecodiumSubManagers.cpp
+  src/bridge/DecodiumSubManagers.h
+  src/radio/DecodiumCatManager.cpp
+  src/radio/DecodiumCatManager.h
+  src/radio/DecodiumOmniRigManager.cpp
+  src/radio/DecodiumOmniRigManager.h
+  src/radio/DecodiumTransceiverManager.cpp
+  src/radio/DecodiumTransceiverManager.h
+  src/services/DecodiumAlertManager.cpp
+  src/services/DecodiumAlertManager.h
   Network/FoxVerifier.cpp
   Network/FoxVerifier.hpp
   Network/DecodiumWsprUploader.cpp
@@ -459,11 +471,11 @@ set (wsjtx_CXXSRCS
   Network/DecodiumCloudlogLite.h
   Network/DecodiumQrzLogbookLite.cpp
   Network/DecodiumQrzLogbookLite.h
-  DecodiumDxCluster.cpp
-  DecodiumDxCluster.h
-  DxccLookup.cpp
-  DxccLookup.h
-  DecodiumLegacyLinkCompat.cpp
+  src/services/DecodiumDxCluster.cpp
+  src/services/DecodiumDxCluster.h
+  src/services/DxccLookup.cpp
+  src/services/DxccLookup.h
+  src/bridge/DecodiumLegacyLinkCompat.cpp
   Network/wsprnet.cpp
   WSPR/WSPRBandHopping.cpp
   widgets/ExportCabrillo.cpp
@@ -483,7 +495,7 @@ if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
 endif ()
 
 set (wsjt_CXXSRCS
-  Logger.cpp
+  src/core/Logger.cpp
   lib/crc10.cpp
   lib/crc13.cpp
   lib/crc14.cpp
@@ -624,7 +636,7 @@ set (wsjt_CSRCS
   )
 
 set (wsjt_qt_UISRCS
-  wf_palette_design_dialog.ui
+  src/ui/wf_palette_design_dialog.ui
   widgets/FoxLogWindow.ui
   widgets/CabrilloLogWindow.ui
   )
@@ -661,7 +673,7 @@ set (wsjtx_UISRCS
   widgets/activeStations.ui
   widgets/widegraph.ui
   widgets/logqso.ui
-  Configuration.ui
+  src/app/Configuration.ui
   widgets/ExportCabrillo.ui
   widgets/QSYMessage.ui
   widgets/QSYMessageCreator.ui
@@ -670,14 +682,14 @@ set (wsjtx_UISRCS
   )
 
 set (UDP_library_CXXSRCS
-  Radio.cpp
-  RadioMetaType.cpp
+  src/radio/Radio.cpp
+  src/radio/RadioMetaType.cpp
   Network/NetworkMessage.cpp
   UDPExamples/MessageServer.cpp
   )
 
 set (UDP_library_HEADERS
-  Radio.hpp
+  src/radio/Radio.hpp
   UDPExamples/MessageServer.hpp
   ${PROJECT_BINARY_DIR}/udp_export.h
   )
@@ -1384,6 +1396,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 #
 set (sources
   ${CMAKE_SOURCE_DIR}/*
+  ${CMAKE_SOURCE_DIR}/src/*
   ${CMAKE_SOURCE_DIR}/logbook/*
   ${CMAKE_SOURCE_DIR}/lib/*
   )
@@ -1659,14 +1672,14 @@ else ()
   set (decodium_qml_VERSION_RESOURCES "")
 endif ()
 set (DECODIUM_QML_LEGACY_SRCS
-  DecodiumLogging.cpp
+  src/bridge/DecodiumLogging.cpp
   logbook/logbook.cpp
   Network/PSKReporter.cpp
   Detector/Detector.cpp
   widgets/logqso.cpp
   widgets/displaytext.cpp
   Decoder/decodedtext.cpp
-  getfile.cpp
+  src/core/getfile.cpp
   widgets/meterwidget.cpp
   widgets/signalmeter.cpp
   widgets/plotter.cpp
@@ -1687,10 +1700,10 @@ set (DECODIUM_QML_LEGACY_SRCS
   Modulator/RTTYModulator.cpp
   Detector/RTTYDetector.cpp
   Decoder/BaudotDecoder.cpp
-  DecodiumCertificate.cpp
+  src/security/DecodiumCertificate.cpp
   WSPR/WsprTxScheduler.cpp
   widgets/mainwindow.cpp
-  Configuration.cpp
+  src/app/Configuration.cpp
   WSPR/WSPRBandHopping.cpp
   widgets/ExportCabrillo.cpp
   widgets/QSYMessage.cpp
@@ -1701,61 +1714,61 @@ set (DECODIUM_QML_LEGACY_SRCS
   widgets/DXClusterWindow.cpp
   )
 add_executable (decodium_qml
-  main_qml.cpp
-  DecodiumStorageMigration.cpp
-  DecodiumStorageMigration.hpp
-  DecodiumSelfCheck.cpp
-  DecodiumSelfCheck.hpp
-  DecodiumUpdater.cpp
-  DecodiumUpdater.hpp
-  DecodiumCommunityReport.cpp
-  DecodiumCommunityReport.hpp
-  DecodiumBridge.cpp
-  DecodiumBridge.h
+  src/app/main_qml.cpp
+  src/app/DecodiumStorageMigration.cpp
+  src/app/DecodiumStorageMigration.hpp
+  src/app/DecodiumSelfCheck.cpp
+  src/app/DecodiumSelfCheck.hpp
+  src/app/DecodiumUpdater.cpp
+  src/app/DecodiumUpdater.hpp
+  src/services/DecodiumCommunityReport.cpp
+  src/services/DecodiumCommunityReport.hpp
+  src/bridge/DecodiumBridge.cpp
+  src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
   Sequencer/MessageTokenRules.cpp
   Sequencer/MessageTokenRules.hpp
-  UsStateDataManager.cpp
-  UsStateDataManager.h
-  DecodeListModel.cpp
-  DecodeListModel.h
+  src/services/UsStateDataManager.cpp
+  src/services/UsStateDataManager.h
+  src/models/DecodeListModel.cpp
+  src/models/DecodeListModel.h
   lib/persistence/DecodeHistoryWorker.cpp
   lib/persistence/DecodeHistoryWorker.h
   Web/DecodiumWebServer.cpp
   Web/DecodiumWebServer.hpp
-  DecodiumDiagnostics.cpp
-  DecodiumPropagationManager.cpp
-  DecodiumPropagationManager.h
-  DecodiumLegacyBackend.cpp
-  DecodiumLegacyBackend.h
-  helper_functions.cpp
-  helper_functions.h
+  src/bridge/DecodiumDiagnostics.cpp
+  src/services/DecodiumPropagationManager.cpp
+  src/services/DecodiumPropagationManager.h
+  src/bridge/DecodiumLegacyBackend.cpp
+  src/bridge/DecodiumLegacyBackend.h
+  src/core/helper_functions.cpp
+  src/core/helper_functions.h
   controllers/ActiveStationsModel.cpp
   controllers/ActiveStationsModel.hpp
   controllers/FT2LinkQmlAdapter.cpp
   controllers/FT2LinkQmlAdapter.hpp
-  DecodiumThemeManager.cpp
-  DecodiumThemeManager.h
-  DecodiumSubManagers.cpp
-  DecodiumSubManagers.h
-  DecodiumCatManager.cpp
-  DecodiumCatManager.h
-  DecodiumOmniRigManager.cpp
-  DecodiumOmniRigManager.h
-  DecodiumTransceiverManager.cpp
-  DecodiumTransceiverManager.h
-  DecodiumAlertManager.cpp
-  DecodiumAlertManager.h
-  WaterfallItem.cpp
-  WaterfallItem.hpp
-  PanadapterItem.cpp
-  PanadapterItem.hpp
-  WorldMapItem.cpp
-  WorldMapItem.hpp
-  WorldMapGpuItem.cpp
-  WorldMapGpuItem.hpp
-  DecodiumAudioSink.h
+  src/ui/DecodiumThemeManager.cpp
+  src/ui/DecodiumThemeManager.h
+  src/bridge/DecodiumSubManagers.cpp
+  src/bridge/DecodiumSubManagers.h
+  src/radio/DecodiumCatManager.cpp
+  src/radio/DecodiumCatManager.h
+  src/radio/DecodiumOmniRigManager.cpp
+  src/radio/DecodiumOmniRigManager.h
+  src/radio/DecodiumTransceiverManager.cpp
+  src/radio/DecodiumTransceiverManager.h
+  src/services/DecodiumAlertManager.cpp
+  src/services/DecodiumAlertManager.h
+  src/ui/WaterfallItem.cpp
+  src/ui/WaterfallItem.hpp
+  src/ui/PanadapterItem.cpp
+  src/ui/PanadapterItem.hpp
+  src/ui/WorldMapItem.cpp
+  src/ui/WorldMapItem.hpp
+  src/ui/WorldMapGpuItem.cpp
+  src/ui/WorldMapGpuItem.hpp
+  src/bridge/DecodiumAudioSink.h
   Detector/FT8DecodeWorker.cpp
   Detector/FT2DecodeWorker.cpp
   Detector/FT4DecodeWorker.cpp
@@ -1785,7 +1798,7 @@ add_executable (decodium_qml
   Audio/soundin.cpp
   Audio/soundout.cpp
   Modulator/Modulator.cpp
-  DecodiumQmlLegacyCompat.cpp
+  src/bridge/DecodiumQmlLegacyCompat.cpp
   Network/FoxVerifier.cpp
   Network/FoxVerifier.hpp
   Network/wsprnet.cpp
@@ -1798,10 +1811,10 @@ add_executable (decodium_qml
   Network/DecodiumCloudlogLite.h
   Network/DecodiumQrzLogbookLite.cpp
   Network/DecodiumQrzLogbookLite.h
-  DecodiumDxCluster.cpp
-  DecodiumDxCluster.h
-  DxccLookup.cpp
-  DxccLookup.h
+  src/services/DecodiumDxCluster.cpp
+  src/services/DecodiumDxCluster.h
+  src/services/DxccLookup.cpp
+  src/services/DxccLookup.h
   ${DECODIUM_QML_LEGACY_SRCS}
   ${wsjtx_GENUISRCS}
   ${wsjtx_RESOURCES_RCC}
@@ -2026,6 +2039,9 @@ add_custom_command (TARGET decodium_qml POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_CURRENT_SOURCE_DIR}/sat.dat"
     "$<TARGET_FILE_DIR:decodium_qml>/sat.dat"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/cty.dat"
+    "$<TARGET_FILE_DIR:decodium_qml>/cty.dat"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/sounds"
     "$<TARGET_FILE_DIR:decodium_qml>/sounds"

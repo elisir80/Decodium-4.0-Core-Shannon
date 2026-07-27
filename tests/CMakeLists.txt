@@ -16,7 +16,11 @@ endif ()
 
 # Tell CMake to run moc when necessary
 set (CMAKE_AUTOMOC ON)
-include_directories (${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+include_directories (
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}
+  ${DECODIUM_SOURCE_DIRS}
+  )
 
 add_executable (test_qt_helpers
   test_qt_helpers.cpp
@@ -30,7 +34,7 @@ add_executable (test_qso_sequencer_rules
   test_qso_sequencer_rules.cpp
   ../Sequencer/QsoSequencerRules.cpp
   ../Sequencer/MessageTokenRules.cpp
-  ../Radio.cpp)
+  ../src/radio/Radio.cpp)
 target_link_libraries (test_qso_sequencer_rules Qt6::Test Qt6::Core)
 add_test (NAME test_qso_sequencer_rules COMMAND $<TARGET_FILE:test_qso_sequencer_rules>)
 
@@ -67,7 +71,7 @@ add_executable (test_jt4_roundtrip test_jt4_roundtrip.cpp)
 target_link_libraries (test_jt4_roundtrip wsjt_qt wsjt_cxx Qt6::Core)
 add_test (NAME test_jt4_roundtrip COMMAND $<TARGET_FILE:test_jt4_roundtrip>)
 
-add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../DecodiumDxCluster.cpp)
+add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../src/services/DecodiumDxCluster.cpp)
 target_link_libraries (test_dx_cluster_band Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_dx_cluster_band COMMAND $<TARGET_FILE:test_dx_cluster_band>)
 
@@ -106,7 +110,7 @@ add_test (NAME test_streaming_list_model COMMAND $<TARGET_FILE:test_streaming_li
 
 add_executable (test_decode_list_model
   test_decode_list_model.cpp
-  ../DecodeListModel.cpp)
+  ../src/models/DecodeListModel.cpp)
 target_link_libraries (test_decode_list_model Qt6::Test Qt6::Core)
 add_test (NAME test_decode_list_model COMMAND $<TARGET_FILE:test_decode_list_model>)
 

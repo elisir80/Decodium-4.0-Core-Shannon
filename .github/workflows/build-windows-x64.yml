@@ -246,7 +246,13 @@ jobs:
           cp icons/windows-icons/decodium.ico "${DIST}/decodium.ico"
           cp -R build-windows/qml "${DIST}/"
           cp build-windows/*.qm "${DIST}/" 2>/dev/null || true
-          cp cty.dat sat.dat ALLCALL7.TXT "${DIST}/" 2>/dev/null || true
+          # These files are required runtime data. Never publish a bundle when
+          # one is absent: the previous best-effort copy hid packaging errors.
+          cp cty.dat sat.dat ALLCALL7.TXT "${DIST}/"
+          test -s "${DIST}/cty.dat"
+          test -s "${DIST}/sat.dat"
+          test -s "${DIST}/ALLCALL7.TXT"
+          cmp -s cty.dat "${DIST}/cty.dat"
           cp -R sounds "${DIST}/sounds"
           cp -R Palettes "${DIST}/Palettes"
 
@@ -455,7 +461,7 @@ jobs:
             "/DSourceRoot=$env:GITHUB_WORKSPACE" `
             "/DOutputDir=$outputDir" `
             "/DOutputBaseFilename=$env:INSTALLER_BASENAME" `
-            "$env:GITHUB_WORKSPACE\installer\decodium_setup.iss"
+            "$env:GITHUB_WORKSPACE\packaging\windows\decodium_setup.iss"
 
           Get-ChildItem $outputDir
 

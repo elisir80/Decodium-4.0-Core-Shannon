@@ -283,8 +283,8 @@ jobs:
 
       - name: Build ARM64 AppImage via Debian Trixie container
         run: |
-          chmod +x build-arm.sh
-          OUTPUT_DIR="${RUNNER_TEMP}/build-arm-output" VERSION="${VERSION}" ./build-arm.sh
+          chmod +x scripts/build/build-arm.sh
+          OUTPUT_DIR="${RUNNER_TEMP}/build-arm-output" VERSION="${VERSION}" ./scripts/build/build-arm.sh
           ls -lh "${RUNNER_TEMP}/build-arm-output"
 
       - name: Upload artifacts
