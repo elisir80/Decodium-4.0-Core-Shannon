@@ -252,7 +252,8 @@ jobs:
           test -s "${DIST}/cty.dat"
           test -s "${DIST}/sat.dat"
           test -s "${DIST}/ALLCALL7.TXT"
-          cmp -s cty.dat "${DIST}/cty.dat"
+          test "$(sha256sum cty.dat | awk '{print $1}')" = \
+               "$(sha256sum "${DIST}/cty.dat" | awk '{print $1}')"
           cp -R sounds "${DIST}/sounds"
           cp -R Palettes "${DIST}/Palettes"
 
