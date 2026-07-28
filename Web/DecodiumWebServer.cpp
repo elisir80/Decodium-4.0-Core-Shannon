@@ -1,6 +1,6 @@
 // -*- Mode: C++ -*-
 #include "DecodiumWebServer.hpp"
-#include "../DecodiumBridge.h"
+#include "DecodiumBridge.h"
 
 #include <QDateTime>
 #include <QHostAddress>

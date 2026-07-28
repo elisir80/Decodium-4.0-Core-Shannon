@@ -83,6 +83,27 @@ include (CTest)
 #
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake/Modules ${CMAKE_MODULE_PATH})
 
+set (DECODIUM_RUNTIME_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources/runtime")
+set (DECODIUM_CMAKE_TEMPLATE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/CMake/templates")
+set (DECODIUM_PACKAGING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/packaging")
+
+set (DECODIUM_REQUIRED_RUNTIME_FILES
+  ALLCALL7.TXT
+  CALL3.TXT
+  cty.dat
+  cty.dat_copyright.txt
+  eclipse.txt
+  grid.dat
+  sat.dat
+  )
+foreach (required_runtime_file IN LISTS DECODIUM_REQUIRED_RUNTIME_FILES)
+  if (NOT EXISTS "${DECODIUM_RUNTIME_DATA_DIR}/${required_runtime_file}")
+    message (FATAL_ERROR
+      "Required runtime data file is missing: "
+      "${DECODIUM_RUNTIME_DATA_DIR}/${required_runtime_file}")
+  endif ()
+endforeach ()
+
 set (PROJECT_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
 if (NOT PROJECT_ARCHITECTURE)
   # This is supposed to happen already on Windows
@@ -240,23 +261,35 @@ endif ()
 #
 # Project sources
 #
+set (DECODIUM_SOURCE_DIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/app
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/bridge
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/core
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/models
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/radio
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/security
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/services
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
+  )
+include_directories (${DECODIUM_SOURCE_DIRS})
+
 set (fort_qt_CXXSRCS
   lib/shmem.cpp
   )
 
 set (wsjt_qt_CXXSRCS
-  helper_functions.cpp
-  SecureSettings.cpp
-  qt_helpers.cpp
+  src/core/helper_functions.cpp
+  src/security/SecureSettings.cpp
+  src/core/qt_helpers.cpp
   widgets/MessageBox.cpp
-  MetaDataRegistry.cpp
+  src/app/MetaDataRegistry.cpp
   Network/NetworkServerLookup.cpp
-  revision_utils.cpp
-  L10nLoader.cpp
-  WFPalette.cpp
-  Radio.cpp
-  RadioMetaType.cpp
-  NonInheritingProcess.cpp
+  src/core/revision_utils.cpp
+  src/app/L10nLoader.cpp
+  src/ui/WFPalette.cpp
+  src/radio/Radio.cpp
+  src/radio/RadioMetaType.cpp
+  src/core/NonInheritingProcess.cpp
   models/IARURegions.cpp
   models/Bands.cpp
   models/Modes.cpp
@@ -268,7 +301,7 @@ set (wsjt_qt_CXXSRCS
   item_delegates/ForeignKeyDelegate.cpp
   item_delegates/MessageItemDelegate.cpp
   validators/LiveFrequencyValidator.cpp
-  GetUserId.cpp
+  src/app/GetUserId.cpp
   Audio/AudioDevice.cpp
   Transceiver/Transceiver.cpp
   Transceiver/TransceiverBase.cpp
@@ -286,17 +319,17 @@ set (wsjt_qt_CXXSRCS
   widgets/HintedSpinBox.cpp
   widgets/RestrictedSpinBox.cpp
   widgets/HelpTextWindow.cpp
-  SampleDownloader.cpp
+  src/services/SampleDownloader.cpp
   SampleDownloader/DirectoryDelegate.cpp
   SampleDownloader/Directory.cpp
   SampleDownloader/FileNode.cpp
   SampleDownloader/RemoteFile.cpp
-  DisplayManual.cpp
-  MultiSettings.cpp
+  src/ui/DisplayManual.cpp
+  src/app/MultiSettings.cpp
   validators/MaidenheadLocatorValidator.cpp
   validators/CallsignValidator.cpp
   widgets/SplashScreen.cpp
-  EqualizationToolsDialog.cpp
+  src/ui/EqualizationToolsDialog.cpp
   Detector/FtxFt8Stage4.cpp
   Detector/FST4DecodeWorker.cpp
   widgets/DoubleClickablePushButton.cpp
@@ -352,7 +385,7 @@ set (wsjt_qt_CXXSRCS
   Detector/Conv232Compat.cpp
   Detector/IndexSortCompat.cpp
   Modulator/WsprLegacyCompat.cpp
-  otpgenerator.cpp
+  src/core/otpgenerator.cpp
   )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread")
@@ -363,7 +396,7 @@ set (wsjt_qtmm_CXXSRCS
   )
 
 set (wsjtx_CXXSRCS
-  DecodiumLogging.cpp
+  src/bridge/DecodiumLogging.cpp
   logbook/logbook.cpp
   Network/PSKReporter.cpp
   Modulator/Modulator.cpp
@@ -384,7 +417,7 @@ set (wsjtx_CXXSRCS
   widgets/logqso.cpp
   widgets/displaytext.cpp
   Decoder/decodedtext.cpp
-  getfile.cpp
+  src/core/getfile.cpp
   Audio/soundout.cpp
   Audio/soundin.cpp
   widgets/meterwidget.cpp
@@ -407,13 +440,13 @@ set (wsjtx_CXXSRCS
   Modulator/RTTYModulator.cpp
   Detector/RTTYDetector.cpp
   Decoder/BaudotDecoder.cpp
-  DecodiumCertificate.cpp
+  src/security/DecodiumCertificate.cpp
   WSPR/WsprTxScheduler.cpp
   widgets/mainwindow.cpp
-  Configuration.cpp
-  main.cpp
-  DecodiumBridge.cpp
-  DecodiumBridge.h
+  src/app/Configuration.cpp
+  src/app/main.cpp
+  src/bridge/DecodiumBridge.cpp
+  src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
   Sequencer/MessageTokenRules.cpp
@@ -421,37 +454,37 @@ set (wsjtx_CXXSRCS
   Sequencer/QsoSequencerState.hpp
   Sequencer/ISequencerSink.hpp
   Sequencer/QsoSequencer.hpp
-  DecodiumSelfCheck.cpp
-  DecodiumSelfCheck.hpp
-  UsStateDataManager.cpp
-  UsStateDataManager.h
+  src/app/DecodiumSelfCheck.cpp
+  src/app/DecodiumSelfCheck.hpp
+  src/services/UsStateDataManager.cpp
+  src/services/UsStateDataManager.h
   lib/persistence/DecodeHistoryWorker.cpp
   lib/persistence/DecodeHistoryWorker.h
-  DecodeListModel.cpp
-  DecodeListModel.h
+  src/models/DecodeListModel.cpp
+  src/models/DecodeListModel.h
   controllers/FT2LinkQmlAdapter.cpp
   controllers/FT2LinkQmlAdapter.hpp
-  DecodiumDiagnostics.cpp
-  DecodiumDiagnostics.h
-  DecodiumLegacyBackend.cpp
-  DecodiumLegacyBackend.h
-  DecodiumPropagationManager.cpp
-  DecodiumPropagationManager.h
-  DecodiumAudioSink.h
+  src/bridge/DecodiumDiagnostics.cpp
+  src/bridge/DecodiumDiagnostics.h
+  src/bridge/DecodiumLegacyBackend.cpp
+  src/bridge/DecodiumLegacyBackend.h
+  src/services/DecodiumPropagationManager.cpp
+  src/services/DecodiumPropagationManager.h
+  src/bridge/DecodiumAudioSink.h
   controllers/ActiveStationsModel.cpp
   controllers/ActiveStationsModel.hpp
-  DecodiumThemeManager.cpp
-  DecodiumThemeManager.h
-  DecodiumSubManagers.cpp
-  DecodiumSubManagers.h
-  DecodiumCatManager.cpp
-  DecodiumCatManager.h
-  DecodiumOmniRigManager.cpp
-  DecodiumOmniRigManager.h
-  DecodiumTransceiverManager.cpp
-  DecodiumTransceiverManager.h
-  DecodiumAlertManager.cpp
-  DecodiumAlertManager.h
+  src/ui/DecodiumThemeManager.cpp
+  src/ui/DecodiumThemeManager.h
+  src/bridge/DecodiumSubManagers.cpp
+  src/bridge/DecodiumSubManagers.h
+  src/radio/DecodiumCatManager.cpp
+  src/radio/DecodiumCatManager.h
+  src/radio/DecodiumOmniRigManager.cpp
+  src/radio/DecodiumOmniRigManager.h
+  src/radio/DecodiumTransceiverManager.cpp
+  src/radio/DecodiumTransceiverManager.h
+  src/services/DecodiumAlertManager.cpp
+  src/services/DecodiumAlertManager.h
   Network/FoxVerifier.cpp
   Network/FoxVerifier.hpp
   Network/DecodiumWsprUploader.cpp
@@ -462,11 +495,11 @@ set (wsjtx_CXXSRCS
   Network/DecodiumCloudlogLite.h
   Network/DecodiumQrzLogbookLite.cpp
   Network/DecodiumQrzLogbookLite.h
-  DecodiumDxCluster.cpp
-  DecodiumDxCluster.h
-  DxccLookup.cpp
-  DxccLookup.h
-  DecodiumLegacyLinkCompat.cpp
+  src/services/DecodiumDxCluster.cpp
+  src/services/DecodiumDxCluster.h
+  src/services/DxccLookup.cpp
+  src/services/DxccLookup.h
+  src/bridge/DecodiumLegacyLinkCompat.cpp
   Network/wsprnet.cpp
   WSPR/WSPRBandHopping.cpp
   widgets/ExportCabrillo.cpp
@@ -486,7 +519,7 @@ if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
 endif ()
 
 set (wsjt_CXXSRCS
-  Logger.cpp
+  src/core/Logger.cpp
   lib/crc10.cpp
   lib/crc13.cpp
   lib/crc14.cpp
@@ -627,7 +660,7 @@ set (wsjt_CSRCS
   )
 
 set (wsjt_qt_UISRCS
-  wf_palette_design_dialog.ui
+  src/ui/wf_palette_design_dialog.ui
   widgets/FoxLogWindow.ui
   widgets/CabrilloLogWindow.ui
   )
@@ -664,7 +697,7 @@ set (wsjtx_UISRCS
   widgets/activeStations.ui
   widgets/widegraph.ui
   widgets/logqso.ui
-  Configuration.ui
+  src/app/Configuration.ui
   widgets/ExportCabrillo.ui
   widgets/QSYMessage.ui
   widgets/QSYMessageCreator.ui
@@ -673,14 +706,14 @@ set (wsjtx_UISRCS
   )
 
 set (UDP_library_CXXSRCS
-  Radio.cpp
-  RadioMetaType.cpp
+  src/radio/Radio.cpp
+  src/radio/RadioMetaType.cpp
   Network/NetworkMessage.cpp
   UDPExamples/MessageServer.cpp
   )
 
 set (UDP_library_HEADERS
-  Radio.hpp
+  src/radio/Radio.hpp
   UDPExamples/MessageServer.hpp
   ${PROJECT_BINARY_DIR}/udp_export.h
   )
@@ -719,7 +752,7 @@ set (all_C_and_CXXSRCS
   )
 
 set (TOP_LEVEL_RESOURCES
-  sat.dat
+  "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
   artwork/ft2logo.png
   contrib/gpl-v3-logo.svg
   artwork/splash.png
@@ -1387,6 +1420,7 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 #
 set (sources
   ${CMAKE_SOURCE_DIR}/*
+  ${CMAKE_SOURCE_DIR}/src/*
   ${CMAKE_SOURCE_DIR}/logbook/*
   ${CMAKE_SOURCE_DIR}/lib/*
   )
@@ -1474,7 +1508,10 @@ add_resources (decodium_RESOURCES "" ${TOP_LEVEL_RESOURCES})
 add_resources (decodium_RESOURCES /Palettes ${PALETTE_FILES})
 add_resources (decodium_RESOURCES /Translations ${QM_FILES})
 
-configure_file (decodium.qrc.in decodium.qrc @ONLY)
+configure_file (
+  "${DECODIUM_CMAKE_TEMPLATE_DIR}/decodium.qrc.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/decodium.qrc"
+  @ONLY)
 
 # UI generation
 qt_wrap_ui (wsjt_qt_GENUISRCS ${wsjt_qt_UISRCS})
@@ -1662,14 +1699,14 @@ else ()
   set (decodium_qml_VERSION_RESOURCES "")
 endif ()
 set (DECODIUM_QML_LEGACY_SRCS
-  DecodiumLogging.cpp
+  src/bridge/DecodiumLogging.cpp
   logbook/logbook.cpp
   Network/PSKReporter.cpp
   Detector/Detector.cpp
   widgets/logqso.cpp
   widgets/displaytext.cpp
   Decoder/decodedtext.cpp
-  getfile.cpp
+  src/core/getfile.cpp
   widgets/meterwidget.cpp
   widgets/signalmeter.cpp
   widgets/plotter.cpp
@@ -1690,10 +1727,10 @@ set (DECODIUM_QML_LEGACY_SRCS
   Modulator/RTTYModulator.cpp
   Detector/RTTYDetector.cpp
   Decoder/BaudotDecoder.cpp
-  DecodiumCertificate.cpp
+  src/security/DecodiumCertificate.cpp
   WSPR/WsprTxScheduler.cpp
   widgets/mainwindow.cpp
-  Configuration.cpp
+  src/app/Configuration.cpp
   WSPR/WSPRBandHopping.cpp
   widgets/ExportCabrillo.cpp
   widgets/QSYMessage.cpp
@@ -1704,17 +1741,17 @@ set (DECODIUM_QML_LEGACY_SRCS
   widgets/DXClusterWindow.cpp
   )
 add_executable (decodium_qml
-  main_qml.cpp
-  DecodiumStorageMigration.cpp
-  DecodiumStorageMigration.hpp
-  DecodiumSelfCheck.cpp
-  DecodiumSelfCheck.hpp
-  DecodiumUpdater.cpp
-  DecodiumUpdater.hpp
-  DecodiumCommunityReport.cpp
-  DecodiumCommunityReport.hpp
-  DecodiumBridge.cpp
-  DecodiumBridge.h
+  src/app/main_qml.cpp
+  src/app/DecodiumStorageMigration.cpp
+  src/app/DecodiumStorageMigration.hpp
+  src/app/DecodiumSelfCheck.cpp
+  src/app/DecodiumSelfCheck.hpp
+  src/app/DecodiumUpdater.cpp
+  src/app/DecodiumUpdater.hpp
+  src/services/DecodiumCommunityReport.cpp
+  src/services/DecodiumCommunityReport.hpp
+  src/bridge/DecodiumBridge.cpp
+  src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
   Sequencer/MessageTokenRules.cpp
@@ -1722,46 +1759,46 @@ add_executable (decodium_qml
   Sequencer/QsoSequencerState.hpp
   Sequencer/ISequencerSink.hpp
   Sequencer/QsoSequencer.hpp
-  UsStateDataManager.cpp
-  UsStateDataManager.h
-  DecodeListModel.cpp
-  DecodeListModel.h
+  src/services/UsStateDataManager.cpp
+  src/services/UsStateDataManager.h
+  src/models/DecodeListModel.cpp
+  src/models/DecodeListModel.h
   lib/persistence/DecodeHistoryWorker.cpp
   lib/persistence/DecodeHistoryWorker.h
   Web/DecodiumWebServer.cpp
   Web/DecodiumWebServer.hpp
-  DecodiumDiagnostics.cpp
-  DecodiumPropagationManager.cpp
-  DecodiumPropagationManager.h
-  DecodiumLegacyBackend.cpp
-  DecodiumLegacyBackend.h
-  helper_functions.cpp
-  helper_functions.h
+  src/bridge/DecodiumDiagnostics.cpp
+  src/services/DecodiumPropagationManager.cpp
+  src/services/DecodiumPropagationManager.h
+  src/bridge/DecodiumLegacyBackend.cpp
+  src/bridge/DecodiumLegacyBackend.h
+  src/core/helper_functions.cpp
+  src/core/helper_functions.h
   controllers/ActiveStationsModel.cpp
   controllers/ActiveStationsModel.hpp
   controllers/FT2LinkQmlAdapter.cpp
   controllers/FT2LinkQmlAdapter.hpp
-  DecodiumThemeManager.cpp
-  DecodiumThemeManager.h
-  DecodiumSubManagers.cpp
-  DecodiumSubManagers.h
-  DecodiumCatManager.cpp
-  DecodiumCatManager.h
-  DecodiumOmniRigManager.cpp
-  DecodiumOmniRigManager.h
-  DecodiumTransceiverManager.cpp
-  DecodiumTransceiverManager.h
-  DecodiumAlertManager.cpp
-  DecodiumAlertManager.h
-  WaterfallItem.cpp
-  WaterfallItem.hpp
-  PanadapterItem.cpp
-  PanadapterItem.hpp
-  WorldMapItem.cpp
-  WorldMapItem.hpp
-  WorldMapGpuItem.cpp
-  WorldMapGpuItem.hpp
-  DecodiumAudioSink.h
+  src/ui/DecodiumThemeManager.cpp
+  src/ui/DecodiumThemeManager.h
+  src/bridge/DecodiumSubManagers.cpp
+  src/bridge/DecodiumSubManagers.h
+  src/radio/DecodiumCatManager.cpp
+  src/radio/DecodiumCatManager.h
+  src/radio/DecodiumOmniRigManager.cpp
+  src/radio/DecodiumOmniRigManager.h
+  src/radio/DecodiumTransceiverManager.cpp
+  src/radio/DecodiumTransceiverManager.h
+  src/services/DecodiumAlertManager.cpp
+  src/services/DecodiumAlertManager.h
+  src/ui/WaterfallItem.cpp
+  src/ui/WaterfallItem.hpp
+  src/ui/PanadapterItem.cpp
+  src/ui/PanadapterItem.hpp
+  src/ui/WorldMapItem.cpp
+  src/ui/WorldMapItem.hpp
+  src/ui/WorldMapGpuItem.cpp
+  src/ui/WorldMapGpuItem.hpp
+  src/bridge/DecodiumAudioSink.h
   Detector/FT8DecodeWorker.cpp
   Detector/FT2DecodeWorker.cpp
   Detector/FT4DecodeWorker.cpp
@@ -1791,7 +1828,7 @@ add_executable (decodium_qml
   Audio/soundin.cpp
   Audio/soundout.cpp
   Modulator/Modulator.cpp
-  DecodiumQmlLegacyCompat.cpp
+  src/bridge/DecodiumQmlLegacyCompat.cpp
   Network/FoxVerifier.cpp
   Network/FoxVerifier.hpp
   Network/wsprnet.cpp
@@ -1804,10 +1841,10 @@ add_executable (decodium_qml
   Network/DecodiumCloudlogLite.h
   Network/DecodiumQrzLogbookLite.cpp
   Network/DecodiumQrzLogbookLite.h
-  DecodiumDxCluster.cpp
-  DecodiumDxCluster.h
-  DxccLookup.cpp
-  DxccLookup.h
+  src/services/DecodiumDxCluster.cpp
+  src/services/DecodiumDxCluster.h
+  src/services/DxccLookup.cpp
+  src/services/DxccLookup.h
   ${DECODIUM_QML_LEGACY_SRCS}
   ${wsjtx_GENUISRCS}
   ${wsjtx_RESOURCES_RCC}
@@ -2030,8 +2067,11 @@ add_custom_command (TARGET decodium_qml POST_BUILD
     "${CMAKE_CURRENT_SOURCE_DIR}/artwork/maps/world_overlay_2048x1024.png"
     "$<TARGET_FILE_DIR:decodium_qml>/artwork/maps/world_overlay_2048x1024.png"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/sat.dat"
+    "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
     "$<TARGET_FILE_DIR:decodium_qml>/sat.dat"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"
+    "$<TARGET_FILE_DIR:decodium_qml>/cty.dat"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/sounds"
     "$<TARGET_FILE_DIR:decodium_qml>/sounds"
@@ -2043,10 +2083,10 @@ if (APPLE)
     COMMAND ${CMAKE_COMMAND} -E remove_directory
       $<TARGET_FILE_DIR:wsjtx>/sounds
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/cty.dat"
+      "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"
       "$<TARGET_FILE_DIR:wsjtx>/../Resources/cty.dat"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/sat.dat"
+      "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
       "$<TARGET_FILE_DIR:wsjtx>/../Resources/sat.dat"
     COMMENT "Refreshing macOS bundle data files"
     )
@@ -2211,24 +2251,22 @@ install (PROGRAMS
   )
 
 install (FILES
-  README
+  README.md
   COPYING
   AUTHORS
-  THANKS
-  NEWS
-  BUGS
+  doc/project/THANKS
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
   #COMPONENT runtime
   )
 
 install (FILES
-  cty.dat
-  CALL3.TXT
-  cty.dat_copyright.txt
-  grid.dat
-  sat.dat
+  "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"
+  "${DECODIUM_RUNTIME_DATA_DIR}/CALL3.TXT"
+  "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat_copyright.txt"
+  "${DECODIUM_RUNTIME_DATA_DIR}/grid.dat"
+  "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
   contrib/Ephemeris/JPLEPH
-  eclipse.txt
+  "${DECODIUM_RUNTIME_DATA_DIR}/eclipse.txt"
   artwork/maps/earth_2048x1024.jpg
   artwork/maps/world_overlay_2048x1024.png
   DESTINATION ${CMAKE_INSTALL_DATADIR}/${CMAKE_PROJECT_NAME}
@@ -2247,13 +2285,13 @@ install (FILES
 
 if (APPLE)
   install (FILES
-    ALLCALL7.TXT
+    "${DECODIUM_RUNTIME_DATA_DIR}/ALLCALL7.TXT"
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}
     #COMPONENT runtime
     )
 else ()
   install (FILES
-    ALLCALL7.TXT
+    "${DECODIUM_RUNTIME_DATA_DIR}/ALLCALL7.TXT"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     #COMPONENT runtime
     )
@@ -2334,7 +2372,7 @@ add_dependencies (wsjt_qt revisiontag)
 # versioning and configuration
 #
 configure_file (
-  "${CMAKE_CURRENT_SOURCE_DIR}/decodium_config.h.in"
+  "${DECODIUM_CMAKE_TEMPLATE_DIR}/decodium_config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/wsjtx_config.h"
   )
 
@@ -2343,7 +2381,9 @@ if (NOT WIN32 AND NOT APPLE)
   # install a desktop file so wsjtx appears in the application start
   # menu with an icon
   install (
-    FILES wsjtx.desktop message_aggregator.desktop
+    FILES
+      "${DECODIUM_PACKAGING_DIR}/linux/wsjtx.desktop"
+      "${DECODIUM_PACKAGING_DIR}/linux/message_aggregator.desktop"
     DESTINATION share/applications
     #COMPONENT runtime
     )
@@ -2380,7 +2420,8 @@ endif ()
 #
 # packaging
 #
-set (CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/package_description.txt")
+set (CPACK_PACKAGE_DESCRIPTION_FILE
+  "${DECODIUM_PACKAGING_DIR}/package_description.txt")
 set (CPACK_MONOLITHIC_INSTALL 1)
 set (CPACK_PACKAGE_NAME "decodium")
 set (CPACK_PACKAGE_VERSION_MAJOR ${FORK_RELEASE_VERSION_MAJOR})
@@ -2426,7 +2467,7 @@ set (CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set (CPACK_RPM_PACKAGE_REQUIRES "qt5-qtbase >= 5.9, qt5-qtserialport >= 5.9, qt5-qtmultimedia >= 5.9, qt5-qtwebsockets >= 5.9, qt5-qtsvg >= 5.9, libusbx >= 1.0.22, libgfortran >= 7, libgomp >= 7, fftw-libs-single >= 3.3, boost-log >= 1.62")
 set (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /usr/share/pixmaps /usr/share/applications /usr/share/man /usr/share/man1)
 
-configure_file ("${PROJECT_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
+configure_file ("${DECODIUM_CMAKE_TEMPLATE_DIR}/CMakeCPackOptions.cmake.in"
   "${PROJECT_BINARY_DIR}/CMakeCPackOptions.cmake" @ONLY)
 set (CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/CMakeCPackOptions.cmake")
 

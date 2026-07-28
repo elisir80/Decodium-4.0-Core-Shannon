@@ -186,6 +186,7 @@ public:
   bool legacyTuning() const;
   bool legacyCatConnected() const;
   double legacySignalLevel() const;
+  void refreshLegacyUdpReporting();
   int legacyBandActivityRevision() const;
   QStringList legacyBandActivityLines() const;
   QStringList legacyTakeBandActivityDelta(bool * reset);
@@ -831,6 +832,7 @@ private:
   void readWidebandDecodes();
   void configActiveStations();
   void sfox_tx();
+  MessageClient * ensureSecondaryUdpMessageClient() const;
   MessageClient * ensureTertiaryUdpMessageClient() const;
   bool play_DXcall = false;
   bool inSettings = false;
@@ -1628,6 +1630,8 @@ private:
   QProgressDialog m_optimizingProgress;
   QTimer m_heartbeat;
   MessageClient * m_messageClient;
+  mutable MessageClient * m_udpSecondaryMessageClient {nullptr};
+  mutable QString m_udpSecondaryRuntimeKey;
   mutable MessageClient * m_udpTertiaryMessageClient {nullptr};
   mutable QString m_udpTertiaryRuntimeKey;
   QPointer<RemoteCommandServer> m_remoteCommandServer;

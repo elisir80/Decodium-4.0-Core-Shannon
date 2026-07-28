@@ -13,6 +13,12 @@ on:
       - 'Modulator/FtxWaveformGenerator.*'
       - 'tests/test_jt4_roundtrip.cpp'
       - 'CMakeLists.txt'
+      - 'CMake/templates/**'
+      - 'packaging/**'
+      - 'resources/runtime/**'
+      - 'scripts/ci/**'
+      - 'fork_release_version.txt'
+      - 'doc/GITHUB_RELEASE_BODY_*.md'
       - '.github/workflows/test-runner.yml'
   push:
     paths:
@@ -25,6 +31,12 @@ on:
       - 'Modulator/FtxWaveformGenerator.*'
       - 'tests/test_jt4_roundtrip.cpp'
       - 'CMakeLists.txt'
+      - 'CMake/templates/**'
+      - 'packaging/**'
+      - 'resources/runtime/**'
+      - 'scripts/ci/**'
+      - 'fork_release_version.txt'
+      - 'doc/GITHUB_RELEASE_BODY_*.md'
       - '.github/workflows/test-runner.yml'
 
 concurrency:
@@ -32,7 +44,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  repository-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate repository layout and release version
+        run: scripts/ci/validate-repository-layout.sh
+
   ft2link-macos:
+    needs: repository-contract
     runs-on: macos-15-intel
     timeout-minutes: 45
     steps:
@@ -75,6 +98,7 @@ jobs:
             --output-on-failure
 
   ft2link-linux:
+    needs: repository-contract
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -140,6 +164,7 @@ jobs:
             --output-on-failure
 
   ft2link-windows:
+    needs: repository-contract
     runs-on: windows-2022
     timeout-minutes: 60
 

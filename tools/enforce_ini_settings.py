@@ -19,7 +19,7 @@ Quindi ogni singolo sito va convertito al costruttore con formato esplicito.
 MANUTENZIONE DOPO GLI ABSORB DA elisir80
 ----------------------------------------
 Upstream continua a scrivere QSettings("Decodium","Decodium3") (91 siti solo in
-DecodiumBridge.cpp). Dopo ogni "allineati a elisir80" rilancia:
+src/bridge/DecodiumBridge.cpp). Dopo ogni "allineati a elisir80" rilancia:
 
     python tools/enforce_ini_settings.py            # applica
     python tools/enforce_ini_settings.py --check    # solo verifica (exit 1 se ne restano)

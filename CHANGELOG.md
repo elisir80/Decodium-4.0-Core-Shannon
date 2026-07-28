@@ -1,5 +1,56 @@
 # Changelog / Registro Modifiche
 
+## [1.0.503] - 2026-07-27
+
+### Repository and release infrastructure
+
+- Moved required runtime data to `resources/runtime`, configured CMake inputs
+  to `CMake/templates`, and platform metadata to `packaging`.
+- Preserved historical technical references and acknowledgements under `doc`.
+- Removed obsolete Qt 5, Cirrus, duplicate Linux, and hard-coded macOS
+  workflows, along with unused root placeholders and the orphan `aethersdr`
+  gitlink.
+- Added a repository-layout validator and a single release-version resolver.
+  Windows, macOS, and Linux release workflows now reject tags or manual version
+  inputs that differ from `fork_release_version.txt`.
+- Made required runtime data and matching release notes part of the CI
+  contract, and removed the stale hard-coded Windows installer version.
+- Kept CAT frequency rejection handling source-compatible with Linux
+  distributions that still provide Hamlib 4.5.
+- Kept installed runtime filenames unchanged so upgrades preserve application
+  lookup behavior on Windows, macOS, and Linux.
+
+### UDP reporting
+
+- Normalized the configured WSJT-X Client ID once and serialized the same value
+  on primary, secondary and tertiary UDP endpoints.
+- Added a complete secondary WSJT-X protocol client for decode, status, WSPR,
+  clear and optional logged-QSO traffic instead of limiting secondary output to
+  selected ADIF notifications.
+- Applied reporting changes immediately to the embedded legacy backend without
+  restarting the application.
+- Added diagnostic lines that identify the Client ID, destination, interface
+  and TTL used by every UDP endpoint.
+- Added loopback tests that inspect heartbeat packets from all three endpoints
+  and verify live Client ID changes.
+
+### macOS audio and panadapter
+
+- Reduced the native AudioQueue callback quantum to approximately 20 ms by
+  default while retaining four queued buffers for stability.
+- Added `DECODIUM_MAC_AUDIO_QUEUE_FRAMES` as a diagnostic override.
+- Changed the spectrum timer to a precise timer and allowed the accelerated
+  legacy GPU path to follow the configured FPS cap.
+- Kept adaptive throttling during DEEP decode and real CPU pressure, with
+  conservative behavior for CPU fallback rendering.
+
+### Runtime data and UI
+
+- Updated source-tree fallbacks for `CALL3.TXT`, `cty.dat` and `sat.dat` to the
+  maintained `resources/runtime` directory.
+- Added internal padding to TCP port, frequency, offset and color-entry fields
+  in Setup so numeric values no longer touch their borders.
+
 ## [1.0.351] - 2026-05-31
 
 ### Italiano

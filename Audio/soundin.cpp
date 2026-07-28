@@ -512,7 +512,22 @@ bool SoundInput::startNativeMacInput (QAudioDevice const& device,
   m_audioQueueBuffers.clear ();
 
   int const requestedFrames = framesPerBuffer > 0 ? framesPerBuffer : 2048;
-  int const bufferFrames = qBound (512, requestedFrames, 8192);
+  // The generic buffer request is intentionally large on Windows to survive
+  // UI/decode stalls.  Using that same value as the native AudioQueue callback
+  // quantum makes macOS deliver fresh spectrum samples only every ~171 ms at
+  // 48 kHz.  Keep four queued buffers, but make each callback about 20 ms so
+  // the GPU panadapter receives continuously advancing PCM.
+  int const defaultNativeFrames = qBound (512, format.sampleRate () / 50, 2048);
+  bool nativeFramesOverrideOk = false;
+  int const nativeFramesOverride =
+      qEnvironmentVariableIntValue ("DECODIUM_MAC_AUDIO_QUEUE_FRAMES",
+                                    &nativeFramesOverrideOk);
+  int const nativeFrameLimit = nativeFramesOverrideOk && nativeFramesOverride > 0
+      ? qBound (512, nativeFramesOverride, 8192)
+      : defaultNativeFrames;
+  int const bufferFrames = qBound (512,
+                                   qMin (requestedFrames, nativeFrameLimit),
+                                   8192);
   UInt32 const bufferBytes = static_cast<UInt32> (format.bytesForFrames (bufferFrames));
   for (int i = 0; i < 4; ++i)
     {
@@ -553,7 +568,11 @@ bool SoundInput::startNativeMacInput (QAudioDevice const& device,
            << device.description()
            << "id=" << QString::fromUtf8 (deviceId)
            << "format=" << inputFormatSummary (format)
-           << "bufferFrames=" << bufferFrames;
+           << "requestedFrames=" << requestedFrames
+           << "bufferFrames=" << bufferFrames
+           << "callbackMs="
+           << QString::number (1000.0 * bufferFrames / format.sampleRate (),
+                               'f', 2);
   cummulative_lost_usec_ = std::numeric_limits<qint64>::min ();
   emitStatusIfChanged (tr ("Receiving"), QAudio::ActiveState);
   return true;

@@ -1518,11 +1518,14 @@ HamlibTransceiver::FrequencyWriteResult HamlibTransceiver::set_frequency_or_tole
       return FrequencyWriteResult::Deferred;
     }
 
+  // RIG_ELIMIT was added after Hamlib 4.5. Keep the stable numeric error code
+  // here so source builds remain compatible with distributions shipping 4.5.
+  constexpr int hamlib_limit_exceeded_error = 21;
   bool const rejected_frequency =
       rc == -RIG_ERJCTED
       || rc == -RIG_EINVAL
       || rc == -RIG_EDOM
-      || rc == -RIG_ELIMIT
+      || rc == -hamlib_limit_exceeded_error
       || rc == -RIG_ENAVAIL
       || rc == -RIG_ENTARGET
       || rc == -RIG_EVFO;
