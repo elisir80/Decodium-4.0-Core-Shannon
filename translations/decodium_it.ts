@@ -624,7 +624,7 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Chiamata diretta</translation>
     </message>
     <message>
@@ -11207,7 +11207,7 @@ non verranno mostrate!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Solo Preferred</translation>
     </message>
     <message>
@@ -11217,7 +11217,7 @@ non verranno mostrate!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Banda:</translation>
     </message>
     <message>
@@ -11459,6 +11459,16 @@ Suggerimento: chiudi OmniRig dall'icona nella tray di Windows, poi premi di nuov
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(altre %1 righe)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Avanzate</translation>
     </message>
 </context>
 <context>
@@ -12275,7 +12285,7 @@ Richiede Conservative FT2 attivo. Default: ON sotto Conservative.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>BANDE OPERATIVE</translation>
     </message>
     <message>
@@ -12400,7 +12410,7 @@ Severi (≥1100ms o burst 4+ short stall) sono il segnale più forte: se vedi �
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Abilita Web Server:</translation>
     </message>
     <message>
@@ -15855,7 +15865,7 @@ Nel dubbio, usa Alta.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>Potenza TX</translation>
     </message>
     <message>
@@ -16002,7 +16012,7 @@ con limite target-mancato, timeout e controllo del periodo</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>Conferma registrazione QSO</translation>
     </message>
     <message>

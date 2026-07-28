@@ -4595,7 +4595,7 @@ Dialog {
                         }
 
                         // ── Bande Operative (#4) — quali bande mostrare nel selettore ──
-                        Text { text: qsTr("BANDE OPERATIVE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        Text { text: qsTr("OPERATING BANDS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
                         Text {
                             text: qsTr("Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.")
@@ -5091,7 +5091,7 @@ Dialog {
                         Text { text: qsTr("REMOTE WEB SERVER (iPad / mobile PWA)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("Abilita Web Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 160 }
+                        Text { text: qsTr("Enable Web Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 160 }
                         CheckBox {
                             id: webServerToggle
                             checked: bridge.webServerRunning()

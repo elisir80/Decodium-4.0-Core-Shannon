@@ -57,6 +57,13 @@ UninstallDisplayIcon={app}\{#AppExeName}
 CloseApplications=yes
 RestartApplications=no
 ShowLanguageDialog=auto
+; 1.0.504 — segnalazione di un utente inglese ("the install gui is mostly in
+; italian"): l'installer deve seguire la lingua dell'interfaccia di Windows.
+; Esplicito il metodo di rilevamento invece di affidarmi al valore implicito, e
+; se il rilevamento non aggancia si ripiega sulla PRIMA voce di [Languages],
+; che ora e' l'inglese (prima era l'italiano: da qui l'installer in italiano
+; per chiunque non fosse italiano).
+LanguageDetectionMethod=uilanguage
 WizardStyle=modern
 LicenseFile={#SourceRoot}\COPYING
 
@@ -64,9 +71,11 @@ LicenseFile={#SourceRoot}\COPYING
 ; 1.0.430 — tutte le 13 lingue supportate dall'app Decodium (translations/decodium_*.ts).
 ; Le ultime 3 (cinese sempl./trad., lettone) non sono nel set ufficiale di Inno: i .isl
 ; sono inclusi nel repo sotto packaging\windows\languages\ (UTF-8 con BOM, da jrsoftware/issrc).
+; L'ORDINE CONTA: la prima voce e' quella usata quando il rilevamento della
+; lingua di Windows non trova corrispondenza. Deve restare l'inglese.
+Name: "english";            MessagesFile: "compiler:Default.isl"
 Name: "italian";            MessagesFile: "compiler:Languages\Italian.isl"
 Name: "dutch";              MessagesFile: "compiler:Languages\Dutch.isl"
-Name: "english";            MessagesFile: "compiler:Default.isl"
 Name: "catalan";            MessagesFile: "compiler:Languages\Catalan.isl"
 Name: "danish";             MessagesFile: "compiler:Languages\Danish.isl"
 Name: "german";             MessagesFile: "compiler:Languages\German.isl"
@@ -129,6 +138,80 @@ chinesetraditional.RemoveDataPrompt=Decodium 的設定已刪除。%n%n是否同�
 latvian.RemoveDataPrompt=Decodium iestatījumi ir noņemti.%n%nVai vēlaties dzēst arī savus personiskos datus: QSO žurnāla datubāzi, kešatmiņu un žurnālus?%n%nIzvēlieties NĒ, lai saglabātu savu QSO žurnālu (ieteicams, ja plānojat Decodium instalēt no jauna).
 dutch.RemoveDataPrompt=De instellingen van Decodium zijn verwijderd.%n%nWilt u ook uw persoonlijke gegevens verwijderen: de QSO-logdatabase, caches en logbestanden?%n%nKies NEE om uw QSO-log te behouden (aanbevolen als u Decodium opnieuw wilt installeren).
 
+; 1.0.504 — descrizioni dei tipi di installazione e dei componenti. Erano
+; ITALIANO FISSO nelle sezioni [Types]/[Components]: un utente inglese si
+; trovava la pagina di scelta dei componenti in italiano anche con l'installer
+; in inglese. Ora passano da qui, tradotte in tutte le lingue dell'installer.
+english.TypeFull=Full (all 14 languages and sounds)
+italian.TypeFull=Completa (tutte le 14 lingue e i suoni)
+catalan.TypeFull=Completa (les 14 llengües i els sons)
+danish.TypeFull=Fuld (alle 14 sprog og lyde)
+german.TypeFull=Vollständig (alle 14 Sprachen und Klänge)
+spanish.TypeFull=Completa (los 14 idiomas y los sonidos)
+french.TypeFull=Complète (les 14 langues et les sons)
+hungarian.TypeFull=Teljes (mind a 14 nyelv és a hangok)
+japanese.TypeFull=完全 (14 言語すべてとサウンド)
+russian.TypeFull=Полная (все 14 языков и звуки)
+chinesesimplified.TypeFull=完整 (全部 14 种语言和提示音)
+chinesetraditional.TypeFull=完整 (全部 14 種語言與提示音)
+latvian.TypeFull=Pilna (visas 14 valodas un skaņas)
+dutch.TypeFull=Volledig (alle 14 talen en geluiden)
+english.TypeLite=Light, for slow PCs (English/Italian only, no sounds)
+italian.TypeLite=Leggera per PC lenti (solo inglese/italiano, senza suoni)
+catalan.TypeLite=Lleugera per a PC lents (només anglès/italià, sense sons)
+danish.TypeLite=Let, til langsomme pc'er (kun engelsk/italiensk, uden lyde)
+german.TypeLite=Schlank, für langsame PCs (nur Englisch/Italienisch, ohne Klänge)
+spanish.TypeLite=Ligera para PC lentos (solo inglés/italiano, sin sonidos)
+french.TypeLite=Légère pour PC lents (anglais/italien seulement, sans sons)
+hungarian.TypeLite=Könnyű, lassú gépekre (csak angol/olasz, hangok nélkül)
+japanese.TypeLite=軽量 (低速 PC 向け。英語/イタリア語のみ、サウンドなし)
+russian.TypeLite=Облегчённая для медленных ПК (только английский/итальянский, без звуков)
+chinesesimplified.TypeLite=精简 (适合慢速电脑：仅英语/意大利语，无提示音)
+chinesetraditional.TypeLite=精簡 (適合慢速電腦：僅英語/義大利語，無提示音)
+latvian.TypeLite=Viegla, lēniem datoriem (tikai angļu/itāļu, bez skaņām)
+dutch.TypeLite=Licht, voor trage pc's (alleen Engels/Italiaans, zonder geluiden)
+english.TypeCustom=Custom
+italian.TypeCustom=Personalizzata
+catalan.TypeCustom=Personalitzada
+danish.TypeCustom=Brugerdefineret
+german.TypeCustom=Benutzerdefiniert
+spanish.TypeCustom=Personalizada
+french.TypeCustom=Personnalisée
+hungarian.TypeCustom=Egyéni
+japanese.TypeCustom=カスタム
+russian.TypeCustom=Выборочная
+chinesesimplified.TypeCustom=自定义
+chinesetraditional.TypeCustom=自訂
+latvian.TypeCustom=Pielāgota
+dutch.TypeCustom=Aangepast
+english.CompSounds=Alert sounds (CQ, call, band, etc. ~3.5 MB)
+italian.CompSounds=Suoni di avviso (CQ, chiamata, banda, ecc. ~3,5 MB)
+catalan.CompSounds=Sons d'avís (CQ, crida, banda, etc. ~3,5 MB)
+danish.CompSounds=Alarmlyde (CQ, kald, bånd osv. ~3,5 MB)
+german.CompSounds=Hinweistöne (CQ, Anruf, Band usw. ~3,5 MB)
+spanish.CompSounds=Sonidos de aviso (CQ, llamada, banda, etc. ~3,5 MB)
+french.CompSounds=Sons d'alerte (CQ, appel, bande, etc. ~3,5 Mo)
+hungarian.CompSounds=Figyelmeztető hangok (CQ, hívás, sáv stb. ~3,5 MB)
+japanese.CompSounds=通知音 (CQ・呼び出し・バンドなど 約 3.5 MB)
+russian.CompSounds=Звуки оповещений (CQ, вызов, диапазон и т. д. ~3,5 МБ)
+chinesesimplified.CompSounds=提示音 (CQ、呼叫、波段等，约 3.5 MB)
+chinesetraditional.CompSounds=提示音 (CQ、呼叫、波段等，約 3.5 MB)
+latvian.CompSounds=Brīdinājuma skaņas (CQ, izsaukums, josla u. c. ~3,5 MB)
+dutch.CompSounds=Waarschuwingsgeluiden (CQ, oproep, band enz. ~3,5 MB)
+english.CompLangs=Additional languages beyond English/Italian (~10 MB)
+italian.CompLangs=Lingue aggiuntive oltre inglese/italiano (~10 MB)
+catalan.CompLangs=Llengües addicionals a més d'anglès/italià (~10 MB)
+danish.CompLangs=Yderligere sprog ud over engelsk/italiensk (~10 MB)
+german.CompLangs=Zusätzliche Sprachen über Englisch/Italienisch hinaus (~10 MB)
+spanish.CompLangs=Idiomas adicionales además de inglés/italiano (~10 MB)
+french.CompLangs=Langues supplémentaires en plus de l'anglais/italien (~10 Mo)
+hungarian.CompLangs=További nyelvek az angolon/olaszon felül (~10 MB)
+japanese.CompLangs=英語/イタリア語以外の追加言語 (約 10 MB)
+russian.CompLangs=Дополнительные языки помимо английского/итальянского (~10 МБ)
+chinesesimplified.CompLangs=英语/意大利语之外的其他语言 (约 10 MB)
+chinesetraditional.CompLangs=英語/義大利語之外的其他語言 (約 10 MB)
+latvian.CompLangs=Papildu valodas papildus angļu/itāļu (~10 MB)
+dutch.CompLangs=Extra talen naast Engels/Italiaans (~10 MB)
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
@@ -137,14 +220,16 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; come file (per quelli vale la Modalità PC lento a runtime). I componenti qui
 ; rimuovono solo ASSET: suoni e pacchetti-lingua aggiuntivi. Inglese e italiano
 ; (lingue base del fork) restano sempre installati.
+
+
 [Types]
-Name: "full";   Description: "Completa (tutte le 14 lingue e i suoni)"
-Name: "lite";   Description: "Leggera per PC lenti (solo inglese/italiano, senza suoni)"
-Name: "custom"; Description: "Personalizzata"; Flags: iscustom
+Name: "full";   Description: "{cm:TypeFull}"
+Name: "lite";   Description: "{cm:TypeLite}"
+Name: "custom"; Description: "{cm:TypeCustom}"; Flags: iscustom
 
 [Components]
-Name: "sounds"; Description: "Suoni di avviso (CQ, chiamata, band, ecc. ~3,5 MB)"; Types: full custom
-Name: "langs";  Description: "Lingue aggiuntive oltre inglese/italiano (~10 MB)"; Types: full custom
+Name: "sounds"; Description: "{cm:CompSounds}"; Types: full custom
+Name: "langs";  Description: "{cm:CompLangs}"; Types: full custom
 
 [InstallDelete]
 ; 1.0.428 — PULIZIA OBBLIGATORIA della cartella di installazione: rimuove tutto il

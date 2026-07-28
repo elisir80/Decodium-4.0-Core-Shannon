@@ -625,7 +625,7 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Direkte opkald</translation>
     </message>
     <message>
@@ -11178,7 +11178,7 @@ ikke blive vist!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Kun Preferred</translation>
     </message>
     <message>
@@ -11188,7 +11188,7 @@ ikke blive vist!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Bånd:</translation>
     </message>
     <message>
@@ -11430,6 +11430,16 @@ Tip: luk OmniRig fra Windows-proceslinjeikonet, og tryk derefter på Forbind ige
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Luk</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(%1 linjer mere)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Avanceret</translation>
     </message>
 </context>
 <context>
@@ -12651,7 +12661,7 @@ Standard FRA = 1.0.445-adfærd (kun et udskudt øjebliksbillede, som kun gendann
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>OPERATIVE BÅND</translation>
     </message>
     <message>
@@ -12845,7 +12855,7 @@ De alvorlige (≥1100ms eller burst af 4+ korte stalls) er det stærkeste signal
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Aktivér Web Server:</translation>
     </message>
     <message>
@@ -15827,7 +15837,7 @@ Hvis du er i tvivl, brug Høj.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>TX-effekt</translation>
     </message>
     <message>
@@ -15974,7 +15984,7 @@ med grænse for opkald uden svar, timeout og periodestyring</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>Bekræft QSO-registrering</translation>
     </message>
     <message>

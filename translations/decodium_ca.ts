@@ -624,7 +624,7 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Trucada directa</translation>
     </message>
     <message>
@@ -11181,7 +11181,7 @@ no es mostraran!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Només Preferred</translation>
     </message>
     <message>
@@ -11191,7 +11191,7 @@ no es mostraran!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Banda:</translation>
     </message>
     <message>
@@ -11433,6 +11433,16 @@ Consell: tanqueu l'OmniRig des de la icona de la safata de Windows i torneu a pr
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Tanca</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(%1 línies més)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Avançades</translation>
     </message>
 </context>
 <context>
@@ -12654,7 +12664,7 @@ Per defecte DESACTIVAT = comportament 1.0.445 (només una instantània diferida,
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>BANDES OPERATIVES</translation>
     </message>
     <message>
@@ -12848,7 +12858,7 @@ Els greus (≥1100ms o ràfega de 4+ bloquejos curts) són el senyal més fort: 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Habilita el servidor web:</translation>
     </message>
     <message>
@@ -15829,7 +15839,7 @@ En cas de dubte, fes servir Alta.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>Potència TX</translation>
     </message>
     <message>
@@ -15976,7 +15986,7 @@ amb límit de target mancat, timeout i control de període</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>Confirma el registre del QSO</translation>
     </message>
     <message>

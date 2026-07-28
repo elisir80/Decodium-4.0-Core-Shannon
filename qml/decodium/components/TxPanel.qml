@@ -276,7 +276,7 @@ Item {
             spacing: 2
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: qsTr("Potenza TX")
+                text: qsTr("TX Power")
                 color: textSecondary
                 font.pixelSize: 10
             }
@@ -2024,7 +2024,7 @@ Item {
                 Layout.fillWidth: true
 
                 Text {
-                    text: qsTr("Conferma registrazione QSO")
+                    text: qsTr("Confirm QSO logging")
                     color: accentGreen
                     font.pixelSize: 18
                     font.bold: true

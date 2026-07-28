@@ -166,7 +166,7 @@ Window {
                     RowLayout {
                         Layout.fillWidth: true
                         Text {
-                            text: "📞  " + qsTr("Chiamata diretta")
+                            text: "📞  " + qsTr("Direct call")
                             color: callDialog.cText
                             font.pixelSize: 18
                             font.bold: true

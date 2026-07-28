@@ -628,7 +628,7 @@ Doorzochte paden:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Directe aanroep</translation>
     </message>
     <message>
@@ -11190,7 +11190,7 @@ FM-frequenties niet getoond!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Alleen voorkeur</translation>
     </message>
     <message>
@@ -11200,7 +11200,7 @@ FM-frequenties niet getoond!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Band:</translation>
     </message>
     <message>
@@ -11442,6 +11442,16 @@ Tip: sluit OmniRig via het Windows-systeemvakpictogram en druk daarna opnieuw op
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Sluiten</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(nog %1 regels)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Geavanceerd</translation>
     </message>
 </context>
 <context>
@@ -12663,7 +12673,7 @@ Standaard UIT = 1.0.445-gedrag (alleen een uitgestelde momentopname, alleen hers
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>OPERATIONELE BANDEN</translation>
     </message>
     <message>
@@ -12857,7 +12867,7 @@ De ernstige (≥1100ms of burst van 4+ korte haperingen) zijn het sterkste signa
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Webserver inschakelen:</translation>
     </message>
     <message>
@@ -15838,7 +15848,7 @@ Gebruik Hoog als u het niet zeker weet.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>TX-vermogen</translation>
     </message>
     <message>
@@ -15985,7 +15995,7 @@ met gemist-doellimiet, time-out en periodebesturing</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>QSO-registratie bevestigen</translation>
     </message>
     <message>

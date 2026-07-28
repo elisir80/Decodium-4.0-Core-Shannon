@@ -628,7 +628,7 @@ Gesuchte Pfade:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Direktanruf</translation>
     </message>
     <message>
@@ -11180,7 +11180,7 @@ keine FM-Frequenzen angezeigt!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Nur bevorzugte</translation>
     </message>
     <message>
@@ -11190,7 +11190,7 @@ keine FM-Frequenzen angezeigt!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Band:</translation>
     </message>
     <message>
@@ -11432,6 +11432,16 @@ Tipp: OmniRig über das Windows-Infobereichssymbol schließen, dann erneut Verbi
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Schließen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(%1 weitere Zeilen)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Erweitert</translation>
     </message>
 </context>
 <context>
@@ -12248,7 +12258,7 @@ Erfordert aktives Conservative FT2. Standard: EIN unter Conservative.</translati
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>BETRIEBSBÄNDER</translation>
     </message>
     <message>
@@ -12373,7 +12383,7 @@ Schwere (≥1100 ms oder ein Stoß von 4+ kurzen Stalls) sind das stärkste Sign
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Webserver aktivieren:</translation>
     </message>
     <message>
@@ -15828,7 +15838,7 @@ Im Zweifel Hoch verwenden.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>TX-Leistung</translation>
     </message>
     <message>
@@ -15975,7 +15985,7 @@ mit Limit verfehltes Ziel, Timeout und Periodensteuerung</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>QSO-Protokollierung bestätigen</translation>
     </message>
     <message>

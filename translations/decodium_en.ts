@@ -628,7 +628,7 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Direct call</translation>
     </message>
     <message>
@@ -11190,7 +11190,7 @@ will not be shown!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Preferred only</translation>
     </message>
     <message>
@@ -11200,7 +11200,7 @@ will not be shown!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Band:</translation>
     </message>
     <message>
@@ -11442,6 +11442,16 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</transl
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Close</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(%1 more lines)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Advanced</translation>
     </message>
 </context>
 <context>
@@ -12663,7 +12673,7 @@ Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>OPERATING BANDS</translation>
     </message>
     <message>
@@ -12857,7 +12867,7 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Enable Web Server:</translation>
     </message>
     <message>
@@ -15838,7 +15848,7 @@ If unsure, use High.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>TX Power</translation>
     </message>
     <message>
@@ -15985,7 +15995,7 @@ with missed-target limit, timeout, and period control</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>Confirm QSO logging</translation>
     </message>
     <message>

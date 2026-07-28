@@ -632,7 +632,7 @@ Searched paths:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Tiešais izsaukums</translation>
     </message>
     <message>
@@ -11193,7 +11193,7 @@ netiks rādītas!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Tikai izvēlētie</translation>
     </message>
     <message>
@@ -11203,7 +11203,7 @@ netiks rādītas!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Josla:</translation>
     </message>
     <message>
@@ -11445,6 +11445,16 @@ Padoms: aizveriet OmniRig no Windows sistēmas teknes ikonas, pēc tam vēlreiz 
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Aizvērt</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(vēl %1 rindas)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Papildu</translation>
     </message>
 </context>
 <context>
@@ -12648,7 +12658,7 @@ Pēc noklusējuma IZSLĒGTS = 1.0.445 uzvedība (tikai atliktais momentuzņēmum
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>DARBA JOSLAS</translation>
     </message>
     <message>
@@ -12835,7 +12845,7 @@ Nopietnie (≥1100ms vai 4+ īsu aizķeršanos uzliesmojums) ir spēcīgākais s
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Iespējot tīmekļa serveri:</translation>
     </message>
     <message>
@@ -15841,7 +15851,7 @@ Noklusējums: IZSL.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>TX jauda</translation>
     </message>
     <message>
@@ -15988,7 +15998,7 @@ ar nesasniegta mērķa ierobežojumu, noildzes un perioda vadību</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>Apstiprināt QSO reģistrēšanu</translation>
     </message>
     <message>

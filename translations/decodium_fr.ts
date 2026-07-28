@@ -628,7 +628,7 @@ Chemins recherchés&#xa0;:
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Appel direct</translation>
     </message>
     <message>
@@ -11180,7 +11180,7 @@ ne seront pas affichées !</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Préférés uniquement</translation>
     </message>
     <message>
@@ -11190,7 +11190,7 @@ ne seront pas affichées !</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Bande :</translation>
     </message>
     <message>
@@ -11432,6 +11432,16 @@ Astuce : fermez OmniRig depuis l'icône de la zone de notification de Windows, p
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Fermer</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(%1 lignes de plus)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Avancé</translation>
     </message>
 </context>
 <context>
@@ -12248,7 +12258,7 @@ Nécessite FT2 Conservateur actif. Par défaut : ON sous Conservateur.</translat
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>BANDES OPÉRATIONNELLES</translation>
     </message>
     <message>
@@ -12373,7 +12383,7 @@ Les sévères (≥1100ms ou rafale de 4+ courts ralentissements) sont le signal 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Activer le serveur web :</translation>
     </message>
     <message>
@@ -15828,7 +15838,7 @@ En cas de doute, utilisez Élevée.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>Puissance TX</translation>
     </message>
     <message>
@@ -15975,7 +15985,7 @@ avec limite de cible manquée, délai et contrôle de période</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>Confirmer l&apos;enregistrement du QSO</translation>
     </message>
     <message>

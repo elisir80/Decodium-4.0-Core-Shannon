@@ -257,7 +257,7 @@ Dialog {
                 contentItem: Text { text: parent.text; color: tabBar.currentIndex === 0 ? secondaryCyan : textSecondary; font.pixelSize: 13; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
             }
             TabButton {
-                text: "Avanzate"
+                text: qsTr("Advanced")
                 implicitHeight: 42
                 background: Rectangle {
                     color: tabBar.currentIndex === 1 ? Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.2) : "transparent"
@@ -686,7 +686,7 @@ Dialog {
             function onErrorMessage(msg) {
                 // mostra solo la prima riga significativa + dettaglio ridotto
                 var lines = msg.split("\n").filter(function(l){ return l.trim().length > 0 })
-                catErrorText.text = lines.length > 0 ? lines[0] + (lines.length > 1 ? "\n…(" + (lines.length-1) + " righe)" : "") : msg
+                catErrorText.text = lines.length > 0 ? lines[0] + (lines.length > 1 ? "\n" + qsTr("…(%1 more lines)").arg(lines.length-1) : "") : msg
             }
         }
 

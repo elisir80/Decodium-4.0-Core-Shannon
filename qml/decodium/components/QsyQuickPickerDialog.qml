@@ -99,7 +99,7 @@ Window {
                 Layout.fillWidth: true
                 spacing: 8
                 CheckBox {
-                    text: qsTr("Solo Preferred")
+                    text: qsTr("Preferred only")
                     checked: qsyPickerDialog.preferredOnly
                     onCheckedChanged: qsyPickerDialog.preferredOnly = checked
                     contentItem: Text { text: parent.text; color: "#cccccc"; leftPadding: 22; verticalAlignment: Text.AlignVCenter }
@@ -113,7 +113,7 @@ Window {
                     onActivated: qsyPickerDialog.modeFilter = currentText
                     implicitWidth: 100
                 }
-                Text { text: qsTr("Banda:"); color: "#aaaacc"; font.pixelSize: 12 }
+                Text { text: qsTr("Band:"); color: "#aaaacc"; font.pixelSize: 12 }
                 DecoComboBox {
                     id: bandCombo
                     model: qsyPickerDialog.uniqueBands()

@@ -622,7 +622,7 @@ Keresett útvonalak:%1</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="169"/>
-        <source>Chiamata diretta</source>
+        <source>Direct call</source>
         <translation>Közvetlen hívás</translation>
     </message>
     <message>
@@ -11048,7 +11048,7 @@ nem jelennek meg!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
-        <source>Solo Preferred</source>
+        <source>Preferred only</source>
         <translation>Csak Preferred</translation>
     </message>
     <message>
@@ -11058,7 +11058,7 @@ nem jelennek meg!</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
-        <source>Banda:</source>
+        <source>Band:</source>
         <translation>Sáv:</translation>
     </message>
     <message>
@@ -11300,6 +11300,16 @@ Tipp: zárja be az OmniRiget a Windows tálca ikonjából, majd nyomja meg újra
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Bezárás</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(még %1 sor)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml"/>
+        <source>Advanced</source>
+        <translation>Speciális</translation>
     </message>
 </context>
 <context>
@@ -12521,7 +12531,7 @@ Alapértelmezetten KI = 1.0.445 viselkedés (csak halasztott pillanatkép, csak 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
-        <source>BANDE OPERATIVE</source>
+        <source>OPERATING BANDS</source>
         <translation>OPERATÍV SÁVOK</translation>
     </message>
     <message>
@@ -12715,7 +12725,7 @@ A súlyosak (≥1100ms vagy 4+ rövid elakadás csomója) a legerősebb jel: ha 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5082"/>
-        <source>Abilita Web Server:</source>
+        <source>Enable Web Server:</source>
         <translation>Web szerver engedélyezése:</translation>
     </message>
     <message>
@@ -15696,7 +15706,7 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="279"/>
-        <source>Potenza TX</source>
+        <source>TX Power</source>
         <translation>TX teljesítmény</translation>
     </message>
     <message>
@@ -15843,7 +15853,7 @@ elvétett cél korlátjával, időtúllépéssel és periódus-vezérléssel</tr
     </message>
     <message>
         <location filename="../qml/decodium/components/TxPanel.qml" line="2027"/>
-        <source>Conferma registrazione QSO</source>
+        <source>Confirm QSO logging</source>
         <translation>QSO naplózás megerősítése</translation>
     </message>
     <message>
