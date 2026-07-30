@@ -2043,6 +2043,33 @@ static QString aliasedBridgeSettingKey(const QString& key)
     return key;
 }
 
+static QString canonicalProfileServiceSettingKey(const QString& key)
+{
+    if (key == QStringLiteral("CloudlogStationID")) return QStringLiteral("CloudLogStationID");
+    if (key == QStringLiteral("LoTWPassword")) return QStringLiteral("Lotw_pwd");
+    if (key == QStringLiteral("LoTWNonQSL")) return QStringLiteral("NonQsl");
+    if (key == QStringLiteral("LoTWDaysSinceUpload")) return QStringLiteral("LotWDaysSinceLastUpload");
+    return key;
+}
+
+static QString legacyProfileServiceSettingKey(const QString& canonicalKey)
+{
+    if (canonicalKey == QStringLiteral("CloudLogStationID")) return QStringLiteral("CloudlogStationID");
+    if (canonicalKey == QStringLiteral("Lotw_pwd")) return QStringLiteral("LoTWPassword");
+    if (canonicalKey == QStringLiteral("NonQsl")) return QStringLiteral("LoTWNonQSL");
+    if (canonicalKey == QStringLiteral("LotWDaysSinceLastUpload")) return QStringLiteral("LoTWDaysSinceUpload");
+    return canonicalKey;
+}
+
+static bool isProfileServiceCompatibilitySetting(const QString& key)
+{
+    QString const canonicalKey = canonicalProfileServiceSettingKey(key);
+    return canonicalKey == QStringLiteral("CloudLogStationID")
+        || canonicalKey == QStringLiteral("Lotw_pwd")
+        || canonicalKey == QStringLiteral("NonQsl")
+        || canonicalKey == QStringLiteral("LotWDaysSinceLastUpload");
+}
+
 static QString resolveBridgeFontFamily(QString const& requestedFamily,
                                        QString const& fallbackFamily = QString {})
 {
@@ -13923,6 +13950,11 @@ void DecodiumBridge::appendTxDecodeEntry(const QString& message)
     }
     m_lastTransmittedMessage = msg;
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
+    QString const transmittedReport = decodium::seq::signalReportFromMessage(msg);
+    if (!transmittedReport.isEmpty() && m_reportSent != transmittedReport) {
+        m_reportSent = transmittedReport;
+        emit reportSentChanged();
+    }
 
     QVariantMap txEntry;
     QString const txTime = currentTxVisualTimeToken(m_mode);
@@ -24935,6 +24967,41 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
         effectiveDefault = true;
     }
 
+    if (isProfileServiceCompatibilitySetting(key)) {
+        QString const canonicalKey = canonicalProfileServiceSettingKey(key);
+        QString const legacyKey = legacyProfileServiceSettingKey(canonicalKey);
+        QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(s);
+
+        QVariant storedValue = s.value(canonicalKey);
+        if (!storedValue.isValid() && legacyKey != canonicalKey) {
+            storedValue = s.value(legacyKey);
+            if (storedValue.isValid()) {
+                s.setValue(canonicalKey, storedValue);
+            }
+        }
+
+        if (canonicalKey == QStringLiteral("Lotw_pwd")) {
+            QString const password =
+                secure_settings::load_or_import(&s,
+                                                secure_settings::service(
+                                                    m_callsign.trimmed().toUpper()),
+                                                canonicalKey,
+                                                storedValue.toString()).trimmed();
+            if (legacyKey != canonicalKey) {
+                s.remove(legacyKey);
+            }
+            s.sync();
+            return password.isEmpty() ? effectiveDefault : QVariant(password);
+        }
+
+        if (legacyKey != canonicalKey && s.contains(legacyKey)) {
+            s.remove(legacyKey);
+        }
+        s.sync();
+        return storedValue.isValid() ? storedValue : effectiveDefault;
+    }
+
     auto readBridgeSettingWithAlias = [](QSettings& settings, const QString& settingKey) -> QVariant {
         QVariant v = settings.value(settingKey);
         if (!v.isValid()) {
@@ -25044,6 +25111,33 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
 {
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
+    if (isProfileServiceCompatibilitySetting(key)) {
+        QString const canonicalKey = canonicalProfileServiceSettingKey(key);
+        QString const legacyKey = legacyProfileServiceSettingKey(canonicalKey);
+        QVariant storedValue = value;
+        if (canonicalKey == QStringLiteral("Lotw_pwd")) {
+            storedValue =
+                secure_settings::value_for_write(
+                    secure_settings::service(m_callsign.trimmed().toUpper()),
+                    canonicalKey,
+                    value.toString());
+        }
+        s.setValue(canonicalKey, storedValue);
+        if (legacyKey != canonicalKey) {
+            s.remove(legacyKey);
+        }
+        s.sync();
+
+        if (canonicalKey == QStringLiteral("CloudLogStationID") && m_cloudlog) {
+            m_cloudlog->setStationId(qBound(0, value.toInt(), 999));
+        }
+        emit settingValueChanged(canonicalKey, value);
+        if (legacyKey != canonicalKey) {
+            emit settingValueChanged(legacyKey, value);
+        }
+        return;
+    }
+
     if (key == QStringLiteral("WorldMapDisplayed")) {
         m_worldMapDisplayed = value.toBool();
         if (m_worldMapDisplayed && worldMapConsumerReady()) {
@@ -25235,7 +25329,7 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
             m_directVisualAudioCaptureUnsafe = directVisual;
             applyDirectVisualAudioCaptureMode(QStringLiteral("settings"));
         }
-    } else if (key == QStringLiteral("CloudlogStationID")) {
+    } else if (key == QStringLiteral("CloudLogStationID")) {
         if (m_cloudlog) {
             m_cloudlog->setStationId(qBound(0, value.toInt(), 999));
         }
@@ -28183,7 +28277,7 @@ QVariantMap DecodiumBridge::uploadExternalAdifInternal(quint32 uploadId,
             m_cloudlog->setEnabled(m_cloudlogEnabled);
             m_cloudlog->setApiUrl(m_cloudlogUrl);
             m_cloudlog->setApiKey(m_cloudlogApiKey);
-            m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudlogStationID"), 1).toInt(), 999));
+            m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudLogStationID"), 1).toInt(), 999));
             m_cloudlog->uploadAdif(cleanCall, adifBytes, uploadId);
             attempted << QStringLiteral("Cloudlog");
             if (uploadId != 0) {
@@ -28619,9 +28713,16 @@ void DecodiumBridge::saveSettings()
     s.setValue("alertSoundsEnabled", m_alertSoundsEnabled);
     s.setValue("alert_Enabled",      m_alertSoundsEnabled);
     // Cloudlog
-    s.setValue("cloudlogEnabled",  m_cloudlogEnabled);
-    s.setValue("cloudlogUrl",      m_cloudlogUrl);
-    s.setValue("cloudlogApiKey",   m_cloudlogApiKey);
+    s.setValue("CloudLog", m_cloudlogEnabled);
+    s.setValue("CloudLogApiUrl", m_cloudlogUrl);
+    s.setValue("CloudLogApiKey",
+               secure_settings::value_for_write(
+                   secure_settings::service(m_callsign.trimmed().toUpper()),
+                   QStringLiteral("CloudLogApiKey"),
+                   m_cloudlogApiKey));
+    s.remove(QStringLiteral("cloudlogEnabled"));
+    s.remove(QStringLiteral("cloudlogUrl"));
+    s.remove(QStringLiteral("cloudlogApiKey"));
     // QRZ Logbook
     s.setValue("qrzLogbookEnabled", m_qrzLogbookEnabled);
     s.setValue("qrzLogbookApiKey",
@@ -29951,6 +30052,14 @@ void DecodiumBridge::capturePendingAutoLogSnapshot()
     m_pendingAutoLogCall = snapshotCall;
     m_pendingAutoLogGrid = !m_dxGrid.trimmed().isEmpty() ? m_dxGrid.trimmed() : m_autoCqLockedGrid.trimmed();
     m_pendingAutoLogRptSent = m_reportSent.trimmed();
+    if (m_pendingAutoLogRptSent.isEmpty()) {
+        m_pendingAutoLogRptSent =
+            decodium::seq::signalReportFromMessage(m_lastTransmittedMessage);
+    }
+    if (m_pendingAutoLogRptSent.isEmpty()) {
+        m_pendingAutoLogRptSent =
+            decodium::seq::signalReportFromMessage(buildCurrentTxMessage());
+    }
     m_pendingAutoLogRptRcvd = m_reportReceived.trimmed();
     m_pendingAutoLogOn = m_qsoStartedOn.isValid() ? m_qsoStartedOn : nowUtc;
     m_pendingAutoLogOff = nowUtc < m_pendingAutoLogOn ? m_pendingAutoLogOn : nowUtc;
@@ -34502,14 +34611,43 @@ void DecodiumBridge::loadSettings()
     // B8 — Alerts
     m_alertSoundsEnabled = s.value("alertSoundsEnabled", s.value("alert_Enabled", false)).toBool();
     // Cloudlog
-    m_cloudlogEnabled  = s.value("cloudlogEnabled",  false).toBool();
-    m_cloudlogUrl      = s.value("cloudlogUrl",      QString()).toString();
-    m_cloudlogApiKey   = s.value("cloudlogApiKey",   QString()).toString();
+    auto migrateProfileAlias = [&s](QString const& canonicalKey,
+                                    QString const& legacyKey,
+                                    QVariant const& defaultValue) {
+        QVariant value = s.value(canonicalKey);
+        if (!value.isValid()) {
+            value = s.value(legacyKey, defaultValue);
+            if (value.isValid()) {
+                s.setValue(canonicalKey, value);
+            }
+        }
+        s.remove(legacyKey);
+        return value.isValid() ? value : defaultValue;
+    };
+    m_cloudlogEnabled =
+        migrateProfileAlias(QStringLiteral("CloudLog"),
+                            QStringLiteral("cloudlogEnabled"),
+                            false).toBool();
+    m_cloudlogUrl =
+        migrateProfileAlias(QStringLiteral("CloudLogApiUrl"),
+                            QStringLiteral("cloudlogUrl"),
+                            QString()).toString();
+    QVariant const cloudlogKeyValue =
+        migrateProfileAlias(QStringLiteral("CloudLogApiKey"),
+                            QStringLiteral("cloudlogApiKey"),
+                            QString());
+    m_cloudlogApiKey =
+        secure_settings::load_or_import(
+            &s,
+            secure_settings::service(m_callsign.trimmed().toUpper()),
+            QStringLiteral("CloudLogApiKey"),
+            cloudlogKeyValue.toString()).trimmed();
+    s.sync();
     if (m_cloudlog) {
         m_cloudlog->setEnabled(m_cloudlogEnabled);
         m_cloudlog->setApiUrl(m_cloudlogUrl);
         m_cloudlog->setApiKey(m_cloudlogApiKey);
-        m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudlogStationID"), 1).toInt(), 999));
+        m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudLogStationID"), 1).toInt(), 999));
     }
     // QRZ Logbook
     m_qrzLogbookEnabled = s.value("qrzLogbookEnabled", false).toBool();
@@ -36221,6 +36359,13 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
         if (m_lateAutoLogOff.isValid()) logOffUtc = m_lateAutoLogOff;
     }
 
+    if (logRptSent.isEmpty()) {
+        logRptSent = decodium::seq::signalReportFromMessage(m_lastTransmittedMessage);
+    }
+    if (logRptSent.isEmpty()) {
+        logRptSent = decodium::seq::signalReportFromMessage(buildCurrentTxMessage());
+    }
+
     if (logOffUtc < logOnUtc) {
         logOffUtc = logOnUtc;
     }
@@ -36882,6 +37027,13 @@ void DecodiumBridge::logQsoNow()
         if (m_lateAutoLogOff.isValid()) utcOff = m_lateAutoLogOff;
     }
 
+    if (logRptSent.isEmpty()) {
+        logRptSent = decodium::seq::signalReportFromMessage(m_lastTransmittedMessage);
+    }
+    if (logRptSent.isEmpty()) {
+        logRptSent = decodium::seq::signalReportFromMessage(buildCurrentTxMessage());
+    }
+
     if (!utcOn.isValid()) {
         utcOn = QDateTime::currentDateTimeUtc();
     }
@@ -36993,7 +37145,7 @@ void DecodiumBridge::logQsoNow()
         m_cloudlog->setEnabled(m_cloudlogEnabled);
         m_cloudlog->setApiUrl(m_cloudlogUrl);
         m_cloudlog->setApiKey(m_cloudlogApiKey);
-        m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudlogStationID"), 1).toInt(), 999));
+        m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudLogStationID"), 1).toInt(), 999));
         m_cloudlog->logQso(logDxCall, logDxGrid, logFreqHz, logMode, utcOn,
                            snrOk ? snr : 0, logRptSent, logRptRcvd,
                            m_callsign, m_grid);
@@ -48839,7 +48991,7 @@ void DecodiumBridge::testCloudlogApi()
 
     m_cloudlog->setApiUrl(m_cloudlogUrl);
     m_cloudlog->setApiKey(m_cloudlogApiKey);
-    m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudlogStationID"), 1).toInt(), 999));
+    m_cloudlog->setStationId(qBound(0, getSetting(QStringLiteral("CloudLogStationID"), 1).toInt(), 999));
     m_cloudlog->testApi();
 }
 

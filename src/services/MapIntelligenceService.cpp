@@ -38,6 +38,7 @@
 #include <QVector>
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <utility>
 
@@ -905,7 +906,9 @@ bool openMapDatabase(const QString& path,
         {"map_spot", "provider", "TEXT"},
         {"map_spot", "first_observed_ms", "INTEGER NOT NULL DEFAULT 0"},
         {"map_spot", "last_observed_ms", "INTEGER NOT NULL DEFAULT 0"},
-        {"map_spot", "correlation_count", "INTEGER NOT NULL DEFAULT 0"}
+        {"map_spot", "correlation_count", "INTEGER NOT NULL DEFAULT 0"},
+        {"map_spot", "direction", "TEXT NOT NULL DEFAULT 'RX'"},
+        {"map_spot_event", "direction", "TEXT NOT NULL DEFAULT 'RX'"}
     };
     for (ColumnMigration const& migration : migrations) {
         if (!ensureColumn(db,
@@ -937,6 +940,7 @@ bool openMapDatabase(const QString& path,
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_correlation ON map_spot(correlation_count, observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_time ON map_spot_event(observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_grid ON map_spot_event(grid, observed_ms DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_band_window ON map_spot_event(band, observed_ms DESC, source, direction)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_roster_ignore_type ON map_roster_ignore(ignore_type, ignore_value)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_roster_rule_type ON map_roster_rule(rule_type, rule_value)")
     };
@@ -1377,6 +1381,12 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
                                                 Qt::CaseInsensitive)) {
         m_spotCorrelationFilter = QStringLiteral("All");
     }
+    m_bandActivityWindowHours =
+        settings.value(QStringLiteral("BandActivityWindowHours"), 6).toInt();
+    if (m_bandActivityWindowHours != 1 && m_bandActivityWindowHours != 6
+        && m_bandActivityWindowHours != 12 && m_bandActivityWindowHours != 24) {
+        m_bandActivityWindowHours = 6;
+    }
     m_rosterVisibleColumns = settings.value(QStringLiteral("RosterVisibleColumns"),
                                              m_rosterVisibleColumns).toStringList();
     if (m_rosterVisibleColumns.isEmpty()) {
@@ -1716,7 +1726,7 @@ bool MapIntelligenceService::liveEntryMatchesCurrentFilters(
     const QString& band) const
 {
     LiveSpot const spot = liveSpotFromEntry(entry, dialFrequencyHz, band);
-    if (spot.message.isEmpty()) {
+    if (spot.message.isEmpty() || spot.direction == QStringLiteral("TX")) {
         return false;
     }
 
@@ -2045,6 +2055,20 @@ void MapIntelligenceService::setSpotCorrelationFilter(const QString& value)
     scheduleQuery();
 }
 
+void MapIntelligenceService::setBandActivityWindowHours(int hours)
+{
+    if (hours != 1 && hours != 6 && hours != 12 && hours != 24) {
+        return;
+    }
+    if (m_bandActivityWindowHours == hours) {
+        return;
+    }
+    m_bandActivityWindowHours = hours;
+    saveSetting(QStringLiteral("BandActivityWindowHours"), hours);
+    emit bandActivityWindowHoursChanged();
+    scheduleQuery();
+}
+
 void MapIntelligenceService::setRosterVisibleColumns(const QStringList& columns)
 {
     QStringList normalized;
@@ -2163,7 +2187,7 @@ void MapIntelligenceService::reloadFromAdif(const QString& path)
         m_cqOnly, m_rosterSortDescending, m_rosterCqOnly,
         m_splitGridEnabled, m_rosterTextFilter, m_rosterTextMode,
         pskLayerEnabled(), m_pskDisplayMode, m_pskOpacityPercent / 100.0,
-        m_spotAgeFilter, m_spotCorrelationFilter
+        m_spotAgeFilter, m_spotCorrelationFilter, m_bandActivityWindowHours
     };
     QPointer<MapIntelligenceService> guard(this);
     m_workerPool.start(QRunnable::create(
@@ -2614,6 +2638,13 @@ void MapIntelligenceService::queuePskSpots(const QVariantList& rows,
                 row.value(QStringLiteral("receiverGrid"), senderGrid).toString());
             spot.provider = row.value(QStringLiteral("provider"),
                                       QStringLiteral("PSK Reporter")).toString().trimmed();
+            spot.direction = row.value(QStringLiteral("direction"),
+                                       QStringLiteral("TX")).toString()
+                                 .trimmed().toUpper();
+            if (spot.direction != QStringLiteral("RX")
+                && spot.direction != QStringLiteral("TX")) {
+                spot.direction = QStringLiteral("TX");
+            }
             spot.message = QStringLiteral("%1 heard %2 from %3")
                                .arg(spot.call, senderCall.trimmed().toUpper(),
                                     senderGrid.trimmed().toUpper());
@@ -2631,7 +2662,7 @@ void MapIntelligenceService::queuePskSpots(const QVariantList& rows,
             spot.activityType = spot.source.compare(QStringLiteral("oams"), Qt::CaseInsensitive) == 0
                 ? QStringLiteral("OAMS") : QStringLiteral("PSK");
             spot.uniqueKey = digestKey({
-                spot.source, spot.call, spot.grid, spot.receiverCall,
+                spot.source, spot.direction, spot.call, spot.grid, spot.receiverCall,
                 QString::number(spot.frequencyHz), QString::number(spot.observedMs / 60000)
             });
             if (!spot.call.isEmpty()) spots.append(std::move(spot));
@@ -2658,8 +2689,7 @@ void MapIntelligenceService::ingestDecodeEntry(const QVariantMap& entry,
                                                qint64 dialFrequencyHz,
                                                const QString& band)
 {
-    if (entry.value(QStringLiteral("isTx")).toBool()
-        || entry.value(QStringLiteral("partialDecode")).toBool()
+    if (entry.value(QStringLiteral("partialDecode")).toBool()
         || entry.value(QStringLiteral("unresolvedHash")).toBool()
         || entry.value(QStringLiteral("message")).toString().trimmed().isEmpty()) {
         return;
@@ -2922,12 +2952,13 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
                                           const QString& band)
 {
     LiveSpot spot;
-    if (entry.value(QStringLiteral("isTx")).toBool()
-        || entry.value(QStringLiteral("partialDecode")).toBool()
+    if (entry.value(QStringLiteral("partialDecode")).toBool()
         || entry.value(QStringLiteral("unresolvedHash")).toBool()) {
         return spot;
     }
 
+    spot.direction = entry.value(QStringLiteral("isTx")).toBool()
+        ? QStringLiteral("TX") : QStringLiteral("RX");
     spot.message = entry.value(QStringLiteral("message")).toString().trimmed();
     if (spot.message.isEmpty()) {
         return spot;
@@ -3017,7 +3048,7 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
     spot.activityType = activityTypeForMessage(
         spot.message, spot.mode, spot.source, spot.isCq, spot.targetCall);
     spot.uniqueKey = digestKey({
-        entry.value(QStringLiteral("time")).toString(),
+        spot.direction, entry.value(QStringLiteral("time")).toString(),
         spot.call, spot.grid, spot.band, spot.mode,
         QString::number(spot.frequencyHz), spot.message
     });
@@ -3768,6 +3799,9 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
     // temporal heatmap and directional paths without growing the live roster.
     QString eventFilter = QStringLiteral(
         " WHERE observed_ms >= :event_cutoff"
+        " AND (upper(COALESCE(direction, 'RX'))='RX'"
+        "      OR lower(source)='psk'"
+        "      OR lower(COALESCE(provider, '')) LIKE '%psk reporter%')"
         " AND (:event_all_band = 1 OR lower(band)=lower(:event_band))"
         " AND (:event_all_mode = 1 OR upper(mode)=upper(:event_mode))"
         " AND (:event_all_source = 1 OR lower(source)=lower(:event_source))"
@@ -3864,6 +3898,235 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("source"), query.value(7).toString());
                 snapshot.spotPaths.append(row);
             }
+        }
+    }
+
+    {
+        struct BandMetric {
+            QVariantMap row;
+            QString band;
+            int total {0};
+            int uniqueCalls {0};
+            int rx {0};
+            int tx {0};
+            int local {0};
+            int psk {0};
+            double averageSnr {-30.0};
+            qint64 latestMs {0};
+        };
+
+        int const windowHours =
+            (options.bandActivityWindowHours == 1
+             || options.bandActivityWindowHours == 6
+             || options.bandActivityWindowHours == 12
+             || options.bandActivityWindowHours == 24)
+                ? options.bandActivityWindowHours : 6;
+        qint64 const windowMs = windowHours * 60LL * 60LL * 1000LL;
+        qint64 const activityCutoff = nowMs - windowMs;
+        QString const pskPredicate =
+            QStringLiteral("(lower(source)='psk'"
+                           " OR lower(COALESCE(provider,'')) LIKE '%psk reporter%')");
+        QString const directionExpression =
+            QStringLiteral("upper(COALESCE(direction,'RX'))");
+        QVector<BandMetric> metrics;
+
+        QSqlQuery aggregate(db);
+        aggregate.prepare(
+            QStringLiteral(
+                "SELECT band,"
+                " SUM(CASE WHEN NOT %1 AND %2='RX' THEN 1 ELSE 0 END),"
+                " SUM(CASE WHEN NOT %1 AND %2='TX' THEN 1 ELSE 0 END),"
+                " SUM(CASE WHEN %1 AND %2='RX' THEN 1 ELSE 0 END),"
+                " SUM(CASE WHEN %1 AND %2='TX' THEN 1 ELSE 0 END),"
+                " COUNT(DISTINCT CASE WHEN %2='RX'"
+                "   THEN upper(NULLIF(call,'')) END),"
+                " ROUND(AVG(CASE WHEN %2='RX' THEN snr END), 1),"
+                " MAX(observed_ms)"
+                " FROM map_spot_event"
+                " WHERE observed_ms>=:activity_cutoff"
+                " AND trim(band)<>'' AND lower(band)<>'unknown'"
+                " AND (:activity_all_mode=1 OR upper(mode)=upper(:activity_mode))"
+                " GROUP BY band")
+                .arg(pskPredicate, directionExpression));
+        aggregate.bindValue(QStringLiteral(":activity_cutoff"), activityCutoff);
+        aggregate.bindValue(QStringLiteral(":activity_all_mode"), allMode);
+        aggregate.bindValue(QStringLiteral(":activity_mode"), options.mode);
+        int maxTotal = 0;
+        int maxUniqueCalls = 0;
+        if (aggregate.exec()) {
+            while (aggregate.next()) {
+                BandMetric metric;
+                metric.band = aggregate.value(0).toString();
+                int const localRx = aggregate.value(1).toInt();
+                int const localTx = aggregate.value(2).toInt();
+                int const pskRx = aggregate.value(3).toInt();
+                int const pskTx = aggregate.value(4).toInt();
+                metric.uniqueCalls = aggregate.value(5).toInt();
+                if (!aggregate.value(6).isNull()) {
+                    metric.averageSnr = aggregate.value(6).toDouble();
+                }
+                metric.latestMs = aggregate.value(7).toLongLong();
+                metric.rx = localRx + pskRx;
+                metric.tx = localTx + pskTx;
+                metric.local = localRx + localTx;
+                metric.psk = pskRx + pskTx;
+                metric.total = metric.local + metric.psk;
+                metric.row.insert(QStringLiteral("band"), metric.band);
+                metric.row.insert(QStringLiteral("localRx"), localRx);
+                metric.row.insert(QStringLiteral("localTx"), localTx);
+                metric.row.insert(QStringLiteral("pskRx"), pskRx);
+                metric.row.insert(QStringLiteral("pskTx"), pskTx);
+                metric.row.insert(QStringLiteral("rx"), metric.rx);
+                metric.row.insert(QStringLiteral("tx"), metric.tx);
+                metric.row.insert(QStringLiteral("local"), metric.local);
+                metric.row.insert(QStringLiteral("psk"), metric.psk);
+                metric.row.insert(QStringLiteral("total"), metric.total);
+                metric.row.insert(QStringLiteral("uniqueCalls"), metric.uniqueCalls);
+                metric.row.insert(QStringLiteral("averageSnr"), metric.averageSnr);
+                metric.row.insert(QStringLiteral("latestMs"), metric.latestMs);
+                maxTotal = qMax(maxTotal, metric.total);
+                maxUniqueCalls = qMax(maxUniqueCalls, metric.uniqueCalls);
+                metrics.append(std::move(metric));
+            }
+        } else if (snapshot.error.isEmpty()) {
+            snapshot.error = aggregate.lastError().text();
+        }
+
+        for (BandMetric& metric : metrics) {
+            double const volumeQuality = maxTotal > 0
+                ? std::log1p(static_cast<double>(metric.total))
+                    / std::log1p(static_cast<double>(maxTotal))
+                : 0.0;
+            double const uniqueQuality = maxUniqueCalls > 0
+                ? static_cast<double>(metric.uniqueCalls) / maxUniqueCalls
+                : 0.0;
+            double const snrQuality =
+                qBound(0.0, (metric.averageSnr + 30.0) / 40.0, 1.0);
+            double const recencyQuality = metric.latestMs > 0
+                ? qBound(0.0,
+                         1.0 - static_cast<double>(nowMs - metric.latestMs)
+                                   / static_cast<double>(windowMs),
+                         1.0)
+                : 0.0;
+            double const balanceQuality = metric.total > 0
+                ? 1.0 - static_cast<double>(qAbs(metric.rx - metric.tx))
+                            / metric.total
+                : 0.0;
+            double const agreementQuality =
+                qMax(metric.local, metric.psk) > 0
+                    ? static_cast<double>(qMin(metric.local, metric.psk))
+                        / qMax(metric.local, metric.psk)
+                    : 0.0;
+            int const score = qBound(
+                0,
+                qRound(100.0 * (0.35 * volumeQuality
+                                + 0.25 * uniqueQuality
+                                + 0.15 * snrQuality
+                                + 0.10 * recencyQuality
+                                + 0.05 * balanceQuality
+                                + 0.10 * agreementQuality)),
+                100);
+            metric.row.insert(QStringLiteral("score"), score);
+            metric.row.insert(QStringLiteral("volumeQuality"), volumeQuality);
+            metric.row.insert(QStringLiteral("uniqueQuality"), uniqueQuality);
+            metric.row.insert(QStringLiteral("snrQuality"), snrQuality);
+            metric.row.insert(QStringLiteral("recencyQuality"), recencyQuality);
+            metric.row.insert(QStringLiteral("balanceQuality"), balanceQuality);
+            metric.row.insert(QStringLiteral("agreementQuality"), agreementQuality);
+        }
+        std::sort(metrics.begin(), metrics.end(),
+                  [](BandMetric const& left, BandMetric const& right) {
+                      int const leftScore =
+                          left.row.value(QStringLiteral("score")).toInt();
+                      int const rightScore =
+                          right.row.value(QStringLiteral("score")).toInt();
+                      return leftScore != rightScore
+                          ? leftScore > rightScore
+                          : bandOrder(left.band) < bandOrder(right.band);
+                  });
+
+        int totalLocalRx = 0;
+        int totalLocalTx = 0;
+        int totalPskRx = 0;
+        int totalPskTx = 0;
+        for (int index = 0; index < metrics.size(); ++index) {
+            metrics[index].row.insert(QStringLiteral("rank"), index + 1);
+            metrics[index].row.insert(QStringLiteral("best"), index == 0);
+            snapshot.bandActivity.append(metrics[index].row);
+            totalLocalRx +=
+                metrics[index].row.value(QStringLiteral("localRx")).toInt();
+            totalLocalTx +=
+                metrics[index].row.value(QStringLiteral("localTx")).toInt();
+            totalPskRx +=
+                metrics[index].row.value(QStringLiteral("pskRx")).toInt();
+            totalPskTx +=
+                metrics[index].row.value(QStringLiteral("pskTx")).toInt();
+        }
+
+        QSqlQuery timeline(db);
+        timeline.prepare(
+            QStringLiteral(
+                "SELECT (observed_ms / 900000) * 900000, band,"
+                " SUM(CASE WHEN NOT %1 AND %2='RX' THEN 1 ELSE 0 END),"
+                " SUM(CASE WHEN NOT %1 AND %2='TX' THEN 1 ELSE 0 END),"
+                " SUM(CASE WHEN %1 AND %2='RX' THEN 1 ELSE 0 END),"
+                " SUM(CASE WHEN %1 AND %2='TX' THEN 1 ELSE 0 END)"
+                " FROM map_spot_event"
+                " WHERE observed_ms>=:activity_cutoff"
+                " AND trim(band)<>'' AND lower(band)<>'unknown'"
+                " AND (:activity_all_mode=1 OR upper(mode)=upper(:activity_mode))"
+                " GROUP BY 1, band ORDER BY 1, band")
+                .arg(pskPredicate, directionExpression));
+        timeline.bindValue(QStringLiteral(":activity_cutoff"), activityCutoff);
+        timeline.bindValue(QStringLiteral(":activity_all_mode"), allMode);
+        timeline.bindValue(QStringLiteral(":activity_mode"), options.mode);
+        if (timeline.exec()) {
+            while (timeline.next()) {
+                QVariantMap row;
+                int const localRx = timeline.value(2).toInt();
+                int const localTx = timeline.value(3).toInt();
+                int const pskRx = timeline.value(4).toInt();
+                int const pskTx = timeline.value(5).toInt();
+                row.insert(QStringLiteral("bucketMs"),
+                           timeline.value(0).toLongLong());
+                row.insert(QStringLiteral("band"), timeline.value(1).toString());
+                row.insert(QStringLiteral("localRx"), localRx);
+                row.insert(QStringLiteral("localTx"), localTx);
+                row.insert(QStringLiteral("pskRx"), pskRx);
+                row.insert(QStringLiteral("pskTx"), pskTx);
+                row.insert(QStringLiteral("total"),
+                           localRx + localTx + pskRx + pskTx);
+                snapshot.bandActivityTimeline.append(row);
+            }
+        } else if (snapshot.error.isEmpty()) {
+            snapshot.error = timeline.lastError().text();
+        }
+
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("windowHours"), windowHours);
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("bandCount"), metrics.size());
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("localRx"), totalLocalRx);
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("localTx"), totalLocalTx);
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("pskRx"), totalPskRx);
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("pskTx"), totalPskTx);
+        snapshot.bandActivitySummary.insert(
+            QStringLiteral("generatedMs"), nowMs);
+        if (!metrics.isEmpty()) {
+            snapshot.bandActivitySummary.insert(
+                QStringLiteral("bestBand"), metrics.first().band);
+            snapshot.bandActivitySummary.insert(
+                QStringLiteral("bestScore"),
+                metrics.first().row.value(QStringLiteral("score")));
+        } else {
+            snapshot.bandActivitySummary.insert(
+                QStringLiteral("bestBand"), QString());
+            snapshot.bandActivitySummary.insert(
+                QStringLiteral("bestScore"), 0);
         }
     }
 
@@ -4590,12 +4853,12 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
             " observed_ms, frequency_hz, snr, source, dxcc, continent, cq_zone,"
             " itu_zone, state, is_cq, target_call, distance_km, activity_type,"
             " receiver_call, receiver_grid, provider, first_observed_ms, last_observed_ms,"
-            " correlation_count)"
+            " correlation_count, direction)"
             " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :message, :utc,"
             " :ms, :freq, :snr, :source, :dxcc, :continent, :cq_zone,"
             " :itu_zone, :state, :is_cq, :target_call, :distance_km, :activity_type,"
             " :receiver_call, :receiver_grid, :provider, :first_observed_ms, :last_observed_ms,"
-            " :correlation_count)"
+            " :correlation_count, :direction)"
             " ON CONFLICT(unique_key) DO UPDATE SET"
             " observed_utc=excluded.observed_utc,"
             " observed_ms=excluded.observed_ms,"
@@ -4604,6 +4867,7 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
             " receiver_call=excluded.receiver_call,"
             " receiver_grid=excluded.receiver_grid,"
             " provider=excluded.provider,"
+            " direction=excluded.direction,"
             " correlation_count=MAX(map_spot.correlation_count, excluded.correlation_count),"
             " activity_type=excluded.activity_type,"
             " hits=map_spot.hits+1"))) {
@@ -4622,54 +4886,65 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
     if (!event.prepare(QStringLiteral(
             "INSERT INTO map_spot_event"
             " (spot_key, call, grid, receiver_call, receiver_grid, band, mode, source, provider,"
-            " observed_ms, frequency_hz, snr, correlation, activity_type)"
+            " observed_ms, frequency_hz, snr, correlation, activity_type, direction)"
             " VALUES (:spot_key, :call, :grid, :receiver_call, :receiver_grid, :band, :mode,"
-            " :source, :provider, :observed_ms, :frequency_hz, :snr, :correlation, :activity_type)"))) {
+            " :source, :provider, :observed_ms, :frequency_hz, :snr, :correlation,"
+            " :activity_type, :direction)"))) {
         if (error) *error = event.lastError().text();
         db.rollback();
         return false;
     }
     for (LiveSpot const& spot : spots) {
-        correlated.bindValue(QStringLiteral(":call"), spot.call);
-        correlated.bindValue(QStringLiteral(":grid"), spot.grid4);
-        correlated.bindValue(QStringLiteral(":source"), spot.source);
-        correlated.bindValue(QStringLiteral(":cutoff"), spot.observedMs - 5 * 60 * 1000LL);
+        bool const pskReporterSpot =
+            spot.source.compare(QStringLiteral("psk"), Qt::CaseInsensitive) == 0
+            || spot.provider.contains(QStringLiteral("PSK Reporter"),
+                                      Qt::CaseInsensitive);
+        bool const visibleSpot =
+            spot.direction != QStringLiteral("TX") || pskReporterSpot;
         int correlationCount = 0;
-        if (correlated.exec() && correlated.next()) {
-            correlationCount = correlated.value(0).toInt();
-        }
-        insert.bindValue(QStringLiteral(":key"), spot.uniqueKey);
-        insert.bindValue(QStringLiteral(":call"), spot.call);
-        insert.bindValue(QStringLiteral(":grid"), spot.grid);
-        insert.bindValue(QStringLiteral(":grid4"), spot.grid4);
-        insert.bindValue(QStringLiteral(":grid6"), spot.grid6);
-        insert.bindValue(QStringLiteral(":band"), spot.band);
-        insert.bindValue(QStringLiteral(":mode"), spot.mode);
-        insert.bindValue(QStringLiteral(":message"), spot.message);
-        insert.bindValue(QStringLiteral(":utc"), spot.observedUtc);
-        insert.bindValue(QStringLiteral(":ms"), spot.observedMs);
-        insert.bindValue(QStringLiteral(":freq"), spot.frequencyHz);
-        insert.bindValue(QStringLiteral(":snr"), spot.snr);
-        insert.bindValue(QStringLiteral(":source"), spot.source);
-        insert.bindValue(QStringLiteral(":dxcc"), spot.dxcc);
-        insert.bindValue(QStringLiteral(":continent"), spot.continent);
-        insert.bindValue(QStringLiteral(":cq_zone"), spot.cqZone);
-        insert.bindValue(QStringLiteral(":itu_zone"), spot.ituZone);
-        insert.bindValue(QStringLiteral(":state"), spot.state);
-        insert.bindValue(QStringLiteral(":is_cq"), spot.isCq ? 1 : 0);
-        insert.bindValue(QStringLiteral(":target_call"), spot.targetCall);
-        insert.bindValue(QStringLiteral(":distance_km"), spot.distanceKm);
-        insert.bindValue(QStringLiteral(":activity_type"), spot.activityType);
-        insert.bindValue(QStringLiteral(":receiver_call"), spot.receiverCall);
-        insert.bindValue(QStringLiteral(":receiver_grid"), spot.receiverGrid);
-        insert.bindValue(QStringLiteral(":provider"), spot.provider);
-        insert.bindValue(QStringLiteral(":first_observed_ms"), spot.observedMs);
-        insert.bindValue(QStringLiteral(":last_observed_ms"), spot.observedMs);
-        insert.bindValue(QStringLiteral(":correlation_count"), correlationCount);
-        if (!insert.exec()) {
-            if (error) *error = insert.lastError().text();
-            db.rollback();
-            return false;
+        if (visibleSpot) {
+            correlated.bindValue(QStringLiteral(":call"), spot.call);
+            correlated.bindValue(QStringLiteral(":grid"), spot.grid4);
+            correlated.bindValue(QStringLiteral(":source"), spot.source);
+            correlated.bindValue(QStringLiteral(":cutoff"),
+                                 spot.observedMs - 5 * 60 * 1000LL);
+            if (correlated.exec() && correlated.next()) {
+                correlationCount = correlated.value(0).toInt();
+            }
+            insert.bindValue(QStringLiteral(":key"), spot.uniqueKey);
+            insert.bindValue(QStringLiteral(":call"), spot.call);
+            insert.bindValue(QStringLiteral(":grid"), spot.grid);
+            insert.bindValue(QStringLiteral(":grid4"), spot.grid4);
+            insert.bindValue(QStringLiteral(":grid6"), spot.grid6);
+            insert.bindValue(QStringLiteral(":band"), spot.band);
+            insert.bindValue(QStringLiteral(":mode"), spot.mode);
+            insert.bindValue(QStringLiteral(":message"), spot.message);
+            insert.bindValue(QStringLiteral(":utc"), spot.observedUtc);
+            insert.bindValue(QStringLiteral(":ms"), spot.observedMs);
+            insert.bindValue(QStringLiteral(":freq"), spot.frequencyHz);
+            insert.bindValue(QStringLiteral(":snr"), spot.snr);
+            insert.bindValue(QStringLiteral(":source"), spot.source);
+            insert.bindValue(QStringLiteral(":dxcc"), spot.dxcc);
+            insert.bindValue(QStringLiteral(":continent"), spot.continent);
+            insert.bindValue(QStringLiteral(":cq_zone"), spot.cqZone);
+            insert.bindValue(QStringLiteral(":itu_zone"), spot.ituZone);
+            insert.bindValue(QStringLiteral(":state"), spot.state);
+            insert.bindValue(QStringLiteral(":is_cq"), spot.isCq ? 1 : 0);
+            insert.bindValue(QStringLiteral(":target_call"), spot.targetCall);
+            insert.bindValue(QStringLiteral(":distance_km"), spot.distanceKm);
+            insert.bindValue(QStringLiteral(":activity_type"), spot.activityType);
+            insert.bindValue(QStringLiteral(":receiver_call"), spot.receiverCall);
+            insert.bindValue(QStringLiteral(":receiver_grid"), spot.receiverGrid);
+            insert.bindValue(QStringLiteral(":provider"), spot.provider);
+            insert.bindValue(QStringLiteral(":first_observed_ms"), spot.observedMs);
+            insert.bindValue(QStringLiteral(":last_observed_ms"), spot.observedMs);
+            insert.bindValue(QStringLiteral(":correlation_count"), correlationCount);
+            insert.bindValue(QStringLiteral(":direction"), spot.direction);
+            if (!insert.exec()) {
+                if (error) *error = insert.lastError().text();
+                db.rollback();
+                return false;
+            }
         }
         event.bindValue(QStringLiteral(":spot_key"), spot.uniqueKey);
         event.bindValue(QStringLiteral(":call"), spot.call);
@@ -4685,10 +4960,14 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
         event.bindValue(QStringLiteral(":snr"), spot.snr);
         event.bindValue(QStringLiteral(":correlation"), correlationCount);
         event.bindValue(QStringLiteral(":activity_type"), spot.activityType);
+        event.bindValue(QStringLiteral(":direction"), spot.direction);
         if (!event.exec()) {
             if (error) *error = event.lastError().text();
             db.rollback();
             return false;
+        }
+        if (!visibleSpot) {
+            continue;
         }
 
         auto addAlert = [&db, &spot](QString const& type, QString const& text) {
@@ -5054,7 +5333,7 @@ void MapIntelligenceService::queueSnapshotQuery(quint64 generation)
         m_cqOnly, m_rosterSortDescending, m_rosterCqOnly,
         m_splitGridEnabled, m_rosterTextFilter, m_rosterTextMode,
         pskLayerEnabled(), m_pskDisplayMode, m_pskOpacityPercent / 100.0,
-        m_spotAgeFilter, m_spotCorrelationFilter
+        m_spotAgeFilter, m_spotCorrelationFilter, m_bandActivityWindowHours
     };
     QPointer<MapIntelligenceService> guard(this);
     m_workerPool.start(QRunnable::create([guard, database, options, generation] {
@@ -5088,6 +5367,9 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     m_spotHeatmap = std::move(snapshot.spotHeatmap);
     m_spotTimeline = std::move(snapshot.spotTimeline);
     m_spotPaths = std::move(snapshot.spotPaths);
+    m_bandActivity = std::move(snapshot.bandActivity);
+    m_bandActivityTimeline = std::move(snapshot.bandActivityTimeline);
+    m_bandActivitySummary = std::move(snapshot.bandActivitySummary);
     m_rosterRules = std::move(snapshot.rosterRules);
     m_statistics = std::move(snapshot.statistics);
     m_availableBands = std::move(snapshot.bands);
@@ -5139,6 +5421,7 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     emit awardsChanged();
     emit alertsChanged();
     emit spotAnalyticsChanged();
+    emit bandActivityChanged();
     emit rosterRulesChanged();
     emit statisticsChanged();
     rebuildVisibleCoverage();

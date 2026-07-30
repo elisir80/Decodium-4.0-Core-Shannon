@@ -5612,9 +5612,9 @@ Dialog {
                         Text { text: qsTr("Station ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         SpinBox {
                             id: cloudlogStIdSpin
-                            from: 0; to: 999; value: Number(bridge.getSetting("CloudlogStationID", 1)); editable: true
+                            from: 0; to: 999; value: Number(bridge.getSetting("CloudLogStationID", 1)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
-                            onValueChanged: bridge.setSetting("CloudlogStationID", value)
+                            onValueChanged: bridge.setSetting("CloudLogStationID", value)
                             contentItem: TextInput { text: cloudlogStIdSpin.textFromValue(cloudlogStIdSpin.value, cloudlogStIdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cloudlogStIdSpin.editable; validator: cloudlogStIdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
@@ -5714,25 +5714,25 @@ Dialog {
                         }
                         Text { text: qsTr("Password:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         DecoTextField {
-                            text: bridge.getSetting("LoTWPassword", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
+                            text: bridge.getSetting("Lotw_pwd", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
-                            onTextChanged: bridge.setSetting("LoTWPassword", text)
+                            onTextChanged: bridge.setSetting("Lotw_pwd", text)
                         }
 
                         Text { text: qsTr("Non-QSL'd:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         CheckBox {
-                            checked: bridge.getSetting("LoTWNonQSL", false)
-                            onCheckedChanged: bridge.setSetting("LoTWNonQSL", checked)
+                            checked: bridge.getSetting("NonQsl", false)
+                            onCheckedChanged: bridge.setSetting("NonQsl", checked)
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
                         Text { text: qsTr("Days Upload:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         SpinBox {
                             id: lotwDaysSpin
-                            from: 0; to: 9999; value: Number(bridge.getSetting("LoTWDaysSinceUpload", 365)); editable: true
+                            from: 0; to: 9999; value: Number(bridge.getSetting("LotWDaysSinceLastUpload", 365)); editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
-                            onValueChanged: bridge.setSetting("LoTWDaysSinceUpload", value)
+                            onValueChanged: bridge.setSetting("LotWDaysSinceLastUpload", value)
                             contentItem: TextInput { text: lotwDaysSpin.textFromValue(lotwDaysSpin.value, lotwDaysSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !lotwDaysSpin.editable; validator: lotwDaysSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }

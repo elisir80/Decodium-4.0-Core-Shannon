@@ -1,5 +1,49 @@
 #include "DecodiumThemeManager.h"
+#include "DecodiumProfileSettings.h"
+
 #include <QSettings>
+
+namespace
+{
+QVariant profiledThemeValue(const QString& key,
+                            const QVariant& defaultValue,
+                            const QString& legacyApplication)
+{
+    QSettings profile(QSettings::IniFormat, QSettings::UserScope,
+                      QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    bool const hasActiveProfile = decodium::beginActiveSettingsProfile(profile);
+    if (hasActiveProfile && profile.contains(key)) {
+        return profile.value(key, defaultValue);
+    }
+
+    QSettings legacy(QSettings::IniFormat, QSettings::UserScope,
+                     QStringLiteral("Decodium"), legacyApplication);
+    QVariant const value = legacy.value(key, defaultValue);
+    if (hasActiveProfile) {
+        profile.setValue(key, value);
+        profile.sync();
+    }
+    return value;
+}
+
+void setProfiledThemeValue(const QString& key,
+                           const QVariant& value,
+                           const QString& legacyApplication)
+{
+    QSettings profile(QSettings::IniFormat, QSettings::UserScope,
+                      QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (decodium::beginActiveSettingsProfile(profile)) {
+        profile.setValue(key, value);
+        profile.sync();
+        return;
+    }
+
+    QSettings legacy(QSettings::IniFormat, QSettings::UserScope,
+                     QStringLiteral("Decodium"), legacyApplication);
+    legacy.setValue(key, value);
+    legacy.sync();
+}
+}
 
 const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {
     /* bgDeep         */ QColor("#0A0F1A"),
@@ -105,46 +149,64 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_dxPedition {
 DecodiumThemeManager::DecodiumThemeManager(QObject* parent)
     : QObject(parent)
 {
-    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium");
     QString const startupTheme = QStringLiteral("Ocean Blue");
     // One-shot migration: from 1.0.70 the dark Ocean Blue theme is the
     // canonical default. Reset any persisted choice once so the upgrade
     // lands on dark; the user can re-select Stellar Light afterwards.
-    if (!s.value("theme/migrated_v2", false).toBool()) {
-        s.setValue("theme/current", startupTheme);
+    if (!profiledThemeValue(QStringLiteral("theme/migrated_v2"), false,
+                            QStringLiteral("Decodium")).toBool()) {
+        setProfiledThemeValue(QStringLiteral("theme/current"), startupTheme,
+                              QStringLiteral("Decodium"));
         // Stellar Light forces palette index 11 (pastel light) on the
         // panadapter. Reset any residual 11 so the dark default lands on
         // a sensible spectrum palette instead of an all-white waterfall.
         // uiPaletteIndex is persisted by DecodiumBridge under the
         // "Decodium3" store, not the same one used for theme/current.
-        QSettings bridgeStore(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
-        if (bridgeStore.value("uiPaletteIndex", 0).toInt() == 11)
-            bridgeStore.setValue("uiPaletteIndex", 0);
-        s.setValue("theme/migrated_v2", true);
+        if (profiledThemeValue(QStringLiteral("uiPaletteIndex"), 0,
+                               QStringLiteral("Decodium3")).toInt() == 11) {
+            setProfiledThemeValue(QStringLiteral("uiPaletteIndex"), 0,
+                                  QStringLiteral("Decodium3"));
+        }
+        setProfiledThemeValue(QStringLiteral("theme/migrated_v2"), true,
+                              QStringLiteral("Decodium"));
     }
     // 1.0.342 — tema persistente: rimosso il guard che forzava 'Ocean Blue' ad
     // ogni avvio (rendeva DX-Pedition non selezionabile in modo permanente). Ora
     // ripristina il tema salvato dall'utente, validandolo contro i temi noti.
-    QString stored = s.value("theme/current", startupTheme).toString().trimmed();
+    QString stored = profiledThemeValue(QStringLiteral("theme/current"), startupTheme,
+                                        QStringLiteral("Decodium")).toString().trimmed();
     // 1.0.344 — rename tema DX-Pedition -> Darkcodium: migra il valore salvato.
-    if (stored == "DX-Pedition") { stored = "Darkcodium"; s.setValue("theme/current", stored); }
+    if (stored == "DX-Pedition") {
+        stored = "Darkcodium";
+        setProfiledThemeValue(QStringLiteral("theme/current"), stored,
+                              QStringLiteral("Decodium"));
+    }
     if (stored != "Ocean Blue" && stored != "Stellar Light" && stored != "Darkcodium")
         stored = startupTheme;
     m_currentTheme = stored;
     // DX-Pedition Fase 1 — accent variant + densità (store Decodium3 esplicito, opt-in)
     {
-        QSettings ds(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
-        QString const av = ds.value("ThemeAccentVariant", "phosphor").toString();
+        QString const av =
+            profiledThemeValue(QStringLiteral("ThemeAccentVariant"), QStringLiteral("phosphor"),
+                               QStringLiteral("Decodium3")).toString();
         if (av == "phosphor" || av == "cyan" || av == "amber" || av == "red")
             m_accentVariant = av;
-        QString const dn = ds.value("ThemeDensity", "regular").toString();
+        QString const dn =
+            profiledThemeValue(QStringLiteral("ThemeDensity"), QStringLiteral("regular"),
+                               QStringLiteral("Decodium3")).toString();
         if (dn == "compact" || dn == "regular" || dn == "comfy")
             m_density = dn;
     }
     // 1.0.305 (#6) — colori UI personalizzati (sfondo+testo), opt-in default OFF
-    m_customColorsEnabled = s.value("theme/customEnabled", false).toBool();
-    m_customBgColor       = s.value("theme/customBg", QString()).toString();
-    m_customTextColor     = s.value("theme/customText", QString()).toString();
+    m_customColorsEnabled =
+        profiledThemeValue(QStringLiteral("theme/customEnabled"), false,
+                           QStringLiteral("Decodium")).toBool();
+    m_customBgColor =
+        profiledThemeValue(QStringLiteral("theme/customBg"), QString(),
+                           QStringLiteral("Decodium")).toString();
+    m_customTextColor =
+        profiledThemeValue(QStringLiteral("theme/customText"), QString(),
+                           QStringLiteral("Decodium")).toString();
 }
 
 // 1.0.305 (#6) — override colori UI ----------------------------------------
@@ -176,7 +238,8 @@ void DecodiumThemeManager::setCustomColorsEnabled(bool v)
 {
     if (m_customColorsEnabled == v) return;
     m_customColorsEnabled = v;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/customEnabled", v);
+    setProfiledThemeValue(QStringLiteral("theme/customEnabled"), v,
+                          QStringLiteral("Decodium"));
     emit paletteChanged();
 }
 
@@ -185,7 +248,8 @@ void DecodiumThemeManager::setCustomBgColor(const QString& hex)
     QString const h = hex.trimmed();
     if (m_customBgColor == h) return;
     m_customBgColor = h;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/customBg", h);
+    setProfiledThemeValue(QStringLiteral("theme/customBg"), h,
+                          QStringLiteral("Decodium"));
     if (m_customColorsEnabled) emit paletteChanged();
 }
 
@@ -194,7 +258,8 @@ void DecodiumThemeManager::setCustomTextColor(const QString& hex)
     QString const h = hex.trimmed();
     if (m_customTextColor == h) return;
     m_customTextColor = h;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/customText", h);
+    setProfiledThemeValue(QStringLiteral("theme/customText"), h,
+                          QStringLiteral("Decodium"));
     if (m_customColorsEnabled) emit paletteChanged();
 }
 
@@ -210,7 +275,8 @@ void DecodiumThemeManager::setCurrentTheme(const QString& name)
     if (m_currentTheme == name) return;
     if (name != "Ocean Blue" && name != "Stellar Light" && name != "Darkcodium") return;
     m_currentTheme = name;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium").setValue("theme/current", name);
+    setProfiledThemeValue(QStringLiteral("theme/current"), name,
+                          QStringLiteral("Decodium"));
     emit currentThemeChanged();
     emit paletteChanged();
 }
@@ -236,7 +302,8 @@ void DecodiumThemeManager::setAccentVariant(const QString& name)
     if (n != "phosphor" && n != "cyan" && n != "amber" && n != "red") return;
     if (m_accentVariant == n) return;
     m_accentVariant = n;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue("ThemeAccentVariant", n);
+    setProfiledThemeValue(QStringLiteral("ThemeAccentVariant"), n,
+                          QStringLiteral("Decodium3"));
     // Influisce sui colori solo quando il tema DX-Pedition è attivo, ma emettiamo
     // comunque: i binding QML restano corretti e l'effetto è nullo sugli altri temi.
     emit paletteChanged();
@@ -248,7 +315,8 @@ void DecodiumThemeManager::setDensity(const QString& name)
     if (n != "compact" && n != "regular" && n != "comfy") return;
     if (m_density == n) return;
     m_density = n;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue("ThemeDensity", n);
+    setProfiledThemeValue(QStringLiteral("ThemeDensity"), n,
+                          QStringLiteral("Decodium3"));
     emit densityChanged();
 }
 

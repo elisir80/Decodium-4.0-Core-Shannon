@@ -16,6 +16,7 @@
 #include "Detector/LegacyDspIoHelpers.hpp"
 #include "Modulator/RTTYModulator.hpp"
 #include "Decoder/BaudotDecoder.hpp"
+#include "Sequencer/MessageTokenRules.hpp"
 
 #include <QSoundEffect>
 #include <QCoreApplication>
@@ -6063,6 +6064,14 @@ void MainWindow::legacyRaiseWarning(QString const& title,
 void MainWindow::legacySetEmbeddedMode(bool enabled)
 {
   m_embeddedShellMode = enabled;
+  if (enabled)
+    {
+      m_saveDecoded = false;
+      m_saveAll = false;
+      ui->actionNone->setChecked (true);
+      ui->actionSave_decoded->setChecked (false);
+      ui->actionSave_all->setChecked (false);
+    }
   if (m_wideGraph)
     {
       m_wideGraph->setAttribute (Qt::WA_DontShowOnScreen, enabled);
@@ -6357,9 +6366,9 @@ void MainWindow::writeSettings()
 
   m_settings->beginGroup("Common");
   m_settings->setValue("Mode",m_mode);
-  m_settings->setValue("SaveNone",ui->actionNone->isChecked());
-  m_settings->setValue("SaveDecoded",ui->actionSave_decoded->isChecked());
-  m_settings->setValue("SaveAll",ui->actionSave_all->isChecked());
+  m_settings->setValue("SaveNone",m_embeddedShellMode || ui->actionNone->isChecked());
+  m_settings->setValue("SaveDecoded",!m_embeddedShellMode && ui->actionSave_decoded->isChecked());
+  m_settings->setValue("SaveAll",!m_embeddedShellMode && ui->actionSave_all->isChecked());
   m_settings->setValue("RemoveAudioFiles",ui->actionRemove_after_30days->isChecked());
   m_settings->setValue("NDepth",m_ndepth);
 
@@ -6721,9 +6730,12 @@ void MainWindow::readSettings()
   ui->actionHideOC->setChecked(m_settings->value("HideOC", false).toBool());
   ui->actionHideAN->setChecked(m_settings->value("HideAN", false).toBool());
 //  m_mode=m_settings->value("Mode","FT8").toString();
-  ui->actionNone->setChecked(m_settings->value("SaveNone",true).toBool());
-  ui->actionSave_decoded->setChecked(m_settings->value("SaveDecoded",false).toBool());
-  ui->actionSave_all->setChecked(m_settings->value("SaveAll",false).toBool());
+  ui->actionNone->setChecked(m_embeddedShellMode
+                             || m_settings->value("SaveNone",true).toBool());
+  ui->actionSave_decoded->setChecked(!m_embeddedShellMode
+                                     && m_settings->value("SaveDecoded",false).toBool());
+  ui->actionSave_all->setChecked(!m_embeddedShellMode
+                                 && m_settings->value("SaveAll",false).toBool());
   ui->actionRemove_after_30days->setChecked(m_settings->value("RemoveAudioFiles",false).toBool());
   ui->RxFreqSpinBox->setValue(0); // ensure a change is signaled
   ui->RxFreqSpinBox->setValue(m_settings->value("RxFreq",1500).toInt());
@@ -7532,7 +7544,8 @@ void MainWindow::dataSink(qint64 frames)
           Q_EMIT reset_audio_input_stream (true); // reports dropped samples
       }
     bool const diagnosticSaveAll =
-        m_mode == "FT8"
+        !m_embeddedShellMode
+        && m_mode == "FT8"
         && !m_diskData
         && qEnvironmentVariableIsSet ("DECODIUM_FORCE_SAVE_ALL");
     if(!m_diskData and (m_saveAll or diagnosticSaveAll or m_saveDecoded or m_mode=="WSPR")) {
@@ -12086,6 +12099,11 @@ void MainWindow::on_actionNone_triggered()                    //Save None
 
 void MainWindow::on_actionSave_decoded_triggered()
 {
+  if (m_embeddedShellMode)
+    {
+      on_actionNone_triggered();
+      return;
+    }
   m_saveDecoded=true;
   m_saveAll=false;
   ui->actionSave_decoded->setChecked(true);
@@ -12093,6 +12111,11 @@ void MainWindow::on_actionSave_decoded_triggered()
 
 void MainWindow::on_actionSave_all_triggered()                //Save All
 {
+  if (m_embeddedShellMode)
+    {
+      on_actionNone_triggered();
+      return;
+    }
   m_saveDecoded=false;
   m_saveAll=true;
   ui->actionSave_all->setChecked(true);
@@ -16567,7 +16590,8 @@ void MainWindow::pskPost (DecodedText const& decodedtext)
 void MainWindow::killFile ()
 {
   bool const diagnosticSaveAll =
-      m_mode == "FT8"
+      !m_embeddedShellMode
+      && m_mode == "FT8"
       && qEnvironmentVariableIsSet ("DECODIUM_FORCE_SAVE_ALL");
   if (m_fnameWE.size () && !(m_saveAll || diagnosticSaveAll || (m_saveDecoded && m_bDecoded))) {
     QFile f1 {m_fnameWE + ".wav"};
@@ -17419,6 +17443,11 @@ void MainWindow::guiUpdate()
     {
       auto temp = m_currentMessage;
       m_currentMessage = QString::fromLatin1(msgsent);
+      QString const transmittedReport =
+          decodium::seq::signalReportFromMessage(m_currentMessage);
+      if (!transmittedReport.isEmpty ()) {
+        m_rptSent = transmittedReport;
+      }
       if (m_currentMessage != temp) // check if tx message changed
       {
           statusUpdate ();
@@ -20433,6 +20462,14 @@ void MainWindow::capturePendingAutoLogSnapshot ()
   m_pendingAutoLogCall = snapshotCall;
   m_pendingAutoLogGrid = m_hisGrid;
   m_pendingAutoLogRptSent = m_rptSent;
+  if (m_pendingAutoLogRptSent.trimmed ().isEmpty ()) {
+    m_pendingAutoLogRptSent =
+        decodium::seq::signalReportFromMessage(m_currentMessage);
+  }
+  if (m_pendingAutoLogRptSent.trimmed ().isEmpty ()) {
+    m_pendingAutoLogRptSent =
+        decodium::seq::signalReportFromMessage(m_lastMessageSent);
+  }
   m_pendingAutoLogRptRcvd = m_rptRcvd;
   m_pendingAutoLogXSent = m_xSent;
   m_pendingAutoLogXRcvd = m_xRcvd;
@@ -22182,6 +22219,15 @@ void MainWindow::on_logQSOButton_clicked()                 //Log QSO button
     applyLateAutoLogSnapshot ();
   }
   recoverLogCallFromActiveContext ();
+  if (logRptSent.trimmed ().isEmpty ()) {
+    logRptSent = decodium::seq::signalReportFromMessage(m_currentMessage);
+  }
+  if (logRptSent.trimmed ().isEmpty ()) {
+    logRptSent = decodium::seq::signalReportFromMessage(m_lastMessageSent);
+  }
+  if (logRptSent.trimmed ().isEmpty ()) {
+    logRptSent = decodium::seq::signalReportFromMessage(selectedTxMessage ());
+  }
 
   if (logHisCall.trimmed ().isEmpty ()) {
     if (mayUseDeferredLogSnapshot) {

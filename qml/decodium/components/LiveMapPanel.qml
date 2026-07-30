@@ -47,7 +47,21 @@ Rectangle {
     property bool operationalDetailsVisible: false
     property bool geographicDetailsVisible: false
     property bool moonLocatePending: false
+    property string activitySelectedBand: ""
     readonly property bool compactIntelligencePanel: width < 760
+
+    function ensureActivityBand() {
+        var rows = root.mapLayers ? (root.mapLayers.bandActivity || []) : []
+        if (rows.length === 0) {
+            root.activitySelectedBand = ""
+            return
+        }
+        for (var i = 0; i < rows.length; ++i) {
+            if (rows[i].band === root.activitySelectedBand)
+                return
+        }
+        root.activitySelectedBand = String(rows[0].band || "")
+    }
 
     component LayerToggle: Rectangle {
         required property string label
@@ -1719,16 +1733,56 @@ Rectangle {
                     TabBar {
                         id: intelligenceTabs
                         Layout.fillWidth: true
-                        TabButton { text: qsTr("MAP"); font.pixelSize: 9 }
-                        TabButton { text: qsTr("ROSTER"); font.pixelSize: 9 }
-                        TabButton { text: qsTr("LOGBOOK"); font.pixelSize: 9 }
-                        TabButton { text: qsTr("STATS"); font.pixelSize: 9 }
-                        TabButton { text: qsTr("AWARDS"); font.pixelSize: 9 }
                         TabButton {
+                            width: intelligenceTabs.width / 7
+                            text: qsTr("MAP")
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
+                        }
+                        TabButton {
+                            width: intelligenceTabs.width / 7
+                            text: qsTr("ROSTER")
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
+                        }
+                        TabButton {
+                            width: intelligenceTabs.width / 7
+                            text: qsTr("LOGBOOK")
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
+                        }
+                        TabButton {
+                            width: intelligenceTabs.width / 7
+                            text: qsTr("STATS")
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
+                        }
+                        TabButton {
+                            width: intelligenceTabs.width / 7
+                            text: qsTr("ACTIVITY")
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
+                        }
+                        TabButton {
+                            width: intelligenceTabs.width / 7
+                            text: qsTr("AWARDS")
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
+                        }
+                        TabButton {
+                            width: intelligenceTabs.width / 7
                             text: root.mapLayers && root.mapLayers.unreadAlertCount > 0
                                 ? qsTr("ALERTS %1").arg(root.mapLayers.unreadAlertCount)
                                 : qsTr("ALERTS")
-                            font.pixelSize: 9
+                            font.pixelSize: 8
+                            leftPadding: 2
+                            rightPadding: 2
                         }
                     }
 
@@ -3563,6 +3617,437 @@ Rectangle {
                         }
 
                         ScrollView {
+                            id: bandActivityScroll
+                            clip: true
+                            contentWidth: availableWidth
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                            ColumnLayout {
+                                id: bandActivityContent
+                                width: bandActivityScroll.availableWidth
+                                spacing: 6
+                                property var summary: root.mapLayers
+                                    ? root.mapLayers.bandActivitySummary : ({})
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 4
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: qsTr("BAND ACTIVITY")
+                                        color: root.secondaryCyan
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                    }
+                                    Repeater {
+                                        model: [1, 6, 12, 24]
+                                        delegate: Button {
+                                            required property int modelData
+                                            Layout.preferredWidth: 38
+                                            Layout.minimumWidth: 38
+                                            Layout.preferredHeight: 24
+                                            Layout.minimumHeight: 24
+                                            text: modelData + "h"
+                                            checkable: true
+                                            checked: root.mapLayers
+                                                && root.mapLayers.bandActivityWindowHours
+                                                   === modelData
+                                            padding: 0
+
+                                            contentItem: Text {
+                                                text: parent.text
+                                                color: parent.checked
+                                                    ? "#07131b" : root.textPrimary
+                                                font.pixelSize: 9
+                                                font.bold: parent.checked
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
+
+                                            background: Rectangle {
+                                                radius: 4
+                                                color: parent.checked
+                                                    ? root.secondaryCyan
+                                                    : (parent.hovered
+                                                       ? "#223348" : "#172333")
+                                                border.width: 1
+                                                border.color: parent.checked
+                                                    ? root.secondaryCyan
+                                                    : (parent.hovered
+                                                       ? root.textSecondary : "#35475d")
+                                            }
+
+                                            onClicked: {
+                                                if (root.mapLayers)
+                                                    root.mapLayers.bandActivityWindowHours =
+                                                        modelData
+                                            }
+                                            ToolTip.visible: hovered
+                                            ToolTip.text: qsTr("Analyse the last %1 hours")
+                                                .arg(modelData)
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 58
+                                    radius: 4
+                                    color: "#101a28"
+                                    border.width: 1
+                                    border.color: root.accentGreen
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.margins: 7
+                                        spacing: 8
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 1
+                                            Text {
+                                                text: qsTr("BEST BAND")
+                                                color: root.textSecondary
+                                                font.pixelSize: 8
+                                                font.bold: true
+                                            }
+                                            Text {
+                                                text: bandActivityContent.summary.bestBand
+                                                      || qsTr("No activity")
+                                                color: bandActivityContent.summary.bestBand
+                                                    ? root.accentGreen
+                                                    : root.textSecondary
+                                                font.pixelSize: 16
+                                                font.bold: true
+                                            }
+                                        }
+                                        Column {
+                                            spacing: 1
+                                            Text {
+                                                anchors.right: parent.right
+                                                text: bandActivityContent.summary.bestBand
+                                                    ? qsTr("%1 / 100")
+                                                          .arg(bandActivityContent.summary.bestScore || 0)
+                                                    : "--"
+                                                color: root.textPrimary
+                                                font.pixelSize: 13
+                                                font.bold: true
+                                            }
+                                            Text {
+                                                anchors.right: parent.right
+                                                text: qsTr("%1 bands / %2h")
+                                                    .arg(bandActivityContent.summary.bandCount || 0)
+                                                    .arg(bandActivityContent.summary.windowHours || 6)
+                                                color: root.textSecondary
+                                                font.pixelSize: 8
+                                            }
+                                        }
+                                    }
+                                }
+
+                                GridLayout {
+                                    Layout.fillWidth: true
+                                    columns: 4
+                                    columnSpacing: 4
+                                    rowSpacing: 4
+                                    Repeater {
+                                        model: [
+                                            {
+                                                label: qsTr("LOCAL RX"),
+                                                value: bandActivityContent.summary.localRx || 0,
+                                                tone: root.secondaryCyan
+                                            },
+                                            {
+                                                label: qsTr("LOCAL TX"),
+                                                value: bandActivityContent.summary.localTx || 0,
+                                                tone: root.accentGreen
+                                            },
+                                            {
+                                                label: qsTr("PSK RX"),
+                                                value: bandActivityContent.summary.pskRx || 0,
+                                                tone: root.accentAmber
+                                            },
+                                            {
+                                                label: qsTr("PSK TX"),
+                                                value: bandActivityContent.summary.pskTx || 0,
+                                                tone: "#d16cff"
+                                            }
+                                        ]
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 42
+                                            radius: 3
+                                            color: "#101a28"
+                                            border.width: 1
+                                            border.color: root.glassBorder
+                                            Column {
+                                                anchors.centerIn: parent
+                                                spacing: 1
+                                                Text {
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    text: modelData.value
+                                                    color: modelData.tone
+                                                    font.pixelSize: 12
+                                                    font.bold: true
+                                                }
+                                                Text {
+                                                    anchors.horizontalCenter: parent.horizontalCenter
+                                                    text: modelData.label
+                                                    color: root.textSecondary
+                                                    font.pixelSize: 7
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 196
+                                    radius: 3
+                                    color: "#0a111d"
+                                    border.width: 1
+                                    border.color: root.glassBorder
+
+                                    Canvas {
+                                        id: activityChart
+                                        anchors.fill: parent
+                                        anchors.margins: 5
+                                        antialiasing: true
+
+                                        function drawSeries(ctx, values, color, left,
+                                                            top, plotWidth,
+                                                            plotHeight, maxValue) {
+                                            if (values.length === 0)
+                                                return
+                                            ctx.beginPath()
+                                            ctx.strokeStyle = color
+                                            ctx.lineWidth = 1.6
+                                            for (var i = 0; i < values.length; ++i) {
+                                                var x = left + (values.length === 1
+                                                    ? plotWidth
+                                                    : plotWidth * i / (values.length - 1))
+                                                var y = top + plotHeight
+                                                    - plotHeight * values[i] / maxValue
+                                                if (i === 0)
+                                                    ctx.moveTo(x, y)
+                                                else
+                                                    ctx.lineTo(x, y)
+                                            }
+                                            ctx.stroke()
+                                        }
+
+                                        onPaint: {
+                                            var ctx = getContext("2d")
+                                            ctx.reset()
+                                            var w = width
+                                            var h = height
+                                            var left = 28
+                                            var right = 7
+                                            var top = 10
+                                            var bottom = 22
+                                            var plotWidth = Math.max(1, w - left - right)
+                                            var plotHeight = Math.max(1, h - top - bottom)
+                                            var hours = root.mapLayers
+                                                ? root.mapLayers.bandActivityWindowHours : 6
+                                            var bucketCount = Math.max(4, hours * 4)
+                                            var endMs = Math.floor(Date.now() / 900000) * 900000
+                                                + 900000
+                                            var startMs = endMs - bucketCount * 900000
+                                            var localRx = []
+                                            var localTx = []
+                                            var pskRx = []
+                                            var pskTx = []
+                                            var buckets = ({})
+                                            var rows = root.mapLayers
+                                                ? (root.mapLayers.bandActivityTimeline || []) : []
+                                            for (var r = 0; r < rows.length; ++r) {
+                                                if (String(rows[r].band || "")
+                                                        !== root.activitySelectedBand)
+                                                    continue
+                                                buckets[String(Number(rows[r].bucketMs))] = rows[r]
+                                            }
+                                            var maxValue = 1
+                                            for (var i = 0; i < bucketCount; ++i) {
+                                                var bucket = buckets[String(startMs + i * 900000)]
+                                                    || ({})
+                                                var values = [
+                                                    Number(bucket.localRx || 0),
+                                                    Number(bucket.localTx || 0),
+                                                    Number(bucket.pskRx || 0),
+                                                    Number(bucket.pskTx || 0)
+                                                ]
+                                                localRx.push(values[0])
+                                                localTx.push(values[1])
+                                                pskRx.push(values[2])
+                                                pskTx.push(values[3])
+                                                for (var v = 0; v < values.length; ++v)
+                                                    maxValue = Math.max(maxValue, values[v])
+                                            }
+
+                                            ctx.strokeStyle = root.glassBorder
+                                            ctx.lineWidth = 1
+                                            ctx.fillStyle = root.textSecondary
+                                            ctx.font = "8px monospace"
+                                            for (var line = 0; line <= 4; ++line) {
+                                                var y = top + plotHeight * line / 4
+                                                ctx.beginPath()
+                                                ctx.moveTo(left, y)
+                                                ctx.lineTo(left + plotWidth, y)
+                                                ctx.stroke()
+                                            }
+                                            ctx.fillText(String(maxValue), 1, top + 4)
+                                            ctx.fillText("0", 15, top + plotHeight + 3)
+                                            ctx.fillText("-" + hours + "h", left,
+                                                         h - 3)
+                                            var nowLabel = qsTr("now")
+                                            ctx.fillText(nowLabel,
+                                                left + plotWidth
+                                                - ctx.measureText(nowLabel).width,
+                                                h - 3)
+
+                                            drawSeries(ctx, localRx, root.secondaryCyan,
+                                                       left, top, plotWidth,
+                                                       plotHeight, maxValue)
+                                            drawSeries(ctx, localTx, root.accentGreen,
+                                                       left, top, plotWidth,
+                                                       plotHeight, maxValue)
+                                            drawSeries(ctx, pskRx, root.accentAmber,
+                                                       left, top, plotWidth,
+                                                       plotHeight, maxValue)
+                                            drawSeries(ctx, pskTx, "#d16cff",
+                                                       left, top, plotWidth,
+                                                       plotHeight, maxValue)
+                                        }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible: !root.activitySelectedBand
+                                        text: qsTr("No band activity in this window")
+                                        color: root.textSecondary
+                                        font.pixelSize: 9
+                                    }
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 7
+                                    Repeater {
+                                        model: [
+                                            { label: qsTr("Local RX"), tone: root.secondaryCyan },
+                                            { label: qsTr("Local TX"), tone: root.accentGreen },
+                                            { label: qsTr("PSK RX"), tone: root.accentAmber },
+                                            { label: qsTr("PSK TX"), tone: "#d16cff" }
+                                        ]
+                                        delegate: Row {
+                                            required property var modelData
+                                            spacing: 3
+                                            Rectangle {
+                                                width: 8
+                                                height: 3
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                color: modelData.tone
+                                            }
+                                            Text {
+                                                text: modelData.label
+                                                color: root.textSecondary
+                                                font.pixelSize: 7
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: qsTr("BAND RANKING")
+                                    color: root.secondaryCyan
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+
+                                Repeater {
+                                    model: root.mapLayers
+                                        ? root.mapLayers.bandActivity : []
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 52
+                                        radius: 3
+                                        color: root.activitySelectedBand === modelData.band
+                                            ? "#153040" : "#101a28"
+                                        border.width: 1
+                                        border.color: modelData.best
+                                            ? root.accentGreen : root.glassBorder
+
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            anchors.margins: 5
+                                            spacing: 2
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                Text {
+                                                    text: "#" + modelData.rank
+                                                    color: root.textSecondary
+                                                    font.pixelSize: 8
+                                                }
+                                                Text {
+                                                    text: modelData.band
+                                                    color: modelData.best
+                                                        ? root.accentGreen
+                                                        : root.textPrimary
+                                                    font.pixelSize: 11
+                                                    font.bold: true
+                                                }
+                                                Text {
+                                                    visible: !!modelData.best
+                                                    text: qsTr("BEST")
+                                                    color: root.accentGreen
+                                                    font.pixelSize: 7
+                                                    font.bold: true
+                                                }
+                                                Item { Layout.fillWidth: true }
+                                                Text {
+                                                    text: qsTr("%1 / 100")
+                                                        .arg(modelData.score)
+                                                    color: root.textPrimary
+                                                    font.pixelSize: 10
+                                                    font.bold: true
+                                                }
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: qsTr("Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB")
+                                                    .arg(modelData.localRx)
+                                                    .arg(modelData.localTx)
+                                                    .arg(modelData.pskRx)
+                                                    .arg(modelData.pskTx)
+                                                    .arg(modelData.uniqueCalls)
+                                                    .arg(Number(modelData.averageSnr).toFixed(1))
+                                                color: root.textSecondary
+                                                font.pixelSize: 8
+                                                elide: Text.ElideRight
+                                            }
+                                        }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                root.activitySelectedBand =
+                                                    String(modelData.band || "")
+                                                activityChart.requestPaint()
+                                            }
+                                        }
+                                    }
+                                }
+                                Item {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 8
+                                }
+                            }
+                        }
+
+                        ScrollView {
                             id: awardsScroll
                             clip: true
                             contentWidth: availableWidth
@@ -3788,6 +4273,20 @@ Rectangle {
         sequence: "Ctrl+Shift+C"
         enabled: root.visible
         onActivated: mapOperationsWindows.openConditions()
+    }
+
+    Connections {
+        target: root.mapLayers
+        ignoreUnknownSignals: true
+
+        function onBandActivityChanged() {
+            root.ensureActivityBand()
+            activityChart.requestPaint()
+        }
+
+        function onBandActivityWindowHoursChanged() {
+            activityChart.requestPaint()
+        }
     }
 
     Connections {

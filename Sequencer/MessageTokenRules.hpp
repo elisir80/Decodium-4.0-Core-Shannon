@@ -46,6 +46,8 @@ QString directedPeerTokenFromMessage(QString const& message,
 
                                             QString const& myBaseCall);
 
+QString signalReportFromMessage(QString const& message);
+
 bool messageCarries73Payload(QString const& message);
 
 bool messageCarries73PayloadForCall(QString const& message,

@@ -2277,7 +2277,27 @@ Maybe<PackedMessage> pack_message77_cpp (QString const& message)
       packed.bits = standard.value.bits;
       packed.i3 = standard.value.i3;
       packed.n3 = standard.value.n3;
-      Maybe<QByteArray> msgsent = unpack77_cpp (packed.bits, packed.i3, packed.n3);
+      // Hash-addressed special calls are necessarily represented by their
+      // 22-bit hash on air. Seed a local unpack context from the explicit
+      // bracketed tokens so the transmitter UI keeps showing the call the
+      // operator selected instead of the unresolved placeholder "<...>".
+      decodium::txmsg::Decode77Context local_context;
+      bool has_explicit_hash_call = false;
+      for (QString const& token : split77_cpp (normalized))
+        {
+          QString const trimmed = token.trimmed ();
+          if (trimmed.size () > 2
+              && trimmed.startsWith (QLatin1Char ('<'))
+              && trimmed.endsWith (QLatin1Char ('>'))
+              && trimmed != QStringLiteral ("<...>"))
+            {
+              local_context.saveHashCall (trimmed.mid (1, trimmed.size () - 2));
+              has_explicit_hash_call = true;
+            }
+        }
+      Maybe<QByteArray> msgsent = unpack77_cpp (
+          packed.bits, packed.i3, packed.n3,
+          has_explicit_hash_call ? &local_context : nullptr);
       if (!msgsent.ok)
         {
           return {};

@@ -24,7 +24,8 @@ include_directories (
 
 add_executable (test_qt_helpers
   test_qt_helpers.cpp
-  ../Detector/MSK144DecodeWorker.cpp)
+  ../Detector/MSK144DecodeWorker.cpp
+  ../Sequencer/MessageTokenRules.cpp)
 target_include_directories (test_qt_helpers PRIVATE ${PROJECT_BINARY_DIR})
 target_link_libraries (test_qt_helpers wsjt_qt wsjt_cxx wsjt_fort Qt6::Test)
 add_test (NAME test_qt_helpers COMMAND $<TARGET_FILE:test_qt_helpers>)

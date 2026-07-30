@@ -33,6 +33,10 @@ class MapIntelligenceService final : public QObject
     Q_PROPERTY(QVariantList spotHeatmap READ spotHeatmap NOTIFY spotAnalyticsChanged)
     Q_PROPERTY(QVariantList spotTimeline READ spotTimeline NOTIFY spotAnalyticsChanged)
     Q_PROPERTY(QVariantList spotPaths READ spotPaths NOTIFY spotAnalyticsChanged)
+    Q_PROPERTY(QVariantList bandActivity READ bandActivity NOTIFY bandActivityChanged)
+    Q_PROPERTY(QVariantList bandActivityTimeline READ bandActivityTimeline NOTIFY bandActivityChanged)
+    Q_PROPERTY(QVariantMap bandActivitySummary READ bandActivitySummary NOTIFY bandActivityChanged)
+    Q_PROPERTY(int bandActivityWindowHours READ bandActivityWindowHours WRITE setBandActivityWindowHours NOTIFY bandActivityWindowHoursChanged)
     Q_PROPERTY(QVariantList rosterRules READ rosterRules NOTIFY rosterRulesChanged)
     Q_PROPERTY(QVariantMap statistics READ statistics NOTIFY statisticsChanged)
     Q_PROPERTY(QString selectedGrid READ selectedGrid NOTIFY gridDetailsChanged)
@@ -127,6 +131,10 @@ public:
     QVariantList spotHeatmap() const { return m_spotHeatmap; }
     QVariantList spotTimeline() const { return m_spotTimeline; }
     QVariantList spotPaths() const { return m_spotPaths; }
+    QVariantList bandActivity() const { return m_bandActivity; }
+    QVariantList bandActivityTimeline() const { return m_bandActivityTimeline; }
+    QVariantMap bandActivitySummary() const { return m_bandActivitySummary; }
+    int bandActivityWindowHours() const { return m_bandActivityWindowHours; }
     QVariantList rosterRules() const { return m_rosterRules; }
     QVariantMap statistics() const { return m_statistics; }
     QStringList availableBands() const { return m_availableBands; }
@@ -232,6 +240,7 @@ public:
     void setPskOpacityPercent(int percent);
     void setSpotAgeFilter(const QString& value);
     void setSpotCorrelationFilter(const QString& value);
+    void setBandActivityWindowHours(int hours);
     void setRosterVisibleColumns(const QStringList& columns);
     void setCallLookupProvider(const QString& provider);
     void setAlertNewGridEnabled(bool enabled);
@@ -314,6 +323,8 @@ signals:
     void spotCorrelationFilterChanged();
     void rosterVisibleColumnsChanged();
     void spotAnalyticsChanged();
+    void bandActivityChanged();
+    void bandActivityWindowHoursChanged();
     void rosterRulesChanged();
     void callLookupProviderChanged();
     void alertRulesChanged();
@@ -384,6 +395,7 @@ private:
         QString receiverCall;
         QString receiverGrid;
         QString provider;
+        QString direction {QStringLiteral("RX")};
         int cqZone {0};
         int ituZone {0};
         bool isCq {false};
@@ -404,6 +416,9 @@ private:
         QVariantList spotHeatmap;
         QVariantList spotTimeline;
         QVariantList spotPaths;
+        QVariantList bandActivity;
+        QVariantList bandActivityTimeline;
+        QVariantMap bandActivitySummary;
         QVariantList rosterRules;
         QVariantMap statistics;
         QStringList bands {QStringLiteral("All")};
@@ -451,6 +466,7 @@ private:
         double pskOpacity {0.65};
         QString spotAgeFilter {QStringLiteral("15 min")};
         QString spotCorrelationFilter {QStringLiteral("All")};
+        int bandActivityWindowHours {6};
     };
 
     struct AlertRules {
@@ -548,6 +564,9 @@ private:
     QVariantList m_spotHeatmap;
     QVariantList m_spotTimeline;
     QVariantList m_spotPaths;
+    QVariantList m_bandActivity;
+    QVariantList m_bandActivityTimeline;
+    QVariantMap m_bandActivitySummary;
     QVariantList m_rosterRules;
     QVariantMap m_statistics;
     QVariantMap m_selectedGridSummary;
@@ -589,6 +608,7 @@ private:
     int m_pskOpacityPercent {65};
     QString m_spotAgeFilter {QStringLiteral("15 min")};
     QString m_spotCorrelationFilter {QStringLiteral("All")};
+    int m_bandActivityWindowHours {6};
     QStringList m_rosterVisibleColumns {
         QStringLiteral("Grid"), QStringLiteral("Band"), QStringLiteral("Mode"),
         QStringLiteral("SNR"), QStringLiteral("DXCC"), QStringLiteral("Age")};

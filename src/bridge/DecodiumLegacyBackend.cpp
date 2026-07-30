@@ -120,6 +120,15 @@ void seedEmbeddedLegacyConfigDefaults(QSettings& settings)
     setSettingIfMissing(settings, QStringLiteral("Configuration/SingleDecode"), false);
 }
 
+void disableEmbeddedLegacyAutomaticWaveSaving(QSettings& settings)
+{
+    // Decodium 4 owns recording through its cross-platform QML controls.
+    // Never inherit automatic period-WAV retention from a legacy profile.
+    settings.setValue(QStringLiteral("Common/SaveNone"), true);
+    settings.setValue(QStringLiteral("Common/SaveDecoded"), false);
+    settings.setValue(QStringLiteral("Common/SaveAll"), false);
+}
+
 void repairEmbeddedLegacyFt8TimingMigration(QSettings& settings)
 {
     QString const marker = QStringLiteral("Decodium4/FastFT8TimingMigrated");
@@ -191,6 +200,7 @@ void bootstrapEmbeddedLegacyConfig()
     QSettings target(targetPath, QSettings::IniFormat);
     mergeMissingSettings(target, legacyPath);
     seedEmbeddedLegacyConfigDefaults(target);
+    disableEmbeddedLegacyAutomaticWaveSaving(target);
     repairEmbeddedLegacyFt8TimingMigration(target);
     applyEmbeddedLegacyFt8FastTimingMigration(target);
     target.sync();

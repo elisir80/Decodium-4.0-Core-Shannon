@@ -25,6 +25,7 @@
 #include "Detector/MSK144DecodeWorker.hpp"
 #include "Modulator/FtxMessageEncoder.hpp"
 #include "Modulator/FtxWaveformGenerator.hpp"
+#include "Sequencer/MessageTokenRules.hpp"
 #include "commons.h"
 #include "helper_functions.h"
 #include "otpgenerator.h"
@@ -2790,6 +2791,30 @@ private:
                                    true);
     QVERIFY (unresolvedDecoded.ok);
     QCOMPARE (decodedText (unresolvedDecoded), QStringLiteral ("II9MESC <...> RR73"));
+
+    QString const specialReport = QStringLiteral ("M9NTS <DL75WAU> -06");
+    decodium::txmsg::EncodedMessage const specialReportEncoded =
+        decodium::txmsg::encodeFt8 (specialReport);
+    QVERIFY (specialReportEncoded.ok);
+    QCOMPARE (sent (specialReportEncoded), specialReport);
+
+    decodium::txmsg::Decode77Context specialReportContext;
+    specialReportContext.saveHashCall (QStringLiteral ("DL75WAU"));
+    decodium::txmsg::DecodedMessage const specialReportDecoded =
+        decodium::txmsg::decode77 (specialReportEncoded.msgbits,
+                                   specialReportEncoded.i3,
+                                   specialReportEncoded.n3,
+                                   &specialReportContext,
+                                   true);
+    QVERIFY (specialReportDecoded.ok);
+    QCOMPARE (decodedText (specialReportDecoded), specialReport);
+    QCOMPARE (decodium::seq::signalReportFromMessage(specialReport),
+              QStringLiteral ("-06"));
+    QCOMPARE (decodium::seq::signalReportFromMessage(
+                  QStringLiteral ("M9NTS <DL75WAU> R-06")),
+              QStringLiteral ("-06"));
+    QVERIFY (decodium::seq::signalReportFromMessage(
+                 QStringLiteral ("<M9NTS> DL75WAU RR73")).isEmpty ());
   }
 
   Q_SLOT void ftx_decode77_updates_recent_calls ()

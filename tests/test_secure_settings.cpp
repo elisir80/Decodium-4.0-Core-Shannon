@@ -95,6 +95,47 @@ private:
               QStringLiteral ("org.decodium3.ft2.DEFAULT"));
   }
 
+  Q_SLOT void logging_credentials_are_scoped_by_callsign ()
+  {
+    FakeBackend backend;
+    QString const personal_service = secure_settings::service (QStringLiteral ("9H1SR"));
+    QString const special_service = secure_settings::service (QStringLiteral ("DL75WAU"));
+
+    QVERIFY (personal_service != special_service);
+
+    QCOMPARE (secure_settings::value_for_write (personal_service,
+                                                QStringLiteral ("CloudLogApiKey"),
+                                                QStringLiteral ("cloud-personal"),
+                                                backend),
+              secure_settings::placeholder ());
+    QCOMPARE (backend.last_service, personal_service);
+    QCOMPARE (backend.last_account, QStringLiteral ("CloudLogApiKey"));
+
+    QCOMPARE (secure_settings::value_for_write (special_service,
+                                                QStringLiteral ("CloudLogApiKey"),
+                                                QStringLiteral ("cloud-special"),
+                                                backend),
+              secure_settings::placeholder ());
+    QCOMPARE (backend.last_service, special_service);
+    QCOMPARE (backend.last_account, QStringLiteral ("CloudLogApiKey"));
+
+    QCOMPARE (secure_settings::value_for_write (personal_service,
+                                                QStringLiteral ("qrzLogbookApiKey"),
+                                                QStringLiteral ("qrz-personal"),
+                                                backend),
+              secure_settings::placeholder ());
+    QCOMPARE (backend.last_service, personal_service);
+    QCOMPARE (backend.last_account, QStringLiteral ("qrzLogbookApiKey"));
+
+    QCOMPARE (secure_settings::value_for_write (special_service,
+                                                QStringLiteral ("Lotw_pwd"),
+                                                QStringLiteral ("lotw-special"),
+                                                backend),
+              secure_settings::placeholder ());
+    QCOMPARE (backend.last_service, special_service);
+    QCOMPARE (backend.last_account, QStringLiteral ("Lotw_pwd"));
+  }
+
   Q_SLOT void load_or_import_falls_back_to_plain_when_backend_unavailable ()
   {
     FakeBackend backend;

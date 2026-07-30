@@ -1466,6 +1466,152 @@ private slots:
                      .value(QStringLiteral("grid")).toString(),
                  QStringLiteral("JO21"));
     }
+
+    void aggregatesOperationalBandActivity()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        QString const databasePath =
+            tempDir.filePath(QStringLiteral("band-activity.sqlite"));
+        MapIntelligenceService service(nullptr, databasePath);
+        service.setBandActivityWindowHours(1);
+        QCOMPARE(service.bandActivityWindowHours(), 1);
+
+        qint64 const now = QDateTime::currentMSecsSinceEpoch();
+        auto ingestLocal = [&service, now](QString const& call,
+                                           QString const& grid,
+                                           QString const& band,
+                                           qint64 dialFrequencyHz,
+                                           int offsetHz,
+                                           int snr,
+                                           bool isTx,
+                                           int ageSeconds) {
+            QVariantMap decode;
+            decode.insert(QStringLiteral("timestamp"),
+                          now - static_cast<qint64>(ageSeconds) * 1000);
+            decode.insert(QStringLiteral("time"), QStringLiteral("120000"));
+            decode.insert(QStringLiteral("message"),
+                          QStringLiteral("CQ %1 %2").arg(call, grid));
+            decode.insert(QStringLiteral("fromCall"), call);
+            decode.insert(QStringLiteral("dxGrid"), grid);
+            decode.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+            decode.insert(QStringLiteral("db"), snr);
+            decode.insert(QStringLiteral("freq"), offsetHz);
+            decode.insert(QStringLiteral("isCQ"), true);
+            decode.insert(QStringLiteral("isTx"), isTx);
+            service.ingestDecodeEntry(decode, dialFrequencyHz, band);
+        };
+
+        ingestLocal(QStringLiteral("RX20A"), QStringLiteral("JN70"),
+                    QStringLiteral("20m"), 14074000, 1450, -7, false, 35);
+        ingestLocal(QStringLiteral("RX20B"), QStringLiteral("JO21"),
+                    QStringLiteral("20m"), 14074000, 1550, -12, false, 20);
+        ingestLocal(QStringLiteral("HOME"), QStringLiteral("JM75"),
+                    QStringLiteral("20m"), 14074000, 1500, 0, true, 10);
+        ingestLocal(QStringLiteral("RX40A"), QStringLiteral("IO91"),
+                    QStringLiteral("40m"), 7074000, 1500, -18, false, 50);
+
+        QTRY_COMPARE_WITH_TIMEOUT(
+            service.bandActivitySummary().value(QStringLiteral("localRx")).toInt(),
+            3, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(
+            service.bandActivitySummary().value(QStringLiteral("localTx")).toInt(),
+            1, 5000);
+
+        QVariantList pskRows;
+        auto pskRow = [now](QString const& call,
+                            QString const& grid,
+                            QString const& band,
+                            qint64 frequencyHz,
+                            QString const& direction,
+                            int ageSeconds) {
+            QVariantMap row;
+            row.insert(QStringLiteral("call"), call);
+            row.insert(QStringLiteral("grid"), grid);
+            row.insert(QStringLiteral("band"), band);
+            row.insert(QStringLiteral("freq"), frequencyHz);
+            row.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+            row.insert(QStringLiteral("snr"), -10);
+            row.insert(QStringLiteral("direction"), direction);
+            row.insert(QStringLiteral("source"), QStringLiteral("psk"));
+            row.insert(QStringLiteral("provider"), QStringLiteral("PSK Reporter"));
+            row.insert(QStringLiteral("timestamp"),
+                       now - static_cast<qint64>(ageSeconds) * 1000);
+            return row;
+        };
+        pskRows.append(pskRow(QStringLiteral("PSK20A"), QStringLiteral("JN58"),
+                              QStringLiteral("20m"), 14074000,
+                              QStringLiteral("TX"), 15));
+        pskRows.append(pskRow(QStringLiteral("PSK20B"), QStringLiteral("FN20"),
+                              QStringLiteral("20m"), 14074000,
+                              QStringLiteral("TX"), 5));
+        pskRows.append(pskRow(QStringLiteral("PSK40A"), QStringLiteral("KO85"),
+                              QStringLiteral("40m"), 7074000,
+                              QStringLiteral("RX"), 25));
+        service.ingestPskSpots(pskRows, QStringLiteral("HOME"),
+                               QStringLiteral("JM75"));
+
+        QTRY_COMPARE_WITH_TIMEOUT(
+            service.bandActivitySummary().value(QStringLiteral("pskTx")).toInt(),
+            2, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(
+            service.bandActivitySummary().value(QStringLiteral("pskRx")).toInt(),
+            1, 5000);
+        QCOMPARE(service.bandActivitySummary()
+                     .value(QStringLiteral("windowHours")).toInt(),
+                 1);
+        QCOMPARE(service.bandActivitySummary()
+                     .value(QStringLiteral("bandCount")).toInt(),
+                 2);
+        QCOMPARE(service.bandActivitySummary()
+                     .value(QStringLiteral("bestBand")).toString(),
+                 QStringLiteral("20m"));
+        QVERIFY(service.bandActivitySummary()
+                    .value(QStringLiteral("bestScore")).toInt() > 0);
+        QCOMPARE(service.bandActivity().size(), 2);
+        QVERIFY(!service.bandActivityTimeline().isEmpty());
+
+        auto metricForBand = [&service](QString const& band) {
+            for (QVariant const& value : service.bandActivity()) {
+                QVariantMap const row = value.toMap();
+                if (row.value(QStringLiteral("band")).toString() == band) {
+                    return row;
+                }
+            }
+            return QVariantMap {};
+        };
+        QVariantMap const twenty = metricForBand(QStringLiteral("20m"));
+        QVERIFY(!twenty.isEmpty());
+        QCOMPARE(twenty.value(QStringLiteral("rank")).toInt(), 1);
+        QVERIFY(twenty.value(QStringLiteral("best")).toBool());
+        QCOMPARE(twenty.value(QStringLiteral("localRx")).toInt(), 2);
+        QCOMPARE(twenty.value(QStringLiteral("localTx")).toInt(), 1);
+        QCOMPARE(twenty.value(QStringLiteral("pskRx")).toInt(), 0);
+        QCOMPARE(twenty.value(QStringLiteral("pskTx")).toInt(), 2);
+        QCOMPARE(twenty.value(QStringLiteral("uniqueCalls")).toInt(), 2);
+
+        QVariantMap const forty = metricForBand(QStringLiteral("40m"));
+        QVERIFY(!forty.isEmpty());
+        QCOMPARE(forty.value(QStringLiteral("localRx")).toInt(), 1);
+        QCOMPARE(forty.value(QStringLiteral("pskRx")).toInt(), 1);
+
+        QVERIFY(databaseHasIndex(
+            databasePath, QStringLiteral("idx_map_spot_event_band_window")));
+
+        service.setBandActivityWindowHours(6);
+        QCOMPARE(service.bandActivityWindowHours(), 6);
+        service.setBandActivityWindowHours(12);
+        QCOMPARE(service.bandActivityWindowHours(), 12);
+        service.setBandActivityWindowHours(24);
+        QCOMPARE(service.bandActivityWindowHours(), 24);
+        service.setBandActivityWindowHours(5);
+        QCOMPARE(service.bandActivityWindowHours(), 24);
+
+        MapIntelligenceService persisted(nullptr, databasePath);
+        QCOMPARE(persisted.bandActivityWindowHours(), 24);
+    }
 };
 
 QTEST_MAIN(TestMapIntelligenceService)

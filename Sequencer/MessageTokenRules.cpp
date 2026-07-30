@@ -364,6 +364,23 @@ QString directedPeerTokenFromMessage(QString const& message,
 
 }
 
+QString signalReportFromMessage(QString const& message)
+{
+    static const QRegularExpression reportPattern {
+        QStringLiteral(R"(\A(?:R)?([+-]\d{2})\z)")
+    };
+
+    QStringList const tokens = message.toUpper().simplified().split(
+        QLatin1Char(' '), Qt::SkipEmptyParts);
+    for (auto it = tokens.crbegin(); it != tokens.crend(); ++it) {
+        QRegularExpressionMatch const match = reportPattern.match(it->trimmed());
+        if (match.hasMatch()) {
+            return match.captured(1);
+        }
+    }
+    return {};
+}
+
 
 bool messageCarries73Payload(QString const& message)
 
