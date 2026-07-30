@@ -604,6 +604,123 @@ private slots:
         QVERIFY(service.roster().isEmpty());
     }
 
+    void attributesDirectedDecodeToTransmittingStation()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        QString const databasePath =
+            tempDir.filePath(QStringLiteral("directed-message-map.sqlite"));
+        MapIntelligenceService service(nullptr, databasePath);
+
+        QVariantMap decode;
+        decode.insert(QStringLiteral("time"), QStringLiteral("075255"));
+        decode.insert(QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch());
+        decode.insert(QStringLiteral("message"), QStringLiteral("WA1BXY UA3GIE KO92"));
+        decode.insert(QStringLiteral("fromCall"), QStringLiteral("WA1BXY"));
+        decode.insert(QStringLiteral("dxGrid"), QStringLiteral("KO92"));
+        decode.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+        decode.insert(QStringLiteral("db"), QStringLiteral("-11"));
+        decode.insert(QStringLiteral("freq"), 1500);
+        decode.insert(QStringLiteral("dxcc"), QStringLiteral("United States"));
+        decode.insert(QStringLiteral("continent"), QStringLiteral("NA"));
+        decode.insert(QStringLiteral("cqZone"), 5);
+        decode.insert(QStringLiteral("ituZone"), 8);
+
+        service.ingestDecodeEntry(decode, 14074000, QStringLiteral("20m"));
+
+        QTRY_COMPARE_WITH_TIMEOUT(service.liveSpotCount(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(service.roster().size(), 1, 5000);
+        QVariantMap const row = service.roster().first().toMap();
+        QCOMPARE(row.value(QStringLiteral("call")).toString(),
+                 QStringLiteral("UA3GIE"));
+        QCOMPARE(row.value(QStringLiteral("targetCall")).toString(),
+                 QStringLiteral("WA1BXY"));
+        QCOMPARE(row.value(QStringLiteral("grid")).toString(),
+                 QStringLiteral("KO92"));
+        QVERIFY(row.value(QStringLiteral("dxcc")).toString()
+                    != QStringLiteral("United States"));
+        QVERIFY(row.value(QStringLiteral("continent")).toString()
+                    != QStringLiteral("NA"));
+    }
+
+    void repairsPersistedDirectedDecodeAttribution()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+        QString const databasePath =
+            tempDir.filePath(QStringLiteral("persisted-attribution-map.sqlite"));
+
+        {
+            MapIntelligenceService service(nullptr, databasePath);
+            QVariantMap decode;
+            decode.insert(QStringLiteral("time"), QStringLiteral("075255"));
+            decode.insert(QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch());
+            decode.insert(QStringLiteral("message"), QStringLiteral("WA1BXY UA3GIE KO92"));
+            decode.insert(QStringLiteral("fromCall"), QStringLiteral("WA1BXY"));
+            decode.insert(QStringLiteral("dxGrid"), QStringLiteral("KO92"));
+            decode.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+            decode.insert(QStringLiteral("db"), QStringLiteral("-11"));
+            decode.insert(QStringLiteral("freq"), 1500);
+            service.ingestDecodeEntry(decode, 14074000, QStringLiteral("20m"));
+            QTRY_COMPARE_WITH_TIMEOUT(service.liveSpotCount(), 1, 5000);
+        }
+
+        QString const connectionName =
+            QStringLiteral("map_attribution_test_%1")
+                .arg(QUuid::createUuid().toString(QUuid::WithoutBraces));
+        {
+            QSqlDatabase database =
+                QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connectionName);
+            database.setDatabaseName(databasePath);
+            QVERIFY(database.open());
+            QSqlQuery query(database);
+            QVERIFY(query.exec(QStringLiteral(
+                "UPDATE map_spot SET call='WA1BXY', target_call='',"
+                " dxcc='United States', continent='NA', cq_zone=5, itu_zone=8,"
+                " state='RI'")));
+            QVERIFY(query.exec(QStringLiteral(
+                "UPDATE map_spot_event SET call='WA1BXY'")));
+            QVERIFY(query.exec(QStringLiteral(
+                "DELETE FROM map_meta"
+                " WHERE key='decoder_sender_attribution_version'")));
+            database.close();
+        }
+        QSqlDatabase::removeDatabase(connectionName);
+
+        {
+            MapIntelligenceService service(nullptr, databasePath);
+            QTRY_COMPARE_WITH_TIMEOUT(service.liveSpotCount(), 1, 5000);
+        }
+
+        QString const verifyConnectionName =
+            QStringLiteral("map_attribution_verify_%1")
+                .arg(QUuid::createUuid().toString(QUuid::WithoutBraces));
+        {
+            QSqlDatabase database =
+                QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"),
+                                          verifyConnectionName);
+            database.setDatabaseName(databasePath);
+            QVERIFY(database.open());
+            QSqlQuery query(database);
+            QVERIFY(query.exec(QStringLiteral(
+                "SELECT call, target_call, dxcc, continent, state FROM map_spot")));
+            QVERIFY(query.next());
+            QCOMPARE(query.value(0).toString(), QStringLiteral("UA3GIE"));
+            QCOMPARE(query.value(1).toString(), QStringLiteral("WA1BXY"));
+            QVERIFY(query.value(2).toString() != QStringLiteral("United States"));
+            QVERIFY(query.value(3).toString() != QStringLiteral("NA"));
+            QVERIFY(query.value(4).toString().isEmpty());
+            QVERIFY(query.exec(QStringLiteral("SELECT call FROM map_spot_event")));
+            QVERIFY(query.next());
+            QCOMPARE(query.value(0).toString(), QStringLiteral("UA3GIE"));
+            database.close();
+        }
+        QSqlDatabase::removeDatabase(verifyConnectionName);
+    }
+
     void exportsAllFilteredRowsBeyondVisibleLimit()
     {
         QTemporaryDir tempDir;

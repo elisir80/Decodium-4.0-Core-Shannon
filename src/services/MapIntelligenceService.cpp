@@ -749,6 +749,10 @@ bool ensureColumn(QSqlDatabase& db,
                    error);
 }
 
+QString transmittingCallFromMessage(const QString& message);
+QString targetCallFromMessage(const QString& message);
+bool repairDecoderSpotAttribution(QSqlDatabase& db, QString* error);
+
 bool openMapDatabase(const QString& path,
                      std::unique_ptr<ScopedSqliteConnection>* connection,
                      QString* error)
@@ -958,6 +962,9 @@ bool openMapDatabase(const QString& path,
                     error)) {
         return false;
     }
+    if (!repairDecoderSpotAttribution(db, error)) {
+        return false;
+    }
 
     *connection = std::move(candidate);
     return true;
@@ -974,11 +981,12 @@ QString adifFingerprint(const QString& path)
     });
 }
 
-QString callFromMessage(const QString& message)
+QStringList callsFromMessage(const QString& message)
 {
     static const QRegularExpression callPattern(
         QStringLiteral(R"(\b(?:[A-Z0-9]{1,4}/)?[A-Z0-9]{1,3}[0-9][A-Z0-9]{1,4}(?:/[A-Z0-9]{1,4})?\b)"),
         QRegularExpression::CaseInsensitiveOption);
+    QStringList calls;
     QRegularExpressionMatchIterator matches = callPattern.globalMatch(message.toUpper());
     while (matches.hasNext()) {
         QString const token = matches.next().captured(0);
@@ -987,10 +995,173 @@ QString callFromMessage(const QString& message)
             // A four-character Maidenhead locator such as JN70 also matches
             // the loose callsign expression.  It is never a station call.
             && normalizedGrid(token).isEmpty()) {
-            return token;
+            calls.append(token);
         }
     }
-    return {};
+    return calls;
+}
+
+bool isGeneralCallMessage(const QString& message)
+{
+    QString const firstToken =
+        message.trimmed().toUpper().section(QLatin1Char(' '), 0, 0);
+    return firstToken == QStringLiteral("CQ")
+        || firstToken == QStringLiteral("QRZ")
+        || firstToken == QStringLiteral("DE")
+        || firstToken == QStringLiteral("BEACON");
+}
+
+QString transmittingCallFromMessage(const QString& message)
+{
+    QStringList const calls = callsFromMessage(message);
+    if (calls.isEmpty()) {
+        return {};
+    }
+    if (isGeneralCallMessage(message) || calls.size() == 1) {
+        return calls.first();
+    }
+    // In a directed standard message the addressee is first and the station
+    // transmitting the message is second: "TO_CALL FROM_CALL payload".
+    return calls.at(1);
+}
+
+QString targetCallFromMessage(const QString& message)
+{
+    if (isGeneralCallMessage(message)) {
+        return {};
+    }
+    QStringList const calls = callsFromMessage(message);
+    return calls.size() >= 2 ? calls.first() : QString();
+}
+
+bool repairDecoderSpotAttribution(QSqlDatabase& db, QString* error)
+{
+    constexpr int kAttributionVersion = 1;
+    constexpr auto kMetaKey = "decoder_sender_attribution_version";
+
+    QSqlQuery versionQuery(db);
+    versionQuery.prepare(QStringLiteral("SELECT value FROM map_meta WHERE key=:key"));
+    versionQuery.bindValue(QStringLiteral(":key"), QString::fromLatin1(kMetaKey));
+    if (!versionQuery.exec()) {
+        if (error) *error = versionQuery.lastError().text();
+        return false;
+    }
+    if (versionQuery.next() && versionQuery.value(0).toInt() >= kAttributionVersion) {
+        return true;
+    }
+
+    if (!db.transaction()) {
+        if (error) *error = db.lastError().text();
+        return false;
+    }
+
+    QSqlQuery select(db);
+    if (!select.exec(QStringLiteral(
+            "SELECT id, unique_key, call, message, target_call, dxcc, continent,"
+            " cq_zone, itu_zone, state"
+            " FROM map_spot WHERE lower(coalesce(source, 'decoder'))='decoder'"))) {
+        if (error) *error = select.lastError().text();
+        db.rollback();
+        return false;
+    }
+
+    QSqlQuery updateSpot(db);
+    if (!updateSpot.prepare(QStringLiteral(
+            "UPDATE map_spot SET call=:call, target_call=:target_call,"
+            " dxcc=:dxcc, continent=:continent, cq_zone=:cq_zone,"
+            " itu_zone=:itu_zone, state=:state WHERE id=:id"))) {
+        if (error) *error = updateSpot.lastError().text();
+        db.rollback();
+        return false;
+    }
+    QSqlQuery updateEvents(db);
+    if (!updateEvents.prepare(QStringLiteral(
+            "UPDATE map_spot_event SET call=:call WHERE spot_key=:spot_key"))) {
+        if (error) *error = updateEvents.lastError().text();
+        db.rollback();
+        return false;
+    }
+
+    std::shared_ptr<const DxccLookup> const lookup = adifDxccLookup();
+    int repaired = 0;
+    while (select.next()) {
+        qint64 const id = select.value(0).toLongLong();
+        QString const spotKey = select.value(1).toString();
+        QString const storedCall = select.value(2).toString().trimmed().toUpper();
+        QString const message = select.value(3).toString();
+        QString const storedTarget = select.value(4).toString().trimmed().toUpper();
+        QString const correctedCall = transmittingCallFromMessage(message);
+        QString const correctedTarget = targetCallFromMessage(message);
+        if (correctedCall.isEmpty()
+            || (correctedCall == storedCall && correctedTarget == storedTarget)) {
+            continue;
+        }
+
+        QString dxcc = select.value(5).toString();
+        QString continent = select.value(6).toString();
+        int cqZone = select.value(7).toInt();
+        int ituZone = select.value(8).toInt();
+        QString state = select.value(9).toString();
+        if (correctedCall != storedCall) {
+            dxcc.clear();
+            continent.clear();
+            cqZone = 0;
+            ituZone = 0;
+            state.clear();
+            if (lookup) {
+                DxccEntity const entity = lookup->lookup(correctedCall);
+                if (entity.isValid()) {
+                    dxcc = entity.name;
+                    continent = entity.continent.toUpper();
+                    cqZone = entity.cqZone;
+                    ituZone = entity.ituZone;
+                }
+            }
+        }
+
+        updateSpot.bindValue(QStringLiteral(":call"), correctedCall);
+        updateSpot.bindValue(QStringLiteral(":target_call"), correctedTarget);
+        updateSpot.bindValue(QStringLiteral(":dxcc"), dxcc);
+        updateSpot.bindValue(QStringLiteral(":continent"), continent);
+        updateSpot.bindValue(QStringLiteral(":cq_zone"), cqZone);
+        updateSpot.bindValue(QStringLiteral(":itu_zone"), ituZone);
+        updateSpot.bindValue(QStringLiteral(":state"), state);
+        updateSpot.bindValue(QStringLiteral(":id"), id);
+        if (!updateSpot.exec()) {
+            if (error) *error = updateSpot.lastError().text();
+            db.rollback();
+            return false;
+        }
+
+        updateEvents.bindValue(QStringLiteral(":call"), correctedCall);
+        updateEvents.bindValue(QStringLiteral(":spot_key"), spotKey);
+        if (!updateEvents.exec()) {
+            if (error) *error = updateEvents.lastError().text();
+            db.rollback();
+            return false;
+        }
+        ++repaired;
+    }
+
+    QSqlQuery setVersion(db);
+    setVersion.prepare(QStringLiteral(
+        "INSERT OR REPLACE INTO map_meta(key, value) VALUES(:key, :value)"));
+    setVersion.bindValue(QStringLiteral(":key"), QString::fromLatin1(kMetaKey));
+    setVersion.bindValue(QStringLiteral(":value"), kAttributionVersion);
+    if (!setVersion.exec()) {
+        if (error) *error = setVersion.lastError().text();
+        db.rollback();
+        return false;
+    }
+    if (!db.commit()) {
+        if (error) *error = db.lastError().text();
+        return false;
+    }
+    if (repaired > 0) {
+        qInfo().noquote()
+            << "[MAPINT] repaired decoder sender attribution rows=" << repaired;
+    }
+    return true;
 }
 
 QString gridFromMessage(const QString& message)
@@ -2761,19 +2932,22 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
     if (spot.message.isEmpty()) {
         return spot;
     }
-    // A decoded standard message carries the transmitting station first.  Do
-    // not use a cached dxGrid blindly: it can belong to a previous QSO or to
-    // a UI selection and would paint a station in the wrong Maidenhead cell.
-    QString const decodedTransmitter = callFromMessage(spot.message);
-    spot.call = decodedTransmitter;
-    if (spot.call.isEmpty()) {
-        spot.call = entry.value(QStringLiteral("fromCall")).toString().trimmed().toUpper();
-    }
-    if (spot.call.isEmpty()) {
-        spot.call = entry.value(QStringLiteral("dxCallsign")).toString().trimmed().toUpper();
-    }
     spot.source = entry.value(QStringLiteral("source"), QStringLiteral("decoder"))
                       .toString().trimmed().toLower();
+    QString const entryCall =
+        entry.value(QStringLiteral("fromCall")).toString().trimmed().toUpper();
+    QString const fallbackCall = !entryCall.isEmpty()
+        ? entryCall
+        : entry.value(QStringLiteral("dxCallsign")).toString().trimmed().toUpper();
+    // Directed weak-signal messages are "TO_CALL FROM_CALL payload".  The
+    // final locator therefore belongs to the second callsign, not the first.
+    QString const decodedTransmitter = spot.source == QStringLiteral("decoder")
+        ? transmittingCallFromMessage(spot.message)
+        : QString();
+    spot.call = decodedTransmitter;
+    if (spot.call.isEmpty()) {
+        spot.call = fallbackCall;
+    }
 
     QString const transmittedGrid = gridFromMessage(spot.message);
     if (!transmittedGrid.isEmpty()
@@ -2801,7 +2975,36 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
     spot.cqZone = entry.value(QStringLiteral("cqZone")).toInt();
     spot.ituZone = entry.value(QStringLiteral("ituZone")).toInt();
     spot.state = entry.value(QStringLiteral("state")).toString().trimmed().toUpper();
-    spot.targetCall = entry.value(QStringLiteral("toCall")).toString().trimmed().toUpper();
+    QString const decodedTarget = spot.source == QStringLiteral("decoder")
+        ? targetCallFromMessage(spot.message)
+        : QString();
+    if (spot.source == QStringLiteral("decoder") && isGeneralCallMessage(spot.message)) {
+        spot.targetCall.clear();
+    } else {
+        spot.targetCall = !decodedTarget.isEmpty()
+            ? decodedTarget
+            : entry.value(QStringLiteral("toCall")).toString().trimmed().toUpper();
+    }
+    if (spot.source == QStringLiteral("decoder") && !spot.call.isEmpty()) {
+        bool const attributionChanged =
+            !fallbackCall.isEmpty() && fallbackCall != spot.call;
+        std::shared_ptr<const DxccLookup> const lookup = adifDxccLookup();
+        DxccEntity const entity = lookup ? lookup->lookup(spot.call) : DxccEntity();
+        if (entity.isValid()) {
+            spot.dxcc = entity.name;
+            spot.continent = entity.continent.toUpper();
+            spot.cqZone = entity.cqZone;
+            spot.ituZone = entity.ituZone;
+        } else if (attributionChanged) {
+            spot.dxcc.clear();
+            spot.continent.clear();
+            spot.cqZone = 0;
+            spot.ituZone = 0;
+        }
+        if (attributionChanged) {
+            spot.state.clear();
+        }
+    }
     spot.isCq = entry.value(QStringLiteral("isCQ")).toBool()
         || spot.message.compare(QStringLiteral("CQ"), Qt::CaseInsensitive) == 0
         || spot.message.startsWith(QStringLiteral("CQ "), Qt::CaseInsensitive);
