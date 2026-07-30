@@ -3834,6 +3834,870 @@ Fejl: %2</translation>
         <source>Detach Live Map</source>
         <translation>Frakobl Live Map</translation>
     </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  for %1 s siden</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> spots</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 styrer listens diplom- og eftersøgt-filtre</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 bekræftet  %3 live  %4 PSK</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 live  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 stationer · %2 eftersøgte · %3 nye · %4 ubekræftede</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 kørt  %2 bekræftet</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 kørt / %2 bekræftet</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>gitre med 4 tegn</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>gitre med 6 tegn</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>ADIF-periode  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>ADVARSLER</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>ADVARSLER %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>ALLE TIDER</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>DIPLOM</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>DIPLOMER</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>Aktive  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>BASISKORT</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>Båndomfang, valgfrit</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>Modeomfang, valgfrit</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>Basis: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Basis: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <source>COND</source>
+        <translation>COND</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>BEKRÆFTET</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Bekræftet</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>Bekræftet  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>CQ-aktivitet</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>Kaldemønster, fx 9H*</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>Tekstfiltertilstand for kaldelisten</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>Kald, gitter, DXCC eller meddelelse</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Kald</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>Regex</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>Centrer kortet på månens subpunkt</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>Centrer dette gitter</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>Vælg oplysningerne der vises i hver række på listen</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Ryd alt</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>Ryd alle overvågede kald og alle kald- eller DXCC-udelukkelser</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>Ryd historikken for live-stationer</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>Klik på CALL for at starte et QSO eller ROTATE for at rette antennen.</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>Klik for hændelsesdetaljer</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>Luk detaljer</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>Luk gitterdetaljer</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Kolonner</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>Kombineret</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>Sammenlign kørt og bekræftet status globalt, pr. bånd eller pr. bånd og mode</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>Bekræftet = papir-QSL, LoTW eller eQSL modtaget (ADIF-status Y)</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>Bekræftede gitre indeholder et importeret ADIF-QSO med QSL_RCVD=Y, LOTW_QSL_RCVD=Y eller EQSL_QSL_RCVD=Y.</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>Tilslut PSK Reporter MQTT-feedet</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>Gitterpræcision for dækning</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>Opret regler for eftersøgte, ignorerede eller overvågede med valgfri bånd- og modeomfang</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>Skift mellem kortvisningerne Live, Logbog og kombineret</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>DETALJER</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>SKJUL DETALJER</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>Decodium Atlas er lokal. NASA GIBS og MapTiler bruger netværket, når offlinetilstand er slået fra.</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>Tegn aktive og eftersøgte gitre som kompakte kortnåle</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>EKSTERNE DATA</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>Jordskælv</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Udelad</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>FILTRERET · %1 · %2 af %3 QSO</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>Filtreringen kører i kortdatabasens arbejdstråd</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>GITTER %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>Gitre</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>Geografisk område</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>Globale jordskælv med styrke 2,5 eller mere rapporteret af USGS det seneste døgn.</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>God</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>Dårlig</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Ukendt</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>HISTORIK</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>HISTORIK %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>Varmekort %1  Tidslinje %2  Ruter %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>Halvdel under markøren: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>Jagt enheder der endnu ikke er kørt eller endnu ikke bekræftet</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>Ignorér alle stationer fra %1</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>Ignorér denne station indtil listens indstillinger nulstilles</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>Hold hver station aktiv på listen i så mange minutter</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>Hold denne station øverst på listen</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>LAG</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>LIVE</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>LIVE %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>Live</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>Live  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>FIND</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>LOGBOG</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>LOGBOG · ALLE TIDER · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>OPSLAG</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>Lister</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>Lister %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>Live 5 min</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>Live 15 min</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>Live 30 min</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>Live 60 min</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>Live MQTT</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>Live-spots</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Live Parks on the Air aktivator-spots. Når dette lag slås fra, fjernes alle POTA-markører straks fra kortet.</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>Synlighed for live og logbog</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>Indlæser PSK...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Indlæser...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>KORT</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>KORTHANDLINGER</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>MÅNE</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>MUF og foF2 angives i MHz. Es er et sandsynlighedsindeks, ikke en frekvens.</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>Kortintelligens</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>Kortelement</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>Kortforudindstilling</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>Kortprojektion</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>Projektion</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>MapTiler API-nøgle</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>Markér som læst</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>Mangler  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>Måne  Az %1°  El %2°  ·  Subpunkt %3 %4</translation>
+    </message>
+    <message>
+        <source>Moon data unavailable</source>
+        <translation>Månedata utilgængelige</translation>
+    </message>
+    <message>
+        <source>Propagation data unavailable</source>
+        <translation>Propagationsdata utilgængelige</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>Månens synlighedshalvkugle, subpunkt og rute fra din station. Markøren vises, så snart efemeriden er beregnet.</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>Nyt gitter</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>Omvendt sortering</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>Ingen QSO-historik i dette gitter</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>Ingen aktiv ADIF-logbog</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>Intet filter</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>Ingen nylig trafik i dette gitter</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>Ingen overvågede eller ignorerede poster</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>OPERATIONELLE REGLER</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>Officielle IOTA Directory-grupper. Katalogpositioner vises på kortet; status kørt og bekræftet anvendes kun, når det importerede ADIF-QSO indeholder et IOTA-felt.</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>Offline</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>Offlinetilstand bruger det lokale Decodium Atlas og stopper onlinebasiskort, PSK MQTT og eksterne kortfeeds. ADIF, lokal cache og radioaktivitet er stadig tilgængelige.</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>Kun</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>Åbn kaldeopslag</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>Åbn detaljeret statistik</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>Åbn globale naturbrande offentliggjort af NASA EONET.</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>Åbn radio- og propagationsforhold</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>Åbn den uafhængige kaldeliste</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>Operationel markør</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>Læg PSK-modtagere oven på den lokale aktivitet, eller erstat den lokale aktivitet</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>PROPAGATIONSSKALA</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: %1 modtagere fundet</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: ingen modtagere indlæst for den seneste time</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>Gitterets uigennemsigtighed for PSK</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>Alder på PSK-/spot-historik</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>Periode</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Værdi</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>Propagation  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>Propagationsstyringen omfatter MUF, foF2, Es og aurora</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>Udbyder brugt af opslag i gitterpopups og på listen</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>Kortnåle for live-gitre</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>LISTE</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>DREJ</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Modtagere der i den seneste time har rapporteret til PSK Reporter, at de hørte dit kald. Decodiums PSK-upload behøver ikke være slået til.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>Hent modtagere der hørte dit kald i den seneste time. PSK-upload er uafhængig.</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>Opdater PSK</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>Opdater aktive eksterne lag</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>Fjern regel</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Fjern denne post</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>Fjern det midlertidige tidsfilter på kortet</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>Gennemgå overvågede kald og ignorerede kald eller DXCC-enheder</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>Regler</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>Regler %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>SKÆRMBILLEDE</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>BILLEDE</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>STATISTIK</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>Gem et skærmbillede af kortet</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>Vælg %1 som listens aktive diplom</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>Vælg et diplom for at gøre dets manglende enheder til operationelle mål</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>Vælg diplomet hvis manglende enheder bliver eftersøgte stationer</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>Brug dette diplom til at finde eftersøgte stationer på listen</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>Vis QSO-/QSL-historik og aktuel aktivitet i hver sin halvdel af samme gitter</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>Opdel gitterets historiske og live-status</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>Vis meridianer for UTC-forskydning på kortet</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>UTC-tidszoner</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>Vis alle, nye, ubekræftede, eftersøgte eller overvågede stationer</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>Vis kun aktive CQ-kald på listen</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>Filter for kildekorrelation</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Kilde: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>Start et QSO med denne station</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>Stationens locator</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>Stop overvågning af denne station</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>Overvåg denne station</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>Abonnér på PSK Reporter MQTT-strømmen for denne station</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>Abonnementet bevares, men er sat på pause, mens offlinetilstand er slået til</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>TOPBÅND</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>TOPMODES</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>ADIF-logbogen er indlæst, men ingen QSO matcher kortets aktuelle filtre.</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>Tid før live-gitteraktiviteten falmer</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>Tsunamiflag rapporteret</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>Utilgængelig mens offlinetilstand er slået til</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>Amtsgrænser i USA fra U.S. Census TIGER-tjenesten. Zoom ind efter indlæsning for at se de enkelte amter.</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>Delstatsgrænser i USA fra U.S. Census TIGER-tjenesten. Når laget er slået til, fokuserer kortet på USA.</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>Brug det lokale atlas og stop onlinebasiskort, PSK MQTT og eksterne lag. Den lokale logbog og radiodata er stadig tilgængelige.</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>SYNLIGE KOLONNER PÅ LISTEN</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>LISTER OVER OVERVÅGEDE / IGNOREREDE</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>KØRT</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>Kørt  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>Kørt %1 · Bekræftet %2 · Mangler %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>WPX-præfikser udledt af din importerede ADIF-log.</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>Jokertegnmønster sammenlignet med kald og meddelelser</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>ikke tilg.</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>ikke opdateret</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>utilgængelig</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16041,6 +16905,22 @@ Langt tryk: rediger besked</translation>
         <source>Add</source>
         <translation>Tilfoj</translation>
     </message>
+    <message>
+        <source>Finish TX before logging the QSO</source>
+        <translation>Afslut TX før QSO&apos;et logges</translation>
+    </message>
+    <message>
+        <source>Log current QSO</source>
+        <translation>Log det aktuelle QSO</translation>
+    </message>
+    <message>
+        <source>No active QSO to log</source>
+        <translation>Intet aktivt QSO at logge</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>Spring over</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -18932,6 +19812,154 @@ Højre klik for at indsætte eller slette elementer.</translation>
         <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt; &lt;p&gt; Dobbeltklik på en farve for at redigere den. &lt;/p&gt; &lt;p&gt; Højreklik for at indsætte eller slette farver. &lt;/p&gt; &lt;p&gt; Farver øverst repræsenterer svage signaler &lt;/p&gt; &lt;p&gt; og farver i bunden repræsenterer stærke &lt;/p&gt; &lt;p&gt; signaler. Du kan have op til 256 farver. &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>MapOperationsWindows</name>
+    <message>
+        <source>%1  %2  %3 dB  %4</source>
+        <translation>%1  %2  %3 dB  %4</translation>
+    </message>
+    <message>
+        <source>%1 items  ·  %2</source>
+        <translation>%1 poster  ·  %2</translation>
+    </message>
+    <message>
+        <source>EXTERNAL MAP CONDITIONS</source>
+        <translation>EKSTERNE KORTFORHOLD</translation>
+    </message>
+    <message>
+        <source>Filter call, grid or DXCC</source>
+        <translation>Filtrér kald, gitter eller DXCC</translation>
+    </message>
+    <message>
+        <source>LIVE CALL ROSTER</source>
+        <translation>LIVE KALDELISTE</translation>
+    </message>
+    <message>
+        <source>Map Roster - Decodium</source>
+        <translation>Kortliste - Decodium</translation>
+    </message>
+    <message>
+        <source>Map Statistics - Decodium</source>
+        <translation>Kortstatistik - Decodium</translation>
+    </message>
+    <message>
+        <source>Radio Conditions - Decodium</source>
+        <translation>Radioforhold - Decodium</translation>
+    </message>
+    <message>
+        <source>Moon: Az %1°  El %2°  Distance %3 km</source>
+        <translation>Måne: Az %1°  El %2°  Afstand %3 km</translation>
+    </message>
+    <message>
+        <source>Sublunar point %1°, %2°  Illumination %3%</source>
+        <translation>Subpunkt %1°, %2°  Belysning %3%</translation>
+    </message>
+</context>
+<context>
+    <name>MapStatisticsPanel</name>
+    <message>
+        <source>%1 / %2 QSL</source>
+        <translation>%1 / %2 QSL</translation>
+    </message>
+    <message>
+        <source>30-DAY COMPARISON</source>
+        <translation>SAMMENLIGNING 30 DAGE</translation>
+    </message>
+    <message>
+        <source>BREAKDOWN</source>
+        <translation>OPDELING</translation>
+    </message>
+    <message>
+        <source>Calls  %1  (%2)</source>
+        <translation>Kald  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>QSO  %1  (%2)</source>
+        <translation>QSO  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>No statistics for the current logbook filters</source>
+        <translation>Ingen statistik for de aktuelle logbogsfiltre</translation>
+    </message>
+</context>
+<context>
+    <name>MapLogbookPanel</name>
+    <message>
+        <source>%1 matching QSO</source>
+        <translation>%1 matchende QSO</translation>
+    </message>
+    <message>
+        <source>ADIF</source>
+        <translation>ADIF</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>Band filter</source>
+        <translation>Båndfilter</translation>
+    </message>
+    <message>
+        <source>Mode filter</source>
+        <translation>Modefilter</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
+        <translation>Kald, gitter, DXCC, stat, POTA, IOTA eller WPX</translation>
+    </message>
+    <message>
+        <source>QSL</source>
+        <translation>QSL</translation>
+    </message>
+    <message>
+        <source>DATE</source>
+        <translation>DATO</translation>
+    </message>
+    <message>
+        <source>Export the current filtered logbook to Documents/Decodium</source>
+        <translation>Eksportér den aktuelle filtrerede logbog til Dokumenter/Decodium</translation>
+    </message>
+    <message>
+        <source>GRID</source>
+        <translation>GITTER</translation>
+    </message>
+    <message>
+        <source>MODE</source>
+        <translation>MODE</translation>
+    </message>
+    <message>
+        <source>Newest first</source>
+        <translation>Nyeste først</translation>
+    </message>
+    <message>
+        <source>No QSO matches the current filters</source>
+        <translation>Ingen QSO matcher de aktuelle filtre</translation>
+    </message>
+    <message>
+        <source>REFERENCE / DXCC</source>
+        <translation>REFERENCE / DXCC</translation>
+    </message>
+    <message>
+        <source>Sort field</source>
+        <translation>Sorteringsfelt</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>Kortets CALL kunne ikke vælge TX1 for %1</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO med %1 klar - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO med %1 klar - TX%2 i næste hele slot</translation>
     </message>
 </context>
 </TS>

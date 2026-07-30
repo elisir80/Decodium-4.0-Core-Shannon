@@ -3843,6 +3843,870 @@ Fout: %2</translation>
         <source>Detach Live Map</source>
         <translation>Live kaart losmaken</translation>
     </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  %1 s geleden</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> spots</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 bepaalt de diploma- en gezocht-filters van de lijst</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 bevestigd  %3 live  %4 PSK</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 live  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 stations · %2 gezocht · %3 nieuw · %4 onbevestigd</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 gewerkt  %2 bevestigd</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 gewerkt / %2 bevestigd</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>grids van 4 tekens</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>grids van 6 tekens</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>ADIF-bereik  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>MELDINGEN</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>MELDINGEN %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>ALTIJD</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>DIPLOMA</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>DIPLOMA&apos;S</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>Actief  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>BASISKAART</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>Bandbereik, optioneel</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>Modebereik, optioneel</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>Basis: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Basis: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <source>COND</source>
+        <translation>COND</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>BEVESTIGD</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Bevestigd</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>Bevestigd  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>CQ-activiteit</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>Callpatroon, bijv. 9H*</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>Tekstfiltermodus van de calllijst</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>Call, grid, DXCC of bericht</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Calls</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>Regex</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>Kaart centreren op het subpunt van de maan</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>Dit grid centreren</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>Kies de informatie die op elke regel van de lijst wordt getoond</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Alles wissen</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>Alle bewaakte calls en alle call- of DXCC-uitsluitingen wissen</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>Geschiedenis van live stations wissen</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>Klik op CALL om een QSO te starten of op ROTATE om de antenne te richten.</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>Klik voor details van de gebeurtenis</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>Details sluiten</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>Griddetails sluiten</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Kolommen</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>Gecombineerd</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>Vergelijk de status gewerkt en bevestigd globaal, per band of per band en mode</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>Bevestigd = papieren QSL, LoTW of eQSL ontvangen (ADIF-status Y)</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>Bevestigde grids bevatten een geïmporteerd ADIF-QSO met QSL_RCVD=Y, LOTW_QSL_RCVD=Y of EQSL_QSL_RCVD=Y.</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>De MQTT-feed van PSK Reporter verbinden</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>Precisie van het dekkingsgrid</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>Regels voor gezocht, genegeerd of bewaakt maken, met optionele band- en modebereiken</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>Wisselen tussen de kaartweergaven Live, Logboek en gecombineerd</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>DETAILS</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>DETAILS VERBERGEN</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>Decodium Atlas is lokaal. NASA GIBS en MapTiler gebruiken het netwerk als de offlinemodus uit is.</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>Actieve en gezochte grids tekenen als compacte kaartspelden</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>EXTERNE GEGEVENS</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>Aardbeving</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Uitsluiten</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>GEFILTERD · %1 · %2 van %3 QSO</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>Het filteren gebeurt in de werker van de kaartdatabase</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>GRID %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>Grids</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>Geografisch gebied</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>Wereldwijde aardbevingen met een kracht van 2,5 of meer, gemeld door USGS in de afgelopen dag.</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>Goed</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>Slecht</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Onbekend</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>GESCHIEDENIS</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>GESCHIEDENIS %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>Heatmap %1  Tijdlijn %2  Paden %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>Helft onder de cursor: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>Jagen op entiteiten die nog niet gewerkt of nog niet bevestigd zijn</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>Alle stations uit %1 negeren</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>Dit station negeren totdat de lijstvoorkeuren worden hersteld</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>Elk station dit aantal minuten actief houden in de lijst</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>Dit station bovenaan de lijst houden</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>LAGEN</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>LIVE</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>LIVE %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>Live</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>Live  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>ZOEKEN</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>LOGBOEK</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>LOGBOEK · ALTIJD · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>OPZOEKEN</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>Lijsten</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>Lijsten %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>Live 5 min</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>Live 15 min</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>Live 30 min</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>Live 60 min</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>Live MQTT</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>Live spots</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Live spots van Parks on the Air-activatoren. Als deze laag wordt uitgezet, verdwijnen alle POTA-markeringen direct van de kaart.</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>Zichtbaarheid van live en logboek</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>PSK laden...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Laden...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>KAART</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>KAARTBEWERKINGEN</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>MAAN</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>MUF en foF2 zijn in MHz. Es is een waarschijnlijkheidsindex, geen frequentie.</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>Kaartintelligentie</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>Kaartitem</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>Kaartvoorinstelling</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>Kaartprojectie</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>Projectie</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>MapTiler API-sleutel</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>Als gelezen markeren</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>Ontbrekend  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>Maan  Az %1°  El %2°  ·  Subpunt %3 %4</translation>
+    </message>
+    <message>
+        <source>Moon data unavailable</source>
+        <translation>Maangegevens niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Propagation data unavailable</source>
+        <translation>Propagatiegegevens niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>Zichtbaarheidshalfrond van de maan, subpunt en pad vanaf uw station. De markering verschijnt zodra de efemeride is berekend.</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>Nieuw grid</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>Omgekeerde sortering</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>Geen QSO-geschiedenis in dit grid</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>Geen actief ADIF-logboek</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>Geen filter</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>Geen recent verkeer in dit grid</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>Geen bewaakte of genegeerde items</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>OPERATIONELE REGELS</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>Officiële groepen uit de IOTA Directory. Catalogusposities staan op de kaart; de status gewerkt en bevestigd geldt alleen als het geïmporteerde ADIF-QSO een IOTA-veld bevat.</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>Offline</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>De offlinemodus gebruikt de lokale Decodium Atlas en stopt online basiskaarten, PSK MQTT en externe kaartfeeds. ADIF, lokale cache en radioactiviteit blijven beschikbaar.</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>Alleen</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>Callsign opzoeken openen</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>Gedetailleerde statistieken openen</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>Wereldwijde natuurbranden van NASA EONET openen.</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>Radio- en propagatieomstandigheden openen</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>De onafhankelijke calllijst openen</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>Operationele markering</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>PSK-ontvangers over de lokale activiteit leggen of de lokale activiteit vervangen</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>PROPAGATIESCHAAL</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: %1 ontvangers gevonden</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: geen ontvangers geladen voor het laatste uur</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>Dekking van het PSK-grid</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>Ouderdom van PSK-/spotgeschiedenis</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>Periode</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Waarde</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>Propagatie  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>De propagatieregelaars beheren MUF, foF2, Es en aurora</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>Aanbieder gebruikt door opzoekacties in gridpop-ups en de lijst</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>Live grids als spelden</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>LIJST</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>DRAAIEN</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Ontvangers die het laatste uur aan PSK Reporter hebben gemeld dat ze uw call hoorden. De PSK-upload van Decodium hoeft niet aan te staan.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>Ontvangers ophalen die uw call het laatste uur hoorden. De PSK-upload staat hier los van.</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>PSK verversen</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>Ingeschakelde externe lagen verversen</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>Regel verwijderen</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Dit item verwijderen</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>Het tijdelijke tijdfilter van de kaart verwijderen</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>Bewaakte calls en genegeerde calls of DXCC-entiteiten bekijken</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>Regels</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>Regels %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>SCHERMAFBEELDING</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>FOTO</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>STATISTIEK</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>Een schermafbeelding van de kaart opslaan</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>%1 selecteren als actief diploma van de lijst</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>Kies een diploma om de ontbrekende entiteiten tot operationele doelen te maken</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>Kies het diploma waarvan de ontbrekende entiteiten gezochte stations worden</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>Dit diploma gebruiken om gezochte stations in de lijst te herkennen</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>QSO-/QSL-geschiedenis en huidige activiteit in aparte helften van hetzelfde grid tonen</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>Historische en live gridstatus scheiden</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>Meridianen van de UTC-afwijking op de kaart tonen</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>UTC-tijdzones</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>Alle, nieuwe, onbevestigde, gezochte of bewaakte stations tonen</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>Alleen actieve CQ-roepen in de lijst tonen</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>Filter voor bronkorrelatie</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Bron: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>Een QSO met dit station starten</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>Locator van het station</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>Dit station niet meer bewaken</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>Dit station bewaken</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>Abonneren op de MQTT-stroom van PSK Reporter voor dit station</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>Het abonnement blijft behouden maar is gepauzeerd zolang de offlinemodus aan is</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>TOPBANDEN</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>TOPMODES</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>Het ADIF-logboek is geladen, maar geen QSO komt overeen met de huidige kaartfilters.</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>Tijd voordat de live gridactiviteit wegvaagt</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>Tsunamiwaarschuwing gemeld</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>Niet beschikbaar zolang de offlinemodus aan is</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>Countygrenzen van de Verenigde Staten uit de TIGER-dienst van de U.S. Census. Zoom na het laden in om afzonderlijke county&apos;s te bekijken.</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>Staatsgrenzen van de Verenigde Staten uit de TIGER-dienst van de U.S. Census. Bij inschakelen richt de kaart zich op de VS.</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>De lokale atlas gebruiken en online basiskaarten, PSK MQTT en externe lagen stoppen. Het lokale logboek en radiogegevens blijven beschikbaar.</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>ZICHTBARE KOLOMMEN VAN DE LIJST</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>LIJSTEN BEWAAKT / GENEGEERD</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>GEWERKT</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>Gewerkt  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>Gewerkt %1 · Bevestigd %2 · Resterend %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>WPX-prefixen afgeleid uit uw geïmporteerde ADIF-log.</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>Patroon met jokertekens, vergeleken met calls en berichten</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>n.v.t.</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>niet bijgewerkt</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>niet beschikbaar</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16052,6 +16916,22 @@ Lang indrukken: bericht bewerken</translation>
         <source>Add</source>
         <translation>Toevoegen</translation>
     </message>
+    <message>
+        <source>Finish TX before logging the QSO</source>
+        <translation>Beëindig het zenden voordat u het QSO logt</translation>
+    </message>
+    <message>
+        <source>Log current QSO</source>
+        <translation>Huidig QSO loggen</translation>
+    </message>
+    <message>
+        <source>No active QSO to log</source>
+        <translation>Geen actief QSO om te loggen</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>Overslaan</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -18943,6 +19823,154 @@ Rechtermuisklik voor invoeg- en verwijderopties.</translation>
         <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dubbelklik op een kleur om deze te bewerken.&lt;/p&gt;&lt;p&gt;Rechtermuisklik om kleuren in te voegen of te verwijderen.&lt;/p&gt;&lt;p&gt;Kleuren bovenaan vertegenwoordigen zwakke signalen&lt;/p&gt;&lt;p&gt;en kleuren onderaan vertegenwoordigen sterke&lt;/p&gt;&lt;p&gt;signalen. U kunt maximaal 256 kleuren hebben.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>MapOperationsWindows</name>
+    <message>
+        <source>%1  %2  %3 dB  %4</source>
+        <translation>%1  %2  %3 dB  %4</translation>
+    </message>
+    <message>
+        <source>%1 items  ·  %2</source>
+        <translation>%1 items  ·  %2</translation>
+    </message>
+    <message>
+        <source>EXTERNAL MAP CONDITIONS</source>
+        <translation>EXTERNE KAARTOMSTANDIGHEDEN</translation>
+    </message>
+    <message>
+        <source>Filter call, grid or DXCC</source>
+        <translation>Filter op call, grid of DXCC</translation>
+    </message>
+    <message>
+        <source>LIVE CALL ROSTER</source>
+        <translation>LIVE CALLLIJST</translation>
+    </message>
+    <message>
+        <source>Map Roster - Decodium</source>
+        <translation>Kaartlijst - Decodium</translation>
+    </message>
+    <message>
+        <source>Map Statistics - Decodium</source>
+        <translation>Kaartstatistieken - Decodium</translation>
+    </message>
+    <message>
+        <source>Radio Conditions - Decodium</source>
+        <translation>Radio-omstandigheden - Decodium</translation>
+    </message>
+    <message>
+        <source>Moon: Az %1°  El %2°  Distance %3 km</source>
+        <translation>Maan: Az %1°  El %2°  Afstand %3 km</translation>
+    </message>
+    <message>
+        <source>Sublunar point %1°, %2°  Illumination %3%</source>
+        <translation>Subpunt %1°, %2°  Verlichting %3%</translation>
+    </message>
+</context>
+<context>
+    <name>MapStatisticsPanel</name>
+    <message>
+        <source>%1 / %2 QSL</source>
+        <translation>%1 / %2 QSL</translation>
+    </message>
+    <message>
+        <source>30-DAY COMPARISON</source>
+        <translation>VERGELIJKING 30 DAGEN</translation>
+    </message>
+    <message>
+        <source>BREAKDOWN</source>
+        <translation>UITSPLITSING</translation>
+    </message>
+    <message>
+        <source>Calls  %1  (%2)</source>
+        <translation>Calls  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>QSO  %1  (%2)</source>
+        <translation>QSO  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>No statistics for the current logbook filters</source>
+        <translation>Geen statistieken voor de huidige logboekfilters</translation>
+    </message>
+</context>
+<context>
+    <name>MapLogbookPanel</name>
+    <message>
+        <source>%1 matching QSO</source>
+        <translation>%1 overeenkomende QSO</translation>
+    </message>
+    <message>
+        <source>ADIF</source>
+        <translation>ADIF</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>Band filter</source>
+        <translation>Bandfilter</translation>
+    </message>
+    <message>
+        <source>Mode filter</source>
+        <translation>Modefilter</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
+        <translation>Call, grid, DXCC, staat, POTA, IOTA of WPX</translation>
+    </message>
+    <message>
+        <source>QSL</source>
+        <translation>QSL</translation>
+    </message>
+    <message>
+        <source>DATE</source>
+        <translation>DATUM</translation>
+    </message>
+    <message>
+        <source>Export the current filtered logbook to Documents/Decodium</source>
+        <translation>Het huidige gefilterde logboek exporteren naar Documenten/Decodium</translation>
+    </message>
+    <message>
+        <source>GRID</source>
+        <translation>GRID</translation>
+    </message>
+    <message>
+        <source>MODE</source>
+        <translation>MODE</translation>
+    </message>
+    <message>
+        <source>Newest first</source>
+        <translation>Nieuwste eerst</translation>
+    </message>
+    <message>
+        <source>No QSO matches the current filters</source>
+        <translation>Geen QSO komt overeen met de huidige filters</translation>
+    </message>
+    <message>
+        <source>REFERENCE / DXCC</source>
+        <translation>REFERENTIE / DXCC</translation>
+    </message>
+    <message>
+        <source>Sort field</source>
+        <translation>Sorteerveld</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>CALL van de kaart kon TX1 niet selecteren voor %1</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO met %1 gereed - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO met %1 gereed - TX%2 in het volgende volledige slot</translation>
     </message>
 </context>
 </TS>

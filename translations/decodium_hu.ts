@@ -3833,6 +3833,870 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>Detach Live Map</source>
         <translation>Live Map leválasztása</translation>
     </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  %1 s ezelőtt</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> spot</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 vezérli a lista diploma- és keresett-szűrőit</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 megerősítve  %3 élő  %4 PSK</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 élő  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 állomás · %2 keresett · %3 új · %4 nem megerősített</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 meglévő  %2 megerősítve</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 meglévő / %2 megerősítve</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>4 karakteres gridek</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>6 karakteres gridek</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>ADIF időszak  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>RIASZTÁSOK</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>RIASZTÁSOK %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>MINDEN IDŐ</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>DIPLOMA</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>DIPLOMÁK</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>Aktív  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>ALAPTÉRKÉP</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>Sáv hatóköre, nem kötelező</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>Mód hatóköre, nem kötelező</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>Alap: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Alap: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <source>COND</source>
+        <translation>KÖRÜLM.</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>MEGERŐSÍTVE</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Megerősítve</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>Megerősítve  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>CQ-tevékenység</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>Hívójel-minta, pl. 9H*</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>A hívójel-lista szövegszűrő módja</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>Hívójel, grid, DXCC vagy üzenet</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Hívójelek</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>Regex</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>Térkép központozása a Hold talppontjára</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>Ennek a gridnek a központozása</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>Válaszd ki a lista soraiban megjelenő adatokat</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Összes törlése</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>Az összes figyelt hívójel és az összes hívójel- vagy DXCC-kizárás törlése</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>Az élő állomások előzményeinek törlése</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>Kattints a CALL-ra QSO indításához, vagy a ROTATE-ra az antenna beállításához.</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>Kattints az esemény részleteihez</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>Részletek bezárása</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>Grid részleteinek bezárása</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Oszlopok</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>Kombinált</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>A meglévő és megerősített állapot összehasonlítása globálisan, sáv szerint vagy sáv és mód szerint</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>Megerősítve = papír QSL, LoTW vagy eQSL megérkezett (ADIF állapot Y)</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>A megerősített gridek olyan importált ADIF QSO-t tartalmaznak, amelyben QSL_RCVD=Y, LOTW_QSL_RCVD=Y vagy EQSL_QSL_RCVD=Y.</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>A PSK Reporter MQTT-adatfolyam csatlakoztatása</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>A lefedettségi grid pontossága</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>Keresett, mellőzött vagy figyelt szabályok létrehozása nem kötelező sáv- és mód-hatókörrel</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>Váltás az Élő, Napló és kombinált térképnézet között</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>RÉSZLETEK</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>RÉSZLETEK ELREJTÉSE</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>A Decodium Atlas helyi. A NASA GIBS és a MapTiler a hálózatot használja, ha az offline mód ki van kapcsolva.</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>Az aktív és keresett gridek megjelenítése kompakt térképtűkként</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>KÜLSŐ ADATOK</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>Földrengés</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Kizárás</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>SZŰRVE · %1 · %3 QSO közül %2</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>A szűrés a térkép-adatbázis munkaszálán fut</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>GRID %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>Gridek</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>Földrajzi terület</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>A USGS által az elmúlt napban jelentett, 2,5-es vagy nagyobb erősségű földrengések világszerte.</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>Jó</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>Gyenge</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Ismeretlen</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>ELŐZMÉNYEK</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>ELŐZMÉNYEK %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>Hőtérkép %1  Időskála %2  Útvonalak %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>Kurzor alatti fél: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>Még nem meglévő vagy még nem megerősített egységek keresése</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>%1 összes állomásának mellőzése</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>Ennek az állomásnak a mellőzése a lista beállításainak visszaállításáig</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>Minden állomás ennyi percig maradjon aktív a listában</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>Ez az állomás maradjon a lista élén</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>RÉTEGEK</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>ÉLŐ</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>ÉLŐ %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>Élő</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>Élő  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>HELYZET</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>NAPLÓ</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>NAPLÓ · MINDEN IDŐ · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>KERESÉS</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>Listák</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>Listák %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>Élő 5 perc</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>Élő 15 perc</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>Élő 30 perc</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>Élő 60 perc</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>Élő MQTT</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>Élő spotok</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Élő Parks on the Air aktivátor-spotok. A réteg kikapcsolása azonnal eltávolítja az összes POTA-jelölőt a térképről.</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>Az élő adatok és a napló láthatósága</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>PSK betöltése...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Betöltés...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>TÉRKÉP</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>TÉRKÉPMŰVELETEK</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>HOLD</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>A MUF és a foF2 MHz-ben van. Az Es valószínűségi index, nem frekvencia.</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>Térkép-intelligencia</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>Térképelem</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>Térkép-előbeállítás</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>Térképvetület</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>Vetület</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>MapTiler API-kulcs</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>Megjelölés olvasottként</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>Hiányzó  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>Hold  Az %1°  El %2°  ·  Talppont %3 %4</translation>
+    </message>
+    <message>
+        <source>Moon data unavailable</source>
+        <translation>A Hold adatai nem érhetők el</translation>
+    </message>
+    <message>
+        <source>Propagation data unavailable</source>
+        <translation>A terjedési adatok nem érhetők el</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>A Hold láthatósági féltekéje, talppontja és útvonala az állomásodtól. A jelölő azonnal megjelenik, amint az efemerida kiszámolt.</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>Új grid</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>Fordított rendezés</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>Nincs QSO-előzmény ebben a gridben</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>Nincs aktív ADIF napló</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>Nincs szűrő</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>Nincs friss forgalom ebben a gridben</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>Nincs figyelt vagy mellőzött bejegyzés</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>MŰKÖDÉSI SZABÁLYOK</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>Az IOTA Directory hivatalos csoportjai. A katalógus pozíciói a térképen látszanak; a meglévő és megerősített állapot csak akkor érvényes, ha az importált ADIF QSO tartalmaz IOTA mezőt.</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>Offline</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>Az offline mód a helyi Decodium Atlaszt használja, és leállítja az online alaptérképeket, a PSK MQTT-t és a külső térképforrásokat. Az ADIF, a helyi gyorsítótár és a rádiós tevékenység továbbra is elérhető.</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>Csak</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>Hívójel-keresés megnyitása</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>Részletes statisztika megnyitása</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>A NASA EONET által közzétett világméretű tűzesetek megnyitása.</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>Rádió- és terjedési viszonyok megnyitása</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>A független hívójel-lista megnyitása</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>Működési jelölő</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>A PSK-vevők a helyi tevékenységre helyezése vagy a helyi tevékenység felváltása</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>TERJEDÉSI SKÁLA</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: %1 vevő találva</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: az elmúlt órára nem töltődött be vevő</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>A PSK grid átlátszatlansága</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>A PSK-/spot-előzmények kora</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>Időszak</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Érték</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>Terjedés  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>A terjedési vezérlők a MUF, foF2, Es és aurora beállításai</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>A grid-felugrókban és a listában végzett keresések szolgáltatója</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>Élő gridek térképtűkkel</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>LISTA</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>FORGAT</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Vevők, amelyek az elmúlt órában jelezték a PSK Reporternek, hogy hallották a hívójeledet. A Decodium PSK-feltöltésének nem kell bekapcsolva lennie.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>Az elmúlt órában a hívójeledet halló vevők lekérése. A PSK-feltöltés ettől független.</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>PSK frissítése</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>Az engedélyezett külső rétegek frissítése</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>Szabály eltávolítása</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Ennek a bejegyzésnek az eltávolítása</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>A térkép átmeneti időszűrőjének eltávolítása</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>A figyelt hívójelek, valamint a mellőzött hívójelek vagy DXCC-egységek áttekintése</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>Szabályok</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>Szabályok %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>KÉPERNYŐKÉP</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>KÉP</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>STATISZTIKA</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>Képernyőkép mentése a térképről</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>%1 kiválasztása a lista aktív diplomájaként</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>Válassz diplomát, hogy a hiányzó egységei működési célokká váljanak</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>Válaszd ki a diplomát, amelynek hiányzó egységei keresett állomásokká válnak</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>Ezzel a diplomával azonosíthatók a keresett állomások a listában</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>A QSO/QSL előzmények és a jelenlegi tevékenység megjelenítése ugyanazon grid külön feleiben</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>A grid történeti és élő állapotának szétválasztása</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>Az UTC-eltolás meridiánjainak megjelenítése a térképen</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>UTC időzónák</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>Az összes, illetve csak az új, nem megerősített, keresett vagy figyelt állomások megjelenítése</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>Csak az aktív CQ-hívások megjelenítése a listában</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>Forráskorrelációs szűrő</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Forrás: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>QSO indítása ezzel az állomással</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>Az állomás locatora</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>Ennek az állomásnak a figyelése abbahagyása</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>Ennek az állomásnak a figyelése</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>Feliratkozás a PSK Reporter MQTT-adatfolyamára ehhez az állomáshoz</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>Az előfizetés megmarad, de szünetel, amíg az offline mód be van kapcsolva</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>VEZETŐ SÁVOK</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>VEZETŐ MÓDOK</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>Az ADIF napló betöltve, de egy QSO sem felel meg a térkép jelenlegi szűrőinek.</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>Mennyi idő után halványul el a grid élő tevékenysége</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>Cunami-jelzés érkezett</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>Nem érhető el, amíg az offline mód be van kapcsolva</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>Az Egyesült Államok megyehatárai a U.S. Census TIGER szolgáltatásból. Betöltés után nagyíts rá az egyes megyék megtekintéséhez.</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>Az Egyesült Államok állam határai a U.S. Census TIGER szolgáltatásból. Bekapcsoláskor a térkép az USA-ra áll.</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>A helyi atlasz használata, valamint az online alaptérképek, a PSK MQTT és a külső rétegek leállítása. A helyi napló és a rádiós adatok elérhetők maradnak.</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>A LISTA LÁTHATÓ OSZLOPAI</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>FIGYELT / MELLŐZÖTT LISTÁK</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>MEGLÉVŐ</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>Meglévő  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>Meglévő %1 · Megerősítve %2 · Hátralévő %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>Az importált ADIF naplóból származó WPX-prefixek.</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>Helyettesítő karakteres minta hívójelekre és üzenetekre</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>n. a.</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>nem frissült</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>nem érhető el</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -15910,6 +16774,22 @@ Hosszú nyomás: üzenet szerkesztése</translation>
         <source>Add</source>
         <translation>Hozzaadas</translation>
     </message>
+    <message>
+        <source>Finish TX before logging the QSO</source>
+        <translation>Fejezd be az adást a QSO naplózása előtt</translation>
+    </message>
+    <message>
+        <source>Log current QSO</source>
+        <translation>A jelenlegi QSO naplózása</translation>
+    </message>
+    <message>
+        <source>No active QSO to log</source>
+        <translation>Nincs naplózható aktív QSO</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>Kihagyás</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -18797,6 +19677,154 @@ Jobb klikk a beillesztési és törlési lehetőségekhez.</translation>
         <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Egy szín szerkesztéséhez kattintson duplán a színre.&lt;/p&gt;&lt;p&gt;Jobb kattintás a színek beszúrásához vagy törléséhez.&lt;/p&gt;&lt;p&gt;A felső színek a gyenge jeleket,&lt;/p&gt;&lt;p&gt;az alsó színek az erős&lt;/p&gt;&lt;p&gt;jeleket reprezentálják. Legfeljebb 256 szín választható.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>MapOperationsWindows</name>
+    <message>
+        <source>%1  %2  %3 dB  %4</source>
+        <translation>%1  %2  %3 dB  %4</translation>
+    </message>
+    <message>
+        <source>%1 items  ·  %2</source>
+        <translation>%1 elem  ·  %2</translation>
+    </message>
+    <message>
+        <source>EXTERNAL MAP CONDITIONS</source>
+        <translation>KÜLSŐ TÉRKÉPVISZONYOK</translation>
+    </message>
+    <message>
+        <source>Filter call, grid or DXCC</source>
+        <translation>Hívójel, grid vagy DXCC szűrése</translation>
+    </message>
+    <message>
+        <source>LIVE CALL ROSTER</source>
+        <translation>ÉLŐ HÍVÓJEL-LISTA</translation>
+    </message>
+    <message>
+        <source>Map Roster - Decodium</source>
+        <translation>Térképlista - Decodium</translation>
+    </message>
+    <message>
+        <source>Map Statistics - Decodium</source>
+        <translation>Térképstatisztika - Decodium</translation>
+    </message>
+    <message>
+        <source>Radio Conditions - Decodium</source>
+        <translation>Rádióviszonyok - Decodium</translation>
+    </message>
+    <message>
+        <source>Moon: Az %1°  El %2°  Distance %3 km</source>
+        <translation>Hold: Az %1°  El %2°  Távolság %3 km</translation>
+    </message>
+    <message>
+        <source>Sublunar point %1°, %2°  Illumination %3%</source>
+        <translation>Talppont %1°, %2°  Megvilágítás %3%</translation>
+    </message>
+</context>
+<context>
+    <name>MapStatisticsPanel</name>
+    <message>
+        <source>%1 / %2 QSL</source>
+        <translation>%1 / %2 QSL</translation>
+    </message>
+    <message>
+        <source>30-DAY COMPARISON</source>
+        <translation>30 NAPOS ÖSSZEHASONLÍTÁS</translation>
+    </message>
+    <message>
+        <source>BREAKDOWN</source>
+        <translation>RÉSZLETEZÉS</translation>
+    </message>
+    <message>
+        <source>Calls  %1  (%2)</source>
+        <translation>Hívójelek  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>QSO  %1  (%2)</source>
+        <translation>QSO  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>No statistics for the current logbook filters</source>
+        <translation>Nincs statisztika a jelenlegi naplószűrőkhöz</translation>
+    </message>
+</context>
+<context>
+    <name>MapLogbookPanel</name>
+    <message>
+        <source>%1 matching QSO</source>
+        <translation>%1 egyező QSO</translation>
+    </message>
+    <message>
+        <source>ADIF</source>
+        <translation>ADIF</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>Band filter</source>
+        <translation>Sávszűrő</translation>
+    </message>
+    <message>
+        <source>Mode filter</source>
+        <translation>Módszűrő</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
+        <translation>Hívójel, grid, DXCC, állam, POTA, IOTA vagy WPX</translation>
+    </message>
+    <message>
+        <source>QSL</source>
+        <translation>QSL</translation>
+    </message>
+    <message>
+        <source>DATE</source>
+        <translation>DÁTUM</translation>
+    </message>
+    <message>
+        <source>Export the current filtered logbook to Documents/Decodium</source>
+        <translation>A jelenlegi szűrt napló exportálása a Dokumentumok/Decodium mappába</translation>
+    </message>
+    <message>
+        <source>GRID</source>
+        <translation>GRID</translation>
+    </message>
+    <message>
+        <source>MODE</source>
+        <translation>MÓD</translation>
+    </message>
+    <message>
+        <source>Newest first</source>
+        <translation>Legújabbak elöl</translation>
+    </message>
+    <message>
+        <source>No QSO matches the current filters</source>
+        <translation>Egy QSO sem felel meg a jelenlegi szűrőknek</translation>
+    </message>
+    <message>
+        <source>REFERENCE / DXCC</source>
+        <translation>HIVATKOZÁS / DXCC</translation>
+    </message>
+    <message>
+        <source>Sort field</source>
+        <translation>Rendezési mező</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>A térkép CALL nem tudta kiválasztani a TX1-et ehhez: %1</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO %1 állomással előkészítve - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO %1 állomással előkészítve - TX%2 a következő teljes időrésben</translation>
     </message>
 </context>
 </TS>

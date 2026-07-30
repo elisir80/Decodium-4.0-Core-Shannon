@@ -3847,6 +3847,870 @@ Error: %2</translation>
         <source>Detach Live Map</source>
         <translation>Atvienot tiešraides karti</translation>
     </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  pirms %1 s</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> spoti</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 nosaka saraksta diplomu un meklēto filtrus</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 apstiprināti  %3 tiešraidē  %4 PSK</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 tiešraidē  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 stacijas · %2 meklētas · %3 jaunas · %4 neapstiprinātas</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 sazināti  %2 apstiprināti</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 sazināti / %2 apstiprināti</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>4 rakstzīmju kvadrāti</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>6 rakstzīmju kvadrāti</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>ADIF periods  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>BRĪDINĀJUMI</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>BRĪDINĀJUMI %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>VISS LAIKS</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>DIPLOMS</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>DIPLOMI</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>Aktīvas  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>PAMATKARTE</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>Joslas tvērums, neobligāts</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>Režīma tvērums, neobligāts</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>Pamats: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Pamats: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <source>COND</source>
+        <translation>APST.</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>APSTIPRINĀTI</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Apstiprināti</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>Apstiprināti  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>CQ aktivitāte</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>Izsaukuma paraugs, piem., 9H*</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>Izsaukumu saraksta teksta filtra režīms</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>Izsaukums, kvadrāts, DXCC vai ziņojums</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Izsaukumi</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>Regex</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>Centrēt karti uz Mēness apakšpunktu</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>Centrēt šo kvadrātu</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>Izvēlieties informāciju, ko rādīt katrā saraksta rindā</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Notīrīt visu</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>Notīrīt visus novērotos izsaukumus un visus izsaukumu vai DXCC izņēmumus</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>Notīrīt tiešraides staciju vēsturi</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>Noklikšķiniet uz CALL, lai sāktu QSO, vai uz ROTATE, lai pavērstu antenu.</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>Noklikšķiniet, lai skatītu notikuma detaļas</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>Aizvērt detaļas</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>Aizvērt kvadrāta detaļas</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Kolonnas</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>Apvienots</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>Salīdzināt sazināto un apstiprināto statusu globāli, pa joslām vai pa joslām un režīmiem</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>Apstiprināts = saņemta papīra QSL, LoTW vai eQSL (ADIF statuss Y)</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>Apstiprinātie kvadrāti satur importētu ADIF QSO ar QSL_RCVD=Y, LOTW_QSL_RCVD=Y vai EQSL_QSL_RCVD=Y.</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>Pievienot PSK Reporter MQTT plūsmu</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>Pārklājuma kvadrātu precizitāte</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>Izveidot meklēto, ignorēto vai novēroto noteikumus ar neobligātu joslas un režīma tvērumu</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>Pārslēgt kartes skatus: tiešraide, žurnāls un apvienotais</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>DETAĻAS</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>PASLĒPT DETAĻAS</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>Decodium Atlas ir lokāls. NASA GIBS un MapTiler izmanto tīklu, kad bezsaistes režīms ir izslēgts.</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>Zīmēt aktīvos un meklētos kvadrātus kā kompaktas kartes spraudītes</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>ĀRĒJIE DATI</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>Zemestrīce</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Izslēgt</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>FILTRĒTS · %1 · %2 no %3 QSO</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>Filtrēšana notiek kartes datubāzes darbinieka pusē</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>KVADRĀTS %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>Kvadrāti</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>Ģeogrāfiskais apgabals</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>Globālas zemestrīces ar magnitūdu 2,5 vai vairāk, ko USGS ziņojis pēdējā diennaktī.</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>Labs</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>Slikts</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Nezināms</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>VĒSTURE</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>VĒSTURE %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>Siltuma karte %1  Laika skala %2  Ceļi %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>Puse zem kursora: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>Meklēt vēl nesazinātas vai vēl neapstiprinātas vienības</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>Ignorēt visas stacijas no %1</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>Ignorēt šo staciju līdz saraksta iestatījumu atiestatīšanai</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>Cik minūtes katra stacija paliek aktīva sarakstā</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>Turēt šo staciju saraksta augšgalā</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>SLĀŅI</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>TIEŠRAIDE</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>TIEŠRAIDE %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>Tiešraide</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>Tiešraide  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>ATRAST</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>ŽURNĀLS</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>ŽURNĀLS · VISS LAIKS · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>MEKLĒT</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>Saraksti</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>Saraksti %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>Tiešraide 5 min</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>Tiešraide 15 min</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>Tiešraide 30 min</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>Tiešraide 60 min</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>Tiešraides MQTT</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>Tiešraides spoti</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Tiešraides Parks on the Air aktivatoru spoti. Izslēdzot šo slāni, visi POTA marķieri uzreiz pazūd no kartes.</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>Tiešraides un žurnāla redzamība</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>Ielādē PSK...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Ielādē...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>KARTE</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>KARTES DARBĪBAS</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>MĒNESS</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>MUF un foF2 ir MHz. Es ir varbūtības indekss, nevis frekvence.</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>Kartes inteliģence</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>Kartes elements</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>Kartes sagatave</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>Kartes projekcija</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>Projekcija</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>MapTiler API atslēga</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>Atzīmēt kā lasītu</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>Trūkst  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>Mēness  Az %1°  El %2°  ·  Apakšpunkts %3 %4</translation>
+    </message>
+    <message>
+        <source>Moon data unavailable</source>
+        <translation>Mēness dati nav pieejami</translation>
+    </message>
+    <message>
+        <source>Propagation data unavailable</source>
+        <translation>Izplatīšanās dati nav pieejami</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>Mēness redzamības puslode, apakšpunkts un ceļš no jūsu stacijas. Marķieris parādās, tiklīdz efemerīda ir aprēķināta.</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>Jauns kvadrāts</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>Apgriezta kārtošana</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>Šajā kvadrātā nav QSO vēstures</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>Nav aktīva ADIF žurnāla</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>Bez filtra</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>Šajā kvadrātā nav nesenas aktivitātes</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>Nav novēroto vai ignorēto ierakstu</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>DARBĪBAS NOTEIKUMI</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>Oficiālās IOTA Directory grupas. Kataloga pozīcijas redzamas kartē; sazināts un apstiprināts statuss tiek piemērots tikai tad, ja importētajā ADIF QSO ir IOTA lauks.</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>Bezsaistē</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>Bezsaistes režīms izmanto vietējo Decodium Atlas un aptur tiešsaistes pamatkartes, PSK MQTT un ārējās kartes plūsmas. ADIF, vietējais kešs un radio darbība paliek pieejami.</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>Tikai</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>Atvērt izsaukuma meklēšanu</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>Atvērt detalizētu statistiku</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>Atvērt globālos meža ugunsgrēkus, ko publicē NASA EONET.</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>Atvērt radio un izplatīšanās apstākļus</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>Atvērt neatkarīgo izsaukumu sarakstu</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>Darbības marķieris</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>Uzklāt PSK uztvērējus uz vietējās aktivitātes vai aizstāt vietējo aktivitāti</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>IZPLATĪŠANĀS SKALA</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: atrasti %1 uztvērēji</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: pēdējai stundai nav ielādēts neviens uztvērējs</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>PSK kvadrātu necaurspīdīgums</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>PSK/spotu vēstures vecums</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>Periods</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Vērtība</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>Izplatīšanās  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>Izplatīšanās vadība attiecas uz MUF, foF2, Es un auroru</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>Pakalpojums, ko izmanto meklēšana kvadrātu uznirstošajos logos un sarakstā</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>Spraudītes tiešraides kvadrātiem</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>SARAKSTS</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>PAGRIEZT</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Uztvērēji, kas pēdējā stundā ziņojuši PSK Reporter, ka dzirdējuši jūsu izsaukumu. Decodium PSK augšupielādei nav jābūt ieslēgtai.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>Iegūt uztvērējus, kas pēdējā stundā dzirdēja jūsu izsaukumu. PSK augšupielāde ir neatkarīga.</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>Atsvaidzināt PSK</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>Atsvaidzināt ieslēgtos ārējos slāņus</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>Noņemt noteikumu</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Noņemt šo ierakstu</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>Noņemt kartes pagaidu laika filtru</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>Pārskatīt novērotos izsaukumus un ignorētos izsaukumus vai DXCC vienības</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>Noteikumi</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>Noteikumi %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>EKRĀNUZŅĒMUMS</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>UZŅEMT</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>STATISTIKA</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>Saglabāt kartes ekrānuzņēmumu</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>Izvēlēties %1 kā saraksta aktīvo diplomu</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>Izvēlieties diplomu, lai tā trūkstošās vienības kļūtu par darbības mērķiem</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>Izvēlieties diplomu, kura trūkstošās vienības kļūst par meklētajām stacijām</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>Izmantot šo diplomu, lai sarakstā atrastu meklētās stacijas</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>Rādīt QSO/QSL vēsturi un pašreizējo aktivitāti atsevišķās viena kvadrāta pusēs</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>Nodalīt kvadrāta vēsturisko un tiešraides statusu</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>Rādīt kartē UTC nobīdes meridiānus</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>UTC laika joslas</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>Rādīt visas, jaunas, neapstiprinātas, meklētas vai novērotas stacijas</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>Rādīt sarakstā tikai aktīvos CQ izsaukumus</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>Avotu korelācijas filtrs</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>Avots: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>Sākt QSO ar šo staciju</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>Stacijas lokators</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>Pārtraukt novērot šo staciju</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>Novērot šo staciju</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>Abonēt PSK Reporter MQTT plūsmu šai stacijai</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>Abonements tiek saglabāts, bet ir apturēts, kamēr ir ieslēgts bezsaistes režīms</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>GALVENĀS JOSLAS</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>GALVENIE REŽĪMI</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>ADIF žurnāls ir ielādēts, taču neviens QSO neatbilst pašreizējiem kartes filtriem.</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>Laiks, pēc kura kvadrāta tiešraides aktivitāte izgaist</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>Ziņots par cunami brīdinājumu</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>Nav pieejams, kamēr ir ieslēgts bezsaistes režīms</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>ASV apgabalu robežas no U.S. Census TIGER servisa. Pēc ielādes pietuviniet, lai apskatītu atsevišķus apgabalus.</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>ASV štatu robežas no U.S. Census TIGER servisa. Ieslēdzot karte tiek fokusēta uz ASV.</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>Izmantot vietējo atlantu un apturēt tiešsaistes pamatkartes, PSK MQTT un ārējos slāņus. Vietējais žurnāls un radio dati paliek pieejami.</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>REDZAMĀS SARAKSTA KOLONNAS</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>NOVĒROTO / IGNORĒTO SARAKSTI</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>SAZINĀTI</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>Sazināti  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>Sazināti %1 · Apstiprināti %2 · Atlikuši %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>WPX prefiksi, kas iegūti no jūsu importētā ADIF žurnāla.</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>Aizstājējzīmju paraugs, ko salīdzina ar izsaukumiem un ziņojumiem</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>nav</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>nav atjaunināts</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>nav pieejams</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16055,6 +16919,22 @@ Ilgs nospiediens: rediģēt ziņojumu</translation>
         <source>Add</source>
         <translation>Add</translation>
     </message>
+    <message>
+        <source>Finish TX before logging the QSO</source>
+        <translation>Pabeidziet raidīšanu pirms QSO reģistrēšanas</translation>
+    </message>
+    <message>
+        <source>Log current QSO</source>
+        <translation>Reģistrēt pašreizējo QSO</translation>
+    </message>
+    <message>
+        <source>No active QSO to log</source>
+        <translation>Nav aktīva QSO, ko reģistrēt</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>Izlaist</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -18946,6 +19826,154 @@ Right click for insert and delete options.</translation>
         <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>MapOperationsWindows</name>
+    <message>
+        <source>%1  %2  %3 dB  %4</source>
+        <translation>%1  %2  %3 dB  %4</translation>
+    </message>
+    <message>
+        <source>%1 items  ·  %2</source>
+        <translation>%1 ieraksti  ·  %2</translation>
+    </message>
+    <message>
+        <source>EXTERNAL MAP CONDITIONS</source>
+        <translation>ĀRĒJIE KARTES APSTĀKĻI</translation>
+    </message>
+    <message>
+        <source>Filter call, grid or DXCC</source>
+        <translation>Filtrēt izsaukumu, kvadrātu vai DXCC</translation>
+    </message>
+    <message>
+        <source>LIVE CALL ROSTER</source>
+        <translation>TIEŠRAIDES IZSAUKUMU SARAKSTS</translation>
+    </message>
+    <message>
+        <source>Map Roster - Decodium</source>
+        <translation>Kartes saraksts - Decodium</translation>
+    </message>
+    <message>
+        <source>Map Statistics - Decodium</source>
+        <translation>Kartes statistika - Decodium</translation>
+    </message>
+    <message>
+        <source>Radio Conditions - Decodium</source>
+        <translation>Radio apstākļi - Decodium</translation>
+    </message>
+    <message>
+        <source>Moon: Az %1°  El %2°  Distance %3 km</source>
+        <translation>Mēness: Az %1°  El %2°  Attālums %3 km</translation>
+    </message>
+    <message>
+        <source>Sublunar point %1°, %2°  Illumination %3%</source>
+        <translation>Apakšpunkts %1°, %2°  Apgaismojums %3%</translation>
+    </message>
+</context>
+<context>
+    <name>MapStatisticsPanel</name>
+    <message>
+        <source>%1 / %2 QSL</source>
+        <translation>%1 / %2 QSL</translation>
+    </message>
+    <message>
+        <source>30-DAY COMPARISON</source>
+        <translation>30 DIENU SALĪDZINĀJUMS</translation>
+    </message>
+    <message>
+        <source>BREAKDOWN</source>
+        <translation>SADALĪJUMS</translation>
+    </message>
+    <message>
+        <source>Calls  %1  (%2)</source>
+        <translation>Izsaukumi  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>QSO  %1  (%2)</source>
+        <translation>QSO  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>No statistics for the current logbook filters</source>
+        <translation>Nav statistikas pašreizējiem žurnāla filtriem</translation>
+    </message>
+</context>
+<context>
+    <name>MapLogbookPanel</name>
+    <message>
+        <source>%1 matching QSO</source>
+        <translation>%1 atbilstoši QSO</translation>
+    </message>
+    <message>
+        <source>ADIF</source>
+        <translation>ADIF</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>Band filter</source>
+        <translation>Joslas filtrs</translation>
+    </message>
+    <message>
+        <source>Mode filter</source>
+        <translation>Režīma filtrs</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
+        <translation>Izsaukums, kvadrāts, DXCC, štats, POTA, IOTA vai WPX</translation>
+    </message>
+    <message>
+        <source>QSL</source>
+        <translation>QSL</translation>
+    </message>
+    <message>
+        <source>DATE</source>
+        <translation>DATUMS</translation>
+    </message>
+    <message>
+        <source>Export the current filtered logbook to Documents/Decodium</source>
+        <translation>Eksportēt pašreizējo filtrēto žurnālu uz Dokumenti/Decodium</translation>
+    </message>
+    <message>
+        <source>GRID</source>
+        <translation>KVADRĀTS</translation>
+    </message>
+    <message>
+        <source>MODE</source>
+        <translation>REŽĪMS</translation>
+    </message>
+    <message>
+        <source>Newest first</source>
+        <translation>Jaunākie vispirms</translation>
+    </message>
+    <message>
+        <source>No QSO matches the current filters</source>
+        <translation>Neviens QSO neatbilst pašreizējiem filtriem</translation>
+    </message>
+    <message>
+        <source>REFERENCE / DXCC</source>
+        <translation>ATSAUCE / DXCC</translation>
+    </message>
+    <message>
+        <source>Sort field</source>
+        <translation>Kārtošanas lauks</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>Kartes CALL nevarēja izvēlēties TX1 priekš %1</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO ar %1 sagatavots - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO ar %1 sagatavots - TX%2 nākamajā pilnajā intervālā</translation>
     </message>
 </context>
 </TS>

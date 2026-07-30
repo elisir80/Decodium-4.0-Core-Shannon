@@ -3832,6 +3832,870 @@ Error: %2</source>
         <source>Detach Live Map</source>
         <translation>分離 Live Map</translation>
     </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  %1 秒前</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> 點報</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 控制列表的獎狀與待通聯篩選</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 已確認  %3 即時  %4 PSK</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 即時  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 個電台 · %2 待通聯 · %3 新增 · %4 未確認</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 已通聯  %2 已確認</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 已通聯 / %2 已確認</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>4 位網格</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>6 位網格</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>ADIF 時間範圍  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>警報</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>警報 %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>全部時間</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>獎狀</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>獎狀</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>活動  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>底圖</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>波段範圍（可選）</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>模式範圍（可選）</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>底圖: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>底圖: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <source>COND</source>
+        <translation>狀況</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>已確認</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>已確認</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>已確認  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>CQ 活動</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>呼號模式，例如 9H*</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>呼號列表文字篩選方式</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>呼號、網格、DXCC 或訊息</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>呼號</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>正規式</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>將地圖置中到月下點</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>將此網格置中</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>選擇列表每行顯示的資訊</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>全部清除</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>清除所有關注的呼號以及所有呼號或 DXCC 排除項</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>清除即時電台歷史</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>點擊 CALL 開始通聯，或點擊 ROTATE 轉動天線。</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>點擊查看事件詳情</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>關閉詳情</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>關閉網格詳情</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>欄</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>合併</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>在全域、按波段或按波段與模式比較已通聯與已確認狀態</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>已確認 = 已收到紙本 QSL、LoTW 或 eQSL（ADIF 狀態 Y）</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>已確認網格包含帶有 QSL_RCVD=Y、LOTW_QSL_RCVD=Y 或 EQSL_QSL_RCVD=Y 的已匯入 ADIF QSO。</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>連接 PSK Reporter 的 MQTT 資料來源</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>覆蓋網格精度</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>建立待通聯、忽略或關注規則，波段與模式範圍可選</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>循環切換即時、日誌與合併地圖檢視</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>詳情</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>隱藏詳情</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>Decodium Atlas 為本機資料。關閉離線模式時，NASA GIBS 與 MapTiler 會使用網路。</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>將活動與待通聯網格繪製為精簡圖釘</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>外部資料</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>地震</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>排除</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>已篩選 · %1 · %3 個 QSO 中的 %2 個</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>篩選在地圖資料庫工作執行緒中執行</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>網格 %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>網格</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>地理區域</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>USGS 在過去一天報告的全球 2.5 級以上地震。</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>良好</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>較差</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>未知</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>歷史</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>歷史 %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>熱區圖 %1  時間軸 %2  路徑 %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>游標所在半區: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>搜尋尚未通聯或尚未確認的實體</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>忽略來自 %1 的所有電台</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>忽略此電台，直到重設列表偏好</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>每個電台在列表中保持活動的分鐘數</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>將此電台置於列表頂端</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>圖層</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>即時</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>即時 %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>即時</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>即時  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>定位</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>日誌</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>日誌 · 全部時間 · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>查詢</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>列表</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>列表 %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>即時 5 分鐘</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>即時 15 分鐘</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>即時 30 分鐘</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>即時 60 分鐘</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>即時 MQTT</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>即時點報</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Parks on the Air 啟動者的即時點報。關閉該圖層會立即從地圖移除所有 POTA 標記。</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>即時與日誌的可見性</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>正在載入 PSK...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>正在載入...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>地圖</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>地圖操作</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>月球</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>MUF 與 foF2 以 MHz 表示。Es 是機率指數，不是頻率。</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>地圖智慧</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>地圖項目</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>地圖預設</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>地圖投影</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>投影</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>MapTiler API 金鑰</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>標為已讀</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>缺少  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>月球  方位 %1°  仰角 %2°  ·  月下點 %3 %4</translation>
+    </message>
+    <message>
+        <source>Moon data unavailable</source>
+        <translation>月球資料不可用</translation>
+    </message>
+    <message>
+        <source>Propagation data unavailable</source>
+        <translation>傳播資料不可用</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>月球可見半球、月下點以及從本站出發的路徑。星曆計算完成後標記即出現。</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>新網格</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>反向排序</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>此網格沒有 QSO 歷史</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>沒有啟用的 ADIF 日誌</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>無篩選</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>此網格近期沒有通訊</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>沒有關注或忽略的項目</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>操作規則</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>IOTA 目錄的官方分組。目錄位置顯示在地圖上；僅當匯入的 ADIF QSO 含有 IOTA 欄位時才套用已通聯與已確認狀態。</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>離線</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>離線模式使用本機 Decodium Atlas，並停止線上底圖、PSK MQTT 與外部地圖資料來源。ADIF、本機快取與無線電活動仍可使用。</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>僅</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>開啟呼號查詢</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>開啟詳細統計</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>開啟 NASA EONET 發布的全球野火事件。</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>開啟無線電與傳播狀況</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>開啟獨立的呼號列表</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>操作標記</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>將 PSK 接收台疊加在本機活動上，或取代本機活動</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>傳播標度</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: 找到 %1 個接收台</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: 未載入最近一小時的接收台</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>PSK 網格不透明度</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>PSK/點報歷史時長</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>週期</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>數值</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>傳播  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>傳播控制包括 MUF、foF2、Es 與極光</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>網格彈出視窗與列表中查詢所用的服務方</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>以圖釘顯示即時網格</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>列表</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>旋轉</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>在過去一小時內向 PSK Reporter 報告收到你呼號的接收台。無需啟用 Decodium 的 PSK 上傳。</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>取得過去一小時內收到你呼號的接收台。PSK 上傳與此無關。</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>重新載入 PSK</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>重新載入已啟用的外部圖層</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>移除規則</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>移除此項目</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>移除地圖的暫時時間篩選</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>檢視關注的呼號以及忽略的呼號或 DXCC 實體</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>規則</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>規則 %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>截圖</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>截圖</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>統計</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>儲存地圖截圖</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>選擇 %1 作為列表的目前獎狀</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>選擇一個獎狀，將其缺少的實體設為操作目標</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>選擇其缺少實體將成為待通聯電台的獎狀</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>用此獎狀在列表中辨識待通聯電台</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>在同一網格的兩半分別顯示 QSO/QSL 歷史與目前活動</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>分開顯示網格的歷史與即時狀態</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>在地圖上顯示 UTC 時差經線</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>UTC 時區</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>顯示全部、新增、未確認、待通聯或關注的電台</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>列表中僅顯示活動的 CQ 呼叫</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>來源關聯篩選</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>來源: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>與此電台開始通聯</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>電台位置</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>停止關注此電台</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>關注此電台</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>訂閱此電台的 PSK Reporter MQTT 資料流</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>啟用離線模式期間訂閱會保留但暫停</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>主要波段</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>主要模式</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>已載入 ADIF 日誌，但沒有 QSO 符合目前地圖篩選條件。</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>即時網格活動淡出前的時長</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>已報告海嘯標誌</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>啟用離線模式期間不可用</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>來自美國人口普查局 TIGER 服務的美國縣界。載入後放大即可查看各個縣。</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>來自美國人口普查局 TIGER 服務的美國州界。啟用後地圖將聚焦美國。</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>使用本機地圖集，並停止線上底圖、PSK MQTT 與外部圖層。本機日誌與無線電資料仍可使用。</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>列表可見欄</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>關注 / 忽略列表</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>已通聯</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>已通聯  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>已通聯 %1 · 已確認 %2 · 剩餘 %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>根據你匯入的 ADIF 日誌得出的 WPX 前綴。</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>用於比對呼號與訊息的萬用字元模式</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>無</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>未更新</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>不可用</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16040,6 +16904,22 @@ Long-press: edit message</source>
         <source>Add</source>
         <translation>新增</translation>
     </message>
+    <message>
+        <source>Finish TX before logging the QSO</source>
+        <translation>記錄 QSO 前請先結束發射</translation>
+    </message>
+    <message>
+        <source>Log current QSO</source>
+        <translation>記錄目前 QSO</translation>
+    </message>
+    <message>
+        <source>No active QSO to log</source>
+        <translation>沒有可記錄的進行中 QSO</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>跳過</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -18930,6 +19810,154 @@ Right click for insert and delete options.</source>
         <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;雙擊一種顏色進行編輯.&lt;/p&gt;&lt;p&gt;右鍵單擊可插入或刪除顏色.&lt;/p&gt;&lt;p&gt;頂部的顏色代表微弱的信號&lt;/p&gt;&lt;p&gt;底部的顏色代表強烈&lt;/p&gt;&lt;p&gt;信號. 您最多可以有256種顏色.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>MapOperationsWindows</name>
+    <message>
+        <source>%1  %2  %3 dB  %4</source>
+        <translation>%1  %2  %3 dB  %4</translation>
+    </message>
+    <message>
+        <source>%1 items  ·  %2</source>
+        <translation>%1 項  ·  %2</translation>
+    </message>
+    <message>
+        <source>EXTERNAL MAP CONDITIONS</source>
+        <translation>外部地圖狀況</translation>
+    </message>
+    <message>
+        <source>Filter call, grid or DXCC</source>
+        <translation>按呼號、網格或 DXCC 篩選</translation>
+    </message>
+    <message>
+        <source>LIVE CALL ROSTER</source>
+        <translation>即時呼號列表</translation>
+    </message>
+    <message>
+        <source>Map Roster - Decodium</source>
+        <translation>地圖列表 - Decodium</translation>
+    </message>
+    <message>
+        <source>Map Statistics - Decodium</source>
+        <translation>地圖統計 - Decodium</translation>
+    </message>
+    <message>
+        <source>Radio Conditions - Decodium</source>
+        <translation>無線電狀況 - Decodium</translation>
+    </message>
+    <message>
+        <source>Moon: Az %1°  El %2°  Distance %3 km</source>
+        <translation>月球: 方位 %1°  仰角 %2°  距離 %3 km</translation>
+    </message>
+    <message>
+        <source>Sublunar point %1°, %2°  Illumination %3%</source>
+        <translation>月下點 %1°, %2°  照度 %3%</translation>
+    </message>
+</context>
+<context>
+    <name>MapStatisticsPanel</name>
+    <message>
+        <source>%1 / %2 QSL</source>
+        <translation>%1 / %2 QSL</translation>
+    </message>
+    <message>
+        <source>30-DAY COMPARISON</source>
+        <translation>30 天對比</translation>
+    </message>
+    <message>
+        <source>BREAKDOWN</source>
+        <translation>明細</translation>
+    </message>
+    <message>
+        <source>Calls  %1  (%2)</source>
+        <translation>呼號  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>QSO  %1  (%2)</source>
+        <translation>QSO  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>No statistics for the current logbook filters</source>
+        <translation>目前日誌篩選條件下沒有統計資料</translation>
+    </message>
+</context>
+<context>
+    <name>MapLogbookPanel</name>
+    <message>
+        <source>%1 matching QSO</source>
+        <translation>%1 個相符的 QSO</translation>
+    </message>
+    <message>
+        <source>ADIF</source>
+        <translation>ADIF</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>Band filter</source>
+        <translation>波段篩選</translation>
+    </message>
+    <message>
+        <source>Mode filter</source>
+        <translation>模式篩選</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
+        <translation>呼號、網格、DXCC、州、POTA、IOTA 或 WPX</translation>
+    </message>
+    <message>
+        <source>QSL</source>
+        <translation>QSL</translation>
+    </message>
+    <message>
+        <source>DATE</source>
+        <translation>日期</translation>
+    </message>
+    <message>
+        <source>Export the current filtered logbook to Documents/Decodium</source>
+        <translation>將目前篩選後的日誌匯出到 文件/Decodium</translation>
+    </message>
+    <message>
+        <source>GRID</source>
+        <translation>網格</translation>
+    </message>
+    <message>
+        <source>MODE</source>
+        <translation>模式</translation>
+    </message>
+    <message>
+        <source>Newest first</source>
+        <translation>最新在前</translation>
+    </message>
+    <message>
+        <source>No QSO matches the current filters</source>
+        <translation>沒有 QSO 符合目前篩選條件</translation>
+    </message>
+    <message>
+        <source>REFERENCE / DXCC</source>
+        <translation>參考 / DXCC</translation>
+    </message>
+    <message>
+        <source>Sort field</source>
+        <translation>排序欄位</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>地圖 CALL 無法為 %1 選擇 TX1</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>與 %1 的 QSO 已就緒 - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>與 %1 的 QSO 已就緒 - 下一個完整時槽發送 TX%2</translation>
     </message>
 </context>
 </TS>

@@ -3833,6 +3833,870 @@ Error: %2</source>
         <source>Detach Live Map</source>
         <translation>Live Map を切り離す</translation>
     </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  %1 秒前</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> スポット</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 がリストのアワードと未交信フィルターを制御します</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 確認済  %3 ライブ  %4 PSK</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL</source>
+        <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 ライブ  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 局 · %2 未交信 · %3 新規 · %4 未確認</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 交信済  %2 確認済</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 交信済 / %2 確認済</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>4 文字のグリッド</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>6 文字のグリッド</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>ADIF 期間  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>アラート</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>アラート %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>全期間</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>アワード</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>アワード</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>アクティブ  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>ベースマップ</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>バンドの範囲 (任意)</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>モードの範囲 (任意)</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>ベース: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>ベース: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <source>COND</source>
+        <translation>状態</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>確認済</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>確認済</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>確認済  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>CQ の活動</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>コールサインのパターン (例: 9H*)</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>コールリストのテキストフィルター方式</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>コールサイン・グリッド・DXCC・メッセージ</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>コールサイン</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>正規表現</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>月の直下点に地図を合わせる</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>このグリッドを中央に表示</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>リストの各行に表示する情報を選びます</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>すべて消去</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>監視中のコールサインと、コールサイン・DXCC の除外をすべて消去します</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>ライブ局の履歴を消去</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>CALL をクリックすると QSO を開始し、ROTATE でアンテナを向けます。</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>クリックでイベントの詳細を表示</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>詳細を閉じる</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>グリッドの詳細を閉じる</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>列</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>統合</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>交信済と確認済の状況を、全体・バンド別・バンドとモード別で比較します</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>確認済 = 紙 QSL・LoTW・eQSL を受領 (ADIF ステータス Y)</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>確認済グリッドには、QSL_RCVD=Y・LOTW_QSL_RCVD=Y・EQSL_QSL_RCVD=Y のいずれかを持つ ADIF QSO が含まれます。</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>PSK Reporter の MQTT フィードに接続します</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>カバレッジグリッドの精度</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>未交信・除外・監視のルールを作成します。バンドとモードの範囲は任意です</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>地図表示をライブ・ログブック・統合の順に切り替えます</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>詳細</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>詳細を隠す</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>Decodium Atlas はローカルです。オフラインモードが無効のとき、NASA GIBS と MapTiler はネットワークを使用します。</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>アクティブと未交信のグリッドを小さなピンで描画します</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>外部データ</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>地震</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>除外</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>絞り込み · %1 · %3 件中 %2 件の QSO</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>絞り込みは地図データベースのワーカーで実行されます</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>グリッド %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>グリッド</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>地理的範囲</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>USGS が過去 1 日に報告したマグニチュード 2.5 以上の世界の地震。</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>良好</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>不良</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>不明</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>履歴</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>履歴 %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>ヒートマップ %1  タイムライン %2  経路 %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>カーソル位置の半分: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>まだ交信していない、または未確認のエンティティを狙います</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>%1 のすべての局を除外</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>リスト設定をリセットするまで、この局を除外します</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>各局をリストで有効にしておく分数</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>この局をリストの先頭に固定します</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>レイヤー</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>ライブ</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>ライブ %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>ライブ</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>ライブ  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>位置</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>ログブック</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>ログブック · 全期間 · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>検索</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>リスト</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>リスト %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>ライブ 5 分</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>ライブ 15 分</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>ライブ 30 分</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>ライブ 60 分</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>ライブ MQTT</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>ライブ スポット</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Parks on the Air アクティベーターのライブスポット。このレイヤーを無効にすると、POTA のマーカーは地図から直ちに消えます。</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>ライブとログブックの表示</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>PSK を読み込み中...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>読み込み中...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>地図</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>地図の操作</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>月</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>MUF と foF2 は MHz です。Es は確率の指標で、周波数ではありません。</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>マップ インテリジェンス</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>地図の項目</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>地図のプリセット</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>地図投影法</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>投影法</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>MapTiler API キー</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>既読にする</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>未取得  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>月  方位 %1°  高度 %2°  ·  直下点 %3 %4</translation>
+    </message>
+    <message>
+        <source>Moon data unavailable</source>
+        <translation>月のデータを取得できません</translation>
+    </message>
+    <message>
+        <source>Propagation data unavailable</source>
+        <translation>伝播データを取得できません</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>月の可視半球・直下点・自局からの経路です。マーカーは天体暦の計算が終わるとすぐに表示されます。</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>新しいグリッド</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>並び順を逆にする</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>このグリッドに QSO の履歴はありません</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>有効な ADIF ログブックがありません</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>フィルターなし</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>このグリッドに最近の交信はありません</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>監視中または除外中の項目はありません</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>運用ルール</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>IOTA ディレクトリの公式グループです。カタログの位置は地図に表示されます。交信済・確認済の状態は、取り込んだ ADIF QSO に IOTA 欄がある場合にのみ反映されます。</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>オフライン</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>オフラインモードはローカルの Decodium Atlas を使い、オンラインのベースマップ・PSK MQTT・外部マップフィードを停止します。ADIF・ローカルキャッシュ・無線の動作はそのまま使えます。</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>のみ</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>コールサイン検索を開く</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>詳細な統計を開く</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>NASA EONET が公開する世界の山火事情報を開きます。</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>電波と伝播の状況を開く</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>独立したコールリストを開く</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>運用マーカー</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>PSK 受信局をローカルの活動に重ねる、またはローカルの活動と置き換えます</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>伝播スケール</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: %1 局の受信局が見つかりました</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: 直近 1 時間の受信局は読み込まれていません</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>PSK グリッドの不透明度</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>PSK・スポット履歴の保持時間</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>期間</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>値</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>伝播  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>伝播の設定は MUF・foF2・Es・オーロラを扱います</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>グリッドのポップアップとリストからの検索に使う提供元</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>ライブ グリッドをピン表示</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>リスト</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>回転</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>直近 1 時間に、あなたのコールサインを受信したと PSK Reporter に報告した局です。Decodium の PSK 送信を有効にする必要はありません。</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>直近 1 時間にあなたのコールサインを受信した局を取得します。PSK 送信とは無関係です。</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>PSK を更新</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>有効な外部レイヤーを更新</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>ルールを削除</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>この項目を削除</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>地図の一時的な時間フィルターを解除します</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>監視中のコールサインと、除外したコールサインや DXCC エンティティを確認します</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>ルール</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>ルール %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>スクリーンショット</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>撮影</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>統計</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>地図のスクリーンショットを保存</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>%1 をリストのアワードとして選択します</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>アワードを選ぶと、未取得のエンティティが運用目標になります</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>未取得のエンティティが未交信局として扱われるアワードを選びます</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>このアワードを使ってリスト内の未交信局を見分けます</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>同じグリッドを半分ずつ使い、QSO/QSL の履歴と現在の活動を表示します</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>グリッドの過去と現在の状態を分けます</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>UTC 時差の子午線を地図に表示します</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>UTC タイムゾーン</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>すべて・新規・未確認・未交信・監視中の局を表示します</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>リストにアクティブな CQ のみを表示します</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>情報源の相関フィルター</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</source>
+        <translation>出典: &lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>この局と QSO を始める</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>局のロケーター</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>この局の監視をやめる</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>この局を監視する</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>この局について PSK Reporter の MQTT ストリームを購読します</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>オフラインモードの間、購読は保持されますが一時停止します</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>上位バンド</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>上位モード</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>ADIF ログブックは読み込まれていますが、現在の地図の絞り込みに一致する QSO はありません。</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>グリッドのライブ活動が消えるまでの時間</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>津波の注意報が報告されました</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>オフラインモードの間は利用できません</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>米国国勢調査局 TIGER サービスによる米国の郡境界です。読み込み後に拡大すると個々の郡を確認できます。</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>米国国勢調査局 TIGER サービスによる米国の州境界です。有効にすると地図は米国に合わせられます。</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>ローカルのアトラスを使い、オンラインのベースマップ・PSK MQTT・外部レイヤーを停止します。ローカルのログブックと無線データはそのまま使えます。</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>リストの表示列</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>監視 / 除外リスト</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>交信済</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>交信済  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>交信済 %1 · 確認済 %2 · 残り %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>取り込んだ ADIF ログから求めた WPX プリフィックスです。</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>コールサインとメッセージに対して照合するワイルドカードのパターン</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>該当なし</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>未更新</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>利用不可</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16041,6 +16905,22 @@ Long-press: edit message</source>
         <source>Add</source>
         <translation>追加</translation>
     </message>
+    <message>
+        <source>Finish TX before logging the QSO</source>
+        <translation>QSO を記録する前に送信を終えてください</translation>
+    </message>
+    <message>
+        <source>Log current QSO</source>
+        <translation>現在の QSO を記録</translation>
+    </message>
+    <message>
+        <source>No active QSO to log</source>
+        <translation>記録できる進行中の QSO がありません</translation>
+    </message>
+    <message>
+        <source>Skip</source>
+        <translation>スキップ</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -18931,6 +19811,154 @@ Right click for insert and delete options.</source>
         <location filename="../wf_palette_design_dialog.ui" line="23"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ダブルクリックで色変更.&lt;/p&gt;&lt;p&gt;右クリックで色の追加または削除.&lt;/p&gt;&lt;p&gt;上の方の色は弱い信号を表します&lt;/p&gt;&lt;p&gt;そして下の方の色は強い信号を表します&lt;/p&gt;&lt;p&gt;信号. 256色まで使用可能.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+</context>
+<context>
+    <name>MapOperationsWindows</name>
+    <message>
+        <source>%1  %2  %3 dB  %4</source>
+        <translation>%1  %2  %3 dB  %4</translation>
+    </message>
+    <message>
+        <source>%1 items  ·  %2</source>
+        <translation>%1 件  ·  %2</translation>
+    </message>
+    <message>
+        <source>EXTERNAL MAP CONDITIONS</source>
+        <translation>外部マップ状況</translation>
+    </message>
+    <message>
+        <source>Filter call, grid or DXCC</source>
+        <translation>コールサイン・グリッド・DXCC で絞り込み</translation>
+    </message>
+    <message>
+        <source>LIVE CALL ROSTER</source>
+        <translation>ライブ コールリスト</translation>
+    </message>
+    <message>
+        <source>Map Roster - Decodium</source>
+        <translation>マップ リスト - Decodium</translation>
+    </message>
+    <message>
+        <source>Map Statistics - Decodium</source>
+        <translation>マップ統計 - Decodium</translation>
+    </message>
+    <message>
+        <source>Radio Conditions - Decodium</source>
+        <translation>電波状況 - Decodium</translation>
+    </message>
+    <message>
+        <source>Moon: Az %1°  El %2°  Distance %3 km</source>
+        <translation>月: 方位 %1°  高度 %2°  距離 %3 km</translation>
+    </message>
+    <message>
+        <source>Sublunar point %1°, %2°  Illumination %3%</source>
+        <translation>直下点 %1°, %2°  輝面比 %3%</translation>
+    </message>
+</context>
+<context>
+    <name>MapStatisticsPanel</name>
+    <message>
+        <source>%1 / %2 QSL</source>
+        <translation>%1 / %2 QSL</translation>
+    </message>
+    <message>
+        <source>30-DAY COMPARISON</source>
+        <translation>30 日間の比較</translation>
+    </message>
+    <message>
+        <source>BREAKDOWN</source>
+        <translation>内訳</translation>
+    </message>
+    <message>
+        <source>Calls  %1  (%2)</source>
+        <translation>コールサイン  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>QSO  %1  (%2)</source>
+        <translation>QSO  %1  (%2)</translation>
+    </message>
+    <message>
+        <source>No statistics for the current logbook filters</source>
+        <translation>現在のログブックの絞り込みに対する統計はありません</translation>
+    </message>
+</context>
+<context>
+    <name>MapLogbookPanel</name>
+    <message>
+        <source>%1 matching QSO</source>
+        <translation>%1 件の一致する QSO</translation>
+    </message>
+    <message>
+        <source>ADIF</source>
+        <translation>ADIF</translation>
+    </message>
+    <message>
+        <source>CSV</source>
+        <translation>CSV</translation>
+    </message>
+    <message>
+        <source>Band filter</source>
+        <translation>バンドフィルター</translation>
+    </message>
+    <message>
+        <source>Mode filter</source>
+        <translation>モードフィルター</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC, state, POTA, IOTA or WPX</source>
+        <translation>コールサイン・グリッド・DXCC・州・POTA・IOTA・WPX</translation>
+    </message>
+    <message>
+        <source>QSL</source>
+        <translation>QSL</translation>
+    </message>
+    <message>
+        <source>DATE</source>
+        <translation>日付</translation>
+    </message>
+    <message>
+        <source>Export the current filtered logbook to Documents/Decodium</source>
+        <translation>現在の絞り込んだログブックを Documents/Decodium に書き出します</translation>
+    </message>
+    <message>
+        <source>GRID</source>
+        <translation>グリッド</translation>
+    </message>
+    <message>
+        <source>MODE</source>
+        <translation>モード</translation>
+    </message>
+    <message>
+        <source>Newest first</source>
+        <translation>新しい順</translation>
+    </message>
+    <message>
+        <source>No QSO matches the current filters</source>
+        <translation>現在の絞り込みに一致する QSO はありません</translation>
+    </message>
+    <message>
+        <source>REFERENCE / DXCC</source>
+        <translation>参照 / DXCC</translation>
+    </message>
+    <message>
+        <source>Sort field</source>
+        <translation>並び替えの項目</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>地図の CALL は %1 に対して TX1 を選べませんでした</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>%1 との QSO を準備 - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>%1 との QSO を準備 - 次の完全なスロットで TX%2</translation>
     </message>
 </context>
 </TS>
