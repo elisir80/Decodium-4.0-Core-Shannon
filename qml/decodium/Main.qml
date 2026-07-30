@@ -480,6 +480,7 @@ ApplicationWindow {
         raise()
         requestActivate()
         startupLog("main window show/raise/requestActivate done")
+        startupLiveMapPopoutRestoreTimer.restart()
         // The clock is re-parented into contentItem during header creation.  At
         // that point the final window geometry may not exist yet, so apply the
         // persisted position once more after the first layout pass.
@@ -568,6 +569,13 @@ ApplicationWindow {
         repeat: false
         running: false
         onTriggered: maybeFinishStartupLiveMapVisualStage("safe-slot")
+    }
+    Timer {
+        id: startupLiveMapPopoutRestoreTimer
+        interval: 350
+        repeat: false
+        running: false
+        onTriggered: mainWindow.restoreLiveMapPopoutAfterStartup()
     }
     Timer {
         id: settingsDialogWarmupTimer
@@ -1917,6 +1925,41 @@ ApplicationWindow {
         } else {
             liveMapFloatingWindow.hide()
         }
+    }
+
+    // A detached map is a real secondary Window. Restoring it from the child
+    // Window's Component.onCompleted is racy on some QPA backends: the menu
+    // state is restored, while the Window misses its initial show event. Do a
+    // second restore once the main Window has a native surface.
+    function restoreLiveMapPopoutAfterStartup() {
+        if (typeof liveMapFloatingWindow === "undefined" || !liveMapFloatingWindow)
+            return
+
+        var state = restoreFloatingWindowState(
+                    liveMapFloatingWindow,
+                    "liveMapFloatingWindow",
+                    "liveMapDetached",
+                    "")
+        var shouldShow = mainWindow.liveMapPanelVisible
+                && mainWindow.liveMapDetached
+                && !mainWindow.liveMapMinimized
+        if (!shouldShow) {
+            liveMapFloatingWindow.hide()
+            startupLog("live map popout restore: hidden visible="
+                       + mainWindow.liveMapPanelVisible
+                       + " detached=" + mainWindow.liveMapDetached)
+            return
+        }
+
+        // Explicitly reset the visibility state before showing. This is needed
+        // after a prior application shutdown closed the detached Window.
+        liveMapFloatingWindow.visibility = Window.Windowed
+        liveMapFloatingWindow.show()
+        startupLog("live map popout restore: shown detached="
+                   + mainWindow.liveMapDetached
+                   + " x=" + liveMapFloatingWindow.x
+                   + " y=" + liveMapFloatingWindow.y
+                   + " saved=" + (state.detached === true))
     }
 	    function detachWaterfallPanel() {
             mainWindow.waterfallPanelVisible = true
@@ -9764,6 +9807,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 	                                              ? ft2LinkFloatingLoader.item
 	                                              : ft2LinkInlineLoader.item
                             showAsyncIcon: mainWindow.asyncIconVisible
+                            handleLogPrompt: !txPanelDetached
                             visible: !txPanelDetached
                             onMamWindowRequested: mainWindow.openMamWindow()
                             onCallRequested: mainWindow.openCallDialog()
@@ -10504,7 +10548,14 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     Shortcut {
         sequence: "F4"
         context: Qt.ApplicationShortcut
-        onActivated: { if (bridge) bridge.promptLogQso() }
+        onActivated: {
+            if (!bridge)
+                return
+            if (bridge.requestManualLogQso)
+                bridge.requestManualLogQso()
+            else
+                bridge.promptLogQso()
+        }
     }
     Shortcut {
         sequence: "Esc"
@@ -14490,7 +14541,7 @@ NumberAnimation {
 	                                      ? ft2LinkFloatingLoader.item
 	                                      : ft2LinkInlineLoader.item
                     showAsyncIcon: mainWindow.asyncIconVisible
-                    handleLogPrompt: false
+                    handleLogPrompt: txPanelDetached
                     onMamWindowRequested: mainWindow.openMamWindow()
                     onCallRequested: mainWindow.openCallDialog()
                     onFt2LinkAccessRequested: mainWindow.requestFt2LinkAccess()

@@ -1,6 +1,10 @@
 #include "WorldMapItem.hpp"
 
+#include "src/services/MapBaseMapService.h"
+#include "src/services/MapExternalOverlayService.h"
+
 #include <QDebug>
+#include <QHoverEvent>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QQuickWindow>
@@ -36,8 +40,8 @@ WorldMapItem::WorldMapItem(QQuickItem* parent)
     : QQuickPaintedItem(parent)
     , m_widget(nullptr)
 {
-    setAcceptedMouseButtons(Qt::LeftButton);
-    setAcceptHoverEvents(false);
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+    setAcceptHoverEvents(true);
     setAntialiasing(true);
     setImplicitWidth(340);
     setImplicitHeight(220);
@@ -57,6 +61,10 @@ WorldMapItem::WorldMapItem(QQuickItem* parent)
 
     connect(&m_widget, &WorldMapWidget::contactClicked,
             this, &WorldMapItem::contactClicked);
+    connect(&m_widget, &WorldMapWidget::operationalMarkerClicked,
+            this, &WorldMapItem::operationalMarkerClicked);
+    connect(&m_widget, &WorldMapWidget::geographicFeatureClicked,
+            this, &WorldMapItem::geographicFeatureClicked);
     // 1.0.214 — propaga l'animation tick dal widget legacy al QQuickItem
     // (greyline pulse, tx travel arc, contact age fade). markDirty fa
     // throttle vero: max 1 paint per m_repaintIntervalMs.
@@ -120,6 +128,20 @@ void WorldMapItem::setActive(bool active)
     if (active && isVisible()) {
         markDirty();
     }
+}
+
+void WorldMapItem::focusLocation(double longitude, double latitude,
+                                 double spanLongitude, double spanLatitude)
+{
+    m_widget.focusLocation(longitude, latitude,
+                           spanLongitude, spanLatitude);
+    markDirty();
+}
+
+void WorldMapItem::resetView()
+{
+    m_widget.resetView();
+    markDirty();
 }
 
 void WorldMapItem::applyAnimationCadence(bool visible)
@@ -225,6 +247,38 @@ void WorldMapItem::setGreylineEnabled(bool enabled)
     markDirty();
 }
 
+void WorldMapItem::setBaseMapEnabled(bool enabled)
+{
+    m_widget.setBaseMapEnabled(enabled);
+    markDirty();
+}
+
+void WorldMapItem::setBaseMapService(QObject* service)
+{
+    auto* baseMapService = qobject_cast<MapBaseMapService*>(service);
+    if (m_baseMapService == baseMapService) {
+        return;
+    }
+    if (m_baseMapConnection) {
+        disconnect(m_baseMapConnection);
+    }
+    m_baseMapService = baseMapService;
+    auto syncBaseMap = [this] {
+        m_widget.setBaseMapImage(m_baseMapService
+            ? m_baseMapService->baseMapImage()
+            : QImage());
+        markDirty();
+    };
+    if (m_baseMapService) {
+        m_baseMapConnection = connect(
+            m_baseMapService,
+            &MapBaseMapService::baseMapImageChanged,
+            this,
+            syncBaseMap);
+    }
+    syncBaseMap();
+}
+
 void WorldMapItem::setDistanceInMiles(bool enabled)
 {
     m_widget.setDistanceInMiles(enabled);
@@ -244,6 +298,69 @@ void WorldMapItem::clearContacts()
 {
     m_widget.clearContacts();
     markDirty();
+}
+
+void WorldMapItem::setCoverageCells(const QVariantList& cells)
+{
+    m_widget.setCoverageCells(cells);
+    markDirty();
+}
+
+void WorldMapItem::setCoveragePushPins(bool enabled)
+{
+    m_widget.setCoveragePushPins(enabled);
+    markDirty();
+}
+
+void WorldMapItem::setTimeZoneOverlayEnabled(bool enabled)
+{
+    m_widget.setTimeZoneOverlayEnabled(enabled);
+    markDirty();
+}
+
+void WorldMapItem::setOperationalMarkers(const QVariantList& markers)
+{
+    m_widget.setOperationalMarkers(markers);
+    markDirty();
+}
+
+void WorldMapItem::setGeographicFeatures(const QVariantList& features)
+{
+    m_widget.setGeographicFeatures(features);
+    markDirty();
+}
+
+void WorldMapItem::setProjection(const QString& projection)
+{
+    m_widget.setProjection(projection);
+    markDirty();
+}
+
+void WorldMapItem::setExternalOverlayService(QObject* service)
+{
+    auto* overlayService = qobject_cast<MapExternalOverlayService*>(service);
+    if (m_externalOverlayService == overlayService) {
+        return;
+    }
+    if (m_externalOverlayConnection) {
+        disconnect(m_externalOverlayConnection);
+    }
+    m_externalOverlayService = overlayService;
+    auto syncOverlay = [this] {
+        m_widget.setExternalOverlayImage(
+            m_externalOverlayService
+                ? m_externalOverlayService->overlayImage()
+                : QImage());
+        markDirty();
+    };
+    if (m_externalOverlayService) {
+        m_externalOverlayConnection = connect(
+            m_externalOverlayService,
+            &MapExternalOverlayService::overlayImageChanged,
+            this,
+            syncOverlay);
+    }
+    syncOverlay();
 }
 
 void WorldMapItem::downgradeContactToBand(const QString& call)
@@ -291,6 +408,16 @@ void WorldMapItem::paint(QPainter* painter)
 
 void WorldMapItem::mousePressEvent(QMouseEvent* event)
 {
+    if (event && event->button() == Qt::RightButton) {
+        syncWidgetSize();
+        QVariantMap const cell = m_widget.coverageCellAt(event->position());
+        if (!cell.isEmpty()) {
+            event->accept();
+            Q_EMIT coverageCellClicked(cell, event->position().x(),
+                                       event->position().y());
+            return;
+        }
+    }
     if (event && event->button() == Qt::LeftButton) {
         syncWidgetSize();
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -303,6 +430,60 @@ void WorldMapItem::mousePressEvent(QMouseEvent* event)
     }
 
     QQuickPaintedItem::mousePressEvent(event);
+}
+
+void WorldMapItem::hoverMoveEvent(QHoverEvent* event)
+{
+    if (!event) {
+        return;
+    }
+    syncWidgetSize();
+    QVariantMap const geographicFeature = m_widget.geographicFeatureAt(event->position());
+    if (!geographicFeature.isEmpty()) {
+        if (!m_hoveredCoverageGrid.isEmpty()) {
+            m_hoveredCoverageGrid.clear();
+            Q_EMIT coverageCellHoverEnded();
+        }
+        if (m_hoveredGeographicFeature != geographicFeature) {
+            m_hoveredGeographicFeature = geographicFeature;
+            Q_EMIT geographicFeatureHovered(geographicFeature, event->position().x(),
+                                             event->position().y());
+        }
+        setCursor(Qt::PointingHandCursor);
+        return;
+    }
+    if (!m_hoveredGeographicFeature.isEmpty()) {
+        m_hoveredGeographicFeature.clear();
+        Q_EMIT geographicFeatureHoverEnded();
+    }
+    QVariantMap const cell = m_widget.coverageCellAt(event->position());
+    QString const grid = cell.value(QStringLiteral("grid")).toString();
+    if (grid.isEmpty()) {
+        if (!m_hoveredCoverageGrid.isEmpty()) {
+            m_hoveredCoverageGrid.clear();
+            Q_EMIT coverageCellHoverEnded();
+        }
+        setCursor(Qt::ArrowCursor);
+        return;
+    }
+    m_hoveredCoverageGrid = grid;
+    setCursor(Qt::PointingHandCursor);
+    Q_EMIT coverageCellHovered(cell, event->position().x(),
+                               event->position().y());
+}
+
+void WorldMapItem::hoverLeaveEvent(QHoverEvent* event)
+{
+    Q_UNUSED(event);
+    if (!m_hoveredCoverageGrid.isEmpty()) {
+        m_hoveredCoverageGrid.clear();
+        Q_EMIT coverageCellHoverEnded();
+    }
+    if (!m_hoveredGeographicFeature.isEmpty()) {
+        m_hoveredGeographicFeature.clear();
+        Q_EMIT geographicFeatureHoverEnded();
+    }
+    setCursor(Qt::ArrowCursor);
 }
 
 void WorldMapItem::itemChange(ItemChange change, const ItemChangeData& data)

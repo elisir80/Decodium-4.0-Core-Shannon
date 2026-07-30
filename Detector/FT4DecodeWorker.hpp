@@ -13,6 +13,9 @@ namespace decodium
 namespace ft4
 {
 
+// Stops the asynchronous hash-seed worker before Qt application teardown.
+void shutdownHashSeedWorker ();
+
 struct DecodeRequest
 {
   quint64 serial {0};

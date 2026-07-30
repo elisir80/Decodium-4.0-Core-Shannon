@@ -139,7 +139,9 @@ Item {
     }
 
     function openLogPromptFromBridge() {
-        if (!engine || !handleLogPrompt)
+        // The docked and popped TxPanel instances coexist. Only the visible,
+        // active panel may own the prompt for the current QSO.
+        if (!engine || !handleLogPrompt || !txPanel.visible)
             return
         var hostWindow = txPanel.Window.window
         if (hostWindow) {
@@ -1709,7 +1711,7 @@ Item {
                     id: logQsoBtn
                     Layout.preferredWidth: qsoInfoWidth("LOG", "\u270E", 58, 70)
                     Layout.preferredHeight: qsoInfoControlHeight
-                    enabled: engine && engine.dxCall.length > 0
+                    enabled: engine && engine.dxCall.length > 0 && !txPanel.txVisualActive
                     padding: 0
                     topInset: 0
                     bottomInset: 0
@@ -1753,11 +1755,21 @@ Item {
                         if (!engine) {
                             return
                         }
-                        if (engine.promptLogQso)
+                        if (engine.requestManualLogQso)
+                            engine.requestManualLogQso()
+                        else if (engine.promptLogQso)
                             engine.promptLogQso()
                         else
                             engine.logQso()
                     }
+
+                    ToolTip.visible: logQsoBtn.hovered
+                    ToolTip.delay: 500
+                    ToolTip.text: txPanel.txVisualActive
+                                  ? qsTr("Finish TX before logging the QSO")
+                                  : (engine && engine.dxCall.length > 0
+                                     ? qsTr("Log current QSO")
+                                     : qsTr("No active QSO to log"))
                 }
             }
 
@@ -1989,7 +2001,9 @@ Item {
         height: 560
         x: parent ? Math.round((parent.width - width) / 2) : 0
         y: parent ? Math.round((parent.height - height) / 2) : 0
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        // Closing this popup marks the QSO as skipped. Keep that operation
+        // explicit so an accidental click outside cannot clear the active QSO.
+        closePolicy: Popup.NoAutoClose
         onOpened: {
             txPanel.refreshLogPreview()
             txPanel.syncLogSatelliteFields()
@@ -2191,7 +2205,7 @@ Item {
                 Button {
                     id: logPromptRejectButton
 
-                    text: qsTr("Close")
+                    text: qsTr("Skip")
                     Layout.preferredWidth: 112
                     Layout.preferredHeight: 36
                     padding: 0

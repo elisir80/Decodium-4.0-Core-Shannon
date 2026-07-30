@@ -2,6 +2,7 @@
 #include "Detector/FT8DecodeWorker.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <condition_variable>
@@ -67,6 +68,8 @@ extern "C"
 
 namespace
 {
+  std::atomic_bool g_hashSeedShutdownRequested {false};
+
   constexpr int kFt8SampleCount {180000};
   constexpr int kFt8MaxLines {200};
   constexpr int kBitsPerMessage {77};
@@ -216,7 +219,8 @@ namespace
 
   bool hash_seed_shutdown_requested ()
   {
-    return QCoreApplication::closingDown ();
+    return g_hashSeedShutdownRequested.load (std::memory_order_acquire)
+           || QCoreApplication::closingDown ();
   }
 
   struct HashSeedCallAccumulator
@@ -1276,6 +1280,8 @@ namespace
     std::mutex mutex;
     std::condition_variable workAvailable;
     bool workerStarted {false};
+    bool shutdownRequested {false};
+    std::thread worker;
     bool initialStarted {false};
     bool initialRequested {false};
     bool initialReady {false};
@@ -1292,20 +1298,21 @@ namespace
 
   HashSeedAsyncState& hash_seed_async_state ()
   {
-    // The state and its detached worker intentionally live until process exit.
-    // Joining while Qt globals are being torn down could block on log I/O.
+    // Keep the state allocated until process exit, but explicitly join the
+    // worker before Qt teardown. The state itself is intentionally leaked so
+    // its condition variable and mutex remain valid during the final join.
     static HashSeedAsyncState* state = new HashSeedAsyncState;
     return *state;
   }
 
   void start_hash_seed_worker_locked (HashSeedAsyncState& state)
   {
-    if (state.workerStarted)
+    if (state.workerStarted || state.shutdownRequested)
       {
         return;
       }
     state.workerStarted = true;
-    std::thread ([&state] {
+    state.worker = std::thread ([&state] {
       QThread::currentThread ()->setObjectName (QStringLiteral ("FT8HashSeedWorker"));
       QThread::currentThread ()->setPriority (QThread::LowPriority);
 
@@ -1317,8 +1324,13 @@ namespace
           {
             std::unique_lock<std::mutex> lock {state.mutex};
             state.workAvailable.wait (lock, [&state] {
-              return state.initialRequested || state.refreshRequested;
+              return state.shutdownRequested
+                     || state.initialRequested || state.refreshRequested;
             });
+            if (state.shutdownRequested)
+              {
+                break;
+              }
             if (state.initialRequested)
               {
                 state.initialRequested = false;
@@ -1348,7 +1360,26 @@ namespace
               state.refreshReady = true;
             }
         }
-    }).detach ();
+    });
+  }
+
+  void shutdown_hash_seed_worker ()
+  {
+    g_hashSeedShutdownRequested.store (true, std::memory_order_release);
+    HashSeedAsyncState& state = hash_seed_async_state ();
+    std::thread worker;
+    {
+      std::lock_guard<std::mutex> lock {state.mutex};
+      state.shutdownRequested = true;
+      state.initialRequested = false;
+      state.refreshRequested = false;
+      state.workAvailable.notify_all ();
+      worker = std::move (state.worker);
+    }
+    if (worker.joinable ())
+      {
+        worker.join ();
+      }
   }
 
   void start_ft8_pack77_hash_seed_collection_once ()
@@ -1812,6 +1843,11 @@ namespace decodium
 {
 namespace ft8
 {
+
+void shutdownHashSeedWorker ()
+{
+  shutdown_hash_seed_worker ();
+}
 
 FT8DecodeWorker::FT8DecodeWorker (QObject * parent)
   : QObject {parent}

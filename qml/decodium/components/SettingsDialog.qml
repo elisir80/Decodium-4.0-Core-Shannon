@@ -687,6 +687,21 @@ Dialog {
         return -1
     }
 
+    // Port names must never use the permissive lookup above: COM1 is not the
+    // same device as COM10, COM15, or COM16. The generic helper intentionally
+    // supports partial labels elsewhere in Settings, but that behavior drops
+    // valid virtual serial ports from the PTT selector on Windows.
+    function exactStringListIndexOf(list, value) {
+        if (!list || value === undefined || value === null)
+            return -1
+        var wanted = String(value).trim().toLowerCase()
+        for (var i = 0; i < list.length; ++i) {
+            if (String(list[i]).trim().toLowerCase() === wanted)
+                return i
+        }
+        return -1
+    }
+
     function selectTciRigIfNeeded() {
         var controller = activeCatController()
         if (!controller || controller.rigName === undefined || controller.rigName === null)
@@ -769,14 +784,14 @@ Dialog {
         var ports = controller.portList || []
         for (var i = 0; i < ports.length; ++i) {
             var port = String(ports[i]).trim()
-            if (port !== "" && settingsDialog.stringListIndexOf(options, port) < 0)
+            if (port !== "" && settingsDialog.exactStringListIndexOf(options, port) < 0)
                 options.push(port)
         }
 
         var saved = controller.pttPort !== undefined && controller.pttPort !== null
                 ? String(controller.pttPort).trim() : ""
         if (saved !== "" && saved.toUpperCase() !== "CAT"
-                && settingsDialog.stringListIndexOf(options, saved) < 0)
+                && settingsDialog.exactStringListIndexOf(options, saved) < 0)
             options.push(saved)
         return options
     }

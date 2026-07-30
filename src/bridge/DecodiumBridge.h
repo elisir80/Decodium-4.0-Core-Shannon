@@ -44,6 +44,7 @@ class DecodiumLegacyBackend;
 #include "lib/persistence/HashedCallsignCache.h"  // AP hashed-callsign cache for FT2 rescue/audit
 #include "Sequencer/QsoSequencerState.hpp"  // 1.0.498 step B strangler: stato sequencer raggruppato
 class DecodiumPropagationManager;
+class MapIntelligenceService;
 class MessageClient;
 class UsStateDataManager;
 
@@ -301,6 +302,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString activeLogbookPath READ activeLogbookPath NOTIFY activeLogbookChanged)
     Q_PROPERTY(QObject* logManager READ logManager CONSTANT)
     Q_PROPERTY(QObject* propagationManager READ propagationManager CONSTANT)
+    Q_PROPERTY(QObject* mapIntelligenceService READ mapIntelligenceService CONSTANT)
+    Q_PROPERTY(QObject* mapLayerService READ mapIntelligenceService CONSTANT)
     Q_PROPERTY(QObject* diagnostics READ diagnostics CONSTANT)
     Q_PROPERTY(int qsoCount READ qsoCount NOTIFY qsoCountChanged)
 
@@ -995,6 +998,7 @@ public:
     int         callerQueueSize()const { return m_callerQueue.size(); }
     QObject*    logManager() { return this; }
     QObject*    propagationManager() const;
+    QObject*    mapIntelligenceService() const;
     QObject*    diagnostics() const { return m_diagnostics; }
     int         qsoCount() const;
 
@@ -1057,6 +1061,7 @@ public slots:
     Q_INVOKABLE void confirmLogQso();
     Q_INVOKABLE void rejectPromptedLogQso();
     Q_INVOKABLE void promptLogQso();
+    Q_INVOKABLE void requestManualLogQso();
     Q_INVOKABLE void shutdown();
     Q_INVOKABLE void copyToClipboard(const QString &text);
     Q_INVOKABLE bool advanceQsoState(int txNum); // GitHub TxController clone
@@ -1213,6 +1218,10 @@ public:
     Q_INVOKABLE double calcBearing(const QString& myGrid, const QString& dxGrid) const;
     Q_INVOKABLE void replayWorldMapFeed();
     Q_INVOKABLE void processMapContactClick(const QString& call, const QString& grid);
+    // Explicit operational actions (roster, history and logbook) arm TX after
+    // selecting the station. A plain map click keeps its configurable
+    // single/double-click behavior.
+    Q_INVOKABLE void processMapRosterCall(const QString& call, const QString& grid);
 
     // C14 — Grid to lat/lon (per AstroPanel)
     Q_INVOKABLE double latFromGrid(const QString& grid) const;
@@ -1917,6 +1926,7 @@ private:
     QString pskReporterRigInfo() const;
     QString pskReporterAntennaInfo() const;
     void refreshPskReporterLocalStation();
+    void refreshMapMoonOverlay();
     void maybeQueuePskReporterSpot(const QVariantMap& entry,
                                    const QString& message,
                                    bool isCQ,
@@ -2165,6 +2175,11 @@ private:
     bool m_periodicTxCheckScheduled {false};
     bool m_syncTxRetryScheduled {false};
     quint64 m_syncTxRetrySerial {0};
+    // A roster CALL prepares the QSO immediately but synchronized waveforms
+    // must not be dispatched in the middle of an already-running slot.
+    bool m_suppressImmediateTxEnableDispatch {false};
+    bool m_mapRosterCallPending {false};
+    quint64 m_mapRosterCallSerial {0};
     // 1.0.256 — guard reentry UNIVERSALE in checkAndStartPeriodicTx. Set
     // a true a entry function, false via qScopeGuard al return. Copre i 11
     // call site, non solo i 2 con m_periodicTxCheckScheduled. Causa singhiozzo
@@ -2445,6 +2460,7 @@ private:
 
     DecodiumThemeManager* m_themeManager  {nullptr};
     DecodiumPropagationManager* m_propagationManager {nullptr};
+    MapIntelligenceService*      m_mapIntelligenceService {nullptr};
     DecodiumDiagnostics*        m_diagnostics {nullptr};
     WavManager*           m_wavManager    {nullptr};
     MacroManager*         m_macroManager  {nullptr};

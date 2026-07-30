@@ -75,6 +75,31 @@ add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../src/services/De
 target_link_libraries (test_dx_cluster_band Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_dx_cluster_band COMMAND $<TARGET_FILE:test_dx_cluster_band>)
 
+add_executable (test_map_layer_service
+  test_map_layer_service.cpp
+  ../src/services/MapIntelligenceService.cpp
+  ../src/services/MapIntelligenceService.h
+  ../src/services/MapBaseMapService.cpp
+  ../src/services/MapBaseMapService.h
+  ../src/services/MapPskFeedService.cpp
+  ../src/services/MapPskFeedService.h
+  ../src/services/MapOperationsService.cpp
+  ../src/services/MapOperationsService.h
+  ../src/services/MapExternalOverlayService.cpp
+  ../src/services/MapExternalOverlayService.h
+  ../src/services/DxccLookup.cpp
+  ../src/services/DxccLookup.h
+  ../src/services/MapLayerModel.cpp
+  ../src/services/MapLayerModel.h)
+target_link_libraries (test_map_layer_service Qt6::Test Qt6::Core Qt6::Gui Qt6::Network Qt6::Sql Qt6::Concurrent)
+qt_add_resources (test_map_layer_service test_map_layer_service_award_resources
+  PREFIX "/"
+  BASE "${CMAKE_SOURCE_DIR}/resources/map"
+  FILES
+    "${CMAKE_SOURCE_DIR}/resources/map/decodium-awards-catalog.json"
+  )
+add_test (NAME test_map_layer_service COMMAND $<TARGET_FILE:test_map_layer_service>)
+
 add_executable (test_udp_client_id test_udp_client_id.cpp)
 target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
@@ -88,7 +113,8 @@ set_tests_properties (test_ft8_weak_decode_deep PROPERTIES
   ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-26;DECODIUM_WEAK_TEST_TRIALS=1")
 add_test (NAME test_ft8_hinted_decode_very_deep COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
 set_tests_properties (test_ft8_hinted_decode_very_deep PROPERTIES
-  ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-27;DECODIUM_WEAK_TEST_TRIALS=1")
+  ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-27;DECODIUM_WEAK_TEST_TRIALS=1;DECODIUM_WEAK_TEST_ACCEPT_MISS=1"
+  LABELS "accepted-limit")
 
 add_executable (test_ft2_qso_sim test_ft2_qso_sim.cpp)
 target_link_libraries (test_ft2_qso_sim wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)

@@ -8,6 +8,9 @@
 #include "DecodiumAlertManager.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumPropagationManager.h"
+#include "MapExternalOverlayService.h"
+#include "MapIntelligenceService.h"
+#include "MapLayerModel.h"
 #include "DecodiumProfileSettings.h"
 #include "Sequencer/QsoSequencerRules.hpp"
 #include "Sequencer/MessageTokenRules.hpp"
@@ -9286,6 +9289,19 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     m_themeManager    = new DecodiumThemeManager(this);
     m_propagationManager = new DecodiumPropagationManager(this);
+    m_mapIntelligenceService = new MapIntelligenceService(this);
+    if (m_mapIntelligenceService) {
+        auto* const mapLayers = qobject_cast<MapLayerModel*>(
+            m_mapIntelligenceService->layerModel());
+        if (mapLayers) {
+            connect(mapLayers, &MapLayerModel::layerToggled, this,
+                    [this](const QString& layerId, bool enabled) {
+                if (layerId == QStringLiteral("moon") && enabled) {
+                    refreshMapMoonOverlay();
+                }
+            });
+        }
+    }
     m_diagnostics     = new DecodiumDiagnostics(this);
     m_wavManager      = new WavManager(this);
     connect(m_wavManager, &WavManager::recordingChanged, this, [this]() {
@@ -10300,6 +10316,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
+    if (m_mapIntelligenceService) {
+        m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
+    }
+    refreshMapMoonOverlay();
     applyLowCpuRuntimeProfile(QStringLiteral("startup"));
     bridgeLog(QStringLiteral("Worked-before ADIF preload deferred until DXCC startup task"));
     resetStartupTransientQsoState();
@@ -10383,6 +10403,11 @@ DecodiumBridge::~DecodiumBridge()
 QObject * DecodiumBridge::propagationManager() const
 {
     return m_propagationManager;
+}
+
+QObject * DecodiumBridge::mapIntelligenceService() const
+{
+    return m_mapIntelligenceService;
 }
 
 bool DecodiumBridge::usingLegacyBackendForTx() const
@@ -11823,6 +11848,13 @@ void DecodiumBridge::syncLegacyBackendState()
         if (m_autoCqRepeat && !m_manualTxHold && !legacyTxEnabled) {
             bridgeLog(QStringLiteral("syncLegacyBackendState: legacy TX enable off while AutoCQ active -> rearm TX"));
             m_legacyBackend->setTxEnabled(true);
+            legacyTxEnabled = true;
+        }
+        if (m_mapRosterCallPending && m_txEnabled && !legacyTxEnabled) {
+            // A roster CALL for a synchronized mode is armed in the bridge
+            // before it is forwarded to the legacy backend at the next full
+            // slot. Do not interpret the backend's expected idle state as a
+            // user cancellation while that request is pending.
             legacyTxEnabled = true;
         }
         if (m_txEnabled != legacyTxEnabled) {
@@ -14777,11 +14809,38 @@ void DecodiumBridge::setCallsign(const QString& v) {
         regenerateTxMessages();
     }
 }
+
+void DecodiumBridge::refreshMapMoonOverlay()
+{
+    if (!m_mapIntelligenceService) {
+        return;
+    }
+
+    auto* const mapLayers = qobject_cast<MapLayerModel*>(
+        m_mapIntelligenceService->layerModel());
+    auto* const overlays = qobject_cast<MapExternalOverlayService*>(
+        m_mapIntelligenceService->externalOverlayService());
+    if (!mapLayers || !overlays
+        || !mapLayers->layerEnabled(QStringLiteral("moon"))) {
+        return;
+    }
+
+    double longitude = 0.0;
+    double latitude = 0.0;
+    if (!grid2deg(m_grid.trimmed(), longitude, latitude)) {
+        overlays->setMoonData(false, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        return;
+    }
+
+    overlays->updateMoonForStation(latitude, longitude);
+}
+
 QString DecodiumBridge::grid() const { return m_grid; }
 void DecodiumBridge::setGrid(const QString& v) {
     if (m_grid != v) {
         m_grid = v;
         emit gridChanged();
+        refreshMapMoonOverlay();
         refreshPskReporterLocalStation();
         if (m_dxCluster)   m_dxCluster->setCallsign(m_callsign);
         regenerateTxMessages();
@@ -17183,6 +17242,11 @@ void DecodiumBridge::setTxEnabled(bool v)
 {
     bool const rearmingFromOff = v && !m_txEnabled;
 
+    if (!v) {
+        m_mapRosterCallPending = false;
+        ++m_mapRosterCallSerial;
+    }
+
     if (!v && m_autoCqRepeat) {
         bridgeLog(QStringLiteral("setTxEnabled(false): disabling AutoCQ with TX"));
         setAutoCqRepeat(false);
@@ -17242,7 +17306,7 @@ void DecodiumBridge::setTxEnabled(bool v)
     // QSO while the QML bridge still shows TX enabled. A subsequent double-click
     // must therefore re-assert the command even when the bridge boolean did not
     // change, otherwise the new message is prepared but never transmitted.
-    if (usingLegacyBackendForTx()) {
+    if (usingLegacyBackendForTx() && !m_suppressImmediateTxEnableDispatch) {
         syncLegacyBackendTxState();
         m_legacyBackend->setTxEnabled(v);
         scheduleLegacyStateRefreshBurst();
@@ -17251,6 +17315,9 @@ void DecodiumBridge::setTxEnabled(bool v)
     if (v) {
         scheduleTxAudioPrecompute(25);
         ensureSyncTxSchedulerActive(QStringLiteral("tx-enable"));
+        if (m_suppressImmediateTxEnableDispatch) {
+            return;
+        }
         if (!usingLegacyBackendForTx()
             && usesDeferredManualSyncTx()
             && m_monitoring
@@ -28885,6 +28952,7 @@ void DecodiumBridge::fetchPskHeardBy()
         }
         QNetworkReply::NetworkError const err = reply->error();
         QString const errStr = reply->errorString();
+        bool const validSnapshot = err == QNetworkReply::NoError && !tooLarge;
         reply->deleteLater();
         nam->deleteLater();
 
@@ -28892,7 +28960,7 @@ void DecodiumBridge::fetchPskHeardBy()
         QSet<QString> dxccSet;
         double maxKm = 0.0;
 
-        if (err == QNetworkReply::NoError && !tooLarge) {
+        if (validSnapshot) {
             QString const xml = QString::fromUtf8(data);
             // Ogni spot e' un <receptionReport ... /> con attributi in ordine
             // variabile: catturiamo l'intero tag e poi i singoli attributi.
@@ -28947,9 +29015,15 @@ void DecodiumBridge::fetchPskHeardBy()
 
                 // DXCC: riusa il lookup cty.dat esistente.
                 QString dxccName;
+                QString continent;
+                int cqZone = 0;
+                int ituZone = 0;
                 if (m_dxccLookup && m_dxccLookup->isLoaded()) {
                     DxccEntity const ent = m_dxccLookup->lookup(rxCall);
                     dxccName = ent.name;
+                    continent = ent.continent;
+                    cqZone = ent.cqZone;
+                    ituZone = ent.ituZone;
                     if (!dxccName.isEmpty()) dxccSet.insert(dxccName);
                 }
 
@@ -28960,6 +29034,9 @@ void DecodiumBridge::fetchPskHeardBy()
                 row.insert(QStringLiteral("freq"), freqHz);
                 row.insert(QStringLiteral("distKm"), distKm);
                 row.insert(QStringLiteral("dxcc"), dxccName);
+                row.insert(QStringLiteral("continent"), continent);
+                row.insert(QStringLiteral("cqZone"), cqZone);
+                row.insert(QStringLiteral("ituZone"), ituZone);
                 rows.append(row);
             }
             bridgeLog(QStringLiteral("PSK heard-by '%1': %2 ricevitori, %3 DXCC, maxKm=%4")
@@ -28979,6 +29056,9 @@ void DecodiumBridge::fetchPskHeardBy()
         m_pskHeardByDxccCount = static_cast<int>(dxccSet.size());
         m_pskHeardByMaxKm = maxKm;
         m_pskHeardByFetching = false;
+        if (m_mapIntelligenceService && validSnapshot) {
+            m_mapIntelligenceService->replacePskHeardBySpots(rows, call, myGrid);
+        }
         emit pskHeardByChanged();
         emit pskHeardByFetchingChanged();
     });
@@ -35341,6 +35421,9 @@ void DecodiumBridge::reloadActiveLogbookState(const QString& reason)
     emit workedCountChanged();
     emit qsoLogCacheChanged();
     emit activeLogbookChanged();
+    if (m_mapIntelligenceService) {
+        m_mapIntelligenceService->reloadFromAdif(path);
+    }
     bridgeLog(QStringLiteral("Logbook reloaded: %1 QSO reason=%2 path=%3")
                   .arg(m_qsoCountCache)
                   .arg(reason, path));
@@ -36198,6 +36281,21 @@ void DecodiumBridge::promptLogQso()
             }
         });
     }
+}
+
+void DecodiumBridge::requestManualLogQso()
+{
+    // A manual log commits and clears the active QSO state. Do not allow it to
+    // race an on-air transmission; automatic logging still uses promptLogQso().
+    if (m_transmitting || m_tuning) {
+        bridgeLog(QStringLiteral("manual log ignored while TX is active transmitting=%1 tuning=%2")
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_tuning ? 1 : 0));
+        emit statusMessage(QStringLiteral("Finish TX before logging the QSO"));
+        return;
+    }
+
+    promptLogQso();
 }
 
 void DecodiumBridge::logQso()
@@ -38213,6 +38311,31 @@ void DecodiumBridge::queueWorldMapEntryForReplay(const QVariantMap& entry,
                                                  int delayMs,
                                                  bool logTxDeferral)
 {
+    if (m_mapIntelligenceService) {
+        QString band;
+        if (m_bandManager) {
+            band = m_bandManager->currentBandLambda().trimmed();
+        }
+        QVariantMap intelligenceEntry = entry;
+        QString mapCall = intelligenceEntry.value(QStringLiteral("fromCall"))
+                              .toString().trimmed().toUpper();
+        if (mapCall.isEmpty()) {
+            mapCall = extractDecodedCallsign(
+                intelligenceEntry.value(QStringLiteral("message")).toString(), true)
+                          .trimmed().toUpper();
+        }
+        if (!mapCall.isEmpty() && m_dxccLookup && m_dxccLookup->isLoaded()) {
+            DxccEntity const entity = m_dxccLookup->lookup(mapCall);
+            if (entity.isValid()) {
+                intelligenceEntry.insert(QStringLiteral("dxcc"), entity.name);
+                intelligenceEntry.insert(QStringLiteral("continent"), entity.continent);
+                intelligenceEntry.insert(QStringLiteral("cqZone"), entity.cqZone);
+                intelligenceEntry.insert(QStringLiteral("ituZone"), entity.ituZone);
+            }
+        }
+        m_mapIntelligenceService->ingestDecodeEntry(
+            intelligenceEntry, static_cast<qint64>(m_frequency), band);
+    }
     if (!worldMapFeedEnabled()) {
         return;
     }
@@ -38448,6 +38571,31 @@ void DecodiumBridge::replayWorldMapEntry(const QVariantMap& entry,
         || messageIsUnresolvedGridOnlyDecode(message)
         || isFst4wUnresolvedHashDecode(mode, message)) {
         return;
+    }
+    if (m_mapIntelligenceService) {
+        QVariantMap filterEntry = entry;
+        QString mapCall = filterEntry.value(QStringLiteral("fromCall"))
+                              .toString().trimmed().toUpper();
+        if (mapCall.isEmpty()) {
+            mapCall = extractDecodedCallsign(message, true).trimmed().toUpper();
+        }
+        if (!mapCall.isEmpty() && m_dxccLookup && m_dxccLookup->isLoaded()) {
+            DxccEntity const entity = m_dxccLookup->lookup(mapCall);
+            if (entity.isValid()) {
+                filterEntry.insert(QStringLiteral("dxcc"), entity.name);
+                filterEntry.insert(QStringLiteral("continent"), entity.continent);
+                filterEntry.insert(QStringLiteral("cqZone"), entity.cqZone);
+                filterEntry.insert(QStringLiteral("ituZone"), entity.ituZone);
+            }
+        }
+        QString band;
+        if (m_bandManager) {
+            band = m_bandManager->currentBandLambda().trimmed();
+        }
+        if (!m_mapIntelligenceService->liveEntryMatchesCurrentFilters(
+                filterEntry, static_cast<qint64>(m_frequency), band)) {
+            return;
+        }
     }
     if (visualFeedsDeferredForTx()) {
         deferWorldMapEntryForTx(entry, skipClearedFeedEntry);
@@ -38768,6 +38916,12 @@ void DecodiumBridge::processMapContactClick(const QString& call, const QString& 
         return;
     }
 
+    if (m_mapRosterCallPending) {
+        m_mapRosterCallPending = false;
+        ++m_mapRosterCallSerial;
+        bridgeLog(QStringLiteral("Map roster CALL cancelled by map selection"));
+    }
+
     QString mapGrid = grid.trimmed().toUpper();
     if (isGridTokenStrict(mapGrid)) {
         mapGrid = mapGrid.left(qMin(6, mapGrid.size()));
@@ -38840,6 +38994,159 @@ void DecodiumBridge::processMapContactClick(const QString& call, const QString& 
     emit statusMessage(isGridTokenStrict(mapGrid)
                            ? tr("Map selection: %1 %2").arg(mapCall, mapGrid)
                            : tr("Map selection: %1").arg(mapCall));
+}
+
+void DecodiumBridge::processMapRosterCall(const QString& call, const QString& grid)
+{
+    QString const targetCall = normalizeWorldMapCall(call);
+    if (targetCall.isEmpty()) {
+        return;
+    }
+
+    bool const deferToFullSyncSlot =
+        shouldAlignTxAudioToCurrentSyncSlot()
+        && !truthyEnvironmentFlag("DECODIUM_LAB_FORCE_TX_IMMEDIATE");
+    QScopedValueRollback<bool> dispatchGuard(m_suppressImmediateTxEnableDispatch,
+                                             deferToFullSyncSlot);
+
+    // The map selection path prepares the standard messages and resets the
+    // current QSO state. Its plain-click TX behavior is intentionally
+    // conservative, but a CALL command in the roster is an explicit request
+    // to start a QSO and must arm the selected TX step.
+    processMapContactClick(targetCall, grid);
+
+    bool const selectedTarget =
+        worldMapCallKey(m_dxCall) == worldMapCallKey(targetCall);
+    bool const selectedQsoTx = m_currentTx >= 1 && m_currentTx <= 5;
+    if (!selectedTarget || !selectedQsoTx) {
+        bridgeLog(QStringLiteral("Map roster CALL not armed: target=%1 selected=%2 tx=%3 progress=%4")
+                      .arg(targetCall)
+                      .arg(selectedTarget ? 1 : 0)
+                      .arg(m_currentTx)
+                      .arg(m_qsoProgress));
+        emit statusMessage(tr("Map CALL could not select TX1 for %1").arg(targetCall));
+        return;
+    }
+
+    int const deferredPeriodMs =
+        deferToFullSyncSlot ? effectivePeriodMsForMode(m_mode) : 0;
+    quint64 rosterSerial = 0;
+    if (deferredPeriodMs > 0) {
+        m_mapRosterCallPending = true;
+        rosterSerial = ++m_mapRosterCallSerial;
+    }
+
+    setTxEnabled(true);
+    if (!m_txEnabled) {
+        if (m_mapRosterCallPending) {
+            m_mapRosterCallPending = false;
+            ++m_mapRosterCallSerial;
+        }
+        bridgeLog(QStringLiteral("Map roster CALL TX enable rejected: target=%1 tx=%2")
+                      .arg(targetCall)
+                      .arg(m_currentTx));
+        return;
+    }
+
+    if (deferredPeriodMs > 0) {
+        int const periodMs = deferredPeriodMs;
+        qint64 const nowMs = correctedUtcMsecsSinceStartOfDay();
+        qint64 const slotIndex = nowMs / static_cast<qint64>(periodMs);
+        int const elapsedMs = static_cast<int>(
+            nowMs % static_cast<qint64>(periodMs));
+        int slotsAhead = 1;
+        while (slotsAhead <= 4) {
+            qint64 const candidate = slotIndex + slotsAhead;
+            bool const candidateEven = ((candidate % 2) == 0);
+            bool const isOurPeriod = bridgeTxPeriodIsEven(m_txPeriod)
+                ? candidateEven
+                : !candidateEven;
+            if (isOurPeriod) {
+                break;
+            }
+            ++slotsAhead;
+        }
+
+        qint64 const delayMs = qMax<qint64>(
+            40,
+            static_cast<qint64>(slotsAhead) * periodMs - elapsedMs + 40);
+        QString const modeSnapshot = m_mode;
+        QString const targetKey = worldMapCallKey(targetCall);
+        int const txSnapshot = m_currentTx;
+
+        bridgeLog(QStringLiteral(
+            "Map roster CALL queued for full slot: target=%1 tx=%2 mode=%3 "
+            "txPeriod=%4 elapsed=%5ms delay=%6ms serial=%7")
+                      .arg(targetCall)
+                      .arg(txSnapshot)
+                      .arg(modeSnapshot)
+                      .arg(m_txPeriod)
+                      .arg(elapsedMs)
+                      .arg(delayMs)
+                      .arg(rosterSerial));
+        emit statusMessage(tr("QSO with %1 armed - TX%2 at next full slot")
+                               .arg(targetCall)
+                               .arg(txSnapshot));
+
+        QTimer::singleShot(delayMs, this,
+                           [this, rosterSerial, modeSnapshot, targetKey,
+                            txSnapshot]() {
+            if (rosterSerial != m_mapRosterCallSerial
+                || !m_txEnabled
+                || m_mode != modeSnapshot
+                || worldMapCallKey(m_dxCall) != targetKey
+                || m_currentTx != txSnapshot
+                || m_transmitting
+                || m_tuning) {
+                bridgeLog(QStringLiteral(
+                    "Map roster CALL full-slot dispatch cancelled: "
+                    "serial=%1 current=%2 mode=%3/%4 tx=%5/%6 enabled=%7")
+                              .arg(rosterSerial)
+                              .arg(m_mapRosterCallSerial)
+                              .arg(modeSnapshot, m_mode)
+                              .arg(txSnapshot)
+                              .arg(m_currentTx)
+                              .arg(m_txEnabled ? 1 : 0));
+                if (rosterSerial == m_mapRosterCallSerial) {
+                    m_mapRosterCallPending = false;
+                }
+                return;
+            }
+
+            bridgeLog(QStringLiteral(
+                "Map roster CALL full-slot dispatch: target=%1 tx=%2 "
+                "mode=%3 serial=%4")
+                          .arg(m_dxCall)
+                          .arg(m_currentTx)
+                          .arg(m_mode)
+                          .arg(rosterSerial));
+            // Keep the pending guard set through setTxEnabled(): that call
+            // first synchronizes the legacy state and only then forwards
+            // the enable command to the backend.
+            setTxEnabled(true);
+            m_mapRosterCallPending = false;
+            checkAndStartPeriodicTx();
+        });
+
+        m_mapLastClickCall.clear();
+        m_mapLastClickMs = 0;
+        return;
+    }
+
+    // Asynchronous modes can start immediately. Synchronized modes only reach
+    // this fallback when their period is unavailable.
+    m_mapRosterCallPending = false;
+    checkAndStartPeriodicTx();
+
+    m_mapLastClickCall.clear();
+    m_mapLastClickMs = 0;
+    bridgeLog(QStringLiteral("Map roster CALL armed: target=%1 tx=%2 progress=%3")
+                  .arg(targetCall)
+                  .arg(m_currentTx)
+                  .arg(m_qsoProgress));
+    emit statusMessage(tr("QSO with %1 armed - TX%2")
+                           .arg(targetCall)
+                           .arg(m_currentTx));
 }
 
 void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
@@ -47298,10 +47605,12 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     QTextStream ts(&f);
     if (newFile) ts << "Decodium3 ADIF Log\n<EOH>\n";
 
-    ts << bridgeAdifRecordText(dxCall, dxGrid, freqHz, mode, timeOnUtc, timeOffUtc,
-                               rstSent, rstRcvd, m_callsign, m_grid,
-                               comments, propMode, satellite, satMode, freqRx)
-       << "<EOR>\n";
+    QString const adifRecord =
+        bridgeAdifRecordText(dxCall, dxGrid, freqHz, mode, timeOnUtc, timeOffUtc,
+                             rstSent, rstRcvd, m_callsign, m_grid,
+                             comments, propMode, satellite, satMode, freqRx)
+        + QStringLiteral("<EOR>\n");
+    ts << adifRecord;
 
     m_workedCalls.insert(dxCall.toUpper());
     QString const qsoDate = (timeOnUtc.isValid() ? timeOnUtc.toUTC() : QDateTime::currentDateTimeUtc())
@@ -47320,6 +47629,9 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     }
     emit qsoCountChanged();
     emit workedCountChanged();
+    if (m_mapIntelligenceService) {
+        m_mapIntelligenceService->appendAdifRecord(adifRecord.toUtf8());
+    }
 }
 
 QVariantList DecodiumBridge::logbookProfiles() const
@@ -48305,6 +48617,9 @@ void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
     emit qsoCountChanged();
     emit workedCountChanged();
     emit qsoLogCacheChanged();
+    if (m_mapIntelligenceService) {
+        m_mapIntelligenceService->reloadFromAdif(activePath);
+    }
     if (importedActiveQso && !m_qsoLogged) {
         // The embedded legacy state machine has already committed this QSO.
         // Mark it before the QML auto-sequence reaches its own logging branch.
@@ -48363,6 +48678,9 @@ int DecodiumBridge::importFromAdif(const QString& filename)
     warmLogCacheAsync();
     emit qsoCountChanged();
     emit workedCountChanged();
+    if (m_mapIntelligenceService && imported > 0) {
+        m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
+    }
     emit statusMessage(QStringLiteral("ADIF importato: %1 QSO").arg(imported));
     bridgeLog(QStringLiteral("importFromAdif: source=%1 imported=%2 total=%3 elapsed=%4ms")
                   .arg(filename)

@@ -389,6 +389,8 @@ set (wsjt_qt_CXXSRCS
   )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread")
+  # GCC 15 misdiagnoses std::atomic increments in inlined Qt functor wrappers.
+  set_source_files_properties (src/services/MapIntelligenceService.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow")
 endif ()
 
 set (wsjt_qtmm_CXXSRCS
@@ -470,6 +472,18 @@ set (wsjtx_CXXSRCS
   src/bridge/DecodiumLegacyBackend.h
   src/services/DecodiumPropagationManager.cpp
   src/services/DecodiumPropagationManager.h
+  src/services/MapIntelligenceService.cpp
+  src/services/MapIntelligenceService.h
+  src/services/MapBaseMapService.cpp
+  src/services/MapBaseMapService.h
+  src/services/MapPskFeedService.cpp
+  src/services/MapPskFeedService.h
+  src/services/MapOperationsService.cpp
+  src/services/MapOperationsService.h
+  src/services/MapExternalOverlayService.cpp
+  src/services/MapExternalOverlayService.h
+  src/services/MapLayerModel.cpp
+  src/services/MapLayerModel.h
   src/bridge/DecodiumAudioSink.h
   controllers/ActiveStationsModel.cpp
   controllers/ActiveStationsModel.hpp
@@ -753,6 +767,7 @@ set (all_C_and_CXXSRCS
 
 set (TOP_LEVEL_RESOURCES
   "${DECODIUM_RUNTIME_DATA_DIR}/sat.dat"
+  resources/map/decodium-awards-catalog.json
   artwork/ft2logo.png
   contrib/gpl-v3-logo.svg
   artwork/splash.png
@@ -1770,6 +1785,18 @@ add_executable (decodium_qml
   src/bridge/DecodiumDiagnostics.cpp
   src/services/DecodiumPropagationManager.cpp
   src/services/DecodiumPropagationManager.h
+  src/services/MapIntelligenceService.cpp
+  src/services/MapIntelligenceService.h
+  src/services/MapBaseMapService.cpp
+  src/services/MapBaseMapService.h
+  src/services/MapPskFeedService.cpp
+  src/services/MapPskFeedService.h
+  src/services/MapOperationsService.cpp
+  src/services/MapOperationsService.h
+  src/services/MapExternalOverlayService.cpp
+  src/services/MapExternalOverlayService.h
+  src/services/MapLayerModel.cpp
+  src/services/MapLayerModel.h
   src/bridge/DecodiumLegacyBackend.cpp
   src/bridge/DecodiumLegacyBackend.h
   src/core/helper_functions.cpp
@@ -2025,10 +2052,12 @@ else ()
   message (STATUS "tools/bench_ft8_features.cpp not found: skipping optional FT8 features benchmark")
 endif ()
 
-# Copy QML files next to the decodium_qml executable on every build.
-# The runtime loads QML from the build tree, so stale copied files cause
-# "fixed in source but still broken at startup" behavior.
+# Copy a clean QML tree next to the decodium_qml executable on every build.
+# In particular, remove stale qmlcachegen artifacts left by older builds:
+# Qt prefers adjacent .qmlc files over the updated source QML.
 add_custom_target (sync_decodium_qml ALL
+  COMMAND ${CMAKE_COMMAND} -E remove_directory
+    "${CMAKE_BINARY_DIR}/qml"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/qml"
     "${CMAKE_BINARY_DIR}/qml"
@@ -2055,6 +2084,8 @@ add_custom_target (decodium_app
   DEPENDS decodium_qml sync_decodium_qml sync_decodium_assets
 )
 add_custom_command (TARGET decodium_qml POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E remove_directory
+    "${CMAKE_BINARY_DIR}/qml"
   COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/qml"
     "${CMAKE_BINARY_DIR}/qml"

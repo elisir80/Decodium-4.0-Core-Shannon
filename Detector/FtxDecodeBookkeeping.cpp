@@ -326,8 +326,10 @@ Ft8AllCallDb load_ft8_allcall_db ()
 {
   Ft8AllCallDb db;
   std::array<int, 16> bucket_counts {};
-  std::array<char const*, 5> const candidates {{
+  std::array<char const*, 7> const candidates {{
       "ALLCALL7.TXT",
+      "resources/runtime/ALLCALL7.TXT",
+      "../resources/runtime/ALLCALL7.TXT",
       "../Resources/ALLCALL7.TXT",
       "../ALLCALL7.TXT",
       "../../ALLCALL7.TXT",

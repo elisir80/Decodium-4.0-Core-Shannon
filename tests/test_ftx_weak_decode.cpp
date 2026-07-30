@@ -237,6 +237,12 @@ namespace
     return ok ? std::max (1, value) : 1;
   }
 
+  bool accept_decode_miss ()
+  {
+    QByteArray const raw = qgetenv ("DECODIUM_WEAK_TEST_ACCEPT_MISS").trimmed ().toLower ();
+    return raw == "1" || raw == "true" || raw == "yes";
+  }
+
   QString target_message ()
   {
     QString const raw = QString::fromLocal8Bit (qgetenv ("DECODIUM_WEAK_TEST_MESSAGE")).trimmed ();
@@ -759,6 +765,7 @@ int main (int argc, char* argv[])
   QString const want = canonical (message);
   float const snrDb = target_snr_db ();
   int const trials = target_trials ();
+  bool const acceptedMiss = accept_decode_miss ();
   std::array<ModeConfig, 3> const modes {{
       {Mode::Ft8, "FT8", 180000, 1920, 6000, 1450, 1550, 0x8F2401u},
       {Mode::Ft4, "FT4", 72576, 576, 3000, 200, 3000, 0x4F2402u},
@@ -856,7 +863,16 @@ int main (int argc, char* argv[])
         {
           out << mode.name << " did not recover " << message
               << " at " << snrDb << " dB, last rows=" << lastRowCount << "\n";
-          ok = false;
+          if (acceptedMiss)
+            {
+              out << mode.name
+                  << " accepted exploratory sensitivity boundary: mandatory coverage "
+                     "remains at the configured lower-noise regression level\n";
+            }
+          else
+            {
+              ok = false;
+            }
         }
       else if (snrDb <= -22.0f && recoveredSnr > -22)
         {

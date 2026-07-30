@@ -1,11 +1,15 @@
 #include "WorldMapGpuItem.hpp"
 
+#include "src/services/MapBaseMapService.h"
+#include "src/services/MapExternalOverlayService.h"
+
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFontMetricsF>
 #include <QGuiApplication>
+#include <QHoverEvent>
 #include <QLinearGradient>
 #include <QLineF>
 #include <QMetaObject>
@@ -48,6 +52,40 @@ constexpr qint64 kLabelImageTtlMs = 5 * 60 * 1000;
 constexpr int kLabelAtlasMaxWidth = 2048;
 constexpr int kLabelAtlasPadding = 2;
 
+bool maidenheadCellBounds(const QString& locator, QPointF* southWest, QPointF* northEast)
+{
+    if (!southWest || !northEast) {
+        return false;
+    }
+    QString const candidate = locator.trimmed().toUpper();
+    QString const grid = candidate.left(candidate.size() >= 6 ? 6 : 4);
+    if ((grid.size() != 4 && grid.size() != 6)
+        || grid.at(0) < QLatin1Char('A') || grid.at(0) > QLatin1Char('R')
+        || grid.at(1) < QLatin1Char('A') || grid.at(1) > QLatin1Char('R')
+        || !grid.at(2).isDigit() || !grid.at(3).isDigit()) {
+        return false;
+    }
+    double west = (grid.at(0).unicode() - 'A') * 20.0 - 180.0
+        + (grid.at(2).unicode() - '0') * 2.0;
+    double south = (grid.at(1).unicode() - 'A') * 10.0 - 90.0
+        + (grid.at(3).unicode() - '0');
+    double lonStep = 2.0;
+    double latStep = 1.0;
+    if (grid.size() == 6) {
+        if (grid.at(4) < QLatin1Char('A') || grid.at(4) > QLatin1Char('X')
+            || grid.at(5) < QLatin1Char('A') || grid.at(5) > QLatin1Char('X')) {
+            return false;
+        }
+        lonStep = 5.0 / 60.0;
+        latStep = 2.5 / 60.0;
+        west += (grid.at(4).unicode() - 'A') * lonStep;
+        south += (grid.at(5).unicode() - 'A') * latStep;
+    }
+    *southWest = QPointF(west, south);
+    *northEast = QPointF(west + lonStep, south + latStep);
+    return true;
+}
+
 const char* liveMapGraphicsApiName(QSGRendererInterface::GraphicsApi api)
 {
     switch (api) {
@@ -79,7 +117,30 @@ class GreylineLayerNode final : public QSGNode {};
 class GeometryLayerNode final : public QSGNode
 {
 public:
+    QSGGeometryNode* workedCoverageFill {nullptr};
+    QSGGeometryNode* confirmedCoverageFill {nullptr};
+    QSGGeometryNode* activeCoverageFill {nullptr};
+    QSGGeometryNode* activeCoverageMediumFill {nullptr};
+    QSGGeometryNode* activeCoverageFadedFill {nullptr};
+    QSGGeometryNode* missingCoverageFill {nullptr};
+    QSGGeometryNode* missingCoverageMediumFill {nullptr};
+    QSGGeometryNode* missingCoverageFadedFill {nullptr};
+    QSGGeometryNode* pskCoverageFill {nullptr};
+    QSGGeometryNode* pskCoverageMediumFill {nullptr};
+    QSGGeometryNode* pskCoverageFadedFill {nullptr};
+    QSGGeometryNode* workedCoverageLines {nullptr};
+    QSGGeometryNode* confirmedCoverageLines {nullptr};
+    QSGGeometryNode* activeCoverageLines {nullptr};
+    QSGGeometryNode* activeCoverageMediumLines {nullptr};
+    QSGGeometryNode* activeCoverageFadedLines {nullptr};
+    QSGGeometryNode* missingCoverageLines {nullptr};
+    QSGGeometryNode* missingCoverageMediumLines {nullptr};
+    QSGGeometryNode* missingCoverageFadedLines {nullptr};
+    QSGGeometryNode* pskCoverageLines {nullptr};
+    QSGGeometryNode* pskCoverageMediumLines {nullptr};
+    QSGGeometryNode* pskCoverageFadedLines {nullptr};
     QSGGeometryNode* gridLines {nullptr};
+    QSGGeometryNode* timeZoneLines {nullptr};
     QSGGeometryNode* genericPaths {nullptr};
     QSGGeometryNode* incomingPaths {nullptr};
     QSGGeometryNode* outgoingPaths {nullptr};
@@ -91,6 +152,24 @@ public:
     QSGGeometryNode* incomingCoreMarkers {nullptr};
     QSGGeometryNode* outgoingCoreMarkers {nullptr};
     QSGGeometryNode* bandCoreMarkers {nullptr};
+    QSGGeometryNode* countyBoundaryFill {nullptr};
+    QSGGeometryNode* stateBoundaryFill {nullptr};
+    QSGGeometryNode* countyBoundaryLines {nullptr};
+    QSGGeometryNode* stateBoundaryLines {nullptr};
+    QSGGeometryNode* earthquakeLowPulseMarkers {nullptr};
+    QSGGeometryNode* earthquakeMediumPulseMarkers {nullptr};
+    QSGGeometryNode* earthquakeHighPulseMarkers {nullptr};
+    QSGGeometryNode* earthquakeLowCoreMarkers {nullptr};
+    QSGGeometryNode* earthquakeMediumCoreMarkers {nullptr};
+    QSGGeometryNode* earthquakeHighCoreMarkers {nullptr};
+    QSGGeometryNode* potaHaloMarkers {nullptr};
+    QSGGeometryNode* iotaHaloMarkers {nullptr};
+    QSGGeometryNode* wpxHaloMarkers {nullptr};
+    QSGGeometryNode* moonHaloMarkers {nullptr};
+    QSGGeometryNode* potaCoreMarkers {nullptr};
+    QSGGeometryNode* iotaCoreMarkers {nullptr};
+    QSGGeometryNode* wpxCoreMarkers {nullptr};
+    QSGGeometryNode* moonCoreMarkers {nullptr};
     QSGGeometryNode* legendIncomingLine {nullptr};
     QSGGeometryNode* legendOutgoingLine {nullptr};
     QSGGeometryNode* legendBandMarker {nullptr};
@@ -145,6 +224,21 @@ public:
     QSGTexture* blankTexture {nullptr};
     QVector<QSGSimpleTextureNode*> tileNodes;
 };
+
+// QSGSimpleTextureNode does not own its texture.  Always remove the nodes
+// before replacing or deleting their shared texture, otherwise Metal can
+// compare a material that still contains a dangling QSGTexture pointer.
+void clearMapTileNodes(MapLayerNode* layer)
+{
+    if (!layer) {
+        return;
+    }
+    while (!layer->tileNodes.isEmpty()) {
+        auto* node = layer->tileNodes.takeLast();
+        layer->removeChildNode(node);
+        delete node;
+    }
+}
 
 qint64 monotonicNowMs()
 {
@@ -218,6 +312,28 @@ bool isInViewport(const QRectF& rect, const QPointF& point, qreal margin)
     return rect.adjusted(-margin, -margin, margin, margin).contains(point);
 }
 
+bool geographicCoordinateToLonLat(const QVariant& value, QPointF* lonLat)
+{
+    if (!lonLat) {
+        return false;
+    }
+    QVariantList const coordinate = value.toList();
+    if (coordinate.size() < 2) {
+        return false;
+    }
+    bool longitudeOk = false;
+    bool latitudeOk = false;
+    double const longitude = coordinate.at(0).toDouble(&longitudeOk);
+    double const latitude = coordinate.at(1).toDouble(&latitudeOk);
+    if (!longitudeOk || !latitudeOk || !std::isfinite(longitude)
+        || !std::isfinite(latitude) || longitude < -180.0 || longitude > 180.0
+        || latitude < -90.0 || latitude > 90.0) {
+        return false;
+    }
+    *lonLat = QPointF(longitude, latitude);
+    return true;
+}
+
 QVector<QPointF> greatCircle(const QPointF& startLonLat, const QPointF& endLonLat, int steps)
 {
     auto toVector = [](const QPointF& lonLat) -> QVector3D {
@@ -258,7 +374,6 @@ QVector<QPointF> greatCircle(const QPointF& startLonLat, const QPointF& endLonLa
     return points;
 }
 
-#ifndef DECODIUM_LIVEMAP_ARROW_QSB
 QPointF pointOnPath(const QVector<QPointF>& points, qreal progress)
 {
     if (points.isEmpty()) {
@@ -323,7 +438,6 @@ bool arrowOnPath(const QVector<QPointF>& points, qreal progress, QPolygonF* arro
     *arrow = QPolygonF {tip, tip - u * arrowLen + n * arrowWid, tip - u * arrowLen - n * arrowWid};
     return true;
 }
-#endif
 
 QSGGeometryNode* makeTexturedQuadNode(const QRectF& rect, QSGMaterial* material)
 {
@@ -359,6 +473,35 @@ QSGTexture* mapBlankTexture(MapLayerNode* layer, QQuickWindow* window)
     return layer->blankTexture;
 }
 
+double projectedLatitudeForTexture(double latitude, const QString& projection)
+{
+    double const bounded = qBound(-90.0, latitude, 90.0);
+    if (projection == QStringLiteral("Mercator")) {
+        double const radians = qDegreesToRadians(
+            qBound(-85.05112878, bounded, 85.05112878));
+        return std::log(std::tan(M_PI_4 + radians * 0.5));
+    }
+    if (projection == QStringLiteral("Miller")) {
+        double const radians = qDegreesToRadians(bounded);
+        return 1.25 * std::log(std::tan(M_PI_4 + 0.4 * radians));
+    }
+    return bounded;
+}
+
+double inverseProjectedLatitudeForTexture(double projected,
+                                          const QString& projection)
+{
+    if (projection == QStringLiteral("Mercator")) {
+        return qRadiansToDegrees(2.0 * std::atan(std::exp(projected))
+                                 - M_PI_2);
+    }
+    if (projection == QStringLiteral("Miller")) {
+        return qRadiansToDegrees(
+            2.5 * (std::atan(std::exp(projected / 1.25)) - M_PI_4));
+    }
+    return projected;
+}
+
 void appendMapTileNodes(MapLayerNode* layer,
                         const QRectF& rect,
                         double centerLon,
@@ -366,25 +509,16 @@ void appendMapTileNodes(MapLayerNode* layer,
                         double spanLon,
                         double spanLat,
                         int textureWidth,
-                        int textureHeight)
+                        int textureHeight,
+                        const QString& projection)
 {
     if (!layer || rect.isEmpty() || spanLon <= 0.0 || spanLat <= 0.0) {
-        if (layer) {
-            while (!layer->tileNodes.isEmpty()) {
-                auto* node = layer->tileNodes.takeLast();
-                layer->removeChildNode(node);
-                delete node;
-            }
-        }
+        clearMapTileNodes(layer);
         return;
     }
     QSGTexture* layerTexture = layer->texture ? layer->texture : layer->blankTexture;
     if (!layerTexture) {
-        while (!layer->tileNodes.isEmpty()) {
-            auto* node = layer->tileNodes.takeLast();
-            layer->removeChildNode(node);
-            delete node;
-        }
+        clearMapTileNodes(layer);
         return;
     }
     textureWidth = qMax(1, textureWidth);
@@ -392,9 +526,14 @@ void appendMapTileNodes(MapLayerNode* layer,
 
     double const topLat = qBound(-90.0, centerLat + 0.5 * spanLat, 90.0);
     double const bottomLat = qBound(-90.0, centerLat - 0.5 * spanLat, 90.0);
-    qreal const srcY0 = static_cast<qreal>((90.0 - topLat) / 180.0 * textureHeight);
-    qreal const srcY1 = static_cast<qreal>((90.0 - bottomLat) / 180.0 * textureHeight);
-    qreal const srcH = qMax<qreal>(1.0, srcY1 - srcY0);
+    double const projectedTop =
+        projectedLatitudeForTexture(topLat, projection);
+    double const projectedBottom =
+        projectedLatitudeForTexture(bottomLat, projection);
+    double const projectedSpan =
+        qMax(0.000001, projectedTop - projectedBottom);
+    int const verticalSlices =
+        projection == QStringLiteral("Equirectangular") ? 1 : 72;
     double const leftLon = centerLon - 0.5 * spanLon;
     double const rightLon = centerLon + 0.5 * spanLon;
 
@@ -403,7 +542,7 @@ void appendMapTileNodes(MapLayerNode* layer,
         QRectF source;
     };
     QVector<Tile> tiles;
-    tiles.reserve(3);
+    tiles.reserve(3 * verticalSlices);
 
     for (int k = -2; k <= 2; ++k) {
         double const lonStart = -180.0 + 360.0 * k;
@@ -420,8 +559,35 @@ void appendMapTileNodes(MapLayerNode* layer,
         qreal const srcX0 = static_cast<qreal>((visibleLon0 - lonStart) / 360.0 * textureWidth);
         qreal const srcX1 = static_cast<qreal>((visibleLon1 - lonStart) / 360.0 * textureWidth);
 
-        tiles.push_back({QRectF(x0, rect.top(), x1 - x0, rect.height()),
-                         QRectF(srcX0, srcY0, qMax<qreal>(1.0, srcX1 - srcX0), srcH)});
+        for (int slice = 0; slice < verticalSlices; ++slice) {
+            double const fraction0 =
+                static_cast<double>(slice) / verticalSlices;
+            double const fraction1 =
+                static_cast<double>(slice + 1) / verticalSlices;
+            double const projected0 =
+                projectedTop - fraction0 * projectedSpan;
+            double const projected1 =
+                projectedTop - fraction1 * projectedSpan;
+            double const latitude0 = inverseProjectedLatitudeForTexture(
+                projected0, projection);
+            double const latitude1 = inverseProjectedLatitudeForTexture(
+                projected1, projection);
+            qreal const srcY0 = static_cast<qreal>(
+                (90.0 - latitude0) / 180.0 * textureHeight);
+            qreal const srcY1 = static_cast<qreal>(
+                (90.0 - latitude1) / 180.0 * textureHeight);
+            qreal const targetY0 =
+                rect.top() + fraction0 * rect.height();
+            qreal const targetY1 =
+                rect.top() + fraction1 * rect.height();
+            tiles.push_back({
+                QRectF(x0, targetY0, x1 - x0,
+                       qMax<qreal>(0.5, targetY1 - targetY0)),
+                QRectF(srcX0, srcY0,
+                       qMax<qreal>(1.0, srcX1 - srcX0),
+                       qMax<qreal>(0.5, srcY1 - srcY0))
+            });
+        }
     }
 
     while (layer->tileNodes.size() < tiles.size()) {
@@ -1158,7 +1324,45 @@ void updateFlatLineNode(QSGNode* parent, QSGGeometryNode*& node, const QVector<Q
     lineNode->markDirty(QSGNode::DirtyGeometry);
 }
 
-#ifndef DECODIUM_LIVEMAP_ARROW_QSB
+void updateCoverageTriangleNode(QSGNode* parent,
+                                QSGGeometryNode*& node,
+                                const QVector<QPointF>& points,
+                                const QColor& color)
+{
+    if (!node) {
+        auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 0);
+        geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+        geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
+
+        auto* material = new QSGFlatColorMaterial;
+        material->setColor(color);
+
+        node = new QSGGeometryNode;
+        node->setGeometry(geometry);
+        node->setFlag(QSGNode::OwnsGeometry);
+        node->setMaterial(material);
+        node->setFlag(QSGNode::OwnsMaterial);
+        parent->appendChildNode(node);
+    }
+    if (auto* material = static_cast<QSGFlatColorMaterial*>(node->material())) {
+        material->setColor(color);
+        node->markDirty(QSGNode::DirtyMaterial);
+    }
+    auto* geometry = node->geometry();
+    geometry->allocate(points.size());
+    geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+    auto* vertices = geometry->vertexDataAsPoint2D();
+    for (int i = 0; i < points.size(); ++i) {
+        vertices[i].set(static_cast<float>(points.at(i).x()),
+                        static_cast<float>(points.at(i).y()));
+    }
+    geometry->markVertexDataDirty();
+    // Dynamic vertex data alone is insufficient on some RHI backends. Mark
+    // the owning node as dirty as well, otherwise newly-enabled coverage and
+    // geographic layers can retain an empty GPU buffer until a full rebuild.
+    node->markDirty(QSGNode::DirtyGeometry);
+}
+
 void updateTriangleNode(QSGNode* parent, QSGGeometryNode*& node, const QVector<QPointF>& points, const QColor& color)
 {
     if (!node) {
@@ -1190,7 +1394,6 @@ void updateTriangleNode(QSGNode* parent, QSGGeometryNode*& node, const QVector<Q
     geometry->markVertexDataDirty();
     node->markDirty(QSGNode::DirtyGeometry);
 }
-#endif
 
 void updateGeoMarkerNode(QSGNode* parent, QSGGeometryNode*& node,
                          const QVector<QPointF>& lonLatPoints,
@@ -1526,7 +1729,8 @@ WorldMapGpuItem::WorldMapGpuItem(QQuickItem* parent)
     , m_mapImage(buildMapTexture())
 {
     setFlag(ItemHasContents, true);
-    setAcceptedMouseButtons(Qt::LeftButton);
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+    setAcceptHoverEvents(true);
 
     m_frameTimer.setInterval(m_frameIntervalMs);
     connect(&m_frameTimer, &QTimer::timeout, this, [this]() {
@@ -1564,6 +1768,10 @@ void WorldMapGpuItem::setHomeGrid(const QString& grid)
         m_homeLonLat = QPointF();
         m_hasHome = false;
     }
+    m_azimuthalMapDirty = true;
+    m_azimuthalExternalOverlayDirty = true;
+    m_baseMapTextureDirty = true;
+    m_externalOverlayTextureDirty = true;
     updateViewportTargets();
     markDirty();
 }
@@ -1588,6 +1796,24 @@ void WorldMapGpuItem::setDistanceInMiles(bool enabled)
     m_distanceInMiles = enabled;
     m_geometryDirty = true;
     update();
+}
+
+void WorldMapGpuItem::setCoveragePushPins(bool enabled)
+{
+    if (m_coveragePushPins == enabled) {
+        return;
+    }
+    m_coveragePushPins = enabled;
+    markDirty(false);
+}
+
+void WorldMapGpuItem::setTimeZoneOverlayEnabled(bool enabled)
+{
+    if (m_timeZoneOverlayEnabled == enabled) {
+        return;
+    }
+    m_timeZoneOverlayEnabled = enabled;
+    markDirty(false);
 }
 
 void WorldMapGpuItem::setTransmitState(bool transmitting,
@@ -1643,6 +1869,17 @@ void WorldMapGpuItem::setTransmitState(bool transmitting,
     }
 }
 
+void WorldMapGpuItem::setBaseMapEnabled(bool enabled)
+{
+    if (m_baseMapEnabled == enabled) {
+        return;
+    }
+    m_baseMapEnabled = enabled;
+    if (isVisible()) {
+        update();
+    }
+}
+
 void WorldMapGpuItem::clearContacts()
 {
     if (m_contacts.isEmpty()) {
@@ -1651,6 +1888,229 @@ void WorldMapGpuItem::clearContacts()
     m_contacts.clear();
     updateViewportTargets();
     markDirty();
+}
+
+void WorldMapGpuItem::setCoverageCells(const QVariantList& cells)
+{
+    QVector<CoverageCell> next;
+    next.reserve(cells.size());
+    int fourCharacterCells = 0;
+    int sixCharacterCells = 0;
+    int activeCells = 0;
+    int missingCells = 0;
+    int pskCells = 0;
+    int workedCells = 0;
+    int confirmedCells = 0;
+    for (const QVariant& value : cells) {
+        QVariantMap const row = value.toMap();
+        CoverageCell cell;
+        QString const grid = row.value(QStringLiteral("grid")).toString().trimmed().toUpper();
+        cell.grid = grid.left(grid.size() >= 6 ? 6 : 4);
+        cell.workedCount = row.value(QStringLiteral("workedCount")).toInt();
+        cell.confirmedCount = row.value(QStringLiteral("confirmedCount")).toInt();
+        cell.activeCount = row.value(QStringLiteral("activeCount")).toInt();
+        cell.pskCount = row.value(QStringLiteral("pskCount")).toInt();
+        cell.historicalStatus = row.value(QStringLiteral("historicalStatus")).toString();
+        cell.liveStatus = row.value(QStringLiteral("liveStatus")).toString();
+        cell.liveOpacity = qBound<qreal>(
+            0.2, row.value(QStringLiteral("liveOpacity"), 1.0).toReal(), 1.0);
+        cell.split = row.value(QStringLiteral("split")).toBool();
+        cell.worked = row.value(QStringLiteral("worked")).toBool();
+        cell.confirmed = row.value(QStringLiteral("confirmed")).toBool();
+        cell.active = row.value(QStringLiteral("active")).toBool();
+        cell.missing = row.value(QStringLiteral("missing")).toBool();
+        cell.psk = row.value(QStringLiteral("psk")).toBool();
+        QPointF southWest;
+        QPointF northEast;
+        if (maidenheadCellBounds(cell.grid, &southWest, &northEast)) {
+            if (cell.grid.size() >= 6) {
+                ++sixCharacterCells;
+            } else {
+                ++fourCharacterCells;
+            }
+            activeCells += cell.active ? 1 : 0;
+            missingCells += cell.missing ? 1 : 0;
+            pskCells += cell.psk ? 1 : 0;
+            workedCells += cell.worked ? 1 : 0;
+            confirmedCells += cell.confirmed ? 1 : 0;
+            next.push_back(cell);
+        }
+    }
+    QString const ingressDiagnostic = QStringLiteral(
+        "coverage input=%1 accepted=%2 grid4=%3 grid6=%4 active=%5 missing=%6 psk=%7 worked=%8 confirmed=%9")
+        .arg(cells.size())
+        .arg(next.size())
+        .arg(fourCharacterCells)
+        .arg(sixCharacterCells)
+        .arg(activeCells)
+        .arg(missingCells)
+        .arg(pskCells)
+        .arg(workedCells)
+        .arg(confirmedCells);
+    if (ingressDiagnostic != m_lastCoverageIngressDiagnostic) {
+        m_lastCoverageIngressDiagnostic = ingressDiagnostic;
+        qInfo().noquote() << "[MAPGEO]" << ingressDiagnostic;
+    }
+    m_coverageCells = next;
+    m_geometryDirty = true;
+    if (isVisible()) {
+        update();
+    }
+}
+
+void WorldMapGpuItem::setOperationalMarkers(const QVariantList& markers)
+{
+    if (m_operationalMarkers == markers) {
+        return;
+    }
+    m_operationalMarkers = markers;
+    markDirty(false);
+}
+
+void WorldMapGpuItem::setGeographicFeatures(const QVariantList& features)
+{
+    int stateFeatures = 0;
+    int countyFeatures = 0;
+    int earthquakeFeatures = 0;
+    int polygonCount = 0;
+    int ringCount = 0;
+    int pointCount = 0;
+    QString coordinateShape;
+    for (const QVariant& featureValue : features) {
+        QVariantMap const feature = featureValue.toMap();
+        QString const type = feature.value(QStringLiteral("type")).toString();
+        if (type == QStringLiteral("states")) {
+            ++stateFeatures;
+        } else if (type == QStringLiteral("counties")) {
+            ++countyFeatures;
+        } else if (type == QStringLiteral("earthquake")) {
+            ++earthquakeFeatures;
+        }
+        for (const QVariant& polygonValue
+             : feature.value(QStringLiteral("polygons")).toList()) {
+            ++polygonCount;
+            for (const QVariant& ringValue : polygonValue.toList()) {
+                QVariantList const ring = ringValue.toList();
+                ++ringCount;
+                pointCount += ring.size();
+                if (coordinateShape.isEmpty() && !ring.isEmpty()) {
+                    QVariant const point = ring.constFirst();
+                    QVariantList const components = point.toList();
+                    QStringList componentTypes;
+                    for (const QVariant& component : components) {
+                        componentTypes << QString::fromLatin1(component.metaType().name());
+                    }
+                    coordinateShape = QStringLiteral("point=%1 components=%2 [%3]")
+                        .arg(QString::fromLatin1(point.metaType().name()))
+                        .arg(components.size())
+                        .arg(componentTypes.join(QLatin1Char(',')));
+                }
+            }
+        }
+    }
+    QString const ingressDiagnostic = QStringLiteral(
+        "geographic input=%1 states=%2 counties=%3 earthquakes=%4 polygons=%5 rings=%6 points=%7 shape=%8")
+        .arg(features.size())
+        .arg(stateFeatures)
+        .arg(countyFeatures)
+        .arg(earthquakeFeatures)
+        .arg(polygonCount)
+        .arg(ringCount)
+        .arg(pointCount)
+        .arg(coordinateShape.isEmpty() ? QStringLiteral("none") : coordinateShape);
+    if (ingressDiagnostic != m_lastGeographicIngressDiagnostic) {
+        m_lastGeographicIngressDiagnostic = ingressDiagnostic;
+        qInfo().noquote() << "[MAPGEO]" << ingressDiagnostic;
+    }
+    if (m_geographicFeatures == features) {
+        return;
+    }
+    m_geographicFeatures = features;
+    markDirty(false);
+}
+
+void WorldMapGpuItem::setProjection(const QString& projection)
+{
+    QString normalized = projection.trimmed();
+    if (normalized != QStringLiteral("Mercator")
+        && normalized != QStringLiteral("Miller")
+        && normalized != QStringLiteral("Azimuthal Equidistant")) {
+        normalized = QStringLiteral("Equirectangular");
+    }
+    if (m_projection == normalized) {
+        return;
+    }
+    m_projection = normalized;
+    m_azimuthalMapDirty = true;
+    m_azimuthalExternalOverlayDirty = true;
+    m_projectionNodeDirty = true;
+    m_baseMapTextureDirty = true;
+    m_externalOverlayTextureDirty = true;
+    m_greylineGeometryDirty = true;
+    updateViewportTargets();
+    markDirty();
+}
+
+void WorldMapGpuItem::setBaseMapService(QObject* service)
+{
+    auto* baseMapService = qobject_cast<MapBaseMapService*>(service);
+    if (m_baseMapService == baseMapService) {
+        return;
+    }
+    if (m_baseMapConnection) {
+        disconnect(m_baseMapConnection);
+    }
+    m_baseMapService = baseMapService;
+
+    auto syncBaseMap = [this] {
+        m_mapImage = m_baseMapService
+            ? m_baseMapService->baseMapImage()
+            : buildMapTexture();
+        m_baseMapTextureDirty = true;
+        m_azimuthalMapDirty = true;
+        if (isVisible()) {
+            update();
+        }
+    };
+    if (m_baseMapService) {
+        m_baseMapConnection = connect(
+            m_baseMapService,
+            &MapBaseMapService::baseMapImageChanged,
+            this,
+            syncBaseMap);
+    }
+    syncBaseMap();
+}
+
+void WorldMapGpuItem::setExternalOverlayService(QObject* service)
+{
+    auto* overlayService = qobject_cast<MapExternalOverlayService*>(service);
+    if (m_externalOverlayService == overlayService) {
+        return;
+    }
+    if (m_externalOverlayConnection) {
+        disconnect(m_externalOverlayConnection);
+    }
+    m_externalOverlayService = overlayService;
+
+    auto syncOverlay = [this] {
+        m_externalOverlayImage = m_externalOverlayService
+            ? m_externalOverlayService->overlayImage()
+            : QImage();
+        m_externalOverlayTextureDirty = true;
+        m_azimuthalExternalOverlayDirty = true;
+        if (isVisible()) {
+            update();
+        }
+    };
+    if (m_externalOverlayService) {
+        m_externalOverlayConnection = connect(
+            m_externalOverlayService,
+            &MapExternalOverlayService::overlayImageChanged,
+            this,
+            syncOverlay);
+    }
+    syncOverlay();
 }
 
 void WorldMapGpuItem::downgradeContactToBand(const QString& call)
@@ -1901,30 +2361,72 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         return root;
     }
 
+    // Marker/path QSB materials encode longitude/latitude directly.  Recreate
+    // the layer when switching projection so AEQD can use screen-space nodes.
+    if (m_projectionNodeDirty) {
+        clearNode(root);
+        m_projectionNodeDirty = false;
+        m_geometryDirty = true;
+        m_contactGeometryDirty = true;
+        m_animationGeometryDirty = true;
+    }
+
+    QImage const& mapImage = displayedMapImage();
+    QImage const& externalOverlayImage = displayedExternalOverlayImage();
+    QString const textureProjection = azimuthalProjectionEnabled()
+        ? QStringLiteral("Equirectangular") : m_projection;
+
     auto* mapLayer = dynamic_cast<MapLayerNode*>(root->firstChild());
     if (!mapLayer) {
         clearNode(root);
         mapLayer = new MapLayerNode;
-        mapLayer->texture = window()->createTextureFromImage(m_mapImage);
+        mapLayer->texture = window()->createTextureFromImage(mapImage);
         if (mapLayer->texture) {
             mapLayer->texture->setFiltering(QSGTexture::Linear);
             mapLayer->texture->setMipmapFiltering(QSGTexture::Linear);
         }
         root->appendChildNode(mapLayer);
+        m_baseMapTextureDirty = false;
+    } else if (m_baseMapTextureDirty) {
+        // Tile nodes retain a non-owning QSGTexture pointer.  They must be
+        // destroyed before the old texture is released (notably when Offline
+        // mode swaps an online image for the local atlas).
+        clearMapTileNodes(mapLayer);
+        delete mapLayer->texture;
+        mapLayer->texture = nullptr;
+        mapLayer->texture = window()->createTextureFromImage(mapImage);
+        if (mapLayer->texture) {
+            mapLayer->texture->setFiltering(QSGTexture::Linear);
+            mapLayer->texture->setMipmapFiltering(QSGTexture::Linear);
+        }
+        m_baseMapTextureDirty = false;
     }
-    int mapTextureWidth = m_mapImage.width();
-    int mapTextureHeight = m_mapImage.height();
+    int mapTextureWidth = mapImage.width();
+    int mapTextureHeight = mapImage.height();
     if (!mapLayer->texture) {
         mapBlankTexture(mapLayer, window());
         mapTextureWidth = 1;
         mapTextureHeight = 1;
     }
-    appendMapTileNodes(mapLayer, rect,
-                       m_viewCenterLon, m_viewCenterLat,
-                       m_viewSpanLon, m_viewSpanLat,
-                       mapTextureWidth, mapTextureHeight);
+    if (m_baseMapEnabled) {
+        appendMapTileNodes(mapLayer, rect,
+                           m_viewCenterLon, m_viewCenterLat,
+                           m_viewSpanLon, m_viewSpanLat,
+                           mapTextureWidth, mapTextureHeight,
+                           textureProjection);
+    } else {
+        appendMapTileNodes(mapLayer, QRectF(),
+                           m_viewCenterLon, m_viewCenterLat,
+                           m_viewSpanLon, m_viewSpanLat,
+                           mapTextureWidth, mapTextureHeight,
+                           textureProjection);
+    }
 
-    auto* greylineLayer = dynamic_cast<GreylineLayerNode*>(mapLayer->nextSibling());
+    auto* externalOverlayLayer =
+        dynamic_cast<MapLayerNode*>(mapLayer->nextSibling());
+    auto* greylineLayer = externalOverlayLayer
+        ? dynamic_cast<GreylineLayerNode*>(externalOverlayLayer->nextSibling())
+        : nullptr;
     auto* geometryLayer = greylineLayer
         ? dynamic_cast<GeometryLayerNode*>(greylineLayer->nextSibling())
         : nullptr;
@@ -1934,15 +2436,18 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     auto* animationLayer = labelLayer
         ? dynamic_cast<AnimationLayerNode*>(labelLayer->nextSibling())
         : nullptr;
-    if (!greylineLayer || !geometryLayer || !labelLayer || !animationLayer) {
+    if (!externalOverlayLayer || !greylineLayer
+        || !geometryLayer || !labelLayer || !animationLayer) {
         while (auto* child = mapLayer->nextSibling()) {
             root->removeChildNode(child);
             delete child;
         }
+        externalOverlayLayer = new MapLayerNode;
         greylineLayer = new GreylineLayerNode;
         geometryLayer = new GeometryLayerNode;
         labelLayer = new LabelLayerNode;
         animationLayer = new AnimationLayerNode;
+        root->appendChildNode(externalOverlayLayer);
         root->appendChildNode(greylineLayer);
         root->appendChildNode(geometryLayer);
         root->appendChildNode(labelLayer);
@@ -1951,9 +2456,38 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         m_geometryDirty = true;
         m_contactGeometryDirty = true;
         m_animationGeometryDirty = true;
+        m_externalOverlayTextureDirty = true;
     }
 
-    if (m_greylineEnabled && m_greylineShaderAllowed) {
+    if (m_externalOverlayTextureDirty) {
+        clearMapTileNodes(externalOverlayLayer);
+        delete externalOverlayLayer->texture;
+        externalOverlayLayer->texture = nullptr;
+        if (!externalOverlayImage.isNull()) {
+            externalOverlayLayer->texture =
+                window()->createTextureFromImage(externalOverlayImage);
+            if (externalOverlayLayer->texture) {
+                externalOverlayLayer->texture->setFiltering(QSGTexture::Linear);
+            }
+        }
+        m_externalOverlayTextureDirty = false;
+    }
+    if (externalOverlayLayer->texture) {
+        appendMapTileNodes(externalOverlayLayer, rect,
+                           m_viewCenterLon, m_viewCenterLat,
+                           m_viewSpanLon, m_viewSpanLat,
+                           externalOverlayImage.width(),
+                           externalOverlayImage.height(),
+                           textureProjection);
+    } else {
+        appendMapTileNodes(externalOverlayLayer, QRectF(),
+                           m_viewCenterLon, m_viewCenterLat,
+                           m_viewSpanLon, m_viewSpanLat, 1, 1,
+                           textureProjection);
+    }
+
+    if (m_greylineEnabled && m_greylineShaderAllowed
+        && !azimuthalProjectionEnabled()) {
 #ifdef DECODIUM_LIVEMAP_GREYLINE_QSB
         QPointF const sun = subSolarLonLat();
         auto* greylineNode = dynamic_cast<QSGGeometryNode*>(greylineLayer->firstChild());
@@ -1995,44 +2529,207 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         rebuildTimer.start();
         rebuildGeometryBatch();
         m_lastMapRebuildUs = rebuildTimer.nsecsElapsed() / 1000;
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->workedCoverageFill,
+                                   m_batch.workedCoverageTriangles, QColor(0, 216, 255, 38));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->confirmedCoverageFill,
+                                   m_batch.confirmedCoverageTriangles, QColor(46, 204, 113, 54));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->activeCoverageFill,
+                                   m_batch.activeCoverageTriangles, QColor(246, 195, 68, 76));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->activeCoverageMediumFill,
+                                   m_batch.activeCoverageMediumTriangles, QColor(246, 195, 68, 52));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->activeCoverageFadedFill,
+                                   m_batch.activeCoverageFadedTriangles, QColor(246, 195, 68, 32));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->missingCoverageFill,
+                                   m_batch.missingCoverageTriangles, QColor(255, 140, 66, 88));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->missingCoverageMediumFill,
+                                   m_batch.missingCoverageMediumTriangles, QColor(255, 140, 66, 58));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->missingCoverageFadedFill,
+                                   m_batch.missingCoverageFadedTriangles, QColor(255, 140, 66, 38));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->pskCoverageFill,
+                                   m_batch.pskCoverageTriangles, QColor(186, 124, 255, 78));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->pskCoverageMediumFill,
+                                   m_batch.pskCoverageMediumTriangles, QColor(186, 124, 255, 52));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->pskCoverageFadedFill,
+                                   m_batch.pskCoverageFadedTriangles, QColor(186, 124, 255, 32));
+        updateFlatLineNode(geometryLayer, geometryLayer->workedCoverageLines,
+                           m_batch.workedCoverageLines, QColor(0, 216, 255, 150));
+        updateFlatLineNode(geometryLayer, geometryLayer->confirmedCoverageLines,
+                           m_batch.confirmedCoverageLines, QColor(84, 255, 145, 205));
+        updateFlatLineNode(geometryLayer, geometryLayer->activeCoverageLines,
+                           m_batch.activeCoverageLines, QColor(246, 195, 68, 190));
+        updateFlatLineNode(geometryLayer, geometryLayer->activeCoverageMediumLines,
+                           m_batch.activeCoverageMediumLines, QColor(246, 195, 68, 120));
+        updateFlatLineNode(geometryLayer, geometryLayer->activeCoverageFadedLines,
+                           m_batch.activeCoverageFadedLines, QColor(246, 195, 68, 72));
+        updateFlatLineNode(geometryLayer, geometryLayer->missingCoverageLines,
+                           m_batch.missingCoverageLines, QColor(255, 140, 66, 215));
+        updateFlatLineNode(geometryLayer, geometryLayer->missingCoverageMediumLines,
+                           m_batch.missingCoverageMediumLines, QColor(255, 140, 66, 136));
+        updateFlatLineNode(geometryLayer, geometryLayer->missingCoverageFadedLines,
+                           m_batch.missingCoverageFadedLines, QColor(255, 140, 66, 82));
+        updateFlatLineNode(geometryLayer, geometryLayer->pskCoverageLines,
+                           m_batch.pskCoverageLines, QColor(186, 124, 255, 205));
+        updateFlatLineNode(geometryLayer, geometryLayer->pskCoverageMediumLines,
+                           m_batch.pskCoverageMediumLines, QColor(186, 124, 255, 130));
+        updateFlatLineNode(geometryLayer, geometryLayer->pskCoverageFadedLines,
+                           m_batch.pskCoverageFadedLines, QColor(186, 124, 255, 78));
         updateFlatLineNode(geometryLayer, geometryLayer->gridLines, m_batch.gridLines, QColor(170, 210, 225, 42));
-        updatePathNode(geometryLayer, geometryLayer->genericPaths, m_batch.genericPaths, colorForRole(PathRole::Generic),
-                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updatePathNode(geometryLayer, geometryLayer->incomingPaths, m_batch.incomingPaths, colorForRole(PathRole::IncomingToMe),
-                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updatePathNode(geometryLayer, geometryLayer->outgoingPaths, m_batch.outgoingPaths, colorForRole(PathRole::OutgoingFromMe),
-                       m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        updateFlatLineNode(geometryLayer, geometryLayer->timeZoneLines,
+                           m_batch.timeZoneLines, QColor(112, 223, 255, 104));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->countyBoundaryFill,
+                                   m_batch.countyBoundaryTriangles,
+                                   QColor(124, 190, 228, 148));
+        updateCoverageTriangleNode(geometryLayer, geometryLayer->stateBoundaryFill,
+                                   m_batch.stateBoundaryTriangles,
+                                   QColor(112, 235, 255, 238));
+        updateFlatLineNode(geometryLayer, geometryLayer->countyBoundaryLines,
+                           m_batch.countyBoundaryLines,
+                           QColor(150, 205, 232, 225));
+        updateFlatLineNode(geometryLayer, geometryLayer->stateBoundaryLines,
+                           m_batch.stateBoundaryLines,
+                           QColor(132, 245, 255, 255));
+        updateScreenCircleNode(geometryLayer, geometryLayer->potaHaloMarkers,
+                               m_batch.potaMarkers, QColor(72, 191, 92, 105), 7.0f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->iotaHaloMarkers,
+                               m_batch.iotaMarkers, QColor(46, 190, 226, 105), 7.0f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->wpxHaloMarkers,
+                               m_batch.wpxMarkers, QColor(242, 178, 61, 105), 7.0f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->moonHaloMarkers,
+                               m_batch.moonMarkers, QColor(196, 224, 255, 145), 10.0f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->potaCoreMarkers,
+                               m_batch.potaMarkers, QColor(166, 255, 154, 240), 3.7f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->iotaCoreMarkers,
+                               m_batch.iotaMarkers, QColor(130, 236, 255, 240), 3.7f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->wpxCoreMarkers,
+                               m_batch.wpxMarkers, QColor(255, 215, 145, 240), 3.7f);
+        updateScreenCircleNode(geometryLayer, geometryLayer->moonCoreMarkers,
+                               m_batch.moonMarkers, QColor(245, 249, 255, 250), 4.5f);
+        if (azimuthalProjectionEnabled()) {
+            auto screenPaths = [this, &rect](const QVector<PathLine>& paths) {
+                QVector<QPointF> lines;
+                for (const PathLine& path : paths) {
+                    QVector<QPointF> const arc = greatCircle(path.sourceLonLat,
+                                                             path.destinationLonLat,
+                                                             kGreatCircleSteps);
+                    QPointF previous;
+                    bool havePrevious = false;
+                    for (const QPointF& lonLat : arc) {
+                        QPointF const current = projectLonLatToPoint(lonLat);
+                        bool const visible = rect.adjusted(-3.0, -3.0, 3.0, 3.0)
+                            .contains(current);
+                        if (visible && havePrevious
+                            && QLineF(previous, current).length() < rect.width() * 0.55) {
+                            lines << previous << current;
+                        }
+                        previous = current;
+                        havePrevious = visible;
+                    }
+                }
+                return lines;
+            };
+            auto screenMarkers = [this, &rect](const QVector<QPointF>& lonLatMarkers) {
+                QVector<QPointF> markers;
+                markers.reserve(lonLatMarkers.size());
+                for (const QPointF& lonLat : lonLatMarkers) {
+                    QPointF const marker = projectLonLatToPoint(lonLat);
+                    if (rect.adjusted(-8.0, -8.0, 8.0, 8.0).contains(marker)) {
+                        markers.push_back(marker);
+                    }
+                }
+                return markers;
+            };
+            QVector<QPointF> const genericPaths = screenPaths(m_batch.genericPaths);
+            QVector<QPointF> const incomingPaths = screenPaths(m_batch.incomingPaths);
+            QVector<QPointF> const outgoingPaths = screenPaths(m_batch.outgoingPaths);
+            QVector<QPointF> const genericMarkers = screenMarkers(m_batch.genericMarkers);
+            QVector<QPointF> const incomingMarkers = screenMarkers(m_batch.incomingMarkers);
+            QVector<QPointF> const outgoingMarkers = screenMarkers(m_batch.outgoingMarkers);
+            QVector<QPointF> const bandMarkers = screenMarkers(m_batch.bandMarkers);
+            updateFlatLineNode(geometryLayer, geometryLayer->genericPaths, genericPaths,
+                               colorForRole(PathRole::Generic));
+            updateFlatLineNode(geometryLayer, geometryLayer->incomingPaths, incomingPaths,
+                               colorForRole(PathRole::IncomingToMe));
+            updateFlatLineNode(geometryLayer, geometryLayer->outgoingPaths, outgoingPaths,
+                               colorForRole(PathRole::OutgoingFromMe));
+            updateScreenCircleNode(geometryLayer, geometryLayer->genericHaloMarkers,
+                                   genericMarkers, withAlpha(colorForRole(PathRole::Generic), 90), 6.4f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->incomingHaloMarkers,
+                                   incomingMarkers, withAlpha(colorForRole(PathRole::IncomingToMe), 92), 6.4f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->outgoingHaloMarkers,
+                                   outgoingMarkers, withAlpha(colorForRole(PathRole::OutgoingFromMe), 92), 6.4f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->bandHaloMarkers,
+                                   bandMarkers, withAlpha(colorForRole(PathRole::BandOnly), 95), 6.2f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->genericCoreMarkers,
+                                   genericMarkers, colorForRole(PathRole::Generic), 3.5f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->incomingCoreMarkers,
+                                   incomingMarkers, colorForRole(PathRole::IncomingToMe), 3.5f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->outgoingCoreMarkers,
+                                   outgoingMarkers, colorForRole(PathRole::OutgoingFromMe), 3.5f);
+            updateScreenCircleNode(geometryLayer, geometryLayer->bandCoreMarkers,
+                                   bandMarkers, colorForRole(PathRole::BandOnly), 3.4f);
+        } else {
+            updatePathNode(geometryLayer, geometryLayer->genericPaths, m_batch.genericPaths, colorForRole(PathRole::Generic),
+                           m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updatePathNode(geometryLayer, geometryLayer->incomingPaths, m_batch.incomingPaths, colorForRole(PathRole::IncomingToMe),
+                           m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updatePathNode(geometryLayer, geometryLayer->outgoingPaths, m_batch.outgoingPaths, colorForRole(PathRole::OutgoingFromMe),
+                           m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
 
-        updateGeoMarkerNode(geometryLayer, geometryLayer->genericHaloMarkers,
-                            m_batch.genericMarkers, withAlpha(colorForRole(PathRole::Generic), 90), 6.4f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updateGeoMarkerNode(geometryLayer, geometryLayer->incomingHaloMarkers,
-                            m_batch.incomingMarkers, withAlpha(colorForRole(PathRole::IncomingToMe), 92), 6.4f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updateGeoMarkerNode(geometryLayer, geometryLayer->outgoingHaloMarkers,
-                            m_batch.outgoingMarkers, withAlpha(colorForRole(PathRole::OutgoingFromMe), 92), 6.4f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updateGeoMarkerNode(geometryLayer, geometryLayer->bandHaloMarkers,
-                            m_batch.bandMarkers, withAlpha(colorForRole(PathRole::BandOnly), 95), 6.2f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->genericHaloMarkers,
+                                m_batch.genericMarkers, withAlpha(colorForRole(PathRole::Generic), 90), 6.4f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->incomingHaloMarkers,
+                                m_batch.incomingMarkers, withAlpha(colorForRole(PathRole::IncomingToMe), 92), 6.4f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->outgoingHaloMarkers,
+                                m_batch.outgoingMarkers, withAlpha(colorForRole(PathRole::OutgoingFromMe), 92), 6.4f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->bandHaloMarkers,
+                                m_batch.bandMarkers, withAlpha(colorForRole(PathRole::BandOnly), 95), 6.2f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
 
-        updateGeoMarkerNode(geometryLayer, geometryLayer->genericCoreMarkers,
-                            m_batch.genericMarkers, colorForRole(PathRole::Generic), 3.5f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updateGeoMarkerNode(geometryLayer, geometryLayer->incomingCoreMarkers,
-                            m_batch.incomingMarkers, colorForRole(PathRole::IncomingToMe), 3.5f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updateGeoMarkerNode(geometryLayer, geometryLayer->outgoingCoreMarkers,
-                            m_batch.outgoingMarkers, colorForRole(PathRole::OutgoingFromMe), 3.5f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
-        updateGeoMarkerNode(geometryLayer, geometryLayer->bandCoreMarkers,
-                            m_batch.bandMarkers, colorForRole(PathRole::BandOnly), 3.4f,
-                            m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->genericCoreMarkers,
+                                m_batch.genericMarkers, colorForRole(PathRole::Generic), 3.5f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->incomingCoreMarkers,
+                                m_batch.incomingMarkers, colorForRole(PathRole::IncomingToMe), 3.5f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->outgoingCoreMarkers,
+                                m_batch.outgoingMarkers, colorForRole(PathRole::OutgoingFromMe), 3.5f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+            updateGeoMarkerNode(geometryLayer, geometryLayer->bandCoreMarkers,
+                                m_batch.bandMarkers, colorForRole(PathRole::BandOnly), 3.4f,
+                                m_viewCenterLon, m_viewCenterLat, m_viewSpanLon, m_viewSpanLat, rect, uploadContactGeometry);
+        }
 
         if (uploadContactGeometry) {
             m_contactGeometryDirty = false;
         }
     }
+
+    // Earthquakes stay vector features: their pulse is cheap geometry updated
+    // by the existing map animation timer, while the source feed is parsed off
+    // the UI thread by MapExternalOverlayService.
+    qreal const quakePulse = 8.0 + m_animationPhase * 11.0;
+    qreal const quakePulseAlpha = 86.0 * (1.0 - m_animationPhase);
+    updateScreenCircleNode(geometryLayer, geometryLayer->earthquakeLowPulseMarkers,
+                           m_batch.earthquakeLowMarkers,
+                           QColor(255, 219, 91, qRound(quakePulseAlpha)),
+                           static_cast<float>(quakePulse));
+    updateScreenCircleNode(geometryLayer, geometryLayer->earthquakeMediumPulseMarkers,
+                           m_batch.earthquakeMediumMarkers,
+                           QColor(255, 160, 54, qRound(quakePulseAlpha)),
+                           static_cast<float>(quakePulse + 1.8));
+    updateScreenCircleNode(geometryLayer, geometryLayer->earthquakeHighPulseMarkers,
+                           m_batch.earthquakeHighMarkers,
+                           QColor(255, 89, 94, qRound(quakePulseAlpha + 18.0)),
+                           static_cast<float>(quakePulse + 3.0));
+    updateScreenCircleNode(geometryLayer, geometryLayer->earthquakeLowCoreMarkers,
+                           m_batch.earthquakeLowMarkers, QColor(255, 219, 91, 232), 3.8f);
+    updateScreenCircleNode(geometryLayer, geometryLayer->earthquakeMediumCoreMarkers,
+                           m_batch.earthquakeMediumMarkers, QColor(255, 160, 54, 238), 4.5f);
+    updateScreenCircleNode(geometryLayer, geometryLayer->earthquakeHighCoreMarkers,
+                           m_batch.earthquakeHighMarkers, QColor(255, 89, 94, 244), 5.2f);
 
     qreal txProgress = m_animationPhase;
     if (m_transmitting && m_txStartMs > 0 && m_txTravelMs > 0) {
@@ -2040,6 +2737,48 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         txProgress = std::fmod(static_cast<qreal>(elapsedMs) / static_cast<qreal>(m_txTravelMs), 1.0);
     }
 
+    if (azimuthalProjectionEnabled()) {
+        QVector<QPointF> genericArrows;
+        QVector<QPointF> incomingArrows;
+        QVector<QPointF> outgoingArrows;
+        for (const AnimatedPath& path : std::as_const(m_animatedPaths)) {
+            qreal progress = std::fmod(m_animationPhase + (qHash(path.key) % 17) * 0.057, 1.0);
+            if (m_transmitting && path.role == PathRole::OutgoingFromMe
+                && (m_txTargetCall.isEmpty() || sameStationCall(path.key, m_txTargetCall))) {
+                progress = txProgress;
+            }
+
+            QVector<QPointF> projectedPath;
+            projectedPath.reserve(path.points.size());
+            for (const QPointF& lonLat : path.points) {
+                projectedPath.push_back(projectLonLatToPoint(lonLat));
+            }
+
+            QPolygonF arrow;
+            if (!arrowOnPath(projectedPath, progress, &arrow)) {
+                continue;
+            }
+            QVector<QPointF>* target = &genericArrows;
+            if (path.role == PathRole::IncomingToMe) {
+                target = &incomingArrows;
+            } else if (path.role == PathRole::OutgoingFromMe) {
+                target = &outgoingArrows;
+            }
+            for (const QPointF& point : arrow) {
+                target->push_back(point);
+            }
+        }
+        updateTriangleNode(animationLayer, animationLayer->genericArrows,
+                           genericArrows, QColor(255, 244, 196, 230));
+        updateTriangleNode(animationLayer, animationLayer->incomingArrows,
+                           incomingArrows, QColor(255, 195, 140, 240));
+        updateTriangleNode(animationLayer, animationLayer->outgoingArrows,
+                           outgoingArrows, QColor(255, 233, 132, 240));
+        animationLayer->genericArrowVertices = genericArrows.size();
+        animationLayer->incomingArrowVertices = incomingArrows.size();
+        animationLayer->outgoingArrowVertices = outgoingArrows.size();
+        m_animationGeometryDirty = false;
+    } else {
 #ifdef DECODIUM_LIVEMAP_ARROW_QSB
     QVector<ArrowPathRequest> arrowPaths;
     arrowPaths.reserve(m_animatedPaths.size());
@@ -2104,6 +2843,7 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
     animationLayer->outgoingArrowVertices = outgoingArrows.size();
     m_animationGeometryDirty = false;
 #endif
+    }
 
     QVector<Label> displayLabels = m_labels;
     QColor const overlayTextColor(226, 236, 246, 215);
@@ -2284,6 +3024,10 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
             << " frameMs=" << m_frameIntervalMs
             << " greylineShader=" << greylineShaderActive
             << " lineVertices=" << m_lastLineVertexCount
+            << " stateBoundaryVertices=" << m_lastStateBoundaryVertexCount
+            << " countyBoundaryVertices=" << m_lastCountyBoundaryVertexCount
+            << " stateBoundaryLineVertices=" << m_lastStateBoundaryLineVertexCount
+            << " countyBoundaryLineVertices=" << m_lastCountyBoundaryLineVertexCount
             << " markerVertices=" << m_lastMarkerVertexCount
             << " labels=" << m_lastLabelCount
             << " visiblePaths=" << m_lastVisiblePathCount
@@ -2317,6 +3061,10 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         qInfo().noquote().nospace()
             << "[MAPGPU] LiveMap QSG profile contacts=" << m_lastContactCount
             << " lineVertices=" << m_lastLineVertexCount
+            << " stateBoundaryVertices=" << m_lastStateBoundaryVertexCount
+            << " countyBoundaryVertices=" << m_lastCountyBoundaryVertexCount
+            << " stateBoundaryLineVertices=" << m_lastStateBoundaryLineVertexCount
+            << " countyBoundaryLineVertices=" << m_lastCountyBoundaryLineVertexCount
             << " markerVertices=" << m_lastMarkerVertexCount
             << " labels=" << m_lastLabelCount
             << " visiblePaths=" << m_lastVisiblePathCount
@@ -2355,12 +3103,38 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
 
 void WorldMapGpuItem::mousePressEvent(QMouseEvent* event)
 {
-    if (!event || event->button() != Qt::LeftButton) {
+    if (!event) {
+        return;
+    }
+    if (event->button() == Qt::RightButton) {
+        QVariantMap const cell = coverageCellAt(event->position());
+        if (!cell.isEmpty()) {
+            event->accept();
+            Q_EMIT coverageCellClicked(cell, event->position().x(),
+                                       event->position().y());
+            return;
+        }
+    }
+    if (event->button() != Qt::LeftButton) {
         QQuickItem::mousePressEvent(event);
         return;
     }
 
     QPointF const pos = event->position();
+    QVariantMap const operationalMarker = operationalMarkerAt(pos);
+    if (!operationalMarker.isEmpty()) {
+        event->accept();
+        Q_EMIT operationalMarkerClicked(
+            operationalMarker, pos.x(), pos.y());
+        return;
+    }
+    QVariantMap const geographicFeature = geographicFeatureAt(pos);
+    if (!geographicFeature.isEmpty()) {
+        event->accept();
+        Q_EMIT geographicFeatureClicked(
+            geographicFeature, pos.x(), pos.y());
+        return;
+    }
     QString closestCall;
     QString closestGrid;
     qreal closestDistance = 14.0;
@@ -2390,6 +3164,67 @@ void WorldMapGpuItem::mousePressEvent(QMouseEvent* event)
     m_panLastPos = pos;
     setCursor(Qt::ClosedHandCursor);
     event->accept();
+}
+
+void WorldMapGpuItem::hoverMoveEvent(QHoverEvent* event)
+{
+    if (!event) {
+        return;
+    }
+    QVariantMap const geographicFeature = geographicFeatureAt(event->position());
+    if (!geographicFeature.isEmpty()) {
+        if (!m_hoveredCoverageGrid.isEmpty()) {
+            m_hoveredCoverageGrid.clear();
+            Q_EMIT coverageCellHoverEnded();
+        }
+        if (m_hoveredGeographicFeature != geographicFeature) {
+            m_hoveredGeographicFeature = geographicFeature;
+            Q_EMIT geographicFeatureHovered(
+                geographicFeature, event->position().x(), event->position().y());
+        }
+        if (!m_panActive) {
+            setCursor(Qt::PointingHandCursor);
+        }
+        return;
+    }
+    if (!m_hoveredGeographicFeature.isEmpty()) {
+        m_hoveredGeographicFeature.clear();
+        Q_EMIT geographicFeatureHoverEnded();
+    }
+    QVariantMap const cell = coverageCellAt(event->position());
+    QString const grid = cell.value(QStringLiteral("grid")).toString();
+    if (grid.isEmpty()) {
+        if (!m_hoveredCoverageGrid.isEmpty()) {
+            m_hoveredCoverageGrid.clear();
+            Q_EMIT coverageCellHoverEnded();
+        }
+        if (!m_panActive) {
+            setCursor(Qt::ArrowCursor);
+        }
+        return;
+    }
+    m_hoveredCoverageGrid = grid;
+    if (!m_panActive) {
+        setCursor(Qt::PointingHandCursor);
+    }
+    Q_EMIT coverageCellHovered(cell, event->position().x(),
+                               event->position().y());
+}
+
+void WorldMapGpuItem::hoverLeaveEvent(QHoverEvent* event)
+{
+    Q_UNUSED(event);
+    if (!m_hoveredCoverageGrid.isEmpty()) {
+        m_hoveredCoverageGrid.clear();
+        Q_EMIT coverageCellHoverEnded();
+    }
+    if (!m_hoveredGeographicFeature.isEmpty()) {
+        m_hoveredGeographicFeature.clear();
+        Q_EMIT geographicFeatureHoverEnded();
+    }
+    if (!m_panActive) {
+        setCursor(Qt::ArrowCursor);
+    }
 }
 
 void WorldMapGpuItem::mouseMoveEvent(QMouseEvent* event)
@@ -2509,6 +3344,25 @@ void WorldMapGpuItem::panBy(double deltaLonDeg, double deltaLatDeg)
     m_targetCenterLat = qBound(-90.0 + 0.5 * m_targetSpanLat,
                                 m_targetCenterLat + deltaLatDeg,
                                 90.0 - 0.5 * m_targetSpanLat);
+    markDirty(false);
+}
+
+void WorldMapGpuItem::focusLocation(double longitude, double latitude,
+                                    double spanLongitude, double spanLatitude)
+{
+    if (!std::isfinite(longitude) || !std::isfinite(latitude)) {
+        return;
+    }
+    if (!m_userViewportLocked) {
+        m_userViewportLocked = true;
+        Q_EMIT viewportLockedChanged(true);
+    }
+    m_targetSpanLon = qBound(12.0, spanLongitude, 360.0);
+    m_targetSpanLat = qBound(8.0, spanLatitude, 180.0);
+    m_targetCenterLon = wrapLongitude(longitude);
+    m_targetCenterLat = qBound(-90.0 + 0.5 * m_targetSpanLat,
+                               latitude,
+                               90.0 - 0.5 * m_targetSpanLat);
     markDirty(false);
 }
 
@@ -2669,16 +3523,276 @@ QPointF WorldMapGpuItem::subSolarLonLat()
     return QPointF(subSolarLon, qRadiansToDegrees(declinationRadians));
 }
 
+bool WorldMapGpuItem::azimuthalProjectionEnabled() const
+{
+    return m_projection == QStringLiteral("Azimuthal Equidistant");
+}
+
+QImage WorldMapGpuItem::azimuthalProjectionImage(const QImage& image) const
+{
+    if (image.isNull()) {
+        return {};
+    }
+
+    QImage const source = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+    int const outputWidth = qBound(640, source.width(), 1280);
+    int const outputHeight = qMax(320, outputWidth / 2);
+    QImage projected(outputWidth, outputHeight, QImage::Format_ARGB32_Premultiplied);
+    projected.fill(Qt::transparent);
+
+    QPointF const origin = m_hasHome ? m_homeLonLat : QPointF();
+    double const lon0 = qDegreesToRadians(origin.x());
+    double const lat0 = qDegreesToRadians(origin.y());
+    double const sinLat0 = std::sin(lat0);
+    double const cosLat0 = std::cos(lat0);
+
+    for (int y = 0; y < outputHeight; ++y) {
+        QRgb* destination = reinterpret_cast<QRgb*>(projected.scanLine(y));
+        double const normalizedY = 1.0
+            - (2.0 * (static_cast<double>(y) + 0.5) / outputHeight);
+        for (int x = 0; x < outputWidth; ++x) {
+            double const normalizedX = (2.0 * (static_cast<double>(x) + 0.5)
+                                        / outputWidth) - 1.0;
+            double const radius = std::hypot(normalizedX, normalizedY);
+            if (radius > 1.0) {
+                continue;
+            }
+
+            double const c = M_PI * radius;
+            double latitude = lat0;
+            double longitude = lon0;
+            if (radius > 1.0e-9) {
+                double const sinC = std::sin(c);
+                double const cosC = std::cos(c);
+                latitude = std::asin(qBound(-1.0,
+                    cosC * sinLat0 + (normalizedY * sinC * cosLat0 / radius),
+                    1.0));
+                longitude = lon0 + std::atan2(normalizedX * sinC,
+                    radius * cosLat0 * cosC
+                    - normalizedY * sinLat0 * sinC);
+            }
+
+            double const lonDegrees = wrapLongitude(qRadiansToDegrees(longitude));
+            double const latDegrees = qBound(-90.0, qRadiansToDegrees(latitude), 90.0);
+            int const sourceX = qBound(0, qRound((lonDegrees + 180.0) / 360.0
+                                                   * (source.width() - 1)),
+                                       source.width() - 1);
+            int const sourceY = qBound(0, qRound((90.0 - latDegrees) / 180.0
+                                                   * (source.height() - 1)),
+                                       source.height() - 1);
+            destination[x] = reinterpret_cast<const QRgb*>(source.constScanLine(sourceY))[sourceX];
+        }
+    }
+    return projected;
+}
+
+const QImage& WorldMapGpuItem::displayedMapImage()
+{
+    if (!azimuthalProjectionEnabled()) {
+        return m_mapImage;
+    }
+    if (m_azimuthalMapDirty) {
+        m_azimuthalMapImage = azimuthalProjectionImage(m_mapImage);
+        m_azimuthalMapDirty = false;
+    }
+    return m_azimuthalMapImage;
+}
+
+const QImage& WorldMapGpuItem::displayedExternalOverlayImage()
+{
+    if (!azimuthalProjectionEnabled()) {
+        return m_externalOverlayImage;
+    }
+    if (m_azimuthalExternalOverlayDirty) {
+        m_azimuthalExternalOverlayImage =
+            azimuthalProjectionImage(m_externalOverlayImage);
+        m_azimuthalExternalOverlayDirty = false;
+    }
+    return m_azimuthalExternalOverlayImage;
+}
+
+double WorldMapGpuItem::projectLatitude(double latitude) const
+{
+    double const bounded = qBound(-90.0, latitude, 90.0);
+    if (m_projection == QStringLiteral("Mercator")) {
+        double const clamped = qBound(-85.05112878, bounded, 85.05112878);
+        double const radians = qDegreesToRadians(clamped);
+        double const scale = std::log(std::tan(M_PI_4
+            + qDegreesToRadians(85.05112878) * 0.5));
+        return 90.0 * std::log(std::tan(M_PI_4 + radians * 0.5)) / scale;
+    }
+    if (m_projection == QStringLiteral("Miller")) {
+        double const radians = qDegreesToRadians(bounded);
+        double const scale = 1.25 * std::log(
+            std::tan(M_PI_4 + 0.4 * M_PI_2));
+        return 90.0 * 1.25
+            * std::log(std::tan(M_PI_4 + 0.4 * radians)) / scale;
+    }
+    return bounded;
+}
+
 QPointF WorldMapGpuItem::projectLonLatToPoint(const QPointF& lonLat) const
 {
     QRectF const bounds = mapRect();
+    if (azimuthalProjectionEnabled()) {
+        QPointF const origin = m_hasHome ? m_homeLonLat : QPointF();
+        double const lon0 = qDegreesToRadians(origin.x());
+        double const lat0 = qDegreesToRadians(origin.y());
+        double const lon = qDegreesToRadians(lonLat.x());
+        double const lat = qDegreesToRadians(lonLat.y());
+        double const deltaLon = lon - lon0;
+        double const sinLat0 = std::sin(lat0);
+        double const cosLat0 = std::cos(lat0);
+        double const sinLat = std::sin(lat);
+        double const cosLat = std::cos(lat);
+        double const cosC = qBound(-1.0,
+            sinLat0 * sinLat + cosLat0 * cosLat * std::cos(deltaLon), 1.0);
+        if (cosC < -0.999999) {
+            return QPointF(-1.0e6, -1.0e6);
+        }
+        double const c = std::acos(cosC);
+        double const scale = c < 1.0e-9 ? 1.0 : c / std::sin(c);
+        double const virtualLon = scale * cosLat * std::sin(deltaLon) * 180.0;
+        double const virtualLat = scale * (cosLat0 * sinLat
+            - sinLat0 * cosLat * std::cos(deltaLon)) * 90.0;
+        qreal const x = bounds.left()
+            + static_cast<qreal>((virtualLon - m_viewCenterLon
+                + 0.5 * m_viewSpanLon) / m_viewSpanLon) * bounds.width();
+        qreal const y = bounds.top()
+            + static_cast<qreal>((m_viewCenterLat + 0.5 * m_viewSpanLat
+                - virtualLat) / m_viewSpanLat) * bounds.height();
+        return QPointF(x, y);
+    }
     double const lonDelta = wrapLongitude(lonLat.x() - m_viewCenterLon);
-    double const lat = qBound(-90.0, static_cast<double>(lonLat.y()), 90.0);
+    double const lat = projectLatitude(lonLat.y());
+    double const topLat = projectLatitude(
+        m_viewCenterLat + 0.5 * m_viewSpanLat);
+    double const bottomLat = projectLatitude(
+        m_viewCenterLat - 0.5 * m_viewSpanLat);
+    double const projectedSpan = qMax(0.0001, topLat - bottomLat);
     qreal const x = bounds.left()
         + static_cast<qreal>((lonDelta + 0.5 * m_viewSpanLon) / m_viewSpanLon) * bounds.width();
     qreal const y = bounds.top()
-        + static_cast<qreal>((m_viewCenterLat + 0.5 * m_viewSpanLat - lat) / m_viewSpanLat) * bounds.height();
+        + static_cast<qreal>((topLat - lat) / projectedSpan) * bounds.height();
     return QPointF(x, y);
+}
+
+QVariantMap WorldMapGpuItem::operationalMarkerAt(const QPointF& point) const
+{
+    qreal bestDistance = 15.0;
+    QVariantMap best;
+    for (QVariant const& value : m_operationalMarkers) {
+        QVariantMap const marker = value.toMap();
+        bool okLon = false;
+        bool okLat = false;
+        double const lon = marker.value(QStringLiteral("longitude"))
+                               .toDouble(&okLon);
+        double const lat = marker.value(QStringLiteral("latitude"))
+                               .toDouble(&okLat);
+        if (!okLon || !okLat) {
+            continue;
+        }
+        qreal const distance = QLineF(
+            point, projectLonLatToPoint(QPointF(lon, lat))).length();
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            best = marker;
+        }
+    }
+    return best;
+}
+
+QVariantMap WorldMapGpuItem::geographicFeatureAt(const QPointF& point) const
+{
+    for (auto featureIt = m_geographicFeatures.crbegin();
+         featureIt != m_geographicFeatures.crend(); ++featureIt) {
+        QVariantMap const feature = featureIt->toMap();
+        bool okLongitude = false;
+        bool okLatitude = false;
+        double const longitude = feature.value(QStringLiteral("longitude")).toDouble(&okLongitude);
+        double const latitude = feature.value(QStringLiteral("latitude")).toDouble(&okLatitude);
+        if (okLongitude && okLatitude) {
+            QPointF const marker = projectLonLatToPoint(QPointF(longitude, latitude));
+            double const hitRadius = qBound(
+                9.0, feature.value(QStringLiteral("hitRadius"), 14.0).toDouble(), 28.0);
+            if (QLineF(marker, point).length() <= hitRadius) {
+                return feature;
+            }
+        }
+        for (QVariant const& polygonValue
+             : feature.value(QStringLiteral("polygons")).toList()) {
+            QVariantList const rings = polygonValue.toList();
+            if (rings.isEmpty()) {
+                continue;
+            }
+            QPolygonF polygon;
+            for (QVariant const& coordinateValue : rings.first().toList()) {
+                QPointF lonLat;
+                if (geographicCoordinateToLonLat(coordinateValue, &lonLat)) {
+                    polygon << projectLonLatToPoint(lonLat);
+                }
+            }
+            if (polygon.containsPoint(point, Qt::OddEvenFill)) {
+                return feature;
+            }
+        }
+    }
+    return {};
+}
+
+QVariantMap WorldMapGpuItem::coverageCellAt(const QPointF& point) const
+{
+    QRectF const bounds = mapRect();
+    if (!bounds.contains(point)) {
+        return {};
+    }
+    for (const CoverageCell& cell : m_coverageCells) {
+        QPointF southWest;
+        QPointF northEast;
+        if (!maidenheadCellBounds(cell.grid, &southWest, &northEast)) {
+            continue;
+        }
+        QPointF const sw = projectLonLatToPoint(southWest);
+        QPointF const se = projectLonLatToPoint(
+            QPointF(northEast.x(), southWest.y()));
+        QPointF const ne = projectLonLatToPoint(northEast);
+        QPointF const nw = projectLonLatToPoint(
+            QPointF(southWest.x(), northEast.y()));
+        if (!azimuthalProjectionEnabled()
+            && (qAbs(se.x() - sw.x()) > bounds.width() * 0.5
+                || qAbs(ne.x() - nw.x()) > bounds.width() * 0.5)) {
+            continue;
+        }
+        QPolygonF const cellPolygon {sw, se, ne, nw};
+        if (!cellPolygon.containsPoint(point, Qt::OddEvenFill)) {
+            continue;
+        }
+        QString splitSegment;
+        if (cell.split && (cell.confirmed || cell.worked)
+            && (cell.active || cell.psk || cell.missing)) {
+            QPolygonF const historicalHalf {sw, se, ne};
+            splitSegment = historicalHalf.containsPoint(point, Qt::OddEvenFill)
+                ? QStringLiteral("Historical") : QStringLiteral("Live");
+        }
+        return {
+            {QStringLiteral("grid"), cell.grid},
+            {QStringLiteral("workedCount"), cell.workedCount},
+            {QStringLiteral("confirmedCount"), cell.confirmedCount},
+            {QStringLiteral("activeCount"), cell.activeCount},
+            {QStringLiteral("pskCount"), cell.pskCount},
+            {QStringLiteral("historicalStatus"), cell.historicalStatus},
+            {QStringLiteral("liveStatus"), cell.liveStatus},
+            {QStringLiteral("liveOpacity"), cell.liveOpacity},
+            {QStringLiteral("split"), cell.split},
+            {QStringLiteral("splitSegment"), splitSegment},
+            {QStringLiteral("worked"), cell.worked},
+            {QStringLiteral("confirmed"), cell.confirmed},
+            {QStringLiteral("active"), cell.active},
+            {QStringLiteral("missing"), cell.missing},
+            {QStringLiteral("psk"), cell.psk}
+        };
+    }
+    return {};
 }
 
 bool WorldMapGpuItem::computeCircularLongitudeBounds(const QVector<double>& longitudes,
@@ -2743,6 +3857,17 @@ void WorldMapGpuItem::updateViewportTargets()
     // i target: smoothViewport continua a interpolare verso i parametri
     // user-set. resetView() rimuove il lock e riabilita l'auto-fit.
     if (m_userViewportLocked) {
+        return;
+    }
+
+    // AEQD is a local, QTH-centred globe view.  Keep the globe centred on
+    // the virtual origin; manual pan/zoom remains available through the
+    // existing viewport controls.
+    if (azimuthalProjectionEnabled()) {
+        m_targetCenterLon = 0.0;
+        m_targetCenterLat = 0.0;
+        m_targetSpanLon = 360.0;
+        m_targetSpanLat = 180.0;
         return;
     }
 
@@ -2881,6 +4006,8 @@ void WorldMapGpuItem::rebuildGeometryBatch()
     if (rect.isEmpty()) {
         m_lastContactCount = 0;
         m_lastLineVertexCount = 0;
+        m_lastStateBoundaryVertexCount = 0;
+        m_lastCountyBoundaryVertexCount = 0;
         m_lastMarkerVertexCount = 0;
         m_lastLabelCount = 0;
         m_lastVisiblePathCount = 0;
@@ -2895,25 +4022,433 @@ void WorldMapGpuItem::rebuildGeometryBatch()
     if (m_viewSpanLon < 220.0) lonStep = 20.0;
     if (m_viewSpanLon < 130.0) lonStep = 10.0;
     if (m_viewSpanLon < 75.0) lonStep = 5.0;
-    double const leftLon = m_viewCenterLon - 0.5 * m_viewSpanLon;
-    double const rightLon = m_viewCenterLon + 0.5 * m_viewSpanLon;
-    double const startLon = std::floor(leftLon / lonStep) * lonStep;
-    for (double lon = startLon; lon <= rightLon; lon += lonStep) {
-        qreal const x = projectLonLatToPoint(QPointF(lon, m_viewCenterLat)).x();
-        m_batch.gridLines.push_back(QPointF(x, rect.top()));
-        m_batch.gridLines.push_back(QPointF(x, rect.bottom()));
-    }
-
     double latStep = 20.0;
     if (m_viewSpanLat < 110.0) latStep = 10.0;
     if (m_viewSpanLat < 55.0) latStep = 5.0;
-    double const topLat = m_viewCenterLat + 0.5 * m_viewSpanLat;
-    double const bottomLat = m_viewCenterLat - 0.5 * m_viewSpanLat;
-    double const startLat = std::floor(bottomLat / latStep) * latStep;
-    for (double lat = startLat; lat <= topLat; lat += latStep) {
-        qreal const y = projectLonLatToPoint(QPointF(m_viewCenterLon, lat)).y();
-        m_batch.gridLines.push_back(QPointF(rect.left(), y));
-        m_batch.gridLines.push_back(QPointF(rect.right(), y));
+
+    auto appendProjectedLine = [&rect, this](QVector<QPointF>* target,
+                                               bool meridian, double value) {
+        if (!target) {
+            return;
+        }
+        QPointF previous;
+        bool havePrevious = false;
+        constexpr int steps = 72;
+        for (int index = 0; index <= steps; ++index) {
+            double const fraction = static_cast<double>(index) / steps;
+            QPointF const lonLat = meridian
+                ? QPointF(value, -89.0 + 178.0 * fraction)
+                : QPointF(-180.0 + 360.0 * fraction, value);
+            QPointF const current = projectLonLatToPoint(lonLat);
+            bool const visible = rect.adjusted(-3.0, -3.0, 3.0, 3.0)
+                .contains(current);
+            if (visible && havePrevious
+                && QLineF(previous, current).length() < rect.width() * 0.36) {
+                *target << previous << current;
+            }
+            previous = current;
+            havePrevious = visible;
+        }
+    };
+
+    if (azimuthalProjectionEnabled()) {
+        for (double lon = -180.0; lon <= 180.0; lon += lonStep) {
+            appendProjectedLine(&m_batch.gridLines, true, lon);
+        }
+        for (double lat = -80.0; lat <= 80.0; lat += latStep) {
+            appendProjectedLine(&m_batch.gridLines, false, lat);
+        }
+    } else {
+        double const leftLon = m_viewCenterLon - 0.5 * m_viewSpanLon;
+        double const rightLon = m_viewCenterLon + 0.5 * m_viewSpanLon;
+        double const startLon = std::floor(leftLon / lonStep) * lonStep;
+        for (double lon = startLon; lon <= rightLon; lon += lonStep) {
+            qreal const x = projectLonLatToPoint(QPointF(lon, m_viewCenterLat)).x();
+            m_batch.gridLines.push_back(QPointF(x, rect.top()));
+            m_batch.gridLines.push_back(QPointF(x, rect.bottom()));
+        }
+
+        double const topLat = m_viewCenterLat + 0.5 * m_viewSpanLat;
+        double const bottomLat = m_viewCenterLat - 0.5 * m_viewSpanLat;
+        double const startLat = std::floor(bottomLat / latStep) * latStep;
+        for (double lat = startLat; lat <= topLat; lat += latStep) {
+            qreal const y = projectLonLatToPoint(QPointF(m_viewCenterLon, lat)).y();
+            m_batch.gridLines.push_back(QPointF(rect.left(), y));
+            m_batch.gridLines.push_back(QPointF(rect.right(), y));
+        }
+    }
+
+    if (m_timeZoneOverlayEnabled) {
+        int timeZoneLabels = 0;
+        for (int utcOffset = -12; utcOffset <= 12; ++utcOffset) {
+            double const longitude = utcOffset * 15.0;
+            appendProjectedLine(&m_batch.timeZoneLines, true, longitude);
+            if ((utcOffset % 2) != 0 || timeZoneLabels >= 13) {
+                continue;
+            }
+            QPointF const labelPoint = projectLonLatToPoint(
+                QPointF(longitude + 7.5, 0.0));
+            if (!rect.adjusted(8.0, 8.0, -8.0, -8.0).contains(labelPoint)) {
+                continue;
+            }
+            QString const label = utcOffset == 0 ? QStringLiteral("UTC")
+                : QStringLiteral("UTC%1%2")
+                    .arg(utcOffset > 0 ? QLatin1Char('+') : QLatin1Char('-'))
+                    .arg(qAbs(utcOffset));
+            m_labels.push_back({label, labelPoint + QPointF(3.0, -4.0),
+                                QRectF(), QColor(112, 223, 255, 165), false});
+            ++timeZoneLabels;
+        }
+    }
+
+    // A six-character Maidenhead square is smaller than a pixel when the
+    // whole continent is visible. Keep the source model and hit testing exact,
+    // but merge fine squares to their four-character parent for this frame.
+    bool const aggregateFineCoverage = m_viewSpanLon >= 55.0
+        || m_viewSpanLat >= 34.0;
+    QVector<CoverageCell> visualCoverageCells;
+    visualCoverageCells.reserve(m_coverageCells.size());
+    QHash<QString, int> visualCoverageIndex;
+    for (const CoverageCell& source : m_coverageCells) {
+        CoverageCell cell = source;
+        if (aggregateFineCoverage && cell.grid.size() >= 6) {
+            cell.grid = cell.grid.left(4);
+        }
+        int const existing = visualCoverageIndex.value(cell.grid, -1);
+        if (existing < 0) {
+            visualCoverageIndex.insert(cell.grid, visualCoverageCells.size());
+            visualCoverageCells.push_back(cell);
+            continue;
+        }
+
+        CoverageCell& merged = visualCoverageCells[existing];
+        merged.workedCount += cell.workedCount;
+        merged.confirmedCount += cell.confirmedCount;
+        merged.activeCount += cell.activeCount;
+        merged.pskCount += cell.pskCount;
+        merged.liveOpacity = qMax(merged.liveOpacity, cell.liveOpacity);
+        merged.split = merged.split || cell.split;
+        merged.worked = merged.worked || cell.worked;
+        merged.confirmed = merged.confirmed || cell.confirmed;
+        merged.active = merged.active || cell.active;
+        merged.missing = merged.missing || cell.missing;
+        merged.psk = merged.psk || cell.psk;
+        if (merged.historicalStatus.isEmpty() || cell.confirmed) {
+            merged.historicalStatus = cell.historicalStatus;
+        }
+        QString const incomingStatus = cell.liveStatus.trimmed().toUpper();
+        QString const currentStatus = merged.liveStatus.trimmed().toUpper();
+        if (currentStatus.isEmpty()
+            || incomingStatus == QStringLiteral("CQDX")
+            || incomingStatus == QStringLiteral("QRZ")
+            || (currentStatus != QStringLiteral("CQDX")
+                && currentStatus != QStringLiteral("QRZ")
+                && !incomingStatus.isEmpty())) {
+            merged.liveStatus = cell.liveStatus;
+        }
+    }
+
+    for (const CoverageCell& cell : visualCoverageCells) {
+        QPointF southWest;
+        QPointF northEast;
+        if (!maidenheadCellBounds(cell.grid, &southWest, &northEast)) {
+            continue;
+        }
+        QPointF const southEast(northEast.x(), southWest.y());
+        QPointF const northWest(southWest.x(), northEast.y());
+        QPointF const sw = projectLonLatToPoint(southWest);
+        QPointF const se = projectLonLatToPoint(southEast);
+        QPointF const ne = projectLonLatToPoint(northEast);
+        QPointF const nw = projectLonLatToPoint(northWest);
+        if (!azimuthalProjectionEnabled()
+            && (qAbs(se.x() - sw.x()) > rect.width() * 0.5
+                || qAbs(ne.x() - nw.x()) > rect.width() * 0.5)) {
+            continue;
+        }
+
+        auto liveGeometry = [this](const CoverageCell& coverage) {
+            QString const status = coverage.liveStatus.trimmed().toUpper();
+            int const opacityBucket = coverage.liveOpacity >= 0.72
+                ? 0 : (coverage.liveOpacity >= 0.45 ? 1 : 2);
+            if (status == QStringLiteral("CQDX")
+                || status == QStringLiteral("QRZ")
+                || coverage.missing) {
+                if (opacityBucket == 1) {
+                    return qMakePair(&m_batch.missingCoverageMediumTriangles,
+                                     &m_batch.missingCoverageMediumLines);
+                }
+                if (opacityBucket == 2) {
+                    return qMakePair(&m_batch.missingCoverageFadedTriangles,
+                                     &m_batch.missingCoverageFadedLines);
+                }
+                return qMakePair(&m_batch.missingCoverageTriangles,
+                                 &m_batch.missingCoverageLines);
+            }
+            if (status == QStringLiteral("WSPR")
+                || status == QStringLiteral("QSX")
+                || status == QStringLiteral("PSK")
+                || coverage.psk) {
+                if (opacityBucket == 1) {
+                    return qMakePair(&m_batch.pskCoverageMediumTriangles,
+                                     &m_batch.pskCoverageMediumLines);
+                }
+                if (opacityBucket == 2) {
+                    return qMakePair(&m_batch.pskCoverageFadedTriangles,
+                                     &m_batch.pskCoverageFadedLines);
+                }
+                return qMakePair(&m_batch.pskCoverageTriangles,
+                                 &m_batch.pskCoverageLines);
+            }
+            if (opacityBucket == 1) {
+                return qMakePair(&m_batch.activeCoverageMediumTriangles,
+                                 &m_batch.activeCoverageMediumLines);
+            }
+            if (opacityBucket == 2) {
+                return qMakePair(&m_batch.activeCoverageFadedTriangles,
+                                 &m_batch.activeCoverageFadedLines);
+            }
+            return qMakePair(&m_batch.activeCoverageTriangles,
+                             &m_batch.activeCoverageLines);
+        };
+        auto historyGeometry = [this](const CoverageCell& coverage) {
+            if (coverage.confirmed) {
+                return qMakePair(&m_batch.confirmedCoverageTriangles,
+                                 &m_batch.confirmedCoverageLines);
+            }
+            return qMakePair(&m_batch.workedCoverageTriangles,
+                             &m_batch.workedCoverageLines);
+        };
+
+        bool const hasHistory = cell.confirmed || cell.worked;
+        bool const hasLive = cell.active || cell.psk || cell.missing;
+        auto appendPin = [](const QPair<QVector<QPointF>*, QVector<QPointF>*>& geometry,
+                            const QPointF& center) {
+            QPointF const headTop(center.x(), center.y() - 7.0);
+            QPointF const headLeft(center.x() - 5.0, center.y() - 1.0);
+            QPointF const headRight(center.x() + 5.0, center.y() - 1.0);
+            QPointF const tip(center.x(), center.y() + 4.0);
+            (*geometry.first) << headTop << headLeft << tip
+                              << headTop << tip << headRight;
+            (*geometry.second) << tip << QPointF(center.x(), center.y() + 12.0);
+        };
+        if (m_coveragePushPins) {
+            if (cell.split && hasHistory && hasLive) {
+                appendPin(historyGeometry(cell), (sw + se + ne) / 3.0);
+                appendPin(liveGeometry(cell), (sw + ne + nw) / 3.0);
+            } else {
+                appendPin(hasHistory ? historyGeometry(cell) : liveGeometry(cell),
+                          (sw + se + ne + nw) / 4.0);
+            }
+            continue;
+        }
+        if (cell.split && hasHistory && hasLive) {
+            auto const history = historyGeometry(cell);
+            auto const live = liveGeometry(cell);
+            (*history.first) << sw << se << ne;
+            (*live.first) << sw << ne << nw;
+            (*history.second) << sw << se << se << ne << ne << nw << nw << sw;
+            (*live.second) << sw << ne;
+        } else {
+            auto const geometry = hasHistory
+                ? historyGeometry(cell)
+                : liveGeometry(cell);
+            (*geometry.first) << sw << se << ne << sw << ne << nw;
+            (*geometry.second) << sw << se << se << ne << ne << nw << nw << sw;
+        }
+    }
+
+    auto appendBoundarySegment = [&rect](QVector<QPointF>* triangles,
+                                         QVector<QPointF>* lines,
+                                         const QPointF& start,
+                                         const QPointF& end,
+                                         qreal width) {
+        if (!triangles && !lines) {
+            return;
+        }
+        QLineF const segment(start, end);
+        double const length = segment.length();
+        if (length < 0.001 || length >= rect.width() * 0.5) {
+            return;
+        }
+        QRectF const segmentBounds(start, end);
+        if (!segmentBounds.normalized().adjusted(-width, -width, width, width)
+                 .intersects(rect)) {
+            return;
+        }
+        if (lines) {
+            *lines << start << end;
+        }
+        if (!triangles) {
+            return;
+        }
+        double const halfWidth = width * 0.5;
+        QPointF const normal(-(end.y() - start.y()) / length * halfWidth,
+                             (end.x() - start.x()) / length * halfWidth);
+        QPointF const startLeft = start + normal;
+        QPointF const startRight = start - normal;
+        QPointF const endLeft = end + normal;
+        QPointF const endRight = end - normal;
+        *triangles << startLeft << endLeft << endRight
+                   << startLeft << endRight << startRight;
+    };
+
+    int geographicCoordinateTotal = 0;
+    int geographicCoordinateAccepted = 0;
+    int geographicCoordinateInvalid = 0;
+    int geographicCoordinateOffscreen = 0;
+    for (QVariant const& featureValue : m_geographicFeatures) {
+        QVariantMap const feature = featureValue.toMap();
+        QString const featureType = feature.value(QStringLiteral("type")).toString();
+        if (featureType == QStringLiteral("earthquake")) {
+            bool okLongitude = false;
+            bool okLatitude = false;
+            double const longitude = feature.value(QStringLiteral("longitude")).toDouble(&okLongitude);
+            double const latitude = feature.value(QStringLiteral("latitude")).toDouble(&okLatitude);
+            if (okLongitude && okLatitude) {
+                QPointF const point = projectLonLatToPoint(QPointF(longitude, latitude));
+                if (isInViewport(rect, point, 24.0)) {
+                    double const magnitude = feature.value(QStringLiteral("magnitude"), 0.0).toDouble();
+                    if (magnitude >= 6.0) {
+                        m_batch.earthquakeHighMarkers << point;
+                    } else if (magnitude >= 4.5) {
+                        m_batch.earthquakeMediumMarkers << point;
+                    } else {
+                        m_batch.earthquakeLowMarkers << point;
+                    }
+                }
+            }
+            continue;
+        }
+        QVector<QPointF>* const boundaryGeometry =
+            featureType == QStringLiteral("states")
+                ? &m_batch.stateBoundaryTriangles
+                : &m_batch.countyBoundaryTriangles;
+        QVector<QPointF>* const boundaryLines =
+            featureType == QStringLiteral("states")
+                ? &m_batch.stateBoundaryLines
+                : &m_batch.countyBoundaryLines;
+        qreal const boundaryWidth = featureType == QStringLiteral("states")
+            ? 2.6 : 1.15;
+        for (QVariant const& polygonValue
+             : feature.value(QStringLiteral("polygons")).toList()) {
+            for (QVariant const& ringValue : polygonValue.toList()) {
+                QVariantList const coordinates = ringValue.toList();
+                QPointF previous;
+                QPointF first;
+                QPointF lastDrawn;
+                bool havePrevious = false;
+                bool haveDrawnPoint = false;
+                // TIGER GeoJSON is intentionally dense. At a continental zoom
+                // adjacent source points are often below one physical pixel.
+                // Keep accumulating them until they create a visible segment;
+                // dropping them individually leaves a non-empty layer with no
+                // actual state/county geometry.
+                qreal const minimumDrawLength = featureType == QStringLiteral("states")
+                    ? 0.35 : 0.55;
+                for (QVariant const& coordinateValue : coordinates) {
+                    ++geographicCoordinateTotal;
+                    QPointF lonLat;
+                    if (!geographicCoordinateToLonLat(coordinateValue, &lonLat)) {
+                        ++geographicCoordinateInvalid;
+                        continue;
+                    }
+                    QPointF const current = projectLonLatToPoint(lonLat);
+                    if (!std::isfinite(current.x()) || !std::isfinite(current.y())) {
+                        ++geographicCoordinateInvalid;
+                        continue;
+                    }
+                    ++geographicCoordinateAccepted;
+                    if (!rect.adjusted(-rect.width(), -rect.height(),
+                                       rect.width(), rect.height()).contains(current)) {
+                        ++geographicCoordinateOffscreen;
+                    }
+                    if (!havePrevious) {
+                        first = current;
+                        lastDrawn = current;
+                        haveDrawnPoint = true;
+                    } else if (qAbs(current.x() - previous.x()) >= rect.width() * 0.5) {
+                        // Do not bridge a wrap/projection discontinuity.
+                        if (haveDrawnPoint
+                            && QLineF(lastDrawn, previous).length() >= 0.001) {
+                            appendBoundarySegment(boundaryGeometry, boundaryLines,
+                                                  lastDrawn, previous,
+                                                  boundaryWidth);
+                        }
+                        first = current;
+                        lastDrawn = current;
+                        haveDrawnPoint = true;
+                    } else if (QLineF(lastDrawn, current).length() >= minimumDrawLength) {
+                        appendBoundarySegment(boundaryGeometry, boundaryLines,
+                                              lastDrawn, current,
+                                              boundaryWidth);
+                        lastDrawn = current;
+                    }
+                    previous = current;
+                    havePrevious = true;
+                }
+                if (havePrevious && haveDrawnPoint
+                    && qAbs(first.x() - previous.x()) < rect.width() * 0.5) {
+                    if (QLineF(lastDrawn, previous).length() >= 0.001) {
+                        appendBoundarySegment(boundaryGeometry, boundaryLines,
+                                              lastDrawn, previous,
+                                              boundaryWidth);
+                    }
+                    if (QLineF(previous, first).length() >= 0.001) {
+                        appendBoundarySegment(boundaryGeometry, boundaryLines,
+                                              previous, first,
+                                              boundaryWidth);
+                    }
+                }
+            }
+        }
+    }
+
+    int operationalLabelCount = 0;
+    for (QVariant const& markerValue : m_operationalMarkers) {
+        QVariantMap const marker = markerValue.toMap();
+        bool okLon = false;
+        bool okLat = false;
+        double const lon = marker.value(QStringLiteral("longitude"))
+                               .toDouble(&okLon);
+        double const lat = marker.value(QStringLiteral("latitude"))
+                               .toDouble(&okLat);
+        if (!okLon || !okLat) {
+            continue;
+        }
+        QPointF const point = projectLonLatToPoint(QPointF(lon, lat));
+        if (!isInViewport(rect, point, 18.0)) {
+            continue;
+        }
+        QString const type = marker.value(QStringLiteral("type"))
+                                 .toString().trimmed().toUpper();
+        if (type == QStringLiteral("POTA")) {
+            m_batch.potaMarkers << point;
+        } else if (type == QStringLiteral("IOTA")) {
+            m_batch.iotaMarkers << point;
+        } else if (type == QStringLiteral("MOON")) {
+            m_batch.moonMarkers << point;
+        } else {
+            m_batch.wpxMarkers << point;
+        }
+        if (operationalLabelCount < 16) {
+            QString label = marker.value(QStringLiteral("label")).toString();
+            if (label.isEmpty()) {
+                label = marker.value(QStringLiteral("reference")).toString();
+            }
+            if (!label.isEmpty()) {
+                QColor const color = type == QStringLiteral("POTA")
+                    ? QColor(166, 255, 154, 235)
+                    : (type == QStringLiteral("IOTA")
+                       ? QColor(130, 236, 255, 235)
+                       : (type == QStringLiteral("MOON")
+                          ? QColor(235, 244, 255, 245)
+                          : QColor(255, 215, 145, 235)));
+                m_labels.push_back(
+                    {label.left(18), point + QPointF(7.0, -7.0),
+                     QRectF(), color});
+                ++operationalLabelCount;
+            }
+        }
     }
 
     if (m_hasHome) {
@@ -3014,6 +4549,30 @@ void WorldMapGpuItem::rebuildGeometryBatch()
     m_lastLineVertexCount = kGreatCircleSteps * 2 * (m_batch.genericPaths.size()
         + m_batch.incomingPaths.size()
         + m_batch.outgoingPaths.size());
+    m_lastStateBoundaryVertexCount = m_batch.stateBoundaryTriangles.size();
+    m_lastCountyBoundaryVertexCount = m_batch.countyBoundaryTriangles.size();
+    m_lastStateBoundaryLineVertexCount = m_batch.stateBoundaryLines.size();
+    m_lastCountyBoundaryLineVertexCount = m_batch.countyBoundaryLines.size();
+    QString const geographicDiagnostic = QStringLiteral(
+        "features=%1 stateTriangles=%2 stateLines=%3 countyTriangles=%4 countyLines=%5 geoCoords=%6/%7 invalid=%8 offscreen=%9 rect=%10x%11 coverageCells=%12 renderCells=%13 activeCoverageLines=%14")
+        .arg(m_geographicFeatures.size())
+        .arg(m_lastStateBoundaryVertexCount)
+        .arg(m_lastStateBoundaryLineVertexCount)
+        .arg(m_lastCountyBoundaryVertexCount)
+        .arg(m_lastCountyBoundaryLineVertexCount)
+        .arg(geographicCoordinateAccepted)
+        .arg(geographicCoordinateTotal)
+        .arg(geographicCoordinateInvalid)
+        .arg(geographicCoordinateOffscreen)
+        .arg(rect.width(), 0, 'f', 0)
+        .arg(rect.height(), 0, 'f', 0)
+        .arg(m_coverageCells.size())
+        .arg(visualCoverageCells.size())
+        .arg(m_batch.activeCoverageLines.size());
+    if (geographicDiagnostic != m_lastGeographicGeometryDiagnostic) {
+        m_lastGeographicGeometryDiagnostic = geographicDiagnostic;
+        qInfo().noquote() << "[MAPGEO]" << geographicDiagnostic;
+    }
     m_lastMarkerVertexCount = 6 * 2 * (m_batch.genericMarkers.size()
         + m_batch.incomingMarkers.size()
         + m_batch.outgoingMarkers.size()

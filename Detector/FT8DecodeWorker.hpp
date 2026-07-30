@@ -18,6 +18,11 @@ namespace decodium
 namespace ft8
 {
 
+// Stops the asynchronous hash-seed worker before Qt application teardown.
+// The worker uses Qt containers and regular expressions and must not outlive
+// the Qt runtime.
+void shutdownHashSeedWorker ();
+
 struct DecodeRequest
 {
   quint64 serial {0};

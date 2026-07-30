@@ -1,9 +1,16 @@
 #pragma once
 
 #include <QQuickPaintedItem>
+#include <QMetaObject>
+#include <QPointer>
+#include <QVariantList>
 #include <QTimer>
 
 #include "widgets/worldmapwidget.h"
+
+class MapExternalOverlayService;
+class MapBaseMapService;
+class QHoverEvent;
 
 class WorldMapItem : public QQuickPaintedItem
 {
@@ -18,6 +25,7 @@ public:
     bool lowSpecMode() const { return m_lowSpecMode; }
 
     Q_INVOKABLE void setHomeGrid(const QString& grid);
+    Q_INVOKABLE void setBaseMapEnabled(bool enabled);
     Q_INVOKABLE void setGreylineEnabled(bool enabled);
     Q_INVOKABLE void setDistanceInMiles(bool enabled);
     Q_INVOKABLE void setTransmitState(bool transmitting,
@@ -25,6 +33,14 @@ public:
                                       const QString& targetGrid,
                                       const QString& mode);
     Q_INVOKABLE void clearContacts();
+    Q_INVOKABLE void setCoverageCells(const QVariantList& cells);
+    Q_INVOKABLE void setCoveragePushPins(bool enabled);
+    Q_INVOKABLE void setTimeZoneOverlayEnabled(bool enabled);
+    Q_INVOKABLE void setOperationalMarkers(const QVariantList& markers);
+    Q_INVOKABLE void setGeographicFeatures(const QVariantList& features);
+    Q_INVOKABLE void setProjection(const QString& projection);
+    Q_INVOKABLE void setBaseMapService(QObject* service);
+    Q_INVOKABLE void setExternalOverlayService(QObject* service);
     Q_INVOKABLE void downgradeContactToBand(const QString& call);
     Q_INVOKABLE void addContact(const QString& call,
                                 const QString& sourceGrid,
@@ -46,18 +62,30 @@ public:
     // worldmapwidget.cpp). I metodi ritornano early senza effetto.
     Q_INVOKABLE void zoomIn(double factor = 1.5) { Q_UNUSED(factor); }
     Q_INVOKABLE void zoomOut(double factor = 1.5) { Q_UNUSED(factor); }
-    Q_INVOKABLE void resetView() {}
+    Q_INVOKABLE void resetView();
     Q_INVOKABLE void panBy(double deltaLonDeg, double deltaLatDeg)
     { Q_UNUSED(deltaLonDeg); Q_UNUSED(deltaLatDeg); }
+    Q_INVOKABLE void focusLocation(double longitude, double latitude,
+                                   double spanLongitude = 90.0,
+                                   double spanLatitude = 54.0);
     Q_INVOKABLE bool greylineEnabled() const { return true; }
 
     void paint(QPainter* painter) override;
 
 Q_SIGNALS:
     void contactClicked(const QString& call, const QString& grid);
+    void coverageCellHovered(const QVariantMap& details, qreal x, qreal y);
+    void coverageCellHoverEnded();
+    void coverageCellClicked(const QVariantMap& details, qreal x, qreal y);
+    void operationalMarkerClicked(const QVariantMap& details, qreal x, qreal y);
+    void geographicFeatureClicked(const QVariantMap& details, qreal x, qreal y);
+    void geographicFeatureHovered(const QVariantMap& details, qreal x, qreal y);
+    void geographicFeatureHoverEnded();
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
+    void hoverMoveEvent(QHoverEvent* event) override;
+    void hoverLeaveEvent(QHoverEvent* event) override;
     void itemChange(ItemChange change, const ItemChangeData& data) override;
 
 private:
@@ -79,12 +107,18 @@ private:
                               int contactsCount = 0, bool cacheRebuild = false);
 
     WorldMapWidget m_widget;
+    QPointer<MapBaseMapService> m_baseMapService;
+    QMetaObject::Connection m_baseMapConnection;
+    QPointer<MapExternalOverlayService> m_externalOverlayService;
+    QMetaObject::Connection m_externalOverlayConnection;
     QTimer m_repaintTimer;
     bool m_dirty {true};
     bool m_hardwareConfigured {false};
     bool m_gpuAccelerated {false};
     bool m_lowSpecMode {false};
     bool m_userActive {true};
+    QString m_hoveredCoverageGrid;
+    QVariantMap m_hoveredGeographicFeature;
     int m_baseRepaintIntervalMs {250};
     int m_repaintIntervalMs {250};
     int m_animationIntervalActiveMs {60};

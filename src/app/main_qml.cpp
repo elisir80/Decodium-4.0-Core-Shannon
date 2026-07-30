@@ -21,6 +21,7 @@
 #include <QSGRendererInterface>
 #include <QTimer>
 #include <QDir>
+#include <QDirIterator>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
@@ -38,6 +39,7 @@
 #include <QList>
 #include <QLocale>
 #include <QWindow>
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -82,6 +84,8 @@
 #include "WorldMapItem.hpp"
 #include "WorldMapGpuItem.hpp"
 #include "Detector/FftCompat.hpp"
+#include "Detector/FT4DecodeWorker.hpp"
+#include "Detector/FT8DecodeWorker.hpp"
 #include "lib/init_random_seed.h"
 
 static void L(const char* msg) {
@@ -504,12 +508,71 @@ static QString sanitizedCacheComponent(QString value)
     return value.isEmpty() ? QStringLiteral("default") : value;
 }
 
-static QString windowsQmlDiskCachePath(const QString& configName)
+static QByteArray windowsQmlContentFingerprint(QString *qmlRootPath = nullptr)
+{
+    QString const qmlRoot = QDir(QCoreApplication::applicationDirPath())
+        .absoluteFilePath(QStringLiteral("qml"));
+    if (qmlRootPath)
+        *qmlRootPath = qmlRoot;
+
+    QDir const rootDir {qmlRoot};
+    if (!rootDir.exists())
+        return QCryptographicHash::hash(
+            QByteArrayLiteral("missing-qml-root\n") + qmlRoot.toUtf8(),
+            QCryptographicHash::Sha256).toHex().left(16);
+
+    QStringList qmlFiles;
+    QDirIterator iterator(
+        qmlRoot,
+        QStringList {
+            QStringLiteral("*.qml"),
+            QStringLiteral("*.js"),
+            QStringLiteral("*.mjs"),
+            QStringLiteral("qmldir"),
+            QStringLiteral("*.qmltypes")
+        },
+        QDir::Files | QDir::Readable,
+        QDirIterator::Subdirectories);
+    while (iterator.hasNext())
+        qmlFiles.push_back(iterator.next());
+
+    std::sort(qmlFiles.begin(), qmlFiles.end(),
+              [&rootDir](const QString& lhs, const QString& rhs) {
+                  return rootDir.relativeFilePath(lhs)
+                      .compare(rootDir.relativeFilePath(rhs), Qt::CaseSensitive) < 0;
+              });
+
+    QCryptographicHash hash {QCryptographicHash::Sha256};
+    for (const QString& filePath : qmlFiles) {
+        QString relativePath = rootDir.relativeFilePath(filePath);
+        relativePath.replace('\\', '/');
+        hash.addData(relativePath.toUtf8());
+        hash.addData(QByteArrayLiteral("\n"));
+
+        QFile file {filePath};
+        if (!file.open(QIODevice::ReadOnly)) {
+            hash.addData(QByteArrayLiteral("<unreadable>\n"));
+            continue;
+        }
+        while (!file.atEnd())
+            hash.addData(file.read(64 * 1024));
+        hash.addData(QByteArrayLiteral("\n"));
+    }
+    return hash.result().toHex().left(16);
+}
+
+static QString windowsQmlDiskCachePath(const QString& configName,
+                                       QByteArray *qmlFingerprint = nullptr,
+                                       QString *qmlRootPath = nullptr)
 {
     QString basePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     if (basePath.isEmpty()) {
         basePath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     }
+
+    QByteArray const contentFingerprint = windowsQmlContentFingerprint(qmlRootPath);
+    if (qmlFingerprint)
+        *qmlFingerprint = contentFingerprint;
 
     QByteArray cacheSeed;
     cacheSeed += QDir::cleanPath(QCoreApplication::applicationDirPath()).toUtf8();
@@ -519,6 +582,8 @@ static QString windowsQmlDiskCachePath(const QString& configName)
     cacheSeed += qVersion();
     cacheSeed += '\n';
     cacheSeed += QSysInfo::buildAbi().toUtf8();
+    cacheSeed += '\n';
+    cacheSeed += contentFingerprint;
     if (!configName.isEmpty()) {
         cacheSeed += '\n';
         cacheSeed += configName.toUtf8();
@@ -545,13 +610,18 @@ static void configureWindowsQmlDiskCache(const QString& configName)
         return;
     }
 
-    QString const cachePath = windowsQmlDiskCachePath(configName);
+    QByteArray qmlFingerprint;
+    QString qmlRootPath;
+    QString const cachePath = windowsQmlDiskCachePath(
+        configName, &qmlFingerprint, &qmlRootPath);
     if (!QDir().mkpath(cachePath)) {
         L(("QML disk cache path could not be created: " + cachePath.toLocal8Bit()).constData());
         return;
     }
 
     qputenv("QML_DISK_CACHE_PATH", QDir::toNativeSeparators(cachePath).toLocal8Bit());
+    L(("QML content fingerprint: " + qmlFingerprint
+       + " root=" + QDir::toNativeSeparators(qmlRootPath).toLocal8Bit()).constData());
     L(("QML disk cache path isolated: " + cachePath.toLocal8Bit()).constData());
 }
 #endif
@@ -2010,6 +2080,8 @@ int main(int argc, char* argv[])
             instance->setProperty("decodiumShuttingDown", true);
         }
         g_shuttingDown.store(true, std::memory_order_relaxed);
+        decodium::ft8::shutdownHashSeedWorker();
+        decodium::ft4::shutdownHashSeedWorker();
     });
 
     L("bridge constructing");
