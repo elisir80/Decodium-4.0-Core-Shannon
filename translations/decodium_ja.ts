@@ -4697,6 +4697,78 @@ Error: %2</source>
         <source>unavailable</source>
         <translation>利用不可</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 バンド / %2 時間</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>アクティビティ</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>バンド別アクティビティ</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>バンドのランキング</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>最良</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>最良のバンド</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>直近 %1 時間を分析します</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>ローカル RX</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>ローカル TX</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>ローカル RX</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>ローカル TX</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>ローカル %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 局   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>アクティビティなし</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>この期間にバンドのアクティビティはありません</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>現在</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>

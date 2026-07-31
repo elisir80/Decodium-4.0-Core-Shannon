@@ -4696,6 +4696,78 @@ Error: %2</source>
         <source>unavailable</source>
         <translation>不可用</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 个波段 / %2 小时</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>活动</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>波段活动</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>波段排名</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>最佳</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>最佳波段</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>分析最近 %1 小时</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>本地 RX</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>本地 TX</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>本地 RX</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>本地 TX</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>本地 %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 个呼号   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>无活动</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>此时间窗内没有波段活动</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>现在</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>

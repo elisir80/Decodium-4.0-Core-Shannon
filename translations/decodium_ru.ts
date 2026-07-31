@@ -4699,6 +4699,78 @@ Error: %2</source>
         <source>unavailable</source>
         <translation>недоступно</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 диап. / %2 ч</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>АКТИВНОСТЬ</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>АКТИВНОСТЬ ПО ДИАПАЗОНАМ</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>РЕЙТИНГ ДИАПАЗОНОВ</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>ЛУЧШИЙ</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>ЛУЧШИЙ ДИАПАЗОН</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>Проанализировать последние %1 ч</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>ЛОКАЛЬНЫЙ RX</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>ЛОКАЛЬНЫЙ TX</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>Локальный RX</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>Локальный TX</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>Локально %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 позывных   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>Нет активности</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>Нет активности по диапазонам в этом окне</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>сейчас</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>

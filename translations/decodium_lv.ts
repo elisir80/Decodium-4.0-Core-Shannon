@@ -4711,6 +4711,78 @@ Error: %2</translation>
         <source>unavailable</source>
         <translation>nav pieejams</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 joslas / %2 h</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>AKTIVITĀTE</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>JOSLU AKTIVITĀTE</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>JOSLU RANGS</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>LABĀKĀ</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>LABĀKĀ JOSLA</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>Analizēt pēdējās %1 stundas</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>VIETĒJAIS RX</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>VIETĒJAIS TX</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>Vietējais RX</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>Vietējais TX</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>Vietēji %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 izsaukumi   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>Nav aktivitātes</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>Šajā logā nav joslu aktivitātes</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>tagad</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>

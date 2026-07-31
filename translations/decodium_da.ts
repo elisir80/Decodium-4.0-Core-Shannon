@@ -4698,6 +4698,78 @@ Fejl: %2</translation>
         <source>unavailable</source>
         <translation>utilgængelig</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 bånd / %2 t</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>AKTIVITET</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>BÅNDAKTIVITET</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>BÅNDRANGERING</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>BEDSTE</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>BEDSTE BÅND</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>Analysér de seneste %1 timer</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>LOKAL RX</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>LOKAL TX</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>Lokal RX</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>Lokal TX</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>Lokalt %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 kald   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>Ingen aktivitet</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>Ingen båndaktivitet i dette tidsrum</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>nu</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>

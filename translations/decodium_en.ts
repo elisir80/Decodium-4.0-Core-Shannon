@@ -4707,6 +4707,78 @@ Error: %2</translation>
         <source>unavailable</source>
         <translation>unavailable</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 bands / %2h</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>ACTIVITY</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>BAND ACTIVITY</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>BAND RANKING</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>BEST</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>BEST BAND</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>Analyse the last %1 hours</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>LOCAL RX</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>LOCAL TX</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>Local RX</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>Local TX</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>No activity</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>No band activity in this window</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>now</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>

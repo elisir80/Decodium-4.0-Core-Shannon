@@ -4852,6 +4852,78 @@ Error: %2</translation>
         <source>unavailable</source>
         <translation>no disponible</translation>
     </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 bandas / %2 h</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>ACTIVIDAD</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>ACTIVIDAD POR BANDA</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>CLASIFICACIÓN DE BANDAS</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>MEJOR</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>MEJOR BANDA</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>Analizar las últimas %1 horas</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>RX LOCAL</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>TX LOCAL</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>RX local</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>TX local</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 indicativos   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>Sin actividad</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>Sin actividad por banda en esta ventana</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>ahora</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
