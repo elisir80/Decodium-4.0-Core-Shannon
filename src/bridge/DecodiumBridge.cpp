@@ -35714,6 +35714,15 @@ void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
         recentStallCount = m_ft8MicroStallGuard.recentStallCount();
     }
     if (activated) {
+        if (!m_gpuPanadapterFftStallGuard.exchange(true)) {
+            // GPU FFT retries perform work on the scene-graph path.  Once the
+            // FT8 guard observes real main-thread stalls, keep that path out
+            // of the recovery loop until several clean periods have passed.
+            m_lastGpuPanadapterProbeMs = nowMs;
+            setGpuPanadapterFftAvailable(false,
+                QStringLiteral("FT8 main-thread micro-stall guard"));
+            bridgeLog(QStringLiteral("Panadapter GPU FFT paused by FT8 micro-stall guard; async CPU fallback remains active"));
+        }
         if (legacyBackendAvailable()) {
             m_legacyBackend->setFt8DeepThreadPenalty(true);
         }
@@ -35743,6 +35752,12 @@ void DecodiumBridge::noteFt8AdaptivePeriod(qint64 periodId)
 
     if (legacyBackendAvailable()) {
         m_legacyBackend->setFt8DeepThreadPenalty(false);
+    }
+    if (m_gpuPanadapterFftStallGuard.exchange(false)) {
+        // Do not blindly re-enable the GPU path: make it eligible for the
+        // normal probe after the FT8 guard has observed clean periods.
+        m_lastGpuPanadapterProbeMs = 0;
+        bridgeLog(QStringLiteral("Panadapter GPU FFT retry eligible after FT8 micro-stall guard restored"));
     }
     bridgeLog(QStringLiteral("FT8 micro-stall guard restored: %1 clean periods, normal DEEP thread budget active")
                   .arg(decodium::decode::Ft8MicroStallGuard::CleanPeriodsToRestore));
@@ -42238,6 +42253,8 @@ void DecodiumBridge::onSpectrumTimer()
             bool const acceleratedLegacyVisual =
                 !directVisualFastFeed
                 && m_legacyPcmSpectrumFeed
+                && !m_lowCpuModeEnabled
+                && !m_gpuPanadapterFftStallGuard.load()
                 && m_forceGpuPanadapterFft.load()
                 && m_gpuPanadapterFftAvailable.load();
             qint64 minPanadapterIntervalMs = directVisualFastFeed
@@ -42309,8 +42326,15 @@ void DecodiumBridge::onSpectrumTimer()
             float const freqMaxHz = static_cast<int>(nfbSnapshot / freqPerBin) * freqPerBin;
             uint64_t const serial = ++m_panadapterComputeSerial;
 
-            bool const forceGpuPanadapterFft = m_forceGpuPanadapterFft.load();
-            bool gpuPanadapterFftAvailable = m_gpuPanadapterFftAvailable.load();
+            bool const gpuPanadapterFftAllowed =
+                !m_lowCpuModeEnabled
+                && !m_gpuPanadapterFftStallGuard.load();
+            bool const forceGpuPanadapterFft =
+                m_forceGpuPanadapterFft.load()
+                && gpuPanadapterFftAllowed;
+            bool gpuPanadapterFftAvailable =
+                m_gpuPanadapterFftAvailable.load()
+                && gpuPanadapterFftAllowed;
             if (!gpuPanadapterFftAvailable
                 && forceGpuPanadapterFft
                 && !remoteWaterfallNeedsCpu
@@ -43111,7 +43135,7 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
     }
 }
 
-void DecodiumBridge::startAudioCapture()
+void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
 {
     MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
                                QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
@@ -43402,6 +43426,34 @@ void DecodiumBridge::startAudioCapture()
         .arg(static_cast<int>(channel))
         .arg(rxFramesPerBuffer);
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (watchdogRecovery && m_soundInput) {
+        // Keep the QAudioSource object alive for a watchdog recovery.  On
+        // Qt 6.11 + PipeWire, a stop/delete/create cycle can leave a posted
+        // QtMultimedia event aimed at a retired backend object and abort with
+        // "pure virtual method called" on the main thread.
+        bridgeLog(QStringLiteral("SoundInput::restart non-destructive watchdog recovery device=%1 id=%2")
+                      .arg(selectedDevice.description(),
+                           audioDeviceIdSettingForLog(selectedDeviceId)));
+        m_lastAudioCaptureStartKey = startKey;
+        m_lastAudioCaptureStartMs = nowMs;
+        m_activeRxInputDeviceName = selectedDevice.description().trimmed();
+        m_activeRxInputDeviceId = selectedDeviceId;
+        m_rxAudioStartupStartMs = nowMs;
+        m_pendingRxAudioStartupHealthLog = true;
+        m_audioUnhealthyStartMs = 0;
+        m_audioWatchdogIgnoreUntilMs = nowMs + 5000;
+        if (m_audioSink) {
+            m_audioSink->resetDecimationPhase();
+        }
+        m_soundInput->restart(selectedDevice, rxFramesPerBuffer, m_audioSink,
+                              downSampleFactor, channel);
+        m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
+        trace.addDetail(QStringLiteral("watchdog_safe_recovery=1 selected=[%1] selected_id=%2")
+                            .arg(selectedDevice.description(),
+                                 audioDeviceIdSettingForLog(selectedDeviceId)));
+        emit statusMessage(QStringLiteral("Audio RX recovery in corso: ") + selectedDevice.description());
+        return;
+    }
     bool const recentAudioStart =
         m_soundInput
         && m_lastAudioCaptureStartMs > 0
@@ -43649,7 +43701,6 @@ void DecodiumBridge::handleAudioHealth(double rms,
     constexpr qint64 kOverdriveWarnMs = 3000;
     constexpr qint64 kOverdriveLogCooldownMs = 10000;
     constexpr qint64 kUnhealthyMs = 8000;
-    constexpr qint64 kRestartCooldownMs = 45000;
     constexpr qint64 kLogCooldownMs = 10000;
 
     const double crestFactor = rms > 1e-9 ? peak / rms : 999.0;
@@ -43751,26 +43802,25 @@ void DecodiumBridge::handleAudioHealth(double rms,
         squareLikeBlock ? QStringLiteral("square-like")
                         : clippedBlock ? QStringLiteral("clipped")
                                        : QStringLiteral("flat");
-    const QString reason =
-        QStringLiteral("%1 RX audio rms=%2 peak=%3 crest=%4 range=%5 clipped=%6/%7 unhealthy_ms=%8")
-            .arg(kind)
-            .arg(rms, 0, 'g', 4)
-            .arg(peak, 0, 'g', 4)
-            .arg(crestFactor, 0, 'g', 4)
-            .arg(dynamicRange)
-            .arg(clippedSamples)
-            .arg(samples)
-            .arg(unhealthyForMs);
-
-    if (now - m_lastAudioWatchdogRestartMs < kRestartCooldownMs) {
-        if (now - m_lastAudioWatchdogLogMs >= kLogCooldownMs) {
-            bridgeLog(QStringLiteral("Audio watchdog: unhealthy RX audio in cooldown (%1)").arg(reason));
-            m_lastAudioWatchdogLogMs = now;
-        }
-        return;
+    // This callback is proof that capture is alive.  A silent, clipped or
+    // square-like PCM stream may need user intervention, but tearing down a
+    // healthy QAudioSource cannot repair its content and is unsafe on Qt 6.11
+    // PipeWire: immediate source recreation can deliver a stale Multimedia
+    // event to a retired backend object.  Keep the Auto-CQ health gate armed,
+    // report the condition, and reserve capture recovery for the no-callback
+    // watchdog paths (waterfall/post-TX recovery).
+    if (now - m_lastAudioWatchdogLogMs >= kLogCooldownMs) {
+        bridgeLog(QStringLiteral("Audio watchdog: RX stream still delivers %1 samples; capture retained rms=%2 peak=%3 crest=%4 range=%5 clipped=%6/%7 unhealthy_ms=%8")
+                      .arg(kind)
+                      .arg(rms, 0, 'g', 4)
+                      .arg(peak, 0, 'g', 4)
+                      .arg(crestFactor, 0, 'g', 4)
+                      .arg(dynamicRange)
+                      .arg(clippedSamples)
+                      .arg(samples)
+                      .arg(unhealthyForMs));
+        m_lastAudioWatchdogLogMs = now;
     }
-
-    restartAudioCaptureFromWatchdog(reason);
 }
 
 void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMode)
@@ -43920,7 +43970,6 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
     bridgeLog(QStringLiteral("Audio watchdog: restarting RX capture (%1)").arg(reason));
     emit statusMessage(QStringLiteral("Audio RX riavviato: watchdog audio"));
 
-    stopAudioCapture();
     m_audioWatchdogIgnoreUntilMs = now + 5000;
     resetRxPeriodAccumulation(true);
     m_spectrumBuf.clear();
@@ -43936,11 +43985,45 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         m_asyncAudioPos.store(0, std::memory_order_release);
     }
 
+    // A source that is still delivering a Qt audio stream gets a safe reset
+    // first.  The full stop/delete/create lifecycle is delayed until we know
+    // that no PCM callback followed the reset; this avoids the Qt 6.11
+    // PipeWire pure-virtual abort observed during immediate recreation.
+    if (m_soundInput && !m_tciAudioCaptureActive) {
+        quint64 const recoverySerial = ++m_audioWatchdogRecoverySerial;
+        startAudioCapture(true);
+        QTimer::singleShot(3500, this, [this, recoverySerial, now, reason]() {
+            if (recoverySerial != m_audioWatchdogRecoverySerial
+                || !m_monitoring
+                || m_transmitting
+                || m_tuning
+                || !m_soundInput
+                || m_tciAudioCaptureActive) {
+                return;
+            }
+            if (m_lastAudioHealthMs >= now) {
+                bridgeLog(QStringLiteral("Audio watchdog: non-destructive recovery received PCM callback (%1)")
+                              .arg(reason));
+                return;
+            }
+
+            bridgeLog(QStringLiteral("Audio watchdog: safe recovery produced no PCM callback; escalating to full reopen (%1)")
+                          .arg(reason));
+            stopAudioCapture();
+            startAudioCapture();
+        });
+        return;
+    }
+
+    stopAudioCapture();
     startAudioCapture();
 }
 
 void DecodiumBridge::stopAudioCapture()
 {
+    // Cancel a pending watchdog fallback before any deliberate stop (mode or
+    // device change) can replace the capture configuration.
+    ++m_audioWatchdogRecoverySerial;
     m_lastAudioCaptureStartKey.clear();
     m_lastAudioCaptureStartMs = 0;
     if (m_tciAudioCaptureActive) {

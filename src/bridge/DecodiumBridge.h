@@ -2677,6 +2677,7 @@ private:
     qint64             m_audioUnhealthyStartMs {0};
     qint64             m_lastAudioWatchdogRestartMs {0};
     qint64             m_lastAudioWatchdogLogMs {0};
+    quint64            m_audioWatchdogRecoverySerial {0};
     qint64             m_audioWatchdogIgnoreUntilMs {0};
     qint64             m_audioOverdriveStartMs {0};
     qint64             m_lastAudioOverdriveWarningMs {0};
@@ -3200,6 +3201,7 @@ private:
     std::atomic<uint64_t> m_panadapterComputeSerial {0};
     std::atomic_bool m_gpuPanadapterFftAvailable {true};
     std::atomic_bool m_forceGpuPanadapterFft {true};
+    std::atomic_bool m_gpuPanadapterFftStallGuard {false};
     qint64 m_lastGpuPanadapterProbeMs {0};
     QList<QPointer<PanadapterItem>> m_panadapterItems;
 
@@ -3471,7 +3473,7 @@ private:
     QStringList parseFt8Row(const QString& row) const;
     QStringList parseWsprRow(const QString& row) const;
     QStringList parseJt65Row(const QString& row) const;
-    void startAudioCapture();
+    void startAudioCapture(bool watchdogRecovery = false);
     void stopAudioCapture();
     void scheduleAudioDeviceRefresh(int delayMs = 250, bool verboseLog = false);
     void refreshAudioDeviceCache(const QString& reason, bool verboseLog, bool emitSignals = true);
