@@ -10201,12 +10201,14 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // UTC display timer
     m_utcTimer = new QTimer(this);
+    m_utcTimer->setObjectName(QStringLiteral("decodiumUtcTimer"));
     m_utcTimer->setInterval(1000);
     connect(m_utcTimer, &QTimer::timeout, this, &DecodiumBridge::onUtcTimer);
     m_utcTimer->start();
 
     // Spectrum timer: emette dati FFT per la waterfall (intervallo configurabile)
     m_spectrumTimer = new QTimer(this);
+    m_spectrumTimer->setObjectName(QStringLiteral("decodiumSpectrumTimer"));
     m_spectrumTimer->setTimerType(Qt::PreciseTimer);
     {
         QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
@@ -10223,6 +10225,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_processGpuSampleInitialized = decodiumCurrentProcessGpuTimeNs(&m_lastProcessGpuTimeNs);
     m_processGpuSampleClock.start();
     m_processCpuTimer = new QTimer(this);
+    m_processCpuTimer->setObjectName(QStringLiteral("decodiumProcessUsageTimer"));
     m_processCpuTimer->setInterval(2000);
     connect(m_processCpuTimer, &QTimer::timeout, this, &DecodiumBridge::updateProcessCpuUsage);
     connect(m_processCpuTimer, &QTimer::timeout, this, &DecodiumBridge::updateProcessGpuUsage);
@@ -10231,12 +10234,14 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // Main-thread stall probe: logs only visible event-loop delays, with FT slot phase.
     m_uiStallClock.start();
     m_uiStallTimer = new QTimer(this);
+    m_uiStallTimer->setObjectName(QStringLiteral("decodiumUiStallTimer"));
     m_uiStallTimer->setInterval(100);
     connect(m_uiStallTimer, &QTimer::timeout, this, &DecodiumBridge::updateUiStallDiagnostics);
     m_uiStallTimer->start();
 
     // Async decode timer: per FT2 turbo async, decodifica ogni 100ms
     m_asyncDecodeTimer = new QTimer(this);
+    m_asyncDecodeTimer->setObjectName(QStringLiteral("decodiumAsyncDecodeTimer"));
     m_asyncDecodeTimer->setInterval(100);
     connect(m_asyncDecodeTimer, &QTimer::timeout, this, &DecodiumBridge::onAsyncDecodeTimer);
 
@@ -35706,32 +35711,39 @@ void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
     }
 
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    // Short QML/model updates are common on Windows and do not implicate the
+    // scene-graph FFT. Keep the decoder thread penalty responsive, but only
+    // move the panadapter off the GPU after a genuinely severe UI freeze.
+    static constexpr qint64 kGpuPanadapterPauseThresholdMs = 750;
     bool activated = false;
+    bool guardActive = false;
     int recentStallCount = 0;
     {
         QMutexLocker locker(&m_ft8MicroStallGuardMutex);
         activated = m_ft8MicroStallGuard.recordStall(nowMs, deltaMs);
+        guardActive = m_ft8MicroStallGuard.active();
         recentStallCount = m_ft8MicroStallGuard.recentStallCount();
     }
+    if (guardActive
+        && deltaMs >= kGpuPanadapterPauseThresholdMs
+        && !m_gpuPanadapterFftStallGuard.exchange(true)) {
+        m_lastGpuPanadapterProbeMs = nowMs;
+        setGpuPanadapterFftAvailable(false,
+            QStringLiteral("severe main-thread stall (%1 ms)").arg(deltaMs));
+        bridgeLog(QStringLiteral("Panadapter GPU FFT paused after severe main-thread stall (%1 ms); async CPU fallback remains active")
+                      .arg(deltaMs));
+    }
     if (activated) {
-        if (!m_gpuPanadapterFftStallGuard.exchange(true)) {
-            // GPU FFT retries perform work on the scene-graph path.  Once the
-            // FT8 guard observes real main-thread stalls, keep that path out
-            // of the recovery loop until several clean periods have passed.
-            m_lastGpuPanadapterProbeMs = nowMs;
-            setGpuPanadapterFftAvailable(false,
-                QStringLiteral("FT8 main-thread micro-stall guard"));
-            bridgeLog(QStringLiteral("Panadapter GPU FFT paused by FT8 micro-stall guard; async CPU fallback remains active"));
-        }
         if (legacyBackendAvailable()) {
             m_legacyBackend->setFt8DeepThreadPenalty(true);
         }
-        bridgeLog(QStringLiteral("FT8 micro-stall guard active: bridge=0x%1 stalls=%2 windowMs=%3 thresholdMs=%4 deepThreadsPenalty=1 restoreCleanPeriods=%5")
+        bridgeLog(QStringLiteral("FT8 micro-stall guard active: bridge=0x%1 stalls=%2 windowMs=%3 thresholdMs=%4 deepThreadsPenalty=1 restoreCleanPeriods=%5 gpuPauseThresholdMs=%6")
                       .arg(reinterpret_cast<quintptr>(this), 0, 16)
                       .arg(recentStallCount)
                       .arg(decodium::decode::Ft8MicroStallGuard::ObservationWindowMs)
                       .arg(decodium::decode::Ft8MicroStallGuard::StallThresholdMs)
-                      .arg(decodium::decode::Ft8MicroStallGuard::CleanPeriodsToRestore));
+                      .arg(decodium::decode::Ft8MicroStallGuard::CleanPeriodsToRestore)
+                      .arg(kGpuPanadapterPauseThresholdMs));
     }
 }
 

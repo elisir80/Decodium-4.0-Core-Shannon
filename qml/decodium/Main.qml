@@ -39,7 +39,6 @@ ApplicationWindow {
     property bool startupWaterfallVisualReady: !startupVisualStagingEnabled
     property bool startupLiveMapVisualReady: !startupVisualStagingEnabled
     property bool startupSettingsSavePending: false
-    property bool settingsDialogWarmupRequested: false
     property bool decodePanelLayoutSaved: false
     property int savedPeriod1PanelWidth: 400
     property int savedRxFreqPanelWidth: 400
@@ -71,51 +70,6 @@ ApplicationWindow {
             return progress >= 8 && progress <= 22
         }
         return true
-    }
-
-    function settingsDialogWarmupCanRun() {
-        if (!bridge)
-            return true
-        if (bridge.transmitting || bridge.tuning)
-            return false
-        if (!startupWaterfallVisualReady || !startupLiveMapVisualReady)
-            return false
-
-        var mode = String(bridge.mode || "").toUpperCase()
-        var progress = Number(bridge.periodProgress || 0)
-        if (mode === "FT8")
-            return progress >= 3.0 && progress <= 9.0
-        if (mode === "FT4")
-            return progress >= 3.0 && progress <= 5.5
-        return true
-    }
-
-    function warmSettingsDialogWhenQuiet(reason) {
-        if (settingsDialogWarmupRequested)
-            return
-        if (settingsDialogLoader.item) {
-            settingsDialogWarmupRequested = true
-            var loadedSettings = settingsDialogLoader.item
-            if (loadedSettings && loadedSettings.warmUpPopup)
-                loadedSettings.warmUpPopup()
-            return
-        }
-        if (!settingsDialogWarmupCanRun()) {
-            settingsDialogWarmupTimer.interval = 3000
-            settingsDialogWarmupTimer.restart()
-            return
-        }
-
-        settingsDialogWarmupRequested = true
-        settingsDialogLoader.warmupLoadStartedMs = Date.now()
-        settingsDialogLoader.pendingAction = function(item) {
-            var elapsed = settingsDialogLoader.warmupLoadStartedMs > 0
-                    ? Math.round(Date.now() - settingsDialogLoader.warmupLoadStartedMs) : -1
-            console.log("Lazy component warmed: SettingsDialog reason=" + reason + " elapsed_ms=" + elapsed)
-            if (item && item.warmUpPopup)
-                item.warmUpPopup()
-        }
-        settingsDialogLoader.active = true
     }
 
     function maybeFinishStartupWaterfallVisualStage(reason) {
@@ -501,7 +455,6 @@ ApplicationWindow {
             startupLiveMapStageTimer.restart()
         }
         firstUseWarmupTimer.restart()
-        settingsDialogWarmupTimer.restart()
         console.log("Main.qml window shown at " + x + "," + y + " size " + width + "x" + height)
     }
 
@@ -576,13 +529,6 @@ ApplicationWindow {
         repeat: false
         running: false
         onTriggered: mainWindow.restoreLiveMapPopoutAfterStartup()
-    }
-    Timer {
-        id: settingsDialogWarmupTimer
-        interval: 6000
-        repeat: false
-        running: false
-        onTriggered: warmSettingsDialogWhenQuiet("idle-preload")
     }
     // Funzione helper chiamabile da qualsiasi parte del QML
     function scheduleSave() {
@@ -2154,11 +2100,9 @@ ApplicationWindow {
     function openMacroDialog() { runWhenLoaded(macroDialogLoader, function(item) { item.open() }) }
     function openAstroWindow() { runWhenLoaded(astroWindowLoader, function(item) { item.open() }) }
     function openSettingsDialog() {
-        settingsDialogWarmupRequested = true
         runWhenLoaded(settingsDialogLoader, function(item) { item.open() })
     }
     function openSettingsTab(tabIndex) {
-        settingsDialogWarmupRequested = true
         runWhenLoaded(settingsDialogLoader, function(item) { item.openTab(tabIndex) })
     }
     function openMamWindow() {
@@ -10463,7 +10407,6 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         asynchronous: true
         source: "components/SettingsDialog.qml"
         property var pendingAction: null
-        property double warmupLoadStartedMs: 0
         onLoaded: {
             console.log("Lazy component loaded: SettingsDialog")
             if (pendingAction) {

@@ -5175,10 +5175,9 @@ Rectangle {
         function onCoverageChanged() {
             root.syncCoverage()
         }
-        function onFiltersChanged() {
-            if (root.visible)
-                root.scheduleRebuild()
-        }
+        // Snapshot refreshes also emit filtersChanged. Coverage and roster
+        // have dedicated incremental signals, so a full contact replay here
+        // would block the UI after every decode cycle.
         function onLiveLayerEnabledChanged() {
             if (!root.worldMap)
                 return
@@ -5207,10 +5206,9 @@ Rectangle {
         onTriggered: {
             if (!root.visible || !root.worldMap)
                 return
-            root.worldMap.clearContacts()
-            if ((!root.mapLayers || root.mapLayers.liveLayerEnabled)
-                    && root.decoderFeedAllowed())
-                root.engine.replayWorldMapFeed()
+            // Spot analytics only changes PSK paths. Decoder contacts already
+            // arrive incrementally through worldMapContactAdded; clearing and
+            // replaying them here caused two full-map rebuilds per FT slot.
             root.syncSpotPaths()
             root.syncTxState()
         }

@@ -5,6 +5,7 @@
 #include <QCommandLineParser>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QEvent>
 #include <QMetaType>
 #include <QStyleFactory>
 #include <QFont>
@@ -20,6 +21,7 @@
 #include <QQuickWindow>
 #include <QSGRendererInterface>
 #include <QTimer>
+#include <QThread>
 #include <QDir>
 #include <QDirIterator>
 #include <QElapsedTimer>
@@ -123,6 +125,61 @@ static QString firstInstalledFontFamily(QStringList const& candidates)
 }
 
 static std::atomic_bool g_shuttingDown {false};
+
+// The render-thread QSG timings can tell us that the scene graph is waiting
+// for the GUI thread, but not which GUI event occupied that thread.  Time the
+// actual QApplication dispatch so a field log can name the receiver of a
+// blocking timer, queued invocation, or update request.  This is deliberately
+// limited to the application thread: worker-thread events are unrelated to
+// event-loop responsiveness and would only add noise to the diagnostic log.
+static const char* mainThreadEventTypeName(QEvent::Type type)
+{
+    switch (type) {
+    case QEvent::Timer: return "Timer";
+    case QEvent::MetaCall: return "MetaCall";
+    case QEvent::UpdateRequest: return "UpdateRequest";
+    case QEvent::UpdateLater: return "UpdateLater";
+    case QEvent::Polish: return "Polish";
+    case QEvent::PolishRequest: return "PolishRequest";
+    case QEvent::LayoutRequest: return "LayoutRequest";
+    case QEvent::DeferredDelete: return "DeferredDelete";
+    case QEvent::ChildAdded: return "ChildAdded";
+    case QEvent::ChildRemoved: return "ChildRemoved";
+    default: return "Other";
+    }
+}
+
+class DecodiumApplication final : public QApplication
+{
+public:
+    using QApplication::QApplication;
+
+    bool notify(QObject* receiver, QEvent* event) override
+    {
+        if (!receiver || !event || QThread::currentThread() != thread()) {
+            return QApplication::notify(receiver, event);
+        }
+
+        constexpr qint64 kSlowMainDispatchMs = 90;
+        QString const receiverClass = QString::fromLatin1(receiver->metaObject()->className());
+        QString const receiverName = receiver->objectName();
+        QEvent::Type const eventType = event->type();
+        QElapsedTimer timer;
+        timer.start();
+        bool const handled = QApplication::notify(receiver, event);
+        qint64 const elapsedMs = timer.elapsed();
+        if (elapsedMs >= kSlowMainDispatchMs) {
+            qWarning().noquote()
+                << "[MAINDISPATCH] slow_event"
+                << "elapsed_ms=" << elapsedMs
+                << "event=" << mainThreadEventTypeName(eventType)
+                << "event_type=" << static_cast<int>(eventType)
+                << "receiver=" << receiverClass
+                << "object=" << (receiverName.isEmpty() ? QStringLiteral("<unnamed>") : receiverName);
+        }
+        return handled;
+    }
+};
 
 #ifdef Q_OS_WIN
 static std::atomic_bool g_windowsD3d12DeviceFailed {false};
@@ -1162,7 +1219,7 @@ int main(int argc, char* argv[])
     setWindowsAppUserModelId();
 #endif
 
-    QApplication app(argc, argv);
+    DecodiumApplication app(argc, argv);
     DecodiumLogging::installCrashHandler();
     L("QApplication OK");
 

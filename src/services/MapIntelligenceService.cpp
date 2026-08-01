@@ -7188,6 +7188,47 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
         qWarning().noquote() << "[MAPINT] SQLite query failed:" << snapshot.error;
     }
 
+    // Snapshot queries intentionally return all map intelligence domains. On
+    // Windows, notifying every QML view after every decode made unchanged
+    // rosters, awards and charts rebuild together and stall the scene graph.
+    // Compare before moving the snapshot and only notify domains that changed.
+    bool const coverageDataChanged = snapshot.coverage != m_rawCoverage
+        || snapshot.qsoCount != m_qsoCount
+        || snapshot.workedGridCount != m_workedGridCount
+        || snapshot.confirmedGridCount != m_confirmedGridCount
+        || snapshot.activeGridCount != m_activeGridCount
+        || snapshot.missingGridCount != m_missingGridCount;
+    bool const rosterDataChanged = snapshot.roster != m_roster
+        || snapshot.liveSpotCount != m_liveSpotCount
+        || snapshot.rosterWantedCount != m_rosterWantedCount
+        || snapshot.rosterNewCount != m_rosterNewCount
+        || snapshot.rosterUnconfirmedCount != m_rosterUnconfirmedCount;
+    bool const rosterPreferencesDataChanged =
+        snapshot.rosterPreferences != m_rosterPreferences;
+    bool const awardsDataChanged = snapshot.awards != m_awards
+        || snapshot.awardMissing != m_awardMissing;
+    bool const alertsDataChanged = snapshot.alerts != m_alerts
+        || snapshot.unreadAlertCount != m_unreadAlertCount;
+    bool const spotAnalyticsDataChanged = snapshot.spotHeatmap != m_spotHeatmap
+        || snapshot.spotTimeline != m_spotTimeline
+        || snapshot.spotPaths != m_spotPaths;
+    bool const bandActivityDataChanged = snapshot.bandActivity != m_bandActivity
+        || snapshot.bandActivityTimeline != m_bandActivityTimeline
+        || snapshot.bandActivitySummary != m_bandActivitySummary;
+    bool const propagationDataChanged =
+        snapshot.propagationStatistics != m_propagationStatistics
+        || snapshot.propagationSummary != m_propagationSummary;
+    bool const rosterRulesDataChanged = snapshot.rosterRules != m_rosterRules;
+    bool const rosterMatricesDataChanged =
+        snapshot.rosterWantedMatrix != m_rosterWantedMatrix
+        || snapshot.rosterExceptionMatrix != m_rosterExceptionMatrix;
+    bool const statisticsDataChanged = snapshot.statistics != m_statistics;
+    bool const filtersDataChanged = snapshot.bands != m_availableBands
+        || snapshot.modes != m_availableModes
+        || snapshot.continents != m_availableContinents
+        || snapshot.dxcc != m_availableDxcc
+        || snapshot.sources != m_availableSources;
+
     m_rawCoverage = std::move(snapshot.coverage);
     m_roster = std::move(snapshot.roster);
     m_rosterPreferences = std::move(snapshot.rosterPreferences);
@@ -7253,18 +7294,18 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     m_layerModel->setCount(QStringLiteral("active"), m_activeGridCount);
     m_layerModel->setCount(QStringLiteral("missing"), m_missingGridCount);
     m_layerModel->setCount(QStringLiteral("psk"), snapshot.pskListenerCount);
-    emit filtersChanged();
-    emit rosterChanged();
-    emit rosterPreferencesChanged();
-    emit awardsChanged();
-    emit alertsChanged();
-    emit spotAnalyticsChanged();
-    emit bandActivityChanged();
-    emit propagationStatisticsChanged();
-    emit rosterRulesChanged();
-    emit rosterMatricesChanged();
-    emit statisticsChanged();
-    rebuildVisibleCoverage();
+    if (filtersDataChanged) emit filtersChanged();
+    if (rosterDataChanged) emit rosterChanged();
+    if (rosterPreferencesDataChanged) emit rosterPreferencesChanged();
+    if (awardsDataChanged) emit awardsChanged();
+    if (alertsDataChanged) emit alertsChanged();
+    if (spotAnalyticsDataChanged) emit spotAnalyticsChanged();
+    if (bandActivityDataChanged) emit bandActivityChanged();
+    if (propagationDataChanged) emit propagationStatisticsChanged();
+    if (rosterRulesDataChanged) emit rosterRulesChanged();
+    if (rosterMatricesDataChanged) emit rosterMatricesChanged();
+    if (statisticsDataChanged) emit statisticsChanged();
+    if (coverageDataChanged) rebuildVisibleCoverage();
 
     qInfo().noquote()
         << QStringLiteral("[MAPINT] snapshot qso=%1 worked=%2 confirmed=%3 active=%4 missing=%5 live=%6 roster=%7 wanted=%8 alerts=%9 db=%10")
