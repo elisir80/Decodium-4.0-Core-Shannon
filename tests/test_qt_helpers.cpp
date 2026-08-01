@@ -2667,6 +2667,7 @@ private:
     QTest::addColumn<QString> ("message");
 
     QTest::newRow ("standard") << "CQ K1ABC FN42";
+    QTest::newRow ("short-area2-callsign") << "A1B W9XYZ -01";
     QTest::newRow ("directed-cq-pota") << "CQ POTA IT9ARO JM68";
     QTest::newRow ("directed-cq-sota") << "CQ SOTA IT9ARO JM68";
     QTest::newRow ("directed-cq-bota") << "CQ BOTA 9H1SR JM68";

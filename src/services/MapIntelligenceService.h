@@ -132,6 +132,7 @@ class MapIntelligenceService final : public QObject
     Q_PROPERTY(bool missingLayerEnabled READ missingLayerEnabled WRITE setMissingLayerEnabled NOTIFY missingLayerEnabledChanged)
     Q_PROPERTY(bool pskLayerEnabled READ pskLayerEnabled WRITE setPskLayerEnabled NOTIFY pskLayerEnabledChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
+    Q_PROPERTY(bool offlineMode READ offlineMode NOTIFY offlineModeChanged)
     Q_PROPERTY(QString sourcePath READ sourcePath NOTIFY sourcePathChanged)
     Q_PROPERTY(QString databasePath READ databasePath CONSTANT)
     Q_PROPERTY(int qsoCount READ qsoCount NOTIFY coverageChanged)
@@ -276,6 +277,9 @@ public:
     int rosterUnconfirmedCount() const { return m_rosterUnconfirmedCount; }
     int rosterPreferenceCount() const { return m_rosterPreferences.size(); }
     int unreadAlertCount() const { return m_unreadAlertCount; }
+    bool offlineMode() const { return m_offlineMode; }
+
+    void setOfflineMode(bool offline);
     QString selectedGrid() const { return m_selectedGrid; }
     QVariantMap selectedGridSummary() const { return m_selectedGridSummary; }
     QVariantList selectedGridLive() const { return m_selectedGridLive; }
@@ -438,6 +442,7 @@ signals:
     void missingLayerEnabledChanged();
     void pskLayerEnabledChanged();
     void loadingChanged();
+    void offlineModeChanged();
     void sourcePathChanged();
     void gridDetailsChanged();
     void gridDetailsLoadingChanged();
@@ -456,6 +461,8 @@ private:
         QString band;
         QString mode;
         QString propagationMode;
+        QString satelliteName;
+        QString satelliteMode;
         QString qsoDate;
         QString timeOn;
         QString source {QStringLiteral("ADIF")};
@@ -468,6 +475,7 @@ private:
         QString iotaReference;
         QString wpxPrefix;
         double frequencyMhz {0.0};
+        double receiveFrequencyMhz {0.0};
         qint64 qsoEpoch {0};
         int cqZone {0};
         int ituZone {0};
@@ -684,7 +692,6 @@ private:
     void rebuildVisibleCoverage();
     void setLoading(bool loading);
     void setGridDetailsLoading(bool loading);
-    void setOfflineMode(bool offline);
     void saveSetting(const QString& key, const QVariant& value) const;
 
     MapLayerModel* m_layerModel {nullptr};
@@ -768,6 +775,7 @@ private:
     QString m_rosterTextFilter;
     QString m_rosterTextMode {QStringLiteral("No filter")};
     bool m_loading {false};
+    bool m_offlineMode {false};
     bool m_gridDetailsLoading {false};
     int m_rosterRetentionMinutes {5};
     int m_gridPrecision {4};

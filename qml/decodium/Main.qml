@@ -467,7 +467,7 @@ ApplicationWindow {
         id: saveTimer
         interval: 2000
         repeat: false
-        onTriggered: bridge.saveSettings()
+        onTriggered: bridge.saveSettingsAsync()
     }
     Timer {
         id: windowStateSaveTimer
@@ -718,7 +718,6 @@ ApplicationWindow {
         persistWorldClockPos()
         persistSettingsDialogIfOpen()
         persistWindowLayouts()
-        bridge.saveSettings()
         console.log("Main window closing - shutting down application")
         // Close all floating windows
         if (waterfallWindow) waterfallWindow.close()
@@ -2099,6 +2098,7 @@ ApplicationWindow {
     }
     function openMacroDialog() { runWhenLoaded(macroDialogLoader, function(item) { item.open() }) }
     function openAstroWindow() { runWhenLoaded(astroWindowLoader, function(item) { item.open() }) }
+    function openSatelliteWindow() { runWhenLoaded(satelliteWindowLoader, function(item) { item.open() }) }
     function openSettingsDialog() {
         runWhenLoaded(settingsDialogLoader, function(item) { item.open() })
     }
@@ -10397,6 +10397,31 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 pendingAction = null
                 action(item)
             }
+        }
+    }
+
+    Loader {
+        id: satelliteWindowLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/SatelliteWindow.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: SatelliteWindow")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
+    }
+
+    Connections {
+        target: bridge
+        ignoreUnknownSignals: true
+        function onSatelliteTrackingWindowRequested() {
+            openSatelliteWindow()
         }
     }
 

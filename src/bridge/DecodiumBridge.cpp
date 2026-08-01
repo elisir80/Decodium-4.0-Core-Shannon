@@ -8,6 +8,7 @@
 #include "DecodiumAlertManager.h"
 #include "DecodiumDiagnostics.h"
 #include "DecodiumPropagationManager.h"
+#include "SatelliteTrackingService.h"
 #include "MapExternalOverlayService.h"
 #include "MapIntelligenceService.h"
 #include "CallsignIntelligenceService.h"
@@ -490,6 +491,17 @@ static void bridgeLog(const QString& msg) {
 }
 
 static QThreadPool& decodeTextLogThreadPool()
+{
+    static QThreadPool* pool = [] {
+        auto* configured = new QThreadPool;
+        configured->setMaxThreadCount(1);
+        configured->setExpiryTimeout(30000);
+        return configured;
+    }();
+    return *pool;
+}
+
+static QThreadPool& settingsWriteThreadPool()
 {
     static QThreadPool* pool = [] {
         auto* configured = new QThreadPool;
@@ -9317,8 +9329,53 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     m_themeManager    = new DecodiumThemeManager(this);
     m_propagationManager = new DecodiumPropagationManager(this);
+    m_satelliteTracking = new SatelliteTrackingService(this);
+    if (m_satelliteTracking) {
+        connect(this, &DecodiumBridge::gridChanged, this, [this]() {
+            if (m_satelliteTracking) m_satelliteTracking->setObserverGrid(m_grid);
+        });
+        connect(this, &DecodiumBridge::frequencyChanged, this, [this]() {
+            if (m_satelliteTracking && !m_satelliteDopplerApplying) {
+                m_satelliteTracking->setNominalFrequencyHz(m_frequency);
+            }
+        });
+        connect(m_satelliteTracking, &SatelliteTrackingService::dopplerFrequencyChanged,
+                this, [this](double frequencyHz) {
+            if (!m_satelliteTracking || !m_satelliteTracking->dopplerTracking()
+                || !m_monitoring || m_transmitting || m_tuning || frequencyHz <= 0.0) {
+                return;
+            }
+            m_satelliteDopplerApplying = true;
+            setFrequency(frequencyHz);
+            m_satelliteDopplerApplying = false;
+        });
+        m_satelliteTracking->setObserverGrid(m_grid);
+        m_satelliteTracking->setNominalFrequencyHz(m_frequency);
+    }
     m_mapIntelligenceService = new MapIntelligenceService(this);
     if (m_mapIntelligenceService) {
+        auto applyOfflineMode = [this]() {
+            if (!m_mapIntelligenceService) return;
+            const bool offline = m_mapIntelligenceService->offlineMode();
+            if (offline) {
+                for (QNetworkAccessManager* manager :
+                     findChildren<QNetworkAccessManager*>()) {
+                    if (!manager) continue;
+                    for (QNetworkReply* reply : manager->findChildren<QNetworkReply*>()) {
+                        if (reply) reply->abort();
+                    }
+                }
+            }
+            if (m_propagationManager) m_propagationManager->setOfflineMode(offline);
+            if (m_satelliteTracking) m_satelliteTracking->setOfflineMode(offline);
+            if (m_callsignIntelligence) m_callsignIntelligence->setOfflineMode(offline);
+            if (m_dxCluster) m_dxCluster->setOfflineMode(offline);
+        };
+        connect(m_mapIntelligenceService, &MapIntelligenceService::offlineModeChanged,
+                this, applyOfflineMode);
+        connect(m_mapIntelligenceService, &MapIntelligenceService::offlineModeChanged,
+                this, &DecodiumBridge::offlineModeChanged);
+        applyOfflineMode();
         auto* const mapLayers = qobject_cast<MapLayerModel*>(
             m_mapIntelligenceService->layerModel());
         if (mapLayers) {
@@ -9366,6 +9423,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_omniRigCat->loadSettings();
     m_hamlibCat->loadSettings();
     m_dxCluster       = new DecodiumDxCluster(this);
+    if (m_mapIntelligenceService) {
+        m_dxCluster->setOfflineMode(m_mapIntelligenceService->offlineMode());
+    }
     QGuiApplication::setFont(fontSettingFont(QStringLiteral("Font"), QString(), 0));
     m_dxClusterSpotsNotifyTimer = new QTimer(this);
     m_dxClusterSpotsNotifyTimer->setSingleShot(true);
@@ -9837,6 +9897,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     // DXCC lookup (cty.dat)
     m_dxccLookup = new DxccLookup();
     m_callsignIntelligence = new CallsignIntelligenceService(this);
+    if (m_mapIntelligenceService) {
+        m_callsignIntelligence->setOfflineMode(m_mapIntelligenceService->offlineMode());
+    }
     m_callsignIntelligence->setDxccLookup(m_dxccLookup);
     m_callsignIntelligence->setOperatorCallsign(m_callsign);
     connect(this, &DecodiumBridge::callsignChanged, this, [this]() {
@@ -10472,9 +10535,24 @@ QObject * DecodiumBridge::propagationManager() const
     return m_propagationManager;
 }
 
+QObject * DecodiumBridge::satelliteTracking() const
+{
+    return m_satelliteTracking;
+}
+
+void DecodiumBridge::requestSatelliteTrackingWindow()
+{
+    emit satelliteTrackingWindowRequested();
+}
+
 QObject * DecodiumBridge::mapIntelligenceService() const
 {
     return m_mapIntelligenceService;
+}
+
+bool DecodiumBridge::offlineMode() const
+{
+    return m_mapIntelligenceService && m_mapIntelligenceService->offlineMode();
 }
 
 QObject * DecodiumBridge::callsignIntelligence() const
@@ -28576,13 +28654,49 @@ void DecodiumBridge::setUdpInterfaceName(const QString& name)
 
 void DecodiumBridge::saveSettings()
 {
+    saveSettingsInternal(false);
+}
+
+void DecodiumBridge::saveSettingsAsync()
+{
+    bool expected = false;
+    if (!m_asyncSettingsSavePending.compare_exchange_strong(
+            expected, true, std::memory_order_acq_rel)) {
+        m_asyncSettingsSaveAgain.store(true, std::memory_order_release);
+        return;
+    }
+    saveSettingsInternal(true);
+}
+
+void DecodiumBridge::saveSettingsInternal(bool asynchronous)
+{
+    if (!asynchronous && m_asyncSettingsSavePending.load(std::memory_order_acquire)) {
+        if (!m_settingsShutdownInProgress) {
+            // Keep normal UI setters non-blocking if a previous snapshot is
+            // still flushing; the worker completion will schedule the newest
+            // snapshot after the current one.
+            m_asyncSettingsSaveAgain.store(true, std::memory_order_release);
+            return;
+        }
+        // The close path is the one place where waiting is intentional: it
+        // must not let an older staged snapshot overwrite the final sync save.
+        settingsWriteThreadPool().waitForDone(5000);
+        m_asyncSettingsSavePending.store(false, std::memory_order_release);
+        m_asyncSettingsSaveAgain.store(false, std::memory_order_release);
+    }
+
     MainThreadTraceScope trace(QStringLiteral("save_settings"),
                                QStringLiteral("mode=%1 cat=%2 monitoring=%3 tx=%4")
                                    .arg(m_mode, m_catBackend)
                                    .arg(m_monitoring ? 1 : 0)
                                    .arg(m_transmitting ? 1 : 0),
                                25);
-    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    // QSettings::setValue() stages changes in memory; its destructor/sync is
+    // the expensive disk operation. Keep the staged objects alive and hand
+    // them to a single worker for the debounced QML path.
+    QSettings* const stagedSettings =
+        new QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    QSettings& s = *stagedSettings;
     decodium::beginActiveSettingsProfile(s);
     s.setValue("callsign", m_callsign);
     s.setValue("grid", m_grid);
@@ -28605,7 +28719,9 @@ void DecodiumBridge::saveSettings()
     QString const audioInputChannelSetting = audioChannelSettingValue(m_audioInputChannel);
     QString const audioOutputChannelSetting = audioChannelSettingValue(m_audioOutputChannel);
 
-    QSettings legacyIni(legacyIniPath(), QSettings::IniFormat);
+    QSettings* const stagedLegacySettings =
+        new QSettings(legacyIniPath(), QSettings::IniFormat);
+    QSettings& legacyIni = *stagedLegacySettings;
     legacyIni.beginGroup(QStringLiteral("MultiSettings"));
     QString legacyGroupName = legacyIni.value(QStringLiteral("CurrentName")).toString();
     legacyIni.endGroup();
@@ -28788,11 +28904,11 @@ void DecodiumBridge::saveSettings()
     // WSPR upload
     s.setValue("wsprUploadEnabled", m_wsprUploadEnabled);
     // DX Cluster
-    if (m_dxCluster) m_dxCluster->saveSettings();
+    if (!asynchronous && m_dxCluster) m_dxCluster->saveSettings();
     // CAT managers — persist serial port, baud rate, rig name etc.
-    if (m_nativeCat)   m_nativeCat->saveSettings();
-    if (m_hamlibCat)   m_hamlibCat->saveSettings();
-    if (m_omniRigCat)  m_omniRigCat->saveSettings();
+    if (!asynchronous && m_nativeCat)   m_nativeCat->saveSettings();
+    if (!asynchronous && m_hamlibCat)   m_hamlibCat->saveSettings();
+    if (!asynchronous && m_omniRigCat)  m_omniRigCat->saveSettings();
     // UI state (posizioni finestre, impostazioni panadapter)
     s.setValue("uiSpectrumHeight",  m_uiSpectrumHeight);
     s.setValue("uiPaletteIndex",    m_uiPaletteIndex);
@@ -28802,12 +28918,50 @@ void DecodiumBridge::saveSettings()
     s.setValue("uiDecodeWinY",      m_uiDecodeWinY);
     s.setValue("uiDecodeWinWidth",  m_uiDecodeWinWidth);
     s.setValue("uiDecodeWinHeight", m_uiDecodeWinHeight);
-    trace.addDetail(QStringLiteral("path=[%1]").arg(s.fileName()));
-    emit statusMessage("Impostazioni salvate");
+    trace.addDetail(QStringLiteral("path=[%1] async=%2")
+                        .arg(s.fileName())
+                        .arg(asynchronous ? 1 : 0));
+
+    if (!asynchronous) {
+        delete stagedLegacySettings;
+        delete stagedSettings;
+        emit statusMessage("Impostazioni salvate");
+        return;
+    }
+
+    QPointer<DecodiumBridge> guard(this);
+    settingsWriteThreadPool().start(QRunnable::create(
+        [stagedSettings, stagedLegacySettings, guard]() {
+            stagedSettings->sync();
+            stagedLegacySettings->sync();
+            delete stagedLegacySettings;
+            delete stagedSettings;
+
+            if (guard) {
+                QMetaObject::invokeMethod(guard.data(), [guard]() {
+                    if (!guard) {
+                        return;
+                    }
+                    const bool saveAgain = guard->m_asyncSettingsSaveAgain.exchange(
+                        false, std::memory_order_acq_rel);
+                    guard->m_asyncSettingsSavePending.store(
+                        false, std::memory_order_release);
+                    emit guard->statusMessage(QStringLiteral("Impostazioni salvate"));
+                    if (saveAgain) {
+                        QMetaObject::invokeMethod(guard.data(), [guard]() {
+                            if (guard) {
+                                guard->saveSettingsAsync();
+                            }
+                        }, Qt::QueuedConnection);
+                    }
+                }, Qt::QueuedConnection);
+            }
+        }));
 }
 
 void DecodiumBridge::shutdown()
 {
+    m_settingsShutdownInProgress = true;
     beginDecodeCallbackShutdown();
     halt();
     stopRx();
@@ -28896,12 +29050,20 @@ void DecodiumBridge::retryRigConnection()
 
 void DecodiumBridge::sendPskReporterNow()
 {
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: PSK Reporter disabled"));
+        return;
+    }
     if (m_pskReporter && m_pskReporterEnabled)
         m_pskReporter->sendReport();
 }
 
 void DecodiumBridge::searchPskReporter(const QString& callsign)
 {
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: PSK Reporter search disabled"));
+        return;
+    }
     if (m_pskSearching) return;
     QString const call = callsign.trimmed().toUpper();
     if (call.isEmpty()) return;
@@ -29047,6 +29209,10 @@ void DecodiumBridge::fetchPskHeardBy()
     static constexpr int kPskHeardByMaxCallLen = 18;
     static constexpr int kPskHeardByMaxGridLen = 8;
 
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: PSK Reporter fetch disabled"));
+        return;
+    }
     if (m_pskHeardByFetching) {
         bridgeLog(QStringLiteral("PSK heard-by: fetch gia' in corso, ignoro"));
         return;
@@ -34290,7 +34456,9 @@ void DecodiumBridge::loadSettings()
 {
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
-    QSettings legacyIni(legacyIniPath(), QSettings::IniFormat);
+    QSettings* const stagedLegacySettings =
+        new QSettings(legacyIniPath(), QSettings::IniFormat);
+    QSettings& legacyIni = *stagedLegacySettings;
     auto const app = QCoreApplication::instance();
     auto const appPropertyString = [app](char const *name) {
         return app ? app->property(name).toString().trimmed() : QString {};
@@ -39101,6 +39269,15 @@ void DecodiumBridge::replayWorldMapFeed()
                                    .arg(m_rxDecodeList.size())
                                    .arg(m_transmitting ? 1 : 0)
                                    .arg(m_tuning ? 1 : 0));
+
+    // Invalidate a previously queued replay before evaluating the current
+    // state.  A full replay is a visual operation and must never monopolize
+    // the GUI event loop while decode/audio callbacks are arriving.
+    const quint64 generation = ++m_worldMapReplayGeneration;
+    m_worldMapReplayActive = false;
+    m_worldMapReplayEntries.clear();
+    m_worldMapReplayIndex = 0;
+
     if (!worldMapFeedEnabled()) {
         return;
     }
@@ -39121,11 +39298,11 @@ void DecodiumBridge::replayWorldMapFeed()
     emit worldMapResetRequested();
 
     QSet<QString> seen;
+    QVariantList replayEntries;
     // A map can be reopened minutes after the associated decode. Keep a
     // bounded history for the consumer-ready replay only; live incremental
     // delivery remains limited to 120 seconds.
-    static constexpr int kWorldMapReplayLifetimeSeconds = 15 * 60;
-    auto replayList = [this, &seen](QVariantList const& entries) {
+    auto collectReplayEntries = [this, &seen, &replayEntries](QVariantList const& entries) {
         for (QVariant const& value : entries) {
             QVariantMap const entry = value.toMap();
             QString const key = worldMapFeedEntryKey(entry);
@@ -39135,12 +39312,67 @@ void DecodiumBridge::replayWorldMapFeed()
             if (!key.isEmpty()) {
                 seen.insert(key);
             }
-            replayWorldMapEntry(entry, true, kWorldMapReplayLifetimeSeconds);
+            replayEntries.append(entry);
         }
     };
 
-    replayList(m_decodeList);
-    replayList(m_rxDecodeList);
+    collectReplayEntries(m_decodeList);
+    collectReplayEntries(m_rxDecodeList);
+
+    m_worldMapReplayEntries = std::move(replayEntries);
+    m_worldMapReplayActive = true;
+    QTimer::singleShot(0, this, [this, generation]() {
+        flushWorldMapReplayChunk(generation);
+    });
+}
+
+void DecodiumBridge::flushWorldMapReplayChunk(quint64 generation)
+{
+    if (!m_worldMapReplayActive || generation != m_worldMapReplayGeneration) {
+        return;
+    }
+
+    if (!worldMapFeedEnabled() || !worldMapConsumerReady()) {
+        m_worldMapReplayActive = false;
+        m_worldMapReplayEntries.clear();
+        m_worldMapReplayIndex = 0;
+        return;
+    }
+
+    if (visualFeedsDeferredForTx()) {
+        m_worldMapReplayActive = false;
+        m_worldMapReplayEntries.clear();
+        m_worldMapReplayIndex = 0;
+        m_worldMapFullReplayDeferred = true;
+        scheduleDeferredWorldMapFeedFlush(600);
+        return;
+    }
+
+    static constexpr int kWorldMapReplayLifetimeSeconds = 15 * 60;
+    // One entry per event-loop turn keeps parsing, callsign lookup and QML
+    // scene-graph updates interruptible.  This is intentionally smaller than
+    // the deferred live-feed chunk because a full replay can contain hundreds
+    // of historical entries.
+    static constexpr int kReplayChunkSize = 1;
+    int processed = 0;
+    while (m_worldMapReplayIndex < m_worldMapReplayEntries.size()
+           && processed < kReplayChunkSize) {
+        QVariantMap const entry =
+            m_worldMapReplayEntries.at(m_worldMapReplayIndex++).toMap();
+        replayWorldMapEntry(entry, true, kWorldMapReplayLifetimeSeconds);
+        ++processed;
+    }
+
+    if (m_worldMapReplayIndex < m_worldMapReplayEntries.size()) {
+        QTimer::singleShot(0, this, [this, generation]() {
+            flushWorldMapReplayChunk(generation);
+        });
+        return;
+    }
+
+    m_worldMapReplayActive = false;
+    m_worldMapReplayEntries.clear();
+    m_worldMapReplayIndex = 0;
     emitCurrentWorldMapQsoPath();
 }
 
@@ -43997,10 +44229,9 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         m_asyncAudioPos.store(0, std::memory_order_release);
     }
 
-    // A source that is still delivering a Qt audio stream gets a safe reset
-    // first.  The full stop/delete/create lifecycle is delayed until we know
-    // that no PCM callback followed the reset; this avoids the Qt 6.11
-    // PipeWire pure-virtual abort observed during immediate recreation.
+    // On Linux, SoundInput retires a terminal PipeWire source and reopens it
+    // after its event queue has settled. Other platforms retain their
+    // established watchdog escalation path unchanged.
     if (m_soundInput && !m_tciAudioCaptureActive) {
         quint64 const recoverySerial = ++m_audioWatchdogRecoverySerial;
         startAudioCapture(true);
@@ -44019,10 +44250,15 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
                 return;
             }
 
+#if defined(Q_OS_LINUX)
+            bridgeLog(QStringLiteral("Audio watchdog: recovery produced no PCM callback; awaiting the next safe retry (%1)")
+                          .arg(reason));
+#else
             bridgeLog(QStringLiteral("Audio watchdog: safe recovery produced no PCM callback; escalating to full reopen (%1)")
                           .arg(reason));
             stopAudioCapture();
             startAudioCapture();
+#endif
         });
         return;
     }
@@ -46827,6 +47063,10 @@ void DecodiumBridge::qsyTo(double freqHz, const QString& newMode)
 
 void DecodiumBridge::checkCtyDatUpdate()
 {
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: cty.dat update disabled; local data remains available"));
+        return;
+    }
     if (m_ctyDatUpdating) {
         bridgeLog("cty.dat update requested while another update is already running");
         emit statusMessage("Download cty.dat già in corso...");
@@ -46972,6 +47212,10 @@ void DecodiumBridge::checkCtyDatUpdate()
 
 void DecodiumBridge::downloadCall3Txt()
 {
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: CALL3.TXT update disabled; local data remains available"));
+        return;
+    }
     if (m_call3TxtUpdating) {
         bridgeLog("downloadCall3Txt: request ignored because an update is already running");
         emit statusMessage(QStringLiteral("Download CALL3.TXT già in corso..."));
@@ -47694,6 +47938,10 @@ bool DecodiumBridge::exportCabrillo(const QString& filename)
 
 void DecodiumBridge::checkForUpdates()
 {
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: update checks disabled"));
+        return;
+    }
     if (!kDecodiumUpdateCheckerEnabled) {
         if (m_updateAvailable) {
             m_updateAvailable = false;
@@ -48360,6 +48608,10 @@ int DecodiumBridge::usStateLocatorCount() const
 
 void DecodiumBridge::updateUsStateData()
 {
+    if (offlineMode()) {
+        emit statusMessage(QStringLiteral("Offline: U.S. state data update disabled; cached data remains available"));
+        return;
+    }
     if (m_usStateData) {
         m_usStateData->updateNow();
     }
@@ -48436,6 +48688,11 @@ void DecodiumBridge::reloadLotwUsers(bool forceDownload)
         }
     }
 
+    if (offlineMode() && !cacheInfo.exists()) {
+        emit statusMessage(QStringLiteral("Offline: no local LotW users cache available"));
+        return;
+    }
+
     m_lotwUpdating = true;
     emit lotwUpdatingChanged();
 
@@ -48474,7 +48731,7 @@ void DecodiumBridge::reloadLotwUsers(bool forceDownload)
                 << "reason=" << result.error;
         }
 
-        if (refreshAfterLoad || m_lotwUsers.isEmpty()) {
+        if (!offlineMode() && (refreshAfterLoad || m_lotwUsers.isEmpty())) {
             startLotwUsersDownload(cachePath, false);
             return;
         }
@@ -48490,6 +48747,14 @@ void DecodiumBridge::reloadLotwUsers(bool forceDownload)
 void DecodiumBridge::startLotwUsersDownload(QString const& cachePath,
                                             bool reportErrors)
 {
+    if (offlineMode()) {
+        if (m_lotwUpdating) {
+            m_lotwUpdating = false;
+            emit lotwUpdatingChanged();
+        }
+        emit statusMessage(QStringLiteral("Offline: LotW download disabled; cached users remain available"));
+        return;
+    }
     emit statusMessage(QStringLiteral("LotW: downloading user list..."));
     QNetworkAccessManager* nam = new QNetworkAccessManager(this);
     QNetworkRequest request(QUrl(QStringLiteral(

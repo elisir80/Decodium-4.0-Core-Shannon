@@ -22,6 +22,7 @@ class DecodiumDxCluster : public QObject
     Q_PROPERTY(QString     callsign  READ callsign   WRITE setCallsign   NOTIFY callsignChanged)
     Q_PROPERTY(QString     lastStatus READ lastStatus NOTIFY lastStatusChanged)
     Q_PROPERTY(QVariantList spots    READ spots      NOTIFY spotsChanged)
+    Q_PROPERTY(bool        offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
 
 public:
     explicit DecodiumDxCluster(QObject* parent = nullptr);
@@ -52,6 +53,8 @@ public:
     QString     lastStatus() const { return m_lastStatus; }
 
     QVariantList spots() const { return m_spots; }
+    bool offlineMode() const { return m_offlineMode; }
+    void setOfflineMode(bool offline);
 
     // --- persistence ---
     void saveSettings();
@@ -78,6 +81,7 @@ signals:
     void newSpot(const QVariantMap& spot);
     void statusUpdate(const QString& msg);
     void errorOccurred(const QString& msg);
+    void offlineModeChanged();
 
 private slots:
     void onConnected();
@@ -119,6 +123,7 @@ private:
     bool         m_connectSequenceActive {false};
     bool         m_ignoreNextSocketError {false};
     bool         m_manualDisconnect {false};
+    bool         m_offlineMode {false};
     QTimer*      m_connectTimeoutTimer {nullptr};
     QTimer*      m_refreshTimer {nullptr};
     QTimer*      m_reconnectTimer {nullptr};

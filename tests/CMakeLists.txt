@@ -86,6 +86,8 @@ add_executable (test_map_layer_service
   ../src/services/MapPskFeedService.h
   ../src/services/MapOperationsService.cpp
   ../src/services/MapOperationsService.h
+  ../src/services/RotatorService.cpp
+  ../src/services/RotatorService.h
   ../src/services/MapExternalOverlayService.cpp
   ../src/services/MapExternalOverlayService.h
   ../src/services/DxccLookup.cpp
@@ -100,6 +102,20 @@ qt_add_resources (test_map_layer_service test_map_layer_service_award_resources
     "${CMAKE_SOURCE_DIR}/resources/map/decodium-awards-catalog.json"
   )
 add_test (NAME test_map_layer_service COMMAND $<TARGET_FILE:test_map_layer_service>)
+
+add_executable (test_sgp4
+  test_sgp4.cpp
+  ../src/services/satellite/sgp4/SGP4.cpp
+  ../src/services/satellite/sgp4/SGP4.h)
+target_link_libraries (test_sgp4 Qt6::Test Qt6::Core)
+add_test (NAME test_sgp4 COMMAND $<TARGET_FILE:test_sgp4>)
+
+add_executable (test_rotator_service
+  test_rotator_service.cpp
+  ../src/services/RotatorService.cpp
+  ../src/services/RotatorService.h)
+target_link_libraries (test_rotator_service Qt6::Test Qt6::Core Qt6::Gui Qt6::Network)
+add_test (NAME test_rotator_service COMMAND $<TARGET_FILE:test_rotator_service>)
 
 add_executable (test_udp_client_id test_udp_client_id.cpp)
 target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Core)

@@ -7,17 +7,18 @@
 #include <QSize>
 #include <QString>
 #include <QThreadPool>
+#include <QTimer>
 #include <QVariantList>
 
 class MapLayerModel;
 class QNetworkAccessManager;
 class QNetworkReply;
-class QTimer;
 
 class MapExternalOverlayService final : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList providerStatus READ providerStatus NOTIFY providerStatusChanged)
+    Q_PROPERTY(QVariantList temporalLegend READ temporalLegend NOTIFY providerStatusChanged)
     Q_PROPERTY(bool offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
     Q_PROPERTY(QVariantList earthquakeFeatures READ earthquakeFeatures NOTIFY earthquakeFeaturesChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
@@ -37,6 +38,7 @@ public:
     ~MapExternalOverlayService() override;
 
     QVariantList providerStatus() const;
+    QVariantList temporalLegend() const;
     bool offlineMode() const { return m_offlineMode; }
     QVariantList earthquakeFeatures() const { return m_earthquakeFeatures; }
     bool loading() const { return m_loadingCount > 0; }
@@ -104,13 +106,16 @@ private:
         QString sourceUrl;
         QString error;
         qint64 updatedMs {0};
+        qint64 validUntilMs {0};
         int refreshSeconds {900};
+        int validitySeconds {1800};
         int opacityPercent {65};
         int itemCount {0};
         int generation {0};
         int appliedGeneration {0};
         bool loading {false};
         bool enabled {false};
+        bool derived {false};
         QTimer* timer {nullptr};
     };
 
@@ -147,12 +152,14 @@ private:
     void saveCache(const QString& layerId, const QByteArray& payload) const;
     void rebuildComposite();
     void updateProviderStatus();
+    void refreshProviderAges();
     void setProviderLoading(Provider& provider, bool loading);
     QString cacheFilePath(const QString& layerId) const;
 
     MapLayerModel* m_layerModel {nullptr};
     QNetworkAccessManager* m_network {nullptr};
     QThreadPool m_workerPool;
+    QTimer m_ageTimer;
     QHash<QString, Provider> m_providers;
     QHash<QString, QImage> m_providerImages;
     QVariantList m_earthquakeFeatures;

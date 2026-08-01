@@ -114,6 +114,25 @@ void DecodiumUpdater::setStatus(const QString& s)
     emit statusTextChanged();
 }
 
+void DecodiumUpdater::setOfflineMode(bool offline)
+{
+    if (m_offlineMode == offline) {
+        return;
+    }
+    m_offlineMode = offline;
+    if (offline) {
+        for (QNetworkReply* reply : m_nam->findChildren<QNetworkReply*>()) {
+            if (reply) reply->abort();
+        }
+        setBusy(false);
+        setProgress(0);
+        setStatus(tr("Offline: update checks disabled"));
+    } else {
+        setStatus(tr("Online: update checks enabled"));
+    }
+    emit offlineModeChanged();
+}
+
 void DecodiumUpdater::setCheckOnStartup(bool on)
 {
     if (m_checkOnStartup == on)
@@ -127,7 +146,7 @@ void DecodiumUpdater::setCheckOnStartup(bool on)
 
 void DecodiumUpdater::checkOnStartupIfDue()
 {
-    if (!m_checkOnStartup)
+    if (m_offlineMode || !m_checkOnStartup)
         return;
     // Non tempestare GitHub (e l'utente) a ogni avvio: al massimo una volta al
     // giorno. Chi vuole puo' sempre forzare il controllo dal menu.
@@ -139,6 +158,10 @@ void DecodiumUpdater::checkOnStartupIfDue()
 
 void DecodiumUpdater::check(bool silent)
 {
+    if (m_offlineMode) {
+        setStatus(tr("Offline: update checks disabled"));
+        return;
+    }
     if (m_busy)
         return;
     setBusy(true);
@@ -160,6 +183,12 @@ void DecodiumUpdater::check(bool silent)
 void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent)
 {
     reply->deleteLater();
+    if (m_offlineMode) {
+        setBusy(false);
+        setProgress(0);
+        setStatus(tr("Offline: update checks disabled"));
+        return;
+    }
     setBusy(false);
     setProgress(0);
 
@@ -246,6 +275,10 @@ void DecodiumUpdater::skipThisVersion()
 
 void DecodiumUpdater::downloadAndInstall()
 {
+    if (m_offlineMode) {
+        setStatus(tr("Offline: downloads disabled"));
+        return;
+    }
     if (m_busy)
         return;
 

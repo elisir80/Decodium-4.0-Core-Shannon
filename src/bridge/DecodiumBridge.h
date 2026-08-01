@@ -46,6 +46,7 @@ class DecodiumLegacyBackend;
 class DecodiumPropagationManager;
 class MapIntelligenceService;
 class CallsignIntelligenceService;
+class SatelliteTrackingService;
 class MessageClient;
 class UsStateDataManager;
 
@@ -303,8 +304,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString activeLogbookPath READ activeLogbookPath NOTIFY activeLogbookChanged)
     Q_PROPERTY(QObject* logManager READ logManager CONSTANT)
     Q_PROPERTY(QObject* propagationManager READ propagationManager CONSTANT)
+    Q_PROPERTY(QObject* satelliteTracking READ satelliteTracking CONSTANT)
     Q_PROPERTY(QObject* mapIntelligenceService READ mapIntelligenceService CONSTANT)
     Q_PROPERTY(QObject* mapLayerService READ mapIntelligenceService CONSTANT)
+    Q_PROPERTY(bool offlineMode READ offlineMode NOTIFY offlineModeChanged)
     Q_PROPERTY(QObject* callsignIntelligence READ callsignIntelligence CONSTANT)
     Q_PROPERTY(QObject* diagnostics READ diagnostics CONSTANT)
     Q_PROPERTY(int qsoCount READ qsoCount NOTIFY qsoCountChanged)
@@ -1000,7 +1003,9 @@ public:
     int         callerQueueSize()const { return m_callerQueue.size(); }
     QObject*    logManager() { return this; }
     QObject*    propagationManager() const;
+    QObject*    satelliteTracking() const;
     QObject*    mapIntelligenceService() const;
+    bool        offlineMode() const;
     QObject*    callsignIntelligence() const;
     QObject*    diagnostics() const { return m_diagnostics; }
     int         qsoCount() const;
@@ -1013,6 +1018,7 @@ public:
     Q_INVOKABLE bool ft2LinkAccessPasswordConfigured() const;
     Q_INVOKABLE bool verifyFt2LinkAccessPassword(const QString& password);
     Q_INVOKABLE void lockFt2LinkAccess();
+    Q_INVOKABLE void requestSatelliteTrackingWindow();
 
 public slots:
     // Notify hooks chiamabili dai DecodeWorker (thread-safe via QueuedConnection)
@@ -1070,6 +1076,8 @@ public slots:
     Q_INVOKABLE bool advanceQsoState(int txNum); // GitHub TxController clone
 
 private:
+    void saveSettingsInternal(bool asynchronous);
+
     struct ExternalAdifUploadPending {
         QString dxCall;
         QString target;
@@ -1232,6 +1240,9 @@ public:
 
     // Settings
     Q_INVOKABLE void saveSettings();
+    // Debounced QML persistence. The QSettings flush runs on a serial worker
+    // so a timer callback never blocks rendering or input.
+    Q_INVOKABLE void saveSettingsAsync();
     Q_INVOKABLE void loadSettings();
     Q_INVOKABLE QVariant getSetting(const QString& key, const QVariant& defaultValue = {}) const;
     Q_INVOKABLE void setSetting(const QString& key, const QVariant& value);
@@ -1438,6 +1449,7 @@ public:
     Q_INVOKABLE void testQrzLogbookApi();
 
 signals:
+    void satelliteTrackingWindowRequested();
     void spectrumDataReady(QVector<float> data);
     // Alta risoluzione: dB raw + range + frequenze exact — per PanadapterItem
     void panadapterDataReady(QVector<float> dbValues, float minDb, float maxDb,
@@ -1726,6 +1738,7 @@ signals:
     void pskReporterConnectedChanged();
     // ADIF / LotW / Cloudlog
     void qsoCountChanged();
+    void offlineModeChanged();
     void qsoLogCacheChanged();
     void workedCountChanged();
     void lotwEnabledChanged();
@@ -2317,6 +2330,13 @@ private:
     bool m_worldMapCall3Loaded {false};
     bool m_worldMapCall3Loading {false};
     bool m_worldMapDisplayed {true};
+    QVariantList m_worldMapReplayEntries;
+    int m_worldMapReplayIndex {0};
+    quint64 m_worldMapReplayGeneration {0};
+    bool m_worldMapReplayActive {false};
+    std::atomic_bool m_asyncSettingsSavePending {false};
+    std::atomic_bool m_asyncSettingsSaveAgain {false};
+    bool m_settingsShutdownInProgress {false};
     QString m_mapLastClickCall;
     qint64 m_mapLastClickMs {0};
     int m_periodProgress {0};
@@ -2463,7 +2483,9 @@ private:
 
     DecodiumThemeManager* m_themeManager  {nullptr};
     DecodiumPropagationManager* m_propagationManager {nullptr};
+    SatelliteTrackingService*   m_satelliteTracking {nullptr};
     MapIntelligenceService*      m_mapIntelligenceService {nullptr};
+    bool                         m_satelliteDopplerApplying {false};
     CallsignIntelligenceService* m_callsignIntelligence {nullptr};
     DecodiumDiagnostics*        m_diagnostics {nullptr};
     WavManager*           m_wavManager    {nullptr};
@@ -3704,6 +3726,7 @@ private:
     void replayWorldMapEntry(const QVariantMap& entry,
                              bool skipClearedFeedEntry = false,
                              int maxAgeSeconds = 120);
+    void flushWorldMapReplayChunk(quint64 generation);
     void emitCurrentWorldMapQsoPath();
     void markWorldMapQsoClosed(const QString& call, const QString& reason = QString());
     void clearWorldMapClosedQso(const QString& call);

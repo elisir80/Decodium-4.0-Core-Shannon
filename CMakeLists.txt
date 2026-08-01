@@ -472,6 +472,12 @@ set (wsjtx_CXXSRCS
   src/bridge/DecodiumLegacyBackend.h
   src/services/DecodiumPropagationManager.cpp
   src/services/DecodiumPropagationManager.h
+  src/services/RotatorService.cpp
+  src/services/RotatorService.h
+  src/services/SatelliteTrackingService.cpp
+  src/services/SatelliteTrackingService.h
+  src/services/satellite/sgp4/SGP4.cpp
+  src/services/satellite/sgp4/SGP4.h
   src/services/MapIntelligenceService.cpp
   src/services/MapIntelligenceService.h
   src/services/MapBaseMapService.cpp
@@ -1300,6 +1306,12 @@ add_executable (jt9_narrow_compare
   Detector/LegacyDspIoHelpers.cpp
   lib/wsprd/fano.c
 )
+
+if (NOT MSVC)
+  set_source_files_properties(
+    src/services/satellite/sgp4/SGP4.cpp
+    PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+endif()
 target_include_directories (jt9_narrow_compare PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -1787,6 +1799,12 @@ add_executable (decodium_qml
   src/bridge/DecodiumDiagnostics.cpp
   src/services/DecodiumPropagationManager.cpp
   src/services/DecodiumPropagationManager.h
+  src/services/RotatorService.cpp
+  src/services/RotatorService.h
+  src/services/SatelliteTrackingService.cpp
+  src/services/SatelliteTrackingService.h
+  src/services/satellite/sgp4/SGP4.cpp
+  src/services/satellite/sgp4/SGP4.h
   src/services/MapIntelligenceService.cpp
   src/services/MapIntelligenceService.h
   src/services/MapBaseMapService.cpp

@@ -1054,6 +1054,9 @@ bool openMapDatabase(const QString& path,
             " qso_date TEXT,"
             " time_on TEXT,"
             " frequency_mhz REAL,"
+            " satellite TEXT,"
+            " sat_mode TEXT,"
+            " freq_rx_mhz REAL,"
             " confirmed INTEGER NOT NULL DEFAULT 0)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid4 ON map_qso(grid4)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_band_mode ON map_qso(band, mode)"),
@@ -1151,6 +1154,9 @@ bool openMapDatabase(const QString& path,
         {"map_qso", "pota_ref", "TEXT"},
         {"map_qso", "iota", "TEXT"},
         {"map_qso", "wpx", "TEXT"},
+        {"map_qso", "satellite", "TEXT"},
+        {"map_qso", "sat_mode", "TEXT"},
+        {"map_qso", "freq_rx_mhz", "REAL NOT NULL DEFAULT 0"},
         {"map_spot", "dxcc", "TEXT"},
         {"map_spot", "dxcc_number", "INTEGER NOT NULL DEFAULT 0"},
         {"map_spot", "continent", "TEXT"},
@@ -1201,6 +1207,7 @@ bool openMapDatabase(const QString& path,
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_iota ON map_qso(iota, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_wpx ON map_qso(wpx, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_county ON map_qso(county, confirmed)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_satellite ON map_qso(satellite, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_geo ON map_spot(continent, dxcc, cq_zone)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_source_cq ON map_spot(source, is_cq)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_call_time ON map_spot(call, observed_ms DESC)"),
@@ -1994,6 +2001,8 @@ QObject* MapIntelligenceService::pskFeedService() const
 
 void MapIntelligenceService::setOfflineMode(bool offline)
 {
+    const bool changed = m_offlineMode != offline;
+    m_offlineMode = offline;
     if (m_baseMapService) {
         m_baseMapService->setOfflineMode(offline);
     }
@@ -2002,6 +2011,12 @@ void MapIntelligenceService::setOfflineMode(bool offline)
     }
     if (m_pskFeedService) {
         m_pskFeedService->setOfflineMode(offline);
+    }
+    if (m_operationsService) {
+        m_operationsService->setOfflineMode(offline);
+    }
+    if (changed) {
+        emit offlineModeChanged();
     }
 }
 
@@ -3949,12 +3964,18 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
             if (!frequencyOk) {
                 record.frequencyMhz = 0.0;
             }
+            bool receiveFrequencyOk = false;
+            record.receiveFrequencyMhz = recordFields.value(QStringLiteral("FREQ_RX"))
+                                             .toDouble(&receiveFrequencyOk);
+            if (!receiveFrequencyOk) record.receiveFrequencyMhz = 0.0;
             record.band = normalizedBand(recordFields.value(QStringLiteral("BAND")),
                                          record.frequencyMhz);
             record.mode = normalizedMode(recordFields.value(QStringLiteral("MODE")),
                                          recordFields.value(QStringLiteral("SUBMODE")));
             record.propagationMode = normalizePropagationMode(
                 recordFields.value(QStringLiteral("PROP_MODE")));
+            record.satelliteName = recordFields.value(QStringLiteral("SAT_NAME")).trimmed();
+            record.satelliteMode = recordFields.value(QStringLiteral("SAT_MODE")).trimmed();
             record.qsoDate = recordFields.value(QStringLiteral("QSO_DATE")).trimmed();
             record.timeOn = recordFields.value(QStringLiteral("TIME_ON")).trimmed();
             record.qsoEpoch = adifEpoch(record.qsoDate, record.timeOn);
@@ -4030,6 +4051,8 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
             QStringLiteral("BAND"), QStringLiteral("FREQ"),
             QStringLiteral("MODE"), QStringLiteral("SUBMODE"),
             QStringLiteral("PROP_MODE"),
+            QStringLiteral("SAT_NAME"), QStringLiteral("SAT_MODE"),
+            QStringLiteral("FREQ_RX"),
             QStringLiteral("QSO_DATE"), QStringLiteral("TIME_ON"),
             QStringLiteral("STATION_CALLSIGN"), QStringLiteral("OPERATOR"),
             QStringLiteral("OWNER_CALLSIGN"), QStringLiteral("DXCC"),
@@ -4057,11 +4080,17 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
         bool ok = false;
         record.frequencyMhz = fields.value(QStringLiteral("FREQ")).toDouble(&ok);
         if (!ok) record.frequencyMhz = 0.0;
+        bool receiveFrequencyOk = false;
+        record.receiveFrequencyMhz = fields.value(QStringLiteral("FREQ_RX"))
+                                         .toDouble(&receiveFrequencyOk);
+        if (!receiveFrequencyOk) record.receiveFrequencyMhz = 0.0;
         record.band = normalizedBand(fields.value(QStringLiteral("BAND")), record.frequencyMhz);
         record.mode = normalizedMode(fields.value(QStringLiteral("MODE")),
                                      fields.value(QStringLiteral("SUBMODE")));
         record.propagationMode = normalizePropagationMode(
             fields.value(QStringLiteral("PROP_MODE")));
+        record.satelliteName = fields.value(QStringLiteral("SAT_NAME")).trimmed();
+        record.satelliteMode = fields.value(QStringLiteral("SAT_MODE")).trimmed();
         record.qsoDate = fields.value(QStringLiteral("QSO_DATE")).trimmed();
         record.timeOn = fields.value(QStringLiteral("TIME_ON")).trimmed();
         record.qsoEpoch = adifEpoch(record.qsoDate, record.timeOn);
@@ -5711,6 +5740,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         statistics.insert(QStringLiteral("modes"), groupedRows(QStringLiteral("mode")));
         statistics.insert(QStringLiteral("continents"),
                           groupedRows(QStringLiteral("continent")));
+        statistics.insert(QStringLiteral("satellites"),
+                          groupedRows(QStringLiteral("satellite")));
 
         QHash<QString, QVariantMap> propagationRowsByCode;
         for (PropagationDefinition const& definition : propagationDefinitions()) {
@@ -6420,7 +6451,7 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
         QSqlQuery query(db);
         query.prepare(QStringLiteral(
             "SELECT call, grid, band, mode, qso_date, time_on, frequency_mhz,"
-            " confirmed, source, dxcc, continent, state, qso_epoch"
+            " satellite, sat_mode, freq_rx_mhz, confirmed, source, dxcc, continent, state, qso_epoch"
             " FROM map_qso WHERE upper(%1)=upper(:grid)"
             " ORDER BY qso_epoch DESC, qso_date DESC, time_on DESC LIMIT 100")
                           .arg(gridColumn));
@@ -6435,12 +6466,15 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
                 row.insert(QStringLiteral("qsoDate"), query.value(4).toString());
                 row.insert(QStringLiteral("timeOn"), query.value(5).toString());
                 row.insert(QStringLiteral("frequencyMhz"), query.value(6).toDouble());
-                row.insert(QStringLiteral("confirmed"), query.value(7).toBool());
-                row.insert(QStringLiteral("source"), query.value(8).toString());
-                row.insert(QStringLiteral("dxcc"), query.value(9).toString());
-                row.insert(QStringLiteral("continent"), query.value(10).toString());
-                row.insert(QStringLiteral("state"), query.value(11).toString());
-                row.insert(QStringLiteral("qsoEpoch"), query.value(12).toLongLong());
+                row.insert(QStringLiteral("satellite"), query.value(7).toString());
+                row.insert(QStringLiteral("satMode"), query.value(8).toString());
+                row.insert(QStringLiteral("frequencyRxMhz"), query.value(9).toDouble());
+                row.insert(QStringLiteral("confirmed"), query.value(10).toBool());
+                row.insert(QStringLiteral("source"), query.value(11).toString());
+                row.insert(QStringLiteral("dxcc"), query.value(12).toString());
+                row.insert(QStringLiteral("continent"), query.value(13).toString());
+                row.insert(QStringLiteral("state"), query.value(14).toString());
+                row.insert(QStringLiteral("qsoEpoch"), query.value(15).toLongLong());
                 details.qsos.append(row);
             }
         } else if (details.error.isEmpty()) {
@@ -6497,11 +6531,11 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
     if (!insert.prepare(QStringLiteral(
             "INSERT OR REPLACE INTO map_qso"
             " (source_key, call, grid, grid4, grid6, band, mode, propagation_mode, qso_date, time_on,"
-            " frequency_mhz, confirmed, qso_epoch, source, operator_call, dxcc, dxcc_number, continent,"
+            " frequency_mhz, satellite, sat_mode, freq_rx_mhz, confirmed, qso_epoch, source, operator_call, dxcc, dxcc_number, continent,"
             " cq_zone, itu_zone, state, county, lotw_confirmed, eqsl_confirmed, oqrs,"
             " pota_ref, iota, wpx)"
             " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :propagation_mode, :date, :time,"
-            " :freq, :confirmed, :epoch, :source, :operator_call, :dxcc, :dxcc_number, :continent,"
+            " :freq, :satellite, :sat_mode, :freq_rx, :confirmed, :epoch, :source, :operator_call, :dxcc, :dxcc_number, :continent,"
             " :cq_zone, :itu_zone, :state, :county, :lotw_confirmed, :eqsl_confirmed, :oqrs,"
             " :pota_ref, :iota, :wpx)"))) {
         if (error) *error = insert.lastError().text();
@@ -6520,6 +6554,9 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
         insert.bindValue(QStringLiteral(":date"), record.qsoDate);
         insert.bindValue(QStringLiteral(":time"), record.timeOn);
         insert.bindValue(QStringLiteral(":freq"), record.frequencyMhz);
+        insert.bindValue(QStringLiteral(":satellite"), record.satelliteName);
+        insert.bindValue(QStringLiteral(":sat_mode"), record.satelliteMode);
+        insert.bindValue(QStringLiteral(":freq_rx"), record.receiveFrequencyMhz);
         insert.bindValue(QStringLiteral(":confirmed"), record.confirmed ? 1 : 0);
         insert.bindValue(QStringLiteral(":epoch"), record.qsoEpoch);
         insert.bindValue(QStringLiteral(":source"), record.source);
@@ -6580,11 +6617,11 @@ bool MapIntelligenceService::appendQsoRecords(const QString& databasePath,
     if (!insert.prepare(QStringLiteral(
             "INSERT OR REPLACE INTO map_qso"
             " (source_key, call, grid, grid4, grid6, band, mode, propagation_mode, qso_date, time_on,"
-            " frequency_mhz, confirmed, qso_epoch, source, operator_call, dxcc, dxcc_number, continent,"
+            " frequency_mhz, satellite, sat_mode, freq_rx_mhz, confirmed, qso_epoch, source, operator_call, dxcc, dxcc_number, continent,"
             " cq_zone, itu_zone, state, county, lotw_confirmed, eqsl_confirmed, oqrs,"
             " pota_ref, iota, wpx)"
             " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :propagation_mode, :date, :time,"
-            " :freq, :confirmed, :epoch, :source, :operator_call, :dxcc, :dxcc_number, :continent,"
+            " :freq, :satellite, :sat_mode, :freq_rx, :confirmed, :epoch, :source, :operator_call, :dxcc, :dxcc_number, :continent,"
             " :cq_zone, :itu_zone, :state, :county, :lotw_confirmed, :eqsl_confirmed, :oqrs,"
             " :pota_ref, :iota, :wpx)"))) {
         if (error) *error = insert.lastError().text();
@@ -6603,6 +6640,9 @@ bool MapIntelligenceService::appendQsoRecords(const QString& databasePath,
         insert.bindValue(QStringLiteral(":date"), record.qsoDate);
         insert.bindValue(QStringLiteral(":time"), record.timeOn);
         insert.bindValue(QStringLiteral(":freq"), record.frequencyMhz);
+        insert.bindValue(QStringLiteral(":satellite"), record.satelliteName);
+        insert.bindValue(QStringLiteral(":sat_mode"), record.satelliteMode);
+        insert.bindValue(QStringLiteral(":freq_rx"), record.receiveFrequencyMhz);
         insert.bindValue(QStringLiteral(":confirmed"), record.confirmed ? 1 : 0);
         insert.bindValue(QStringLiteral(":epoch"), record.qsoEpoch);
         insert.bindValue(QStringLiteral(":source"), record.source);

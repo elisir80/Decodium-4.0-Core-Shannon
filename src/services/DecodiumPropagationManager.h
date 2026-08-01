@@ -27,6 +27,7 @@ class DecodiumPropagationManager final : public QObject
     Q_PROPERTY(QString signalNoise READ signalNoise NOTIFY propagationChanged)
     Q_PROPERTY(QVariantList hfConditions READ hfConditions NOTIFY propagationChanged)
     Q_PROPERTY(QVariantList vhfConditions READ vhfConditions NOTIFY propagationChanged)
+    Q_PROPERTY(bool offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
     Q_PROPERTY(QString sourceUrl READ sourceUrl CONSTANT)
     Q_PROPERTY(QString sourcePageUrl READ sourcePageUrl CONSTANT)
 
@@ -49,15 +50,18 @@ public:
     QString signalNoise() const { return m_signalNoise; }
     QVariantList hfConditions() const { return m_hfConditions; }
     QVariantList vhfConditions() const { return m_vhfConditions; }
+    bool offlineMode() const { return m_offlineMode; }
     QString sourceUrl() const;
     QString sourcePageUrl() const;
 
     Q_INVOKABLE void refresh();
+    void setOfflineMode(bool offline);
 
 signals:
     void propagationChanged();
     void updatingChanged();
     void statusTextChanged();
+    void offlineModeChanged();
 
 private slots:
     void onNetworkFinished(QNetworkReply * reply);
@@ -108,6 +112,7 @@ private:
     QTimer m_refreshTimer;
     QNetworkAccessManager * m_network {nullptr};
     bool m_requestInFlight {false};
+    bool m_offlineMode {false};
     bool m_available {false};
     bool m_updating {false};
     QString m_statusText;

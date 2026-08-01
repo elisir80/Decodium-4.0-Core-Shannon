@@ -22,7 +22,8 @@ MapLayerModel::MapLayerModel(QObject* parent)
           {QStringLiteral("lightning"), QStringLiteral("LIGHTNING"), QStringLiteral("#ffffff"), false, 0},
           {QStringLiteral("muf"), QStringLiteral("MUF"), QStringLiteral("#f6c344"), false, 0},
           {QStringLiteral("fof2"), QStringLiteral("foF2"), QStringLiteral("#66d9ff"), false, 0},
-          {QStringLiteral("es"), QStringLiteral("Es"), QStringLiteral("#ff9f43"), false, 0},
+          {QStringLiteral("nvis"), QStringLiteral("NVIS"), QStringLiteral("#b18cff"), false, 0},
+          {QStringLiteral("es"), QStringLiteral("Sporadic-E"), QStringLiteral("#ff9f43"), false, 0},
           {QStringLiteral("aurora"), QStringLiteral("AURORA"), QStringLiteral("#77ff9f"), false, 0},
           {QStringLiteral("tropo"), QStringLiteral("TROPO"), QStringLiteral("#ffd166"), false, 0},
           {QStringLiteral("earthquakes"), QStringLiteral("EARTHQUAKES"), QStringLiteral("#ff5f57"), false, 0},
@@ -36,6 +37,7 @@ MapLayerModel::MapLayerModel(QObject* parent)
     setLayerOpacity(QStringLiteral("radar"), 0.72);
     setLayerOpacity(QStringLiteral("muf"), 0.52);
     setLayerOpacity(QStringLiteral("fof2"), 0.52);
+    setLayerOpacity(QStringLiteral("nvis"), 0.44);
     setLayerOpacity(QStringLiteral("es"), 0.58);
     setLayerOpacity(QStringLiteral("aurora"), 0.62);
     setLayerOpacity(QStringLiteral("tropo"), 0.58);

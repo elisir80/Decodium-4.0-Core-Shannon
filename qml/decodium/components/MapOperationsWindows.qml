@@ -25,6 +25,22 @@ Item {
     function openRoster() { expose(rosterWindow) }
     function openStatistics() { expose(statisticsWindow) }
     function openConditions() { expose(conditionsWindow) }
+    function ageText(seconds) {
+        var value = Number(seconds)
+        if (!isFinite(value) || value < 0)
+            return qsTr("no sample")
+        if (value < 60)
+            return qsTr("%1s old").arg(Math.round(value))
+        if (value < 3600)
+            return qsTr("%1m old").arg(Math.floor(value / 60))
+        return qsTr("%1h old").arg((value / 3600).toFixed(1))
+    }
+    function stateColor(state) {
+        if (state === "current") return root.accentColor
+        if (state === "stale") return "#f6c344"
+        if (state === "error") return "#e35d6a"
+        return root.mutedColor
+    }
 
     Window {
         id: rosterWindow
@@ -201,6 +217,69 @@ Item {
                     }
                 }
             }
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 76
+                radius: 3
+                color: "#0d2430"
+                border.width: 1
+                border.color: root.borderColor
+                visible: root.externalOverlays
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: 7
+                    spacing: 3
+                    Text {
+                        text: qsTr("PROPAGATION FORECAST · age / validity / decay")
+                        color: root.primaryColor
+                        font.pixelSize: 9
+                        font.bold: true
+                    }
+                    ListView {
+                        width: parent.width
+                        height: 48
+                        orientation: ListView.Horizontal
+                        spacing: 5
+                        clip: true
+                        model: root.externalOverlays
+                            ? root.externalOverlays.temporalLegend : []
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: 112
+                            height: 44
+                            radius: 3
+                            color: "#101a28"
+                            border.width: 1
+                            border.color: root.stateColor(modelData.state)
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 4
+                                spacing: 1
+                                Text {
+                                    text: modelData.label || modelData.layerId
+                                    color: root.stateColor(modelData.state)
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+                                Text {
+                                    text: root.ageText(modelData.ageSeconds)
+                                          + " · " + (modelData.stateText || "")
+                                    color: root.mutedColor
+                                    font.pixelSize: 8
+                                }
+                                Text {
+                                    text: modelData.validUntilText
+                                          ? qsTr("valid to %1").arg(modelData.validUntilText)
+                                          : qsTr("validity unavailable")
+                                    color: root.mutedColor
+                                    font.pixelSize: 7
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             ListView {
                 id: providerList
                 Layout.fillWidth: true
@@ -214,7 +293,7 @@ Item {
                     required property var modelData
                     required property int index
                     width: providerList.width
-                    height: 52
+                    height: 68
                     radius: 3
                     color: index % 2 ? "#101a28" : "#0d2430"
                     border.width: 1
@@ -241,6 +320,17 @@ Item {
                                 color: modelData.error
                                     ? "#e35d6a" : root.mutedColor
                                 font.pixelSize: 8
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: root.ageText(modelData.ageSeconds)
+                                      + "  ·  " + (modelData.stateText || "")
+                                      + (modelData.validUntilText
+                                         ? qsTr("  · valid to %1").arg(modelData.validUntilText)
+                                         : "")
+                                color: root.stateColor(modelData.state)
+                                font.pixelSize: 7
                                 elide: Text.ElideRight
                             }
                         }

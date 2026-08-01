@@ -13,13 +13,15 @@
 class MapLayerModel;
 class QNetworkAccessManager;
 class QNetworkReply;
-class QUdpSocket;
+class RotatorService;
+class QTimer;
 
 class MapOperationsService final : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QVariantList potaSpots READ potaSpots NOTIFY potaSpotsChanged)
     Q_PROPERTY(QVariantMap selectedPotaPark READ selectedPotaPark NOTIFY selectedPotaParkChanged)
+    Q_PROPERTY(QString operatorCall READ operatorCall WRITE setOperatorCall NOTIFY operatorCallChanged)
     Q_PROPERTY(QVariantList operationalMarkers READ operationalMarkers NOTIFY operationalMarkersChanged)
     Q_PROPERTY(QVariantList geographicFeatures READ geographicFeatures NOTIFY geographicFeaturesChanged)
     Q_PROPERTY(QVariantList logbookRows READ logbookRows NOTIFY logbookChanged)
@@ -52,9 +54,28 @@ class MapOperationsService final : public QObject
     Q_PROPERTY(QString rotatorHost READ rotatorHost WRITE setRotatorHost NOTIFY rotatorSettingsChanged)
     Q_PROPERTY(int rotatorPort READ rotatorPort WRITE setRotatorPort NOTIFY rotatorSettingsChanged)
     Q_PROPERTY(bool rotatorEnabled READ rotatorEnabled WRITE setRotatorEnabled NOTIFY rotatorSettingsChanged)
+    Q_PROPERTY(QString rotatorProtocol READ rotatorProtocol WRITE setRotatorProtocol NOTIFY rotatorSettingsChanged)
+    Q_PROPERTY(QStringList rotatorProtocols READ rotatorProtocols CONSTANT)
+    Q_PROPERTY(bool rotatorFeedbackAvailable READ rotatorFeedbackAvailable NOTIFY rotatorFeedbackChanged)
+    Q_PROPERTY(qint64 rotatorLastFeedbackMs READ rotatorLastFeedbackMs NOTIFY rotatorFeedbackChanged)
+    Q_PROPERTY(double rotatorCurrentAzimuth READ rotatorCurrentAzimuth NOTIFY rotatorFeedbackChanged)
+    Q_PROPERTY(double rotatorCurrentElevation READ rotatorCurrentElevation NOTIFY rotatorFeedbackChanged)
+    Q_PROPERTY(double rotatorTargetAzimuth READ rotatorTargetAzimuth NOTIFY rotatorTargetChanged)
+    Q_PROPERTY(double rotatorTargetElevation READ rotatorTargetElevation NOTIFY rotatorTargetChanged)
+    Q_PROPERTY(bool rotatorTracking READ rotatorTracking NOTIFY rotatorTrackingChanged)
+    Q_PROPERTY(int rotatorTrackingIntervalMs READ rotatorTrackingIntervalMs WRITE setRotatorTrackingIntervalMs NOTIFY rotatorSettingsChanged)
+    Q_PROPERTY(bool rotatorSafetyEnabled READ rotatorSafetyEnabled WRITE setRotatorSafetyEnabled NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(double rotatorMinAzimuth READ rotatorMinAzimuth WRITE setRotatorMinAzimuth NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(double rotatorMaxAzimuth READ rotatorMaxAzimuth WRITE setRotatorMaxAzimuth NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(double rotatorMinElevation READ rotatorMinElevation WRITE setRotatorMinElevation NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(double rotatorMaxElevation READ rotatorMaxElevation WRITE setRotatorMaxElevation NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(bool rotatorParkOnStop READ rotatorParkOnStop WRITE setRotatorParkOnStop NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(double rotatorParkAzimuth READ rotatorParkAzimuth WRITE setRotatorParkAzimuth NOTIFY rotatorSafetyChanged)
+    Q_PROPERTY(double rotatorParkElevation READ rotatorParkElevation WRITE setRotatorParkElevation NOTIFY rotatorSafetyChanged)
     Q_PROPERTY(QString rotatorStatus READ rotatorStatus NOTIFY rotatorStatusChanged)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
     Q_PROPERTY(QString lastExportPath READ lastExportPath NOTIFY lastExportPathChanged)
+    Q_PROPERTY(bool offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
 
 public:
     explicit MapOperationsService(const QString& databasePath,
@@ -64,6 +85,7 @@ public:
 
     QVariantList potaSpots() const { return m_potaSpots; }
     QVariantMap selectedPotaPark() const { return m_selectedPotaPark; }
+    QString operatorCall() const { return m_operatorCall; }
     QVariantList operationalMarkers() const { return m_operationalMarkers; }
     QVariantList geographicFeatures() const { return m_geographicFeatures; }
     QVariantList logbookRows() const { return m_logbookRows; }
@@ -96,9 +118,28 @@ public:
     QString rotatorHost() const { return m_rotatorHost; }
     int rotatorPort() const { return m_rotatorPort; }
     bool rotatorEnabled() const { return m_rotatorEnabled; }
+    QString rotatorProtocol() const { return m_rotatorProtocol; }
+    QStringList rotatorProtocols() const;
+    bool rotatorFeedbackAvailable() const;
+    qint64 rotatorLastFeedbackMs() const;
+    double rotatorCurrentAzimuth() const;
+    double rotatorCurrentElevation() const;
+    double rotatorTargetAzimuth() const;
+    double rotatorTargetElevation() const;
+    bool rotatorTracking() const;
+    int rotatorTrackingIntervalMs() const;
+    bool rotatorSafetyEnabled() const;
+    double rotatorMinAzimuth() const;
+    double rotatorMaxAzimuth() const;
+    double rotatorMinElevation() const;
+    double rotatorMaxElevation() const;
+    bool rotatorParkOnStop() const;
+    double rotatorParkAzimuth() const;
+    double rotatorParkElevation() const;
     QString rotatorStatus() const { return m_rotatorStatus; }
     QString statusMessage() const { return m_statusMessage; }
     QString lastExportPath() const { return m_lastExportPath; }
+    bool offlineMode() const { return m_offlineMode; }
 
     void setMapProjection(const QString& projection);
     void setDataViewMode(const QString& mode);
@@ -112,10 +153,25 @@ public:
     void setRotatorHost(const QString& host);
     void setRotatorPort(int port);
     void setRotatorEnabled(bool enabled);
+    void setRotatorProtocol(const QString& protocol);
+    void setRotatorTrackingIntervalMs(int intervalMs);
+    void setRotatorSafetyEnabled(bool enabled);
+    void setRotatorMinAzimuth(double value);
+    void setRotatorMaxAzimuth(double value);
+    void setRotatorMinElevation(double value);
+    void setRotatorMaxElevation(double value);
+    void setRotatorParkOnStop(bool enabled);
+    void setRotatorParkAzimuth(double value);
+    void setRotatorParkElevation(double value);
+    void setOperatorCall(const QString& call);
+    void setOfflineMode(bool offline);
 
     Q_INVOKABLE void refreshPota();
     Q_INVOKABLE void selectPotaPark(const QString& reference);
     Q_INVOKABLE void clearSelectedPotaPark();
+    Q_INVOKABLE QVariantMap preparePotaAction(
+        const QVariantMap& spot,
+        const QString& operatorCall = QString()) const;
     Q_INVOKABLE void refreshGeographicFeatures();
     Q_INVOKABLE void refreshIotaCatalog();
     Q_INVOKABLE void refreshLogbook();
@@ -132,8 +188,21 @@ public:
     Q_INVOKABLE void saveMapPreset(const QString& name);
     Q_INVOKABLE void deleteMapPreset(const QString& name);
     Q_INVOKABLE void aimRotator(double azimuth);
+    Q_INVOKABLE void aimRotatorWithElevation(double azimuth, double elevation);
     Q_INVOKABLE void aimRotatorAt(double latitude, double longitude,
                                   double homeLatitude, double homeLongitude);
+    Q_INVOKABLE void trackRotatorAt(double latitude, double longitude,
+                                    double homeLatitude, double homeLongitude);
+    Q_INVOKABLE void trackRotatorAtWithElevation(double latitude, double longitude,
+                                                 double elevation,
+                                                 double homeLatitude, double homeLongitude);
+    Q_INVOKABLE void aimRotatorAtWithElevation(double latitude, double longitude,
+                                               double elevation,
+                                               double homeLatitude, double homeLongitude);
+    Q_INVOKABLE void trackRotator(double azimuth, double elevation = 0.0,
+                                  bool hasElevation = true);
+    Q_INVOKABLE void stopRotator();
+    Q_INVOKABLE void parkRotator();
     Q_INVOKABLE QString reserveScreenshotPath();
     Q_INVOKABLE QString reserveLogbookExportPath(
         const QString& format = QStringLiteral("CSV"));
@@ -141,6 +210,7 @@ public:
 signals:
     void potaSpotsChanged();
     void selectedPotaParkChanged();
+    void operatorCallChanged();
     void operationalMarkersChanged();
     void geographicFeaturesChanged();
     void logbookChanged();
@@ -155,10 +225,15 @@ signals:
     void potaLoadingChanged();
     void exportInProgressChanged();
     void rotatorSettingsChanged();
+    void rotatorFeedbackChanged();
+    void rotatorTargetChanged();
+    void rotatorTrackingChanged();
+    void rotatorSafetyChanged();
     void rotatorStatusChanged();
     void statusMessageChanged();
     void lastExportPathChanged();
     void screenshotPathReserved(const QString& path);
+    void offlineModeChanged();
 
 private:
     struct LogbookSnapshot {
@@ -204,6 +279,7 @@ private:
     void requestGeoLayer(const QString& layerId, const QUrl& url);
     void handlePotaReply(QNetworkReply* reply);
     void handlePotaParkReply(QNetworkReply* reply);
+    void pruneExpiredPotaSpots();
     void handleGeoReply(const QString& layerId, quint64 generation,
                         QNetworkReply* reply);
     void setLogbookLoading(bool loading);
@@ -225,14 +301,19 @@ private:
         const QString& band, const QString& mode, const QString& period,
         const QString& sort, bool descending);
     static QVariantMap markerFromPotaSpot(const QVariantMap& spot);
+    static QVariantMap potaSpotState(const QVariantMap& spot,
+                                     const QString& operatorCall,
+                                     qint64 nowMs);
     static QString normalizedLocalPath(const QString& path);
 
     QString m_databasePath;
     MapLayerModel* m_layerModel {nullptr};
     QNetworkAccessManager* m_network {nullptr};
-    QUdpSocket* m_rotatorSocket {nullptr};
+    QTimer* m_potaExpiryTimer {nullptr};
+    RotatorService* m_rotatorService {nullptr};
     QVariantList m_potaSpots;
     QVariantMap m_selectedPotaPark;
+    QString m_operatorCall;
     QVariantList m_potaMarkers;
     QVariantList m_databaseMarkers;
     QVariantList m_iotaCatalogMarkers;
@@ -267,9 +348,20 @@ private:
     bool m_potaLoading {false};
     bool m_iotaLoading {false};
     bool m_exportInProgress {false};
+    bool m_offlineMode {false};
     QString m_rotatorHost {QStringLiteral("127.0.0.1")};
     int m_rotatorPort {12040};
     bool m_rotatorEnabled {false};
+    QString m_rotatorProtocol {QStringLiteral("PSTRotator")};
+    int m_rotatorTrackingIntervalMs {1000};
+    bool m_rotatorSafetyEnabled {true};
+    double m_rotatorMinAzimuth {0.0};
+    double m_rotatorMaxAzimuth {360.0};
+    double m_rotatorMinElevation {0.0};
+    double m_rotatorMaxElevation {180.0};
+    bool m_rotatorParkOnStop {false};
+    double m_rotatorParkAzimuth {0.0};
+    double m_rotatorParkElevation {0.0};
     QString m_rotatorStatus {QStringLiteral("Rotator disabled")};
     QString m_statusMessage;
     QString m_lastExportPath;

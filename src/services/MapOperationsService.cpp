@@ -1,6 +1,7 @@
 #include "MapOperationsService.h"
 
 #include "MapLayerModel.h"
+#include "RotatorService.h"
 
 #include <QCryptographicHash>
 #include <QDateTime>
@@ -8,7 +9,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFutureWatcher>
-#include <QHostAddress>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -27,7 +27,7 @@
 #include <QTextStream>
 #include <QThread>
 #include <QTimeZone>
-#include <QUdpSocket>
+#include <QTimer>
 #include <QUrl>
 #include <QUrlQuery>
 #include <QUuid>
@@ -234,14 +234,17 @@ QVariantMap rowToMap(QSqlQuery& query)
     row.insert(QStringLiteral("time"), query.value(6).toString());
     row.insert(QStringLiteral("epoch"), query.value(7).toLongLong());
     row.insert(QStringLiteral("frequencyMhz"), query.value(8).toDouble());
-    row.insert(QStringLiteral("confirmed"), query.value(9).toBool());
-    row.insert(QStringLiteral("dxcc"), query.value(10).toString());
-    row.insert(QStringLiteral("continent"), query.value(11).toString());
-    row.insert(QStringLiteral("state"), query.value(12).toString());
-    row.insert(QStringLiteral("pota"), query.value(13).toString());
-    row.insert(QStringLiteral("iota"), query.value(14).toString());
-    row.insert(QStringLiteral("wpx"), query.value(15).toString());
-    row.insert(QStringLiteral("source"), query.value(16).toString());
+    row.insert(QStringLiteral("satellite"), query.value(9).toString());
+    row.insert(QStringLiteral("satMode"), query.value(10).toString());
+    row.insert(QStringLiteral("frequencyRxMhz"), query.value(11).toDouble());
+    row.insert(QStringLiteral("confirmed"), query.value(12).toBool());
+    row.insert(QStringLiteral("dxcc"), query.value(13).toString());
+    row.insert(QStringLiteral("continent"), query.value(14).toString());
+    row.insert(QStringLiteral("state"), query.value(15).toString());
+    row.insert(QStringLiteral("pota"), query.value(16).toString());
+    row.insert(QStringLiteral("iota"), query.value(17).toString());
+    row.insert(QStringLiteral("wpx"), query.value(18).toString());
+    row.insert(QStringLiteral("source"), query.value(19).toString());
     return row;
 }
 
@@ -294,8 +297,25 @@ MapOperationsService::MapOperationsService(const QString& databasePath,
     , m_databasePath(databasePath)
     , m_layerModel(layerModel)
     , m_network(new QNetworkAccessManager(this))
-    , m_rotatorSocket(new QUdpSocket(this))
+    , m_potaExpiryTimer(new QTimer(this))
+    , m_rotatorService(new RotatorService(this))
 {
+    connect(m_rotatorService, &RotatorService::feedbackChanged,
+            this, &MapOperationsService::rotatorFeedbackChanged);
+    connect(m_rotatorService, &RotatorService::targetChanged,
+            this, &MapOperationsService::rotatorTargetChanged);
+    connect(m_rotatorService, &RotatorService::trackingChanged,
+            this, &MapOperationsService::rotatorTrackingChanged);
+    connect(m_rotatorService, &RotatorService::safetyChanged,
+            this, &MapOperationsService::rotatorSafetyChanged);
+    connect(m_rotatorService, &RotatorService::statusChanged, this, [this]() {
+        if (m_rotatorService) setRotatorStatus(m_rotatorService->status());
+    });
+    m_potaExpiryTimer->setInterval(30000);
+    connect(m_potaExpiryTimer, &QTimer::timeout, this,
+            &MapOperationsService::pruneExpiredPotaSpots);
+    m_potaExpiryTimer->start();
+
     loadSettings();
     loadMapPresets();
 
@@ -364,6 +384,95 @@ QStringList MapOperationsService::availableDataViews() const
     };
 }
 
+QStringList MapOperationsService::rotatorProtocols() const
+{
+    return m_rotatorService ? m_rotatorService->protocols()
+                            : QStringList {QStringLiteral("PSTRotator"),
+                                            QStringLiteral("CatRotator")};
+}
+
+bool MapOperationsService::rotatorFeedbackAvailable() const
+{
+    return m_rotatorService && m_rotatorService->feedbackAvailable();
+}
+
+qint64 MapOperationsService::rotatorLastFeedbackMs() const
+{
+    return m_rotatorService ? m_rotatorService->lastFeedbackMs() : 0;
+}
+
+double MapOperationsService::rotatorCurrentAzimuth() const
+{
+    return m_rotatorService ? m_rotatorService->currentAzimuth() : 0.0;
+}
+
+double MapOperationsService::rotatorCurrentElevation() const
+{
+    return m_rotatorService ? m_rotatorService->currentElevation() : 0.0;
+}
+
+double MapOperationsService::rotatorTargetAzimuth() const
+{
+    return m_rotatorService ? m_rotatorService->targetAzimuth() : 0.0;
+}
+
+double MapOperationsService::rotatorTargetElevation() const
+{
+    return m_rotatorService ? m_rotatorService->targetElevation() : 0.0;
+}
+
+bool MapOperationsService::rotatorTracking() const
+{
+    return m_rotatorService && m_rotatorService->tracking();
+}
+
+int MapOperationsService::rotatorTrackingIntervalMs() const
+{
+    return m_rotatorService ? m_rotatorService->trackingIntervalMs()
+                            : m_rotatorTrackingIntervalMs;
+}
+
+bool MapOperationsService::rotatorSafetyEnabled() const
+{
+    return m_rotatorService ? m_rotatorService->safetyEnabled()
+                            : m_rotatorSafetyEnabled;
+}
+
+double MapOperationsService::rotatorMinAzimuth() const
+{
+    return m_rotatorService ? m_rotatorService->minAzimuth() : m_rotatorMinAzimuth;
+}
+
+double MapOperationsService::rotatorMaxAzimuth() const
+{
+    return m_rotatorService ? m_rotatorService->maxAzimuth() : m_rotatorMaxAzimuth;
+}
+
+double MapOperationsService::rotatorMinElevation() const
+{
+    return m_rotatorService ? m_rotatorService->minElevation() : m_rotatorMinElevation;
+}
+
+double MapOperationsService::rotatorMaxElevation() const
+{
+    return m_rotatorService ? m_rotatorService->maxElevation() : m_rotatorMaxElevation;
+}
+
+bool MapOperationsService::rotatorParkOnStop() const
+{
+    return m_rotatorService ? m_rotatorService->parkOnStop() : m_rotatorParkOnStop;
+}
+
+double MapOperationsService::rotatorParkAzimuth() const
+{
+    return m_rotatorService ? m_rotatorService->parkAzimuth() : m_rotatorParkAzimuth;
+}
+
+double MapOperationsService::rotatorParkElevation() const
+{
+    return m_rotatorService ? m_rotatorService->parkElevation() : m_rotatorParkElevation;
+}
+
 void MapOperationsService::loadSettings()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
@@ -402,10 +511,37 @@ void MapOperationsService::loadSettings()
         qBound(1, settings.value(QStringLiteral("RotatorPort"), 12040).toInt(), 65535);
     m_rotatorEnabled =
         settings.value(QStringLiteral("RotatorEnabled"), false).toBool();
+    m_rotatorProtocol = settings.value(QStringLiteral("RotatorProtocol"),
+                                       QStringLiteral("PSTRotator")).toString();
+    m_rotatorTrackingIntervalMs = qBound(
+        250, settings.value(QStringLiteral("RotatorTrackingIntervalMs"), 1000).toInt(), 10000);
+    m_rotatorSafetyEnabled = settings.value(QStringLiteral("RotatorSafetyEnabled"), true).toBool();
+    m_rotatorMinAzimuth = settings.value(QStringLiteral("RotatorMinAzimuth"), 0.0).toDouble();
+    m_rotatorMaxAzimuth = settings.value(QStringLiteral("RotatorMaxAzimuth"), 360.0).toDouble();
+    m_rotatorMinElevation = settings.value(QStringLiteral("RotatorMinElevation"), 0.0).toDouble();
+    m_rotatorMaxElevation = settings.value(QStringLiteral("RotatorMaxElevation"), 180.0).toDouble();
+    m_rotatorParkOnStop = settings.value(QStringLiteral("RotatorParkOnStop"), false).toBool();
+    m_rotatorParkAzimuth = settings.value(QStringLiteral("RotatorParkAzimuth"), 0.0).toDouble();
+    m_rotatorParkElevation = settings.value(QStringLiteral("RotatorParkElevation"), 0.0).toDouble();
     settings.endGroup();
-    m_rotatorStatus = m_rotatorEnabled
-        ? QStringLiteral("PSTRotator ready")
-        : QStringLiteral("Rotator disabled");
+    if (m_rotatorService) {
+        m_rotatorService->setProtocol(m_rotatorProtocol);
+        m_rotatorProtocol = m_rotatorService->protocol();
+        m_rotatorService->setHost(m_rotatorHost);
+        m_rotatorService->setPort(m_rotatorPort);
+        m_rotatorService->setTrackingIntervalMs(m_rotatorTrackingIntervalMs);
+        m_rotatorService->setSafetyEnabled(m_rotatorSafetyEnabled);
+        m_rotatorService->setMinAzimuth(m_rotatorMinAzimuth);
+        m_rotatorService->setMaxAzimuth(m_rotatorMaxAzimuth);
+        m_rotatorService->setMinElevation(m_rotatorMinElevation);
+        m_rotatorService->setMaxElevation(m_rotatorMaxElevation);
+        m_rotatorService->setParkOnStop(m_rotatorParkOnStop);
+        m_rotatorService->setParkAzimuth(m_rotatorParkAzimuth);
+        m_rotatorService->setParkElevation(m_rotatorParkElevation);
+        m_rotatorService->setEnabled(m_rotatorEnabled);
+    }
+    m_rotatorStatus = m_rotatorService ? m_rotatorService->status()
+                                       : QStringLiteral("Rotator disabled");
 }
 
 void MapOperationsService::saveSetting(const QString& key,
@@ -543,6 +679,7 @@ void MapOperationsService::setRotatorHost(const QString& host)
     QString const normalized = host.trimmed().left(255);
     if (normalized.isEmpty() || m_rotatorHost == normalized) return;
     m_rotatorHost = normalized;
+    if (m_rotatorService) m_rotatorService->setHost(normalized);
     saveSetting(QStringLiteral("RotatorHost"), normalized);
     emit rotatorSettingsChanged();
 }
@@ -552,6 +689,7 @@ void MapOperationsService::setRotatorPort(int port)
     int const bounded = qBound(1, port, 65535);
     if (m_rotatorPort == bounded) return;
     m_rotatorPort = bounded;
+    if (m_rotatorService) m_rotatorService->setPort(bounded);
     saveSetting(QStringLiteral("RotatorPort"), bounded);
     emit rotatorSettingsChanged();
 }
@@ -560,15 +698,187 @@ void MapOperationsService::setRotatorEnabled(bool enabled)
 {
     if (m_rotatorEnabled == enabled) return;
     m_rotatorEnabled = enabled;
+    if (m_rotatorService) m_rotatorService->setEnabled(enabled);
     saveSetting(QStringLiteral("RotatorEnabled"), enabled);
-    setRotatorStatus(enabled ? QStringLiteral("PSTRotator ready")
-                             : QStringLiteral("Rotator disabled"));
     emit rotatorSettingsChanged();
+}
+
+void MapOperationsService::setRotatorProtocol(const QString& protocol)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setProtocol(protocol);
+    m_rotatorProtocol = m_rotatorService->protocol();
+    saveSetting(QStringLiteral("RotatorProtocol"), m_rotatorProtocol);
+    emit rotatorSettingsChanged();
+}
+
+void MapOperationsService::setRotatorTrackingIntervalMs(int intervalMs)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setTrackingIntervalMs(intervalMs);
+    m_rotatorTrackingIntervalMs = m_rotatorService->trackingIntervalMs();
+    saveSetting(QStringLiteral("RotatorTrackingIntervalMs"), m_rotatorTrackingIntervalMs);
+    emit rotatorSettingsChanged();
+}
+
+void MapOperationsService::setRotatorSafetyEnabled(bool enabled)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setSafetyEnabled(enabled);
+    m_rotatorSafetyEnabled = m_rotatorService->safetyEnabled();
+    saveSetting(QStringLiteral("RotatorSafetyEnabled"), m_rotatorSafetyEnabled);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorMinAzimuth(double value)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setMinAzimuth(value);
+    m_rotatorMinAzimuth = m_rotatorService->minAzimuth();
+    saveSetting(QStringLiteral("RotatorMinAzimuth"), m_rotatorMinAzimuth);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorMaxAzimuth(double value)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setMaxAzimuth(value);
+    m_rotatorMaxAzimuth = m_rotatorService->maxAzimuth();
+    saveSetting(QStringLiteral("RotatorMaxAzimuth"), m_rotatorMaxAzimuth);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorMinElevation(double value)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setMinElevation(value);
+    m_rotatorMinElevation = m_rotatorService->minElevation();
+    saveSetting(QStringLiteral("RotatorMinElevation"), m_rotatorMinElevation);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorMaxElevation(double value)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setMaxElevation(value);
+    m_rotatorMaxElevation = m_rotatorService->maxElevation();
+    saveSetting(QStringLiteral("RotatorMaxElevation"), m_rotatorMaxElevation);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorParkOnStop(bool enabled)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setParkOnStop(enabled);
+    m_rotatorParkOnStop = m_rotatorService->parkOnStop();
+    saveSetting(QStringLiteral("RotatorParkOnStop"), m_rotatorParkOnStop);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorParkAzimuth(double value)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setParkAzimuth(value);
+    m_rotatorParkAzimuth = m_rotatorService->parkAzimuth();
+    saveSetting(QStringLiteral("RotatorParkAzimuth"), m_rotatorParkAzimuth);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setRotatorParkElevation(double value)
+{
+    if (!m_rotatorService) return;
+    m_rotatorService->setParkElevation(value);
+    m_rotatorParkElevation = m_rotatorService->parkElevation();
+    saveSetting(QStringLiteral("RotatorParkElevation"), m_rotatorParkElevation);
+    emit rotatorSafetyChanged();
+}
+
+void MapOperationsService::setOperatorCall(const QString& call)
+{
+    QString normalized = call.trimmed().toUpper();
+    if (m_operatorCall == normalized) {
+        return;
+    }
+    m_operatorCall = normalized;
+    emit operatorCallChanged();
+
+    if (m_potaSpots.isEmpty()) {
+        return;
+    }
+    QVariantList updatedSpots;
+    QVariantList updatedMarkers;
+    updatedSpots.reserve(m_potaSpots.size());
+    updatedMarkers.reserve(m_potaSpots.size());
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    for (QVariant const& value : std::as_const(m_potaSpots)) {
+        QVariantMap spot = value.toMap();
+        QVariantMap const state = potaSpotState(spot, m_operatorCall, nowMs);
+        if (!state.value(QStringLiteral("valid")).toBool()) {
+            continue;
+        }
+        for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+            spot.insert(it.key(), it.value());
+        }
+        updatedSpots << spot;
+        QVariantMap marker = markerFromPotaSpot(spot);
+        for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+            marker.insert(it.key(), it.value());
+        }
+        updatedMarkers << marker;
+    }
+    if (m_potaSpots != updatedSpots || m_potaMarkers != updatedMarkers) {
+        m_potaSpots = updatedSpots;
+        m_potaMarkers = updatedMarkers;
+        if (m_layerModel) {
+            m_layerModel->setCount(QStringLiteral("pota"), m_potaSpots.size());
+        }
+        rebuildOperationalMarkers();
+        emit potaSpotsChanged();
+    }
+}
+
+void MapOperationsService::setOfflineMode(bool offline)
+{
+    if (m_offlineMode == offline) {
+        return;
+    }
+
+    m_offlineMode = offline;
+    if (offline) {
+        ++m_geoGeneration;
+        ++m_iotaGeneration;
+        for (QNetworkReply* reply : m_network->findChildren<QNetworkReply*>()) {
+            if (reply) {
+                reply->abort();
+            }
+        }
+        m_geoPendingLayers.clear();
+        m_iotaLoading = false;
+        setPotaLoading(false);
+        setGeographicLoading(false);
+        setStatusMessage(QStringLiteral("Offline: POTA, IOTA e confini usano solo la cache locale"));
+        refreshGeographicFeatures();
+        rebuildOperationalMarkers();
+    } else {
+        setStatusMessage(QStringLiteral("Online: aggiornamento dei dati mappa abilitato"));
+        if (m_layerModel && m_layerModel->layerEnabled(QStringLiteral("pota"))) {
+            refreshPota();
+        }
+        if (m_layerModel
+            && (m_layerModel->layerEnabled(QStringLiteral("states"))
+                || m_layerModel->layerEnabled(QStringLiteral("counties")))) {
+            refreshGeographicFeatures();
+        }
+        if (m_layerModel && m_layerModel->layerEnabled(QStringLiteral("iota"))) {
+            ensureIotaCatalog();
+        }
+    }
+    emit offlineModeChanged();
 }
 
 void MapOperationsService::refreshPota()
 {
-    if (m_potaLoading) {
+    if (m_offlineMode || m_potaLoading) {
         return;
     }
     setPotaLoading(true);
@@ -586,6 +896,14 @@ void MapOperationsService::refreshPota()
 
 void MapOperationsService::handlePotaReply(QNetworkReply* reply)
 {
+    if (m_offlineMode) {
+        if (reply) {
+            reply->abort();
+            reply->deleteLater();
+        }
+        setPotaLoading(false);
+        return;
+    }
     QByteArray const bytes = reply->readAll();
     QString const networkError = reply->error() == QNetworkReply::NoError
         ? QString() : reply->errorString();
@@ -608,6 +926,7 @@ void MapOperationsService::handlePotaReply(QNetworkReply* reply)
     QJsonArray const values = document.array();
     spots.reserve(qMin(values.size(), kMaxPotaSpots));
     markers.reserve(qMin(values.size(), kMaxPotaSpots));
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     for (QJsonValue const& value : values) {
         if (spots.size() >= kMaxPotaSpots || !value.isObject()) break;
         QVariantMap spot = value.toObject().toVariantMap();
@@ -625,8 +944,19 @@ void MapOperationsService::handlePotaReply(QNetworkReply* reply)
         spot.insert(QStringLiteral("reference"), reference);
         spot.insert(QStringLiteral("parkName"),
                     spot.value(QStringLiteral("name")).toString());
+        QVariantMap const state = potaSpotState(spot, m_operatorCall, nowMs);
+        if (!state.value(QStringLiteral("valid")).toBool()) {
+            continue;
+        }
+        for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+            spot.insert(it.key(), it.value());
+        }
+        QVariantMap marker = markerFromPotaSpot(spot);
+        for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+            marker.insert(it.key(), it.value());
+        }
         spots << spot;
-        markers << markerFromPotaSpot(spot);
+        markers << marker;
     }
     m_potaSpots = spots;
     m_potaMarkers = markers;
@@ -652,6 +982,11 @@ void MapOperationsService::selectPotaPark(const QString& reference)
         }
     }
 
+    if (m_offlineMode) {
+        setStatusMessage(QStringLiteral("Offline: dettagli POTA remoti non disponibili; uso lo spot in cache"));
+        return;
+    }
+
     QNetworkRequest request(
         QUrl(QStringLiteral("https://api.pota.app/park/%1").arg(normalized)));
     request.setHeader(QNetworkRequest::UserAgentHeader,
@@ -666,6 +1001,13 @@ void MapOperationsService::selectPotaPark(const QString& reference)
 
 void MapOperationsService::handlePotaParkReply(QNetworkReply* reply)
 {
+    if (m_offlineMode) {
+        if (reply) {
+            reply->abort();
+            reply->deleteLater();
+        }
+        return;
+    }
     QByteArray const bytes = reply->readAll();
     bool const ok = reply->error() == QNetworkReply::NoError;
     reply->deleteLater();
@@ -688,13 +1030,192 @@ void MapOperationsService::clearSelectedPotaPark()
     emit selectedPotaParkChanged();
 }
 
+void MapOperationsService::pruneExpiredPotaSpots()
+{
+    if (m_potaSpots.isEmpty()) {
+        return;
+    }
+
+    QVariantList activeSpots;
+    QVariantList activeMarkers;
+    activeSpots.reserve(m_potaSpots.size());
+    activeMarkers.reserve(m_potaSpots.size());
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    for (QVariant const& value : std::as_const(m_potaSpots)) {
+        QVariantMap spot = value.toMap();
+        QVariantMap const state = potaSpotState(spot, m_operatorCall, nowMs);
+        if (!state.value(QStringLiteral("valid")).toBool()) {
+            continue;
+        }
+        for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+            spot.insert(it.key(), it.value());
+        }
+        QVariantMap marker = markerFromPotaSpot(spot);
+        for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+            marker.insert(it.key(), it.value());
+        }
+        activeSpots << spot;
+        activeMarkers << marker;
+    }
+    if (activeSpots == m_potaSpots && activeMarkers == m_potaMarkers) {
+        return;
+    }
+    m_potaSpots = activeSpots;
+    m_potaMarkers = activeMarkers;
+    if (m_layerModel) {
+        m_layerModel->setCount(QStringLiteral("pota"), m_potaSpots.size());
+    }
+    rebuildOperationalMarkers();
+    emit potaSpotsChanged();
+}
+
+QVariantMap MapOperationsService::preparePotaAction(
+    const QVariantMap& spot, const QString& operatorCall) const
+{
+    QString const effectiveOperator = operatorCall.trimmed().isEmpty()
+        ? m_operatorCall : operatorCall.trimmed().toUpper();
+    QVariantMap action = potaSpotState(
+        spot, effectiveOperator, QDateTime::currentMSecsSinceEpoch());
+    QString const grid = spot.value(QStringLiteral("grid6")).toString().trimmed()
+        .toUpper();
+    QString const mode = spot.value(QStringLiteral("mode")).toString().trimmed()
+        .toUpper();
+    QString const activator = spot.value(QStringLiteral("activator"))
+        .toString().trimmed().toUpper();
+    double frequency = spot.value(QStringLiteral("frequency")).toDouble();
+    if (frequency > 0.0) {
+        // POTA publishes kHz (e.g. 14074.0).  Accept MHz as well for
+        // imported/cached entries whose value is below 1000.
+        frequency = frequency < 1000.0 ? frequency * 1000000.0
+                                       : frequency * 1000.0;
+    }
+    bool const digital = mode == QStringLiteral("FT8")
+        || mode == QStringLiteral("FT4")
+        || mode == QStringLiteral("JT9")
+        || mode == QStringLiteral("JT65")
+        || mode == QStringLiteral("Q65")
+        || mode == QStringLiteral("MSK144")
+        || mode == QStringLiteral("FST4")
+        || mode == QStringLiteral("FST4W")
+        || mode == QStringLiteral("JS8");
+    action.insert(QStringLiteral("targetCall"),
+                  action.value(QStringLiteral("role")).toString()
+                          == QStringLiteral("HUNTER")
+                      ? activator : QString());
+    action.insert(QStringLiteral("targetGrid"), grid);
+    action.insert(QStringLiteral("frequencyHz"), frequency);
+    action.insert(QStringLiteral("mode"), mode);
+    action.insert(QStringLiteral("digitalMode"), digital);
+    action.insert(QStringLiteral("messageReady"),
+                  action.value(QStringLiteral("valid")).toBool()
+                  && !activator.isEmpty()
+                  && digital
+                  && action.value(QStringLiteral("role")).toString()
+                         == QStringLiteral("HUNTER"));
+    if (!action.value(QStringLiteral("valid")).toBool()) {
+        action.insert(QStringLiteral("reason"),
+                      action.value(QStringLiteral("expired")).toBool()
+                          ? QStringLiteral("Spot scaduto")
+                          : QStringLiteral("Spot non valido"));
+    } else if (activator.isEmpty()) {
+        action.insert(QStringLiteral("reason"), QStringLiteral("Attivatore non disponibile"));
+    } else if (action.value(QStringLiteral("role")).toString()
+                   == QStringLiteral("ACTIVATOR")) {
+        action.insert(QStringLiteral("reason"),
+                      QStringLiteral("Sei l'attivatore di questo parco"));
+    } else if (!digital) {
+        action.insert(QStringLiteral("reason"),
+                      QStringLiteral("Spot %1: nessun messaggio WSJT-X").arg(mode));
+    } else {
+        action.insert(QStringLiteral("reason"),
+                      QStringLiteral("Hunter: messaggio WSJT-X pronto"));
+    }
+    return action;
+}
+
+QVariantMap MapOperationsService::potaSpotState(const QVariantMap& spot,
+                                                 const QString& operatorCall,
+                                                 qint64 nowMs)
+{
+    auto canonicalCall = [](QString value) {
+        value = value.trimmed().toUpper();
+        QStringList const parts = value.split(QLatin1Char('/'), Qt::SkipEmptyParts);
+        if (parts.isEmpty()) {
+            return value;
+        }
+        QString longest = parts.constFirst();
+        for (QString const& part : parts) {
+            if (part.size() > longest.size()) {
+                longest = part;
+            }
+        }
+        return longest;
+    };
+
+    QString const activator = spot.value(QStringLiteral("activator"))
+        .toString().trimmed().toUpper();
+    QString const localCall = operatorCall.trimmed().toUpper();
+    bool const isActivator = !activator.isEmpty() && !localCall.isEmpty()
+        && (activator.compare(localCall, Qt::CaseInsensitive) == 0
+            || canonicalCall(activator).compare(canonicalCall(localCall),
+                                                Qt::CaseInsensitive) == 0);
+
+    QString const spotTimeText = spot.value(QStringLiteral("spotTime"))
+        .toString().trimmed();
+    bool const hasExplicitTimeZone = spotTimeText.endsWith(QLatin1Char('Z'))
+        || spotTimeText.contains(QLatin1Char('+'))
+        || spotTimeText.contains(QRegularExpression(QStringLiteral("-\\d\\d:\\d\\d$")));
+    QString const parseSpotTimeText = hasExplicitTimeZone
+        ? spotTimeText : spotTimeText + QLatin1Char('Z');
+    QDateTime spotTime = QDateTime::fromString(parseSpotTimeText,
+                                               Qt::ISODateWithMs);
+    if (!spotTime.isValid()) {
+        spotTime = QDateTime::fromString(parseSpotTimeText, Qt::ISODate);
+    }
+    qint64 const spotTimeMs = spotTime.isValid()
+        ? spotTime.toUTC().toMSecsSinceEpoch() : 0;
+    bool expireOk = false;
+    qint64 const expireSeconds = spot.value(QStringLiteral("expire"))
+        .toLongLong(&expireOk);
+    bool const hasExpiry = expireOk && spotTimeMs > 0;
+    qint64 const expiresAtMs = hasExpiry
+        ? spotTimeMs + expireSeconds * 1000LL : 0;
+    bool invalid = spot.value(QStringLiteral("invalid")).toBool();
+    QString const invalidText = spot.value(QStringLiteral("invalid"))
+        .toString().trimmed().toLower();
+    if (invalidText == QStringLiteral("true")
+        || invalidText == QStringLiteral("yes")) {
+        invalid = true;
+    }
+    bool const expired = hasExpiry && nowMs >= expiresAtMs;
+    bool const valid = !invalid && !expired;
+    qint64 const remainingSeconds = hasExpiry
+        ? qMax<qint64>(0, (expiresAtMs - nowMs + 999) / 1000) : 0;
+    qint64 const ageSeconds = spotTimeMs > 0
+        ? qMax<qint64>(0, (nowMs - spotTimeMs) / 1000) : 0;
+
+    return {
+        {QStringLiteral("role"), isActivator
+             ? QStringLiteral("ACTIVATOR") : QStringLiteral("HUNTER")},
+        {QStringLiteral("spotValid"), valid},
+        {QStringLiteral("valid"), valid},
+        {QStringLiteral("invalid"), invalid},
+        {QStringLiteral("expired"), expired},
+        {QStringLiteral("spotTimeMs"), spotTimeMs},
+        {QStringLiteral("expiresAtMs"), expiresAtMs},
+        {QStringLiteral("remainingSeconds"), remainingSeconds},
+        {QStringLiteral("spotAgeSeconds"), ageSeconds},
+        {QStringLiteral("expirySeconds"), expireSeconds}
+    };
+}
+
 QVariantMap MapOperationsService::markerFromPotaSpot(const QVariantMap& spot)
 {
     QString const reference =
         spot.value(QStringLiteral("reference")).toString().toUpper();
     QString const activator =
         spot.value(QStringLiteral("activator")).toString().toUpper();
-    return {
+    QVariantMap marker {
         {QStringLiteral("id"), QStringLiteral("pota:%1:%2").arg(reference, activator)},
         {QStringLiteral("type"), QStringLiteral("POTA")},
         {QStringLiteral("reference"), reference},
@@ -707,8 +1228,17 @@ QVariantMap MapOperationsService::markerFromPotaSpot(const QVariantMap& spot)
         {QStringLiteral("frequency"), spot.value(QStringLiteral("frequency"))},
         {QStringLiteral("mode"), spot.value(QStringLiteral("mode"))},
         {QStringLiteral("comments"), spot.value(QStringLiteral("comments"))},
+        {QStringLiteral("activator"), activator},
+        {QStringLiteral("spotter"), spot.value(QStringLiteral("spotter"))},
+        {QStringLiteral("source"), spot.value(QStringLiteral("source"))},
         {QStringLiteral("color"), QStringLiteral("#74d66a")}
     };
+    QVariantMap const state = potaSpotState(
+        spot, QString(), QDateTime::currentMSecsSinceEpoch());
+    for (auto it = state.constBegin(); it != state.constEnd(); ++it) {
+        marker.insert(it.key(), it.value());
+    }
+    return marker;
 }
 
 QString MapOperationsService::iotaCachePath() const
@@ -741,12 +1271,17 @@ void MapOperationsService::ensureIotaCatalog()
 
 void MapOperationsService::refreshIotaCatalog()
 {
+    if (m_offlineMode) {
+        ensureIotaCatalog();
+        setStatusMessage(QStringLiteral("Offline: catalogo IOTA locale"));
+        return;
+    }
     requestIotaCatalog();
 }
 
 void MapOperationsService::requestIotaCatalog()
 {
-    if (m_iotaLoading) {
+    if (m_offlineMode || m_iotaLoading) {
         return;
     }
     m_iotaLoading = true;
@@ -763,6 +1298,14 @@ void MapOperationsService::requestIotaCatalog()
 
 void MapOperationsService::handleIotaCatalogReply(QNetworkReply* reply)
 {
+    if (m_offlineMode) {
+        if (reply) {
+            reply->abort();
+            reply->deleteLater();
+        }
+        m_iotaLoading = false;
+        return;
+    }
     QByteArray const bytes = reply->readAll();
     QString const networkError = reply->error() == QNetworkReply::NoError
         ? QString() : reply->errorString();
@@ -931,6 +1474,17 @@ void MapOperationsService::refreshGeographicFeatures()
             m_geoLayerGeneration.insert(layerId, ++m_geoGeneration);
         }
     }
+    if (m_offlineMode) {
+        m_geographicFeatures.clear();
+        if (m_layerModel->layerEnabled(QStringLiteral("states"))) {
+            m_geographicFeatures.append(m_stateFeatures);
+        }
+        if (m_layerModel->layerEnabled(QStringLiteral("counties"))) {
+            m_geographicFeatures.append(m_countyFeatures);
+        }
+        emit geographicFeaturesChanged();
+        return;
+    }
     bool requested = false;
     if (m_layerModel->layerEnabled(QStringLiteral("states"))
         && m_stateFeatures.isEmpty()) {
@@ -983,7 +1537,7 @@ void MapOperationsService::refreshGeographicFeatures()
 void MapOperationsService::requestGeoLayer(const QString& layerId,
                                            const QUrl& url)
 {
-    if (m_geoPendingLayers.contains(layerId)) {
+    if (m_offlineMode || m_geoPendingLayers.contains(layerId)) {
         return;
     }
     quint64 const generation = ++m_geoGeneration;
@@ -1007,6 +1561,15 @@ void MapOperationsService::handleGeoReply(const QString& layerId,
                                           quint64 generation,
                                           QNetworkReply* reply)
 {
+    if (m_offlineMode) {
+        if (reply) {
+            reply->abort();
+            reply->deleteLater();
+        }
+        m_geoPendingLayers.remove(layerId);
+        setGeographicLoading(!m_geoPendingLayers.isEmpty());
+        return;
+    }
     QByteArray const bytes = reply->readAll();
     QString const error = reply->error() == QNetworkReply::NoError
         ? QString() : reply->errorString();
@@ -1194,7 +1757,7 @@ MapOperationsService::queryLogbookDatabase(
 
     QString const selectSql = QStringLiteral(
         "SELECT source_key,call,grid,band,mode,qso_date,time_on,qso_epoch,"
-        " frequency_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source"
+        " frequency_mhz,satellite,sat_mode,freq_rx_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source"
         " FROM map_qso WHERE %1 ORDER BY %2 %3 LIMIT %4")
         .arg(filter.where, sortableColumn(sort),
              descending ? QStringLiteral("DESC") : QStringLiteral("ASC"))
@@ -1214,7 +1777,8 @@ MapOperationsService::queryLogbookDatabase(
         " count(DISTINCT upper(grid4)),"
         " count(DISTINCT CASE WHEN pota_ref<>'' THEN upper(pota_ref) END),"
         " count(DISTINCT CASE WHEN iota<>'' THEN upper(iota) END),"
-        " count(DISTINCT CASE WHEN wpx<>'' THEN upper(wpx) END)"
+        " count(DISTINCT CASE WHEN wpx<>'' THEN upper(wpx) END),"
+        " count(DISTINCT CASE WHEN satellite<>'' THEN upper(satellite) END)"
         " FROM map_qso WHERE %1").arg(filter.where);
     if (prepareAndBind(&scoreQuery, scoreSql, filter.binds, nullptr)
         && scoreQuery.next()) {
@@ -1226,7 +1790,8 @@ MapOperationsService::queryLogbookDatabase(
             {QStringLiteral("grids"), scoreQuery.value(4).toInt()},
             {QStringLiteral("pota"), scoreQuery.value(5).toInt()},
             {QStringLiteral("iota"), scoreQuery.value(6).toInt()},
-            {QStringLiteral("wpx"), scoreQuery.value(7).toInt()}
+            {QStringLiteral("wpx"), scoreQuery.value(7).toInt()},
+            {QStringLiteral("satellites"), scoreQuery.value(8).toInt()}
         };
     }
 
@@ -1253,6 +1818,7 @@ MapOperationsService::queryLogbookDatabase(
     appendChart(QStringLiteral("DXCC"), QStringLiteral("dxcc"));
     appendChart(QStringLiteral("WPX"), QStringLiteral("wpx"));
     appendChart(QStringLiteral("Grid"), QStringLiteral("grid4"));
+    appendChart(QStringLiteral("Satellite"), QStringLiteral("satellite"));
 
     auto appendTopStatistics = [&](const QString& group, const QString& column) {
         QSqlQuery topQuery(db);
@@ -1284,6 +1850,7 @@ MapOperationsService::queryLogbookDatabase(
     appendTopStatistics(QStringLiteral("WPX"), QStringLiteral("wpx"));
     appendTopStatistics(QStringLiteral("Grid"), QStringLiteral("grid4"));
     appendTopStatistics(QStringLiteral("Callsign"), QStringLiteral("call"));
+    appendTopStatistics(QStringLiteral("Satellite"), QStringLiteral("satellite"));
 
     struct ProgressBucket {
         int qsos {0};
@@ -1546,6 +2113,72 @@ MapOperationsService::queryLogbookDatabase(
         }
     }
 
+    QHash<QString, QVariantMap> markerDetails;
+    QSqlQuery markerDetailQuery(db);
+    QString const markerDetailSql = QStringLiteral(
+        "SELECT coalesce(nullif(trim(pota_ref),''),"
+        " nullif(trim(iota),''),nullif(trim(wpx),'')),"
+        " CASE WHEN trim(pota_ref)<>'' THEN 'POTA'"
+        "      WHEN trim(iota)<>'' THEN 'IOTA' ELSE 'WPX' END,"
+        " coalesce(nullif(upper(trim(band)),''),'ALL'),"
+        " coalesce(nullif(upper(trim(mode)),''),'ALL'),"
+        " sum(confirmed),count(*) FROM map_qso WHERE %1"
+        " AND (trim(pota_ref)<>'' OR trim(iota)<>'' OR trim(wpx)<>'')"
+        " GROUP BY 1,2,3,4").arg(filter.where);
+    if (prepareAndBind(&markerDetailQuery, markerDetailSql, filter.binds, nullptr)) {
+        auto appendUnique = [](QVariantList& values, const QString& value) {
+            for (QVariant const& existing : values) {
+                if (existing.toString().compare(value, Qt::CaseInsensitive) == 0) {
+                    return;
+                }
+            }
+            values << value;
+        };
+        while (markerDetailQuery.next()) {
+            QString const reference = markerDetailQuery.value(0).toString().trimmed();
+            QString const type = markerDetailQuery.value(1).toString().toUpper();
+            if (reference.isEmpty() || type.isEmpty()) {
+                continue;
+            }
+            QString const key = type + QLatin1Char('\x1f') + reference.toUpper();
+            QVariantMap detail = markerDetails.value(key);
+            QVariantList workedBands = detail.value(QStringLiteral("workedBands")).toList();
+            QVariantList confirmedBands = detail.value(QStringLiteral("confirmedBands")).toList();
+            QVariantList workedModes = detail.value(QStringLiteral("workedModes")).toList();
+            QVariantList confirmedModes = detail.value(QStringLiteral("confirmedModes")).toList();
+            QVariantList bandModes = detail.value(QStringLiteral("workedBandModes")).toList();
+            QString const band = markerDetailQuery.value(2).toString().toUpper();
+            QString const mode = markerDetailQuery.value(3).toString().toUpper();
+            int const confirmedCount = markerDetailQuery.value(4).toInt();
+            int const qsoCount = markerDetailQuery.value(5).toInt();
+            appendUnique(workedBands, band);
+            appendUnique(workedModes, mode);
+            if (confirmedCount > 0) {
+                appendUnique(confirmedBands, band);
+                appendUnique(confirmedModes, mode);
+            }
+            bandModes << QVariantMap {
+                {QStringLiteral("band"), band},
+                {QStringLiteral("mode"), mode},
+                {QStringLiteral("worked"), qsoCount > 0},
+                {QStringLiteral("confirmed"), confirmedCount > 0},
+                {QStringLiteral("qsos"), qsoCount},
+                {QStringLiteral("confirmedQsos"), confirmedCount}
+            };
+            detail.insert(QStringLiteral("workedBands"), workedBands);
+            detail.insert(QStringLiteral("confirmedBands"), confirmedBands);
+            detail.insert(QStringLiteral("workedModes"), workedModes);
+            detail.insert(QStringLiteral("confirmedModes"), confirmedModes);
+            detail.insert(QStringLiteral("workedBandModes"), bandModes);
+            detail.insert(QStringLiteral("workedCount"),
+                          detail.value(QStringLiteral("workedCount")).toInt() + qsoCount);
+            detail.insert(QStringLiteral("confirmedCount"),
+                          detail.value(QStringLiteral("confirmedCount")).toInt()
+                              + confirmedCount);
+            markerDetails.insert(key, detail);
+        }
+    }
+
     QSqlQuery markerQuery(db);
     QString const markerSql = QStringLiteral(
         "SELECT call,grid,"
@@ -1555,15 +2188,14 @@ MapOperationsService::queryLogbookDatabase(
         " max(qso_epoch),max(confirmed)"
         " FROM map_qso WHERE %1"
         " AND (pota_ref<>'' OR iota<>'' OR wpx<>'')"
-        " AND length(grid)>=4 GROUP BY 3,4 LIMIT 3000").arg(filter.where);
+        " GROUP BY 3,4 LIMIT 3000").arg(filter.where);
     if (prepareAndBind(&markerQuery, markerSql, filter.binds, nullptr)) {
         while (markerQuery.next()) {
             QString const grid = markerQuery.value(1).toString();
             QPointF const center = maidenheadCenter(grid);
-            if (center.isNull()) continue;
             QString const reference = markerQuery.value(2).toString();
             QString const type = markerQuery.value(3).toString();
-            snapshot.markers << QVariantMap {
+            QVariantMap marker {
                 {QStringLiteral("id"),
                  QStringLiteral("%1:%2").arg(type.toLower(), reference)},
                 {QStringLiteral("type"), type},
@@ -1571,14 +2203,24 @@ MapOperationsService::queryLogbookDatabase(
                 {QStringLiteral("call"), markerQuery.value(0).toString()},
                 {QStringLiteral("grid"), grid},
                 {QStringLiteral("label"), reference},
-                {QStringLiteral("longitude"), center.x()},
-                {QStringLiteral("latitude"), center.y()},
                 {QStringLiteral("confirmed"), markerQuery.value(5).toBool()},
                 {QStringLiteral("color"),
                  type == QStringLiteral("IOTA") ? QStringLiteral("#44d7e8")
                  : type == QStringLiteral("WPX") ? QStringLiteral("#f0b94d")
                                                   : QStringLiteral("#74d66a")}
             };
+            if (!center.isNull()) {
+                marker.insert(QStringLiteral("longitude"), center.x());
+                marker.insert(QStringLiteral("latitude"), center.y());
+            }
+            QString const detailKey = type.toUpper() + QLatin1Char('\x1f')
+                + reference.toUpper();
+            QVariantMap const detail = markerDetails.value(detailKey);
+            for (auto it = detail.constBegin(); it != detail.constEnd(); ++it) {
+                marker.insert(it.key(), it.value());
+            }
+            marker.insert(QStringLiteral("worked"), true);
+            snapshot.markers << marker;
         }
     }
     return snapshot;
@@ -1587,24 +2229,57 @@ MapOperationsService::queryLogbookDatabase(
 void MapOperationsService::rebuildOperationalMarkers()
 {
     QVariantList markers;
-    if (m_layerModel && m_layerModel->layerEnabled(QStringLiteral("pota"))) {
-        markers.append(m_potaMarkers);
+    QHash<QString, QVariantMap> loggedByKey;
+    for (QVariant const& value : std::as_const(m_databaseMarkers)) {
+        QVariantMap const marker = value.toMap();
+        QString const type = marker.value(QStringLiteral("type")).toString().trimmed().toUpper();
+        QString const reference = marker.value(QStringLiteral("reference"))
+            .toString().trimmed().toUpper();
+        if (type.isEmpty() || reference.isEmpty()) {
+            continue;
+        }
+        loggedByKey.insert(type + QLatin1Char('\x1f') + reference, marker);
+    }
+
+    auto mergeLoggedStatus = [](QVariantMap& marker, const QVariantMap& logged) {
+        for (QString const& key : {
+                 QStringLiteral("call"), QStringLiteral("grid"),
+                 QStringLiteral("worked"), QStringLiteral("confirmed"),
+                 QStringLiteral("workedBands"), QStringLiteral("confirmedBands"),
+                 QStringLiteral("workedModes"), QStringLiteral("confirmedModes"),
+                 QStringLiteral("workedBandModes"), QStringLiteral("workedCount"),
+                 QStringLiteral("confirmedCount")}) {
+            if (logged.contains(key)) {
+                marker.insert(key, logged.value(key));
+            }
+        }
+        marker.insert(QStringLiteral("worked"), true);
+    };
+
+    bool const potaEnabled =
+        m_layerModel && m_layerModel->layerEnabled(QStringLiteral("pota"));
+    QSet<QString> livePotaKeys;
+    if (potaEnabled) {
+        for (QVariant const& value : std::as_const(m_potaMarkers)) {
+            QVariantMap marker = value.toMap();
+            QString const reference = marker.value(QStringLiteral("reference"))
+                .toString().trimmed().toUpper();
+            QString const key = QStringLiteral("POTA") + QLatin1Char('\x1f') + reference;
+            auto const logged = loggedByKey.constFind(key);
+            if (logged != loggedByKey.constEnd()) {
+                mergeLoggedStatus(marker, logged.value());
+            }
+            livePotaKeys.insert(key);
+            markers << marker;
+        }
     }
 
     QHash<QString, QVariantMap> loggedIota;
-    for (QVariant const& value : std::as_const(m_databaseMarkers)) {
-        QVariantMap const marker = value.toMap();
-        if (marker.value(QStringLiteral("type")).toString()
-                .compare(QStringLiteral("IOTA"), Qt::CaseInsensitive) != 0) {
-            continue;
-        }
-        QString const reference =
-            marker.value(QStringLiteral("reference")).toString().trimmed().toUpper();
-        if (!reference.isEmpty()) {
-            loggedIota.insert(reference, marker);
+    for (auto it = loggedByKey.constBegin(); it != loggedByKey.constEnd(); ++it) {
+        if (it.key().startsWith(QStringLiteral("IOTA") + QLatin1Char('\x1f'))) {
+            loggedIota.insert(it.key().section(QLatin1Char('\x1f'), 1), it.value());
         }
     }
-
     bool const iotaEnabled =
         m_layerModel && m_layerModel->layerEnabled(QStringLiteral("iota"));
     if (iotaEnabled && !m_iotaCatalogMarkers.isEmpty()) {
@@ -1615,14 +2290,7 @@ void MapOperationsService::rebuildOperationalMarkers()
             auto const logged = loggedIota.constFind(reference);
             if (logged != loggedIota.constEnd()) {
                 QVariantMap const qsoMarker = logged.value();
-                for (QString const& key : {
-                         QStringLiteral("call"), QStringLiteral("grid"),
-                         QStringLiteral("confirmed")}) {
-                    if (qsoMarker.contains(key)) {
-                        marker.insert(key, qsoMarker.value(key));
-                    }
-                }
-                marker.insert(QStringLiteral("worked"), true);
+                mergeLoggedStatus(marker, qsoMarker);
                 marker.insert(
                     QStringLiteral("comments"),
                     marker.value(QStringLiteral("confirmed")).toBool()
@@ -1638,6 +2306,12 @@ void MapOperationsService::rebuildOperationalMarkers()
         QString const type = marker.value(QStringLiteral("type")).toString().toLower();
         if (type == QStringLiteral("iota")
             && iotaEnabled && !m_iotaCatalogMarkers.isEmpty()) {
+            continue;
+        }
+        QString const reference = marker.value(QStringLiteral("reference"))
+            .toString().trimmed().toUpper();
+        QString const markerKey = type.toUpper() + QLatin1Char('\x1f') + reference;
+        if (type == QStringLiteral("pota") && livePotaKeys.contains(markerKey)) {
             continue;
         }
         if (!m_layerModel || m_layerModel->layerEnabled(type)) {
@@ -1876,7 +2550,7 @@ MapOperationsService::exportLogbookDatabase(
     SqlFilter const filter = buildFilter(search, band, mode, period);
     QString const selectSql = QStringLiteral(
         "SELECT source_key,call,grid,band,mode,qso_date,time_on,qso_epoch,"
-        " frequency_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source"
+        " frequency_mhz,satellite,sat_mode,freq_rx_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source"
         " FROM map_qso WHERE %1 ORDER BY %2 %3")
         .arg(filter.where, sortableColumn(sort),
              descending ? QStringLiteral("DESC") : QStringLiteral("ASC"));
@@ -1898,7 +2572,7 @@ MapOperationsService::exportLogbookDatabase(
     if (adif) {
         stream << "<ADIF_VER:5>3.1.4 <PROGRAMID:9>Decodium4 <EOH>\n";
     } else {
-        stream << "Date,Time,Call,Grid,Band,Mode,Frequency MHz,Confirmed,DXCC,"
+        stream << "Date,Time,Call,Grid,Band,Mode,Frequency MHz,Receive Frequency MHz,Satellite,Sat Mode,Confirmed,DXCC,"
                   "Continent,State,POTA,IOTA,WPX,Source\n";
     }
 
@@ -1916,8 +2590,12 @@ MapOperationsService::exportLogbookDatabase(
             field(QStringLiteral("grid"), QStringLiteral("GRIDSQUARE"));
             field(QStringLiteral("band"), QStringLiteral("BAND"));
             field(QStringLiteral("mode"), QStringLiteral("MODE"));
+            field(QStringLiteral("frequencyMhz"), QStringLiteral("FREQ"));
+            field(QStringLiteral("frequencyRxMhz"), QStringLiteral("FREQ_RX"));
             field(QStringLiteral("date"), QStringLiteral("QSO_DATE"));
             field(QStringLiteral("time"), QStringLiteral("TIME_ON"));
+            field(QStringLiteral("satellite"), QStringLiteral("SAT_NAME"));
+            field(QStringLiteral("satMode"), QStringLiteral("SAT_MODE"));
             field(QStringLiteral("pota"), QStringLiteral("POTA_REF"));
             field(QStringLiteral("iota"), QStringLiteral("IOTA"));
             stream << "<EOR>\n";
@@ -1932,6 +2610,11 @@ MapOperationsService::exportLogbookDatabase(
                 QString::number(
                     row.value(QStringLiteral("frequencyMhz")).toDouble(),
                     'f', 6),
+                QString::number(
+                    row.value(QStringLiteral("frequencyRxMhz")).toDouble(),
+                    'f', 6),
+                row.value(QStringLiteral("satellite")).toString(),
+                row.value(QStringLiteral("satMode")).toString(),
                 row.value(QStringLiteral("confirmed")).toBool()
                     ? QStringLiteral("Y") : QStringLiteral("N"),
                 row.value(QStringLiteral("dxcc")).toString(),
@@ -2096,25 +2779,14 @@ void MapOperationsService::deleteMapPreset(const QString& name)
 
 void MapOperationsService::aimRotator(double azimuth)
 {
-    if (!m_rotatorEnabled) {
-        setRotatorStatus(QStringLiteral("Enable PSTRotator first"));
-        return;
-    }
-    if (!qIsFinite(azimuth)) return;
+    if (!m_rotatorService || !qIsFinite(azimuth)) return;
     int const heading = qRound(std::fmod(azimuth + 360.0, 360.0));
-    QByteArray const payload =
-        QStringLiteral("<PST><AZIMUTH>%1</AZIMUTH></PST>")
-            .arg(heading).toUtf8();
-    QHostAddress address;
-    if (!address.setAddress(m_rotatorHost)) {
-        address = QHostAddress::LocalHost;
-    }
-    qint64 const written =
-        m_rotatorSocket->writeDatagram(payload, address,
-                                       static_cast<quint16>(m_rotatorPort));
-    setRotatorStatus(written == payload.size()
-        ? QStringLiteral("PSTRotator: %1 deg").arg(heading)
-        : QStringLiteral("PSTRotator send failed"));
+    m_rotatorService->commandTarget(heading, 0.0, false);
+}
+
+void MapOperationsService::aimRotatorWithElevation(double azimuth, double elevation)
+{
+    if (m_rotatorService) m_rotatorService->commandTarget(azimuth, elevation, true);
 }
 
 void MapOperationsService::aimRotatorAt(double latitude, double longitude,
@@ -2122,6 +2794,53 @@ void MapOperationsService::aimRotatorAt(double latitude, double longitude,
 {
     aimRotator(initialBearing(homeLatitude, homeLongitude,
                               latitude, longitude));
+}
+
+void MapOperationsService::aimRotatorAtWithElevation(double latitude, double longitude,
+                                                     double elevation,
+                                                     double homeLatitude,
+                                                     double homeLongitude)
+{
+    aimRotatorWithElevation(initialBearing(homeLatitude, homeLongitude,
+                                           latitude, longitude), elevation);
+}
+
+void MapOperationsService::trackRotatorAt(double latitude, double longitude,
+                                          double homeLatitude, double homeLongitude)
+{
+    if (m_rotatorService) {
+        m_rotatorService->trackTarget(initialBearing(homeLatitude, homeLongitude,
+                                                     latitude, longitude),
+                                      0.0, false);
+    }
+}
+
+void MapOperationsService::trackRotatorAtWithElevation(double latitude, double longitude,
+                                                       double elevation,
+                                                       double homeLatitude,
+                                                       double homeLongitude)
+{
+    if (m_rotatorService) {
+        m_rotatorService->trackTarget(initialBearing(homeLatitude, homeLongitude,
+                                                     latitude, longitude),
+                                      elevation, true);
+    }
+}
+
+void MapOperationsService::trackRotator(double azimuth, double elevation,
+                                        bool hasElevation)
+{
+    if (m_rotatorService) m_rotatorService->trackTarget(azimuth, elevation, hasElevation);
+}
+
+void MapOperationsService::stopRotator()
+{
+    if (m_rotatorService) m_rotatorService->emergencyStop();
+}
+
+void MapOperationsService::parkRotator()
+{
+    if (m_rotatorService) m_rotatorService->park();
 }
 
 QString MapOperationsService::reserveScreenshotPath()

@@ -116,6 +116,9 @@ private:
   qint64 m_lastDuplicateStartLogMs {-1};
   int m_suppressedDebugStateLogs {0};
   int m_suppressedDuplicateStartLogs {0};
+#if defined(Q_OS_LINUX)
+  quint64 m_deferredRestartGeneration {0};
+#endif
   bool m_haveReportedState_ {false};
   bool m_expectedSuspend_ {false};
   bool m_startInProgress {false};

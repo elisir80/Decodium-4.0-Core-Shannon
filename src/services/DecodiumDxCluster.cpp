@@ -463,6 +463,33 @@ DecodiumDxCluster::~DecodiumDxCluster()
     }
 }
 
+void DecodiumDxCluster::setOfflineMode(bool offline)
+{
+    if (m_offlineMode == offline) {
+        return;
+    }
+    m_offlineMode = offline;
+    if (offline) {
+        m_manualDisconnect = true;
+        m_connectSequenceActive = false;
+        if (m_connectTimeoutTimer) m_connectTimeoutTimer->stop();
+        if (m_refreshTimer) m_refreshTimer->stop();
+        if (m_reconnectTimer) m_reconnectTimer->stop();
+        for (QTcpSocket* socket : findChildren<QTcpSocket*>()) {
+            if (socket) socket->abort();
+        }
+        if (m_connected) {
+            m_connected = false;
+            emit connectedChanged();
+        }
+        setLastStatus(tr("DX Cluster paused in Offline mode"));
+    } else {
+        m_manualDisconnect = false;
+        setLastStatus(tr("DX Cluster ready; connect when requested"));
+    }
+    emit offlineModeChanged();
+}
+
 void DecodiumDxCluster::ensureSocket()
 {
     if (!m_socket) {
@@ -499,7 +526,7 @@ void DecodiumDxCluster::ensureSocket()
 
 void DecodiumDxCluster::sendLogin()
 {
-    if (!m_socket || m_loginSent || m_callsign.trimmed().isEmpty()) {
+    if (m_offlineMode || !m_socket || m_loginSent || m_callsign.trimmed().isEmpty()) {
         return;
     }
 
@@ -523,7 +550,8 @@ void DecodiumDxCluster::sendLogin()
     // dxspider la documentazione ufficiale usa il nome esteso.
     // Delay 8s per dare al server tempo di processare login + banner.
     QTimer::singleShot(8000, this, [this]() {
-        if (m_socket && m_socket->state() == QAbstractSocket::ConnectedState) {
+        if (!m_offlineMode && m_socket
+            && m_socket->state() == QAbstractSocket::ConnectedState) {
             QByteArray cmd = "SHOW/DX 30\n";
             qint64 written = m_socket->write(cmd);
             m_socket->flush();
@@ -538,7 +566,7 @@ void DecodiumDxCluster::sendLogin()
 
 void DecodiumDxCluster::scheduleReconnect(const QString& reason)
 {
-    if (m_manualDisconnect || m_callsign.trimmed().isEmpty()) {
+    if (m_offlineMode || m_manualDisconnect || m_callsign.trimmed().isEmpty()) {
         return;
     }
     if (!m_reconnectTimer || m_reconnectTimer->isActive()) {
@@ -643,6 +671,11 @@ bool DecodiumDxCluster::tryNextConnectionCandidate(const QString& failureReason)
 
 void DecodiumDxCluster::connectCluster()
 {
+    if (m_offlineMode) {
+        setLastStatus(tr("DX Cluster disabled in Offline mode"));
+        emit statusUpdate(tr("DX Cluster disabled in Offline mode"));
+        return;
+    }
     if (m_reconnectTimer) {
         m_reconnectTimer->stop();
     }
@@ -724,7 +757,7 @@ void DecodiumDxCluster::disconnectCluster()
     }
 
     // Politely say goodbye first (best-effort, non-blocking).
-    if (m_socket->state() == QAbstractSocket::ConnectedState) {
+    if (!m_offlineMode && m_socket->state() == QAbstractSocket::ConnectedState) {
         m_socket->write(QByteArray("BYE\r\n"));
         m_socket->flush();
     }
@@ -735,6 +768,10 @@ void DecodiumDxCluster::disconnectCluster()
 
 void DecodiumDxCluster::sendCommand(const QString& cmd)
 {
+    if (m_offlineMode) {
+        emit errorOccurred(tr("Cannot send command in Offline mode."));
+        return;
+    }
     if (!m_socket || m_socket->state() != QAbstractSocket::ConnectedState) {
         emit errorOccurred(tr("Cannot send command: not connected."));
         return;
@@ -745,6 +782,10 @@ void DecodiumDxCluster::sendCommand(const QString& cmd)
 
 bool DecodiumDxCluster::sendSpot(const QString& dxCall, double freqKhz, const QString& comment)
 {
+    if (m_offlineMode) {
+        emit errorOccurred(tr("Cannot send spot in Offline mode."));
+        return false;
+    }
     QString call = dxCall.trimmed().toUpper();
     if (call.isEmpty() || freqKhz <= 0.0) {
         emit errorOccurred(tr("Cannot send spot: invalid call or frequency."));
@@ -781,6 +822,10 @@ bool DecodiumDxCluster::sendSpot(const QString& dxCall, double freqKhz, const QS
 
 bool DecodiumDxCluster::submitSpotVerified(const QString& dxCall, double freqKhz, const QString& comment)
 {
+    if (m_offlineMode) {
+        emit errorOccurred(tr("Cannot send spot in Offline mode."));
+        return false;
+    }
     QString call = baseCallForClusterCheck(dxCall);
     if (call.isEmpty() || freqKhz <= 0.0) {
         emit errorOccurred(tr("Cannot send spot: invalid call or frequency."));
@@ -1082,6 +1127,10 @@ void DecodiumDxCluster::clearSpots()
 
 void DecodiumDxCluster::onConnected()
 {
+    if (m_offlineMode) {
+        if (m_socket) m_socket->abort();
+        return;
+    }
     if (m_connectTimeoutTimer) {
         m_connectTimeoutTimer->stop();
     }
@@ -1133,6 +1182,10 @@ void DecodiumDxCluster::onDisconnected()
 
 void DecodiumDxCluster::onReadyRead()
 {
+    if (m_offlineMode) {
+        if (m_socket) m_socket->abort();
+        return;
+    }
     if (!m_socket) return;
 
     // Append all available bytes to the receive buffer.

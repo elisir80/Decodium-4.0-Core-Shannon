@@ -443,6 +443,24 @@ void CallsignIntelligenceService::finishLookup(const QVariantMap& value, bool fr
     }
 }
 
+void CallsignIntelligenceService::setOfflineMode(bool offline)
+{
+    if (m_offlineMode == offline) {
+        return;
+    }
+    m_offlineMode = offline;
+    if (offline) {
+        if (m_activeReply) {
+            m_activeReply->abort();
+        }
+        setPending(false);
+        setStatus(tr("Offline: solo cache e database callsign locali"));
+    } else {
+        setStatus(tr("Online: provider remoto callsign abilitati"));
+    }
+    emit offlineModeChanged();
+}
+
 void CallsignIntelligenceService::lookup(const QString& callsign, bool forceRefresh)
 {
     const QString call = normalizeCall(callsign);
@@ -470,11 +488,15 @@ void CallsignIntelligenceService::lookup(const QString& callsign, bool forceRefr
         finishLookup(local, false, tr("Risultato da database locali"));
         return;
     }
-    setPending(true);
-    setStatus(tr("Nessun record locale: provo i provider remoti..."));
-    if (!m_clubLogApiKey.isEmpty()) {
-        lookupRemoteClubLog(call);
-        return;
+    if (!m_offlineMode) {
+        setPending(true);
+        setStatus(tr("Nessun record locale: provo i provider remoti..."));
+        if (!m_clubLogApiKey.isEmpty()) {
+            lookupRemoteClubLog(call);
+            return;
+        }
+    } else {
+        setStatus(tr("Offline: nessun record remoto richiesto"));
     }
     QVariantMap fallback;
     fallback.insert(QStringLiteral("call"), call);
@@ -496,6 +518,9 @@ void CallsignIntelligenceService::lookup(const QString& callsign, bool forceRefr
 
 void CallsignIntelligenceService::lookupRemoteClubLog(const QString& callsign)
 {
+    if (m_offlineMode) {
+        return;
+    }
     QUrl url(QStringLiteral("https://clublog.org/watch.php"));
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("call"), callsign);
@@ -518,6 +543,9 @@ void CallsignIntelligenceService::handleRemoteLookupFinished(QNetworkReply* repl
     const QString errorText = reply->errorString();
     reply->deleteLater();
     m_activeReply = nullptr;
+    if (m_offlineMode) {
+        return;
+    }
     QVariantMap local = localLookup(callsign);
     if (error == QNetworkReply::NoError) {
         const QJsonDocument doc = QJsonDocument::fromJson(payload);
@@ -785,6 +813,10 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
 {
     const QString cleanProvider = provider.trimmed().toLower();
     if (!m_specs.contains(cleanProvider) || cleanProvider == QStringLiteral("dxcc")) return;
+    if (m_offlineMode) {
+        setStatus(tr("Offline: aggiornamenti remoti callsign disabilitati"));
+        return;
+    }
     if (m_activeReply) {
         setStatus(tr("Aggiornamento già in corso"));
         return;
@@ -832,6 +864,9 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply, cons
     const QString errorText = reply->errorString();
     reply->deleteLater();
     m_activeReply = nullptr;
+    if (m_offlineMode) {
+        return;
+    }
     if (error != QNetworkReply::NoError) {
         refreshDatabaseState(provider, 0, 0, tr("Errore"), errorText);
         setStatus(tr("Aggiornamento %1 fallito: %2").arg(providerLabel(provider), errorText));
@@ -916,6 +951,7 @@ QString CallsignIntelligenceService::externalUrl(const QString& provider, const 
 
 void CallsignIntelligenceService::openProviderLookup(const QString& provider) const
 {
+    if (m_offlineMode) return;
     const QString cleanProvider = provider.trimmed().toLower().isEmpty() ? QStringLiteral("qrz") : provider.trimmed().toLower();
     if (m_currentCall.isEmpty()) return;
     QDesktopServices::openUrl(QUrl(externalUrl(cleanProvider, m_currentCall)));

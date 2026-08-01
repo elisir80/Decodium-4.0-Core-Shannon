@@ -126,6 +126,17 @@ Dialog {
 
             Item { Layout.fillWidth: true }
 
+            ToolButton {
+                text: "🛰"
+                ToolTip.visible: hovered
+                ToolTip.text: qsTr("Satellite tracking")
+                onClicked: {
+                    if (typeof appEngine !== "undefined" && appEngine
+                            && appEngine.requestSatelliteTrackingWindow)
+                        appEngine.requestSatelliteTrackingWindow()
+                }
+            }
+
             Rectangle {
                 width: 28
                 height: 28

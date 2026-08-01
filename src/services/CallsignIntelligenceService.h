@@ -35,6 +35,7 @@ class CallsignIntelligenceService final : public QObject
     Q_PROPERTY(QString clubLogApiKey READ clubLogApiKey WRITE setClubLogApiKey NOTIFY settingsChanged)
     Q_PROPERTY(QString clubLogEmail READ clubLogEmail WRITE setClubLogEmail NOTIFY settingsChanged)
     Q_PROPERTY(QString clubLogApplicationPassword READ clubLogApplicationPassword WRITE setClubLogApplicationPassword NOTIFY settingsChanged)
+    Q_PROPERTY(bool offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
 
 public:
     explicit CallsignIntelligenceService(QObject* parent = nullptr);
@@ -66,6 +67,8 @@ public:
     void setClubLogEmail(const QString& value);
     QString clubLogApplicationPassword() const { return m_clubLogApplicationPassword; }
     void setClubLogApplicationPassword(const QString& value);
+    bool offlineMode() const { return m_offlineMode; }
+    void setOfflineMode(bool offline);
 
     void setDxccLookup(DxccLookup* lookup);
 
@@ -91,6 +94,7 @@ signals:
     void lookupWindowRequested();
     void lookupWindowCloseRequested();
     void enrichmentReady(const QString& callsign, const QVariantMap& fields);
+    void offlineModeChanged();
 
 private:
     struct ProviderSpec {
@@ -137,6 +141,7 @@ private:
     QVariantMap m_result;
     QString m_status;
     bool m_lookupPending {false};
+    bool m_offlineMode {false};
     bool m_autoOpenOnQsoStart {false};
     bool m_autoCloseAfterLogging {false};
     bool m_enrichMissingFields {false};

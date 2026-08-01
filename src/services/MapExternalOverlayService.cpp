@@ -332,13 +332,17 @@ MapExternalOverlayService::MapExternalOverlayService(MapLayerModel* layerModel,
                               const QString& label,
                               const QString& attribution,
                               int refreshSeconds,
-                              int opacityPercent) {
+                              int validitySeconds,
+                              int opacityPercent,
+                              bool derived) {
         Provider provider;
         provider.id = id;
         provider.label = label;
         provider.attribution = attribution;
         provider.refreshSeconds = refreshSeconds;
+        provider.validitySeconds = validitySeconds;
         provider.opacityPercent = opacityPercent;
+        provider.derived = derived;
         provider.enabled = m_layerModel && m_layerModel->layerEnabled(id);
         provider.timer = new QTimer(this);
         provider.timer->setSingleShot(true);
@@ -349,25 +353,37 @@ MapExternalOverlayService::MapExternalOverlayService(MapLayerModel* layerModel,
     };
 
     addProvider(QStringLiteral("radar"), QStringLiteral("RADAR WORLD"),
-                QStringLiteral("RainViewer (global)"), 300, 72);
+                QStringLiteral("RainViewer (global)"), 300, 900, 72, false);
     addProvider(QStringLiteral("muf"), QStringLiteral("MUF"),
-                QStringLiteral("KC2G"), 901, 52);
+                QStringLiteral("KC2G"), 900, 1800, 52, false);
     addProvider(QStringLiteral("fof2"), QStringLiteral("foF2"),
-                QStringLiteral("KC2G"), 901, 52);
-    addProvider(QStringLiteral("es"), QStringLiteral("Es"),
-                QStringLiteral("PROPquest"), 3600, 58);
+                QStringLiteral("KC2G"), 900, 1800, 52, false);
+    addProvider(QStringLiteral("nvis"), QStringLiteral("NVIS"),
+                QStringLiteral("KC2G · foF2-derived"), 900, 1800, 44, true);
+    addProvider(QStringLiteral("es"), QStringLiteral("Sporadic-E"),
+                QStringLiteral("PROPquest"), 3600, 10800, 58, false);
     addProvider(QStringLiteral("aurora"), QStringLiteral("AURORA"),
-                QStringLiteral("NOAA SWPC"), 361, 62);
+                QStringLiteral("NOAA SWPC"), 360, 900, 62, false);
     addProvider(QStringLiteral("tropo"), QStringLiteral("TROPO"),
-                QStringLiteral("DXView"), 60, 58);
+                QStringLiteral("DXView"), 60, 300, 58, false);
     addProvider(QStringLiteral("lightning"), QStringLiteral("LIGHTNING"),
-                QStringLiteral("NOAA nowCOAST"), 900, 90);
+                QStringLiteral("NOAA nowCOAST"), 900, 1800, 90, false);
     addProvider(QStringLiteral("earthquakes"), QStringLiteral("EARTHQUAKES"),
-                QStringLiteral("USGS Earthquake Hazards Program"), 300, 94);
+                QStringLiteral("USGS Earthquake Hazards Program"), 300, 900, 94, false);
     addProvider(QStringLiteral("wildfires"), QStringLiteral("WILDFIRES"),
-                QStringLiteral("NASA EONET"), 900, 92);
+                QStringLiteral("NASA EONET"), 900, 1800, 92, false);
     m_providers[QStringLiteral("radar")].attributionUrl =
         QStringLiteral("https://www.rainviewer.com/");
+    m_providers[QStringLiteral("muf")].attributionUrl =
+        QStringLiteral("https://prop.kc2g.com/");
+    m_providers[QStringLiteral("fof2")].attributionUrl =
+        QStringLiteral("https://prop.kc2g.com/");
+    m_providers[QStringLiteral("nvis")].attributionUrl =
+        QStringLiteral("https://prop.kc2g.com/");
+    m_providers[QStringLiteral("es")].attributionUrl =
+        QStringLiteral("https://www.propquest.co.uk/");
+    m_providers[QStringLiteral("aurora")].attributionUrl =
+        QStringLiteral("https://www.swpc.noaa.gov/");
     m_providers[QStringLiteral("earthquakes")].attributionUrl =
         QStringLiteral(
             "https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php");
@@ -392,6 +408,10 @@ MapExternalOverlayService::MapExternalOverlayService(MapLayerModel* layerModel,
             loadCache(it.key());
         }
     }
+    m_ageTimer.setInterval(30000);
+    connect(&m_ageTimer, &QTimer::timeout,
+            this, &MapExternalOverlayService::refreshProviderAges);
+    m_ageTimer.start();
     updateProviderStatus();
 }
 
@@ -406,10 +426,11 @@ QVariantList MapExternalOverlayService::providerStatus() const
     static const QStringList order {
         QStringLiteral("radar"), QStringLiteral("lightning"),
         QStringLiteral("muf"), QStringLiteral("fof2"),
-        QStringLiteral("es"), QStringLiteral("aurora"),
+        QStringLiteral("nvis"), QStringLiteral("es"), QStringLiteral("aurora"),
         QStringLiteral("tropo"), QStringLiteral("earthquakes"),
         QStringLiteral("wildfires")
     };
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     QVariantList rows;
     rows.reserve(order.size());
     for (QString const& id : order) {
@@ -420,17 +441,98 @@ QVariantList MapExternalOverlayService::providerStatus() const
         Provider const& provider = it.value();
         QVariantMap row;
         row.insert(QStringLiteral("layerId"), provider.id);
+        row.insert(QStringLiteral("id"), provider.id);
         row.insert(QStringLiteral("label"), provider.label);
         row.insert(QStringLiteral("enabled"), provider.enabled);
         row.insert(QStringLiteral("loading"), provider.loading);
         row.insert(QStringLiteral("available"), m_providerImages.contains(provider.id));
         row.insert(QStringLiteral("count"), provider.itemCount);
+        row.insert(QStringLiteral("itemCount"), provider.itemCount);
         row.insert(QStringLiteral("updatedMs"), provider.updatedMs);
+        row.insert(QStringLiteral("validFromMs"), provider.updatedMs);
+        row.insert(QStringLiteral("validUntilMs"), provider.validUntilMs);
+        qint64 const ageSeconds = provider.updatedMs > 0
+            ? qMax<qint64>(0, (nowMs - provider.updatedMs) / 1000)
+            : -1;
+        double freshness = 0.0;
+        if (ageSeconds >= 0 && provider.validitySeconds > 0) {
+            freshness = qBound(0.0,
+                               1.0 - static_cast<double>(ageSeconds)
+                                   / provider.validitySeconds,
+                               1.0);
+        }
+        bool const stale = provider.updatedMs > 0
+            && (provider.validUntilMs <= 0 || nowMs >= provider.validUntilMs);
+        QString state = QStringLiteral("waiting");
+        if (!provider.enabled) {
+            state = QStringLiteral("disabled");
+        } else if (m_offlineMode) {
+            state = provider.updatedMs > 0
+                ? QStringLiteral("offline-cache")
+                : QStringLiteral("offline");
+        } else if (provider.loading) {
+            state = QStringLiteral("loading");
+        } else if (!provider.error.isEmpty() && !provider.updatedMs) {
+            state = QStringLiteral("error");
+        } else if (!provider.updatedMs) {
+            state = QStringLiteral("waiting");
+        } else if (stale) {
+            state = QStringLiteral("stale");
+        } else {
+            state = QStringLiteral("current");
+        }
+        QString stateText = state;
+        if (state == QStringLiteral("current")) {
+            stateText = tr("current");
+        } else if (state == QStringLiteral("stale")) {
+            stateText = tr("stale");
+        } else if (state == QStringLiteral("offline-cache")) {
+            stateText = tr("offline cache");
+        } else if (state == QStringLiteral("loading")) {
+            stateText = tr("loading");
+        }
+        row.insert(QStringLiteral("ageSeconds"), ageSeconds);
+        row.insert(QStringLiteral("validitySeconds"), provider.validitySeconds);
+        row.insert(QStringLiteral("freshness"), freshness);
+        row.insert(QStringLiteral("stale"), stale);
+        row.insert(QStringLiteral("state"), state);
+        row.insert(QStringLiteral("stateText"), stateText);
+        row.insert(QStringLiteral("updatedText"), provider.updatedMs > 0
+            ? QDateTime::fromMSecsSinceEpoch(provider.updatedMs, QTimeZone::UTC)
+                  .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss 'UTC'"))
+            : QString());
+        row.insert(QStringLiteral("validUntilText"), provider.validUntilMs > 0
+            ? QDateTime::fromMSecsSinceEpoch(provider.validUntilMs, QTimeZone::UTC)
+                  .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss 'UTC'"))
+            : QString());
+        row.insert(QStringLiteral("derived"), provider.derived);
+        row.insert(QStringLiteral("derivedFrom"), provider.derived
+            ? QStringLiteral("fof2") : QString());
+        row.insert(QStringLiteral("decayOpacity"), provider.updatedMs > 0
+            ? qMax(0.12, freshness) : 0.0);
         row.insert(QStringLiteral("error"), provider.error);
         row.insert(QStringLiteral("attribution"), provider.attribution);
         row.insert(QStringLiteral("attributionUrl"), provider.attributionUrl);
         row.insert(QStringLiteral("sourceUrl"), provider.sourceUrl);
         rows.append(row);
+    }
+    return rows;
+}
+
+QVariantList MapExternalOverlayService::temporalLegend() const
+{
+    QVariantList rows;
+    QVariantList const statuses = providerStatus();
+    for (QVariant const& value : statuses) {
+        QVariantMap const row = value.toMap();
+        QString const id = row.value(QStringLiteral("layerId")).toString();
+        if (id == QStringLiteral("muf")
+            || id == QStringLiteral("fof2")
+            || id == QStringLiteral("nvis")
+            || id == QStringLiteral("es")
+            || id == QStringLiteral("aurora")) {
+            rows.append(value);
+        }
     }
     return rows;
 }
@@ -445,6 +547,14 @@ void MapExternalOverlayService::refreshAll()
             requestProvider(it.key());
         }
     }
+}
+
+void MapExternalOverlayService::refreshProviderAges()
+{
+    // Age is part of the rendered semantics, not only a diagnostic field: a
+    // cached forecast must visibly decay while it waits for the next update.
+    rebuildComposite();
+    updateProviderStatus();
 }
 
 void MapExternalOverlayService::refreshLayer(const QString& layerId)
@@ -477,11 +587,9 @@ void MapExternalOverlayService::setOfflineMode(bool offline)
         for (QNetworkReply* reply : findChildren<QNetworkReply*>()) {
             reply->abort();
         }
-        // Moon geometry is calculated locally from the station position. Keep
-        // its cached raster so Offline mode does not remove an Astro overlay.
-        for (auto it = m_providers.cbegin(); it != m_providers.cend(); ++it) {
-            m_providerImages.remove(it.key());
-        }
+        // Keep the last accepted raster visible and mark it as an offline
+        // cache entry.  Offline mode stops network activity; it must not
+        // destroy the forecast cache that the temporal legend describes.
         if (!m_earthquakeFeatures.isEmpty()) {
             m_earthquakeFeatures.clear();
             emit earthquakeFeaturesChanged();
@@ -558,9 +666,9 @@ void MapExternalOverlayService::setLayerEnabled(const QString& layerId, bool ena
         return;
     }
 
+    loadCache(id);
     if (!m_offlineMode) {
         requestProvider(id);
-        loadCache(id);
     }
 }
 
@@ -606,6 +714,15 @@ QString MapExternalOverlayService::providerUrl(const QString& layerId,
             .arg(bucket);
     }
     if (id == QStringLiteral("fof2")) {
+        qint64 const bucket = QDateTime::currentSecsSinceEpoch() / 900;
+        return QStringLiteral("https://tagloomis.com/pred/muf/img/fof2.png?v=%1")
+            .arg(bucket);
+    }
+    if (id == QStringLiteral("nvis")) {
+        // The critical frequency (foF2) is the operational input used to
+        // select an NVIS working frequency.  The source does not publish a
+        // separate NVIS raster, so keep a first-class NVIS layer while
+        // explicitly deriving it from the same current foF2 forecast.
         qint64 const bucket = QDateTime::currentSecsSinceEpoch() / 900;
         return QStringLiteral("https://tagloomis.com/pred/muf/img/fof2.png?v=%1")
             .arg(bucket);
@@ -893,6 +1010,7 @@ MapExternalOverlayService::processPayload(const QString& layerId,
 
     if (layerId == QStringLiteral("muf")
         || layerId == QStringLiteral("fof2")
+        || layerId == QStringLiteral("nvis")
         || layerId == QStringLiteral("es")
         || layerId == QStringLiteral("aurora")
         || layerId == QStringLiteral("radar")) {
@@ -944,7 +1062,7 @@ void MapExternalOverlayService::applyProcessedPayload(
     auto it = m_providers.find(layerId);
     if (it == m_providers.end()
         || !it->enabled
-        || m_offlineMode
+        || (m_offlineMode && !fromCache)
         || generation != it->generation) {
         return;
     }
@@ -963,6 +1081,8 @@ void MapExternalOverlayService::applyProcessedPayload(
         it->updatedMs = fromCache
             ? QFileInfo(cacheFilePath(layerId)).lastModified().toMSecsSinceEpoch()
             : QDateTime::currentMSecsSinceEpoch();
+        it->validUntilMs = it->updatedMs
+            + static_cast<qint64>(it->validitySeconds) * 1000;
         it->appliedGeneration = generation;
         it->error.clear();
         if (m_layerModel) {
@@ -1021,7 +1141,7 @@ void MapExternalOverlayService::rebuildComposite()
 {
     static const QStringList drawOrder {
         QStringLiteral("moon"),
-        QStringLiteral("muf"), QStringLiteral("fof2"),
+        QStringLiteral("muf"), QStringLiteral("fof2"), QStringLiteral("nvis"),
         QStringLiteral("es"), QStringLiteral("aurora"),
         QStringLiteral("tropo"), QStringLiteral("radar"),
         QStringLiteral("lightning"), QStringLiteral("wildfires"),
@@ -1046,7 +1166,17 @@ void MapExternalOverlayService::rebuildComposite()
             if (provider == m_providers.cend() || !provider->enabled) {
                 continue;
             }
-            opacityPercent = provider->opacityPercent;
+            double decay = 1.0;
+            if (provider->updatedMs > 0 && provider->validitySeconds > 0) {
+                qint64 const ageSeconds = qMax<qint64>(
+                    0,
+                    (QDateTime::currentMSecsSinceEpoch() - provider->updatedMs)
+                        / 1000);
+                decay = qMax(0.12,
+                             1.0 - static_cast<double>(ageSeconds)
+                                 / provider->validitySeconds);
+            }
+            opacityPercent = qRound(provider->opacityPercent * decay);
         }
         if (composite.isNull()) {
             composite = QImage(1024, 512, QImage::Format_ARGB32_Premultiplied);

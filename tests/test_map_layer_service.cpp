@@ -1,8 +1,10 @@
 #include <QtTest>
 
 #include <QDateTime>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QImage>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
@@ -40,7 +42,8 @@ QByteArray record(const QByteArray& call,
                   const QByteArray& ituZone = {},
                   const QByteArray& state = {},
                   const QByteArray& iota = {},
-                  const QByteArray& timeOn = "120000")
+                  const QByteArray& timeOn = "120000",
+                  const QByteArray& pota = {})
 {
     QByteArray result = field("CALL", call)
         + field("GRIDSQUARE", grid)
@@ -65,6 +68,7 @@ QByteArray record(const QByteArray& call,
     if (!ituZone.isEmpty()) result += field("ITUZ", ituZone);
     if (!state.isEmpty()) result += field("STATE", state);
     if (!iota.isEmpty()) result += field("IOTA", iota);
+    if (!pota.isEmpty()) result += field("POTA_REF", pota);
     return result + "<EOR>\n";
 }
 
@@ -97,6 +101,55 @@ class TestMapIntelligenceService final : public QObject
     Q_OBJECT
 
 private slots:
+    void satelliteFieldsSurviveCanonicalQsoStore()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+        QString const adifPath = tempDir.filePath(QStringLiteral("satellite.adi"));
+        QString const databasePath = tempDir.filePath(QStringLiteral("satellite.sqlite"));
+        QFile file(adifPath);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("Decodium ADIF\n<EOH>\n");
+        file.write(field("CALL", "SAT1")
+                   + field("GRIDSQUARE", "JN70aa")
+                   + field("QSO_DATE", "20260728")
+                   + field("TIME_ON", "120000")
+                   + field("BAND", "70cm")
+                   + field("MODE", "SSB")
+                   + field("FREQ", "435.800")
+                   + field("FREQ_RX", "435.900")
+                   + field("PROP_MODE", "SAT")
+                   + field("SAT_NAME", "AO-7")
+                   + field("SAT_MODE", "U/V")
+                   + "<EOR>\n");
+        file.close();
+
+        MapIntelligenceService service(nullptr, databasePath);
+        service.reloadFromAdif(adifPath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 1, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(
+            !service.statistics().value(QStringLiteral("satellites")).toList().isEmpty(),
+            5000);
+
+        QString const connectionName =
+            QStringLiteral("satellite_fields_%1").arg(QUuid::createUuid().toString(QUuid::WithoutBraces));
+        QSqlDatabase database = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connectionName);
+        database.setDatabaseName(databasePath);
+        QVERIFY(database.open());
+        {
+            QSqlQuery query(database);
+            QVERIFY(query.exec(QStringLiteral(
+                "SELECT satellite, sat_mode, freq_rx_mhz FROM map_qso LIMIT 1")));
+            QVERIFY(query.next());
+            QCOMPARE(query.value(0).toString(), QStringLiteral("AO-7"));
+            QCOMPARE(query.value(1).toString(), QStringLiteral("U/V"));
+            QCOMPARE(query.value(2).toDouble(), 435.9);
+        }
+        database.close();
+        QSqlDatabase::removeDatabase(connectionName);
+    }
+
     void persistsIndexesFiltersAndLiveRoster()
     {
         QTemporaryDir tempDir;
@@ -164,27 +217,74 @@ private slots:
         auto* externalOverlays =
             qobject_cast<MapExternalOverlayService*>(service.externalOverlayService());
         QVERIFY(externalOverlays);
+        QCOMPARE(externalOverlays->temporalLegend().size(), 5);
+        bool hasNvisStatus = false;
+        for (QVariant const& statusValue : externalOverlays->providerStatus()) {
+            if (statusValue.toMap().value(QStringLiteral("layerId")).toString()
+                == QStringLiteral("nvis")) {
+                hasNvisStatus = true;
+                QCOMPARE(statusValue.toMap().value(QStringLiteral("derivedFrom"))
+                             .toString(), QStringLiteral("fof2"));
+            }
+        }
+        QVERIFY(hasNvisStatus);
         auto* pskFeed = qobject_cast<MapPskFeedService*>(service.pskFeedService());
         QVERIFY(pskFeed);
         QVERIFY(!layerModel->layerEnabled(QStringLiteral("offline")));
         QVERIFY(!baseMap->offlineMode());
         QVERIFY(!baseMap->baseMapImage().isNull());
+        QVERIFY(baseMap->availableProviders().contains(
+            QStringLiteral("OpenStreetMap")));
+        QVERIFY(baseMap->availableProviders().contains(
+            QStringLiteral("OpenTopoMap")));
+        QVERIFY(baseMap->availableProviders().contains(
+            QStringLiteral("GEBCO bathymetry")));
+        QVERIFY(baseMap->availableStyles().contains(QStringLiteral("Day")));
+        QVERIFY(baseMap->availableStyles().contains(QStringLiteral("Night")));
 
         layerModel->setLayerEnabled(QStringLiteral("offline"), true);
         QTRY_VERIFY_WITH_TIMEOUT(baseMap->offlineMode(), 1000);
         QTRY_VERIFY_WITH_TIMEOUT(externalOverlays->offlineMode(), 1000);
         QTRY_VERIFY_WITH_TIMEOUT(pskFeed->offlineMode(), 1000);
         QCOMPARE(baseMap->attribution(), QStringLiteral("Decodium Atlas (local)"));
+        auto* offlineOperations =
+            qobject_cast<MapOperationsService*>(service.operationsService());
+        QVERIFY(offlineOperations);
+        QTRY_VERIFY_WITH_TIMEOUT(offlineOperations->offlineMode(), 1000);
+
+        QString const offlineRasterPath = tempDir.filePath(QStringLiteral("world.png"));
+        QImage offlineRaster(128, 64, QImage::Format_ARGB32_Premultiplied);
+        offlineRaster.fill(QColor(QStringLiteral("#223b58")));
+        QVERIFY(offlineRaster.save(offlineRasterPath, "PNG"));
+        baseMap->importOfflinePack(offlineRasterPath);
+        QTRY_VERIFY_WITH_TIMEOUT(baseMap->offlinePackAvailable(), 3000);
+        QVERIFY(baseMap->offlinePackStatus().contains(QStringLiteral("verify source licence")));
+        QTRY_COMPARE_WITH_TIMEOUT(
+            baseMap->attribution(),
+            QStringLiteral("User-provided offline raster pack (verify source licence)"),
+            3000);
+        baseMap->clearOfflinePack();
+        QTRY_VERIFY_WITH_TIMEOUT(!baseMap->offlinePackAvailable(), 3000);
+        QTRY_COMPARE_WITH_TIMEOUT(baseMap->attribution(),
+                                  QStringLiteral("Decodium Atlas (local)"), 3000);
         baseMap->setProvider(QStringLiteral("NASA GIBS satellite"));
         QCOMPARE(baseMap->provider(), QStringLiteral("NASA GIBS satellite"));
         QVERIFY(baseMap->offlineMode());
         QCOMPARE(baseMap->attribution(), QStringLiteral("Decodium Atlas (local)"));
+        baseMap->setProvider(QStringLiteral("MapTiler satellite"));
+        baseMap->setMapTilerApiKey(QString());
+        QVERIFY(baseMap->apiKeyRequired());
+        baseMap->setStyle(QStringLiteral("Night"));
+        QTRY_VERIFY_WITH_TIMEOUT(!baseMap->baseMapImage().isNull(), 1000);
+        QCOMPARE(baseMap->style(), QStringLiteral("Night"));
         baseMap->setProvider(QStringLiteral("Decodium Atlas"));
+        baseMap->setStyle(QStringLiteral("Day"));
 
         layerModel->setLayerEnabled(QStringLiteral("offline"), false);
         QTRY_VERIFY_WITH_TIMEOUT(!baseMap->offlineMode(), 1000);
         QTRY_VERIFY_WITH_TIMEOUT(!externalOverlays->offlineMode(), 1000);
         QTRY_VERIFY_WITH_TIMEOUT(!pskFeed->offlineMode(), 1000);
+        QTRY_VERIFY_WITH_TIMEOUT(!offlineOperations->offlineMode(), 1000);
         auto* operations =
             qobject_cast<MapOperationsService*>(service.operationsService());
         QVERIFY(operations);
@@ -311,7 +411,7 @@ private slots:
         QVERIFY(databaseHasIndex(databasePath, QStringLiteral("idx_map_qso_grid6_status")));
         QVERIFY(databaseHasIndex(databasePath, QStringLiteral("idx_map_spot_activity_time")));
 
-        QCOMPARE(layerModel->rowCount(), 23);
+        QCOMPARE(layerModel->rowCount(), 24);
         auto hasLayer = [layerModel](QString const& id) {
             for (int row = 0; row < layerModel->rowCount(); ++row) {
                 if (layerModel->data(
@@ -326,7 +426,9 @@ private slots:
                  QStringLiteral("pota"), QStringLiteral("states"),
                  QStringLiteral("counties"), QStringLiteral("iota"),
                  QStringLiteral("wpx"), QStringLiteral("earthquakes"),
-                 QStringLiteral("wildfires")}) {
+                 QStringLiteral("wildfires"), QStringLiteral("muf"),
+                 QStringLiteral("fof2"), QStringLiteral("nvis"),
+                 QStringLiteral("es"), QStringLiteral("aurora")}) {
             QVERIFY2(hasLayer(layerId),
                      qPrintable(QStringLiteral("Missing map layer: %1")
                                     .arg(layerId)));
@@ -802,6 +904,129 @@ private slots:
         QCOMPARE(data.count('\n'), 76);
         QVERIFY(data.contains("\"EX0000\""));
         QVERIFY(data.contains("\"EX0074\""));
+    }
+
+    void completesPotaActionValidityAndBandModeStatus()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        QString const adifPath = tempDir.filePath(QStringLiteral("pota.adi"));
+        QString const databasePath =
+            tempDir.filePath(QStringLiteral("pota-intelligence.sqlite"));
+        QFile file(adifPath);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("Decodium ADIF\n<EOH>\n");
+        file.write(record("POTA1", "FN20", "20m", "14.074", "FT8", "",
+                          {}, {}, "United States", "NA", {}, {}, {}, {},
+                          "120000", "US-0001"));
+        file.write(record("POTA2", "FN21", "40m", "7.074", "FT4", "",
+                          "LOTW_QSL_RCVD", "Y", "United States", "NA", {}, {}, {}, {},
+                          "120001", "US-0001"));
+        file.write(record("IOTA1", "JN70", "20m", "14.074", "FT8", "",
+                          "QSL_RCVD", "Y", "Italy", "EU", {}, {}, {}, "EU-005",
+                          "120002"));
+        file.close();
+
+        MapIntelligenceService service(nullptr, databasePath);
+        service.reloadFromAdif(adifPath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 3, 5000);
+        auto* operations =
+            qobject_cast<MapOperationsService*>(service.operationsService());
+        QVERIFY(operations);
+        auto* layers = qobject_cast<MapLayerModel*>(service.layerModel());
+        QVERIFY(layers);
+        layers->setLayerEnabled(QStringLiteral("pota"), true);
+        layers->setLayerEnabled(QStringLiteral("iota"), true);
+        QTRY_COMPARE_WITH_TIMEOUT(operations->logbookTotal(), 3, 5000);
+
+        QDateTime const now = QDateTime::currentDateTimeUtc();
+        QVariantMap liveSpot {
+            {QStringLiteral("reference"), QStringLiteral("US-0001")},
+            {QStringLiteral("activator"), QStringLiteral("N0CALL/P")},
+            {QStringLiteral("grid6"), QStringLiteral("FN20aa")},
+            {QStringLiteral("frequency"), QStringLiteral("14074.0")},
+            {QStringLiteral("mode"), QStringLiteral("FT8")},
+            {QStringLiteral("spotTime"), now.toString(Qt::ISODate)},
+            {QStringLiteral("expire"), 120},
+            {QStringLiteral("invalid"), false}
+        };
+        operations->setOperatorCall(QStringLiteral("N0CALL"));
+        QVariantMap const activatorAction = operations->preparePotaAction(
+            liveSpot, QStringLiteral("N0CALL"));
+        QCOMPARE(activatorAction.value(QStringLiteral("role")).toString(),
+                 QStringLiteral("ACTIVATOR"));
+        QVERIFY(activatorAction.value(QStringLiteral("valid")).toBool());
+        QVERIFY(activatorAction.value(QStringLiteral("targetCall")).toString().isEmpty());
+
+        QVariantMap const hunterAction = operations->preparePotaAction(
+            liveSpot, QStringLiteral("W1AW"));
+        QCOMPARE(hunterAction.value(QStringLiteral("role")).toString(),
+                 QStringLiteral("HUNTER"));
+        QCOMPARE(hunterAction.value(QStringLiteral("targetCall")).toString(),
+                 QStringLiteral("N0CALL/P"));
+        QCOMPARE(hunterAction.value(QStringLiteral("targetGrid")).toString(),
+                 QStringLiteral("FN20AA"));
+        QCOMPARE(hunterAction.value(QStringLiteral("frequencyHz")).toDouble(),
+                 14074000.0);
+        QVERIFY(hunterAction.value(QStringLiteral("messageReady")).toBool());
+        QVERIFY(hunterAction.value(QStringLiteral("remainingSeconds")).toLongLong() > 0);
+
+        QVariantMap expiredSpot = liveSpot;
+        expiredSpot.insert(QStringLiteral("spotTime"),
+                           now.addSecs(-180).toString(Qt::ISODate));
+        expiredSpot.insert(QStringLiteral("expire"), 60);
+        QVariantMap const expiredAction = operations->preparePotaAction(
+            expiredSpot, QStringLiteral("W1AW"));
+        QVERIFY(!expiredAction.value(QStringLiteral("valid")).toBool());
+        QVERIFY(expiredAction.value(QStringLiteral("expired")).toBool());
+        QVERIFY(!expiredAction.value(QStringLiteral("messageReady")).toBool());
+
+        QTRY_VERIFY_WITH_TIMEOUT(!operations->operationalMarkers().isEmpty(), 5000);
+        QVariantMap potaMarker;
+        QVariantMap iotaMarker;
+        for (QVariant const& value : operations->operationalMarkers()) {
+            QVariantMap const marker = value.toMap();
+            QString const type = marker.value(QStringLiteral("type")).toString();
+            if (type.compare(QStringLiteral("POTA"), Qt::CaseInsensitive) == 0
+                && marker.value(QStringLiteral("reference")).toString()
+                       == QStringLiteral("US-0001")) {
+                potaMarker = marker;
+            }
+            if (type.compare(QStringLiteral("IOTA"), Qt::CaseInsensitive) == 0
+                && marker.value(QStringLiteral("reference")).toString()
+                       == QStringLiteral("EU-005")) {
+                iotaMarker = marker;
+            }
+        }
+        QVERIFY(!potaMarker.isEmpty());
+        QVERIFY(potaMarker.value(QStringLiteral("worked")).toBool());
+        QVERIFY(potaMarker.value(QStringLiteral("workedBands")).toList()
+                    .contains(QStringLiteral("20M")));
+        QVERIFY(potaMarker.value(QStringLiteral("workedBands")).toList()
+                    .contains(QStringLiteral("40M")));
+        QVERIFY(potaMarker.value(QStringLiteral("confirmedBands")).toList()
+                    .contains(QStringLiteral("40M")));
+        QVERIFY(potaMarker.value(QStringLiteral("workedModes")).toList()
+                    .contains(QStringLiteral("FT8")));
+        QVERIFY(potaMarker.value(QStringLiteral("workedModes")).toList()
+                    .contains(QStringLiteral("FT4")));
+        bool confirmedBandMode = false;
+        for (QVariant const& value : potaMarker.value(QStringLiteral("workedBandModes"))
+                                        .toList()) {
+            QVariantMap const bandMode = value.toMap();
+            if (bandMode.value(QStringLiteral("band")).toString() == QStringLiteral("40M")
+                && bandMode.value(QStringLiteral("mode")).toString() == QStringLiteral("FT4")) {
+                confirmedBandMode = bandMode.value(QStringLiteral("confirmed")).toBool();
+            }
+        }
+        QVERIFY(confirmedBandMode);
+
+        QVERIFY(!iotaMarker.isEmpty());
+        QVERIFY(iotaMarker.value(QStringLiteral("worked")).toBool());
+        QVERIFY(iotaMarker.value(QStringLiteral("confirmed")).toBool());
+        QVERIFY(iotaMarker.value(QStringLiteral("workedBandModes")).toList().size() >= 1);
     }
 
     void buildsIndependentOperationalRoster()
@@ -1860,6 +2085,50 @@ private slots:
         QVERIFY(!wildfireImage.isNull());
     }
 
+    void exposesTemporalForecastMetadataFromCache()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QString const cachePath = tempDir.filePath(QStringLiteral("cache"));
+        QDir().mkpath(cachePath);
+
+        QImage cachedImage(16, 8, QImage::Format_ARGB32);
+        cachedImage.fill(QColor(120, 80, 220, 180));
+        QString const mufPath = QDir(cachePath).filePath(QStringLiteral("muf.img"));
+        QVERIFY(cachedImage.save(mufPath, "PNG"));
+        QFile cacheFile(mufPath);
+        QVERIFY(cacheFile.open(QIODevice::ReadOnly));
+        QVERIFY(cacheFile.setFileTime(
+            QDateTime::currentDateTimeUtc().addSecs(-3600),
+            QFileDevice::FileModificationTime));
+        cacheFile.close();
+
+        MapLayerModel layers;
+        MapExternalOverlayService overlays(&layers, nullptr, cachePath);
+        overlays.setOfflineMode(true);
+        layers.setLayerEnabled(QStringLiteral("muf"), true);
+
+        auto mufStatus = [&overlays] {
+            for (QVariant const& value : overlays.providerStatus()) {
+                QVariantMap const row = value.toMap();
+                if (row.value(QStringLiteral("layerId")).toString()
+                    == QStringLiteral("muf")) {
+                    return row;
+                }
+            }
+            return QVariantMap {};
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(
+            mufStatus().value(QStringLiteral("available")).toBool(), 5000);
+        QVariantMap const status = mufStatus();
+        QVERIFY(status.value(QStringLiteral("validUntilMs")).toLongLong() > 0);
+        QVERIFY(status.value(QStringLiteral("ageSeconds")).toLongLong() >= 3500);
+        QVERIFY(status.value(QStringLiteral("stale")).toBool());
+        QCOMPARE(status.value(QStringLiteral("state")).toString(),
+                 QStringLiteral("offline-cache"));
+        QVERIFY(status.value(QStringLiteral("decayOpacity")).toDouble() < 1.0);
+    }
+
     void persistsLiveMapLayersAcrossRestarts()
     {
         QTemporaryDir tempDir;
@@ -2133,7 +2402,7 @@ private slots:
         QJsonParseError parseError;
         QJsonDocument const document = QJsonDocument::fromJson(bundle.readAll(), &parseError);
         QCOMPARE(parseError.error, QJsonParseError::NoError);
-        QVERIFY(document.object().value(QStringLiteral("layers")).toArray().size() >= 23);
+        QVERIFY(document.object().value(QStringLiteral("layers")).toArray().size() >= 24);
         QVERIFY(document.object().value(QStringLiteral("presetNames")).toArray().size() >= 6);
         QVERIFY(document.object().value(QStringLiteral("presets")).isObject());
         QVERIFY(document.object().value(QStringLiteral("roster")).toObject()

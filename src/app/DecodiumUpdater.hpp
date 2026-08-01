@@ -38,6 +38,7 @@ class DecodiumUpdater : public QObject
     Q_PROPERTY(int     progress        READ progress        NOTIFY progressChanged)  // 0-100, -1 = indeterminato
     Q_PROPERTY(QString statusText      READ statusText      NOTIFY statusTextChanged)
     Q_PROPERTY(bool    checkOnStartup  READ checkOnStartup  WRITE setCheckOnStartup NOTIFY checkOnStartupChanged)
+    Q_PROPERTY(bool    offlineMode     READ offlineMode     WRITE setOfflineMode NOTIFY offlineModeChanged)
 
 public:
     explicit DecodiumUpdater(QObject* parent = nullptr);
@@ -50,7 +51,9 @@ public:
     int     progress()       const { return m_progress; }
     QString statusText()     const { return m_statusText; }
     bool    checkOnStartup() const { return m_checkOnStartup; }
+    bool    offlineMode() const { return m_offlineMode; }
     void    setCheckOnStartup(bool on);
+    void    setOfflineMode(bool offline);
 
     // Interroga le release del fork. silent=true (avvio) non disturba l'utente
     // se non c'e' nulla di nuovo o se la rete non risponde.
@@ -74,6 +77,7 @@ signals:
     void progressChanged();
     void statusTextChanged();
     void checkOnStartupChanged();
+    void offlineModeChanged();
 
     // Emesso quando c'e' davvero una versione nuova non ancora saltata:
     // la QML apre il dialog di conferma.
@@ -100,6 +104,7 @@ private:
     int     m_progress {0};
     QString m_statusText;
     bool    m_checkOnStartup {true};
+    bool    m_offlineMode {false};
 };
 
 #endif  // DECODIUMUPDATER_HPP

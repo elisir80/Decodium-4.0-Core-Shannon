@@ -709,6 +709,11 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       return;
     }
 
+#if defined(Q_OS_LINUX)
+  // A pending recovery must never reopen an old device after a manual start,
+  // a mode change, or a newer watchdog attempt has superseded it.
+  ++m_deferredRestartGeneration;
+#endif
   m_sink = sink;
 
   bool usingStereoForMono = false;
@@ -983,6 +988,49 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
   };
   QTimer::singleShot (850, this, delayedStart);
 #else
+#if defined(Q_OS_LINUX)
+  // Qt 6.11's PipeWire backend can leave its notifier bound to a dead socket
+  // after a service restart. Calling reset(), start(), or resume() on that
+  // terminal source immediately enters an "Invalid socket" notifier loop.
+  // Retire it on its owning thread and let the backend settle before creating
+  // a replacement. The delay also keeps posted QtMultimedia events away from
+  // a same-turn replacement source, which was the trigger for the earlier
+  // pure-virtual abort. This is deliberately Linux-only: Windows and macOS
+  // retain their established capture and timing paths.
+  bool const terminalStream = m_stream
+      && (m_stream->state() == QAudio::StoppedState
+          || m_stream->error() != QAudio::NoError);
+  if (terminalStream)
+    {
+      qWarning() << "SoundInput: deferring PipeWire recovery for terminal source"
+                 << device.description()
+                 << "state=" << static_cast<int>(m_stream->state())
+                 << "error=" << static_cast<int>(m_stream->error());
+      stop();
+
+      constexpr int kPipeWireRecoveryDelayMs = 2000;
+      quint64 const recoveryGeneration = ++m_deferredRestartGeneration;
+      QPointer<SoundInput> guard {this};
+      QPointer<AudioDevice> sinkGuard {sink};
+      QAudioDevice deviceCopy {device};
+      QTimer::singleShot(kPipeWireRecoveryDelayMs, this,
+                         [guard, deviceCopy, framesPerBuffer, sinkGuard,
+                          downSampleFactor, channel, recoveryGeneration] {
+        if (!guard
+            || !sinkGuard
+            || guard->m_deferredRestartGeneration != recoveryGeneration)
+          {
+            return;
+          }
+
+        qInfo() << "SoundInput: reopening PipeWire source after recovery delay for"
+                << deviceCopy.description();
+        guard->start(deviceCopy, framesPerBuffer, sinkGuard.data(), downSampleFactor, channel);
+      });
+      return;
+    }
+#endif
+
   // PipeWire may still have a QtMultimedia event queued after QAudioSource::stop().
   // Destroying the source and recreating it in the same recovery turn can leave
   // that event targeting a retired backend object (QTBUG-style pure-virtual abort).
@@ -1318,6 +1366,9 @@ void SoundInput::stop()
       return;
     }
 
+#if defined(Q_OS_LINUX)
+  ++m_deferredRestartGeneration;
+#endif
 #if defined(Q_OS_MACOS)
   stopNativeMacInput ();
 #endif

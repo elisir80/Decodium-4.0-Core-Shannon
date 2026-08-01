@@ -33,6 +33,32 @@ DecodiumPropagationManager::DecodiumPropagationManager(QObject * parent)
     refresh();
 }
 
+void DecodiumPropagationManager::setOfflineMode(bool offline)
+{
+    if (m_offlineMode == offline) {
+        return;
+    }
+    m_offlineMode = offline;
+    if (offline) {
+        m_refreshTimer.stop();
+        for (QNetworkReply* reply : m_network->findChildren<QNetworkReply*>()) {
+            if (reply) {
+                reply->abort();
+            }
+        }
+        m_requestInFlight = false;
+        if (m_updating) {
+            m_updating = false;
+            emit updatingChanged();
+        }
+        setStatusText(tr("Offline: using cached propagation data"));
+    } else {
+        m_refreshTimer.start();
+        refresh();
+    }
+    emit offlineModeChanged();
+}
+
 QString DecodiumPropagationManager::sourceUrl() const
 {
     return kSolarXmlUrl.toString();
@@ -45,6 +71,10 @@ QString DecodiumPropagationManager::sourcePageUrl() const
 
 void DecodiumPropagationManager::refresh()
 {
+    if (m_offlineMode) {
+        setStatusText(tr("Offline: using cached propagation data"));
+        return;
+    }
     if (m_requestInFlight) {
         return;
     }
@@ -74,6 +104,18 @@ void DecodiumPropagationManager::refresh()
 
 void DecodiumPropagationManager::onNetworkFinished(QNetworkReply * reply)
 {
+    if (m_offlineMode) {
+        if (reply) {
+            reply->abort();
+            reply->deleteLater();
+        }
+        m_requestInFlight = false;
+        if (m_updating) {
+            m_updating = false;
+            emit updatingChanged();
+        }
+        return;
+    }
     if (!reply) {
         m_requestInFlight = false;
         if (m_updating) {

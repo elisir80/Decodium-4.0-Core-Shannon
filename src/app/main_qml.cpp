@@ -70,6 +70,7 @@
 #include "DecodiumStorageMigration.hpp"
 #include "DecodiumUpdater.hpp"
 #include "DecodiumCommunityReport.hpp"
+#include "MapIntelligenceService.h"
 #include "controllers/FT2LinkQmlAdapter.hpp"
 #include "L10nLoader.hpp"
 #include "MetaDataRegistry.hpp"
@@ -134,6 +135,10 @@ static std::atomic_bool g_shuttingDown {false};
 // event-loop responsiveness and would only add noise to the diagnostic log.
 static const char* mainThreadEventTypeName(QEvent::Type type)
 {
+    // QQmlTimer posts a private/custom event instead of QEvent::Timer.
+    if (type == QEvent::Type(QEvent::User + 1)) {
+        return "QQmlTimer";
+    }
     switch (type) {
     case QEvent::Timer: return "Timer";
     case QEvent::MetaCall: return "MetaCall";
@@ -169,13 +174,20 @@ public:
         bool const handled = QApplication::notify(receiver, event);
         qint64 const elapsedMs = timer.elapsed();
         if (elapsedMs >= kSlowMainDispatchMs) {
+            QString qmlSource;
+            if (receiverClass == QStringLiteral("QQmlTimer")) {
+                if (QQmlContext* context = qmlContext(receiver)) {
+                    qmlSource = context->baseUrl().toString();
+                }
+            }
             qWarning().noquote()
                 << "[MAINDISPATCH] slow_event"
                 << "elapsed_ms=" << elapsedMs
                 << "event=" << mainThreadEventTypeName(eventType)
                 << "event_type=" << static_cast<int>(eventType)
                 << "receiver=" << receiverClass
-                << "object=" << (receiverName.isEmpty() ? QStringLiteral("<unnamed>") : receiverName);
+                << "object=" << (receiverName.isEmpty() ? QStringLiteral("<unnamed>") : receiverName)
+                << "qml_source=" << (qmlSource.isEmpty() ? QStringLiteral("<unknown>") : qmlSource);
         }
         return handled;
     }
@@ -3284,6 +3296,14 @@ int main(int argc, char* argv[])
     // vecchissime e segnalano bug gia' corretti.
     static DecodiumUpdater updater;
     engine.rootContext()->setContextProperty("updater", &updater);
+    if (auto* map = qobject_cast<MapIntelligenceService*>(bridge.mapIntelligenceService())) {
+        DecodiumUpdater* updaterPtr = &updater;
+        QObject::connect(map, &MapIntelligenceService::offlineModeChanged,
+                         updaterPtr, [updaterPtr, map]() {
+            updaterPtr->setOfflineMode(map->offlineMode());
+        });
+        updater.setOfflineMode(map->offlineMode());
+    }
     // IU8LMC: segnalazione problemi al forum community.ft2.it (sostituisce GitHub).
     static DecodiumCommunityReport community;
     engine.rootContext()->setContextProperty("community", &community);

@@ -24,6 +24,7 @@ Rectangle {
     property color glassBorder: engine ? engine.themeManager.glassBorder : "#2a3950"
     property var worldMap: worldMapLoader.item
     property var mapLayers: engine ? engine.mapIntelligenceService : null
+    property var satelliteTracking: engine ? engine.satelliteTracking : null
     property var baseMapService: mapLayers ? mapLayers.baseMapService : null
     property var externalOverlays: mapLayers ? mapLayers.externalOverlayService : null
     property var mapOperations: mapLayers ? mapLayers.operationsService : null
@@ -143,11 +144,18 @@ Rectangle {
     function syncOperations() {
         if (!worldMap)
             return
+        if (mapOperations && engine)
+            mapOperations.operatorCall = String(engine.callsign || "").toUpperCase()
         var operationalMarkers = []
         var sourceMarkers = mapOperations
                 ? (mapOperations.operationalMarkers || []) : []
         for (var markerIndex = 0; markerIndex < sourceMarkers.length; ++markerIndex)
             operationalMarkers.push(sourceMarkers[markerIndex])
+        if (satelliteTracking && satelliteTracking.mapMarkers) {
+            var satelliteMarkers = satelliteTracking.mapMarkers || []
+            for (var satelliteIndex = 0; satelliteIndex < satelliteMarkers.length; ++satelliteIndex)
+                operationalMarkers.push(satelliteMarkers[satelliteIndex])
+        }
         if (mapLayerEnabled("moon") && externalOverlays
                 && externalOverlays.moonDataAvailable) {
             operationalMarkers.push({
@@ -180,9 +188,23 @@ Rectangle {
         selectedMapY = Number(y || 0)
         geographicDetailsVisible = false
         operationalDetailsVisible = true
-        if (mapOperations && details && details.type === "pota"
-                && details.reference)
+        var isPota = details && String(details.type || "").toLowerCase() === "pota"
+        if (mapOperations && isPota && details.reference)
             mapOperations.selectPotaPark(details.reference)
+        if (mapOperations && isPota && engine) {
+            var action = mapOperations.preparePotaAction(
+                        details, String(engine.callsign || ""))
+            if (action.messageReady) {
+                if (Number(action.frequencyHz || 0) > 0)
+                    engine.frequency = Number(action.frequencyHz)
+                if (String(action.mode || "").length > 0)
+                    engine.mode = String(action.mode)
+                // Selecting the target regenerates the standard WSJT-X
+                // messages. TX remains governed by the existing map setting.
+                engine.processMapContactClick(
+                            String(action.targetCall), String(action.targetGrid || ""))
+            }
+        }
     }
 
     function showGeographicDetails(details, x, y) {
@@ -266,9 +288,31 @@ Rectangle {
             Number(engine.lonFromGrid(homeGrid)))
     }
 
+    function trackSelectedMarker() {
+        if (!mapOperations || !engine || !selectedOperationalDetails)
+            return
+        var latitude = Number(selectedOperationalDetails.latitude)
+        var longitude = Number(selectedOperationalDetails.longitude)
+        var homeGrid = String(engine.grid || "")
+        if (!isFinite(latitude) || !isFinite(longitude)
+                || homeGrid.length < 4)
+            return
+        var type = String(selectedOperationalDetails.type || "").toUpperCase()
+        var elevation = Number(selectedOperationalDetails.elevation)
+        if (type === "SATELLITE" && isFinite(elevation)) {
+            mapOperations.trackRotator(
+                Number(selectedOperationalDetails.azimuth), elevation, true)
+            return
+        }
+        mapOperations.trackRotatorAt(
+            latitude, longitude,
+            Number(engine.latFromGrid(homeGrid)),
+            Number(engine.lonFromGrid(homeGrid)))
+    }
+
     function operationalValue(key) {
         var base = selectedOperationalDetails || ({})
-        if (base.type === "pota" && mapOperations
+        if (String(base.type || "").toLowerCase() === "pota" && mapOperations
                 && mapOperations.selectedPotaPark
                 && mapOperations.selectedPotaPark[key] !== undefined
                 && String(mapOperations.selectedPotaPark[key]).length > 0)
@@ -304,12 +348,22 @@ Rectangle {
             return qsTr("WPX prefixes derived from your imported ADIF log.")
         if (layerId === "moon")
             return qsTr("Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.")
+        if (layerId === "muf")
+            return qsTr("Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.")
+        if (layerId === "fof2")
+            return qsTr("F2 critical-frequency forecast used to estimate ionospheric support for HF paths.")
+        if (layerId === "nvis")
+            return qsTr("NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.")
+        if (layerId === "es")
+            return qsTr("Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.")
+        if (layerId === "aurora")
+            return qsTr("Auroral propagation forecast. The temporal legend shows source age and validity.")
         if (layerId === "earthquakes")
             return qsTr("Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.")
         if (layerId === "wildfires")
             return qsTr("Open global wildfire events published by NASA EONET.")
         if (layerId === "offline")
-            return qsTr("Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.")
+            return qsTr("Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.")
         return ""
     }
 
@@ -1211,7 +1265,7 @@ Rectangle {
                 y: Math.max(8, Math.min(parent.height - height - 8,
                                         worldMapLoader.y + root.selectedMapY + 14))
                 width: Math.min(330, parent.width - 16)
-                height: 172
+                height: 214
                 radius: 4
                 color: Qt.rgba(root.bgDeep.r, root.bgDeep.g, root.bgDeep.b, 0.97)
                 border.width: 1
@@ -1269,6 +1323,58 @@ Rectangle {
                         elide: Text.ElideRight
                     }
                     Text {
+                        visible: String(root.operationalValue("type") || "").toUpperCase() === "POTA"
+                        Layout.fillWidth: true
+                        text: [
+                            root.operationalValue("role"),
+                            root.operationalValue("expired") ? qsTr("EXPIRED")
+                                                                : qsTr("VALID"),
+                            root.operationalValue("worked") ? qsTr("WORKED") : qsTr("NEW"),
+                            root.operationalValue("confirmed") ? qsTr("CONFIRMED") : qsTr("UNCONFIRMED")
+                        ].filter(function(value) {
+                            return String(value || "").length > 0
+                        }).join("  ·  ")
+                        color: root.operationalValue("expired")
+                            ? root.accentAmber : root.textSecondary
+                        font.pixelSize: 9
+                        font.bold: true
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        visible: String(root.operationalValue("type") || "").toUpperCase() === "SATELLITE"
+                        Layout.fillWidth: true
+                        text: [
+                            root.operationalValue("elevation") !== undefined
+                                ? qsTr("EL %1°").arg(Number(root.operationalValue("elevation")).toFixed(1)) : "",
+                            root.operationalValue("azimuth") !== undefined
+                                ? qsTr("AZ %1°").arg(Number(root.operationalValue("azimuth")).toFixed(1)) : "",
+                            root.operationalValue("rangeKm") !== undefined
+                                ? qsTr("%1 km").arg(Number(root.operationalValue("rangeKm")).toFixed(0)) : "",
+                            root.operationalValue("visible") ? qsTr("VISIBLE") : qsTr("BELOW HORIZON")
+                        ].filter(function(value) {
+                            return String(value || "").length > 0
+                        }).join("  ·  ")
+                        color: root.operationalValue("visible") ? root.accentGreen : root.textSecondary
+                        font.pixelSize: 9
+                        font.bold: true
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        visible: String(root.operationalValue("type") || "").toUpperCase() === "POTA"
+                        Layout.fillWidth: true
+                        text: {
+                            var remaining = Number(root.operationalValue("remainingSeconds") || 0)
+                            if (root.operationalValue("expired"))
+                                return qsTr("Spot scaduto")
+                            if (remaining > 0)
+                                return qsTr("Spot valido ancora %1 s").arg(remaining)
+                            return qsTr("Validità non dichiarata dal provider")
+                        }
+                        color: root.textSecondary
+                        font.pixelSize: 9
+                        elide: Text.ElideRight
+                    }
+                    Text {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         text: root.operationalValue("comments")
@@ -1300,6 +1406,12 @@ Rectangle {
                             enabled: root.mapOperations
                                      && root.mapOperations.rotatorEnabled
                             onClicked: root.aimSelectedMarker()
+                        }
+                        Button {
+                            text: qsTr("TRACK")
+                            enabled: root.mapOperations
+                                     && root.mapOperations.rotatorEnabled
+                            onClicked: root.trackSelectedMarker()
                         }
                         Item { Layout.fillWidth: true }
                     }
@@ -2127,7 +2239,7 @@ Rectangle {
                                                 root.baseMapService.provider = currentText
                                         }
                                         ToolTip.visible: hovered
-                                        ToolTip.text: qsTr("Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.")
+                                        ToolTip.text: qsTr("Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.")
                                     }
                                     CheckBox {
                                         Layout.preferredWidth: implicitWidth
@@ -2140,8 +2252,77 @@ Rectangle {
                                                     "offline", checked)
                                         }
                                         ToolTip.visible: hovered
-                                        ToolTip.text: qsTr("Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.")
+                                        ToolTip.text: qsTr("Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.")
                                     }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Text {
+                                        text: qsTr("STYLE")
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                    }
+                                    ComboBox {
+                                        Layout.preferredWidth: 110
+                                        model: root.baseMapService
+                                            ? root.baseMapService.availableStyles : []
+                                        currentIndex: root.baseMapService
+                                            ? Math.max(0, model.indexOf(root.baseMapService.style)) : 0
+                                        font.pixelSize: 9
+                                        onActivated: {
+                                            if (root.baseMapService)
+                                                root.baseMapService.style = currentText
+                                        }
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.baseMapService && root.baseMapService.fallbackActive
+                                            ? qsTr("Fallback attivo: %1").arg(root.baseMapService.activeProvider)
+                                            : (root.baseMapService && root.baseMapService.staleCache
+                                               ? qsTr("Cache obsoleta · aggiornamento in corso") : "")
+                                        color: root.baseMapService && root.baseMapService.fallbackActive
+                                            ? root.accentAmber : root.textSecondary
+                                        font.pixelSize: 8
+                                        elide: Text.ElideRight
+                                    }
+                                    Button {
+                                        text: qsTr("Clear cache")
+                                        font.pixelSize: 8
+                                        enabled: root.baseMapService && !root.baseMapService.loading
+                                        onClicked: root.baseMapService.invalidateCache()
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Button {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Import offline raster")
+                                        font.pixelSize: 8
+                                        onClicked: offlineRasterImportDialog.open()
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.")
+                                    }
+                                    Button {
+                                        text: qsTr("Clear")
+                                        font.pixelSize: 8
+                                        enabled: root.baseMapService
+                                            && root.baseMapService.offlinePackAvailable
+                                        onClicked: root.baseMapService.clearOfflinePack()
+                                    }
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    visible: root.baseMapService
+                                        && root.baseMapService.offlinePackStatus.length > 0
+                                    text: root.baseMapService
+                                        ? root.baseMapService.offlinePackStatus : ""
+                                    color: root.baseMapService
+                                        && root.baseMapService.offlinePackAvailable
+                                        ? root.accentGreen : root.textSecondary
+                                    font.pixelSize: 8
+                                    elide: Text.ElideRight
                                 }
                                 TextField {
                                     Layout.fillWidth: true
@@ -2163,7 +2344,9 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: root.baseMapService
-                                            ? root.baseMapService.status : ""
+                                            ? ((root.baseMapService.activeProvider !== root.baseMapService.provider
+                                                ? qsTr("[%1] ").arg(root.baseMapService.activeProvider) : "")
+                                               + root.baseMapService.status) : ""
                                         color: root.textSecondary
                                         font.pixelSize: 8
                                         elide: Text.ElideRight
@@ -2575,6 +2758,54 @@ Rectangle {
                                 RowLayout {
                                     Layout.fillWidth: true
                                     spacing: 5
+                                    Label { text: qsTr("AZ"); font.pixelSize: 8; color: root.textSecondary }
+                                    SpinBox {
+                                        Layout.preferredWidth: 78
+                                        from: 0
+                                        to: 360
+                                        editable: true
+                                        value: root.mapOperations
+                                            ? Math.round(root.mapOperations.rotatorMinAzimuth) : 0
+                                        font.pixelSize: 8
+                                        onValueModified: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorMinAzimuth = value
+                                        }
+                                    }
+                                    SpinBox {
+                                        Layout.preferredWidth: 78
+                                        from: 0
+                                        to: 360
+                                        editable: true
+                                        value: root.mapOperations
+                                            ? Math.round(root.mapOperations.rotatorMaxAzimuth) : 360
+                                        font.pixelSize: 8
+                                        onValueModified: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorMaxAzimuth = value
+                                        }
+                                    }
+                                    Label { text: qsTr("range"); font.pixelSize: 8; color: root.textSecondary }
+                                    Label { text: qsTr("refresh"); font.pixelSize: 8; color: root.textSecondary }
+                                    SpinBox {
+                                        Layout.preferredWidth: 82
+                                        from: 250
+                                        to: 10000
+                                        stepSize: 250
+                                        editable: true
+                                        value: root.mapOperations
+                                            ? root.mapOperations.rotatorTrackingIntervalMs : 1000
+                                        font.pixelSize: 8
+                                        onValueModified: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorTrackingIntervalMs = value
+                                        }
+                                    }
+                                    Label { text: qsTr("ms"); font.pixelSize: 8; color: root.textSecondary }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
                                     CheckBox {
                                         Layout.fillWidth: true
                                         text: qsTr("Push-pin live grids")
@@ -2972,8 +3203,22 @@ Rectangle {
                                 RowLayout {
                                     Layout.fillWidth: true
                                     spacing: 5
+                                    ComboBox {
+                                        Layout.preferredWidth: 120
+                                        model: root.mapOperations
+                                            ? root.mapOperations.rotatorProtocols : []
+                                        currentIndex: root.mapOperations
+                                            ? Math.max(0, model.indexOf(
+                                                           root.mapOperations.rotatorProtocol))
+                                            : 0
+                                        font.pixelSize: 8
+                                        onActivated: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorProtocol = currentText
+                                        }
+                                    }
                                     CheckBox {
-                                        text: "PSTRotator"
+                                        text: qsTr("Rotator")
                                         checked: root.mapOperations
                                             ? root.mapOperations.rotatorEnabled : false
                                         font.pixelSize: 9
@@ -3006,6 +3251,90 @@ Rectangle {
                                             if (root.mapOperations)
                                                 root.mapOperations.rotatorPort = value
                                         }
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    CheckBox {
+                                        text: qsTr("Safety")
+                                        checked: root.mapOperations
+                                            ? root.mapOperations.rotatorSafetyEnabled : true
+                                        font.pixelSize: 8
+                                        onToggled: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorSafetyEnabled = checked
+                                        }
+                                    }
+                                    SpinBox {
+                                        Layout.preferredWidth: 82
+                                        from: -10
+                                        to: 180
+                                        editable: true
+                                        value: root.mapOperations
+                                            ? Math.round(root.mapOperations.rotatorMinElevation) : 0
+                                        font.pixelSize: 8
+                                        onValueModified: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorMinElevation = value
+                                        }
+                                    }
+                                    Label { text: qsTr("min EL"); font.pixelSize: 8; color: root.textSecondary }
+                                    SpinBox {
+                                        Layout.preferredWidth: 82
+                                        from: -10
+                                        to: 180
+                                        editable: true
+                                        value: root.mapOperations
+                                            ? Math.round(root.mapOperations.rotatorMaxElevation) : 180
+                                        font.pixelSize: 8
+                                        onValueModified: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorMaxElevation = value
+                                        }
+                                    }
+                                    Label { text: qsTr("max EL"); font.pixelSize: 8; color: root.textSecondary }
+                                    CheckBox {
+                                        text: qsTr("Park on stop")
+                                        checked: root.mapOperations
+                                            ? root.mapOperations.rotatorParkOnStop : false
+                                        font.pixelSize: 8
+                                        onToggled: {
+                                            if (root.mapOperations)
+                                                root.mapOperations.rotatorParkOnStop = checked
+                                        }
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Button {
+                                        text: qsTr("STOP")
+                                        font.pixelSize: 8
+                                        onClicked: if (root.mapOperations)
+                                            root.mapOperations.stopRotator()
+                                    }
+                                    Button {
+                                        text: qsTr("PARK")
+                                        font.pixelSize: 8
+                                        onClicked: if (root.mapOperations)
+                                            root.mapOperations.parkRotator()
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: {
+                                            if (!root.mapOperations) return ""
+                                            var feedback = root.mapOperations.rotatorFeedbackAvailable
+                                                ? qsTr("FB AZ %1° / EL %2°")
+                                                      .arg(root.mapOperations.rotatorCurrentAzimuth.toFixed(1))
+                                                      .arg(root.mapOperations.rotatorCurrentElevation.toFixed(1))
+                                                : qsTr("Feedback non disponibile")
+                                            return feedback + (root.mapOperations.rotatorTracking
+                                                ? qsTr(" · tracking") : "")
+                                        }
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        elide: Text.ElideRight
                                     }
                                 }
                                 Text {
@@ -5038,6 +5367,20 @@ Rectangle {
         onAccepted: root.importMapConfiguration(selectedFile)
     }
 
+    FileDialog {
+        id: offlineRasterImportDialog
+        title: qsTr("Import offline world raster")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [
+            qsTr("World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)"),
+            qsTr("Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)")
+        ]
+        onAccepted: {
+            if (root.baseMapService)
+                root.baseMapService.importOfflinePack(selectedFile.toString())
+        }
+    }
+
     Shortcut {
         sequence: "Ctrl+Shift+M"
         enabled: root.visible && root.mapOperations
@@ -5233,6 +5576,18 @@ Rectangle {
                     && Object.keys(root.mapOperations.selectedPotaPark).length > 0)
                 root.selectedOperationalDetails =
                     root.mapOperations.selectedPotaPark
+        }
+    }
+
+    Connections {
+        target: root.satelliteTracking
+        ignoreUnknownSignals: true
+
+        function onStateChanged() {
+            root.syncOperations()
+        }
+        function onSatellitesChanged() {
+            root.syncOperations()
         }
     }
 

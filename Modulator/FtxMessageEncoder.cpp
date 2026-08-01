@@ -860,7 +860,18 @@ Maybe<int> pack28_cpp (QString const& token)
       return {};
     }
 
-  QString six = (area == 2) ? QStringLiteral (" ") + callsign.left (5) : callsign.leftJustified (6, QLatin1Char (' '));
+  // Callsigns with the digit in position 2 use a leading space in the
+  // 6-character standard field.  The old expression only padded callsigns
+  // when the digit was in position 3, so a valid short token such as A1B
+  // produced a 4-character field and the indexed reads below aborted inside
+  // QString::operator[].
+  QString six = (area == 2)
+      ? (QStringLiteral (" ") + callsign.left (5)).leftJustified (6, QLatin1Char (' '))
+      : callsign.leftJustified (6, QLatin1Char (' '));
+  if (six.size () < 6)
+    {
+      return {};
+    }
   static QString const a1 = QStringLiteral (" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   static QString const a2 = QStringLiteral ("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   static QString const a4 = QStringLiteral (" ABCDEFGHIJKLMNOPQRSTUVWXYZ");
