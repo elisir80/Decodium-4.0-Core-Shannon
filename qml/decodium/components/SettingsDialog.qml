@@ -28,7 +28,7 @@ Dialog {
     property bool warmupInProgress: false
     property int currentTab: {
         var savedTab = Number(bridge.getSetting("uiSettingsCurrentTab", 0))
-        return isFinite(savedTab) ? Math.max(0, Math.min(12, Math.floor(savedTab))) : 0
+        return isFinite(savedTab) ? Math.max(0, Math.min(13, Math.floor(savedTab))) : 0
     }
     property bool closeAlreadyPersisted: false
     readonly property int labelWidth: compactSettingsLayout ? 132 : 172
@@ -67,6 +67,7 @@ Dialog {
     property string qrzLogbookTestStatus: ""
     property bool qrzLogbookTestIsError: false
     property bool qrzLogbookTestBusy: false
+    readonly property var callsignService: bridge ? bridge.callsignIntelligence : null
 
     function refreshFontLabels() {
         uiFontLabel = bridge.fontSettingLabel("Font", "", 0)
@@ -953,7 +954,7 @@ Dialog {
 
     function openTab(index) {
         var tab = Number(index)
-        currentTab = isFinite(tab) ? Math.max(0, Math.min(12, Math.floor(tab))) : 0
+        currentTab = isFinite(tab) ? Math.max(0, Math.min(13, Math.floor(tab))) : 0
         open()
     }
 
@@ -1593,7 +1594,7 @@ Dialog {
                     spacing: 2
 
                     Repeater {
-                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("UI Buttons")]
+                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("UI Buttons"), qsTr("Callsign")]
                         delegate: Rectangle {
                             width: parent.width; height: 36; radius: 6
                             color: tabStack.currentIndex === index ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.25) : (tabMA.containsMouse ? Qt.rgba(1,1,1,0.05) : "transparent")
@@ -8640,6 +8641,177 @@ Dialog {
                         }
 
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2; Layout.fillHeight: true }
+                    }
+                }
+
+                // ═══════════ TAB 13 — CALLSIGN INTELLIGENCE ═══════════
+                ScrollView {
+                    id: callsignSettingsPage
+                    clip: true
+                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                    ColumnLayout {
+                        width: Math.max(0, callsignSettingsPage.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: settingsDialog.scrollLeftMargin
+                        anchors.rightMargin: settingsDialog.scrollRightMargin
+                        spacing: 10
+
+                        Text { text: qsTr("CALLSIGN INTELLIGENCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 4 }
+                        Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+                        Text {
+                            text: qsTr("Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.")
+                            color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 14
+                            rowSpacing: 6
+
+                            Text { text: qsTr("Apertura automatica all'avvio QSO"); color: textSecondary }
+                            CheckBox {
+                                checked: settingsDialog.callsignService ? settingsDialog.callsignService.autoOpenOnQsoStart : false
+                                onToggled: if (settingsDialog.callsignService) settingsDialog.callsignService.autoOpenOnQsoStart = checked
+                                indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                contentItem: Text { text: qsTr("Apri il pannello lookup"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
+                            }
+                            Text { text: qsTr("Chiusura automatica dopo logging"); color: textSecondary }
+                            CheckBox {
+                                checked: settingsDialog.callsignService ? settingsDialog.callsignService.autoCloseAfterLogging : false
+                                onToggled: if (settingsDialog.callsignService) settingsDialog.callsignService.autoCloseAfterLogging = checked
+                                indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                contentItem: Text { text: qsTr("Chiudi il pannello dopo il QSO"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
+                            }
+                            Text { text: qsTr("Arricchimento campi mancanti"); color: textSecondary }
+                            CheckBox {
+                                checked: settingsDialog.callsignService ? settingsDialog.callsignService.enrichMissingFields : false
+                                onToggled: if (settingsDialog.callsignService) settingsDialog.callsignService.enrichMissingFields = checked
+                                indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                                contentItem: Text { text: qsTr("Grid, nome e QTH nel prossimo log"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
+                            }
+                            Text { text: qsTr("Durata cache (minuti)"); color: textSecondary }
+                            SpinBox {
+                                from: 5; to: 10080; stepSize: 5
+                                value: settingsDialog.callsignService ? settingsDialog.callsignService.cacheTtlMinutes : 1440
+                                onValueModified: if (settingsDialog.callsignService) settingsDialog.callsignService.cacheTtlMinutes = value
+                            }
+                        }
+
+                        Text { text: qsTr("CLUB LOG OQRS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 14
+                            rowSpacing: 6
+                            Text { text: qsTr("API key"); color: textSecondary }
+                            TextField {
+                                Layout.fillWidth: true
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.clubLogApiKey : ""
+                                echoMode: TextInput.Password
+                                onEditingFinished: if (settingsDialog.callsignService) settingsDialog.callsignService.clubLogApiKey = text.trim()
+                            }
+                            Text { text: qsTr("Email"); color: textSecondary }
+                            TextField {
+                                Layout.fillWidth: true
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.clubLogEmail : ""
+                                onEditingFinished: if (settingsDialog.callsignService) settingsDialog.callsignService.clubLogEmail = text.trim()
+                            }
+                            Text { text: qsTr("Application password"); color: textSecondary }
+                            TextField {
+                                Layout.fillWidth: true
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.clubLogApplicationPassword : ""
+                                echoMode: TextInput.Password
+                                onEditingFinished: if (settingsDialog.callsignService) settingsDialog.callsignService.clubLogApplicationPassword = text.trim()
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Button {
+                                text: qsTr("Aggiorna OQRS")
+                                enabled: settingsDialog.callsignService
+                                onClicked: settingsDialog.callsignService.refreshDatabase("clublog_oqrs")
+                            }
+                            Button {
+                                text: qsTr("Svuota cache")
+                                enabled: settingsDialog.callsignService
+                                onClicked: settingsDialog.callsignService.clearCache()
+                            }
+                            Item { Layout.fillWidth: true }
+                            Text {
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.status : ""
+                                color: textSecondary; elide: Text.ElideRight; Layout.fillWidth: true
+                            }
+                        }
+
+                        Text { text: qsTr("DATABASE LOCALI"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
+                        Text {
+                            text: settingsDialog.callsignService ? qsTr("SQLite: %1").arg(settingsDialog.callsignService.databasePath) : ""
+                            color: textSecondary; elide: Text.ElideMiddle; Layout.fillWidth: true
+                        }
+
+                        Repeater {
+                            model: settingsDialog.callsignService ? settingsDialog.callsignService.databases : []
+                            delegate: Rectangle {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: modelData.updateable ? 74 : 54
+                                color: Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.55)
+                                border.color: glassBorder
+                                radius: 5
+
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 8
+                                    spacing: 3
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        Text { text: modelData.label; color: textPrimary; font.bold: true; Layout.fillWidth: true }
+                                        Text { text: modelData.rowCount > 0 ? qsTr("%1 record").arg(modelData.rowCount) : qsTr("nessun record"); color: textSecondary; font.pixelSize: 11 }
+                                        Text { text: modelData.status || qsTr("mai aggiornato"); color: modelData.error ? "#ff7676" : secondaryCyan; font.pixelSize: 11 }
+                                        Button {
+                                            text: qsTr("Aggiorna")
+                                            visible: modelData.updateable
+                                            enabled: settingsDialog.callsignService && !settingsDialog.callsignService.lookupPending
+                                            onClicked: settingsDialog.callsignService.refreshDatabase(modelData.id)
+                                        }
+                                    }
+                                    RowLayout {
+                                        visible: modelData.updateable
+                                        Layout.fillWidth: true
+                                        TextField {
+                                            id: localDatabasePathField
+                                            Layout.fillWidth: true
+                                            placeholderText: qsTr("Percorso file locale opzionale")
+                                            text: modelData.localPath || ""
+                                        }
+                                        Button {
+                                            text: qsTr("Scegli")
+                                            onClicked: {
+                                                var selected = bridge.openFileDialog(qsTr("Importa database callsign"), "", [qsTr("Database e CSV (*)")])
+                                                if (selected && selected.length > 0)
+                                                    localDatabasePathField.text = selected
+                                            }
+                                        }
+                                        Button {
+                                            text: qsTr("Importa")
+                                            enabled: settingsDialog.callsignService && localDatabasePathField.text.trim().length > 0
+                                            onClicked: settingsDialog.callsignService.importDatabase(modelData.id, localDatabasePathField.text.trim())
+                                        }
+                                    }
+                                    Text {
+                                        visible: !!modelData.error
+                                        text: modelData.error || ""
+                                        color: "#ff7676"; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true
+                                    }
+                                }
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true; Layout.fillHeight: true; implicitHeight: 16 }
                     }
                 }
 

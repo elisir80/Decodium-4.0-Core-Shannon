@@ -379,6 +379,11 @@ MapExternalOverlayService::MapExternalOverlayService(MapLayerModel* layerModel,
     if (m_layerModel) {
         connect(m_layerModel, &MapLayerModel::layerToggled,
                 this, &MapExternalOverlayService::setLayerEnabled);
+        connect(m_layerModel, &MapLayerModel::layerStyleChanged,
+                this, &MapExternalOverlayService::setLayerStyle);
+        for (auto it = m_providers.begin(); it != m_providers.end(); ++it) {
+            setLayerStyle(it.key());
+        }
     }
 
     for (auto it = m_providers.begin(); it != m_providers.end(); ++it) {
@@ -557,6 +562,21 @@ void MapExternalOverlayService::setLayerEnabled(const QString& layerId, bool ena
         requestProvider(id);
         loadCache(id);
     }
+}
+
+void MapExternalOverlayService::setLayerStyle(const QString& layerId)
+{
+    if (!m_layerModel) {
+        return;
+    }
+    auto it = m_providers.find(layerId.trimmed().toLower());
+    if (it == m_providers.end()) {
+        return;
+    }
+    QVariantMap const style = m_layerModel->layerStyle(layerId);
+    it->opacityPercent = qBound(5,
+        qRound(style.value(QStringLiteral("opacity"), 1.0).toDouble() * 100.0), 100);
+    rebuildComposite();
 }
 
 QString MapExternalOverlayService::providerUrl(const QString& layerId,

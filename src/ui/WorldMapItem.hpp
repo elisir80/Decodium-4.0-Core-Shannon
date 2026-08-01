@@ -39,6 +39,11 @@ public:
     Q_INVOKABLE void setOperationalMarkers(const QVariantList& markers);
     Q_INVOKABLE void setGeographicFeatures(const QVariantList& features);
     Q_INVOKABLE void setProjection(const QString& projection);
+    Q_INVOKABLE void setLayerStyles(const QVariantMap& styles)
+    { Q_UNUSED(styles); }
+    Q_INVOKABLE QVariantMap viewportState() const { return {}; }
+    Q_INVOKABLE void setViewportState(const QVariantMap& state)
+    { Q_UNUSED(state); }
     Q_INVOKABLE void setBaseMapService(QObject* service);
     Q_INVOKABLE void setExternalOverlayService(QObject* service);
     Q_INVOKABLE void downgradeContactToBand(const QString& call);
@@ -75,6 +80,8 @@ public:
 Q_SIGNALS:
     void contactClicked(const QString& call, const QString& grid);
     void coverageCellHovered(const QVariantMap& details, qreal x, qreal y);
+    void coverageCellSegmentHovered(const QVariantMap& details, qreal x, qreal y,
+                                    const QString& segment);
     void coverageCellHoverEnded();
     void coverageCellClicked(const QVariantMap& details, qreal x, qreal y);
     void operationalMarkerClicked(const QVariantMap& details, qreal x, qreal y);

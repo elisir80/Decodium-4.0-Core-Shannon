@@ -45,6 +45,7 @@ class DecodiumLegacyBackend;
 #include "Sequencer/QsoSequencerState.hpp"  // 1.0.498 step B strangler: stato sequencer raggruppato
 class DecodiumPropagationManager;
 class MapIntelligenceService;
+class CallsignIntelligenceService;
 class MessageClient;
 class UsStateDataManager;
 
@@ -304,6 +305,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QObject* propagationManager READ propagationManager CONSTANT)
     Q_PROPERTY(QObject* mapIntelligenceService READ mapIntelligenceService CONSTANT)
     Q_PROPERTY(QObject* mapLayerService READ mapIntelligenceService CONSTANT)
+    Q_PROPERTY(QObject* callsignIntelligence READ callsignIntelligence CONSTANT)
     Q_PROPERTY(QObject* diagnostics READ diagnostics CONSTANT)
     Q_PROPERTY(int qsoCount READ qsoCount NOTIFY qsoCountChanged)
 
@@ -999,6 +1001,7 @@ public:
     QObject*    logManager() { return this; }
     QObject*    propagationManager() const;
     QObject*    mapIntelligenceService() const;
+    QObject*    callsignIntelligence() const;
     QObject*    diagnostics() const { return m_diagnostics; }
     int         qsoCount() const;
 
@@ -2461,6 +2464,7 @@ private:
     DecodiumThemeManager* m_themeManager  {nullptr};
     DecodiumPropagationManager* m_propagationManager {nullptr};
     MapIntelligenceService*      m_mapIntelligenceService {nullptr};
+    CallsignIntelligenceService* m_callsignIntelligence {nullptr};
     DecodiumDiagnostics*        m_diagnostics {nullptr};
     WavManager*           m_wavManager    {nullptr};
     MacroManager*         m_macroManager  {nullptr};
@@ -3154,6 +3158,8 @@ private:
     bool    m_qrzLogbookEnabled {false};
     QString m_qrzLogbookApiKey;
     bool    m_qrzLogbookReplaceDuplicates {false};
+    QString m_nextLogName;
+    QString m_nextLogQth;
 
     // FT2 async ring buffer: ultimi 7.5s di audio (90000 campioni a 12kHz)
     static constexpr int ASYNC_BUF_SIZE = 90000;

@@ -27,6 +27,11 @@ class MapOperationsService final : public QObject
     Q_PROPERTY(QVariantMap scorecard READ scorecard NOTIFY statisticsChanged)
     Q_PROPERTY(QVariantList chartData READ chartData NOTIFY statisticsChanged)
     Q_PROPERTY(QVariantMap comparison READ comparison NOTIFY statisticsChanged)
+    Q_PROPERTY(QVariantList awardProgression READ awardProgression NOTIFY statisticsChanged)
+    Q_PROPERTY(QVariantList topStatistics READ topStatistics NOTIFY statisticsChanged)
+    Q_PROPERTY(QVariantList periodComparison READ periodComparison NOTIFY statisticsChanged)
+    Q_PROPERTY(QVariantList profileStatistics READ profileStatistics NOTIFY statisticsChanged)
+    Q_PROPERTY(QString statisticsDrilldown READ statisticsDrilldown NOTIFY logbookFiltersChanged)
     Q_PROPERTY(QStringList availableProjections READ availableProjections CONSTANT)
     Q_PROPERTY(QStringList availableDataViews READ availableDataViews CONSTANT)
     Q_PROPERTY(QStringList mapPresets READ mapPresets NOTIFY mapPresetsChanged)
@@ -66,6 +71,11 @@ public:
     QVariantMap scorecard() const { return m_scorecard; }
     QVariantList chartData() const { return m_chartData; }
     QVariantMap comparison() const { return m_comparison; }
+    QVariantList awardProgression() const { return m_awardProgression; }
+    QVariantList topStatistics() const { return m_topStatistics; }
+    QVariantList periodComparison() const { return m_periodComparison; }
+    QVariantList profileStatistics() const { return m_profileStatistics; }
+    QString statisticsDrilldown() const { return m_statisticsDrilldown; }
     QStringList availableProjections() const;
     QStringList availableDataViews() const;
     QStringList mapPresets() const { return m_mapPresets; }
@@ -111,6 +121,12 @@ public:
     Q_INVOKABLE void refreshLogbook();
     Q_INVOKABLE bool exportLogbook(const QString& path,
                                    const QString& format = QStringLiteral("CSV"));
+    Q_INVOKABLE bool exportStatistics(const QString& path,
+                                      const QString& format = QStringLiteral("JSON"));
+    Q_INVOKABLE QString reserveStatisticsExportPath(
+        const QString& format = QStringLiteral("JSON"));
+    Q_INVOKABLE void drillDownStatistics(const QString& dimension,
+                                         const QString& value);
     Q_INVOKABLE void cycleDataView();
     Q_INVOKABLE void applyMapPreset(const QString& name);
     Q_INVOKABLE void saveMapPreset(const QString& name);
@@ -151,6 +167,10 @@ private:
         QVariantMap scorecard;
         QVariantList chartData;
         QVariantMap comparison;
+        QVariantList awardProgression;
+        QVariantList topStatistics;
+        QVariantList periodComparison;
+        QVariantList profileStatistics;
         int total {0};
         QString error;
     };
@@ -224,6 +244,11 @@ private:
     QVariantMap m_scorecard;
     QVariantList m_chartData;
     QVariantMap m_comparison;
+    QVariantList m_awardProgression;
+    QVariantList m_topStatistics;
+    QVariantList m_periodComparison;
+    QVariantList m_profileStatistics;
+    QString m_statisticsDrilldown;
     QHash<QString, QByteArray> m_geoCache;
     QStringList m_mapPresets;
     QString m_mapProjection {QStringLiteral("Equirectangular")};

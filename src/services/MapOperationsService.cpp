@@ -12,11 +12,13 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMap>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QRegularExpression>
 #include <QSaveFile>
+#include <QSet>
 #include <QSettings>
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -24,6 +26,7 @@
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QThread>
+#include <QTimeZone>
 #include <QUdpSocket>
 #include <QUrl>
 #include <QUrlQuery>
@@ -192,10 +195,10 @@ SqlFilter buildFilter(const QString& search, const QString& band,
     QString const text = search.trimmed();
     if (!text.isEmpty()) {
         clauses << QStringLiteral(
-            "(call LIKE ? OR grid LIKE ? OR dxcc LIKE ? OR state LIKE ?"
+            "(call LIKE ? OR operator_call LIKE ? OR grid LIKE ? OR dxcc LIKE ? OR state LIKE ?"
             " OR pota_ref LIKE ? OR iota LIKE ? OR wpx LIKE ?)");
         QString const pattern = QStringLiteral("%%1%").arg(text);
-        for (int i = 0; i < 7; ++i) {
+        for (int i = 0; i < 8; ++i) {
             binds << pattern;
         }
     }
@@ -381,6 +384,8 @@ void MapOperationsService::loadSettings()
         settings.value(QStringLiteral("LogbookBand"), QStringLiteral("All")).toString();
     m_logbookMode =
         settings.value(QStringLiteral("LogbookMode"), QStringLiteral("All")).toString();
+    m_logbookSearch =
+        settings.value(QStringLiteral("LogbookSearch"), QString()).toString().left(80);
     m_logbookPeriod =
         settings.value(QStringLiteral("LogbookPeriod"),
                        QStringLiteral("All time")).toString();
@@ -1145,6 +1150,10 @@ void MapOperationsService::refreshLogbook()
         m_scorecard = snapshot.scorecard;
         m_chartData = snapshot.chartData;
         m_comparison = snapshot.comparison;
+        m_awardProgression = snapshot.awardProgression;
+        m_topStatistics = snapshot.topStatistics;
+        m_periodComparison = snapshot.periodComparison;
+        m_profileStatistics = snapshot.profileStatistics;
         m_databaseMarkers = snapshot.markers;
         rebuildOperationalMarkers();
         emit logbookChanged();
@@ -1241,38 +1250,300 @@ MapOperationsService::queryLogbookDatabase(
     appendChart(QStringLiteral("Band"), QStringLiteral("band"));
     appendChart(QStringLiteral("Mode"), QStringLiteral("mode"));
     appendChart(QStringLiteral("Continent"), QStringLiteral("continent"));
+    appendChart(QStringLiteral("DXCC"), QStringLiteral("dxcc"));
+    appendChart(QStringLiteral("WPX"), QStringLiteral("wpx"));
+    appendChart(QStringLiteral("Grid"), QStringLiteral("grid4"));
 
-    qint64 const now = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
-    qint64 const currentStart = now - 30LL * 24LL * 60LL * 60LL;
-    qint64 const previousStart = now - 60LL * 24LL * 60LL * 60LL;
-    QSqlQuery comparisonQuery(db);
-    comparisonQuery.prepare(QStringLiteral(
-        "SELECT"
-        " sum(CASE WHEN qso_epoch>=? THEN 1 ELSE 0 END),"
-        " sum(CASE WHEN qso_epoch>=? AND qso_epoch<? THEN 1 ELSE 0 END),"
-        " count(DISTINCT CASE WHEN qso_epoch>=? THEN call END),"
-        " count(DISTINCT CASE WHEN qso_epoch>=? AND qso_epoch<? THEN call END)"
-        " FROM map_qso"));
-    comparisonQuery.addBindValue(currentStart);
-    comparisonQuery.addBindValue(previousStart);
-    comparisonQuery.addBindValue(currentStart);
-    comparisonQuery.addBindValue(currentStart);
-    comparisonQuery.addBindValue(previousStart);
-    comparisonQuery.addBindValue(currentStart);
-    if (comparisonQuery.exec() && comparisonQuery.next()) {
-        int const current = comparisonQuery.value(0).toInt();
-        int const previous = comparisonQuery.value(1).toInt();
-        int const currentCalls = comparisonQuery.value(2).toInt();
-        int const previousCalls = comparisonQuery.value(3).toInt();
-        snapshot.comparison = {
-            {QStringLiteral("period"), QStringLiteral("30 days")},
-            {QStringLiteral("currentQsos"), current},
-            {QStringLiteral("previousQsos"), previous},
-            {QStringLiteral("qsoDelta"), current - previous},
-            {QStringLiteral("currentCalls"), currentCalls},
-            {QStringLiteral("previousCalls"), previousCalls},
-            {QStringLiteral("callDelta"), currentCalls - previousCalls}
+    auto appendTopStatistics = [&](const QString& group, const QString& column) {
+        QSqlQuery topQuery(db);
+        QString const sql = QStringLiteral(
+            "SELECT coalesce(nullif(%1,''),'Unknown'), count(*),"
+            " sum(CASE WHEN confirmed<>0 THEN 1 ELSE 0 END),"
+            " count(DISTINCT nullif(upper(call),'')), min(qso_epoch), max(qso_epoch)"
+            " FROM map_qso WHERE %2 GROUP BY 1"
+            " ORDER BY count(*) DESC, 1 LIMIT 20")
+            .arg(column, filter.where);
+        if (!prepareAndBind(&topQuery, sql, filter.binds, nullptr)) return;
+        int rank = 0;
+        while (topQuery.next()) {
+            snapshot.topStatistics << QVariantMap {
+                {QStringLiteral("group"), group},
+                {QStringLiteral("label"), topQuery.value(0).toString()},
+                {QStringLiteral("worked"), topQuery.value(1).toInt()},
+                {QStringLiteral("confirmed"), topQuery.value(2).toInt()},
+                {QStringLiteral("calls"), topQuery.value(3).toInt()},
+                {QStringLiteral("firstEpoch"), topQuery.value(4).toLongLong()},
+                {QStringLiteral("lastEpoch"), topQuery.value(5).toLongLong()},
+                {QStringLiteral("rank"), ++rank}
+            };
+        }
+    };
+    appendTopStatistics(QStringLiteral("Band"), QStringLiteral("band"));
+    appendTopStatistics(QStringLiteral("Mode"), QStringLiteral("mode"));
+    appendTopStatistics(QStringLiteral("DXCC"), QStringLiteral("dxcc"));
+    appendTopStatistics(QStringLiteral("WPX"), QStringLiteral("wpx"));
+    appendTopStatistics(QStringLiteral("Grid"), QStringLiteral("grid4"));
+    appendTopStatistics(QStringLiteral("Callsign"), QStringLiteral("call"));
+
+    struct ProgressBucket {
+        int qsos {0};
+        int confirmed {0};
+        QSet<QString> calls;
+        QSet<QString> confirmedCalls;
+        QSet<QString> dxcc;
+        QSet<QString> confirmedDxcc;
+        QSet<QString> grids;
+        QSet<QString> confirmedGrids;
+        QSet<QString> wpx;
+        QSet<QString> confirmedWpx;
+        QSet<QString> pota;
+        QSet<QString> confirmedPota;
+        QSet<QString> iota;
+        QSet<QString> confirmedIota;
+        QSet<QString> cqZones;
+        QSet<QString> confirmedCqZones;
+        QSet<QString> ituZones;
+        QSet<QString> confirmedItuZones;
+        QSet<QString> states;
+        QSet<QString> confirmedStates;
+        QSet<QString> continents;
+        QSet<QString> confirmedContinents;
+    };
+
+    QMap<qint64, ProgressBucket> progressBuckets;
+    QSqlQuery progressionQuery(db);
+    QList<QVariantList> progressionRows;
+    QString const progressionSql = QStringLiteral(
+        "SELECT qso_epoch, confirmed, call, dxcc, grid4, wpx, pota_ref, iota,"
+        " cq_zone, itu_zone, state, continent"
+        " FROM map_qso WHERE %1 AND qso_epoch>0 ORDER BY qso_epoch ASC")
+        .arg(filter.where);
+    if (prepareAndBind(&progressionQuery, progressionSql, filter.binds, nullptr)) {
+        qint64 firstEpoch = 0;
+        qint64 lastEpoch = 0;
+        while (progressionQuery.next()) {
+            qint64 const epoch = progressionQuery.value(0).toLongLong();
+            if (firstEpoch == 0) firstEpoch = epoch;
+            lastEpoch = epoch;
+            QVariantList values;
+            for (int column = 0; column < 12; ++column) {
+                values.append(progressionQuery.value(column));
+            }
+            progressionRows.append(std::move(values));
+        }
+        qint64 const span = qMax<qint64>(0, lastEpoch - firstEpoch);
+        qint64 const bucketSeconds = span <= 90LL * 86400
+            ? 86400 : (span <= 3LL * 365 * 86400 ? 30LL * 86400 : 365LL * 86400);
+
+        for (QVariantList const& values : std::as_const(progressionRows)) {
+                qint64 const epoch = values.value(0).toLongLong();
+                qint64 const bucket = (epoch / bucketSeconds) * bucketSeconds;
+                ProgressBucket& row = progressBuckets[bucket];
+                bool const confirmed = values.value(1).toBool();
+                ++row.qsos;
+                if (confirmed) ++row.confirmed;
+                auto add = [](QSet<QString>& set, const QVariant& value) {
+                    QString const normalized = value.toString().trimmed().toUpper();
+                    if (!normalized.isEmpty() && normalized != QStringLiteral("UNKNOWN")) {
+                        set.insert(normalized);
+                    }
+                };
+                add(row.calls, values.value(2));
+                add(row.dxcc, values.value(3));
+                add(row.grids, values.value(4));
+                add(row.wpx, values.value(5));
+                add(row.pota, values.value(6));
+                add(row.iota, values.value(7));
+                add(row.cqZones, values.value(8));
+                add(row.ituZones, values.value(9));
+                add(row.states, values.value(10));
+                add(row.continents, values.value(11));
+                if (confirmed) {
+                    add(row.confirmedCalls, values.value(2));
+                    add(row.confirmedDxcc, values.value(3));
+                    add(row.confirmedGrids, values.value(4));
+                    add(row.confirmedWpx, values.value(5));
+                    add(row.confirmedPota, values.value(6));
+                    add(row.confirmedIota, values.value(7));
+                    add(row.confirmedCqZones, values.value(8));
+                    add(row.confirmedItuZones, values.value(9));
+                    add(row.confirmedStates, values.value(10));
+                    add(row.confirmedContinents, values.value(11));
+                }
+        }
+
+        ProgressBucket cumulative;
+        for (auto it = progressBuckets.constBegin(); it != progressBuckets.constEnd(); ++it) {
+            ProgressBucket const& bucket = it.value();
+            cumulative.qsos += bucket.qsos;
+            cumulative.confirmed += bucket.confirmed;
+            cumulative.calls.unite(bucket.calls);
+            cumulative.confirmedCalls.unite(bucket.confirmedCalls);
+            cumulative.dxcc.unite(bucket.dxcc);
+            cumulative.confirmedDxcc.unite(bucket.confirmedDxcc);
+            cumulative.grids.unite(bucket.grids);
+            cumulative.confirmedGrids.unite(bucket.confirmedGrids);
+            cumulative.wpx.unite(bucket.wpx);
+            cumulative.confirmedWpx.unite(bucket.confirmedWpx);
+            cumulative.pota.unite(bucket.pota);
+            cumulative.confirmedPota.unite(bucket.confirmedPota);
+            cumulative.iota.unite(bucket.iota);
+            cumulative.confirmedIota.unite(bucket.confirmedIota);
+            cumulative.cqZones.unite(bucket.cqZones);
+            cumulative.confirmedCqZones.unite(bucket.confirmedCqZones);
+            cumulative.ituZones.unite(bucket.ituZones);
+            cumulative.confirmedItuZones.unite(bucket.confirmedItuZones);
+            cumulative.states.unite(bucket.states);
+            cumulative.confirmedStates.unite(bucket.confirmedStates);
+            cumulative.continents.unite(bucket.continents);
+            cumulative.confirmedContinents.unite(bucket.confirmedContinents);
+
+            QDateTime const date = QDateTime::fromSecsSinceEpoch(it.key(), QTimeZone::UTC);
+            QString label;
+            if (bucketSeconds == 86400) {
+                label = date.toString(QStringLiteral("yyyy-MM-dd"));
+            } else if (bucketSeconds == 30LL * 86400) {
+                label = date.toString(QStringLiteral("yyyy-MM"));
+            } else {
+                label = date.toString(QStringLiteral("yyyy"));
+            }
+            snapshot.awardProgression << QVariantMap {
+                {QStringLiteral("bucketEpoch"), it.key()},
+                {QStringLiteral("period"), label},
+                {QStringLiteral("bucketSeconds"), bucketSeconds},
+                {QStringLiteral("qsos"), bucket.qsos},
+                {QStringLiteral("confirmed"), bucket.confirmed},
+                {QStringLiteral("callsWorked"), cumulative.calls.size()},
+                {QStringLiteral("callsConfirmed"), cumulative.confirmedCalls.size()},
+                {QStringLiteral("dxccWorked"), cumulative.dxcc.size()},
+                {QStringLiteral("dxccConfirmed"), cumulative.confirmedDxcc.size()},
+                {QStringLiteral("gridWorked"), cumulative.grids.size()},
+                {QStringLiteral("gridConfirmed"), cumulative.confirmedGrids.size()},
+                {QStringLiteral("wpxWorked"), cumulative.wpx.size()},
+                {QStringLiteral("wpxConfirmed"), cumulative.confirmedWpx.size()},
+                {QStringLiteral("potaWorked"), cumulative.pota.size()},
+                {QStringLiteral("potaConfirmed"), cumulative.confirmedPota.size()},
+                {QStringLiteral("iotaWorked"), cumulative.iota.size()},
+                {QStringLiteral("iotaConfirmed"), cumulative.confirmedIota.size()},
+                {QStringLiteral("cqZonesWorked"), cumulative.cqZones.size()},
+                {QStringLiteral("cqZonesConfirmed"), cumulative.confirmedCqZones.size()},
+                {QStringLiteral("ituZonesWorked"), cumulative.ituZones.size()},
+                {QStringLiteral("ituZonesConfirmed"), cumulative.confirmedItuZones.size()},
+                {QStringLiteral("statesWorked"), cumulative.states.size()},
+                {QStringLiteral("statesConfirmed"), cumulative.confirmedStates.size()},
+                {QStringLiteral("continentsWorked"), cumulative.continents.size()},
+                {QStringLiteral("continentsConfirmed"), cumulative.confirmedContinents.size()}
+            };
+        }
+    }
+
+    auto metricsForWindow = [&](const SqlFilter& baseFilter,
+                                qint64 start, qint64 end) {
+        QVariantMap result;
+        QSqlQuery metricQuery(db);
+        QString sql = QStringLiteral(
+            "SELECT count(*), coalesce(sum(confirmed),0),"
+            " count(DISTINCT nullif(upper(call),'')),"
+            " count(DISTINCT nullif(upper(dxcc),'')),"
+            " count(DISTINCT nullif(upper(grid4),'')),"
+            " count(DISTINCT nullif(upper(wpx),''))"
+            " FROM map_qso WHERE %1 AND qso_epoch>=?")
+            .arg(baseFilter.where);
+        if (end > 0) sql += QStringLiteral(" AND qso_epoch<?");
+        if (!metricQuery.prepare(sql)) return result;
+        for (QVariant const& bind : baseFilter.binds) metricQuery.addBindValue(bind);
+        metricQuery.addBindValue(start);
+        if (end > 0) metricQuery.addBindValue(end);
+        if (metricQuery.exec() && metricQuery.next()) {
+            result.insert(QStringLiteral("qsos"), metricQuery.value(0).toInt());
+            result.insert(QStringLiteral("confirmed"), metricQuery.value(1).toInt());
+            result.insert(QStringLiteral("calls"), metricQuery.value(2).toInt());
+            result.insert(QStringLiteral("dxcc"), metricQuery.value(3).toInt());
+            result.insert(QStringLiteral("grids"), metricQuery.value(4).toInt());
+            result.insert(QStringLiteral("wpx"), metricQuery.value(5).toInt());
+        }
+        return result;
+    };
+
+    SqlFilter const comparisonFilter = buildFilter(search, band, mode,
+                                                    QStringLiteral("All time"));
+    qint64 const comparisonNow = QDateTime::currentDateTimeUtc().toSecsSinceEpoch();
+    const QList<QPair<QString, qint64>> comparisonWindows {
+        {QStringLiteral("24 hours"), 86400},
+        {QStringLiteral("7 days"), 7LL * 86400},
+        {QStringLiteral("30 days"), 30LL * 86400},
+        {QStringLiteral("1 year"), 365LL * 86400}
+    };
+    for (auto const& window : comparisonWindows) {
+        QVariantMap const current = metricsForWindow(
+            comparisonFilter, comparisonNow - window.second, 0);
+        QVariantMap const previous = metricsForWindow(
+            comparisonFilter, comparisonNow - 2 * window.second,
+            comparisonNow - window.second);
+        auto delta = [&current, &previous](const QString& key) {
+            return current.value(key).toInt() - previous.value(key).toInt();
         };
+        QVariantMap row {
+            {QStringLiteral("period"), window.first},
+            {QStringLiteral("windowSeconds"), window.second},
+            {QStringLiteral("currentQsos"), current.value(QStringLiteral("qsos"))},
+            {QStringLiteral("previousQsos"), previous.value(QStringLiteral("qsos"))},
+            {QStringLiteral("qsoDelta"), delta(QStringLiteral("qsos"))},
+            {QStringLiteral("currentConfirmed"), current.value(QStringLiteral("confirmed"))},
+            {QStringLiteral("previousConfirmed"), previous.value(QStringLiteral("confirmed"))},
+            {QStringLiteral("confirmedDelta"), delta(QStringLiteral("confirmed"))},
+            {QStringLiteral("currentCalls"), current.value(QStringLiteral("calls"))},
+            {QStringLiteral("previousCalls"), previous.value(QStringLiteral("calls"))},
+            {QStringLiteral("callDelta"), delta(QStringLiteral("calls"))},
+            {QStringLiteral("currentDxcc"), current.value(QStringLiteral("dxcc"))},
+            {QStringLiteral("previousDxcc"), previous.value(QStringLiteral("dxcc"))},
+            {QStringLiteral("dxccDelta"), delta(QStringLiteral("dxcc"))},
+            {QStringLiteral("currentGrids"), current.value(QStringLiteral("grids"))},
+            {QStringLiteral("previousGrids"), previous.value(QStringLiteral("grids"))},
+            {QStringLiteral("gridDelta"), delta(QStringLiteral("grids"))},
+            {QStringLiteral("currentWpx"), current.value(QStringLiteral("wpx"))},
+            {QStringLiteral("previousWpx"), previous.value(QStringLiteral("wpx"))},
+            {QStringLiteral("wpxDelta"), delta(QStringLiteral("wpx"))}
+        };
+        snapshot.periodComparison.append(row);
+        if (window.first == QStringLiteral("30 days")) {
+            snapshot.comparison = {
+                {QStringLiteral("period"), window.first},
+                {QStringLiteral("currentQsos"), current.value(QStringLiteral("qsos"))},
+                {QStringLiteral("previousQsos"), previous.value(QStringLiteral("qsos"))},
+                {QStringLiteral("qsoDelta"), delta(QStringLiteral("qsos"))},
+                {QStringLiteral("currentCalls"), current.value(QStringLiteral("calls"))},
+                {QStringLiteral("previousCalls"), previous.value(QStringLiteral("calls"))},
+                {QStringLiteral("callDelta"), delta(QStringLiteral("calls"))}
+            };
+        }
+    }
+
+    {
+        QSqlQuery profiles(db);
+        QString const sql = QStringLiteral(
+            "SELECT coalesce(nullif(upper(operator_call),''),'UNKNOWN'), count(*),"
+            " coalesce(sum(confirmed),0), count(DISTINCT nullif(upper(call),'')),"
+            " count(DISTINCT nullif(upper(dxcc),'')), count(DISTINCT nullif(upper(grid4),'')),"
+            " min(qso_epoch), max(qso_epoch) FROM map_qso WHERE %1"
+            " GROUP BY 1 ORDER BY count(*) DESC, 1 LIMIT 50").arg(filter.where);
+        if (prepareAndBind(&profiles, sql, filter.binds, nullptr)) {
+            int rank = 0;
+            while (profiles.next()) {
+                snapshot.profileStatistics << QVariantMap {
+                    {QStringLiteral("profile"), profiles.value(0).toString()},
+                    {QStringLiteral("callsign"), profiles.value(0).toString()},
+                    {QStringLiteral("qsos"), profiles.value(1).toInt()},
+                    {QStringLiteral("confirmed"), profiles.value(2).toInt()},
+                    {QStringLiteral("calls"), profiles.value(3).toInt()},
+                    {QStringLiteral("dxcc"), profiles.value(4).toInt()},
+                    {QStringLiteral("grids"), profiles.value(5).toInt()},
+                    {QStringLiteral("firstEpoch"), profiles.value(6).toLongLong()},
+                    {QStringLiteral("lastEpoch"), profiles.value(7).toLongLong()},
+                    {QStringLiteral("rank"), ++rank}
+                };
+            }
+        }
     }
 
     QSqlQuery markerQuery(db);
@@ -1451,6 +1722,134 @@ bool MapOperationsService::exportLogbook(const QString& path,
     return true;
 }
 
+bool MapOperationsService::exportStatistics(const QString& path,
+                                            const QString& format)
+{
+    QString const localPath = normalizedLocalPath(path).trimmed();
+    if (localPath.isEmpty()) {
+        setStatusMessage(QStringLiteral("Choose a statistics export file"));
+        return false;
+    }
+    QFileInfo const info(localPath);
+    if (!QDir().mkpath(info.absolutePath())) {
+        setStatusMessage(QStringLiteral("Cannot create statistics export directory"));
+        return false;
+    }
+
+    QSaveFile file(localPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        setStatusMessage(QStringLiteral("Statistics export: %1").arg(file.errorString()));
+        return false;
+    }
+
+    bool const json = format.compare(QStringLiteral("JSON"), Qt::CaseInsensitive) == 0
+        || info.suffix().compare(QStringLiteral("json"), Qt::CaseInsensitive) == 0;
+    if (json) {
+        QJsonObject report {
+            {QStringLiteral("type"), QStringLiteral("decodium-logbook-statistics")},
+            {QStringLiteral("version"), 1},
+            {QStringLiteral("generatedAt"),
+             QDateTime::currentDateTimeUtc().toString(Qt::ISODate)},
+            {QStringLiteral("filters"), QJsonObject {
+                {QStringLiteral("search"), m_logbookSearch},
+                {QStringLiteral("band"), m_logbookBand},
+                {QStringLiteral("mode"), m_logbookMode},
+                {QStringLiteral("period"), m_logbookPeriod},
+                {QStringLiteral("drilldown"), m_statisticsDrilldown}
+            }},
+            {QStringLiteral("scorecard"), QJsonObject::fromVariantMap(m_scorecard)},
+            {QStringLiteral("comparison"), QJsonObject::fromVariantMap(m_comparison)},
+            {QStringLiteral("periodComparison"), QJsonValue::fromVariant(m_periodComparison)},
+            {QStringLiteral("awardProgression"), QJsonValue::fromVariant(m_awardProgression)},
+            {QStringLiteral("topStatistics"), QJsonValue::fromVariant(m_topStatistics)},
+            {QStringLiteral("profileStatistics"), QJsonValue::fromVariant(m_profileStatistics)},
+            {QStringLiteral("logbookRows"), QJsonValue::fromVariant(m_logbookRows)}
+        };
+        file.write(QJsonDocument(report).toJson(QJsonDocument::Indented));
+    } else {
+        QTextStream stream(&file);
+        stream << "Section,Period/Group,Label,QSO,Confirmed,Calls,DXCC,Grids,WPX\n";
+        for (QVariant const& value : std::as_const(m_periodComparison)) {
+            QVariantMap const row = value.toMap();
+            stream << "Period," << csvQuoted(row.value(QStringLiteral("period")).toString())
+                   << ",Current," << row.value(QStringLiteral("currentQsos")).toInt()
+                   << "," << row.value(QStringLiteral("currentConfirmed")).toInt()
+                   << "," << row.value(QStringLiteral("currentCalls")).toInt()
+                   << "," << row.value(QStringLiteral("currentDxcc")).toInt()
+                   << "," << row.value(QStringLiteral("currentGrids")).toInt()
+                   << "," << row.value(QStringLiteral("currentWpx")).toInt() << "\n";
+            stream << "Period," << csvQuoted(row.value(QStringLiteral("period")).toString())
+                   << ",Previous," << row.value(QStringLiteral("previousQsos")).toInt()
+                   << "," << row.value(QStringLiteral("previousConfirmed")).toInt()
+                   << "," << row.value(QStringLiteral("previousCalls")).toInt()
+                   << "," << row.value(QStringLiteral("previousDxcc")).toInt()
+                   << "," << row.value(QStringLiteral("previousGrids")).toInt()
+                   << "," << row.value(QStringLiteral("previousWpx")).toInt() << "\n";
+        }
+        for (QVariant const& value : std::as_const(m_topStatistics)) {
+            QVariantMap const row = value.toMap();
+            stream << "Top," << csvQuoted(row.value(QStringLiteral("group")).toString())
+                   << "," << csvQuoted(row.value(QStringLiteral("label")).toString())
+                   << "," << row.value(QStringLiteral("worked")).toInt()
+                   << "," << row.value(QStringLiteral("confirmed")).toInt()
+                   << "," << row.value(QStringLiteral("calls")).toInt() << "\n";
+        }
+        for (QVariant const& value : std::as_const(m_awardProgression)) {
+            QVariantMap const row = value.toMap();
+            stream << "AwardProgression," << csvQuoted(row.value(QStringLiteral("period")).toString())
+                   << ",Cumulative," << row.value(QStringLiteral("qsos")).toInt()
+                   << "," << row.value(QStringLiteral("confirmed")).toInt()
+                   << "," << row.value(QStringLiteral("callsWorked")).toInt()
+                   << "," << row.value(QStringLiteral("dxccWorked")).toInt()
+                   << "," << row.value(QStringLiteral("gridWorked")).toInt()
+                   << "," << row.value(QStringLiteral("wpxWorked")).toInt() << "\n";
+        }
+        for (QVariant const& value : std::as_const(m_profileStatistics)) {
+            QVariantMap const row = value.toMap();
+            stream << "Profile,," << csvQuoted(row.value(QStringLiteral("profile")).toString())
+                   << "," << row.value(QStringLiteral("qsos")).toInt()
+                   << "," << row.value(QStringLiteral("confirmed")).toInt()
+                   << "," << row.value(QStringLiteral("calls")).toInt()
+                   << "," << row.value(QStringLiteral("dxcc")).toInt()
+                   << "," << row.value(QStringLiteral("grids")).toInt() << "\n";
+        }
+    }
+
+    if (!file.commit()) {
+        setStatusMessage(QStringLiteral("Statistics export: %1").arg(file.errorString()));
+        return false;
+    }
+    m_lastExportPath = localPath;
+    emit lastExportPathChanged();
+    setStatusMessage(QStringLiteral("Exported logbook statistics"));
+    return true;
+}
+
+void MapOperationsService::drillDownStatistics(const QString& dimension,
+                                                const QString& value)
+{
+    QString const normalizedDimension = dimension.trimmed();
+    QString const normalizedValue = value.trimmed().left(120);
+    if (normalizedValue.isEmpty()) return;
+
+    m_statisticsDrilldown = QStringLiteral("%1: %2")
+        .arg(normalizedDimension, normalizedValue);
+    if (normalizedDimension.compare(QStringLiteral("Band"), Qt::CaseInsensitive) == 0) {
+        m_logbookBand = normalizedValue;
+        m_logbookSearch.clear();
+    } else if (normalizedDimension.compare(QStringLiteral("Mode"), Qt::CaseInsensitive) == 0) {
+        m_logbookMode = normalizedValue;
+        m_logbookSearch.clear();
+    } else {
+        m_logbookSearch = normalizedValue;
+    }
+    saveSetting(QStringLiteral("LogbookBand"), m_logbookBand);
+    saveSetting(QStringLiteral("LogbookMode"), m_logbookMode);
+    saveSetting(QStringLiteral("LogbookSearch"), m_logbookSearch);
+    emit logbookFiltersChanged();
+    refreshLogbook();
+}
+
 MapOperationsService::ExportResult
 MapOperationsService::exportLogbookDatabase(
     const QString& databasePath, const QString& path,
@@ -1616,6 +2015,15 @@ void MapOperationsService::applyMapPreset(const QString& name)
             settings.value(QStringLiteral("DataView"),
                            QStringLiteral("Live + Logbook")).toString(),
             settings.value(QStringLiteral("Layers")).toStringList());
+        QVariantMap const styles = settings.value(QStringLiteral("Styles")).toMap();
+        for (auto it = styles.constBegin(); it != styles.constEnd(); ++it) {
+            QVariantMap const style = it.value().toMap();
+            m_layerModel->setLayerStyle(
+                it.key(), style.value(QStringLiteral("color")).toString(),
+                style.value(QStringLiteral("opacity"), 1.0).toDouble(),
+                style.value(QStringLiteral("thickness"), 1.0).toDouble(),
+                style.value(QStringLiteral("labelDensity"), 100).toInt());
+        }
         settings.endGroup();
         settings.endGroup();
     }
@@ -1653,6 +2061,7 @@ void MapOperationsService::saveMapPreset(const QString& name)
     settings.setValue(QStringLiteral("Projection"), m_mapProjection);
     settings.setValue(QStringLiteral("DataView"), m_dataViewMode);
     settings.setValue(QStringLiteral("Layers"), enabled);
+    settings.setValue(QStringLiteral("Styles"), m_layerModel->allLayerStyles());
     settings.endGroup();
     settings.endGroup();
     m_activeMapPreset = normalized;
@@ -1750,6 +2159,22 @@ QString MapOperationsService::reserveLogbookExportPath(const QString& format)
             .arg(QDateTime::currentDateTimeUtc().toString(
                      QStringLiteral("yyyyMMdd-HHmmss")),
                  adif ? QStringLiteral("adi") : QStringLiteral("csv")));
+}
+
+QString MapOperationsService::reserveStatisticsExportPath(const QString& format)
+{
+    QString root = QStandardPaths::writableLocation(
+        QStandardPaths::DocumentsLocation);
+    if (root.isEmpty()) root = QStandardPaths::writableLocation(
+        QStandardPaths::HomeLocation);
+    QDir directory(root);
+    directory.mkpath(QStringLiteral("Decodium"));
+    bool const json = format.compare(QStringLiteral("JSON"), Qt::CaseInsensitive) == 0;
+    return directory.absoluteFilePath(
+        QStringLiteral("Decodium-Logbook-Statistics-%1.%2")
+            .arg(QDateTime::currentDateTimeUtc().toString(
+                     QStringLiteral("yyyyMMdd-HHmmss")),
+                 json ? QStringLiteral("json") : QStringLiteral("csv")));
 }
 
 void MapOperationsService::setLogbookLoading(bool loading)

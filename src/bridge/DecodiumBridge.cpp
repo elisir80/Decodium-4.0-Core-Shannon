@@ -10,6 +10,7 @@
 #include "DecodiumPropagationManager.h"
 #include "MapExternalOverlayService.h"
 #include "MapIntelligenceService.h"
+#include "CallsignIntelligenceService.h"
 #include "MapLayerModel.h"
 #include "DecodiumProfileSettings.h"
 #include "Sequencer/QsoSequencerRules.hpp"
@@ -9835,6 +9836,39 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // DXCC lookup (cty.dat)
     m_dxccLookup = new DxccLookup();
+    m_callsignIntelligence = new CallsignIntelligenceService(this);
+    m_callsignIntelligence->setDxccLookup(m_dxccLookup);
+    m_callsignIntelligence->setOperatorCallsign(m_callsign);
+    connect(this, &DecodiumBridge::callsignChanged, this, [this]() {
+        if (m_callsignIntelligence) {
+            m_callsignIntelligence->setOperatorCallsign(m_callsign);
+        }
+    });
+    connect(this, &DecodiumBridge::dxCallChanged, this, [this]() {
+        if (m_callsignIntelligence) {
+            m_callsignIntelligence->notifyQsoStarted(m_dxCall);
+        }
+    });
+    connect(m_callsignIntelligence, &CallsignIntelligenceService::enrichmentReady,
+            this, [this](const QString& call, const QVariantMap& fields) {
+        const QString active = Radio::base_callsign(m_dxCall).trimmed().toUpper();
+        const QString incoming = Radio::base_callsign(call).trimmed().toUpper();
+        if (active.isEmpty() || active != incoming) {
+            return;
+        }
+        if (m_dxGrid.trimmed().isEmpty()) {
+            const QString grid = fields.value(QStringLiteral("grid")).toString().trimmed().toUpper();
+            if (!grid.isEmpty()) {
+                setDxGrid(grid);
+            }
+        }
+        if (m_nextLogName.trimmed().isEmpty()) {
+            m_nextLogName = fields.value(QStringLiteral("name")).toString().trimmed();
+        }
+        if (m_nextLogQth.trimmed().isEmpty()) {
+            m_nextLogQth = fields.value(QStringLiteral("qth")).toString().trimmed();
+        }
+    });
     bridgeLog(QStringLiteral("DXCC: load deferred until Main.qml ready"));
     m_usStateData = new UsStateDataManager(this);
     connect(m_usStateData, &UsStateDataManager::statusMessage, this, [this](const QString& msg) {
@@ -10344,6 +10378,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     loadSettings();
     if (m_mapIntelligenceService) {
+        m_mapIntelligenceService->setRosterStationCall(m_callsign);
         m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
     }
     refreshMapMoonOverlay();
@@ -10435,6 +10470,11 @@ QObject * DecodiumBridge::propagationManager() const
 QObject * DecodiumBridge::mapIntelligenceService() const
 {
     return m_mapIntelligenceService;
+}
+
+QObject * DecodiumBridge::callsignIntelligence() const
+{
+    return m_callsignIntelligence;
 }
 
 bool DecodiumBridge::usingLegacyBackendForTx() const
@@ -14837,6 +14877,9 @@ void DecodiumBridge::setCallsign(const QString& v) {
         m_callsign = v;
         emit callsignChanged();
         refreshPskReporterLocalStation();
+        if (m_mapIntelligenceService) {
+            m_mapIntelligenceService->setRosterStationCall(m_callsign);
+        }
         if (m_dxCluster)   m_dxCluster->setCallsign(m_callsign);
         regenerateTxMessages();
     }
@@ -17123,6 +17166,10 @@ void DecodiumBridge::setDxCall(const QString& v) {
         // partner in autoSequenceStep. 127 = sentinel "no data".
         if (!resumedFromMemory) {
             m_currentPartnerSnrDb = 127;
+        }
+        if (previousBase != nextBase) {
+            m_nextLogName.clear();
+            m_nextLogQth.clear();
         }
         QString const activeQueueCall = normalizedBaseCall(next);
         if (!activeQueueCall.isEmpty()) {
@@ -36306,7 +36353,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
                                     const QString& propMode = QString(),
                                     const QString& satellite = QString(),
                                     const QString& satMode = QString(),
-                                    const QString& freqRx = QString());
+                                    const QString& freqRx = QString(),
+                                    const QString& name = QString(),
+                                    const QString& qth = QString());
 
 QVariantMap DecodiumBridge::pendingLogQsoPreview() const
 {
@@ -36984,6 +37033,9 @@ void DecodiumBridge::logQsoNow()
         clearPromptLogSnapshot();
         clearPendingAutoLogSnapshot();
         m_qsoLogged = true;
+        if (m_callsignIntelligence) {
+            m_callsignIntelligence->notifyQsoLogged(legacyCompletedCall);
+        }
         clearTxArmedAfterCompletedQso(legacyCompletedCall, QStringLiteral("legacy-log"));
         emit statusMessage("Log QSO via backend legacy");
         return;
@@ -37115,7 +37167,8 @@ void DecodiumBridge::logQsoNow()
     // 2) Log ADIF (decodium_log.adi) — per import/export e B4 check
     QByteArray const adifRecord = bridgeAdifRecordText(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
                                                        logRptSent, logRptRcvd, m_callsign, m_grid,
-                                                       logComments, logPropMode, logSatellite, logSatMode, logFreqRx).toUtf8();
+                                                       logComments, logPropMode, logSatellite, logSatMode, logFreqRx,
+                                                       m_nextLogName, m_nextLogQth).toUtf8();
     traceLogStep(QStringLiteral("adif-record-built"));
     appendAdifRecord(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
                      logRptSent, logRptRcvd,
@@ -37184,6 +37237,9 @@ void DecodiumBridge::logQsoNow()
     clearPromptLogSnapshot();
     clearPendingAutoLogSnapshot();
     m_qsoLogged = true;  // impedisce doppio log per questo QSO
+    if (m_callsignIntelligence) {
+        m_callsignIntelligence->notifyQsoLogged(logDxCall);
+    }
     clearTxArmedAfterCompletedQso(logDxCall, QStringLiteral("log"));
     emit statusMessage("QSO loggato: " + logDxCall);
     traceLogStep(QStringLiteral("done"));
@@ -47678,7 +47734,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
                                     const QString& propMode,
                                     const QString& satellite,
                                     const QString& satMode,
-                                    const QString& freqRx)
+                                    const QString& freqRx,
+                                    const QString& name,
+                                    const QString& qth)
 {
     double const freqMhz = freqHz / 1e6;
     QString const normalizedMode = mode.trimmed().toUpper();
@@ -47711,6 +47769,12 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
             + bridgeAdifField(QStringLiteral("STATION_CALLSIGN"), myCall);
     if (!myGrid.trimmed().isEmpty()) {
         record += bridgeAdifField(QStringLiteral("MY_GRIDSQUARE"), myGrid);
+    }
+    if (!name.trimmed().isEmpty()) {
+        record += bridgeAdifField(QStringLiteral("NAME"), name.trimmed());
+    }
+    if (!qth.trimmed().isEmpty()) {
+        record += bridgeAdifField(QStringLiteral("QTH"), qth.trimmed());
     }
     QString const cleanComments = comments.trimmed();
     if (!cleanComments.isEmpty()) {
@@ -47760,7 +47824,8 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     QString const adifRecord =
         bridgeAdifRecordText(dxCall, dxGrid, freqHz, mode, timeOnUtc, timeOffUtc,
                              rstSent, rstRcvd, m_callsign, m_grid,
-                             comments, propMode, satellite, satMode, freqRx)
+                             comments, propMode, satellite, satMode, freqRx,
+                             m_nextLogName, m_nextLogQth)
         + QStringLiteral("<EOR>\n");
     ts << adifRecord;
 

@@ -24,11 +24,13 @@
 #include <QPointer>
 #include <QRegularExpression>
 #include <QRunnable>
+#include <QSaveFile>
 #include <QSet>
 #include <QSettings>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QStandardPaths>
 #include <QThread>
 #include <QTime>
@@ -36,6 +38,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <QVector>
+#include <QUrl>
 
 #include <algorithm>
 #include <cmath>
@@ -48,7 +51,7 @@ constexpr qint64 kMaxAdifBytes = 64 * 1024 * 1024;
 constexpr int kMaxAdifRecords = 500000;
 // Changing this invalidates the derived map_qso cache once.  The source ADI
 // itself remains untouched; only metadata derived from it is rebuilt.
-constexpr int kAdifImportFormatVersion = 2;
+constexpr int kAdifImportFormatVersion = 3;
 constexpr int kMaxPendingLiveSpots = 512;
 constexpr int kRosterLimit = 100;
 constexpr int kRosterCandidateLimit = 500;
@@ -159,6 +162,87 @@ QString normalizedMode(QString mode, QString submode = {})
         return submode;
     }
     return mode;
+}
+
+struct PropagationDefinition {
+    const char* code;
+    const char* label;
+};
+
+const QVector<PropagationDefinition>& propagationDefinitions()
+{
+    static const QVector<PropagationDefinition> definitions {
+        {"MIXED", "Mixed"},
+        {"UNKNOWN", "Unknown"},
+        {"AS", "Aircraft Scatter"},
+        {"AUE", "Aurora-E"},
+        {"AUR", "Aurora"},
+        {"BS", "Back Scatter"},
+        {"ECH", "EchoLink"},
+        {"EME", "EME"},
+        {"ES", "Sporadic E"},
+        {"F2", "F2 Reflection"},
+        {"FAI", "Field Aligned I"},
+        {"INTERNET", "Inet-assist"},
+        {"ION", "Ionoscatter"},
+        {"IRL", "IRLP"},
+        {"MS", "Meteor Scatter"},
+        {"RPT", "Repeater"},
+        {"RS", "Rain Scatter"},
+        {"SAT", "Satellite"},
+        {"TEP", "Trans-equatorial"},
+        {"TR", "Tropo-ducting"}
+    };
+    return definitions;
+}
+
+QString normalizePropagationMode(QString value)
+{
+    value = value.trimmed().toUpper();
+    if (value.isEmpty()) {
+        return QStringLiteral("UNKNOWN");
+    }
+
+    value.replace(QLatin1Char('_'), QLatin1Char(' '));
+    value.replace(QLatin1Char('-'), QLatin1Char(' '));
+    value = value.simplified();
+    static const QHash<QString, QString> aliases {
+        {QStringLiteral("MIXED"), QStringLiteral("MIXED")},
+        {QStringLiteral("UNKNOWN"), QStringLiteral("UNKNOWN")},
+        {QStringLiteral("AIRCRAFT"), QStringLiteral("AS")},
+        {QStringLiteral("AIRCRAFT SCATTER"), QStringLiteral("AS")},
+        {QStringLiteral("AURORA E"), QStringLiteral("AUE")},
+        {QStringLiteral("AURORA-E"), QStringLiteral("AUE")},
+        {QStringLiteral("AURORA"), QStringLiteral("AUR")},
+        {QStringLiteral("BACKSCATTER"), QStringLiteral("BS")},
+        {QStringLiteral("BACK SCATTER"), QStringLiteral("BS")},
+        {QStringLiteral("ECHOLINK"), QStringLiteral("ECH")},
+        {QStringLiteral("MOONBOUNCE"), QStringLiteral("EME")},
+        {QStringLiteral("EME"), QStringLiteral("EME")},
+        {QStringLiteral("SPORADIC E"), QStringLiteral("ES")},
+        {QStringLiteral("F2 REFLECTION"), QStringLiteral("F2")},
+        {QStringLiteral("FIELD ALIGNED I"), QStringLiteral("FAI")},
+        {QStringLiteral("INTERNET ASSIST"), QStringLiteral("INTERNET")},
+        {QStringLiteral("INET ASSIST"), QStringLiteral("INTERNET")},
+        {QStringLiteral("IONOSCATTER"), QStringLiteral("ION")},
+        {QStringLiteral("IRLP"), QStringLiteral("IRL")},
+        {QStringLiteral("METEOR"), QStringLiteral("MS")},
+        {QStringLiteral("METEOR SCATTER"), QStringLiteral("MS")},
+        {QStringLiteral("REPEATER"), QStringLiteral("RPT")},
+        {QStringLiteral("RAIN SCATTER"), QStringLiteral("RS")},
+        {QStringLiteral("SATELLITE"), QStringLiteral("SAT")},
+        {QStringLiteral("TRANS EQUATORIAL"), QStringLiteral("TEP")},
+        {QStringLiteral("TRANSEQUATORIAL"), QStringLiteral("TEP")},
+        {QStringLiteral("TROPO"), QStringLiteral("TR")},
+        {QStringLiteral("TROPO DUCTING"), QStringLiteral("TR")}
+    };
+    QString const canonical = aliases.value(value, value);
+    for (PropagationDefinition const& definition : propagationDefinitions()) {
+        if (canonical == QLatin1String(definition.code)) {
+            return canonical;
+        }
+    }
+    return QStringLiteral("UNKNOWN");
 }
 
 QString normalizedIota(QString value)
@@ -281,11 +365,22 @@ struct ExternalAwardDefinition {
     QString tooltip;
     QStringList bands;
     QStringList modes;
+    QStringList endorsements;
+    QStringList dxccNumbers;
+    QStringList continents;
+    QStringList calls;
+    QStringList grids;
+    QStringList iotaReferences;
+    QVector<int> zones;
+    QStringList prefixes;
     // Some catalog rules collapse multiple prefixes or suffixes into one
     // award entity.  Preserve those equivalences instead of treating every
     // raw callsign fragment as a separate award credit.
     QVector<QStringList> aliases;
     QStringList prefixWhitelist;
+    QVector<int> unique;
+    QVector<int> count;
+    int requiredBandCount {0};
     int target {0};
 };
 
@@ -313,6 +408,33 @@ QVector<QStringList> jsonAliasGroups(const QJsonValue& value)
         if (!group.isEmpty()) groups.append(group);
     }
     return groups;
+}
+
+QVector<int> jsonInts(const QJsonValue& value)
+{
+    QVector<int> values;
+    if (value.isDouble()) {
+        values.append(value.toInt());
+    } else if (value.isString()) {
+        bool ok = false;
+        int const parsed = value.toString().trimmed().toInt(&ok);
+        if (ok) values.append(parsed);
+    } else if (value.isArray()) {
+        for (QJsonValue const& child : value.toArray()) {
+            QVector<int> const nested = jsonInts(child);
+            for (int const value : nested) values.append(value);
+        }
+    }
+    values.erase(std::unique(values.begin(), values.end()), values.end());
+    return values;
+}
+
+QStringList jsonNumberStrings(const QJsonValue& value)
+{
+    QStringList values;
+    QVector<int> const numbers = jsonInts(value);
+    for (int const number : numbers) values.append(QString::number(number));
+    return values;
 }
 
 QVector<ExternalAwardDefinition> const& externalAwardDefinitions()
@@ -347,15 +469,30 @@ QVector<ExternalAwardDefinition> const& externalAwardDefinitions()
                 definition.label = definition.sponsor + QStringLiteral(": ") + name;
                 definition.type = rule.value(QStringLiteral("type")).toString().trimmed().toLower();
                 definition.tooltip = award.value(QStringLiteral("tooltip")).toString().trimmed();
-                for (QJsonValue const& value : rule.value(QStringLiteral("band")).toArray()) {
-                    definition.bands.append(value.toString().trimmed());
+                definition.bands = jsonStrings(rule.value(QStringLiteral("band")));
+                definition.modes = jsonStrings(
+                    rule.contains(QStringLiteral("mode"))
+                        ? rule.value(QStringLiteral("mode"))
+                        : rule.value(QStringLiteral("mdoe")));
+                definition.endorsements = jsonStrings(rule.value(QStringLiteral("endorse")));
+                definition.dxccNumbers = jsonNumberStrings(rule.value(QStringLiteral("dxcc")));
+                definition.continents = jsonStrings(rule.value(QStringLiteral("cont")));
+                definition.calls = jsonStrings(rule.value(QStringLiteral("call")));
+                definition.grids = jsonStrings(rule.value(QStringLiteral("grid")));
+                definition.iotaReferences = jsonStrings(rule.value(QStringLiteral("IOTA")));
+                definition.zones = jsonInts(rule.value(QStringLiteral("zone")));
+                definition.prefixes = jsonStrings(rule.value(QStringLiteral("px")));
+                definition.unique = jsonInts(rule.value(QStringLiteral("unique")));
+                definition.count = jsonInts(rule.value(QStringLiteral("count")));
+                for (int const value : definition.count) {
+                    definition.target = qMax(definition.target, value);
                 }
-                for (QJsonValue const& value : rule.value(QStringLiteral("mode")).toArray()) {
-                    definition.modes.append(value.toString().trimmed());
+                for (int const value : definition.unique) {
+                    definition.target = qMax(definition.target, value);
                 }
-                for (QJsonValue const& value : rule.value(QStringLiteral("count")).toArray()) {
-                    definition.target = qMax(definition.target, value.toInt());
-                }
+                definition.requiredBandCount = definition.count.isEmpty()
+                    ? definition.bands.size() : *std::max_element(
+                          definition.count.constBegin(), definition.count.constEnd());
                 if (definition.type == QStringLiteral("pxa")) {
                     definition.aliases = jsonAliasGroups(rule.value(QStringLiteral("pxa")));
                 } else if (definition.type == QStringLiteral("numsfx")) {
@@ -442,83 +579,203 @@ QString sqlQuotedList(const QStringList& values)
     return quoted.join(QStringLiteral(","));
 }
 
-QString externalAwardScopeFilter(const ExternalAwardDefinition& definition)
+QStringList externalAwardBands(const ExternalAwardDefinition& definition,
+                               const QString& endorsement)
+{
+    QStringList bands;
+    QString const selected = endorsement.trimmed();
+    if (!selected.isEmpty()
+        && selected.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) != 0
+        && selected.compare(QStringLiteral("All"), Qt::CaseInsensitive) != 0
+        && selected.compare(QStringLiteral("Any"), Qt::CaseInsensitive) != 0) {
+        bands.append(selected.toLower());
+        return bands;
+    }
+    for (QString const& band : definition.bands) {
+        if (band.compare(QStringLiteral("All"), Qt::CaseInsensitive) != 0
+            && band.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) != 0
+            && band.compare(QStringLiteral("Any"), Qt::CaseInsensitive) != 0) {
+            bands.append(band.toLower());
+        }
+    }
+    bands.removeDuplicates();
+    return bands;
+}
+
+bool isDigitalAwardMode(const QString& mode)
+{
+    static const QStringList digitalModes {
+        QStringLiteral("FT2"), QStringLiteral("FT4"), QStringLiteral("FT8"),
+        QStringLiteral("FST4"), QStringLiteral("FST4W"), QStringLiteral("JT4"),
+        QStringLiteral("JT9"), QStringLiteral("JT65"), QStringLiteral("JT6M"),
+        QStringLiteral("MSK144"), QStringLiteral("Q65"), QStringLiteral("WSPR"),
+        QStringLiteral("FSK441"), QStringLiteral("ISCAT"), QStringLiteral("OLIVIA"),
+        QStringLiteral("DOMINO"), QStringLiteral("PSK"), QStringLiteral("JS8"),
+        QStringLiteral("MFSK"), QStringLiteral("PKT")
+    };
+    return digitalModes.contains(mode.trimmed().toUpper());
+}
+
+bool isPhoneAwardMode(const QString& mode)
+{
+    static const QStringList phoneModes {
+        QStringLiteral("AM"), QStringLiteral("FM"), QStringLiteral("SSB"),
+        QStringLiteral("USB"), QStringLiteral("LSB"), QStringLiteral("DSB"),
+        QStringLiteral("PHONE"), QStringLiteral("DV"), QStringLiteral("DSTAR")
+    };
+    return phoneModes.contains(mode.trimmed().toUpper());
+}
+
+bool matchesAwardMode(const QStringList& modes, const QString& mode)
+{
+    if (modes.isEmpty()) return true;
+    bool familyMatch = false;
+    for (QString const& candidate : modes) {
+        if (candidate.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) == 0
+            || candidate.compare(QStringLiteral("Any"), Qt::CaseInsensitive) == 0
+            || candidate.compare(mode, Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+        if (candidate.compare(QStringLiteral("Digital"), Qt::CaseInsensitive) == 0) {
+            familyMatch = familyMatch || isDigitalAwardMode(mode);
+        } else if (candidate.compare(QStringLiteral("Phone"), Qt::CaseInsensitive) == 0) {
+            familyMatch = familyMatch || isPhoneAwardMode(mode);
+        } else if (candidate.compare(QStringLiteral("CW"), Qt::CaseInsensitive) == 0) {
+            familyMatch = familyMatch || mode.compare(QStringLiteral("CW"), Qt::CaseInsensitive) == 0;
+        }
+    }
+    return familyMatch;
+}
+
+QString externalAwardScopeFilter(const ExternalAwardDefinition& definition,
+                                 const QString& endorsement = {})
 {
     QString filter;
-    QStringList bands;
-    bool allBands = false;
-    for (QString const& band : definition.bands) {
-        if (band.compare(QStringLiteral("All"), Qt::CaseInsensitive) == 0
-            || band.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) == 0
-            || band.compare(QStringLiteral("Any"), Qt::CaseInsensitive) == 0) {
-            allBands = true;
-            break;
-        }
-        bands.append(band.toLower());
-    }
-    if (!allBands && !bands.isEmpty()) {
+    QStringList const bands = externalAwardBands(definition, endorsement);
+    if (!bands.isEmpty()) {
         filter += QStringLiteral(" AND lower(band) IN (%1)").arg(sqlQuotedList(bands));
     }
 
-    bool digitalOnly = false;
-    bool hasSpecificMode = false;
     QStringList modes;
     for (QString const& mode : definition.modes) {
-        if (mode.compare(QStringLiteral("Digital"), Qt::CaseInsensitive) == 0) {
-            digitalOnly = true;
-        } else if (mode.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) != 0
-                   && mode.compare(QStringLiteral("Any"), Qt::CaseInsensitive) != 0
-                   && mode.compare(QStringLiteral("Phone"), Qt::CaseInsensitive) != 0) {
-            hasSpecificMode = true;
+        if (mode.compare(QStringLiteral("Digital"), Qt::CaseInsensitive) != 0
+            && mode.compare(QStringLiteral("Phone"), Qt::CaseInsensitive) != 0
+            && mode.compare(QStringLiteral("CW"), Qt::CaseInsensitive) != 0
+            && mode.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) != 0
+            && mode.compare(QStringLiteral("Any"), Qt::CaseInsensitive) != 0) {
             modes.append(mode.toUpper());
         }
     }
-    if (hasSpecificMode) {
+    bool const hasDigital = definition.modes.contains(QStringLiteral("Digital"), Qt::CaseInsensitive);
+    bool const hasPhone = definition.modes.contains(QStringLiteral("Phone"), Qt::CaseInsensitive);
+    bool const hasCw = definition.modes.contains(QStringLiteral("CW"), Qt::CaseInsensitive);
+    if (!modes.isEmpty()) {
         filter += QStringLiteral(" AND upper(mode) IN (%1)").arg(sqlQuotedList(modes));
-    } else if (digitalOnly) {
-        filter += QStringLiteral(
-            " AND upper(mode) IN ('FT8','FT4','FT2','JT4','JT9','JT65','Q65','MSK144','FST4','FST4W','WSPR')");
+    } else if (hasDigital || hasPhone || hasCw) {
+        QStringList families;
+        if (hasDigital) families << QStringLiteral("'FT2'") << QStringLiteral("'FT4'")
+                                 << QStringLiteral("'FT8'") << QStringLiteral("'FST4'")
+                                 << QStringLiteral("'FST4W'") << QStringLiteral("'JT4'")
+                                 << QStringLiteral("'JT9'") << QStringLiteral("'JT65'")
+                                 << QStringLiteral("'Q65'") << QStringLiteral("'MSK144'")
+                                 << QStringLiteral("'WSPR'") << QStringLiteral("'FSK441'")
+                                 << QStringLiteral("'ISCAT'") << QStringLiteral("'OLIVIA'")
+                                 << QStringLiteral("'DOMINO'") << QStringLiteral("'PSK'")
+                                 << QStringLiteral("'JS8'") << QStringLiteral("'MFSK'")
+                                 << QStringLiteral("'PKT'");
+        if (hasPhone) families << QStringLiteral("'AM'") << QStringLiteral("'FM'")
+                               << QStringLiteral("'SSB'") << QStringLiteral("'USB'")
+                               << QStringLiteral("'LSB'") << QStringLiteral("'DSB'")
+                               << QStringLiteral("'PHONE'") << QStringLiteral("'DV'")
+                               << QStringLiteral("'DSTAR'");
+        if (hasCw) families << QStringLiteral("'CW'");
+        filter += QStringLiteral(" AND upper(mode) IN (%1)").arg(families.join(','));
+    }
+    if (!definition.dxccNumbers.isEmpty()) {
+        filter += QStringLiteral(" AND CAST(dxcc_number AS TEXT) IN (%1)")
+                      .arg(sqlQuotedList(definition.dxccNumbers));
+    }
+    if (!definition.continents.isEmpty()) {
+        filter += QStringLiteral(" AND upper(continent) IN (%1)")
+                      .arg(sqlQuotedList(definition.continents));
+    }
+    if (!definition.calls.isEmpty()) {
+        filter += QStringLiteral(" AND upper(call) IN (%1)")
+                      .arg(sqlQuotedList(definition.calls));
+    }
+    if (!definition.grids.isEmpty()) {
+        filter += QStringLiteral(" AND upper(grid4) IN (%1)")
+                      .arg(sqlQuotedList(definition.grids));
+    }
+    if (!definition.iotaReferences.isEmpty()) {
+        filter += QStringLiteral(" AND upper(iota) IN (%1)")
+                      .arg(sqlQuotedList(definition.iotaReferences));
     }
     return filter;
 }
 
 bool externalAwardMatchesSpot(const ExternalAwardDefinition& definition,
-                              const QString& band, const QString& mode)
+                              const QString& band, const QString& mode,
+                              const QString& endorsement = {})
 {
-    bool bandAllowed = definition.bands.isEmpty();
-    for (QString const& candidate : definition.bands) {
-        if (candidate.compare(QStringLiteral("All"), Qt::CaseInsensitive) == 0
-            || candidate.compare(QStringLiteral("Any"), Qt::CaseInsensitive) == 0
-            || candidate.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) == 0
-            || candidate.compare(band, Qt::CaseInsensitive) == 0) {
-            bandAllowed = true;
-            break;
-        }
-    }
-    if (!bandAllowed) return false;
+    QStringList const bands = externalAwardBands(definition, endorsement);
+    return (bands.isEmpty() || bands.contains(band.trimmed().toLower()))
+        && matchesAwardMode(definition.modes, mode);
+}
 
-    bool digitalOnly = false;
-    bool modeAllowed = definition.modes.isEmpty();
-    for (QString const& candidate : definition.modes) {
-        if (candidate.compare(QStringLiteral("Any"), Qt::CaseInsensitive) == 0
-            || candidate.compare(QStringLiteral("Mixed"), Qt::CaseInsensitive) == 0
-            || candidate.compare(mode, Qt::CaseInsensitive) == 0) {
-            modeAllowed = true;
-            break;
+bool externalAwardMatchesFields(const ExternalAwardDefinition& definition,
+                                const QString& call, const QString& band,
+                                const QString& mode, const QString& grid,
+                                int dxccNumber, int cqZone,
+                                const QString& continent, const QString& iota,
+                                const QString& endorsement = {})
+{
+    if (!externalAwardMatchesSpot(definition, band, mode, endorsement)) return false;
+    QString const normalizedCall = call.trimmed().toUpper();
+    QString const normalizedGrid = grid.left(4).trimmed().toUpper();
+    QString const normalizedContinent = continent.trimmed().toUpper();
+    QString const normalizedIota = iota.trimmed().toUpper();
+    if (!definition.dxccNumbers.isEmpty()
+        && !definition.dxccNumbers.contains(QString::number(dxccNumber))) {
+        return false;
+    }
+    if (!definition.continents.isEmpty()
+        && !definition.continents.contains(normalizedContinent, Qt::CaseInsensitive)) {
+        return false;
+    }
+    if (!definition.calls.isEmpty()
+        && !definition.calls.contains(normalizedCall, Qt::CaseInsensitive)) {
+        return false;
+    }
+    if (!definition.grids.isEmpty()
+        && !definition.grids.contains(normalizedGrid, Qt::CaseInsensitive)) {
+        return false;
+    }
+    if (!definition.iotaReferences.isEmpty()
+        && !definition.iotaReferences.contains(normalizedIota, Qt::CaseInsensitive)) {
+        return false;
+    }
+    QString const prefix = wpxPrefix(normalizedCall);
+    if (!definition.prefixes.isEmpty()) {
+        bool found = false;
+        for (QString const& allowed : definition.prefixes) {
+            if (prefix.startsWith(allowed, Qt::CaseInsensitive)) {
+                found = true;
+                break;
+            }
         }
-        digitalOnly = digitalOnly
-            || candidate.compare(QStringLiteral("Digital"), Qt::CaseInsensitive) == 0;
+        if (!found) return false;
     }
-    if (!modeAllowed && digitalOnly) {
-        static const QStringList digitalModes {
-            QStringLiteral("FT8"), QStringLiteral("FT4"), QStringLiteral("FT2"),
-            QStringLiteral("JT4"), QStringLiteral("JT9"), QStringLiteral("JT65"),
-            QStringLiteral("Q65"), QStringLiteral("MSK144"), QStringLiteral("FST4"),
-            QStringLiteral("FST4W"), QStringLiteral("WSPR")
-        };
-        modeAllowed = digitalModes.contains(mode.toUpper());
+    if (!definition.zones.isEmpty()) {
+        int zone = cqZone;
+        if (definition.type == QStringLiteral("callarea")) {
+            QRegularExpressionMatch const match = QRegularExpression(
+                QStringLiteral("[0-9]")).match(prefix);
+            zone = match.hasMatch() ? match.captured(0).toInt() : -1;
+        }
+        if (!definition.zones.contains(zone)) return false;
     }
-    return modeAllowed;
+    return true;
 }
 
 QString awardAliasEntity(const ExternalAwardDefinition& definition,
@@ -878,8 +1135,11 @@ bool openMapDatabase(const QString& path,
     static const ColumnMigration migrations[] {
         {"map_qso", "qso_epoch", "INTEGER NOT NULL DEFAULT 0"},
         {"map_qso", "source", "TEXT NOT NULL DEFAULT 'ADIF'"},
+        {"map_qso", "propagation_mode", "TEXT NOT NULL DEFAULT 'UNKNOWN'"},
+        {"map_qso", "operator_call", "TEXT"},
         {"map_qso", "grid6", "TEXT"},
         {"map_qso", "dxcc", "TEXT"},
+        {"map_qso", "dxcc_number", "INTEGER NOT NULL DEFAULT 0"},
         {"map_qso", "continent", "TEXT"},
         {"map_qso", "cq_zone", "INTEGER NOT NULL DEFAULT 0"},
         {"map_qso", "itu_zone", "INTEGER NOT NULL DEFAULT 0"},
@@ -892,6 +1152,7 @@ bool openMapDatabase(const QString& path,
         {"map_qso", "iota", "TEXT"},
         {"map_qso", "wpx", "TEXT"},
         {"map_spot", "dxcc", "TEXT"},
+        {"map_spot", "dxcc_number", "INTEGER NOT NULL DEFAULT 0"},
         {"map_spot", "continent", "TEXT"},
         {"map_spot", "cq_zone", "INTEGER NOT NULL DEFAULT 0"},
         {"map_spot", "itu_zone", "INTEGER NOT NULL DEFAULT 0"},
@@ -900,6 +1161,11 @@ bool openMapDatabase(const QString& path,
         {"map_spot", "target_call", "TEXT"},
         {"map_spot", "distance_km", "REAL NOT NULL DEFAULT -1"},
         {"map_spot", "grid6", "TEXT"},
+        {"map_spot", "dt", "REAL NOT NULL DEFAULT 0"},
+        {"map_spot", "county", "TEXT"},
+        {"map_spot", "pota_ref", "TEXT"},
+        {"map_spot", "iota", "TEXT"},
+        {"map_spot", "wpx", "TEXT"},
         {"map_spot", "activity_type", "TEXT NOT NULL DEFAULT 'LIVE'"},
         {"map_spot", "receiver_call", "TEXT"},
         {"map_spot", "receiver_grid", "TEXT"},
@@ -908,6 +1174,8 @@ bool openMapDatabase(const QString& path,
         {"map_spot", "last_observed_ms", "INTEGER NOT NULL DEFAULT 0"},
         {"map_spot", "correlation_count", "INTEGER NOT NULL DEFAULT 0"},
         {"map_spot", "direction", "TEXT NOT NULL DEFAULT 'RX'"},
+        {"map_spot", "propagation_mode", "TEXT NOT NULL DEFAULT 'UNKNOWN'"},
+        {"map_spot_event", "propagation_mode", "TEXT NOT NULL DEFAULT 'UNKNOWN'"},
         {"map_spot_event", "direction", "TEXT NOT NULL DEFAULT 'RX'"}
     };
     for (ColumnMigration const& migration : migrations) {
@@ -923,10 +1191,12 @@ bool openMapDatabase(const QString& path,
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_period ON map_qso(qso_epoch DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_geo ON map_qso(continent, dxcc, cq_zone)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_source ON map_qso(source)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_propagation ON map_qso(propagation_mode, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_call_status ON map_qso(call, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid_status ON map_qso(grid4, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid6_status ON map_qso(grid6, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_dxcc_status ON map_qso(dxcc, confirmed)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_dxcc_number ON map_qso(dxcc_number, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_pota ON map_qso(pota_ref, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_iota ON map_qso(iota, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_wpx ON map_qso(wpx, confirmed)"),
@@ -938,7 +1208,9 @@ bool openMapDatabase(const QString& path,
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_activity_time ON map_spot(activity_type, observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_receiver_time ON map_spot(receiver_call, observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_correlation ON map_spot(correlation_count, observed_ms DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_propagation ON map_spot(propagation_mode, observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_time ON map_spot_event(observed_ms DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_propagation ON map_spot_event(propagation_mode, observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_grid ON map_spot_event(grid, observed_ms DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_event_band_window ON map_spot_event(band, observed_ms DESC, source, direction)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_roster_ignore_type ON map_roster_ignore(ignore_type, ignore_value)"),
@@ -963,6 +1235,21 @@ bool openMapDatabase(const QString& path,
                     QStringLiteral(
                         "UPDATE map_spot SET first_observed_ms=observed_ms, last_observed_ms=observed_ms"
                         " WHERE first_observed_ms=0 OR last_observed_ms=0"),
+                    error)
+        || !execSql(db,
+                    QStringLiteral(
+                        "UPDATE map_qso SET propagation_mode='UNKNOWN'"
+                        " WHERE propagation_mode IS NULL OR trim(propagation_mode)=''"),
+                    error)
+        || !execSql(db,
+                    QStringLiteral(
+                        "UPDATE map_spot SET propagation_mode='UNKNOWN'"
+                        " WHERE propagation_mode IS NULL OR trim(propagation_mode)=''"),
+                    error)
+        || !execSql(db,
+                    QStringLiteral(
+                        "UPDATE map_spot_event SET propagation_mode='UNKNOWN'"
+                        " WHERE propagation_mode IS NULL OR trim(propagation_mode)=''"),
                     error)) {
         return false;
     }
@@ -1240,6 +1527,30 @@ QString normalizedFilter(const QString& value)
     return value.trimmed().isEmpty() ? QStringLiteral("All") : value.trimmed();
 }
 
+QStringList defaultRosterWantedTypes()
+{
+    return {QStringLiteral("CALL"), QStringLiteral("GRID"),
+            QStringLiteral("DXCC"), QStringLiteral("WPX"),
+            QStringLiteral("POTA"), QStringLiteral("CQ"),
+            QStringLiteral("ITU"), QStringLiteral("STATE"),
+            QStringLiteral("COUNTY"), QStringLiteral("CONTINENT")};
+}
+
+QString potaFromMessage(const QString& message)
+{
+    static const QRegularExpression expression(
+        QStringLiteral("\\b([A-Z0-9]{1,4}-[0-9]{1,6})\\b"),
+        QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatchIterator iterator = expression.globalMatch(message);
+    while (iterator.hasNext()) {
+        QString const candidate = normalizedPota(iterator.next().captured(1));
+        if (!candidate.isEmpty()) {
+            return candidate;
+        }
+    }
+    return {};
+}
+
 QString rosterOrderColumn(const QString& sort)
 {
     QString const value = sort.trimmed().toLower();
@@ -1320,6 +1631,11 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     m_continentFilter = settings.value(QStringLiteral("Continent"), QStringLiteral("All")).toString();
     m_dxccFilter = settings.value(QStringLiteral("Dxcc"), QStringLiteral("All")).toString();
     m_sourceFilter = settings.value(QStringLiteral("Source"), QStringLiteral("All")).toString();
+    m_propagationFilter = settings.value(QStringLiteral("PropagationFilter"), QStringLiteral("MIXED"))
+                              .toString().trimmed().toUpper();
+    if (!availablePropagationModes().contains(m_propagationFilter, Qt::CaseInsensitive)) {
+        m_propagationFilter = QStringLiteral("MIXED");
+    }
     m_cqOnly = settings.value(QStringLiteral("CqOnly"), false).toBool();
     m_rosterSort = settings.value(QStringLiteral("RosterSort"), QStringLiteral("Time")).toString();
     m_rosterSortDescending =
@@ -1328,6 +1644,45 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
         settings.value(QStringLiteral("RosterStatus"), QStringLiteral("All")).toString();
     m_rosterHuntScope =
         settings.value(QStringLiteral("RosterHuntScope"), QStringLiteral("All time")).toString();
+    m_rosterScope = settings.value(QStringLiteral("RosterScope"), m_rosterScope).toString();
+    if (!QStringList {QStringLiteral("Current band"), QStringLiteral("Current mode"),
+                      QStringLiteral("Digital modes"), QStringLiteral("All bands"),
+                      QStringLiteral("Award selected")}
+            .contains(m_rosterScope, Qt::CaseInsensitive)) {
+        m_rosterScope = QStringLiteral("All bands");
+    }
+    m_rosterDxccScope =
+        settings.value(QStringLiteral("RosterDxccScope"), m_rosterDxccScope).toString();
+    if (!QStringList {QStringLiteral("All"), QStringLiteral("Same DXCC"),
+                      QStringLiteral("Other DXCC")}
+            .contains(m_rosterDxccScope, Qt::CaseInsensitive)) {
+        m_rosterDxccScope = QStringLiteral("All");
+    }
+    m_rosterUsesLoTW = settings.value(QStringLiteral("RosterUsesLoTW"), false).toBool();
+    m_rosterMaxLoTWDays = qBound(1,
+        settings.value(QStringLiteral("RosterMaxLoTWDays"), 810).toInt(), 3650);
+    m_rosterUsesEQSL = settings.value(QStringLiteral("RosterUsesEQSL"), false).toBool();
+    m_rosterUsesOQRS = settings.value(QStringLiteral("RosterUsesOQRS"), false).toBool();
+    m_rosterSpottedMeOnly =
+        settings.value(QStringLiteral("RosterSpottedMeOnly"), false).toBool();
+    m_rosterMinSnrEnabled =
+        settings.value(QStringLiteral("RosterMinSnrEnabled"), false).toBool();
+    m_rosterMinSnr = qBound(-60, settings.value(QStringLiteral("RosterMinSnr"), -25).toInt(), 30);
+    m_rosterMaxDtEnabled =
+        settings.value(QStringLiteral("RosterMaxDtEnabled"), false).toBool();
+    m_rosterMaxDt = qBound(0.01,
+                           settings.value(QStringLiteral("RosterMaxDt"), 0.5).toDouble(), 10.0);
+    m_rosterTreatRr73AsCq =
+        settings.value(QStringLiteral("RosterTreatRr73AsCq"), false).toBool();
+    QStringList const savedWantedTypes =
+        settings.value(QStringLiteral("RosterWantedTypes"), m_rosterWantedTypes).toStringList();
+    m_rosterWantedTypes.clear();
+    for (QString const& type : savedWantedTypes) {
+        int const index = defaultRosterWantedTypes().indexOf(type.trimmed().toUpper());
+        if (index >= 0 && !m_rosterWantedTypes.contains(defaultRosterWantedTypes().at(index))) {
+            m_rosterWantedTypes.append(defaultRosterWantedTypes().at(index));
+        }
+    }
     m_rosterRetentionMinutes =
         qBound(1, settings.value(QStringLiteral("RosterRetentionMinutes"), 5).toInt(), 60);
     m_rosterCqOnly = settings.value(QStringLiteral("RosterCqOnly"), false).toBool();
@@ -1353,10 +1708,27 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     if (!availableAwardGoals().contains(m_awardGoal, Qt::CaseInsensitive)) {
         m_awardGoal = QStringLiteral("Confirmed");
     }
+    m_awardEndorsement = settings.value(QStringLiteral("AwardEndorsement")).toString();
+    m_awardConfirmation = settings.value(QStringLiteral("AwardConfirmation"),
+                                         QStringLiteral("Any")).toString();
+    if (!availableAwardConfirmations().contains(m_awardConfirmation, Qt::CaseInsensitive)) {
+        m_awardConfirmation = QStringLiteral("Any");
+    }
+    m_awardCallsign = settings.value(QStringLiteral("AwardCallsign")).toString().trimmed().toUpper();
+    m_awardFromDate = settings.value(QStringLiteral("AwardFromDate")).toString().trimmed();
+    m_awardToDate = settings.value(QStringLiteral("AwardToDate")).toString().trimmed();
     m_gridPrecision =
         settings.value(QStringLiteral("GridPrecision"), 4).toInt() == 6 ? 6 : 4;
     m_liveDecayMinutes =
         qBound(1, settings.value(QStringLiteral("LiveDecayMinutes"), 15).toInt(), 120);
+    m_sourceDecayMinutes.insert(
+        QStringLiteral("decoder"), m_liveDecayMinutes);
+    m_sourceDecayMinutes.insert(
+        QStringLiteral("psk"), qBound(1,
+            settings.value(QStringLiteral("Decay/psk"), 60).toInt(), 240));
+    m_sourceDecayMinutes.insert(
+        QStringLiteral("oams"), qBound(1,
+            settings.value(QStringLiteral("Decay/oams"), 30).toInt(), 240));
     m_splitGridEnabled =
         settings.value(QStringLiteral("SplitGridEnabled"), true).toBool();
     m_coveragePushPinsEnabled =
@@ -1458,6 +1830,26 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
                                       ? false
                                       : settings.value(QStringLiteral("Offline"), false).toBool());
 
+    // Layer appearance is part of the map preference, not a transient QML
+    // choice.  Keep it beside the legacy enabled flags so old profiles remain
+    // fully compatible while every layer gains independent style controls.
+    for (int row = 0; row < m_layerModel->rowCount(); ++row) {
+        QModelIndex const index = m_layerModel->index(row, 0);
+        QString const id = m_layerModel->data(
+            index, MapLayerModel::LayerIdRole).toString();
+        QVariantMap const defaults = m_layerModel->layerStyle(id);
+        m_layerModel->setLayerStyle(
+            id,
+            settings.value(QStringLiteral("Style/%1/Color").arg(id),
+                           defaults.value(QStringLiteral("color"))).toString(),
+            settings.value(QStringLiteral("Style/%1/Opacity").arg(id),
+                           defaults.value(QStringLiteral("opacity"))).toDouble(),
+            settings.value(QStringLiteral("Style/%1/Thickness").arg(id),
+                           defaults.value(QStringLiteral("thickness"))).toDouble(),
+            settings.value(QStringLiteral("Style/%1/LabelDensity").arg(id),
+                           defaults.value(QStringLiteral("labelDensity"))).toInt());
+    }
+
     if (migrateLiveDefault || !hasLivePreference) {
         settings.setValue(QStringLiteral("Live"), true);
     }
@@ -1510,6 +1902,19 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
                 m_layerModel->setLayerEnabled(layer, enabled);
             }
         }
+    });
+
+    connect(m_layerModel, &MapLayerModel::layerStyleChanged, this,
+            [this](const QString& id) {
+        QVariantMap const style = m_layerModel->layerStyle(id);
+        saveSetting(QStringLiteral("Style/%1/Color").arg(id),
+                    style.value(QStringLiteral("color")));
+        saveSetting(QStringLiteral("Style/%1/Opacity").arg(id),
+                    style.value(QStringLiteral("opacity")));
+        saveSetting(QStringLiteral("Style/%1/Thickness").arg(id),
+                    style.value(QStringLiteral("thickness")));
+        saveSetting(QStringLiteral("Style/%1/LabelDensity").arg(id),
+                    style.value(QStringLiteral("labelDensity")));
     });
 
     m_baseMapService = new MapBaseMapService(this);
@@ -1624,6 +2029,27 @@ QStringList MapIntelligenceService::availablePeriods() const
     };
 }
 
+QStringList MapIntelligenceService::availablePropagationModes() const
+{
+    QStringList result;
+    for (PropagationDefinition const& definition : propagationDefinitions()) {
+        result.append(QString::fromLatin1(definition.code));
+    }
+    return result;
+}
+
+QVariantList MapIntelligenceService::availablePropagationTypes() const
+{
+    QVariantList result;
+    for (PropagationDefinition const& definition : propagationDefinitions()) {
+        result.append(QVariantMap {
+            {QStringLiteral("code"), QString::fromLatin1(definition.code)},
+            {QStringLiteral("label"), QString::fromLatin1(definition.label)}
+        });
+    }
+    return result;
+}
+
 QStringList MapIntelligenceService::availableRosterStatuses() const
 {
     return {
@@ -1664,6 +2090,30 @@ QStringList MapIntelligenceService::availableAwardGoals() const
     };
 }
 
+QStringList MapIntelligenceService::availableAwardConfirmations() const
+{
+    return {QStringLiteral("Any"), QStringLiteral("QSL"), QStringLiteral("LoTW"),
+            QStringLiteral("eQSL"), QStringLiteral("OQRS")};
+}
+
+QStringList MapIntelligenceService::availableAwardEndorsements() const
+{
+    QStringList result {QStringLiteral("Mixed")};
+    ExternalAwardDefinition const* definition =
+        externalAwardForLabel(m_activeAwardProgram);
+    if (definition) {
+        for (QString const& endorsement : definition->endorsements) {
+            QString const display = endorsement.compare(QStringLiteral("Mixed"),
+                                                        Qt::CaseInsensitive) == 0
+                ? QStringLiteral("Mixed") : endorsement.toLower();
+            if (!display.isEmpty() && !result.contains(display, Qt::CaseInsensitive)) {
+                result.append(display);
+            }
+        }
+    }
+    return result;
+}
+
 QStringList MapIntelligenceService::availablePskDisplayModes() const
 {
     return {QStringLiteral("Overlay"), QStringLiteral("Replace")};
@@ -1687,7 +2137,7 @@ QStringList MapIntelligenceService::availableCorrelationFilters() const
 QStringList MapIntelligenceService::availableRosterColumns() const
 {
     return {QStringLiteral("Grid"), QStringLiteral("Band"),
-            QStringLiteral("Mode"), QStringLiteral("SNR"),
+            QStringLiteral("Mode"), QStringLiteral("SNR"), QStringLiteral("DT"),
             QStringLiteral("DXCC"), QStringLiteral("Continent"),
             QStringLiteral("CQ zone"), QStringLiteral("ITU zone"),
             QStringLiteral("State"), QStringLiteral("County"),
@@ -1695,6 +2145,31 @@ QStringList MapIntelligenceService::availableRosterColumns() const
             QStringLiteral("WPX"), QStringLiteral("LoTW age"),
             QStringLiteral("eQSL age"), QStringLiteral("OQRS"),
             QStringLiteral("Age"), QStringLiteral("Source")};
+}
+
+QStringList MapIntelligenceService::availableRosterScopes() const
+{
+    return {QStringLiteral("Current band"), QStringLiteral("Current mode"),
+            QStringLiteral("Digital modes"), QStringLiteral("All bands"),
+            QStringLiteral("Award selected")};
+}
+
+QStringList MapIntelligenceService::availableRosterDxccScopes() const
+{
+    return {QStringLiteral("All"), QStringLiteral("Same DXCC"),
+            QStringLiteral("Other DXCC")};
+}
+
+QStringList MapIntelligenceService::availableRosterRuleTypes() const
+{
+    return defaultRosterWantedTypes() + QStringList {
+        QStringLiteral("IOTA"), QStringLiteral("OQRS"),
+        QStringLiteral("BAND"), QStringLiteral("MODE")};
+}
+
+QStringList MapIntelligenceService::availableRosterWantedTypes() const
+{
+    return defaultRosterWantedTypes();
 }
 
 QStringList MapIntelligenceService::availableCallLookupProviders() const
@@ -1739,7 +2214,9 @@ bool MapIntelligenceService::liveEntryMatchesCurrentFilters(
         || !matches(m_modeFilter, spot.mode)
         || !matches(m_continentFilter, spot.continent)
         || !matches(m_dxccFilter, spot.dxcc)
-        || !matches(m_sourceFilter, spot.source)) {
+        || !matches(m_sourceFilter, spot.source)
+        || (m_propagationFilter.compare(QStringLiteral("MIXED"), Qt::CaseInsensitive) != 0
+            && m_propagationFilter.compare(spot.propagationMode, Qt::CaseInsensitive) != 0)) {
         return false;
     }
 
@@ -1815,6 +2292,27 @@ void MapIntelligenceService::setSourceFilter(const QString& value)
     scheduleQuery();
 }
 
+void MapIntelligenceService::setPropagationFilter(const QString& value)
+{
+    QString normalized = value.trimmed().toUpper();
+    if (normalized.isEmpty()) {
+        normalized = QStringLiteral("MIXED");
+    }
+    int const index = availablePropagationModes().indexOf(normalized, 0, Qt::CaseInsensitive);
+    if (index < 0) {
+        normalized = QStringLiteral("MIXED");
+    } else {
+        normalized = availablePropagationModes().at(index);
+    }
+    if (m_propagationFilter == normalized) {
+        return;
+    }
+    m_propagationFilter = normalized;
+    saveSetting(QStringLiteral("PropagationFilter"), normalized);
+    emit propagationFilterChanged();
+    scheduleQuery();
+}
+
 void MapIntelligenceService::setCqOnly(bool enabled)
 {
     if (m_cqOnly == enabled) return;
@@ -1869,6 +2367,32 @@ void MapIntelligenceService::setRosterHuntScope(const QString& value)
     scheduleQuery();
 }
 
+void MapIntelligenceService::setRosterScope(const QString& value)
+{
+    int const index = availableRosterScopes().indexOf(value.trimmed(), 0,
+                                                      Qt::CaseInsensitive);
+    QString const normalized = index >= 0 ? availableRosterScopes().at(index)
+                                          : QStringLiteral("All bands");
+    if (m_rosterScope == normalized) return;
+    m_rosterScope = normalized;
+    saveSetting(QStringLiteral("RosterScope"), normalized);
+    emit rosterScopeChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterDxccScope(const QString& value)
+{
+    int const index = availableRosterDxccScopes().indexOf(value.trimmed(), 0,
+                                                           Qt::CaseInsensitive);
+    QString const normalized = index >= 0 ? availableRosterDxccScopes().at(index)
+                                          : QStringLiteral("All");
+    if (m_rosterDxccScope == normalized) return;
+    m_rosterDxccScope = normalized;
+    saveSetting(QStringLiteral("RosterDxccScope"), normalized);
+    emit rosterDxccScopeChanged();
+    scheduleQuery();
+}
+
 void MapIntelligenceService::setRosterRetentionMinutes(int minutes)
 {
     int const bounded = qBound(1, minutes, 60);
@@ -1917,6 +2441,116 @@ void MapIntelligenceService::setRosterTextMode(const QString& value)
     scheduleQuery();
 }
 
+void MapIntelligenceService::setRosterUsesLoTW(bool enabled)
+{
+    if (m_rosterUsesLoTW == enabled) return;
+    m_rosterUsesLoTW = enabled;
+    saveSetting(QStringLiteral("RosterUsesLoTW"), enabled);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterMaxLoTWDays(int days)
+{
+    int const bounded = qBound(1, days, 3650);
+    if (m_rosterMaxLoTWDays == bounded) return;
+    m_rosterMaxLoTWDays = bounded;
+    saveSetting(QStringLiteral("RosterMaxLoTWDays"), bounded);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterUsesEQSL(bool enabled)
+{
+    if (m_rosterUsesEQSL == enabled) return;
+    m_rosterUsesEQSL = enabled;
+    saveSetting(QStringLiteral("RosterUsesEQSL"), enabled);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterUsesOQRS(bool enabled)
+{
+    if (m_rosterUsesOQRS == enabled) return;
+    m_rosterUsesOQRS = enabled;
+    saveSetting(QStringLiteral("RosterUsesOQRS"), enabled);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterSpottedMeOnly(bool enabled)
+{
+    if (m_rosterSpottedMeOnly == enabled) return;
+    m_rosterSpottedMeOnly = enabled;
+    saveSetting(QStringLiteral("RosterSpottedMeOnly"), enabled);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterMinSnrEnabled(bool enabled)
+{
+    if (m_rosterMinSnrEnabled == enabled) return;
+    m_rosterMinSnrEnabled = enabled;
+    saveSetting(QStringLiteral("RosterMinSnrEnabled"), enabled);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterMinSnr(int snr)
+{
+    int const bounded = qBound(-60, snr, 30);
+    if (m_rosterMinSnr == bounded) return;
+    m_rosterMinSnr = bounded;
+    saveSetting(QStringLiteral("RosterMinSnr"), bounded);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterMaxDtEnabled(bool enabled)
+{
+    if (m_rosterMaxDtEnabled == enabled) return;
+    m_rosterMaxDtEnabled = enabled;
+    saveSetting(QStringLiteral("RosterMaxDtEnabled"), enabled);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterMaxDt(double dt)
+{
+    double const bounded = qBound(0.01, dt, 10.0);
+    if (qFuzzyCompare(m_rosterMaxDt, bounded)) return;
+    m_rosterMaxDt = bounded;
+    saveSetting(QStringLiteral("RosterMaxDt"), bounded);
+    emit rosterFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterTreatRr73AsCq(bool enabled)
+{
+    if (m_rosterTreatRr73AsCq == enabled) return;
+    m_rosterTreatRr73AsCq = enabled;
+    saveSetting(QStringLiteral("RosterTreatRr73AsCq"), enabled);
+    emit rosterTreatRr73AsCqChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setRosterWantedTypes(const QStringList& types)
+{
+    QStringList normalized;
+    QStringList const known = availableRosterWantedTypes();
+    for (QString const& type : types) {
+        int const index = known.indexOf(type.trimmed(), 0, Qt::CaseInsensitive);
+        if (index >= 0 && !normalized.contains(known.at(index))) {
+            normalized.append(known.at(index));
+        }
+    }
+    if (m_rosterWantedTypes == normalized) return;
+    m_rosterWantedTypes = normalized;
+    saveSetting(QStringLiteral("RosterWantedTypes"), normalized);
+    emit rosterWantedTypesChanged();
+    scheduleQuery();
+}
+
 void MapIntelligenceService::setActiveAwardProgram(const QString& value)
 {
     QString const normalized = availableAwardPrograms().contains(value, Qt::CaseInsensitive)
@@ -1928,7 +2562,12 @@ void MapIntelligenceService::setActiveAwardProgram(const QString& value)
     }
     m_activeAwardProgram = normalized;
     saveSetting(QStringLiteral("ActiveAwardProgram"), normalized);
+    if (!availableAwardEndorsements().contains(m_awardEndorsement, Qt::CaseInsensitive)) {
+        m_awardEndorsement.clear();
+        saveSetting(QStringLiteral("AwardEndorsement"), m_awardEndorsement);
+    }
     emit activeAwardProgramChanged();
+    emit awardFiltersChanged();
     scheduleQuery();
 }
 
@@ -1944,6 +2583,66 @@ void MapIntelligenceService::setAwardGoal(const QString& value)
     m_awardGoal = normalized;
     saveSetting(QStringLiteral("AwardGoal"), normalized);
     emit awardGoalChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setAwardEndorsement(const QString& value)
+{
+    QString const normalized = availableAwardEndorsements().contains(
+        value.trimmed(), Qt::CaseInsensitive)
+        ? availableAwardEndorsements().at(
+              availableAwardEndorsements().indexOf(value.trimmed(), 0, Qt::CaseInsensitive))
+        : QStringLiteral("Mixed");
+    if (m_awardEndorsement.compare(normalized, Qt::CaseInsensitive) == 0) return;
+    m_awardEndorsement = normalized == QStringLiteral("Mixed") ? QString() : normalized;
+    saveSetting(QStringLiteral("AwardEndorsement"), m_awardEndorsement);
+    emit awardFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setAwardConfirmation(const QString& value)
+{
+    QString const normalized = availableAwardConfirmations().contains(
+        value.trimmed(), Qt::CaseInsensitive)
+        ? availableAwardConfirmations().at(
+              availableAwardConfirmations().indexOf(value.trimmed(), 0, Qt::CaseInsensitive))
+        : QStringLiteral("Any");
+    if (m_awardConfirmation.compare(normalized, Qt::CaseInsensitive) == 0) return;
+    m_awardConfirmation = normalized;
+    saveSetting(QStringLiteral("AwardConfirmation"), normalized);
+    emit awardFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setAwardCallsign(const QString& value)
+{
+    QString const normalized = value.trimmed().toUpper().left(32);
+    if (m_awardCallsign == normalized) return;
+    m_awardCallsign = normalized;
+    saveSetting(QStringLiteral("AwardCallsign"), normalized);
+    emit awardFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setAwardFromDate(const QString& value)
+{
+    QString const normalized = value.trimmed().left(10);
+    if (!normalized.isEmpty() && !QDate::fromString(normalized, Qt::ISODate).isValid()) return;
+    if (m_awardFromDate == normalized) return;
+    m_awardFromDate = normalized;
+    saveSetting(QStringLiteral("AwardFromDate"), normalized);
+    emit awardFiltersChanged();
+    scheduleQuery();
+}
+
+void MapIntelligenceService::setAwardToDate(const QString& value)
+{
+    QString const normalized = value.trimmed().left(10);
+    if (!normalized.isEmpty() && !QDate::fromString(normalized, Qt::ISODate).isValid()) return;
+    if (m_awardToDate == normalized) return;
+    m_awardToDate = normalized;
+    saveSetting(QStringLiteral("AwardToDate"), normalized);
+    emit awardFiltersChanged();
     scheduleQuery();
 }
 
@@ -1966,8 +2665,10 @@ void MapIntelligenceService::setLiveDecayMinutes(int minutes)
         return;
     }
     m_liveDecayMinutes = bounded;
+    m_sourceDecayMinutes.insert(QStringLiteral("decoder"), bounded);
     saveSetting(QStringLiteral("LiveDecayMinutes"), bounded);
     emit liveDecayMinutesChanged();
+    emit mapTemporalSettingsChanged();
     scheduleQuery();
 }
 
@@ -2069,6 +2770,55 @@ void MapIntelligenceService::setBandActivityWindowHours(int hours)
     scheduleQuery();
 }
 
+QVariantList MapIntelligenceService::temporalLegend() const
+{
+    auto sourceRow = [this](const QString& source, const QString& label,
+                            const QString& color) {
+        int const minutes = m_sourceDecayMinutes.value(source, 15).toInt();
+        return QVariantMap {
+            {QStringLiteral("source"), source},
+            {QStringLiteral("label"), label},
+            {QStringLiteral("color"), color},
+            {QStringLiteral("decayMinutes"), minutes},
+            {QStringLiteral("freshLabel"), QStringLiteral("0-%1 min").arg(qMax(1, minutes / 3))},
+            {QStringLiteral("fadingLabel"), QStringLiteral("%1-%2 min")
+                                                  .arg(qMax(1, minutes / 3))
+                                                  .arg(qMax(2, (minutes * 2) / 3))},
+            {QStringLiteral("staleLabel"), QStringLiteral(">%1 min").arg(qMax(2, (minutes * 2) / 3))}
+        };
+    };
+    return {
+        sourceRow(QStringLiteral("decoder"), QStringLiteral("Decoder / local"),
+                  QStringLiteral("#00d8ff")),
+        sourceRow(QStringLiteral("psk"), QStringLiteral("PSK Reporter"),
+                  QStringLiteral("#ba7cff")),
+        sourceRow(QStringLiteral("oams"), QStringLiteral("OAMS / external"),
+                  QStringLiteral("#ff9f43"))
+    };
+}
+
+void MapIntelligenceService::setSourceDecayMinutes(const QVariantMap& values)
+{
+    QVariantMap next = m_sourceDecayMinutes;
+    next.insert(QStringLiteral("decoder"), qBound(1,
+        values.value(QStringLiteral("decoder"), m_liveDecayMinutes).toInt(), 120));
+    next.insert(QStringLiteral("psk"), qBound(1,
+        values.value(QStringLiteral("psk"), 60).toInt(), 240));
+    next.insert(QStringLiteral("oams"), qBound(1,
+        values.value(QStringLiteral("oams"), 30).toInt(), 240));
+    if (next == m_sourceDecayMinutes) {
+        return;
+    }
+    m_sourceDecayMinutes = next;
+    m_liveDecayMinutes = next.value(QStringLiteral("decoder")).toInt();
+    saveSetting(QStringLiteral("LiveDecayMinutes"), m_liveDecayMinutes);
+    saveSetting(QStringLiteral("Decay/psk"), next.value(QStringLiteral("psk")));
+    saveSetting(QStringLiteral("Decay/oams"), next.value(QStringLiteral("oams")));
+    emit liveDecayMinutesChanged();
+    emit mapTemporalSettingsChanged();
+    scheduleQuery();
+}
+
 void MapIntelligenceService::setRosterVisibleColumns(const QStringList& columns)
 {
     QStringList normalized;
@@ -2167,6 +2917,337 @@ void MapIntelligenceService::setPskLayerEnabled(bool enabled)
     m_layerModel->setLayerEnabled(QStringLiteral("psk"), enabled);
 }
 
+QString MapIntelligenceService::reserveMapConfigurationPath() const
+{
+    QString root = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    if (root.isEmpty()) {
+        root = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    }
+    QDir directory(root);
+    directory.mkpath(QStringLiteral("Decodium"));
+    return directory.absoluteFilePath(QStringLiteral("Decodium-Map-Config-%1.json")
+        .arg(QDateTime::currentDateTimeUtc().toString(QStringLiteral("yyyyMMdd-HHmmss"))));
+}
+
+bool MapIntelligenceService::exportMapConfiguration(const QString& path,
+                                                     const QVariantMap& viewport)
+{
+    QString localPath = path.trimmed();
+    QUrl const url(localPath);
+    if (url.isLocalFile()) {
+        localPath = url.toLocalFile();
+    }
+    if (localPath.isEmpty()) {
+        return false;
+    }
+
+    QJsonObject root {
+        {QStringLiteral("type"), QStringLiteral("decodium-map-configuration")},
+        {QStringLiteral("version"), 1},
+        {QStringLiteral("exportedAt"), QDateTime::currentDateTimeUtc().toString(Qt::ISODate)},
+        {QStringLiteral("viewport"), QJsonObject::fromVariantMap(viewport)},
+        {QStringLiteral("layers"), QJsonArray()},
+        {QStringLiteral("settings"), QJsonObject()},
+        {QStringLiteral("mapOperations"), QJsonObject()},
+        {QStringLiteral("presetNames"), QJsonArray()},
+        {QStringLiteral("presets"), QJsonObject()},
+        {QStringLiteral("roster"), QJsonObject()}
+    };
+
+    QJsonArray layers;
+    for (int row = 0; row < m_layerModel->rowCount(); ++row) {
+        QModelIndex const index = m_layerModel->index(row, 0);
+        QString const id = m_layerModel->data(index, MapLayerModel::LayerIdRole).toString();
+        QJsonObject layer = QJsonObject::fromVariantMap(m_layerModel->layerStyle(id));
+        layer.insert(QStringLiteral("id"), id);
+        layer.insert(QStringLiteral("enabled"),
+                     m_layerModel->data(index, MapLayerModel::LayerEnabledRole).toBool());
+        layers.append(layer);
+    }
+    root.insert(QStringLiteral("layers"), layers);
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    auto exportGroup = [&settings](const QString& group) {
+        QJsonObject result;
+        settings.beginGroup(group);
+        for (QString const& key : settings.allKeys()) {
+            result.insert(key, QJsonValue::fromVariant(settings.value(key)));
+        }
+        settings.endGroup();
+        return result;
+    };
+    root.insert(QStringLiteral("settings"), exportGroup(QStringLiteral("LiveMapLayers")));
+    QJsonObject const mapOperations = exportGroup(QStringLiteral("MapOperations"));
+    root.insert(QStringLiteral("mapOperations"), mapOperations);
+
+    QJsonArray presetNames;
+    if (m_operationsService) {
+        for (const QString& name : m_operationsService->mapPresets()) {
+            presetNames.append(name);
+        }
+    }
+    root.insert(QStringLiteral("presetNames"), presetNames);
+
+    QJsonObject presets;
+    settings.beginGroup(QStringLiteral("MapPresets"));
+    for (QString const& name : settings.childGroups()) {
+        settings.beginGroup(name);
+        QJsonObject preset;
+        for (QString const& key : settings.allKeys()) {
+            preset.insert(key, QJsonValue::fromVariant(settings.value(key)));
+        }
+        settings.endGroup();
+        presets.insert(name, preset);
+    }
+    settings.endGroup();
+    root.insert(QStringLiteral("presets"), presets);
+
+    QJsonObject roster;
+    ScopedSqliteConnection connection(m_databasePath);
+    if (connection.database().open()) {
+        QSqlDatabase& db = connection.database();
+        auto queryRows = [&db](const QString& sql, int columns) {
+            QJsonArray result;
+            QSqlQuery query(db);
+            if (!query.exec(sql)) {
+                return result;
+            }
+            while (query.next()) {
+                QJsonObject row;
+                for (int column = 0; column < columns; ++column) {
+                    row.insert(QString::number(column),
+                               QJsonValue::fromVariant(query.value(column)));
+                }
+                result.append(row);
+            }
+            return result;
+        };
+        roster.insert(QStringLiteral("preferences"), queryRows(
+            QStringLiteral("SELECT call,watched,ignored,updated_ms FROM map_roster_preference"), 4));
+        roster.insert(QStringLiteral("ignores"), queryRows(
+            QStringLiteral("SELECT ignore_type,ignore_value,updated_ms FROM map_roster_ignore"), 3));
+        roster.insert(QStringLiteral("rules"), queryRows(
+            QStringLiteral("SELECT rule_type,rule_value,rule_action,band,mode,enabled,updated_ms FROM map_roster_rule"), 7));
+    }
+    root.insert(QStringLiteral("roster"), roster);
+
+    QFileInfo const info(localPath);
+    if (!QDir().mkpath(info.absolutePath())) {
+        return false;
+    }
+    QSaveFile file(localPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        return false;
+    }
+    file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+    return file.commit();
+}
+
+QVariantMap MapIntelligenceService::importMapConfiguration(const QString& path)
+{
+    QString localPath = path.trimmed();
+    QUrl const url(localPath);
+    if (url.isLocalFile()) {
+        localPath = url.toLocalFile();
+    }
+    QFile file(localPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    QJsonParseError parseError;
+    QJsonDocument const document = QJsonDocument::fromJson(file.readAll(), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+        return {};
+    }
+    QJsonObject const root = document.object();
+    if (root.value(QStringLiteral("type")).toString()
+            != QStringLiteral("decodium-map-configuration")
+        || root.value(QStringLiteral("version")).toInt() != 1) {
+        return {};
+    }
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    settings.beginGroup(QStringLiteral("LiveMapLayers"));
+    settings.remove(QString());
+    QJsonObject const settingObject = root.value(QStringLiteral("settings")).toObject();
+    for (auto it = settingObject.constBegin(); it != settingObject.constEnd(); ++it) {
+        settings.setValue(it.key(), it.value().toVariant());
+    }
+    settings.endGroup();
+
+    settings.beginGroup(QStringLiteral("MapOperations"));
+    QJsonObject const operationObject = root.value(QStringLiteral("mapOperations")).toObject();
+    for (auto it = operationObject.constBegin(); it != operationObject.constEnd(); ++it) {
+        settings.setValue(it.key(), it.value().toVariant());
+    }
+    settings.endGroup();
+    settings.beginGroup(QStringLiteral("MapPresets"));
+    settings.remove(QString());
+    QJsonObject const presets = root.value(QStringLiteral("presets")).toObject();
+    for (auto presetIt = presets.constBegin(); presetIt != presets.constEnd(); ++presetIt) {
+        settings.beginGroup(presetIt.key());
+        QJsonObject const preset = presetIt.value().toObject();
+        for (auto valueIt = preset.constBegin(); valueIt != preset.constEnd(); ++valueIt) {
+            settings.setValue(valueIt.key(), valueIt.value().toVariant());
+        }
+        settings.endGroup();
+    }
+    settings.endGroup();
+    settings.sync();
+
+    for (QJsonValue const& value : root.value(QStringLiteral("layers")).toArray()) {
+        QJsonObject const layer = value.toObject();
+        QString const id = layer.value(QStringLiteral("id")).toString();
+        if (id.isEmpty()) {
+            continue;
+        }
+        m_layerModel->setLayerStyle(
+            id, layer.value(QStringLiteral("color")).toString(),
+            layer.value(QStringLiteral("opacity")).toDouble(1.0),
+            layer.value(QStringLiteral("thickness")).toDouble(1.0),
+            layer.value(QStringLiteral("labelDensity")).toInt(100));
+        m_layerModel->setLayerEnabled(
+            id, layer.contains(QStringLiteral("enabled"))
+                    ? layer.value(QStringLiteral("enabled")).toBool() : true);
+    }
+
+    QJsonObject const roster = root.value(QStringLiteral("roster")).toObject();
+    ScopedSqliteConnection connection(m_databasePath);
+    if (connection.database().open()) {
+        QSqlDatabase& db = connection.database();
+        if (db.transaction()) {
+            QSqlQuery clear(db);
+            clear.exec(QStringLiteral("DELETE FROM map_roster_preference"));
+            clear.exec(QStringLiteral("DELETE FROM map_roster_ignore"));
+            clear.exec(QStringLiteral("DELETE FROM map_roster_rule"));
+            QSqlQuery insertPreference(db);
+            insertPreference.prepare(QStringLiteral(
+                "INSERT INTO map_roster_preference(call,watched,ignored,updated_ms) VALUES(?,?,?,?)"));
+            for (QJsonValue const& value : roster.value(QStringLiteral("preferences")).toArray()) {
+                QJsonObject const row = value.toObject();
+                for (int column = 0; column < 4; ++column) {
+                    insertPreference.bindValue(column, row.value(QString::number(column)).toVariant());
+                }
+                insertPreference.exec();
+                insertPreference.finish();
+            }
+            QSqlQuery insertIgnore(db);
+            insertIgnore.prepare(QStringLiteral(
+                "INSERT INTO map_roster_ignore(ignore_type,ignore_value,updated_ms) VALUES(?,?,?)"));
+            for (QJsonValue const& value : roster.value(QStringLiteral("ignores")).toArray()) {
+                QJsonObject const row = value.toObject();
+                for (int column = 0; column < 3; ++column) {
+                    insertIgnore.bindValue(column, row.value(QString::number(column)).toVariant());
+                }
+                insertIgnore.exec();
+                insertIgnore.finish();
+            }
+            QSqlQuery insertRule(db);
+            insertRule.prepare(QStringLiteral(
+                "INSERT INTO map_roster_rule(rule_type,rule_value,rule_action,band,mode,enabled,updated_ms) VALUES(?,?,?,?,?,?,?)"));
+            for (QJsonValue const& value : roster.value(QStringLiteral("rules")).toArray()) {
+                QJsonObject const row = value.toObject();
+                for (int column = 0; column < 7; ++column) {
+                    insertRule.bindValue(column, row.value(QString::number(column)).toVariant());
+                }
+                insertRule.exec();
+                insertRule.finish();
+            }
+            db.commit();
+        }
+    }
+
+    auto value = [&settingObject](const QString& key, const QVariant& fallback = {}) {
+        return settingObject.contains(key) ? settingObject.value(key).toVariant() : fallback;
+    };
+    setBandFilter(value(QStringLiteral("Band"), m_bandFilter).toString());
+    setModeFilter(value(QStringLiteral("Mode"), m_modeFilter).toString());
+    setPeriodFilter(value(QStringLiteral("Period"), m_periodFilter).toString());
+    setContinentFilter(value(QStringLiteral("Continent"), m_continentFilter).toString());
+    setDxccFilter(value(QStringLiteral("Dxcc"), m_dxccFilter).toString());
+    setSourceFilter(value(QStringLiteral("Source"), m_sourceFilter).toString());
+    setPropagationFilter(value(QStringLiteral("PropagationFilter"), m_propagationFilter).toString());
+    setCqOnly(value(QStringLiteral("CqOnly"), m_cqOnly).toBool());
+    setRosterSort(value(QStringLiteral("RosterSort"), m_rosterSort).toString());
+    setRosterSortDescending(value(QStringLiteral("RosterSortDescending"), m_rosterSortDescending).toBool());
+    setRosterStatusFilter(value(QStringLiteral("RosterStatus"), m_rosterStatusFilter).toString());
+    setRosterHuntScope(value(QStringLiteral("RosterHuntScope"), m_rosterHuntScope).toString());
+    setRosterScope(value(QStringLiteral("RosterScope"), m_rosterScope).toString());
+    setRosterDxccScope(value(QStringLiteral("RosterDxccScope"), m_rosterDxccScope).toString());
+    setRosterRetentionMinutes(value(QStringLiteral("RosterRetentionMinutes"), m_rosterRetentionMinutes).toInt());
+    setRosterCqOnly(value(QStringLiteral("RosterCqOnly"), m_rosterCqOnly).toBool());
+    setRosterTextFilter(value(QStringLiteral("RosterTextFilter"), m_rosterTextFilter).toString());
+    setRosterTextMode(value(QStringLiteral("RosterTextMode"), m_rosterTextMode).toString());
+    setActiveAwardProgram(value(QStringLiteral("ActiveAwardProgram"), m_activeAwardProgram).toString());
+    setAwardGoal(value(QStringLiteral("AwardGoal"), m_awardGoal).toString());
+    setAwardEndorsement(value(QStringLiteral("AwardEndorsement"), m_awardEndorsement).toString());
+    setAwardConfirmation(value(QStringLiteral("AwardConfirmation"), m_awardConfirmation).toString());
+    setAwardCallsign(value(QStringLiteral("AwardCallsign"), m_awardCallsign).toString());
+    setAwardFromDate(value(QStringLiteral("AwardFromDate"), m_awardFromDate).toString());
+    setAwardToDate(value(QStringLiteral("AwardToDate"), m_awardToDate).toString());
+    setRosterUsesLoTW(value(QStringLiteral("RosterUsesLoTW"), m_rosterUsesLoTW).toBool());
+    setRosterMaxLoTWDays(value(QStringLiteral("RosterMaxLoTWDays"), m_rosterMaxLoTWDays).toInt());
+    setRosterUsesEQSL(value(QStringLiteral("RosterUsesEQSL"), m_rosterUsesEQSL).toBool());
+    setRosterUsesOQRS(value(QStringLiteral("RosterUsesOQRS"), m_rosterUsesOQRS).toBool());
+    setRosterSpottedMeOnly(value(QStringLiteral("RosterSpottedMeOnly"), m_rosterSpottedMeOnly).toBool());
+    setRosterMinSnrEnabled(value(QStringLiteral("RosterMinSnrEnabled"), m_rosterMinSnrEnabled).toBool());
+    setRosterMinSnr(value(QStringLiteral("RosterMinSnr"), m_rosterMinSnr).toInt());
+    setRosterMaxDtEnabled(value(QStringLiteral("RosterMaxDtEnabled"), m_rosterMaxDtEnabled).toBool());
+    setRosterMaxDt(value(QStringLiteral("RosterMaxDt"), m_rosterMaxDt).toDouble());
+    setRosterTreatRr73AsCq(value(QStringLiteral("RosterTreatRr73AsCq"), m_rosterTreatRr73AsCq).toBool());
+    setGridPrecision(value(QStringLiteral("GridPrecision"), m_gridPrecision).toInt());
+    setLiveDecayMinutes(value(QStringLiteral("LiveDecayMinutes"), m_liveDecayMinutes).toInt());
+    setSplitGridEnabled(value(QStringLiteral("SplitGridEnabled"), m_splitGridEnabled).toBool());
+    setCoveragePushPinsEnabled(value(QStringLiteral("CoveragePushPinsEnabled"), m_coveragePushPinsEnabled).toBool());
+    setTimeZoneOverlayEnabled(value(QStringLiteral("TimeZoneOverlayEnabled"), m_timeZoneOverlayEnabled).toBool());
+    setPskDisplayMode(value(QStringLiteral("PskDisplayMode"), m_pskDisplayMode).toString());
+    setPskOpacityPercent(value(QStringLiteral("PskOpacityPercent"), m_pskOpacityPercent).toInt());
+    setSpotAgeFilter(value(QStringLiteral("SpotAgeFilter"), m_spotAgeFilter).toString());
+    setSpotCorrelationFilter(value(QStringLiteral("SpotCorrelationFilter"), m_spotCorrelationFilter).toString());
+    setBandActivityWindowHours(value(QStringLiteral("BandActivityWindowHours"),
+                                     m_bandActivityWindowHours).toInt());
+    setRosterWantedTypes(value(QStringLiteral("RosterWantedTypes"),
+                               m_rosterWantedTypes).toStringList());
+    setRosterVisibleColumns(value(QStringLiteral("RosterVisibleColumns"),
+                                  m_rosterVisibleColumns).toStringList());
+    setCallLookupProvider(value(QStringLiteral("CallLookupProvider"),
+                                m_callLookupProvider).toString());
+    setAlertNewGridEnabled(value(QStringLiteral("AlertNewGrid"),
+                                 m_alertNewGridEnabled).toBool());
+    setAlertNewDxccEnabled(value(QStringLiteral("AlertNewDxcc"),
+                                 m_alertNewDxccEnabled).toBool());
+    setAlertCqEnabled(value(QStringLiteral("AlertCq"), m_alertCqEnabled).toBool());
+    setAlertCallPattern(value(QStringLiteral("AlertCallPattern"),
+                               m_alertCallPattern).toString());
+    if (m_pskFeedService) {
+        m_pskFeedService->setEndpoint(value(QStringLiteral("PskMqttEndpoint"),
+                                             m_pskFeedService->endpoint()).toString());
+        m_pskFeedService->setEnabled(value(QStringLiteral("PskMqttEnabled"),
+                                           m_pskFeedService->enabled()).toBool());
+    }
+    QVariantMap decay {
+        {QStringLiteral("decoder"), m_liveDecayMinutes},
+        {QStringLiteral("psk"), value(QStringLiteral("Decay/psk"), 60)},
+        {QStringLiteral("oams"), value(QStringLiteral("Decay/oams"), 30)}
+    };
+    setSourceDecayMinutes(decay);
+
+    if (m_operationsService) {
+        QVariantMap const operations = operationObject.toVariantMap();
+        m_operationsService->setMapProjection(
+            operations.value(QStringLiteral("Projection"), QStringLiteral("Equirectangular")).toString());
+        m_operationsService->setDataViewMode(
+            operations.value(QStringLiteral("DataView"), QStringLiteral("Live + Logbook")).toString());
+        QString const active = operations.value(QStringLiteral("ActivePreset"),
+                                                  QStringLiteral("Operational")).toString();
+        m_operationsService->applyMapPreset(active);
+    }
+    scheduleQuery();
+    return root.value(QStringLiteral("viewport")).toObject().toVariantMap();
+}
+
 void MapIntelligenceService::reloadFromAdif(const QString& path)
 {
     QString const cleanPath = QFileInfo(path).absoluteFilePath();
@@ -2181,13 +3262,21 @@ void MapIntelligenceService::reloadFromAdif(const QString& path)
     QString const database = m_databasePath;
     QueryOptions const options {
         m_bandFilter, m_modeFilter, m_periodFilter, m_continentFilter,
-        m_dxccFilter, m_sourceFilter, m_rosterSort, m_rosterStatusFilter,
-        m_rosterHuntScope, m_activeAwardProgram, m_awardGoal,
+        m_dxccFilter, m_sourceFilter, m_propagationFilter, m_rosterSort, m_rosterStatusFilter,
+        m_rosterHuntScope, m_rosterScope, m_rosterDxccScope,
+        m_rosterMyCall, m_rosterMyDxcc, m_activeAwardProgram, m_awardGoal,
         m_rosterRetentionMinutes, m_gridPrecision, m_liveDecayMinutes,
+        m_sourceDecayMinutes,
         m_cqOnly, m_rosterSortDescending, m_rosterCqOnly,
         m_splitGridEnabled, m_rosterTextFilter, m_rosterTextMode,
         pskLayerEnabled(), m_pskDisplayMode, m_pskOpacityPercent / 100.0,
-        m_spotAgeFilter, m_spotCorrelationFilter, m_bandActivityWindowHours
+        m_spotAgeFilter, m_spotCorrelationFilter, m_bandActivityWindowHours,
+        m_rosterUsesLoTW, m_rosterMaxLoTWDays, m_rosterUsesEQSL,
+        m_rosterUsesOQRS, m_rosterSpottedMeOnly, m_rosterMinSnrEnabled,
+        m_rosterMinSnr, m_rosterMaxDtEnabled, m_rosterMaxDt,
+        m_rosterTreatRr73AsCq, m_rosterWantedTypes,
+        m_awardEndorsement, m_awardConfirmation, m_awardCallsign,
+        m_awardFromDate, m_awardToDate
     };
     QPointer<MapIntelligenceService> guard(this);
     m_workerPool.start(QRunnable::create(
@@ -2210,7 +3299,8 @@ void MapIntelligenceService::reloadFromAdif(const QString& path)
             // a log is temporarily unavailable (network drive, permissions or
             // a log rotation in progress).
             bool const imported = sourceReadable && importAdifIntoDatabase(
-                database, cleanPath, data, adifFingerprint(cleanPath), &error);
+                database, cleanPath, data, adifFingerprint(cleanPath),
+                options.awardCallsign, &error);
             Snapshot snapshot = queryDatabase(database, options);
             if ((!sourceReadable || !imported) && snapshot.error.isEmpty()) {
                 snapshot.error = error;
@@ -2238,9 +3328,15 @@ void MapIntelligenceService::reloadFromAdif(const QString& path)
 void MapIntelligenceService::appendAdifRecord(const QByteArray& record)
 {
     QString const database = m_databasePath;
+    QString const defaultOperatorCall = m_awardCallsign;
     QPointer<MapIntelligenceService> guard(this);
-    m_workerPool.start(QRunnable::create([guard, database, record] {
-        QList<QsoRecord> const records = parseAdif(record);
+    m_workerPool.start(QRunnable::create([guard, database, record, defaultOperatorCall] {
+        QList<QsoRecord> records = parseAdif(record);
+        for (QsoRecord& qso : records) {
+            if (qso.operatorCall.isEmpty()) {
+                qso.operatorCall = defaultOperatorCall;
+            }
+        }
         QString error;
         if (!records.isEmpty()) {
             appendQsoRecords(database, records, &error);
@@ -2578,6 +3674,31 @@ void MapIntelligenceService::removeRosterRule(const QString& type,
     }));
 }
 
+void MapIntelligenceService::setRosterStationCall(const QString& call)
+{
+    QString const normalized = call.trimmed().toUpper();
+    bool const rosterChanged = m_rosterMyCall != normalized;
+    bool const awardChanged = m_awardCallsign.isEmpty() && !normalized.isEmpty();
+    if (!rosterChanged && !awardChanged) return;
+    m_rosterMyCall = normalized;
+    if (awardChanged) {
+        m_awardCallsign = normalized;
+        saveSetting(QStringLiteral("AwardCallsign"), normalized);
+        emit awardFiltersChanged();
+    }
+    m_rosterMyDxcc.clear();
+    if (!m_rosterMyCall.isEmpty()) {
+        std::shared_ptr<const DxccLookup> const lookup = adifDxccLookup();
+        if (lookup) {
+            DxccEntity const entity = lookup->lookup(m_rosterMyCall);
+            if (entity.isValid()) {
+                m_rosterMyDxcc = entity.name;
+            }
+        }
+    }
+    scheduleQuery();
+}
+
 void MapIntelligenceService::ingestPskSpots(const QVariantList& rows,
                                             const QString& senderCall,
                                             const QString& senderGrid)
@@ -2621,6 +3742,12 @@ void MapIntelligenceService::queuePskSpots(const QVariantList& rows,
             spot.band = normalizedBand(row.value(QStringLiteral("band")).toString(),
                                        spot.frequencyHz / 1.0e6);
             spot.mode = normalizedMode(row.value(QStringLiteral("mode")).toString());
+            spot.propagationMode = normalizePropagationMode(
+                row.value(QStringLiteral("propMode"),
+                          row.value(QStringLiteral("propagationMode"),
+                                    row.value(QStringLiteral("propagation"),
+                                              row.value(QStringLiteral("prop_mode")))))
+                    .toString());
             spot.snr = row.value(QStringLiteral("snr")).toInt();
             spot.distanceKm = row.value(QStringLiteral("distKm"), -1.0).toDouble();
             spot.dxcc = row.value(QStringLiteral("dxcc")).toString().trimmed();
@@ -2628,6 +3755,19 @@ void MapIntelligenceService::queuePskSpots(const QVariantList& rows,
             spot.cqZone = row.value(QStringLiteral("cqZone")).toInt();
             spot.ituZone = row.value(QStringLiteral("ituZone")).toInt();
             spot.state = row.value(QStringLiteral("state")).toString().trimmed().toUpper();
+            spot.county = row.value(QStringLiteral("county"),
+                                    row.value(QStringLiteral("cnty"))).toString()
+                              .trimmed().toUpper();
+            spot.potaReference = normalizedPota(
+                row.value(QStringLiteral("pota"), row.value(QStringLiteral("potaReference")))
+                    .toString());
+            spot.iotaReference = normalizedIota(
+                row.value(QStringLiteral("iota"), row.value(QStringLiteral("iotaReference")))
+                    .toString());
+            spot.wpxPrefix = wpxPrefix(spot.call);
+            bool dtOk = false;
+            spot.dt = row.value(QStringLiteral("dt")).toDouble(&dtOk);
+            if (!dtOk || !std::isfinite(spot.dt)) spot.dt = 0.0;
             spot.source = row.value(QStringLiteral("source"),
                                     QStringLiteral("psk")).toString().trimmed().toLower();
             if (spot.source.isEmpty()) spot.source = QStringLiteral("psk");
@@ -2813,15 +3953,28 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
                                          record.frequencyMhz);
             record.mode = normalizedMode(recordFields.value(QStringLiteral("MODE")),
                                          recordFields.value(QStringLiteral("SUBMODE")));
+            record.propagationMode = normalizePropagationMode(
+                recordFields.value(QStringLiteral("PROP_MODE")));
             record.qsoDate = recordFields.value(QStringLiteral("QSO_DATE")).trimmed();
             record.timeOn = recordFields.value(QStringLiteral("TIME_ON")).trimmed();
             record.qsoEpoch = adifEpoch(record.qsoDate, record.timeOn);
+            record.operatorCall = recordFields.value(QStringLiteral("STATION_CALLSIGN"))
+                                      .trimmed().toUpper();
+            if (record.operatorCall.isEmpty()) {
+                record.operatorCall = recordFields.value(QStringLiteral("OPERATOR"))
+                                          .trimmed().toUpper();
+            }
+            if (record.operatorCall.isEmpty()) {
+                record.operatorCall = recordFields.value(QStringLiteral("OWNER_CALLSIGN"))
+                                          .trimmed().toUpper();
+            }
             record.source = normalizedFilter(
                 recordFields.value(QStringLiteral("APP_DECODIUM_SOURCE")));
             if (record.source.compare(QStringLiteral("All"), Qt::CaseInsensitive) == 0) {
                 record.source = QStringLiteral("ADIF");
             }
             record.dxcc = recordFields.value(QStringLiteral("COUNTRY")).trimmed();
+            record.dxccNumber = recordFields.value(QStringLiteral("DXCC")).toInt();
             record.continent = recordFields.value(QStringLiteral("CONT")).trimmed().toUpper();
             record.cqZone = recordFields.value(QStringLiteral("CQZ")).toInt();
             record.ituZone = recordFields.value(QStringLiteral("ITUZ")).toInt();
@@ -2847,7 +4000,7 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
             record.confirmed = isConfirmed(recordFields);
             enrichRecord(record);
             record.sourceKey = digestKey({
-                record.call, record.grid, record.band, record.mode,
+                record.operatorCall, record.call, record.grid, record.band, record.mode,
                 record.qsoDate, record.timeOn,
                 QString::number(record.frequencyMhz, 'f', 6)
             });
@@ -2876,7 +4029,10 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
             QStringLiteral("CALL"), QStringLiteral("GRIDSQUARE"),
             QStringLiteral("BAND"), QStringLiteral("FREQ"),
             QStringLiteral("MODE"), QStringLiteral("SUBMODE"),
+            QStringLiteral("PROP_MODE"),
             QStringLiteral("QSO_DATE"), QStringLiteral("TIME_ON"),
+            QStringLiteral("STATION_CALLSIGN"), QStringLiteral("OPERATOR"),
+            QStringLiteral("OWNER_CALLSIGN"), QStringLiteral("DXCC"),
             QStringLiteral("QSL_RCVD"), QStringLiteral("LOTW_QSL_RCVD"),
             QStringLiteral("EQSL_QSL_RCVD"), QStringLiteral("COUNTRY"),
             QStringLiteral("CONT"), QStringLiteral("CQZ"),
@@ -2904,14 +4060,27 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
         record.band = normalizedBand(fields.value(QStringLiteral("BAND")), record.frequencyMhz);
         record.mode = normalizedMode(fields.value(QStringLiteral("MODE")),
                                      fields.value(QStringLiteral("SUBMODE")));
+        record.propagationMode = normalizePropagationMode(
+            fields.value(QStringLiteral("PROP_MODE")));
         record.qsoDate = fields.value(QStringLiteral("QSO_DATE")).trimmed();
         record.timeOn = fields.value(QStringLiteral("TIME_ON")).trimmed();
         record.qsoEpoch = adifEpoch(record.qsoDate, record.timeOn);
+        record.operatorCall = fields.value(QStringLiteral("STATION_CALLSIGN"))
+                                  .trimmed().toUpper();
+        if (record.operatorCall.isEmpty()) {
+            record.operatorCall = fields.value(QStringLiteral("OPERATOR"))
+                                      .trimmed().toUpper();
+        }
+        if (record.operatorCall.isEmpty()) {
+            record.operatorCall = fields.value(QStringLiteral("OWNER_CALLSIGN"))
+                                      .trimmed().toUpper();
+        }
         record.source = normalizedFilter(fields.value(QStringLiteral("APP_DECODIUM_SOURCE")));
         if (record.source.compare(QStringLiteral("All"), Qt::CaseInsensitive) == 0) {
             record.source = QStringLiteral("ADIF");
         }
         record.dxcc = fields.value(QStringLiteral("COUNTRY")).trimmed();
+        record.dxccNumber = fields.value(QStringLiteral("DXCC")).toInt();
         record.continent = fields.value(QStringLiteral("CONT")).trimmed().toUpper();
         record.cqZone = fields.value(QStringLiteral("CQZ")).toInt();
         record.ituZone = fields.value(QStringLiteral("ITUZ")).toInt();
@@ -2937,7 +4106,7 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
         record.confirmed = isConfirmed(fields);
         enrichRecord(record);
         record.sourceKey = digestKey({
-            record.call, record.grid, record.band, record.mode,
+            record.operatorCall, record.call, record.grid, record.band, record.mode,
             record.qsoDate, record.timeOn,
             QString::number(record.frequencyMhz, 'f', 6)
         });
@@ -2997,15 +4166,52 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
     spot.grid4 = spot.grid.left(4);
     spot.grid6 = spot.grid.size() >= 6 ? spot.grid.left(6) : QString();
     spot.mode = normalizedMode(entry.value(QStringLiteral("mode")).toString());
+    QVariant propagationValue = entry.value(QStringLiteral("propMode"));
+    if (!propagationValue.isValid()) {
+        propagationValue = entry.value(QStringLiteral("propagationMode"));
+    }
+    if (!propagationValue.isValid()) {
+        propagationValue = entry.value(QStringLiteral("propagation"));
+    }
+    if (!propagationValue.isValid()) {
+        propagationValue = entry.value(QStringLiteral("prop_mode"));
+    }
+    if (!propagationValue.isValid()) {
+        propagationValue = entry.value(QStringLiteral("PROP_MODE"));
+    }
+    spot.propagationMode = normalizePropagationMode(propagationValue.toString());
     spot.band = normalizedBand(band, dialFrequencyHz / 1.0e6);
     spot.snr = entry.value(QStringLiteral("db")).toString().toInt();
+    bool dtOk = false;
+    spot.dt = entry.value(QStringLiteral("dt")).toString().toDouble(&dtOk);
+    if (!dtOk) {
+        spot.dt = entry.value(QStringLiteral("deltaTime")).toDouble(&dtOk);
+    }
+    if (!dtOk || !std::isfinite(spot.dt)) {
+        spot.dt = 0.0;
+    }
     spot.frequencyHz = dialFrequencyHz + entry.value(QStringLiteral("freq")).toLongLong();
     spot.distanceKm = entry.value(QStringLiteral("distanceKm"), -1.0).toDouble();
     spot.dxcc = entry.value(QStringLiteral("dxcc")).toString().trimmed();
+    spot.dxccNumber = entry.value(QStringLiteral("dxccNumber"),
+                                  entry.value(QStringLiteral("dxccNum"))).toInt();
     spot.continent = entry.value(QStringLiteral("continent")).toString().trimmed().toUpper();
     spot.cqZone = entry.value(QStringLiteral("cqZone")).toInt();
     spot.ituZone = entry.value(QStringLiteral("ituZone")).toInt();
     spot.state = entry.value(QStringLiteral("state")).toString().trimmed().toUpper();
+    spot.county = entry.value(QStringLiteral("county"),
+                              entry.value(QStringLiteral("cnty"))).toString()
+                      .trimmed().toUpper();
+    spot.potaReference = normalizedPota(
+        entry.value(QStringLiteral("pota"), entry.value(QStringLiteral("potaReference")))
+            .toString());
+    if (spot.potaReference.isEmpty()) {
+        spot.potaReference = potaFromMessage(spot.message);
+    }
+    spot.iotaReference = normalizedIota(
+        entry.value(QStringLiteral("iota"), entry.value(QStringLiteral("iotaReference")))
+            .toString());
+    spot.wpxPrefix = wpxPrefix(spot.call);
     QString const decodedTarget = spot.source == QStringLiteral("decoder")
         ? targetCallFromMessage(spot.message)
         : QString();
@@ -3022,10 +4228,12 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
         std::shared_ptr<const DxccLookup> const lookup = adifDxccLookup();
         DxccEntity const entity = lookup ? lookup->lookup(spot.call) : DxccEntity();
         if (entity.isValid()) {
-            spot.dxcc = entity.name;
-            spot.continent = entity.continent.toUpper();
-            spot.cqZone = entity.cqZone;
-            spot.ituZone = entity.ituZone;
+            if (attributionChanged || spot.dxcc.isEmpty()) spot.dxcc = entity.name;
+            if (attributionChanged || spot.continent.isEmpty()) {
+                spot.continent = entity.continent.toUpper();
+            }
+            if (attributionChanged || spot.cqZone <= 0) spot.cqZone = entity.cqZone;
+            if (attributionChanged || spot.ituZone <= 0) spot.ituZone = entity.ituZone;
         } else if (attributionChanged) {
             spot.dxcc.clear();
             spot.continent.clear();
@@ -3085,6 +4293,16 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
     qint64 const coverageCutoff = qMax(
         spotCutoff,
         nowMs - qBound(1, options.liveDecayMinutes, 120) * 60LL * 1000LL);
+    qint64 const pskCoverageCutoff = qMax(
+        spotCutoff,
+        nowMs - qBound(1,
+            options.sourceDecayMinutes.value(QStringLiteral("psk"), 60).toInt(),
+            240) * 60LL * 1000LL);
+    qint64 const oamsCoverageCutoff = qMax(
+        spotCutoff,
+        nowMs - qBound(1,
+            options.sourceDecayMinutes.value(QStringLiteral("oams"), 30).toInt(),
+            240) * 60LL * 1000LL);
     QString const qsoGridExpression = options.gridPrecision == 6
         ? QStringLiteral(
               "CASE WHEN length(grid6)=6 THEN upper(grid6) ELSE upper(grid4) END")
@@ -3103,6 +4321,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         options.dxcc.compare(QStringLiteral("All"), Qt::CaseInsensitive) == 0;
     bool const allSource =
         options.source.compare(QStringLiteral("All"), Qt::CaseInsensitive) == 0;
+    bool const allPropagation =
+        options.propagation.compare(QStringLiteral("MIXED"), Qt::CaseInsensitive) == 0;
 
     auto bindCommon = [&](QSqlQuery& query, bool spot) {
         query.bindValue(QStringLiteral(":all_band"), allBand);
@@ -3115,6 +4335,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         query.bindValue(QStringLiteral(":dxcc"), options.dxcc);
         query.bindValue(QStringLiteral(":all_source"), allSource);
         query.bindValue(QStringLiteral(":source"), options.source);
+        query.bindValue(QStringLiteral(":all_propagation"), allPropagation);
+        query.bindValue(QStringLiteral(":propagation"), options.propagation);
         query.bindValue(QStringLiteral(":cutoff"), spot ? spotCutoff : periodCutoff);
         if (spot) {
             query.bindValue(QStringLiteral(":cq_only"), options.cqOnly);
@@ -3126,15 +4348,40 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         " AND (:all_mode = 1 OR upper(mode) = upper(:mode))"
         " AND (:all_continent = 1 OR upper(continent) = upper(:continent))"
         " AND (:all_dxcc = 1 OR lower(dxcc) = lower(:dxcc))"
-        " AND (:all_source = 1 OR lower(source) = lower(:source))");
+        " AND (:all_source = 1 OR lower(source) = lower(:source))"
+        " AND (:all_propagation = 1 OR upper(propagation_mode) = upper(:propagation))");
     QString const qsoFilter =
         commonFilter + QStringLiteral(" AND (:cutoff = 0 OR qso_epoch >= :cutoff)");
-    // Awards describe durable logbook progress. A temporary map time window
-    // must not make previously earned entities disappear. Keep band/mode
-    // scoping, but always evaluate award progress against the full ADIF history.
+    QString awardConfirmedColumn = QStringLiteral("confirmed");
+    if (options.awardConfirmation.compare(QStringLiteral("LoTW"), Qt::CaseInsensitive) == 0) {
+        awardConfirmedColumn = QStringLiteral("lotw_confirmed");
+    } else if (options.awardConfirmation.compare(QStringLiteral("eQSL"), Qt::CaseInsensitive) == 0) {
+        awardConfirmedColumn = QStringLiteral("eqsl_confirmed");
+    } else if (options.awardConfirmation.compare(QStringLiteral("OQRS"), Qt::CaseInsensitive) == 0) {
+        awardConfirmedColumn = QStringLiteral("oqrs");
+    }
+    qint64 const awardFrom = options.awardFromDate.isEmpty()
+        ? 0 : adifEpoch(options.awardFromDate, QStringLiteral("000000"));
+    qint64 const awardTo = options.awardToDate.isEmpty()
+        ? 0 : adifEpoch(QDate::fromString(options.awardToDate, Qt::ISODate)
+                            .addDays(1).toString(Qt::ISODate), QStringLiteral("000000"));
+    // Award progress is durable by default, but an explicit callsign/date
+    // window is part of the award query itself. This keeps roster, statistics
+    // and award calculations on the same imported map_qso source.
     QString const awardQsoFilter = QStringLiteral(
         " AND (:all_band = 1 OR lower(band) = lower(:band))"
-        " AND (:all_mode = 1 OR upper(mode) = upper(:mode))");
+        " AND (:all_mode = 1 OR upper(mode) = upper(:mode))"
+        " AND (:all_propagation = 1 OR upper(propagation_mode) = upper(:propagation))"
+        " AND (:award_call = '' OR upper(operator_call) = upper(:award_call))"
+        " AND (:award_from = 0 OR qso_epoch >= :award_from)"
+        " AND (:award_to = 0 OR qso_epoch < :award_to)");
+    auto bindAward = [awardFrom, awardTo, &options](QSqlQuery& query) {
+        query.bindValue(QStringLiteral(":award_call"), options.awardCallsign.isEmpty()
+                                                            ? QStringLiteral("")
+                                                            : options.awardCallsign.toUpper());
+        query.bindValue(QStringLiteral(":award_from"), awardFrom);
+        query.bindValue(QStringLiteral(":award_to"), awardTo);
+    };
     QString const correlation = options.spotCorrelationFilter.trimmed().toLower();
     QString correlationFilter;
     if (correlation == QStringLiteral("correlated")) {
@@ -3148,7 +4395,12 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
     }
     QString const spotFilter =
         commonFilter
-        + QStringLiteral(" AND observed_ms >= :cutoff AND (:cq_only = 0 OR is_cq = 1)")
+        + QStringLiteral(
+            " AND ((lower(source)='psk' AND observed_ms >= :psk_cutoff)"
+            " OR (lower(source)='oams' AND observed_ms >= :oams_cutoff)"
+            " OR (lower(source) NOT IN ('psk','oams')"
+            "     AND observed_ms >= :cutoff))"
+            " AND (:cq_only = 0 OR is_cq = 1)")
         + (!options.pskLayerEnabled
                ? QStringLiteral(" AND lower(source)<>'psk'")
                : (options.pskDisplayMode.compare(
@@ -3182,6 +4434,11 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 rule.insert(QStringLiteral("band"), rulesQuery.value(3).toString());
                 rule.insert(QStringLiteral("mode"), rulesQuery.value(4).toString());
                 activeRosterRules.append(rule);
+                if (rulesQuery.value(2).toString() == QStringLiteral("WANTED")) {
+                    snapshot.rosterWantedMatrix.append(rule);
+                } else if (rulesQuery.value(2).toString() == QStringLiteral("IGNORE")) {
+                    snapshot.rosterExceptionMatrix.append(rule);
+                }
             }
         }
     }
@@ -3300,7 +4557,9 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             + spotFilter
             + QStringLiteral(" GROUP BY coverage_grid ORDER BY coverage_grid"));
         bindCommon(query, true);
-        query.bindValue(QStringLiteral(":cutoff"), coverageCutoff);
+            query.bindValue(QStringLiteral(":cutoff"), coverageCutoff);
+            query.bindValue(QStringLiteral(":psk_cutoff"), pskCoverageCutoff);
+            query.bindValue(QStringLiteral(":oams_cutoff"), oamsCoverageCutoff);
         if (query.exec()) {
             while (query.next()) {
                 QString const grid = query.value(0).toString();
@@ -3340,9 +4599,17 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("ageSeconds"),
                            qMax<qint64>(0, nowMs - newestMs) / 1000);
                 row.insert(QStringLiteral("liveStatus"), liveStatus);
+                QString const source = pskCount > 0
+                    ? QStringLiteral("psk")
+                    : (liveStatus == QStringLiteral("WSPR")
+                           ? QStringLiteral("oams")
+                           : QStringLiteral("decoder"));
+                int const sourceDecay = qBound(1,
+                    options.sourceDecayMinutes.value(source,
+                                                     options.liveDecayMinutes).toInt(),
+                    source == QStringLiteral("decoder") ? 120 : 240);
                 qreal opacity = liveOpacityForAge(
-                    qMax<qint64>(0, nowMs - newestMs),
-                    options.liveDecayMinutes);
+                    qMax<qint64>(0, nowMs - newestMs), sourceDecay);
                 if (liveStatus == QStringLiteral("PSK")) {
                     opacity *= qBound(0.2, options.pskOpacity, 1.0);
                 }
@@ -3370,12 +4637,24 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         QString const scope = options.rosterHuntScope.trimmed().toLower();
         bool const scopeBand = scope != QStringLiteral("all time");
         bool const scopeMode = scope == QStringLiteral("band + mode");
+        QString const rosterScope = options.rosterScope.trimmed().toLower();
+        bool const rosterCurrentBand = rosterScope == QStringLiteral("current band")
+            && options.band.compare(QStringLiteral("All"), Qt::CaseInsensitive) != 0;
+        bool const rosterCurrentMode = rosterScope == QStringLiteral("current mode")
+            && options.mode.compare(QStringLiteral("All"), Qt::CaseInsensitive) != 0;
+        bool const rosterDigitalModes = rosterScope == QStringLiteral("digital modes");
+        bool const rosterAwardScope = rosterScope == QStringLiteral("award selected");
+        QString const rosterDxccScope = options.rosterDxccScope.trimmed().toLower();
+        QString const digitalModeSql =
+            "('FT2','FT4','FT8','FST4','FST4W','JT4','JT9','JT65','JT6M',"
+            "'MSK144','Q65','WSPR','FSK441','ISCAT','OLIVIA','DOMINO','PSK','JS8')";
         qint64 const rosterCutoff =
             QDateTime::currentMSecsSinceEpoch()
             - qBound(1, options.rosterRetentionMinutes, 60) * 60LL * 1000LL;
         QString const historyScope = QStringLiteral(
             " AND (:scope_band = 0 OR lower(q.band) = lower(s.band))"
-            " AND (:scope_mode = 0 OR upper(q.mode) = upper(s.mode))");
+            " AND (:scope_mode = 0 OR upper(q.mode) = upper(s.mode))"
+            " AND (:roster_all_propagation = 1 OR upper(q.propagation_mode) = upper(:roster_propagation))");
         query.prepare(QStringLiteral(
             "SELECT s.call, s.grid, s.band, s.mode, s.snr, s.frequency_hz,"
             " s.observed_utc, s.source, s.message, s.dxcc, s.continent, s.cq_zone,"
@@ -3428,10 +4707,33 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             " EXISTS(SELECT 1 FROM map_qso q"
             "   WHERE s.continent<>'' AND upper(q.continent)=upper(s.continent)"
             "     AND q.confirmed=1") + historyScope
-            + QStringLiteral(
-            " LIMIT 1),"
+            + QStringLiteral(" LIMIT 1),"
             " COALESCE(p.watched, 0),"
-            " COALESCE(p.ignored, 0)"
+            " COALESCE(p.ignored, 0),"
+            " COALESCE(s.county, ''), COALESCE(s.pota_ref, ''),"
+            " COALESCE(s.iota, ''), COALESCE(s.wpx, ''), COALESCE(s.dt, 0),"
+            " EXISTS(SELECT 1 FROM map_qso q"
+            "   WHERE s.county<>'' AND upper(q.county)=upper(s.county)") + historyScope
+            + QStringLiteral(" LIMIT 1),"
+            " EXISTS(SELECT 1 FROM map_qso q"
+            "   WHERE s.county<>'' AND upper(q.county)=upper(s.county)"
+            "     AND q.confirmed=1") + historyScope
+            + QStringLiteral(" LIMIT 1),"
+            " EXISTS(SELECT 1 FROM map_qso q"
+            "   WHERE s.pota_ref<>'' AND upper(q.pota_ref)=upper(s.pota_ref)") + historyScope
+            + QStringLiteral(" LIMIT 1),"
+            " EXISTS(SELECT 1 FROM map_qso q"
+            "   WHERE s.pota_ref<>'' AND upper(q.pota_ref)=upper(s.pota_ref)"
+            "     AND q.confirmed=1") + historyScope
+            + QStringLiteral(" LIMIT 1),"
+            " EXISTS(SELECT 1 FROM map_qso q"
+            "   WHERE s.wpx<>'' AND upper(q.wpx)=upper(s.wpx)") + historyScope
+            + QStringLiteral(" LIMIT 1),"
+            " EXISTS(SELECT 1 FROM map_qso q"
+            "   WHERE s.wpx<>'' AND upper(q.wpx)=upper(s.wpx)"
+            "     AND q.confirmed=1") + historyScope
+            + QStringLiteral(" LIMIT 1), s.dxcc_number, s.propagation_mode")
+            + QStringLiteral(
             " FROM map_spot s"
             " LEFT JOIN map_roster_preference p ON upper(p.call)=upper(s.call)"
             " WHERE COALESCE(p.ignored, 0)=0"
@@ -3439,22 +4741,74 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             "   SELECT 1 FROM map_roster_ignore i"
             "   WHERE upper(i.ignore_type)='DXCC'"
             "     AND upper(i.ignore_value)=upper(s.dxcc))"
+            " AND (:roster_all_band = 1 OR lower(s.band)=lower(:roster_band))"
+            " AND (:roster_all_mode = 1 OR upper(s.mode)=upper(:roster_mode))"
+            " AND (:roster_all_propagation = 1 OR upper(s.propagation_mode)=upper(:roster_propagation))"
+            " AND (:roster_digital = 0 OR upper(s.mode) IN ") + digitalModeSql
+            + QStringLiteral(")"
+            " AND (:roster_min_snr_enabled = 0 OR s.snr >= :roster_min_snr)"
+            " AND (:roster_max_dt_enabled = 0 OR ABS(COALESCE(s.dt, 0)) <= :roster_max_dt)"
+            " AND (:roster_dxcc_scope = 'all'"
+            "      OR (:roster_dxcc_scope = 'same dxcc'"
+            "          AND :roster_my_dxcc <> '' AND upper(s.dxcc)=upper(:roster_my_dxcc))"
+            "      OR (:roster_dxcc_scope = 'other dxcc'"
+            "          AND (:roster_my_dxcc = '' OR upper(s.dxcc)<>upper(:roster_my_dxcc)))"
+            " )"
+            " AND ((:roster_spotted = 1 AND lower(s.source)='psk'"
+            "       AND upper(s.target_call)=upper(:roster_my_call))"
+            "      OR (:roster_spotted = 0 AND lower(s.source)<>'psk'))"
+            " AND (:roster_cq_only = 0 OR s.is_cq = 1"
+            "      OR (:roster_rr73 = 1 AND upper(s.message) LIKE '%RR73%'))"
             " AND s.id IN ("
             "   SELECT MAX(recent.id) FROM map_spot recent"
             "   WHERE recent.observed_ms >= :roster_cutoff"
             "     AND recent.call <> ''"
-            "     AND lower(recent.source) <> 'psk'"
-            "     AND (:roster_cq_only = 0 OR recent.is_cq = 1)"
+            "     AND (:roster_all_band = 1 OR lower(recent.band)=lower(:roster_band))"
+            "     AND (:roster_all_mode = 1 OR upper(recent.mode)=upper(:roster_mode))"
+            "     AND (:roster_all_propagation = 1 OR upper(recent.propagation_mode)=upper(:roster_propagation))"
+            "     AND (:roster_digital = 0 OR upper(recent.mode) IN ") + digitalModeSql
+            + QStringLiteral(")"
+            "     AND (:roster_min_snr_enabled = 0 OR recent.snr >= :roster_min_snr)"
+            "     AND (:roster_max_dt_enabled = 0 OR ABS(COALESCE(recent.dt, 0)) <= :roster_max_dt)"
+            "     AND (:roster_dxcc_scope = 'all'"
+            "          OR (:roster_dxcc_scope = 'same dxcc'"
+            "              AND :roster_my_dxcc <> ''"
+            "              AND upper(recent.dxcc)=upper(:roster_my_dxcc))"
+            "          OR (:roster_dxcc_scope = 'other dxcc'"
+            "              AND (:roster_my_dxcc = ''"
+            "                   OR upper(recent.dxcc)<>upper(:roster_my_dxcc))))"
+            "     AND ((:roster_spotted = 1 AND lower(recent.source)='psk'"
+            "           AND upper(recent.target_call)=upper(:roster_my_call))"
+            "          OR (:roster_spotted = 0 AND lower(recent.source)<>'psk'))"
+            "     AND (:roster_cq_only = 0 OR recent.is_cq = 1"
+            "          OR (:roster_rr73 = 1 AND upper(recent.message) LIKE '%RR73%'))"
             "   GROUP BY upper(recent.call))"
             " ORDER BY COALESCE(p.watched, 0) DESC,"
             " %1 %2, s.observed_ms DESC LIMIT :limit")
                   .arg(orderColumn, orderDirection));
         query.bindValue(QStringLiteral(":scope_band"), scopeBand);
         query.bindValue(QStringLiteral(":scope_mode"), scopeMode);
+        query.bindValue(QStringLiteral(":roster_all_band"), !rosterCurrentBand);
+        query.bindValue(QStringLiteral(":roster_band"), options.band);
+        query.bindValue(QStringLiteral(":roster_all_mode"), !rosterCurrentMode);
+        query.bindValue(QStringLiteral(":roster_mode"), options.mode);
+        query.bindValue(QStringLiteral(":roster_all_propagation"), allPropagation);
+        query.bindValue(QStringLiteral(":roster_propagation"), options.propagation);
+        query.bindValue(QStringLiteral(":roster_digital"), rosterDigitalModes);
+        query.bindValue(QStringLiteral(":roster_min_snr_enabled"), options.rosterMinSnrEnabled);
+        query.bindValue(QStringLiteral(":roster_min_snr"), options.rosterMinSnr);
+        query.bindValue(QStringLiteral(":roster_max_dt_enabled"), options.rosterMaxDtEnabled);
+        query.bindValue(QStringLiteral(":roster_max_dt"), options.rosterMaxDt);
+        query.bindValue(QStringLiteral(":roster_dxcc_scope"), rosterDxccScope);
+        query.bindValue(QStringLiteral(":roster_my_dxcc"), options.rosterMyDxcc.toUpper());
+        query.bindValue(QStringLiteral(":roster_spotted"), options.rosterSpottedMeOnly);
+        query.bindValue(QStringLiteral(":roster_my_call"), options.rosterMyCall.toUpper());
         query.bindValue(QStringLiteral(":roster_cutoff"), rosterCutoff);
         query.bindValue(QStringLiteral(":roster_cq_only"), options.rosterCqOnly);
+        query.bindValue(QStringLiteral(":roster_rr73"), options.rosterTreatRr73AsCq);
         query.bindValue(QStringLiteral(":limit"), kRosterCandidateLimit);
         if (query.exec()) {
+            int const rosterDxccNumberIndex = query.record().indexOf(QStringLiteral("dxcc_number"));
             QSqlQuery profileQuery(db);
             profileQuery.prepare(QStringLiteral(
                 "SELECT COALESCE(MAX(county), ''), COALESCE(MAX(pota_ref), ''),"
@@ -3483,20 +4837,29 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 bool const ignored = query.value(32).toBool();
                 bool const hasGrid = !query.value(1).toString().trimmed().isEmpty();
                 bool const hasDxcc = !query.value(9).toString().trimmed().isEmpty();
-                QString county;
-                QString pota;
-                QString iota;
-                QString wpx;
+                bool const countyWorked = query.value(38).toBool();
+                bool const countyConfirmed = query.value(39).toBool();
+                bool const potaWorked = query.value(40).toBool();
+                bool const potaConfirmed = query.value(41).toBool();
+                bool const wpxWorked = query.value(42).toBool();
+                bool const wpxConfirmed = query.value(43).toBool();
+                bool const hasCounty = !query.value(33).toString().trimmed().isEmpty();
+                bool const hasPota = !query.value(34).toString().trimmed().isEmpty();
+                bool const hasWpx = !query.value(36).toString().trimmed().isEmpty();
+                QString county = query.value(33).toString().trimmed().toUpper();
+                QString pota = query.value(34).toString().trimmed().toUpper();
+                QString const iota = query.value(35).toString().trimmed().toUpper();
+                QString wpx = query.value(36).toString().trimmed().toUpper();
+                double const dt = query.value(37).toDouble();
                 qint64 lastQsoEpoch = 0;
                 qint64 lotwEpoch = 0;
                 qint64 eqslEpoch = 0;
                 bool oqrs = false;
                 profileQuery.bindValue(QStringLiteral(":call"), query.value(0).toString());
                 if (profileQuery.exec() && profileQuery.next()) {
-                    county = profileQuery.value(0).toString().trimmed().toUpper();
-                    pota = profileQuery.value(1).toString().trimmed().toUpper();
-                    iota = profileQuery.value(2).toString().trimmed().toUpper();
-                    wpx = profileQuery.value(3).toString().trimmed().toUpper();
+                    if (county.isEmpty()) county = profileQuery.value(0).toString().trimmed().toUpper();
+                    if (pota.isEmpty()) pota = profileQuery.value(1).toString().trimmed().toUpper();
+                    if (wpx.isEmpty()) wpx = profileQuery.value(3).toString().trimmed().toUpper();
                     lastQsoEpoch = profileQuery.value(4).toLongLong();
                     lotwEpoch = profileQuery.value(5).toLongLong();
                     eqslEpoch = profileQuery.value(6).toLongLong();
@@ -3510,6 +4873,24 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 int const lotwAgeDays = ageDays(lotwEpoch);
                 int const eqslAgeDays = ageDays(eqslEpoch);
                 int const lastQsoAgeDays = ageDays(lastQsoEpoch);
+                int const providerFilters = (options.rosterUsesLoTW ? 1 : 0)
+                    + (options.rosterUsesEQSL ? 1 : 0)
+                    + (options.rosterUsesOQRS ? 1 : 0);
+                if (providerFilters > 0) {
+                    bool providerMatch = false;
+                    if (options.rosterUsesLoTW
+                        && lotwAgeDays >= 0
+                        && lotwAgeDays <= options.rosterMaxLoTWDays) {
+                        providerMatch = true;
+                    }
+                    if (options.rosterUsesEQSL && eqslAgeDays >= 0) {
+                        providerMatch = true;
+                    }
+                    if (options.rosterUsesOQRS && oqrs) {
+                        providerMatch = true;
+                    }
+                    if (!providerMatch) continue;
+                }
                 QString const rosterNeedle = options.rosterText.trimmed();
                 QString const rosterMode = options.rosterTextMode.trimmed().toLower();
                 if (!rosterNeedle.isEmpty()
@@ -3539,12 +4920,63 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                         continue;
                     }
                 }
-                bool const anyNew =
-                    !callWorked || (hasGrid && !gridWorked) || (hasDxcc && !dxccWorked);
-                bool const hasUnconfirmedEntity =
-                    (callWorked && !callConfirmed)
-                    || (hasGrid && gridWorked && !gridConfirmed)
-                    || (hasDxcc && dxccWorked && !dxccConfirmed);
+                struct HuntEntity {
+                    QString type;
+                    QString label;
+                    QString value;
+                    bool eligible {false};
+                    bool worked {false};
+                    bool confirmed {false};
+                };
+                QVector<HuntEntity> huntEntities {
+                    {QStringLiteral("CALL"), QStringLiteral("call"),
+                     query.value(0).toString(), !query.value(0).toString().isEmpty(),
+                     callWorked, callConfirmed},
+                    {QStringLiteral("GRID"), QStringLiteral("grid"),
+                     query.value(1).toString().left(4), hasGrid,
+                     gridWorked, gridConfirmed},
+                    {QStringLiteral("DXCC"), QStringLiteral("DXCC"),
+                     query.value(9).toString(), hasDxcc, dxccWorked, dxccConfirmed},
+                    {QStringLiteral("WPX"), QStringLiteral("WPX"),
+                     wpx, hasWpx, wpxWorked, wpxConfirmed},
+                    {QStringLiteral("POTA"), QStringLiteral("POTA"),
+                     pota, hasPota, potaWorked, potaConfirmed},
+                    {QStringLiteral("CQ"), QStringLiteral("CQ zone"),
+                     QString::number(query.value(11).toInt()),
+                     query.value(11).toInt() > 0, cqWorked, cqConfirmed},
+                    {QStringLiteral("ITU"), QStringLiteral("ITU zone"),
+                     QString::number(query.value(12).toInt()),
+                     query.value(12).toInt() > 0, ituWorked, ituConfirmed},
+                    {QStringLiteral("STATE"), QStringLiteral("state"),
+                     query.value(13).toString().trimmed().toUpper(),
+                     !query.value(13).toString().trimmed().isEmpty(),
+                     stateWorked, stateConfirmed},
+                    {QStringLiteral("COUNTY"), QStringLiteral("county"),
+                     county, hasCounty, countyWorked, countyConfirmed},
+                    {QStringLiteral("CONTINENT"), QStringLiteral("continent"),
+                     query.value(10).toString().trimmed().toUpper(),
+                     !query.value(10).toString().trimmed().isEmpty(),
+                     continentWorked, continentConfirmed}
+                };
+                auto wantedTypeEnabled = [&options](const QString& type) {
+                    return options.rosterWantedTypes.contains(type, Qt::CaseInsensitive);
+                };
+                bool anyNew = false;
+                bool hasUnconfirmedEntity = false;
+                QStringList newReasons;
+                QStringList unconfirmedReasons;
+                for (HuntEntity const& entity : std::as_const(huntEntities)) {
+                    if (!entity.eligible || !wantedTypeEnabled(entity.type)) continue;
+                    if (!entity.worked) {
+                        anyNew = true;
+                        newReasons.append(QStringLiteral("New %1: %2")
+                                               .arg(entity.label, entity.value));
+                    } else if (!entity.confirmed) {
+                        hasUnconfirmedEntity = true;
+                        unconfirmedReasons.append(QStringLiteral("Unconfirmed %1: %2")
+                                                       .arg(entity.label, entity.value));
+                    }
+                }
                 bool const anyUnconfirmed = !anyNew && hasUnconfirmedEntity;
                 QString const activeAward =
                     options.activeAwardProgram.trimmed().toLower();
@@ -3606,9 +5038,13 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                         query.value(13).toString(), query.value(10).toString(),
                         county, iota);
                     awardEligible = !awardEntity.isEmpty()
-                        && externalAwardMatchesSpot(*external,
-                                                    query.value(2).toString(),
-                                                    query.value(3).toString());
+                        && externalAwardMatchesFields(
+                            *external, query.value(0).toString(), query.value(2).toString(),
+                            query.value(3).toString(), query.value(1).toString(),
+                            rosterDxccNumberIndex >= 0
+                                ? query.value(rosterDxccNumberIndex).toInt() : 0,
+                            query.value(11).toInt(), query.value(10).toString(),
+                            query.value(35).toString(), options.awardEndorsement);
                     if (external->type == QStringLiteral("grids")) {
                         awardWorked = gridWorked;
                         awardConfirmed = gridConfirmed;
@@ -3691,6 +5127,9 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 if (ignoredByRule) {
                     continue;
                 }
+                if (rosterAwardScope && !awardWanted && !forceWanted) {
+                    continue;
+                }
                 bool const wanted = forceWanted || (awardMode
                     ? awardWanted
                     : (anyNew || hasUnconfirmedEntity));
@@ -3708,21 +5147,10 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                     continue;
                 }
 
-                QStringList reasons;
-                if (hasDxcc && !dxccWorked) reasons.append(QStringLiteral("New DXCC"));
-                if (hasGrid && !gridWorked) reasons.append(QStringLiteral("New grid"));
-                if (!callWorked) reasons.append(QStringLiteral("New call"));
-                if (hasDxcc && dxccWorked && !dxccConfirmed) {
-                    reasons.append(QStringLiteral("DXCC unconfirmed"));
-                }
-                if (hasGrid && gridWorked && !gridConfirmed) {
-                    reasons.append(QStringLiteral("Grid unconfirmed"));
-                }
-                if (callWorked && !callConfirmed) {
-                    reasons.append(QStringLiteral("Call unconfirmed"));
-                }
+                QStringList reasons = newReasons;
+                reasons.append(unconfirmedReasons);
                 if (awardWanted) {
-                    reasons.prepend(QStringLiteral("%1 %2 %3")
+                    reasons.append(QStringLiteral("%1 %2 %3")
                                         .arg(options.activeAwardProgram,
                                              awardEntity,
                                              confirmedGoal
@@ -3736,7 +5164,9 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("grid"), query.value(1).toString());
                 row.insert(QStringLiteral("band"), query.value(2).toString());
                 row.insert(QStringLiteral("mode"), query.value(3).toString());
+                row.insert(QStringLiteral("propagation"), query.value(45).toString());
                 row.insert(QStringLiteral("snr"), query.value(4).toInt());
+                row.insert(QStringLiteral("dt"), dt);
                 row.insert(QStringLiteral("frequencyHz"), query.value(5).toLongLong());
                 row.insert(QStringLiteral("observedUtc"), query.value(6).toString());
                 row.insert(QStringLiteral("source"), query.value(7).toString());
@@ -3754,7 +5184,10 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("eqslAgeDays"), eqslAgeDays);
                 row.insert(QStringLiteral("oqrs"), oqrs);
                 row.insert(QStringLiteral("ageDays"), lastQsoAgeDays);
-                row.insert(QStringLiteral("isCQ"), query.value(14).toBool());
+                row.insert(QStringLiteral("isCQ"), query.value(14).toBool()
+                           || (options.rosterTreatRr73AsCq
+                               && query.value(8).toString().contains(QStringLiteral("RR73"),
+                                                                       Qt::CaseInsensitive)));
                 row.insert(QStringLiteral("targetCall"), query.value(15).toString());
                 row.insert(QStringLiteral("distanceKm"), query.value(16).toDouble());
                 row.insert(QStringLiteral("callWorked"), callWorked);
@@ -3763,6 +5196,12 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("gridConfirmed"), gridConfirmed);
                 row.insert(QStringLiteral("dxccWorked"), dxccWorked);
                 row.insert(QStringLiteral("dxccConfirmed"), dxccConfirmed);
+                row.insert(QStringLiteral("countyWorked"), countyWorked);
+                row.insert(QStringLiteral("countyConfirmed"), countyConfirmed);
+                row.insert(QStringLiteral("potaWorked"), potaWorked);
+                row.insert(QStringLiteral("potaConfirmed"), potaConfirmed);
+                row.insert(QStringLiteral("wpxWorked"), wpxWorked);
+                row.insert(QStringLiteral("wpxConfirmed"), wpxConfirmed);
                 row.insert(QStringLiteral("new"), anyNew);
                 row.insert(QStringLiteral("unconfirmed"), anyUnconfirmed);
                 row.insert(QStringLiteral("wanted"), wanted);
@@ -3778,11 +5217,14 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                            anyNew ? QStringLiteral("NEW")
                                   : (anyUnconfirmed ? QStringLiteral("UNCONFIRMED")
                                                     : QStringLiteral("CONFIRMED")));
-                row.insert(QStringLiteral("huntReason"), reasons.mid(0, 2).join(QStringLiteral(" · ")));
+                row.insert(QStringLiteral("newReasons"), newReasons);
+                row.insert(QStringLiteral("unconfirmedReasons"), unconfirmedReasons);
+                row.insert(QStringLiteral("huntReason"), reasons.join(QStringLiteral(" · ")));
                 snapshot.roster.append(row);
                 if (snapshot.roster.size() >= kRosterLimit) break;
             }
         } else if (snapshot.error.isEmpty()) {
+            qWarning().noquote() << "[MAPINT] roster query failed:" << query.lastError().text();
             snapshot.error = query.lastError().text();
         }
     }
@@ -3790,6 +5232,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         QSqlQuery query(db);
         query.prepare(QStringLiteral("SELECT COUNT(*) FROM map_spot WHERE 1=1") + spotFilter);
         bindCommon(query, true);
+        query.bindValue(QStringLiteral(":psk_cutoff"), pskCoverageCutoff);
+        query.bindValue(QStringLiteral(":oams_cutoff"), oamsCoverageCutoff);
         if (query.exec() && query.next()) {
             snapshot.liveSpotCount = query.value(0).toInt();
         }
@@ -3805,6 +5249,7 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         " AND (:event_all_band = 1 OR lower(band)=lower(:event_band))"
         " AND (:event_all_mode = 1 OR upper(mode)=upper(:event_mode))"
         " AND (:event_all_source = 1 OR lower(source)=lower(:event_source))"
+        " AND (:event_all_propagation = 1 OR upper(propagation_mode)=upper(:event_propagation))"
         " AND (:event_cq_only = 0 OR upper(activity_type) IN ('CQ','CQDX','QRZ'))");
     QString const eventCorrelation = options.spotCorrelationFilter.trimmed().toLower();
     if (eventCorrelation == QStringLiteral("correlated")) {
@@ -3824,6 +5269,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         query.bindValue(QStringLiteral(":event_mode"), options.mode);
         query.bindValue(QStringLiteral(":event_all_source"), allSource);
         query.bindValue(QStringLiteral(":event_source"), options.source);
+        query.bindValue(QStringLiteral(":event_all_propagation"), allPropagation);
+        query.bindValue(QStringLiteral(":event_propagation"), options.propagation);
         query.bindValue(QStringLiteral(":event_cq_only"), options.cqOnly);
     };
     {
@@ -3946,11 +5393,14 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 " WHERE observed_ms>=:activity_cutoff"
                 " AND trim(band)<>'' AND lower(band)<>'unknown'"
                 " AND (:activity_all_mode=1 OR upper(mode)=upper(:activity_mode))"
+                " AND (:activity_all_propagation=1 OR upper(propagation_mode)=upper(:activity_propagation))"
                 " GROUP BY band")
                 .arg(pskPredicate, directionExpression));
         aggregate.bindValue(QStringLiteral(":activity_cutoff"), activityCutoff);
         aggregate.bindValue(QStringLiteral(":activity_all_mode"), allMode);
         aggregate.bindValue(QStringLiteral(":activity_mode"), options.mode);
+        aggregate.bindValue(QStringLiteral(":activity_all_propagation"), allPropagation);
+        aggregate.bindValue(QStringLiteral(":activity_propagation"), options.propagation);
         int maxTotal = 0;
         int maxUniqueCalls = 0;
         if (aggregate.exec()) {
@@ -4075,11 +5525,14 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 " WHERE observed_ms>=:activity_cutoff"
                 " AND trim(band)<>'' AND lower(band)<>'unknown'"
                 " AND (:activity_all_mode=1 OR upper(mode)=upper(:activity_mode))"
+                " AND (:activity_all_propagation=1 OR upper(propagation_mode)=upper(:activity_propagation))"
                 " GROUP BY 1, band ORDER BY 1, band")
                 .arg(pskPredicate, directionExpression));
         timeline.bindValue(QStringLiteral(":activity_cutoff"), activityCutoff);
         timeline.bindValue(QStringLiteral(":activity_all_mode"), allMode);
         timeline.bindValue(QStringLiteral(":activity_mode"), options.mode);
+        timeline.bindValue(QStringLiteral(":activity_all_propagation"), allPropagation);
+        timeline.bindValue(QStringLiteral(":activity_propagation"), options.propagation);
         if (timeline.exec()) {
             while (timeline.next()) {
                 QVariantMap row;
@@ -4258,6 +5711,69 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         statistics.insert(QStringLiteral("modes"), groupedRows(QStringLiteral("mode")));
         statistics.insert(QStringLiteral("continents"),
                           groupedRows(QStringLiteral("continent")));
+
+        QHash<QString, QVariantMap> propagationRowsByCode;
+        for (PropagationDefinition const& definition : propagationDefinitions()) {
+            QString const code = QString::fromLatin1(definition.code);
+            propagationRowsByCode.insert(code, QVariantMap {
+                {QStringLiteral("code"), code},
+                {QStringLiteral("label"), QString::fromLatin1(definition.label)},
+                {QStringLiteral("qso"), 0},
+                {QStringLiteral("confirmed"), 0},
+                {QStringLiteral("calls"), 0},
+                {QStringLiteral("percent"), 0.0}
+            });
+        }
+        QSqlQuery propagationQuery(db);
+        propagationQuery.prepare(QStringLiteral(
+            "SELECT COALESCE(NULLIF(propagation_mode, ''), 'UNKNOWN'), COUNT(*),"
+            " COALESCE(SUM(confirmed), 0),"
+            " COUNT(DISTINCT CASE WHEN call<>'' THEN upper(call) END)"
+            " FROM map_qso WHERE 1=1") + qsoFilter
+            + QStringLiteral(" GROUP BY 1"));
+        bindCommon(propagationQuery, false);
+        int propagationQso = 0;
+        int propagationConfirmed = 0;
+        int propagationUnknown = 0;
+        if (propagationQuery.exec()) {
+            while (propagationQuery.next()) {
+                QString code = normalizePropagationMode(propagationQuery.value(0).toString());
+                QVariantMap row = propagationRowsByCode.value(code);
+                if (row.isEmpty()) {
+                    code = QStringLiteral("UNKNOWN");
+                    row = propagationRowsByCode.value(code);
+                }
+                int const qso = propagationQuery.value(1).toInt();
+                int const confirmed = propagationQuery.value(2).toInt();
+                propagationQso += qso;
+                propagationConfirmed += confirmed;
+                if (code == QStringLiteral("UNKNOWN")) {
+                    propagationUnknown += qso;
+                }
+                row.insert(QStringLiteral("qso"), qso);
+                row.insert(QStringLiteral("confirmed"), confirmed);
+                row.insert(QStringLiteral("calls"), propagationQuery.value(3).toInt());
+                propagationRowsByCode.insert(code, row);
+            }
+        } else if (snapshot.error.isEmpty()) {
+            snapshot.error = propagationQuery.lastError().text();
+        }
+        for (PropagationDefinition const& definition : propagationDefinitions()) {
+            QString const code = QString::fromLatin1(definition.code);
+            QVariantMap row = propagationRowsByCode.value(code);
+            int const qso = row.value(QStringLiteral("qso")).toInt();
+            row.insert(QStringLiteral("percent"), propagationQso > 0
+                           ? 100.0 * static_cast<double>(qso) / propagationQso : 0.0);
+            snapshot.propagationStatistics.append(row);
+        }
+        snapshot.propagationSummary.insert(QStringLiteral("qso"), propagationQso);
+        snapshot.propagationSummary.insert(QStringLiteral("confirmed"), propagationConfirmed);
+        snapshot.propagationSummary.insert(QStringLiteral("classified"),
+                                           propagationQso - propagationUnknown);
+        snapshot.propagationSummary.insert(QStringLiteral("unknown"), propagationUnknown);
+        snapshot.propagationSummary.insert(QStringLiteral("filter"), options.propagation);
+        statistics.insert(QStringLiteral("propagation"), snapshot.propagationStatistics);
+        statistics.insert(QStringLiteral("propagationSummary"), snapshot.propagationSummary);
         statistics.insert(QStringLiteral("live"), snapshot.liveSpotCount);
         statistics.insert(QStringLiteral("roster"), snapshot.roster.size());
         statistics.insert(QStringLiteral("spotHeatmap"), snapshot.spotHeatmap.size());
@@ -4330,7 +5846,7 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
 
     {
         QSqlQuery query(db);
-        query.prepare(QStringLiteral(
+        QString awardAggregate = QStringLiteral(
             "SELECT"
             " COUNT(DISTINCT CASE WHEN dxcc<>'' THEN dxcc END),"
             " COUNT(DISTINCT CASE WHEN confirmed=1 AND dxcc<>'' THEN dxcc END),"
@@ -4375,9 +5891,17 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             " COUNT(DISTINCT CASE WHEN wpx<>'' THEN upper(wpx) END),"
             " COUNT(DISTINCT CASE WHEN confirmed=1 AND wpx<>''"
             " THEN upper(wpx) END)"
-            " FROM map_qso WHERE 1=1") + awardQsoFilter);
+            " FROM map_qso WHERE 1=1");
+        awardAggregate.replace(QStringLiteral("confirmed=1"),
+                               awardConfirmedColumn + QStringLiteral("=1"));
+        query.prepare(awardAggregate + awardQsoFilter);
         bindCommon(query, false);
-        if (query.exec() && query.next()) {
+        bindAward(query);
+        bool const awardQueryOk = query.exec();
+        if (!awardQueryOk) {
+            qWarning().noquote() << "[MAPINT] award aggregate failed:" << query.lastError().text();
+        }
+        if (awardQueryOk && query.next()) {
             bool const confirmedGoal =
                 options.awardGoal.compare(QStringLiteral("Confirmed"),
                                           Qt::CaseInsensitive) == 0;
@@ -4399,9 +5923,19 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                              options.activeAwardProgram.compare(
                                  label, Qt::CaseInsensitive) == 0);
                 award.insert(QStringLiteral("goal"), options.awardGoal);
-                award.insert(QStringLiteral("scope"),
-                             QStringLiteral("%1 / %2 / All time")
-                                 .arg(options.band, options.mode));
+                QStringList scopeParts {
+                    options.band, options.mode,
+                    options.awardConfirmation,
+                    options.awardEndorsement.isEmpty()
+                        ? QStringLiteral("Mixed") : options.awardEndorsement,
+                    options.awardCallsign.isEmpty()
+                        ? QStringLiteral("All callsigns") : options.awardCallsign,
+                    (options.awardFromDate.isEmpty() && options.awardToDate.isEmpty())
+                        ? QStringLiteral("All time")
+                        : QStringLiteral("%1..%2").arg(options.awardFromDate,
+                                                        options.awardToDate)
+                };
+                award.insert(QStringLiteral("scope"), scopeParts.join(QStringLiteral(" / ")));
                 award.insert(QStringLiteral("rule"), rule);
                 award.insert(QStringLiteral("progress"),
                              target > 0
@@ -4450,13 +5984,18 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                     QSqlQuery externalQuery(db);
                     externalQuery.prepare(QStringLiteral(
                         "SELECT call, grid4, band, mode, dxcc, cq_zone, state, continent,"
-                        " county, iota, confirmed FROM map_qso WHERE 1=1")
+                        " county, iota, wpx, dxcc_number, confirmed, lotw_confirmed,"
+                        " eqsl_confirmed, oqrs FROM map_qso WHERE 1=1")
                                               + awardQsoFilter
-                                              + externalAwardScopeFilter(*external));
+                                              + externalAwardScopeFilter(
+                                                    *external, options.awardEndorsement));
                     bindCommon(externalQuery, false);
+                    bindAward(externalQuery);
                     if (externalQuery.exec()) {
                         QSet<QString> workedEntities;
                         QSet<QString> confirmedEntities;
+                        QHash<QString, QSet<QString> > workedGroups;
+                        QHash<QString, QSet<QString> > confirmedGroups;
                         while (externalQuery.next()) {
                             QString const entity = externalAwardSpotEntity(
                                 *external,
@@ -4470,25 +6009,262 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                                 externalQuery.value(8).toString(),
                                 externalQuery.value(9).toString());
                             if (entity.isEmpty()
-                                || !externalAwardMatchesSpot(
-                                    *external, externalQuery.value(2).toString(),
-                                    externalQuery.value(3).toString())) {
+                                || !externalAwardMatchesFields(
+                                    *external, externalQuery.value(0).toString(),
+                                    externalQuery.value(2).toString(),
+                                    externalQuery.value(3).toString(),
+                                    externalQuery.value(1).toString(),
+                                    externalQuery.value(11).toInt(),
+                                    externalQuery.value(5).toInt(),
+                                    externalQuery.value(7).toString(),
+                                    externalQuery.value(9).toString(),
+                                    options.awardEndorsement)) {
                                 continue;
                             }
+                            bool confirmed = externalQuery.value(12).toBool();
+                            if (options.awardConfirmation.compare(
+                                    QStringLiteral("LoTW"), Qt::CaseInsensitive) == 0) {
+                                confirmed = externalQuery.value(13).toBool();
+                            } else if (options.awardConfirmation.compare(
+                                           QStringLiteral("eQSL"), Qt::CaseInsensitive) == 0) {
+                                confirmed = externalQuery.value(14).toBool();
+                            } else if (options.awardConfirmation.compare(
+                                           QStringLiteral("OQRS"), Qt::CaseInsensitive) == 0) {
+                                confirmed = externalQuery.value(15).toBool();
+                            }
                             workedEntities.insert(entity);
-                            if (externalQuery.value(10).toBool()) {
+                            if (confirmed) {
                                 confirmedEntities.insert(entity);
+                            }
+                            if (external->type.endsWith(QStringLiteral("2band"))) {
+                                QString const base = entity.section(QLatin1Char('@'), 0, 0);
+                                workedGroups[base].insert(externalQuery.value(2).toString().toLower());
+                                if (confirmed) {
+                                    confirmedGroups[base].insert(externalQuery.value(2).toString().toLower());
+                                }
+                            } else if (external->type == QStringLiteral("calls2dxcc")) {
+                                QString const group = externalQuery.value(11).toInt() > 0
+                                    ? QString::number(externalQuery.value(11).toInt())
+                                    : externalQuery.value(4).toString().toUpper();
+                                workedGroups[group].insert(externalQuery.value(0).toString().toUpper());
+                                if (confirmed) {
+                                    confirmedGroups[group].insert(externalQuery.value(0).toString().toUpper());
+                                }
+                            }
+                        }
+                        int worked = workedEntities.size();
+                        int confirmed = confirmedEntities.size();
+                        int target = external->target;
+                        if (external->type.endsWith(QStringLiteral("2band"))
+                            && !external->unique.isEmpty()) {
+                            target = *std::max_element(external->unique.constBegin(),
+                                                       external->unique.constEnd());
+                            worked = 0;
+                            confirmed = 0;
+                            for (QHash<QString, QSet<QString> >::const_iterator it = workedGroups.constBegin();
+                                 it != workedGroups.constEnd(); ++it) {
+                                if (it.value().size() >= external->requiredBandCount) ++worked;
+                                if (confirmedGroups.value(it.key()).size() >= external->requiredBandCount) {
+                                    ++confirmed;
+                                }
+                            }
+                        } else if (external->type == QStringLiteral("calls2dxcc")
+                                   && !external->unique.isEmpty()) {
+                            target = *std::max_element(external->unique.constBegin(),
+                                                       external->unique.constEnd());
+                            int const requiredEntities = external->count.isEmpty()
+                                ? external->dxccNumbers.size()
+                                : *std::max_element(external->count.constBegin(),
+                                                    external->count.constEnd());
+                            worked = requiredEntities > 0 ? requiredEntities : workedGroups.size();
+                            confirmed = worked;
+                            for (QString const& group : external->dxccNumbers) {
+                                worked = qMin(worked, workedGroups.value(group).size());
+                                confirmed = qMin(confirmed, confirmedGroups.value(group).size());
                             }
                         }
                         addAward(external->id, external->label,
-                                 workedEntities.size(), confirmedEntities.size(),
-                                 external->target,
+                                 worked, confirmed, target,
                                  external->tooltip.isEmpty()
                                      ? QStringLiteral("%1 rule: %2")
                                            .arg(external->sponsor, external->type)
                                      : external->tooltip);
                     }
                 }
+            }
+
+            if (options.activeAwardProgram.compare(QStringLiteral("None"),
+                                                   Qt::CaseInsensitive) != 0) {
+                ExternalAwardDefinition const* selectedExternal =
+                    externalAwardForLabel(options.activeAwardProgram);
+                QSet<QString> detailWorked;
+                QSet<QString> detailConfirmed;
+                QString const active = options.activeAwardProgram.trimmed().toLower();
+                auto baseEntity = [&active](QString const& call, QString const& grid,
+                                             QString const& dxcc, int cqZone, int ituZone,
+                                             QString const& state, QString const& continent,
+                                             QString const& pota, QString const& iota,
+                                             QString const& wpx) {
+                    if (active == QStringLiteral("dxcc")) return dxcc.trimmed().toLower();
+                    if (active == QStringLiteral("maidenhead")) return grid.left(4).toUpper();
+                    if (active == QStringLiteral("waz")) {
+                        return cqZone > 0 && cqZone <= 40 ? QString::number(cqZone) : QString();
+                    }
+                    if (active == QStringLiteral("was") || active == QStringLiteral("us48")) {
+                        QString const candidate = state.trimmed().toUpper();
+                        return (active == QStringLiteral("was") ? isWasState(candidate)
+                                                                  : isLower48State(candidate))
+                            ? candidate : QString();
+                    }
+                    if (active == QStringLiteral("itu zones")) {
+                        return ituZone > 0 && ituZone <= 90 ? QString::number(ituZone) : QString();
+                    }
+                    if (active == QStringLiteral("wac")) {
+                        QString const candidate = continent.trimmed().toUpper();
+                        return QStringList {QStringLiteral("AF"), QStringLiteral("AS"),
+                                            QStringLiteral("EU"), QStringLiteral("NA"),
+                                            QStringLiteral("OC"), QStringLiteral("SA")}
+                            .contains(candidate) ? candidate : QString();
+                    }
+                    if (active == QStringLiteral("pota")) return pota.trimmed().toUpper();
+                    if (active == QStringLiteral("iota")) return iota.trimmed().toUpper();
+                    if (active == QStringLiteral("wpx")) return wpx.trimmed().toUpper();
+                    return call.trimmed().toUpper();
+                };
+                QString detailSql = QStringLiteral(
+                    "SELECT call, grid4, band, mode, dxcc, dxcc_number, cq_zone, itu_zone, state,"
+                    " continent, county, iota, wpx, pota_ref, confirmed, lotw_confirmed,"
+                    " eqsl_confirmed, oqrs FROM map_qso WHERE 1=1") + awardQsoFilter;
+                if (selectedExternal) {
+                    detailSql += externalAwardScopeFilter(*selectedExternal,
+                                                           options.awardEndorsement);
+                }
+                QSqlQuery detailQuery(db);
+                detailQuery.prepare(detailSql);
+                bindCommon(detailQuery, false);
+                bindAward(detailQuery);
+                if (detailQuery.exec()) {
+                    while (detailQuery.next()) {
+                        QString entity;
+                        if (selectedExternal) {
+                            entity = externalAwardSpotEntity(
+                                *selectedExternal, detailQuery.value(0).toString(),
+                                detailQuery.value(2).toString(), detailQuery.value(1).toString(),
+                                detailQuery.value(4).toString(), detailQuery.value(6).toInt(),
+                                detailQuery.value(8).toString(), detailQuery.value(9).toString(),
+                                detailQuery.value(10).toString(), detailQuery.value(11).toString());
+                            if (entity.isEmpty()
+                                || !externalAwardMatchesFields(
+                                    *selectedExternal, detailQuery.value(0).toString(),
+                                    detailQuery.value(2).toString(), detailQuery.value(3).toString(),
+                                    detailQuery.value(1).toString(), detailQuery.value(5).toInt(),
+                                    detailQuery.value(6).toInt(), detailQuery.value(9).toString(),
+                                    detailQuery.value(11).toString(), options.awardEndorsement)) {
+                                continue;
+                            }
+                        } else {
+                            entity = baseEntity(
+                                detailQuery.value(0).toString(), detailQuery.value(1).toString(),
+                                detailQuery.value(4).toString(), detailQuery.value(6).toInt(),
+                                detailQuery.value(7).toInt(), detailQuery.value(8).toString(),
+                                detailQuery.value(9).toString(), detailQuery.value(13).toString(),
+                                detailQuery.value(11).toString(), detailQuery.value(12).toString());
+                        }
+                        if (entity.isEmpty()) continue;
+                        detailWorked.insert(entity);
+                        bool confirmed = detailQuery.value(14).toBool();
+                        if (options.awardConfirmation.compare(QStringLiteral("LoTW"), Qt::CaseInsensitive) == 0) {
+                            confirmed = detailQuery.value(15).toBool();
+                        } else if (options.awardConfirmation.compare(QStringLiteral("eQSL"), Qt::CaseInsensitive) == 0) {
+                            confirmed = detailQuery.value(16).toBool();
+                        } else if (options.awardConfirmation.compare(QStringLiteral("OQRS"), Qt::CaseInsensitive) == 0) {
+                            confirmed = detailQuery.value(17).toBool();
+                        }
+                        if (confirmed) detailConfirmed.insert(entity);
+                    }
+                }
+                QVariantList missing;
+                QSet<QString> missingKeys;
+                QSqlQuery liveQuery(db);
+                liveQuery.prepare(QStringLiteral(
+                    "SELECT call, grid, band, mode, dxcc, dxcc_number, cq_zone, itu_zone, state,"
+                    " continent, county, pota_ref, iota, wpx FROM map_spot"
+                    " WHERE observed_ms >= :live_cutoff"
+                    " AND (:all_band = 1 OR lower(band) = lower(:band))"
+                    " AND (:all_mode = 1 OR upper(mode) = upper(:mode))"));
+                bindCommon(liveQuery, false);
+                liveQuery.bindValue(QStringLiteral(":live_cutoff"), spotCutoff);
+                if (liveQuery.exec()) {
+                    while (liveQuery.next()) {
+                        QString entity;
+                        if (selectedExternal) {
+                            entity = externalAwardSpotEntity(
+                                *selectedExternal, liveQuery.value(0).toString(),
+                                liveQuery.value(2).toString(), liveQuery.value(1).toString(),
+                                liveQuery.value(4).toString(), liveQuery.value(6).toInt(),
+                                liveQuery.value(8).toString(), liveQuery.value(9).toString(),
+                                liveQuery.value(10).toString(), liveQuery.value(12).toString());
+                            if (entity.isEmpty()
+                                || !externalAwardMatchesFields(
+                                    *selectedExternal, liveQuery.value(0).toString(),
+                                    liveQuery.value(2).toString(), liveQuery.value(3).toString(),
+                                    liveQuery.value(1).toString(), liveQuery.value(5).toInt(),
+                                    liveQuery.value(6).toInt(), liveQuery.value(9).toString(),
+                                    liveQuery.value(12).toString(), options.awardEndorsement)) {
+                                continue;
+                            }
+                        } else {
+                            entity = baseEntity(
+                                liveQuery.value(0).toString(), liveQuery.value(1).toString(),
+                                liveQuery.value(4).toString(), liveQuery.value(6).toInt(),
+                                liveQuery.value(7).toInt(), liveQuery.value(8).toString(),
+                                liveQuery.value(9).toString(), liveQuery.value(11).toString(),
+                                liveQuery.value(12).toString(), liveQuery.value(13).toString());
+                        }
+                        QString const call = liveQuery.value(0).toString().toUpper();
+                        QString const key = call + QLatin1Char('\n') + entity;
+                        if (entity.isEmpty() || detailWorked.contains(entity)
+                            || missingKeys.contains(key)) continue;
+                        missingKeys.insert(key);
+                        QVariantMap row;
+                        row.insert(QStringLiteral("entity"), entity);
+                        row.insert(QStringLiteral("call"), call);
+                        row.insert(QStringLiteral("grid"), liveQuery.value(1).toString());
+                        row.insert(QStringLiteral("band"), liveQuery.value(2).toString());
+                        row.insert(QStringLiteral("mode"), liveQuery.value(3).toString());
+                        row.insert(QStringLiteral("dxcc"), liveQuery.value(4).toString());
+                        row.insert(QStringLiteral("reason"),
+                                   QStringLiteral("Missing %1: %2")
+                                       .arg(options.activeAwardProgram, entity));
+                        missing.append(row);
+                    }
+                }
+                std::sort(missing.begin(), missing.end(), [](QVariant const& left,
+                                                             QVariant const& right) {
+                    QVariantMap const a = left.toMap();
+                    QVariantMap const b = right.toMap();
+                    return a.value(QStringLiteral("entity")).toString()
+                        + a.value(QStringLiteral("call")).toString()
+                        < b.value(QStringLiteral("entity")).toString()
+                        + b.value(QStringLiteral("call")).toString();
+                });
+                QStringList workedEntities = detailWorked.values();
+                QStringList confirmedEntities = detailConfirmed.values();
+                std::sort(workedEntities.begin(), workedEntities.end());
+                std::sort(confirmedEntities.begin(), confirmedEntities.end());
+                for (int index = 0; index < snapshot.awards.size(); ++index) {
+                    QVariantMap award = snapshot.awards.at(index).toMap();
+                    if (award.value(QStringLiteral("label")).toString().compare(
+                            options.activeAwardProgram, Qt::CaseInsensitive) == 0) {
+                        award.insert(QStringLiteral("workedEntities"), workedEntities);
+                        award.insert(QStringLiteral("confirmedEntities"), confirmedEntities);
+                        award.insert(QStringLiteral("missing"), missing);
+                        award.insert(QStringLiteral("missingCount"), missing.size());
+                        snapshot.awards[index] = award;
+                        break;
+                    }
+                }
+                snapshot.awardMissing = missing;
             }
         }
     }
@@ -4678,6 +6454,7 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
                                                     const QString& sourcePath,
                                                     const QByteArray& data,
                                                     const QString& fingerprint,
+                                                    const QString& defaultOperatorCall,
                                                     QString* error)
 {
     std::unique_ptr<ScopedSqliteConnection> connection;
@@ -4690,6 +6467,18 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
         QSqlQuery query(db);
         query.prepare(QStringLiteral("SELECT value FROM map_meta WHERE key = 'adif_fingerprint'"));
         if (query.exec() && query.next() && query.value(0).toString() == fingerprint) {
+            if (!defaultOperatorCall.isEmpty()) {
+                QSqlQuery update(db);
+                update.prepare(QStringLiteral(
+                    "UPDATE map_qso SET operator_call = :operator_call "
+                    "WHERE COALESCE(operator_call, '') = ''"));
+                update.bindValue(QStringLiteral(":operator_call"),
+                                 defaultOperatorCall.toUpper());
+                if (!update.exec()) {
+                    if (error) *error = update.lastError().text();
+                    return false;
+                }
+            }
             return true;
         }
     }
@@ -4707,12 +6496,12 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
     QSqlQuery insert(db);
     if (!insert.prepare(QStringLiteral(
             "INSERT OR REPLACE INTO map_qso"
-            " (source_key, call, grid, grid4, grid6, band, mode, qso_date, time_on,"
-            " frequency_mhz, confirmed, qso_epoch, source, dxcc, continent,"
+            " (source_key, call, grid, grid4, grid6, band, mode, propagation_mode, qso_date, time_on,"
+            " frequency_mhz, confirmed, qso_epoch, source, operator_call, dxcc, dxcc_number, continent,"
             " cq_zone, itu_zone, state, county, lotw_confirmed, eqsl_confirmed, oqrs,"
             " pota_ref, iota, wpx)"
-            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :date, :time,"
-            " :freq, :confirmed, :epoch, :source, :dxcc, :continent,"
+            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :propagation_mode, :date, :time,"
+            " :freq, :confirmed, :epoch, :source, :operator_call, :dxcc, :dxcc_number, :continent,"
             " :cq_zone, :itu_zone, :state, :county, :lotw_confirmed, :eqsl_confirmed, :oqrs,"
             " :pota_ref, :iota, :wpx)"))) {
         if (error) *error = insert.lastError().text();
@@ -4727,13 +6516,18 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
         insert.bindValue(QStringLiteral(":grid6"), record.grid6);
         insert.bindValue(QStringLiteral(":band"), record.band);
         insert.bindValue(QStringLiteral(":mode"), record.mode);
+        insert.bindValue(QStringLiteral(":propagation_mode"), record.propagationMode);
         insert.bindValue(QStringLiteral(":date"), record.qsoDate);
         insert.bindValue(QStringLiteral(":time"), record.timeOn);
         insert.bindValue(QStringLiteral(":freq"), record.frequencyMhz);
         insert.bindValue(QStringLiteral(":confirmed"), record.confirmed ? 1 : 0);
         insert.bindValue(QStringLiteral(":epoch"), record.qsoEpoch);
         insert.bindValue(QStringLiteral(":source"), record.source);
+        insert.bindValue(QStringLiteral(":operator_call"),
+                         record.operatorCall.isEmpty()
+                             ? defaultOperatorCall.toUpper() : record.operatorCall);
         insert.bindValue(QStringLiteral(":dxcc"), record.dxcc);
+        insert.bindValue(QStringLiteral(":dxcc_number"), record.dxccNumber);
         insert.bindValue(QStringLiteral(":continent"), record.continent);
         insert.bindValue(QStringLiteral(":cq_zone"), record.cqZone);
         insert.bindValue(QStringLiteral(":itu_zone"), record.ituZone);
@@ -4785,12 +6579,12 @@ bool MapIntelligenceService::appendQsoRecords(const QString& databasePath,
     QSqlQuery insert(db);
     if (!insert.prepare(QStringLiteral(
             "INSERT OR REPLACE INTO map_qso"
-            " (source_key, call, grid, grid4, grid6, band, mode, qso_date, time_on,"
-            " frequency_mhz, confirmed, qso_epoch, source, dxcc, continent,"
+            " (source_key, call, grid, grid4, grid6, band, mode, propagation_mode, qso_date, time_on,"
+            " frequency_mhz, confirmed, qso_epoch, source, operator_call, dxcc, dxcc_number, continent,"
             " cq_zone, itu_zone, state, county, lotw_confirmed, eqsl_confirmed, oqrs,"
             " pota_ref, iota, wpx)"
-            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :date, :time,"
-            " :freq, :confirmed, :epoch, :source, :dxcc, :continent,"
+            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :propagation_mode, :date, :time,"
+            " :freq, :confirmed, :epoch, :source, :operator_call, :dxcc, :dxcc_number, :continent,"
             " :cq_zone, :itu_zone, :state, :county, :lotw_confirmed, :eqsl_confirmed, :oqrs,"
             " :pota_ref, :iota, :wpx)"))) {
         if (error) *error = insert.lastError().text();
@@ -4805,13 +6599,16 @@ bool MapIntelligenceService::appendQsoRecords(const QString& databasePath,
         insert.bindValue(QStringLiteral(":grid6"), record.grid6);
         insert.bindValue(QStringLiteral(":band"), record.band);
         insert.bindValue(QStringLiteral(":mode"), record.mode);
+        insert.bindValue(QStringLiteral(":propagation_mode"), record.propagationMode);
         insert.bindValue(QStringLiteral(":date"), record.qsoDate);
         insert.bindValue(QStringLiteral(":time"), record.timeOn);
         insert.bindValue(QStringLiteral(":freq"), record.frequencyMhz);
         insert.bindValue(QStringLiteral(":confirmed"), record.confirmed ? 1 : 0);
         insert.bindValue(QStringLiteral(":epoch"), record.qsoEpoch);
         insert.bindValue(QStringLiteral(":source"), record.source);
+        insert.bindValue(QStringLiteral(":operator_call"), record.operatorCall);
         insert.bindValue(QStringLiteral(":dxcc"), record.dxcc);
+        insert.bindValue(QStringLiteral(":dxcc_number"), record.dxccNumber);
         insert.bindValue(QStringLiteral(":continent"), record.continent);
         insert.bindValue(QStringLiteral(":cq_zone"), record.cqZone);
         insert.bindValue(QStringLiteral(":itu_zone"), record.ituZone);
@@ -4849,14 +6646,14 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
     QSqlQuery insert(db);
     if (!insert.prepare(QStringLiteral(
             "INSERT INTO map_spot"
-            " (unique_key, call, grid, grid4, grid6, band, mode, message, observed_utc,"
-            " observed_ms, frequency_hz, snr, source, dxcc, continent, cq_zone,"
-            " itu_zone, state, is_cq, target_call, distance_km, activity_type,"
+            " (unique_key, call, grid, grid4, grid6, band, mode, propagation_mode, message, observed_utc,"
+            " observed_ms, frequency_hz, snr, dt, source, dxcc, continent, cq_zone,"
+            " itu_zone, state, county, pota_ref, iota, wpx, dxcc_number, is_cq, target_call, distance_km, activity_type,"
             " receiver_call, receiver_grid, provider, first_observed_ms, last_observed_ms,"
             " correlation_count, direction)"
-            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :message, :utc,"
-            " :ms, :freq, :snr, :source, :dxcc, :continent, :cq_zone,"
-            " :itu_zone, :state, :is_cq, :target_call, :distance_km, :activity_type,"
+            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :propagation_mode, :message, :utc,"
+            " :ms, :freq, :snr, :dt, :source, :dxcc, :continent, :cq_zone,"
+            " :itu_zone, :state, :county, :pota_ref, :iota, :wpx, :dxcc_number, :is_cq, :target_call, :distance_km, :activity_type,"
             " :receiver_call, :receiver_grid, :provider, :first_observed_ms, :last_observed_ms,"
             " :correlation_count, :direction)"
             " ON CONFLICT(unique_key) DO UPDATE SET"
@@ -4864,10 +6661,17 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
             " observed_ms=excluded.observed_ms,"
             " last_observed_ms=excluded.last_observed_ms,"
             " snr=excluded.snr,"
+            " dt=excluded.dt,"
+            " county=CASE WHEN excluded.county<>'' THEN excluded.county ELSE map_spot.county END,"
+            " pota_ref=CASE WHEN excluded.pota_ref<>'' THEN excluded.pota_ref ELSE map_spot.pota_ref END,"
+            " iota=CASE WHEN excluded.iota<>'' THEN excluded.iota ELSE map_spot.iota END,"
+            " wpx=CASE WHEN excluded.wpx<>'' THEN excluded.wpx ELSE map_spot.wpx END,"
             " receiver_call=excluded.receiver_call,"
             " receiver_grid=excluded.receiver_grid,"
             " provider=excluded.provider,"
             " direction=excluded.direction,"
+            " propagation_mode=CASE WHEN excluded.propagation_mode<>'UNKNOWN'"
+            " THEN excluded.propagation_mode ELSE map_spot.propagation_mode END,"
             " correlation_count=MAX(map_spot.correlation_count, excluded.correlation_count),"
             " activity_type=excluded.activity_type,"
             " hits=map_spot.hits+1"))) {
@@ -4885,9 +6689,9 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
     QSqlQuery event(db);
     if (!event.prepare(QStringLiteral(
             "INSERT INTO map_spot_event"
-            " (spot_key, call, grid, receiver_call, receiver_grid, band, mode, source, provider,"
+            " (spot_key, call, grid, receiver_call, receiver_grid, band, mode, propagation_mode, source, provider,"
             " observed_ms, frequency_hz, snr, correlation, activity_type, direction)"
-            " VALUES (:spot_key, :call, :grid, :receiver_call, :receiver_grid, :band, :mode,"
+            " VALUES (:spot_key, :call, :grid, :receiver_call, :receiver_grid, :band, :mode, :propagation_mode,"
             " :source, :provider, :observed_ms, :frequency_hz, :snr, :correlation,"
             " :activity_type, :direction)"))) {
         if (error) *error = event.lastError().text();
@@ -4895,6 +6699,7 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
         return false;
     }
     for (LiveSpot const& spot : spots) {
+        QString const propagationMode = normalizePropagationMode(spot.propagationMode);
         bool const pskReporterSpot =
             spot.source.compare(QStringLiteral("psk"), Qt::CaseInsensitive) == 0
             || spot.provider.contains(QStringLiteral("PSK Reporter"),
@@ -4918,17 +6723,24 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
             insert.bindValue(QStringLiteral(":grid6"), spot.grid6);
             insert.bindValue(QStringLiteral(":band"), spot.band);
             insert.bindValue(QStringLiteral(":mode"), spot.mode);
+            insert.bindValue(QStringLiteral(":propagation_mode"), propagationMode);
             insert.bindValue(QStringLiteral(":message"), spot.message);
             insert.bindValue(QStringLiteral(":utc"), spot.observedUtc);
             insert.bindValue(QStringLiteral(":ms"), spot.observedMs);
             insert.bindValue(QStringLiteral(":freq"), spot.frequencyHz);
             insert.bindValue(QStringLiteral(":snr"), spot.snr);
+            insert.bindValue(QStringLiteral(":dt"), spot.dt);
             insert.bindValue(QStringLiteral(":source"), spot.source);
             insert.bindValue(QStringLiteral(":dxcc"), spot.dxcc);
             insert.bindValue(QStringLiteral(":continent"), spot.continent);
             insert.bindValue(QStringLiteral(":cq_zone"), spot.cqZone);
             insert.bindValue(QStringLiteral(":itu_zone"), spot.ituZone);
             insert.bindValue(QStringLiteral(":state"), spot.state);
+            insert.bindValue(QStringLiteral(":county"), spot.county);
+            insert.bindValue(QStringLiteral(":pota_ref"), spot.potaReference);
+            insert.bindValue(QStringLiteral(":iota"), spot.iotaReference);
+            insert.bindValue(QStringLiteral(":wpx"), spot.wpxPrefix);
+            insert.bindValue(QStringLiteral(":dxcc_number"), spot.dxccNumber);
             insert.bindValue(QStringLiteral(":is_cq"), spot.isCq ? 1 : 0);
             insert.bindValue(QStringLiteral(":target_call"), spot.targetCall);
             insert.bindValue(QStringLiteral(":distance_km"), spot.distanceKm);
@@ -4953,6 +6765,7 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
         event.bindValue(QStringLiteral(":receiver_grid"), spot.receiverGrid);
         event.bindValue(QStringLiteral(":band"), spot.band);
         event.bindValue(QStringLiteral(":mode"), spot.mode);
+        event.bindValue(QStringLiteral(":propagation_mode"), propagationMode);
         event.bindValue(QStringLiteral(":source"), spot.source);
         event.bindValue(QStringLiteral(":provider"), spot.provider);
         event.bindValue(QStringLiteral(":observed_ms"), spot.observedMs);
@@ -5287,8 +7100,12 @@ bool MapIntelligenceService::updateRosterRuleRow(const QString& databasePath,
     query.bindValue(QStringLiteral(":type"), type);
     query.bindValue(QStringLiteral(":value"), value);
     query.bindValue(QStringLiteral(":action"), action);
-    query.bindValue(QStringLiteral(":band"), band.trimmed());
-    query.bindValue(QStringLiteral(":mode"), mode.trimmed());
+    QString const normalizedBand = band.trimmed().isNull()
+        ? QStringLiteral("") : band.trimmed();
+    QString const normalizedMode = mode.trimmed().isNull()
+        ? QStringLiteral("") : mode.trimmed();
+    query.bindValue(QStringLiteral(":band"), normalizedBand);
+    query.bindValue(QStringLiteral(":mode"), normalizedMode);
     query.bindValue(QStringLiteral(":updated"), QDateTime::currentMSecsSinceEpoch());
     if (!query.exec()) {
         if (error) *error = query.lastError().text();
@@ -5313,8 +7130,12 @@ bool MapIntelligenceService::removeRosterRuleRow(const QString& databasePath,
         " AND upper(mode)=upper(:mode)"));
     query.bindValue(QStringLiteral(":type"), type);
     query.bindValue(QStringLiteral(":value"), value);
-    query.bindValue(QStringLiteral(":band"), band.trimmed());
-    query.bindValue(QStringLiteral(":mode"), mode.trimmed());
+    QString const normalizedBand = band.trimmed().isNull()
+        ? QStringLiteral("") : band.trimmed();
+    QString const normalizedMode = mode.trimmed().isNull()
+        ? QStringLiteral("") : mode.trimmed();
+    query.bindValue(QStringLiteral(":band"), normalizedBand);
+    query.bindValue(QStringLiteral(":mode"), normalizedMode);
     if (!query.exec()) {
         if (error) *error = query.lastError().text();
         return false;
@@ -5327,13 +7148,21 @@ void MapIntelligenceService::queueSnapshotQuery(quint64 generation)
     QString const database = m_databasePath;
     QueryOptions const options {
         m_bandFilter, m_modeFilter, m_periodFilter, m_continentFilter,
-        m_dxccFilter, m_sourceFilter, m_rosterSort, m_rosterStatusFilter,
-        m_rosterHuntScope, m_activeAwardProgram, m_awardGoal,
+        m_dxccFilter, m_sourceFilter, m_propagationFilter, m_rosterSort, m_rosterStatusFilter,
+        m_rosterHuntScope, m_rosterScope, m_rosterDxccScope,
+        m_rosterMyCall, m_rosterMyDxcc, m_activeAwardProgram, m_awardGoal,
         m_rosterRetentionMinutes, m_gridPrecision, m_liveDecayMinutes,
+        m_sourceDecayMinutes,
         m_cqOnly, m_rosterSortDescending, m_rosterCqOnly,
         m_splitGridEnabled, m_rosterTextFilter, m_rosterTextMode,
         pskLayerEnabled(), m_pskDisplayMode, m_pskOpacityPercent / 100.0,
-        m_spotAgeFilter, m_spotCorrelationFilter, m_bandActivityWindowHours
+        m_spotAgeFilter, m_spotCorrelationFilter, m_bandActivityWindowHours,
+        m_rosterUsesLoTW, m_rosterMaxLoTWDays, m_rosterUsesEQSL,
+        m_rosterUsesOQRS, m_rosterSpottedMeOnly, m_rosterMinSnrEnabled,
+        m_rosterMinSnr, m_rosterMaxDtEnabled, m_rosterMaxDt,
+        m_rosterTreatRr73AsCq, m_rosterWantedTypes,
+        m_awardEndorsement, m_awardConfirmation, m_awardCallsign,
+        m_awardFromDate, m_awardToDate
     };
     QPointer<MapIntelligenceService> guard(this);
     m_workerPool.start(QRunnable::create([guard, database, options, generation] {
@@ -5363,6 +7192,7 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     m_roster = std::move(snapshot.roster);
     m_rosterPreferences = std::move(snapshot.rosterPreferences);
     m_awards = std::move(snapshot.awards);
+    m_awardMissing = std::move(snapshot.awardMissing);
     m_alerts = std::move(snapshot.alerts);
     m_spotHeatmap = std::move(snapshot.spotHeatmap);
     m_spotTimeline = std::move(snapshot.spotTimeline);
@@ -5370,7 +7200,11 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     m_bandActivity = std::move(snapshot.bandActivity);
     m_bandActivityTimeline = std::move(snapshot.bandActivityTimeline);
     m_bandActivitySummary = std::move(snapshot.bandActivitySummary);
+    m_propagationStatistics = std::move(snapshot.propagationStatistics);
+    m_propagationSummary = std::move(snapshot.propagationSummary);
     m_rosterRules = std::move(snapshot.rosterRules);
+    m_rosterWantedMatrix = std::move(snapshot.rosterWantedMatrix);
+    m_rosterExceptionMatrix = std::move(snapshot.rosterExceptionMatrix);
     m_statistics = std::move(snapshot.statistics);
     m_availableBands = std::move(snapshot.bands);
     m_availableModes = std::move(snapshot.modes);
@@ -5408,6 +7242,10 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
         m_sourceFilter = QStringLiteral("All");
         emit sourceFilterChanged();
     }
+    if (!availablePropagationModes().contains(m_propagationFilter, Qt::CaseInsensitive)) {
+        m_propagationFilter = QStringLiteral("MIXED");
+        emit propagationFilterChanged();
+    }
 
     m_layerModel->setCount(QStringLiteral("live"), m_liveSpotCount);
     m_layerModel->setCount(QStringLiteral("worked"), m_workedGridCount);
@@ -5422,7 +7260,9 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     emit alertsChanged();
     emit spotAnalyticsChanged();
     emit bandActivityChanged();
+    emit propagationStatisticsChanged();
     emit rosterRulesChanged();
+    emit rosterMatricesChanged();
     emit statisticsChanged();
     rebuildVisibleCoverage();
 

@@ -126,6 +126,7 @@ Item {
             anchors.fill: parent
             anchors.margins: 10
             operations: root.operations
+            mapLayers: root.mapLayers
             legacyStatistics: root.mapLayers ? root.mapLayers.statistics : ({})
             borderColor: root.borderColor
             primaryColor: root.primaryColor
