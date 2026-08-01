@@ -1310,7 +1310,7 @@ add_executable (jt9_narrow_compare
 if (NOT MSVC)
   set_source_files_properties(
     src/services/satellite/sgp4/SGP4.cpp
-    PROPERTIES COMPILE_OPTIONS "-Wno-unused-function")
+    PROPERTIES COMPILE_OPTIONS "-Wno-unused-function;-Wno-unused-result")
 endif()
 target_include_directories (jt9_narrow_compare PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
