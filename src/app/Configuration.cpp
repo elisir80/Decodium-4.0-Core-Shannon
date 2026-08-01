@@ -2579,7 +2579,7 @@ Configuration::impl::impl (Configuration * self, QNetworkAccessManager * network
     if (!default_save_directory_.mkpath (save_dir) || !default_save_directory_.cd (save_dir))
       {
         MessageBox::critical_message (this, tr ("Failed to create save directory"),
-                                      tr ("path: \"%1\%")
+                                      tr ("path: \"%1\"")
                                       .arg (default_save_directory_.absoluteFilePath (save_dir)));
         throw std::runtime_error {"Failed to create save directory"};
       }
