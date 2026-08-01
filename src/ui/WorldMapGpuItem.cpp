@@ -1284,12 +1284,13 @@ QSGMaterialShader* ArrowMaterial::createShader(QSGRendererInterface::RenderMode)
 }
 #endif
 
-QSGGeometryNode* ensureFlatLineNode(QSGNode* parent, QSGGeometryNode*& node, const QColor& color)
+QSGGeometryNode* ensureFlatLineNode(QSGNode* parent, QSGGeometryNode*& node,
+                                    const QColor& color, float width = 1.0f)
 {
     if (!node) {
         auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 0);
         geometry->setDrawingMode(QSGGeometry::DrawLines);
-        geometry->setLineWidth(1.0f);
+        geometry->setLineWidth(width);
         geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
 
         auto* material = new QSGFlatColorMaterial;
@@ -1306,16 +1307,19 @@ QSGGeometryNode* ensureFlatLineNode(QSGNode* parent, QSGGeometryNode*& node, con
         material->setColor(color);
         node->markDirty(QSGNode::DirtyMaterial);
     }
+    node->geometry()->setLineWidth(width);
     return node;
 }
 
-void updateFlatLineNode(QSGNode* parent, QSGGeometryNode*& node, const QVector<QPointF>& points, const QColor& color)
+void updateFlatLineNode(QSGNode* parent, QSGGeometryNode*& node,
+                        const QVector<QPointF>& points, const QColor& color,
+                        float width = 1.0f)
 {
-    auto* lineNode = ensureFlatLineNode(parent, node, color);
+    auto* lineNode = ensureFlatLineNode(parent, node, color, width);
     auto* geometry = lineNode->geometry();
     geometry->allocate(points.size());
     geometry->setDrawingMode(QSGGeometry::DrawLines);
-    geometry->setLineWidth(1.0f);
+    geometry->setLineWidth(width);
     auto* vertices = geometry->vertexDataAsPoint2D();
     for (int i = 0; i < points.size(); ++i) {
         vertices[i].set(static_cast<float>(points[i].x()), static_cast<float>(points[i].y()));
@@ -2051,6 +2055,84 @@ void WorldMapGpuItem::setProjection(const QString& projection)
     markDirty();
 }
 
+void WorldMapGpuItem::setLayerStyles(const QVariantMap& styles)
+{
+    if (m_layerStyles == styles) {
+        return;
+    }
+    m_layerStyles = styles;
+    m_geometryDirty = true;
+    m_contactGeometryDirty = true;
+    markDirty(false);
+}
+
+QVariantMap WorldMapGpuItem::viewportState() const
+{
+    return {
+        {QStringLiteral("centerLongitude"), m_targetCenterLon},
+        {QStringLiteral("centerLatitude"), m_targetCenterLat},
+        {QStringLiteral("spanLongitude"), m_targetSpanLon},
+        {QStringLiteral("spanLatitude"), m_targetSpanLat},
+        {QStringLiteral("locked"), m_userViewportLocked}
+    };
+}
+
+void WorldMapGpuItem::setViewportState(const QVariantMap& state)
+{
+    bool okLon = false;
+    bool okLat = false;
+    bool okSpanLon = false;
+    bool okSpanLat = false;
+    double const lon = state.value(QStringLiteral("centerLongitude")).toDouble(&okLon);
+    double const lat = state.value(QStringLiteral("centerLatitude")).toDouble(&okLat);
+    double const spanLon = state.value(QStringLiteral("spanLongitude")).toDouble(&okSpanLon);
+    double const spanLat = state.value(QStringLiteral("spanLatitude")).toDouble(&okSpanLat);
+    if (!okLon || !okLat || !okSpanLon || !okSpanLat
+        || !std::isfinite(lon) || !std::isfinite(lat)
+        || !std::isfinite(spanLon) || !std::isfinite(spanLat)) {
+        return;
+    }
+    m_targetCenterLon = wrapLongitude(lon);
+    m_targetSpanLon = qBound(12.0, spanLon, 360.0);
+    m_targetSpanLat = qBound(8.0, spanLat, 180.0);
+    m_targetCenterLat = qBound(-90.0 + 0.5 * m_targetSpanLat,
+                               lat, 90.0 - 0.5 * m_targetSpanLat);
+    m_userViewportLocked = state.value(QStringLiteral("locked"), true).toBool();
+    m_viewVelocityLon = 0.0;
+    m_viewVelocityLat = 0.0;
+    m_viewVelocitySpanLon = 0.0;
+    m_viewVelocitySpanLat = 0.0;
+    markDirty(false);
+}
+
+QColor WorldMapGpuItem::styledColor(const QString& layerId,
+                                    const QColor& fallback, int alpha) const
+{
+    QColor result = fallback;
+    QVariantMap const style = m_layerStyles.value(layerId).toMap();
+    QColor const configured(style.value(QStringLiteral("color")).toString());
+    if (configured.isValid()) {
+        result = configured;
+    }
+    double const opacity = qBound(0.05,
+        style.value(QStringLiteral("opacity"), 1.0).toDouble(), 1.0);
+    int const baseAlpha = alpha >= 0 ? alpha : result.alpha();
+    result.setAlpha(qBound(0, qRound(baseAlpha * opacity), 255));
+    return result;
+}
+
+double WorldMapGpuItem::layerThickness(const QString& layerId, double fallback) const
+{
+    QVariantMap const style = m_layerStyles.value(layerId).toMap();
+    return qBound(0.5, style.value(QStringLiteral("thickness"), fallback).toDouble(), 8.0);
+}
+
+int WorldMapGpuItem::layerLabelDensity(const QString& layerId) const
+{
+    QVariantMap const style = m_layerStyles.value(layerId).toMap();
+    return qBound(0, style.value(QStringLiteral("labelDensity"), 100).toInt(), 100);
+}
+
 void WorldMapGpuItem::setBaseMapService(QObject* service)
 {
     auto* baseMapService = qobject_cast<MapBaseMapService*>(service);
@@ -2530,80 +2612,135 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
         rebuildGeometryBatch();
         m_lastMapRebuildUs = rebuildTimer.nsecsElapsed() / 1000;
         updateCoverageTriangleNode(geometryLayer, geometryLayer->workedCoverageFill,
-                                   m_batch.workedCoverageTriangles, QColor(0, 216, 255, 38));
+                                   m_batch.workedCoverageTriangles,
+                                   styledColor(QStringLiteral("worked"), QColor(0, 216, 255), 38));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->confirmedCoverageFill,
-                                   m_batch.confirmedCoverageTriangles, QColor(46, 204, 113, 54));
+                                   m_batch.confirmedCoverageTriangles,
+                                   styledColor(QStringLiteral("confirmed"), QColor(46, 204, 113), 54));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->activeCoverageFill,
-                                   m_batch.activeCoverageTriangles, QColor(246, 195, 68, 76));
+                                   m_batch.activeCoverageTriangles,
+                                   styledColor(QStringLiteral("active"), QColor(246, 195, 68), 76));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->activeCoverageMediumFill,
-                                   m_batch.activeCoverageMediumTriangles, QColor(246, 195, 68, 52));
+                                   m_batch.activeCoverageMediumTriangles,
+                                   styledColor(QStringLiteral("active"), QColor(246, 195, 68), 52));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->activeCoverageFadedFill,
-                                   m_batch.activeCoverageFadedTriangles, QColor(246, 195, 68, 32));
+                                   m_batch.activeCoverageFadedTriangles,
+                                   styledColor(QStringLiteral("active"), QColor(246, 195, 68), 32));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->missingCoverageFill,
-                                   m_batch.missingCoverageTriangles, QColor(255, 140, 66, 88));
+                                   m_batch.missingCoverageTriangles,
+                                   styledColor(QStringLiteral("missing"), QColor(255, 140, 66), 88));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->missingCoverageMediumFill,
-                                   m_batch.missingCoverageMediumTriangles, QColor(255, 140, 66, 58));
+                                   m_batch.missingCoverageMediumTriangles,
+                                   styledColor(QStringLiteral("missing"), QColor(255, 140, 66), 58));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->missingCoverageFadedFill,
-                                   m_batch.missingCoverageFadedTriangles, QColor(255, 140, 66, 38));
+                                   m_batch.missingCoverageFadedTriangles,
+                                   styledColor(QStringLiteral("missing"), QColor(255, 140, 66), 38));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->pskCoverageFill,
-                                   m_batch.pskCoverageTriangles, QColor(186, 124, 255, 78));
+                                   m_batch.pskCoverageTriangles,
+                                   styledColor(QStringLiteral("psk"), QColor(186, 124, 255), 78));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->pskCoverageMediumFill,
-                                   m_batch.pskCoverageMediumTriangles, QColor(186, 124, 255, 52));
+                                   m_batch.pskCoverageMediumTriangles,
+                                   styledColor(QStringLiteral("psk"), QColor(186, 124, 255), 52));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->pskCoverageFadedFill,
-                                   m_batch.pskCoverageFadedTriangles, QColor(186, 124, 255, 32));
+                                   m_batch.pskCoverageFadedTriangles,
+                                   styledColor(QStringLiteral("psk"), QColor(186, 124, 255), 32));
         updateFlatLineNode(geometryLayer, geometryLayer->workedCoverageLines,
-                           m_batch.workedCoverageLines, QColor(0, 216, 255, 150));
+                           m_batch.workedCoverageLines,
+                           styledColor(QStringLiteral("worked"), QColor(0, 216, 255), 150),
+                           layerThickness(QStringLiteral("worked")));
         updateFlatLineNode(geometryLayer, geometryLayer->confirmedCoverageLines,
-                           m_batch.confirmedCoverageLines, QColor(84, 255, 145, 205));
+                           m_batch.confirmedCoverageLines,
+                           styledColor(QStringLiteral("confirmed"), QColor(84, 255, 145), 205),
+                           layerThickness(QStringLiteral("confirmed")));
         updateFlatLineNode(geometryLayer, geometryLayer->activeCoverageLines,
-                           m_batch.activeCoverageLines, QColor(246, 195, 68, 190));
+                           m_batch.activeCoverageLines,
+                           styledColor(QStringLiteral("active"), QColor(246, 195, 68), 190),
+                           layerThickness(QStringLiteral("active")));
         updateFlatLineNode(geometryLayer, geometryLayer->activeCoverageMediumLines,
-                           m_batch.activeCoverageMediumLines, QColor(246, 195, 68, 120));
+                           m_batch.activeCoverageMediumLines,
+                           styledColor(QStringLiteral("active"), QColor(246, 195, 68), 120),
+                           layerThickness(QStringLiteral("active")));
         updateFlatLineNode(geometryLayer, geometryLayer->activeCoverageFadedLines,
-                           m_batch.activeCoverageFadedLines, QColor(246, 195, 68, 72));
+                           m_batch.activeCoverageFadedLines,
+                           styledColor(QStringLiteral("active"), QColor(246, 195, 68), 72),
+                           layerThickness(QStringLiteral("active")));
         updateFlatLineNode(geometryLayer, geometryLayer->missingCoverageLines,
-                           m_batch.missingCoverageLines, QColor(255, 140, 66, 215));
+                           m_batch.missingCoverageLines,
+                           styledColor(QStringLiteral("missing"), QColor(255, 140, 66), 215),
+                           layerThickness(QStringLiteral("missing")));
         updateFlatLineNode(geometryLayer, geometryLayer->missingCoverageMediumLines,
-                           m_batch.missingCoverageMediumLines, QColor(255, 140, 66, 136));
+                           m_batch.missingCoverageMediumLines,
+                           styledColor(QStringLiteral("missing"), QColor(255, 140, 66), 136),
+                           layerThickness(QStringLiteral("missing")));
         updateFlatLineNode(geometryLayer, geometryLayer->missingCoverageFadedLines,
-                           m_batch.missingCoverageFadedLines, QColor(255, 140, 66, 82));
+                           m_batch.missingCoverageFadedLines,
+                           styledColor(QStringLiteral("missing"), QColor(255, 140, 66), 82),
+                           layerThickness(QStringLiteral("missing")));
         updateFlatLineNode(geometryLayer, geometryLayer->pskCoverageLines,
-                           m_batch.pskCoverageLines, QColor(186, 124, 255, 205));
+                           m_batch.pskCoverageLines,
+                           styledColor(QStringLiteral("psk"), QColor(186, 124, 255), 205),
+                           layerThickness(QStringLiteral("psk")));
         updateFlatLineNode(geometryLayer, geometryLayer->pskCoverageMediumLines,
-                           m_batch.pskCoverageMediumLines, QColor(186, 124, 255, 130));
+                           m_batch.pskCoverageMediumLines,
+                           styledColor(QStringLiteral("psk"), QColor(186, 124, 255), 130),
+                           layerThickness(QStringLiteral("psk")));
         updateFlatLineNode(geometryLayer, geometryLayer->pskCoverageFadedLines,
-                           m_batch.pskCoverageFadedLines, QColor(186, 124, 255, 78));
-        updateFlatLineNode(geometryLayer, geometryLayer->gridLines, m_batch.gridLines, QColor(170, 210, 225, 42));
+                           m_batch.pskCoverageFadedLines,
+                           styledColor(QStringLiteral("psk"), QColor(186, 124, 255), 78),
+                           layerThickness(QStringLiteral("psk")));
+        updateFlatLineNode(geometryLayer, geometryLayer->gridLines, m_batch.gridLines,
+                           styledColor(QStringLiteral("live"), QColor(170, 210, 225), 42),
+                           layerThickness(QStringLiteral("live")));
         updateFlatLineNode(geometryLayer, geometryLayer->timeZoneLines,
-                           m_batch.timeZoneLines, QColor(112, 223, 255, 104));
+                           m_batch.timeZoneLines,
+                           styledColor(QStringLiteral("propagation"), QColor(112, 223, 255), 104),
+                           layerThickness(QStringLiteral("propagation")));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->countyBoundaryFill,
                                    m_batch.countyBoundaryTriangles,
-                                   QColor(124, 190, 228, 148));
+                                   styledColor(QStringLiteral("counties"), QColor(124, 190, 228), 148));
         updateCoverageTriangleNode(geometryLayer, geometryLayer->stateBoundaryFill,
                                    m_batch.stateBoundaryTriangles,
-                                   QColor(112, 235, 255, 238));
+                                   styledColor(QStringLiteral("states"), QColor(112, 235, 255), 238));
         updateFlatLineNode(geometryLayer, geometryLayer->countyBoundaryLines,
                            m_batch.countyBoundaryLines,
-                           QColor(150, 205, 232, 225));
+                           styledColor(QStringLiteral("counties"), QColor(150, 205, 232), 225),
+                           layerThickness(QStringLiteral("counties")));
         updateFlatLineNode(geometryLayer, geometryLayer->stateBoundaryLines,
                            m_batch.stateBoundaryLines,
-                           QColor(132, 245, 255, 255));
+                           styledColor(QStringLiteral("states"), QColor(132, 245, 255), 255),
+                           layerThickness(QStringLiteral("states")));
         updateScreenCircleNode(geometryLayer, geometryLayer->potaHaloMarkers,
-                               m_batch.potaMarkers, QColor(72, 191, 92, 105), 7.0f);
+                               m_batch.potaMarkers,
+                               styledColor(QStringLiteral("pota"), QColor(72, 191, 92), 105),
+                               static_cast<float>(7.0 * layerThickness(QStringLiteral("pota"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->iotaHaloMarkers,
-                               m_batch.iotaMarkers, QColor(46, 190, 226, 105), 7.0f);
+                               m_batch.iotaMarkers,
+                               styledColor(QStringLiteral("iota"), QColor(46, 190, 226), 105),
+                               static_cast<float>(7.0 * layerThickness(QStringLiteral("iota"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->wpxHaloMarkers,
-                               m_batch.wpxMarkers, QColor(242, 178, 61, 105), 7.0f);
+                               m_batch.wpxMarkers,
+                               styledColor(QStringLiteral("wpx"), QColor(242, 178, 61), 105),
+                               static_cast<float>(7.0 * layerThickness(QStringLiteral("wpx"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->moonHaloMarkers,
-                               m_batch.moonMarkers, QColor(196, 224, 255, 145), 10.0f);
+                               m_batch.moonMarkers,
+                               styledColor(QStringLiteral("moon"), QColor(196, 224, 255), 145),
+                               static_cast<float>(10.0 * layerThickness(QStringLiteral("moon"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->potaCoreMarkers,
-                               m_batch.potaMarkers, QColor(166, 255, 154, 240), 3.7f);
+                               m_batch.potaMarkers,
+                               styledColor(QStringLiteral("pota"), QColor(166, 255, 154), 240),
+                               static_cast<float>(3.7 * layerThickness(QStringLiteral("pota"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->iotaCoreMarkers,
-                               m_batch.iotaMarkers, QColor(130, 236, 255, 240), 3.7f);
+                               m_batch.iotaMarkers,
+                               styledColor(QStringLiteral("iota"), QColor(130, 236, 255), 240),
+                               static_cast<float>(3.7 * layerThickness(QStringLiteral("iota"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->wpxCoreMarkers,
-                               m_batch.wpxMarkers, QColor(255, 215, 145, 240), 3.7f);
+                               m_batch.wpxMarkers,
+                               styledColor(QStringLiteral("wpx"), QColor(255, 215, 145), 240),
+                               static_cast<float>(3.7 * layerThickness(QStringLiteral("wpx"))));
         updateScreenCircleNode(geometryLayer, geometryLayer->moonCoreMarkers,
-                               m_batch.moonMarkers, QColor(245, 249, 255, 250), 4.5f);
+                               m_batch.moonMarkers,
+                               styledColor(QStringLiteral("moon"), QColor(245, 249, 255), 250),
+                               static_cast<float>(4.5 * layerThickness(QStringLiteral("moon"))));
         if (azimuthalProjectionEnabled()) {
             auto screenPaths = [this, &rect](const QVector<PathLine>& paths) {
                 QVector<QPointF> lines;
@@ -2646,11 +2783,14 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
             QVector<QPointF> const outgoingMarkers = screenMarkers(m_batch.outgoingMarkers);
             QVector<QPointF> const bandMarkers = screenMarkers(m_batch.bandMarkers);
             updateFlatLineNode(geometryLayer, geometryLayer->genericPaths, genericPaths,
-                               colorForRole(PathRole::Generic));
+                               styledColor(QStringLiteral("live"), colorForRole(PathRole::Generic)),
+                               layerThickness(QStringLiteral("live")));
             updateFlatLineNode(geometryLayer, geometryLayer->incomingPaths, incomingPaths,
-                               colorForRole(PathRole::IncomingToMe));
+                               styledColor(QStringLiteral("live"), colorForRole(PathRole::IncomingToMe)),
+                               layerThickness(QStringLiteral("live")));
             updateFlatLineNode(geometryLayer, geometryLayer->outgoingPaths, outgoingPaths,
-                               colorForRole(PathRole::OutgoingFromMe));
+                               styledColor(QStringLiteral("live"), colorForRole(PathRole::OutgoingFromMe)),
+                               layerThickness(QStringLiteral("live")));
             updateScreenCircleNode(geometryLayer, geometryLayer->genericHaloMarkers,
                                    genericMarkers, withAlpha(colorForRole(PathRole::Generic), 90), 6.4f);
             updateScreenCircleNode(geometryLayer, geometryLayer->incomingHaloMarkers,
@@ -3209,6 +3349,10 @@ void WorldMapGpuItem::hoverMoveEvent(QHoverEvent* event)
     }
     Q_EMIT coverageCellHovered(cell, event->position().x(),
                                event->position().y());
+    Q_EMIT coverageCellSegmentHovered(
+        cell, event->position().x(), event->position().y(),
+        cell.value(QStringLiteral("splitSegment"),
+                   QStringLiteral("Combined")).toString());
 }
 
 void WorldMapGpuItem::hoverLeaveEvent(QHoverEvent* event)
@@ -4430,7 +4574,15 @@ void WorldMapGpuItem::rebuildGeometryBatch()
         } else {
             m_batch.wpxMarkers << point;
         }
-        if (operationalLabelCount < 16) {
+        int const operationalLabelLimit = qRound(
+            16.0 * layerLabelDensity(type == QStringLiteral("POTA")
+                                          ? QStringLiteral("pota")
+                                          : type == QStringLiteral("IOTA")
+                                                ? QStringLiteral("iota")
+                                                : type == QStringLiteral("MOON")
+                                                      ? QStringLiteral("moon")
+                                                      : QStringLiteral("wpx")) / 100.0);
+        if (operationalLabelCount < operationalLabelLimit) {
             QString label = marker.value(QStringLiteral("label")).toString();
             if (label.isEmpty()) {
                 label = marker.value(QStringLiteral("reference")).toString();
@@ -4457,7 +4609,8 @@ void WorldMapGpuItem::rebuildGeometryBatch()
         if (homeVisible) {
             m_batch.genericMarkers.push_back(m_homeLonLat);
         }
-        if (homeVisible && !m_homeGrid.isEmpty()) {
+        if (homeVisible && !m_homeGrid.isEmpty()
+            && layerLabelDensity(QStringLiteral("live")) > 0) {
             m_labels.push_back({m_homeGrid.left(6), home + QPointF(9.0, -8.0), QRectF(), QColor(235, 250, 255, 235)});
         }
     }
@@ -4532,7 +4685,10 @@ void WorldMapGpuItem::rebuildGeometryBatch()
             }
         }
 
-        if (markerVisible && !contact.call.isEmpty() && contactLabels < kMaxVisibleContactLabels) {
+        int const contactLabelLimit = qRound(
+            kMaxVisibleContactLabels * layerLabelDensity(QStringLiteral("live")) / 100.0);
+        if (markerVisible && !contact.call.isEmpty()
+            && contactLabels < contactLabelLimit) {
             QColor labelColor = contact.role == PathRole::BandOnly
                 ? QColor(255, 238, 174, 235)
                 : QColor(255, 244, 196, 235);

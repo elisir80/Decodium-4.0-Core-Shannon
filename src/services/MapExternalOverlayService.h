@@ -129,6 +129,7 @@ private:
     static QString normalizedLayerId(const QString& value);
 
     void setLayerEnabled(const QString& layerId, bool enabled);
+    void setLayerStyle(const QString& layerId);
     void requestProvider(const QString& layerId, int fallbackOffset = 0);
     void requestRainViewerTile(const QString& layerId,
                                int generation,

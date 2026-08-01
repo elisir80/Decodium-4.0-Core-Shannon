@@ -2,6 +2,9 @@
 
 #include <QDateTime>
 #include <QFile>
+#include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QSettings>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -36,12 +39,13 @@ QByteArray record(const QByteArray& call,
                   const QByteArray& cqZone = {},
                   const QByteArray& ituZone = {},
                   const QByteArray& state = {},
-                  const QByteArray& iota = {})
+                  const QByteArray& iota = {},
+                  const QByteArray& timeOn = "120000")
 {
     QByteArray result = field("CALL", call)
         + field("GRIDSQUARE", grid)
         + field("QSO_DATE", "20260728")
-        + field("TIME_ON", call.rightJustified(6, '0').right(6));
+        + field("TIME_ON", timeOn);
     if (!band.isEmpty()) {
         result += field("BAND", band);
     }
@@ -214,6 +218,43 @@ private slots:
                  QStringLiteral("TEST2"));
         operations->setLogbookSearch(QString());
         QTRY_COMPARE_WITH_TIMEOUT(operations->logbookTotal(), 4, 5000);
+
+        QTRY_VERIFY_WITH_TIMEOUT(!operations->awardProgression().isEmpty(), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(!operations->topStatistics().isEmpty(), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(!operations->profileStatistics().isEmpty(), 5000);
+        QCOMPARE(operations->periodComparison().size(), 4);
+        operations->drillDownStatistics(QStringLiteral("Band"), QStringLiteral("20m"));
+        QTRY_COMPARE_WITH_TIMEOUT(operations->logbookTotal(), 3, 5000);
+        QCOMPARE(operations->statisticsDrilldown(), QStringLiteral("Band: 20m"));
+        operations->setLogbookBand(QStringLiteral("All"));
+        QTRY_COMPARE_WITH_TIMEOUT(operations->logbookTotal(), 4, 5000);
+
+        QString const statisticsJsonPath =
+            tempDir.filePath(QStringLiteral("statistics.json"));
+        QVERIFY(operations->exportStatistics(statisticsJsonPath, QStringLiteral("JSON")));
+        QFile statisticsJson(statisticsJsonPath);
+        QVERIFY(statisticsJson.open(QIODevice::ReadOnly));
+        QJsonParseError statisticsError;
+        QJsonDocument const statisticsDocument =
+            QJsonDocument::fromJson(statisticsJson.readAll(), &statisticsError);
+        QCOMPARE(statisticsError.error, QJsonParseError::NoError);
+        QCOMPARE(statisticsDocument.object().value(QStringLiteral("type")).toString(),
+                 QStringLiteral("decodium-logbook-statistics"));
+        QVERIFY(statisticsDocument.object().value(QStringLiteral("awardProgression"))
+                    .toArray().size() >= 1);
+        QVERIFY(statisticsDocument.object().value(QStringLiteral("topStatistics"))
+                    .toArray().size() >= 5);
+        statisticsJson.close();
+
+        QString const statisticsCsvPath =
+            tempDir.filePath(QStringLiteral("statistics.csv"));
+        QVERIFY(operations->exportStatistics(statisticsCsvPath, QStringLiteral("CSV")));
+        QFile statisticsCsv(statisticsCsvPath);
+        QVERIFY(statisticsCsv.open(QIODevice::ReadOnly));
+        QByteArray const statisticsCsvData = statisticsCsv.readAll();
+        QVERIFY(statisticsCsvData.startsWith("Section,Period/Group"));
+        QVERIFY(statisticsCsvData.contains("AwardProgression"));
+        statisticsCsv.close();
 
         QString const csvPath = tempDir.filePath(QStringLiteral("filtered.csv"));
         QVERIFY(operations->exportLogbook(csvPath, QStringLiteral("CSV")));
@@ -1006,6 +1047,7 @@ private slots:
         file.close();
 
         MapIntelligenceService service(nullptr, databasePath);
+        service.setRosterStationCall(QStringLiteral("9H1ABC"));
         service.reloadFromAdif(adifPath);
         QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 1, 5000);
         QTRY_VERIFY_WITH_TIMEOUT(service.availableDxcc().contains(
@@ -1027,6 +1069,9 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(
             awardByLabel(QStringLiteral("Maidenhead")).value(QStringLiteral("worked")).toInt(),
             1, 5000);
+        QVERIFY(awardByLabel(QStringLiteral("DXCC"))
+                    .value(QStringLiteral("scope")).toString()
+                    .contains(QStringLiteral("9H1ABC")));
 
         QVariantMap decode;
         decode.insert(QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch());
@@ -1168,6 +1213,232 @@ private slots:
         QTRY_COMPARE_WITH_TIMEOUT(persisted.rosterPreferenceCount(), 0, 5000);
     }
 
+    void completesRosterFiltersScopesMatricesAndRr73()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        QString const adifPath = tempDir.filePath(QStringLiteral("roster.adi"));
+        QString const databasePath = tempDir.filePath(QStringLiteral("roster.sqlite"));
+        QByteArray adif = QByteArrayLiteral("Decodium ADIF\n<EOH>\n");
+        adif += record("LOTW1", "FN25", "20m", "14.074", "FT8", "",
+                        "LOTW_QSL_RCVD", "Y", "Canada", "NA", "2", "4", "ON");
+        adif += record("EQSL1", "FN26", "20m", "14.074", "FT8", "",
+                        "EQSL_QSL_RCVD", "Y", "Canada", "NA", "2", "4", "ON");
+        adif += record("OQRS1", "FN27", "20m", "14.074", "FT8", "",
+                        "OQRS", "Y", "Canada", "NA", "2", "4", "ON");
+        QFile file(adifPath);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        QVERIFY(file.write(adif) == adif.size());
+        file.close();
+
+        MapIntelligenceService service(nullptr, databasePath);
+        service.setRosterStationCall(QStringLiteral("WA1BXY"));
+        service.reloadFromAdif(adifPath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 3, 5000);
+
+        qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
+        auto ingest = [&service, &timestamp](const QString& call,
+                                               const QString& message,
+                                               const QString& grid,
+                                               const QString& band,
+                                               const QString& mode,
+                                               const QString& dxcc,
+                                               const QString& continent,
+                                               const QString& state,
+                                               int snr,
+                                               double dt,
+                                               bool isCq,
+                                               const QString& pota = {},
+                                               const QString& county = {},
+                                               int cqZone = 0,
+                                               int ituZone = 0) {
+            QVariantMap decode;
+            decode.insert(QStringLiteral("time"), QString::number(++timestamp));
+            decode.insert(QStringLiteral("timestamp"), timestamp);
+            decode.insert(QStringLiteral("message"), message);
+            decode.insert(QStringLiteral("fromCall"), call);
+            decode.insert(QStringLiteral("dxGrid"), grid);
+            decode.insert(QStringLiteral("mode"), mode);
+            decode.insert(QStringLiteral("db"), snr);
+            decode.insert(QStringLiteral("dt"), dt);
+            decode.insert(QStringLiteral("freq"), 1500);
+            decode.insert(QStringLiteral("dxcc"), dxcc);
+            decode.insert(QStringLiteral("continent"), continent);
+            decode.insert(QStringLiteral("state"), state);
+            if (cqZone > 0) decode.insert(QStringLiteral("cqZone"), cqZone);
+            if (ituZone > 0) decode.insert(QStringLiteral("ituZone"), ituZone);
+            decode.insert(QStringLiteral("isCQ"), isCq);
+            if (!pota.isEmpty()) decode.insert(QStringLiteral("pota"), pota);
+            if (!county.isEmpty()) decode.insert(QStringLiteral("county"), county);
+            service.ingestDecodeEntry(decode, 14074000,
+                                      band.isEmpty() ? QStringLiteral("20m") : band);
+        };
+
+        ingest(QStringLiteral("WANTED1"), QStringLiteral("CQ WANTED1 FN20"),
+               QStringLiteral("FN20"), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("Brazil"), QStringLiteral("SA"), QStringLiteral("SP"),
+               -10, 0.20, true, QStringLiteral("K-1234"), QStringLiteral("SP-001"), 5, 8);
+        ingest(QStringLiteral("LOTW1"), QStringLiteral("CQ LOTW1 FN21"),
+               QStringLiteral("FN21"), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("United States"), QStringLiteral("NA"), QStringLiteral("PA"),
+               -10, 0.20, true);
+        ingest(QStringLiteral("EQSL1"), QStringLiteral("CQ EQSL1 FN36"),
+               QStringLiteral("FN36"), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("Canada"), QStringLiteral("NA"), QStringLiteral("ON"),
+               -10, 0.20, true);
+        ingest(QStringLiteral("OQRS1"), QStringLiteral("CQ OQRS1 FN37"),
+               QStringLiteral("FN37"), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("Canada"), QStringLiteral("NA"), QStringLiteral("ON"),
+               -10, 0.20, true);
+        ingest(QStringLiteral("HIGHDT"), QStringLiteral("CQ HIGHDT FN22"),
+               QStringLiteral("FN22"), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("United States"), QStringLiteral("NA"), QStringLiteral("PA"),
+               -10, 0.90, true);
+        ingest(QStringLiteral("LOWSNR"), QStringLiteral("CQ LOWSNR FN23"),
+               QStringLiteral("FN23"), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("United States"), QStringLiteral("NA"), QStringLiteral("PA"),
+               -30, 0.10, true);
+        ingest(QStringLiteral("CW1"), QStringLiteral("CQ CW1 FN24"),
+               QStringLiteral("FN24"), QStringLiteral("20m"), QStringLiteral("CW"),
+               QStringLiteral("United States"), QStringLiteral("NA"), QStringLiteral("PA"),
+               -10, 0.10, true);
+        ingest(QStringLiteral("ITALY1"), QStringLiteral("CQ ITALY1 JN70"),
+               QStringLiteral("JN70"), QStringLiteral("40m"), QStringLiteral("FT8"),
+               QStringLiteral("Italy"), QStringLiteral("EU"), QString(),
+               -10, 0.10, true);
+        ingest(QStringLiteral("RR73CALL"), QStringLiteral("RR73CALL RR73"),
+               QString(), QStringLiteral("20m"), QStringLiteral("FT8"),
+               QStringLiteral("United States"), QStringLiteral("NA"), QStringLiteral("PA"),
+               -10, 0.10, false);
+
+        auto rosterRow = [&service](const QString& call) {
+            for (QVariant const& value : service.roster()) {
+                QVariantMap const row = value.toMap();
+                if (row.value(QStringLiteral("call")).toString()
+                        .compare(call, Qt::CaseInsensitive) == 0) {
+                    return row;
+                }
+            }
+            return QVariantMap();
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("WANTED1")).isEmpty(), 5000);
+        QVariantMap const wanted = rosterRow(QStringLiteral("WANTED1"));
+        QString const reason = wanted.value(QStringLiteral("huntReason")).toString();
+        QVERIFY(reason.contains(QStringLiteral("New call: WANTED1")));
+        QVERIFY(reason.contains(QStringLiteral("New grid: FN20")));
+        QVERIFY(reason.contains(QStringLiteral("New DXCC: Brazil")));
+        QVERIFY(reason.contains(QStringLiteral("New WPX:")));
+        QVERIFY(reason.contains(QStringLiteral("New POTA: K-1234")));
+        QVERIFY(reason.contains(QStringLiteral("New CQ zone: 5")));
+        QVERIFY(reason.contains(QStringLiteral("New ITU zone: 0"))
+                || reason.contains(QStringLiteral("New ITU zone: 8")));
+        QVERIFY(reason.contains(QStringLiteral("New state: SP")));
+        QVERIFY(reason.contains(QStringLiteral("New county: SP-001")));
+        QVERIFY(reason.contains(QStringLiteral("New continent: SA")));
+        QCOMPARE(wanted.value(QStringLiteral("dt")).toDouble(), 0.20);
+
+        service.setRosterWantedTypes({QStringLiteral("POTA")});
+        QTRY_VERIFY_WITH_TIMEOUT(
+            !rosterRow(QStringLiteral("WANTED1"))
+                 .value(QStringLiteral("huntReason")).toString()
+                 .contains(QStringLiteral("New grid:")), 5000);
+        QVERIFY(!rosterRow(QStringLiteral("WANTED1"))
+                     .value(QStringLiteral("huntReason")).toString()
+                     .contains(QStringLiteral("New grid:")));
+        service.setRosterRule(QStringLiteral("POTA"), QStringLiteral("K-1234"),
+                              QStringLiteral("WANTED"));
+        service.setRosterRule(QStringLiteral("STATE"), QStringLiteral("SP"),
+                              QStringLiteral("IGNORE"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.rosterWantedMatrix().size(), 1, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(service.rosterExceptionMatrix().size(), 1, 5000);
+        service.removeRosterRule(QStringLiteral("STATE"), QStringLiteral("SP"));
+        service.setRosterWantedTypes(service.availableRosterWantedTypes());
+
+        service.setRosterMinSnr(-15);
+        service.setRosterMinSnrEnabled(true);
+        service.setRosterMaxDt(0.30);
+        service.setRosterMaxDtEnabled(true);
+        QTRY_VERIFY_WITH_TIMEOUT(rosterRow(QStringLiteral("LOWSNR")).isEmpty(), 5000);
+        QVERIFY(rosterRow(QStringLiteral("LOWSNR")).isEmpty());
+        QVERIFY(rosterRow(QStringLiteral("HIGHDT")).isEmpty());
+        service.setRosterMinSnrEnabled(false);
+        service.setRosterMaxDtEnabled(false);
+
+        service.setRosterUsesLoTW(true);
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("LOTW1")).isEmpty()
+                                 && rosterRow(QStringLiteral("WANTED1")).isEmpty(),
+                                 5000);
+        QVERIFY(!rosterRow(QStringLiteral("LOTW1")).isEmpty());
+        QVERIFY(rosterRow(QStringLiteral("WANTED1")).isEmpty());
+        service.setRosterUsesLoTW(false);
+        service.setRosterUsesEQSL(true);
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("EQSL1")).isEmpty()
+                                 && rosterRow(QStringLiteral("LOTW1")).isEmpty()
+                                 && rosterRow(QStringLiteral("OQRS1")).isEmpty(),
+                                 5000);
+        service.setRosterUsesEQSL(false);
+        service.setRosterUsesOQRS(true);
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("OQRS1")).isEmpty()
+                                 && rosterRow(QStringLiteral("LOTW1")).isEmpty()
+                                 && rosterRow(QStringLiteral("EQSL1")).isEmpty(),
+                                 5000);
+        service.setRosterUsesOQRS(false);
+
+        QVariantMap spotted;
+        spotted.insert(QStringLiteral("call"), QStringLiteral("SPOTME"));
+        spotted.insert(QStringLiteral("grid"), QStringLiteral("FN30"));
+        spotted.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+        spotted.insert(QStringLiteral("freq"), 14074000);
+        service.ingestPskSpots({spotted}, QStringLiteral("WA1BXY"),
+                               QStringLiteral("FN20"));
+        service.setRosterSpottedMeOnly(true);
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("SPOTME")).isEmpty()
+                                 && rosterRow(QStringLiteral("WANTED1")).isEmpty(),
+                                 5000);
+        service.setRosterSpottedMeOnly(false);
+
+        service.setRosterScope(QStringLiteral("Current band"));
+        service.setBandFilter(QStringLiteral("20m"));
+        QTRY_VERIFY_WITH_TIMEOUT(rosterRow(QStringLiteral("ITALY1")).isEmpty(), 5000);
+        service.setRosterScope(QStringLiteral("Current mode"));
+        service.setModeFilter(QStringLiteral("FT8"));
+        QTRY_VERIFY_WITH_TIMEOUT(rosterRow(QStringLiteral("CW1")).isEmpty(), 5000);
+        service.setRosterScope(QStringLiteral("Digital modes"));
+        service.setBandFilter(QStringLiteral("All"));
+        QVERIFY(rosterRow(QStringLiteral("CW1")).isEmpty());
+        service.setRosterScope(QStringLiteral("All bands"));
+
+        service.setRosterCqOnly(true);
+        service.setRosterTreatRr73AsCq(false);
+        QTRY_VERIFY_WITH_TIMEOUT(rosterRow(QStringLiteral("RR73CALL")).isEmpty(), 5000);
+        service.setRosterTreatRr73AsCq(true);
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("RR73CALL")).isEmpty(), 5000);
+        QVERIFY(rosterRow(QStringLiteral("RR73CALL"))
+                    .value(QStringLiteral("isCQ")).toBool());
+        service.setRosterCqOnly(false);
+
+        service.setRosterDxccScope(QStringLiteral("Same DXCC"));
+        QTRY_VERIFY_WITH_TIMEOUT(rosterRow(QStringLiteral("ITALY1")).isEmpty(), 5000);
+        service.setRosterDxccScope(QStringLiteral("Other DXCC"));
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("ITALY1")).isEmpty(), 5000);
+        service.setRosterDxccScope(QStringLiteral("All"));
+
+        service.setActiveAwardProgram(QStringLiteral("DXCC"));
+        service.setAwardGoal(QStringLiteral("Worked"));
+        service.setRosterScope(QStringLiteral("Award selected"));
+        QTRY_VERIFY_WITH_TIMEOUT(
+            rosterRow(QStringLiteral("WANTED1"))
+                .value(QStringLiteral("awardProgram")).toString()
+                .compare(QStringLiteral("DXCC"), Qt::CaseInsensitive) == 0,
+            5000);
+        QVERIFY(!rosterRow(QStringLiteral("ITALY1")).isEmpty());
+        QVERIFY(!rosterRow(QStringLiteral("WANTED1")).isEmpty());
+        QVERIFY(rosterRow(QStringLiteral("WANTED1"))
+                    .value(QStringLiteral("awardWanted")).toBool());
+    }
+
     void ingestsPskMqttIntoAnalyticsAndOperationalRoster()
     {
         QTemporaryDir tempDir;
@@ -1233,6 +1504,217 @@ private slots:
                                 return label.contains(QStringLiteral("FT8DMC:"),
                                                       Qt::CaseInsensitive);
                             }));
+    }
+
+    void classifiesAndFiltersPropagationData()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        auto propagationQso = [](const QByteArray& call,
+                                 const QByteArray& grid,
+                                 const QByteArray& propagation,
+                                 const QByteArray& time,
+                                 bool confirmed) {
+            QByteArray result = field("CALL", call)
+                + field("GRIDSQUARE", grid)
+                + field("QSO_DATE", "20260728")
+                + field("TIME_ON", time)
+                + field("BAND", "20m")
+                + field("MODE", "FT8");
+            if (!propagation.isEmpty()) {
+                result += field("PROP_MODE", propagation);
+            }
+            if (confirmed) {
+                result += field("QSL_RCVD", "Y");
+            }
+            return result + "<EOR>\n";
+        };
+
+        QString const adifPath = tempDir.filePath(QStringLiteral("propagation.adi"));
+        QFile file(adifPath);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("Decodium ADIF\n<EOH>\n");
+        file.write(propagationQso("ES1TEST", "JN58aa", "ES", "120000", true));
+        file.write(propagationQso("EME1TEST", "JN48bb", "EME", "120100", false));
+        file.write(propagationQso("MS1TEST", "JO21cc", "Meteor Scatter", "120200", true));
+        file.write(propagationQso("UNKNOWN1", "FN20dd", {}, "120300", false));
+        file.close();
+
+        MapIntelligenceService service(
+            nullptr, tempDir.filePath(QStringLiteral("propagation.sqlite")));
+        service.reloadFromAdif(adifPath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 4, 5000);
+        QStringList const expectedPropagationModes {
+            QStringLiteral("MIXED"), QStringLiteral("UNKNOWN"),
+            QStringLiteral("AS"), QStringLiteral("AUE"), QStringLiteral("AUR"),
+            QStringLiteral("BS"), QStringLiteral("ECH"), QStringLiteral("EME"),
+            QStringLiteral("ES"), QStringLiteral("F2"), QStringLiteral("FAI"),
+            QStringLiteral("INTERNET"), QStringLiteral("ION"), QStringLiteral("IRL"),
+            QStringLiteral("MS"), QStringLiteral("RPT"), QStringLiteral("RS"),
+            QStringLiteral("SAT"), QStringLiteral("TEP"), QStringLiteral("TR")
+        };
+        QCOMPARE(service.availablePropagationModes(), expectedPropagationModes);
+        QTRY_COMPARE_WITH_TIMEOUT(service.propagationStatistics().size(), 20, 5000);
+        QVERIFY(std::any_of(service.availablePropagationTypes().cbegin(),
+                            service.availablePropagationTypes().cend(),
+                            [](const QVariant& value) {
+                                return value.toMap().value(QStringLiteral("label"))
+                                           == QStringLiteral("Meteor Scatter");
+                            }));
+
+        auto rowFor = [&service](const QString& code) {
+            for (QVariant const& value : service.propagationStatistics()) {
+                QVariantMap const row = value.toMap();
+                if (row.value(QStringLiteral("code")).toString() == code) {
+                    return row;
+                }
+            }
+            return QVariantMap();
+        };
+        QTRY_COMPARE_WITH_TIMEOUT(rowFor(QStringLiteral("ES"))
+                                      .value(QStringLiteral("qso")).toInt(),
+                                  1, 5000);
+        QCOMPARE(rowFor(QStringLiteral("EME"))
+                     .value(QStringLiteral("qso")).toInt(), 1);
+        QCOMPARE(rowFor(QStringLiteral("MS"))
+                     .value(QStringLiteral("qso")).toInt(), 1);
+        QCOMPARE(rowFor(QStringLiteral("UNKNOWN"))
+                     .value(QStringLiteral("qso")).toInt(), 1);
+        QCOMPARE(service.propagationSummary().value(QStringLiteral("classified")).toInt(), 3);
+        QCOMPARE(service.propagationSummary().value(QStringLiteral("unknown")).toInt(), 1);
+
+        service.setPropagationFilter(QStringLiteral("MS"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.statistics().value(QStringLiteral("qso")).toInt(),
+                                  1, 5000);
+        QCOMPARE(service.propagationSummary().value(QStringLiteral("filter")).toString(),
+                 QStringLiteral("MS"));
+        QCOMPARE(rowFor(QStringLiteral("MS"))
+                     .value(QStringLiteral("confirmed")).toInt(), 1);
+        QCOMPARE(rowFor(QStringLiteral("ES"))
+                     .value(QStringLiteral("qso")).toInt(), 0);
+
+        service.setPropagationFilter(QStringLiteral("MIXED"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.statistics().value(QStringLiteral("qso")).toInt(),
+                                  4, 5000);
+
+        QVariantList const liveRows {
+            QVariantMap {
+                {QStringLiteral("call"), QStringLiteral("LIVE-ES")},
+                {QStringLiteral("grid"), QStringLiteral("JN58aa")},
+                {QStringLiteral("band"), QStringLiteral("20m")},
+                {QStringLiteral("mode"), QStringLiteral("FT8")},
+                {QStringLiteral("propMode"), QStringLiteral("ES")},
+                {QStringLiteral("source"), QStringLiteral("psk")},
+                {QStringLiteral("direction"), QStringLiteral("RX")},
+                {QStringLiteral("freq"), 14074000},
+                {QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch()}
+            },
+            QVariantMap {
+                {QStringLiteral("call"), QStringLiteral("LIVE-MS")},
+                {QStringLiteral("grid"), QStringLiteral("JO21cc")},
+                {QStringLiteral("band"), QStringLiteral("20m")},
+                {QStringLiteral("mode"), QStringLiteral("FT8")},
+                {QStringLiteral("propMode"), QStringLiteral("MS")},
+                {QStringLiteral("source"), QStringLiteral("psk")},
+                {QStringLiteral("direction"), QStringLiteral("RX")},
+                {QStringLiteral("freq"), 14075000},
+                {QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch()}
+            }
+        };
+        service.ingestPskSpots(liveRows, QStringLiteral("9H1ABC"), QStringLiteral("JM75fv"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.liveSpotCount(), 2, 5000);
+        auto heatmapHasGrid = [&service](const QString& grid) {
+            for (QVariant const& value : service.spotHeatmap()) {
+                if (value.toMap().value(QStringLiteral("grid")).toString()
+                        .compare(grid, Qt::CaseInsensitive) == 0) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(heatmapHasGrid(QStringLiteral("JN58")), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(heatmapHasGrid(QStringLiteral("JO21")), 5000);
+        service.setPropagationFilter(QStringLiteral("ES"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.liveSpotCount(), 1, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(heatmapHasGrid(QStringLiteral("JN58")), 5000);
+        QVERIFY(!heatmapHasGrid(QStringLiteral("JO21")));
+        service.setPropagationFilter(QStringLiteral("MIXED"));
+        QTRY_COMPARE_WITH_TIMEOUT(service.liveSpotCount(), 2, 5000);
+    }
+
+    void executesAwardsAgainstRealAdifAndShowsMissingEntities()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        QString const adifPath = QFINDTESTDATA("data/award-real.adi");
+        QVERIFY2(!adifPath.isEmpty(), "real ADIF award fixture not found");
+        QString const databasePath = tempDir.filePath(QStringLiteral("real-awards.sqlite"));
+        MapIntelligenceService service(nullptr, databasePath);
+        service.reloadFromAdif(adifPath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 5, 5000);
+        QCOMPARE(service.statistics().value(QStringLiteral("qso")).toInt(), 5);
+        QCOMPARE(service.sourcePath(), QFileInfo(adifPath).absoluteFilePath());
+
+        QString const bassa = QStringLiteral("FT8DMC: BASSA - Basotho Stations");
+        QVERIFY(service.availableAwardPrograms().contains(bassa));
+        service.setActiveAwardProgram(bassa);
+        service.setAwardGoal(QStringLiteral("Worked"));
+        service.setAwardConfirmation(QStringLiteral("LoTW"));
+        service.setAwardCallsign(QStringLiteral("9H1ABC"));
+        service.setAwardFromDate(QStringLiteral("2026-01-01"));
+        service.setAwardToDate(QStringLiteral("2026-01-03"));
+        service.setBandFilter(QStringLiteral("20m"));
+        service.setModeFilter(QStringLiteral("FT8"));
+
+        auto awardByLabel = [&service](const QString& label) {
+            for (QVariant const& value : service.awards()) {
+                QVariantMap const award = value.toMap();
+                if (award.value(QStringLiteral("label")).toString()
+                        .compare(label, Qt::CaseInsensitive) == 0) {
+                    return award;
+                }
+            }
+            return QVariantMap();
+        };
+        QTRY_COMPARE_WITH_TIMEOUT(
+            awardByLabel(bassa).value(QStringLiteral("worked")).toInt(), 2, 5000);
+        QCOMPARE(awardByLabel(bassa).value(QStringLiteral("confirmed")).toInt(), 1);
+        QVERIFY(awardByLabel(bassa).value(QStringLiteral("workedEntities"))
+                    .toStringList().contains(QStringLiteral("7P8ABC")));
+        QVERIFY(awardByLabel(bassa).value(QStringLiteral("scope"))
+                    .toString().contains(QStringLiteral("9H1ABC")));
+
+        QVariantMap decode;
+        decode.insert(QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch());
+        decode.insert(QStringLiteral("message"), QStringLiteral("CQ 7P8XYZ KG30DZ"));
+        decode.insert(QStringLiteral("fromCall"), QStringLiteral("7P8XYZ"));
+        decode.insert(QStringLiteral("dxGrid"), QStringLiteral("KG30DZ"));
+        decode.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+        decode.insert(QStringLiteral("dxcc"), QStringLiteral("Lesotho"));
+        decode.insert(QStringLiteral("dxccNumber"), 432);
+        decode.insert(QStringLiteral("continent"), QStringLiteral("AF"));
+        decode.insert(QStringLiteral("isCQ"), true);
+        service.ingestDecodeEntry(decode, 14074000, QStringLiteral("20m"));
+        QTRY_VERIFY_WITH_TIMEOUT(!service.awardMissing().isEmpty(), 5000);
+        QVariantMap const missing = service.awardMissing().first().toMap();
+        QCOMPARE(missing.value(QStringLiteral("call")).toString(), QStringLiteral("7P8XYZ"));
+        QVERIFY(missing.value(QStringLiteral("reason")).toString().contains("Missing"));
+
+        QVERIFY(service.availableAwardPrograms().contains(
+            QStringLiteral("FT8DMC: OHCA - One Hundred Countries")));
+        service.setActiveAwardProgram(QStringLiteral("FT8DMC: OHCA - One Hundred Countries"));
+        QTRY_VERIFY_WITH_TIMEOUT(service.availableAwardEndorsements().contains(
+                                     QStringLiteral("20m")), 5000);
+        service.setAwardEndorsement(QStringLiteral("20m"));
+        QCOMPARE(service.awardEndorsement(), QStringLiteral("20m"));
+        service.setAwardCallsign(QStringLiteral("OTHER"));
+        QTRY_COMPARE_WITH_TIMEOUT(
+            awardByLabel(QStringLiteral("FT8DMC: OHCA - One Hundred Countries"))
+                .value(QStringLiteral("worked")).toInt(), 0, 5000);
     }
 
     void convertsWebMercatorAndRendersTropo()
@@ -1611,6 +2093,67 @@ private slots:
 
         MapIntelligenceService persisted(nullptr, databasePath);
         QCOMPARE(persisted.bandActivityWindowHours(), 24);
+    }
+
+    void roundTripsMapConfigurationBundle()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+
+        const QString sourceDatabase = tempDir.filePath(QStringLiteral("source.sqlite"));
+        const QString targetDatabase = tempDir.filePath(QStringLiteral("target.sqlite"));
+        MapIntelligenceService source(nullptr, sourceDatabase);
+        auto* sourceLayers = qobject_cast<MapLayerModel*>(source.layerModel());
+        QVERIFY(sourceLayers);
+        sourceLayers->setLayerStyle(QStringLiteral("live"), QStringLiteral("#123456"),
+                                    0.42, 2.5, 30);
+        source.setSourceDecayMinutes({
+            {QStringLiteral("decoder"), 25},
+            {QStringLiteral("psk"), 120},
+            {QStringLiteral("oams"), 45}
+        });
+        source.setRosterCallWatched(QStringLiteral("W8TEST"), true);
+        source.setRosterRule(QStringLiteral("DXCC"), QStringLiteral("Italy"),
+                             QStringLiteral("WANTED"), QStringLiteral("20m"),
+                             QStringLiteral("FT8"));
+        QTRY_VERIFY_WITH_TIMEOUT(source.rosterPreferenceCount() >= 1, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(!source.rosterRules().isEmpty(), 5000);
+
+        QString const bundlePath = tempDir.filePath(QStringLiteral("map-config.json"));
+        QVERIFY(source.exportMapConfiguration(bundlePath, {
+            {QStringLiteral("centerLongitude"), 12.5},
+            {QStringLiteral("centerLatitude"), 41.9},
+            {QStringLiteral("spanLongitude"), 28.0},
+            {QStringLiteral("spanLatitude"), 18.0},
+            {QStringLiteral("locked"), true}
+        }));
+        QFile bundle(bundlePath);
+        QVERIFY(bundle.open(QIODevice::ReadOnly));
+        QJsonParseError parseError;
+        QJsonDocument const document = QJsonDocument::fromJson(bundle.readAll(), &parseError);
+        QCOMPARE(parseError.error, QJsonParseError::NoError);
+        QVERIFY(document.object().value(QStringLiteral("layers")).toArray().size() >= 23);
+        QVERIFY(document.object().value(QStringLiteral("presetNames")).toArray().size() >= 6);
+        QVERIFY(document.object().value(QStringLiteral("presets")).isObject());
+        QVERIFY(document.object().value(QStringLiteral("roster")).toObject()
+                    .value(QStringLiteral("rules")).toArray().size() >= 1);
+        QCOMPARE(document.object().value(QStringLiteral("viewport")).toObject()
+                     .value(QStringLiteral("centerLongitude")).toDouble(), 12.5);
+
+        MapIntelligenceService target(nullptr, targetDatabase);
+        QVariantMap const viewport = target.importMapConfiguration(bundlePath);
+        QCOMPARE(viewport.value(QStringLiteral("centerLongitude")).toDouble(), 12.5);
+        auto* targetLayers = qobject_cast<MapLayerModel*>(target.layerModel());
+        QVERIFY(targetLayers);
+        QVariantMap const liveStyle = targetLayers->layerStyle(QStringLiteral("live"));
+        QCOMPARE(liveStyle.value(QStringLiteral("color")).toString(), QStringLiteral("#123456"));
+        QCOMPARE(liveStyle.value(QStringLiteral("labelDensity")).toInt(), 30);
+        QCOMPARE(target.sourceDecayMinutes().value(QStringLiteral("decoder")).toInt(), 25);
+        QCOMPARE(target.sourceDecayMinutes().value(QStringLiteral("psk")).toInt(), 120);
+        QVERIFY(target.temporalLegend().size() >= 3);
+        QTRY_VERIFY_WITH_TIMEOUT(target.rosterPreferenceCount() >= 1, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(!target.rosterRules().isEmpty(), 5000);
     }
 };
 

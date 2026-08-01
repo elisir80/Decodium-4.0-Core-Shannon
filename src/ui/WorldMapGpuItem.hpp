@@ -51,6 +51,9 @@ public:
     Q_INVOKABLE void setOperationalMarkers(const QVariantList& markers);
     Q_INVOKABLE void setGeographicFeatures(const QVariantList& features);
     Q_INVOKABLE void setProjection(const QString& projection);
+    Q_INVOKABLE void setLayerStyles(const QVariantMap& styles);
+    Q_INVOKABLE QVariantMap viewportState() const;
+    Q_INVOKABLE void setViewportState(const QVariantMap& state);
     Q_INVOKABLE void setBaseMapService(QObject* service);
     Q_INVOKABLE void setExternalOverlayService(QObject* service);
     Q_INVOKABLE void downgradeContactToBand(const QString& call);
@@ -83,6 +86,8 @@ public:
 Q_SIGNALS:
     void contactClicked(const QString& call, const QString& grid);
     void coverageCellHovered(const QVariantMap& details, qreal x, qreal y);
+    void coverageCellSegmentHovered(const QVariantMap& details, qreal x, qreal y,
+                                    const QString& segment);
     void coverageCellHoverEnded();
     void coverageCellClicked(const QVariantMap& details, qreal x, qreal y);
     void operationalMarkerClicked(const QVariantMap& details, qreal x, qreal y);
@@ -211,6 +216,10 @@ private:
     QVariantMap geographicFeatureAt(const QPointF& point) const;
     QVariantMap coverageCellAt(const QPointF& point) const;
     QRectF mapRect() const;
+    QColor styledColor(const QString& layerId, const QColor& fallback,
+                       int alpha = -1) const;
+    double layerThickness(const QString& layerId, double fallback = 1.0) const;
+    int layerLabelDensity(const QString& layerId) const;
     bool computeCircularLongitudeBounds(const QVector<double>& longitudes, double* centerLon, double* spanLon) const;
     void updateViewportTargets();
     bool smoothViewport();
@@ -243,6 +252,7 @@ private:
     QString m_txTargetCall;
     QString m_txTargetGrid;
     QString m_projection {QStringLiteral("Equirectangular")};
+    QVariantMap m_layerStyles;
     QPointF m_homeLonLat;
     qint64 m_txStartMs {0};
     qint64 m_lastProfileLogMs {0};

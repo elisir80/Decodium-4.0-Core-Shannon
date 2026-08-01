@@ -29,6 +29,7 @@ class MapIntelligenceService final : public QObject
     Q_PROPERTY(QVariantList roster READ roster NOTIFY rosterChanged)
     Q_PROPERTY(QVariantList rosterPreferences READ rosterPreferences NOTIFY rosterPreferencesChanged)
     Q_PROPERTY(QVariantList awards READ awards NOTIFY awardsChanged)
+    Q_PROPERTY(QVariantList awardMissing READ awardMissing NOTIFY awardsChanged)
     Q_PROPERTY(QVariantList alerts READ alerts NOTIFY alertsChanged)
     Q_PROPERTY(QVariantList spotHeatmap READ spotHeatmap NOTIFY spotAnalyticsChanged)
     Q_PROPERTY(QVariantList spotTimeline READ spotTimeline NOTIFY spotAnalyticsChanged)
@@ -36,6 +37,10 @@ class MapIntelligenceService final : public QObject
     Q_PROPERTY(QVariantList bandActivity READ bandActivity NOTIFY bandActivityChanged)
     Q_PROPERTY(QVariantList bandActivityTimeline READ bandActivityTimeline NOTIFY bandActivityChanged)
     Q_PROPERTY(QVariantMap bandActivitySummary READ bandActivitySummary NOTIFY bandActivityChanged)
+    Q_PROPERTY(QVariantList propagationStatistics READ propagationStatistics NOTIFY propagationStatisticsChanged)
+    Q_PROPERTY(QVariantMap propagationSummary READ propagationSummary NOTIFY propagationStatisticsChanged)
+    Q_PROPERTY(QVariantMap sourceDecayMinutes READ sourceDecayMinutes WRITE setSourceDecayMinutes NOTIFY mapTemporalSettingsChanged)
+    Q_PROPERTY(QVariantList temporalLegend READ temporalLegend NOTIFY mapTemporalSettingsChanged)
     Q_PROPERTY(int bandActivityWindowHours READ bandActivityWindowHours WRITE setBandActivityWindowHours NOTIFY bandActivityWindowHoursChanged)
     Q_PROPERTY(QVariantList rosterRules READ rosterRules NOTIFY rosterRulesChanged)
     Q_PROPERTY(QVariantMap statistics READ statistics NOTIFY statisticsChanged)
@@ -50,10 +55,18 @@ class MapIntelligenceService final : public QObject
     Q_PROPERTY(QStringList availableContinents READ availableContinents NOTIFY filtersChanged)
     Q_PROPERTY(QStringList availableDxcc READ availableDxcc NOTIFY filtersChanged)
     Q_PROPERTY(QStringList availableSources READ availableSources NOTIFY filtersChanged)
+    Q_PROPERTY(QStringList availablePropagationModes READ availablePropagationModes CONSTANT)
+    Q_PROPERTY(QVariantList availablePropagationTypes READ availablePropagationTypes CONSTANT)
     Q_PROPERTY(QStringList availableRosterStatuses READ availableRosterStatuses CONSTANT)
     Q_PROPERTY(QStringList availableRosterHuntScopes READ availableRosterHuntScopes CONSTANT)
+    Q_PROPERTY(QStringList availableRosterScopes READ availableRosterScopes CONSTANT)
+    Q_PROPERTY(QStringList availableRosterDxccScopes READ availableRosterDxccScopes CONSTANT)
+    Q_PROPERTY(QStringList availableRosterRuleTypes READ availableRosterRuleTypes CONSTANT)
+    Q_PROPERTY(QStringList availableRosterWantedTypes READ availableRosterWantedTypes CONSTANT)
     Q_PROPERTY(QStringList availableAwardPrograms READ availableAwardPrograms CONSTANT)
     Q_PROPERTY(QStringList availableAwardGoals READ availableAwardGoals CONSTANT)
+    Q_PROPERTY(QStringList availableAwardConfirmations READ availableAwardConfirmations CONSTANT)
+    Q_PROPERTY(QStringList availableAwardEndorsements READ availableAwardEndorsements NOTIFY awardsChanged)
     Q_PROPERTY(QStringList availablePskDisplayModes READ availablePskDisplayModes CONSTANT)
     Q_PROPERTY(QStringList availableSpotAgeFilters READ availableSpotAgeFilters CONSTANT)
     Q_PROPERTY(QStringList availableCorrelationFilters READ availableCorrelationFilters CONSTANT)
@@ -65,17 +78,38 @@ class MapIntelligenceService final : public QObject
     Q_PROPERTY(QString continentFilter READ continentFilter WRITE setContinentFilter NOTIFY continentFilterChanged)
     Q_PROPERTY(QString dxccFilter READ dxccFilter WRITE setDxccFilter NOTIFY dxccFilterChanged)
     Q_PROPERTY(QString sourceFilter READ sourceFilter WRITE setSourceFilter NOTIFY sourceFilterChanged)
+    Q_PROPERTY(QString propagationFilter READ propagationFilter WRITE setPropagationFilter NOTIFY propagationFilterChanged)
     Q_PROPERTY(bool cqOnly READ cqOnly WRITE setCqOnly NOTIFY cqOnlyChanged)
     Q_PROPERTY(QString rosterSort READ rosterSort WRITE setRosterSort NOTIFY rosterSortChanged)
     Q_PROPERTY(bool rosterSortDescending READ rosterSortDescending WRITE setRosterSortDescending NOTIFY rosterSortDescendingChanged)
     Q_PROPERTY(QString rosterStatusFilter READ rosterStatusFilter WRITE setRosterStatusFilter NOTIFY rosterStatusFilterChanged)
     Q_PROPERTY(QString rosterHuntScope READ rosterHuntScope WRITE setRosterHuntScope NOTIFY rosterHuntScopeChanged)
+    Q_PROPERTY(QString rosterScope READ rosterScope WRITE setRosterScope NOTIFY rosterScopeChanged)
+    Q_PROPERTY(QString rosterDxccScope READ rosterDxccScope WRITE setRosterDxccScope NOTIFY rosterDxccScopeChanged)
     Q_PROPERTY(int rosterRetentionMinutes READ rosterRetentionMinutes WRITE setRosterRetentionMinutes NOTIFY rosterRetentionMinutesChanged)
     Q_PROPERTY(bool rosterCqOnly READ rosterCqOnly WRITE setRosterCqOnly NOTIFY rosterCqOnlyChanged)
     Q_PROPERTY(QString rosterTextFilter READ rosterTextFilter WRITE setRosterTextFilter NOTIFY rosterTextFilterChanged)
     Q_PROPERTY(QString rosterTextMode READ rosterTextMode WRITE setRosterTextMode NOTIFY rosterTextModeChanged)
     Q_PROPERTY(QString activeAwardProgram READ activeAwardProgram WRITE setActiveAwardProgram NOTIFY activeAwardProgramChanged)
     Q_PROPERTY(QString awardGoal READ awardGoal WRITE setAwardGoal NOTIFY awardGoalChanged)
+    Q_PROPERTY(QString awardEndorsement READ awardEndorsement WRITE setAwardEndorsement NOTIFY awardFiltersChanged)
+    Q_PROPERTY(QString awardConfirmation READ awardConfirmation WRITE setAwardConfirmation NOTIFY awardFiltersChanged)
+    Q_PROPERTY(QString awardCallsign READ awardCallsign WRITE setAwardCallsign NOTIFY awardFiltersChanged)
+    Q_PROPERTY(QString awardFromDate READ awardFromDate WRITE setAwardFromDate NOTIFY awardFiltersChanged)
+    Q_PROPERTY(QString awardToDate READ awardToDate WRITE setAwardToDate NOTIFY awardFiltersChanged)
+    Q_PROPERTY(bool rosterUsesLoTW READ rosterUsesLoTW WRITE setRosterUsesLoTW NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(int rosterMaxLoTWDays READ rosterMaxLoTWDays WRITE setRosterMaxLoTWDays NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(bool rosterUsesEQSL READ rosterUsesEQSL WRITE setRosterUsesEQSL NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(bool rosterUsesOQRS READ rosterUsesOQRS WRITE setRosterUsesOQRS NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(bool rosterSpottedMeOnly READ rosterSpottedMeOnly WRITE setRosterSpottedMeOnly NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(bool rosterMinSnrEnabled READ rosterMinSnrEnabled WRITE setRosterMinSnrEnabled NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(int rosterMinSnr READ rosterMinSnr WRITE setRosterMinSnr NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(bool rosterMaxDtEnabled READ rosterMaxDtEnabled WRITE setRosterMaxDtEnabled NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(double rosterMaxDt READ rosterMaxDt WRITE setRosterMaxDt NOTIFY rosterFiltersChanged)
+    Q_PROPERTY(bool rosterTreatRr73AsCq READ rosterTreatRr73AsCq WRITE setRosterTreatRr73AsCq NOTIFY rosterTreatRr73AsCqChanged)
+    Q_PROPERTY(QStringList rosterWantedTypes READ rosterWantedTypes WRITE setRosterWantedTypes NOTIFY rosterWantedTypesChanged)
+    Q_PROPERTY(QVariantList rosterWantedMatrix READ rosterWantedMatrix NOTIFY rosterMatricesChanged)
+    Q_PROPERTY(QVariantList rosterExceptionMatrix READ rosterExceptionMatrix NOTIFY rosterMatricesChanged)
     Q_PROPERTY(int gridPrecision READ gridPrecision WRITE setGridPrecision NOTIFY gridPrecisionChanged)
     Q_PROPERTY(int liveDecayMinutes READ liveDecayMinutes WRITE setLiveDecayMinutes NOTIFY liveDecayMinutesChanged)
     Q_PROPERTY(bool splitGridEnabled READ splitGridEnabled WRITE setSplitGridEnabled NOTIFY splitGridEnabledChanged)
@@ -127,6 +161,7 @@ public:
     QVariantList roster() const { return m_roster; }
     QVariantList rosterPreferences() const { return m_rosterPreferences; }
     QVariantList awards() const { return m_awards; }
+    QVariantList awardMissing() const { return m_awardMissing; }
     QVariantList alerts() const { return m_alerts; }
     QVariantList spotHeatmap() const { return m_spotHeatmap; }
     QVariantList spotTimeline() const { return m_spotTimeline; }
@@ -134,6 +169,10 @@ public:
     QVariantList bandActivity() const { return m_bandActivity; }
     QVariantList bandActivityTimeline() const { return m_bandActivityTimeline; }
     QVariantMap bandActivitySummary() const { return m_bandActivitySummary; }
+    QVariantList propagationStatistics() const { return m_propagationStatistics; }
+    QVariantMap propagationSummary() const { return m_propagationSummary; }
+    QVariantMap sourceDecayMinutes() const { return m_sourceDecayMinutes; }
+    QVariantList temporalLegend() const;
     int bandActivityWindowHours() const { return m_bandActivityWindowHours; }
     QVariantList rosterRules() const { return m_rosterRules; }
     QVariantMap statistics() const { return m_statistics; }
@@ -143,10 +182,18 @@ public:
     QStringList availableContinents() const { return m_availableContinents; }
     QStringList availableDxcc() const { return m_availableDxcc; }
     QStringList availableSources() const { return m_availableSources; }
+    QStringList availablePropagationModes() const;
+    QVariantList availablePropagationTypes() const;
     QStringList availableRosterStatuses() const;
     QStringList availableRosterHuntScopes() const;
+    QStringList availableRosterScopes() const;
+    QStringList availableRosterDxccScopes() const;
+    QStringList availableRosterRuleTypes() const;
+    QStringList availableRosterWantedTypes() const;
     QStringList availableAwardPrograms() const;
     QStringList availableAwardGoals() const;
+    QStringList availableAwardConfirmations() const;
+    QStringList availableAwardEndorsements() const;
     QStringList availablePskDisplayModes() const;
     QStringList availableSpotAgeFilters() const;
     QStringList availableCorrelationFilters() const;
@@ -158,17 +205,38 @@ public:
     QString continentFilter() const { return m_continentFilter; }
     QString dxccFilter() const { return m_dxccFilter; }
     QString sourceFilter() const { return m_sourceFilter; }
+    QString propagationFilter() const { return m_propagationFilter; }
     bool cqOnly() const { return m_cqOnly; }
     QString rosterSort() const { return m_rosterSort; }
     bool rosterSortDescending() const { return m_rosterSortDescending; }
     QString rosterStatusFilter() const { return m_rosterStatusFilter; }
     QString rosterHuntScope() const { return m_rosterHuntScope; }
+    QString rosterScope() const { return m_rosterScope; }
+    QString rosterDxccScope() const { return m_rosterDxccScope; }
     int rosterRetentionMinutes() const { return m_rosterRetentionMinutes; }
     bool rosterCqOnly() const { return m_rosterCqOnly; }
     QString rosterTextFilter() const { return m_rosterTextFilter; }
     QString rosterTextMode() const { return m_rosterTextMode; }
     QString activeAwardProgram() const { return m_activeAwardProgram; }
     QString awardGoal() const { return m_awardGoal; }
+    QString awardEndorsement() const { return m_awardEndorsement; }
+    QString awardConfirmation() const { return m_awardConfirmation; }
+    QString awardCallsign() const { return m_awardCallsign; }
+    QString awardFromDate() const { return m_awardFromDate; }
+    QString awardToDate() const { return m_awardToDate; }
+    bool rosterUsesLoTW() const { return m_rosterUsesLoTW; }
+    int rosterMaxLoTWDays() const { return m_rosterMaxLoTWDays; }
+    bool rosterUsesEQSL() const { return m_rosterUsesEQSL; }
+    bool rosterUsesOQRS() const { return m_rosterUsesOQRS; }
+    bool rosterSpottedMeOnly() const { return m_rosterSpottedMeOnly; }
+    bool rosterMinSnrEnabled() const { return m_rosterMinSnrEnabled; }
+    int rosterMinSnr() const { return m_rosterMinSnr; }
+    bool rosterMaxDtEnabled() const { return m_rosterMaxDtEnabled; }
+    double rosterMaxDt() const { return m_rosterMaxDt; }
+    bool rosterTreatRr73AsCq() const { return m_rosterTreatRr73AsCq; }
+    QStringList rosterWantedTypes() const { return m_rosterWantedTypes; }
+    QVariantList rosterWantedMatrix() const { return m_rosterWantedMatrix; }
+    QVariantList rosterExceptionMatrix() const { return m_rosterExceptionMatrix; }
     int gridPrecision() const { return m_gridPrecision; }
     int liveDecayMinutes() const { return m_liveDecayMinutes; }
     bool splitGridEnabled() const { return m_splitGridEnabled; }
@@ -220,17 +288,36 @@ public:
     void setContinentFilter(const QString& value);
     void setDxccFilter(const QString& value);
     void setSourceFilter(const QString& value);
+    void setPropagationFilter(const QString& value);
     void setCqOnly(bool enabled);
     void setRosterSort(const QString& value);
     void setRosterSortDescending(bool descending);
     void setRosterStatusFilter(const QString& value);
     void setRosterHuntScope(const QString& value);
+    void setRosterScope(const QString& value);
+    void setRosterDxccScope(const QString& value);
     void setRosterRetentionMinutes(int minutes);
     void setRosterCqOnly(bool enabled);
     void setRosterTextFilter(const QString& value);
     void setRosterTextMode(const QString& value);
     void setActiveAwardProgram(const QString& value);
     void setAwardGoal(const QString& value);
+    void setAwardEndorsement(const QString& value);
+    void setAwardConfirmation(const QString& value);
+    void setAwardCallsign(const QString& value);
+    void setAwardFromDate(const QString& value);
+    void setAwardToDate(const QString& value);
+    void setRosterUsesLoTW(bool enabled);
+    void setRosterMaxLoTWDays(int days);
+    void setRosterUsesEQSL(bool enabled);
+    void setRosterUsesOQRS(bool enabled);
+    void setRosterSpottedMeOnly(bool enabled);
+    void setRosterMinSnrEnabled(bool enabled);
+    void setRosterMinSnr(int snr);
+    void setRosterMaxDtEnabled(bool enabled);
+    void setRosterMaxDt(double dt);
+    void setRosterTreatRr73AsCq(bool enabled);
+    void setRosterWantedTypes(const QStringList& types);
     void setGridPrecision(int precision);
     void setLiveDecayMinutes(int minutes);
     void setSplitGridEnabled(bool enabled);
@@ -241,6 +328,7 @@ public:
     void setSpotAgeFilter(const QString& value);
     void setSpotCorrelationFilter(const QString& value);
     void setBandActivityWindowHours(int hours);
+    void setSourceDecayMinutes(const QVariantMap& values);
     void setRosterVisibleColumns(const QStringList& columns);
     void setCallLookupProvider(const QString& provider);
     void setAlertNewGridEnabled(bool enabled);
@@ -255,6 +343,10 @@ public:
     void setPskLayerEnabled(bool enabled);
 
     Q_INVOKABLE void reloadFromAdif(const QString& path);
+    Q_INVOKABLE QString reserveMapConfigurationPath() const;
+    Q_INVOKABLE bool exportMapConfiguration(const QString& path,
+                                            const QVariantMap& viewport = {});
+    Q_INVOKABLE QVariantMap importMapConfiguration(const QString& path);
     Q_INVOKABLE void appendAdifRecord(const QByteArray& record);
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void clearLiveSpots();
@@ -282,6 +374,7 @@ public:
     Q_INVOKABLE void removeRosterRule(const QString& type, const QString& value,
                                       const QString& band = {},
                                       const QString& mode = {});
+    Q_INVOKABLE void setRosterStationCall(const QString& call);
 
     void ingestDecodeEntry(const QVariantMap& entry,
                            qint64 dialFrequencyHz,
@@ -301,17 +394,26 @@ signals:
     void continentFilterChanged();
     void dxccFilterChanged();
     void sourceFilterChanged();
+    void propagationFilterChanged();
+    void propagationStatisticsChanged();
     void cqOnlyChanged();
     void rosterSortChanged();
     void rosterSortDescendingChanged();
     void rosterStatusFilterChanged();
     void rosterHuntScopeChanged();
+    void rosterScopeChanged();
+    void rosterDxccScopeChanged();
     void rosterRetentionMinutesChanged();
     void rosterCqOnlyChanged();
     void rosterTextFilterChanged();
     void rosterTextModeChanged();
     void activeAwardProgramChanged();
     void awardGoalChanged();
+    void awardFiltersChanged();
+    void rosterFiltersChanged();
+    void rosterTreatRr73AsCqChanged();
+    void rosterWantedTypesChanged();
+    void rosterMatricesChanged();
     void gridPrecisionChanged();
     void liveDecayMinutesChanged();
     void splitGridEnabledChanged();
@@ -325,6 +427,7 @@ signals:
     void spotAnalyticsChanged();
     void bandActivityChanged();
     void bandActivityWindowHoursChanged();
+    void mapTemporalSettingsChanged();
     void rosterRulesChanged();
     void callLookupProviderChanged();
     void alertRulesChanged();
@@ -352,9 +455,11 @@ private:
         QString grid6;
         QString band;
         QString mode;
+        QString propagationMode;
         QString qsoDate;
         QString timeOn;
         QString source {QStringLiteral("ADIF")};
+        QString operatorCall;
         QString dxcc;
         QString continent;
         QString state;
@@ -366,6 +471,7 @@ private:
         qint64 qsoEpoch {0};
         int cqZone {0};
         int ituZone {0};
+        int dxccNumber {0};
         bool confirmed {false};
         bool lotwConfirmed {false};
         bool eqslConfirmed {false};
@@ -380,16 +486,23 @@ private:
         QString grid6;
         QString band;
         QString mode;
+        QString propagationMode;
         QString message;
         QString observedUtc;
         qint64 observedMs {0};
         qint64 frequencyHz {0};
         double distanceKm {-1.0};
         int snr {0};
+        double dt {0.0};
         QString source;
+        int dxccNumber {0};
         QString dxcc;
         QString continent;
         QString state;
+        QString county;
+        QString potaReference;
+        QString iotaReference;
+        QString wpxPrefix;
         QString targetCall;
         QString activityType;
         QString receiverCall;
@@ -412,6 +525,7 @@ private:
         QVariantList roster;
         QVariantList rosterPreferences;
         QVariantList awards;
+        QVariantList awardMissing;
         QVariantList alerts;
         QVariantList spotHeatmap;
         QVariantList spotTimeline;
@@ -419,7 +533,11 @@ private:
         QVariantList bandActivity;
         QVariantList bandActivityTimeline;
         QVariantMap bandActivitySummary;
+        QVariantList propagationStatistics;
+        QVariantMap propagationSummary;
         QVariantList rosterRules;
+        QVariantList rosterWantedMatrix;
+        QVariantList rosterExceptionMatrix;
         QVariantMap statistics;
         QStringList bands {QStringLiteral("All")};
         QStringList modes {QStringLiteral("All")};
@@ -447,14 +565,20 @@ private:
         QString continent;
         QString dxcc;
         QString source;
+        QString propagation;
         QString rosterSort;
         QString rosterStatus;
         QString rosterHuntScope;
+        QString rosterScope;
+        QString rosterDxccScope;
+        QString rosterMyCall;
+        QString rosterMyDxcc;
         QString activeAwardProgram;
         QString awardGoal;
         int rosterRetentionMinutes {5};
         int gridPrecision {4};
         int liveDecayMinutes {15};
+        QVariantMap sourceDecayMinutes;
         bool cqOnly {false};
         bool rosterSortDescending {true};
         bool rosterCqOnly {false};
@@ -467,6 +591,22 @@ private:
         QString spotAgeFilter {QStringLiteral("15 min")};
         QString spotCorrelationFilter {QStringLiteral("All")};
         int bandActivityWindowHours {6};
+        bool rosterUsesLoTW {false};
+        int rosterMaxLoTWDays {810};
+        bool rosterUsesEQSL {false};
+        bool rosterUsesOQRS {false};
+        bool rosterSpottedMeOnly {false};
+        bool rosterMinSnrEnabled {false};
+        int rosterMinSnr {-25};
+        bool rosterMaxDtEnabled {false};
+        double rosterMaxDt {0.5};
+        bool rosterTreatRr73AsCq {false};
+        QStringList rosterWantedTypes;
+        QString awardEndorsement;
+        QString awardConfirmation {QStringLiteral("Any")};
+        QString awardCallsign;
+        QString awardFromDate;
+        QString awardToDate;
     };
 
     struct AlertRules {
@@ -495,6 +635,7 @@ private:
                                        const QString& sourcePath,
                                        const QByteArray& data,
                                        const QString& fingerprint,
+                                       const QString& defaultOperatorCall,
                                        QString* error);
     static bool appendQsoRecords(const QString& databasePath,
                                  const QList<QsoRecord>& records,
@@ -560,6 +701,7 @@ private:
     QVariantList m_roster;
     QVariantList m_rosterPreferences;
     QVariantList m_awards;
+    QVariantList m_awardMissing;
     QVariantList m_alerts;
     QVariantList m_spotHeatmap;
     QVariantList m_spotTimeline;
@@ -567,7 +709,11 @@ private:
     QVariantList m_bandActivity;
     QVariantList m_bandActivityTimeline;
     QVariantMap m_bandActivitySummary;
+    QVariantList m_propagationStatistics;
+    QVariantMap m_propagationSummary;
     QVariantList m_rosterRules;
+    QVariantList m_rosterWantedMatrix;
+    QVariantList m_rosterExceptionMatrix;
     QVariantMap m_statistics;
     QVariantMap m_selectedGridSummary;
     QVariantList m_selectedGridLive;
@@ -583,11 +729,36 @@ private:
     QString m_continentFilter {QStringLiteral("All")};
     QString m_dxccFilter {QStringLiteral("All")};
     QString m_sourceFilter {QStringLiteral("All")};
+    QString m_propagationFilter {QStringLiteral("MIXED")};
     QString m_rosterSort {QStringLiteral("Time")};
     QString m_rosterStatusFilter {QStringLiteral("All")};
     QString m_rosterHuntScope {QStringLiteral("All time")};
+    QString m_rosterScope {QStringLiteral("All bands")};
+    QString m_rosterDxccScope {QStringLiteral("All")};
     QString m_activeAwardProgram {QStringLiteral("None")};
     QString m_awardGoal {QStringLiteral("Confirmed")};
+    QString m_awardEndorsement;
+    QString m_awardConfirmation {QStringLiteral("Any")};
+    QString m_awardCallsign;
+    QString m_awardFromDate;
+    QString m_awardToDate;
+    bool m_rosterUsesLoTW {false};
+    int m_rosterMaxLoTWDays {810};
+    bool m_rosterUsesEQSL {false};
+    bool m_rosterUsesOQRS {false};
+    bool m_rosterSpottedMeOnly {false};
+    bool m_rosterMinSnrEnabled {false};
+    int m_rosterMinSnr {-25};
+    bool m_rosterMaxDtEnabled {false};
+    double m_rosterMaxDt {0.5};
+    bool m_rosterTreatRr73AsCq {false};
+    QStringList m_rosterWantedTypes {
+        QStringLiteral("CALL"), QStringLiteral("GRID"), QStringLiteral("DXCC"),
+        QStringLiteral("WPX"), QStringLiteral("POTA"), QStringLiteral("CQ"),
+        QStringLiteral("ITU"), QStringLiteral("STATE"), QStringLiteral("COUNTY"),
+        QStringLiteral("CONTINENT")};
+    QString m_rosterMyCall;
+    QString m_rosterMyDxcc;
     QString m_sourcePath;
     QString m_databasePath;
     QString m_selectedGrid;
@@ -601,6 +772,11 @@ private:
     int m_rosterRetentionMinutes {5};
     int m_gridPrecision {4};
     int m_liveDecayMinutes {15};
+    QVariantMap m_sourceDecayMinutes {
+        {QStringLiteral("decoder"), 15},
+        {QStringLiteral("psk"), 60},
+        {QStringLiteral("oams"), 30}
+    };
     bool m_splitGridEnabled {true};
     bool m_coveragePushPinsEnabled {false};
     bool m_timeZoneOverlayEnabled {false};

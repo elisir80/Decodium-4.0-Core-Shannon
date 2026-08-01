@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import Decodium 1.0
 
 Rectangle {
@@ -31,7 +32,10 @@ Rectangle {
     property bool showRosterPreferences: false
     property bool showRosterColumns: false
     property bool showRosterRules: false
+    property bool showRosterMatrix: false
     property var hoveredGridDetails: ({})
+    property var hoveredHistoricalGridDetails: ({})
+    property var hoveredLiveGridDetails: ({})
     property real hoveredGridX: 0
     property real hoveredGridY: 0
     property bool gridPreviewVisible: false
@@ -46,6 +50,8 @@ Rectangle {
     property real selectedMapY: 0
     property bool operationalDetailsVisible: false
     property bool geographicDetailsVisible: false
+    property var savedViewportBeforeQsoFocus: ({})
+    property bool qsoViewportFocused: false
     property bool moonLocatePending: false
     property string activitySelectedBand: ""
     readonly property bool compactIntelligencePanel: width < 760
@@ -128,6 +134,9 @@ Rectangle {
                                      ? root.mapLayers.coveragePushPinsEnabled : false)
         worldMap.setTimeZoneOverlayEnabled(root.mapLayers
                                            ? root.mapLayers.timeZoneOverlayEnabled : false)
+        if (root.mapLayers && root.mapLayers.layerModel
+                && worldMap.setLayerStyles)
+            worldMap.setLayerStyles(root.mapLayers.layerModel.allLayerStyles())
         root.syncOperations()
     }
 
@@ -219,6 +228,27 @@ Rectangle {
             if (!result.saveToFile(path))
                 console.warn("Unable to save Live Map screenshot", path)
         })
+    }
+
+    function exportMapConfiguration() {
+        if (!root.mapLayers)
+            return
+        var path = root.mapLayers.reserveMapConfigurationPath()
+        if (path)
+            root.mapLayers.exportMapConfiguration(
+                path, root.worldMap && root.worldMap.viewportState
+                    ? root.worldMap.viewportState() : ({}))
+    }
+
+    function importMapConfiguration(path) {
+        if (!root.mapLayers || !path)
+            return
+        var viewport = root.mapLayers.importMapConfiguration(path)
+        if (root.worldMap && root.worldMap.setViewportState
+                && viewport && Object.keys(viewport).length > 0)
+            root.worldMap.setViewportState(viewport)
+        root.syncMapSettings()
+        root.syncCoverage()
     }
 
     function aimSelectedMarker() {
@@ -414,6 +444,7 @@ Rectangle {
         if (column === "Band") return row.band || ""
         if (column === "Mode") return row.mode || ""
         if (column === "SNR") return row.snr !== undefined ? String(row.snr) + " dB" : ""
+        if (column === "DT") return row.dt !== undefined ? "DT " + Number(row.dt).toFixed(2) : ""
         if (column === "DXCC") return row.dxcc || ""
         if (column === "Continent") return row.continent || ""
         if (column === "CQ zone") return row.cqZone ? "CQ " + row.cqZone : ""
@@ -455,6 +486,20 @@ Rectangle {
 
     function hideGridPreview() {
         gridPreviewVisible = false
+        hoveredHistoricalGridDetails = ({})
+        hoveredLiveGridDetails = ({})
+    }
+
+    function showGridSegmentPreview(details, x, y, segment) {
+        showGridPreview(details, x, y)
+        if (String(segment || "Combined") === "Historical")
+            hoveredHistoricalGridDetails = details
+        else if (String(segment || "Combined") === "Live")
+            hoveredLiveGridDetails = details
+        else {
+            hoveredHistoricalGridDetails = details
+            hoveredLiveGridDetails = details
+        }
     }
 
     function pinGridDetails(details) {
@@ -479,6 +524,31 @@ Rectangle {
             Number(engine.lonFromGrid(mapLayers.selectedGrid)),
             Number(engine.latFromGrid(mapLayers.selectedGrid)),
             28, 18)
+    }
+
+    function focusActiveQso() {
+        if (!worldMap || !engine)
+            return
+        var grid = String(engine.dxGrid || "").trim().toUpperCase()
+        if (grid.length < 4 || !engine.lonFromGrid || !engine.latFromGrid)
+            return
+        if (!root.qsoViewportFocused && worldMap.viewportState)
+            root.savedViewportBeforeQsoFocus = worldMap.viewportState()
+        worldMap.focusLocation(Number(engine.lonFromGrid(grid)),
+                                Number(engine.latFromGrid(grid)), 28, 18)
+        root.qsoViewportFocused = true
+    }
+
+    function restoreViewportAfterQsoFocus() {
+        if (!worldMap || !root.qsoViewportFocused)
+            return
+        if (worldMap.setViewportState
+                && Object.keys(root.savedViewportBeforeQsoFocus).length > 0)
+            worldMap.setViewportState(root.savedViewportBeforeQsoFocus)
+        else
+            worldMap.resetView()
+        root.savedViewportBeforeQsoFocus = ({})
+        root.qsoViewportFocused = false
     }
 
     function scheduleRebuild() {
@@ -564,6 +634,9 @@ Rectangle {
             } else if (layerId === "psk" && enabled) {
                 pskInitialFetchTimer.restart()
             }
+        }
+        function onLayerStyleChanged(layerId) {
+            root.syncMapSettings()
         }
     }
 
@@ -716,10 +789,13 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: if (root.worldMap) root.worldMap.resetView()
+                        onClicked: root.qsoViewportFocused
+                            ? root.restoreViewportAfterQsoFocus()
+                            : (root.worldMap ? root.worldMap.resetView() : undefined)
                     }
                     ToolTip.visible: resetMa.containsMouse
-                    ToolTip.text: qsTr("Reset view (auto-fit)")
+                    ToolTip.text: root.qsoViewportFocused
+                        ? qsTr("Restore previous view") : qsTr("Reset view (auto-fit)")
                     ToolTip.delay: 500
                 }
 
@@ -761,6 +837,43 @@ Rectangle {
                     }
                     ToolTip.visible: greylineMa.containsMouse
                     ToolTip.text: qsTr("Toggle day/night greyline overlay")
+                    ToolTip.delay: 500
+                }
+
+                Rectangle {
+                    id: qsoFocusBtn
+                    Layout.preferredWidth: 30
+                    Layout.preferredHeight: 18
+                    radius: 4
+                    color: qsoFocusMa.containsMouse
+                        ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.25)
+                        : (root.qsoViewportFocused
+                           ? Qt.rgba(246/255, 195/255, 68/255, 0.18)
+                           : "transparent")
+                    border.color: qsoFocusMa.containsMouse || root.qsoViewportFocused
+                        ? secondaryCyan : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.35)
+                    border.width: 1
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.qsoViewportFocused ? "↶" : "DX"
+                        font.pixelSize: 10
+                        font.bold: true
+                        color: qsoFocusMa.containsMouse || root.qsoViewportFocused
+                            ? secondaryCyan : textSecondary
+                    }
+                    MouseArea {
+                        id: qsoFocusMa
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.qsoViewportFocused
+                            ? root.restoreViewportAfterQsoFocus()
+                            : root.focusActiveQso()
+                    }
+                    ToolTip.visible: qsoFocusMa.containsMouse
+                    ToolTip.text: root.qsoViewportFocused
+                        ? qsTr("Restore previous map view")
+                        : qsTr("Auto-fit active QSO")
                     ToolTip.delay: 500
                 }
 
@@ -1038,6 +1151,9 @@ Rectangle {
                         onCoverageCellHovered: function(details, x, y) {
                             root.showGridPreview(details, x, y)
                         }
+                        onCoverageCellSegmentHovered: function(details, x, y, segment) {
+                            root.showGridSegmentPreview(details, x, y, segment)
+                        }
                         onCoverageCellHoverEnded: root.hideGridPreview()
                         onCoverageCellClicked: function(details, x, y) {
                             root.pinGridDetails(details)
@@ -1064,6 +1180,9 @@ Rectangle {
                         }
                         onCoverageCellHovered: function(details, x, y) {
                             root.showGridPreview(details, x, y)
+                        }
+                        onCoverageCellSegmentHovered: function(details, x, y, segment) {
+                            root.showGridSegmentPreview(details, x, y, segment)
                         }
                         onCoverageCellHoverEnded: root.hideGridPreview()
                         onCoverageCellClicked: function(details, x, y) {
@@ -1378,6 +1497,16 @@ Rectangle {
                         text: qsTr("Hovered half: %1")
                             .arg(root.hoveredGridDetails.splitSegment || qsTr("Combined"))
                         color: "#f6c344"
+                        font.pixelSize: 8
+                    }
+                    Text {
+                        visible: !!root.hoveredGridDetails.split
+                        text: qsTr("Historical hover: %1 · Live hover: %2")
+                            .arg(root.hoveredHistoricalGridDetails.grid
+                                     ? qsTr("ready") : qsTr("—"))
+                            .arg(root.hoveredLiveGridDetails.grid
+                                     ? qsTr("ready") : qsTr("—"))
+                        color: root.textSecondary
                         font.pixelSize: 8
                     }
                 }
@@ -1734,49 +1863,42 @@ Rectangle {
                         id: intelligenceTabs
                         Layout.fillWidth: true
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: qsTr("MAP")
                             font.pixelSize: 8
                             leftPadding: 2
                             rightPadding: 2
                         }
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: qsTr("ROSTER")
                             font.pixelSize: 8
                             leftPadding: 2
                             rightPadding: 2
                         }
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: qsTr("LOGBOOK")
                             font.pixelSize: 8
                             leftPadding: 2
                             rightPadding: 2
                         }
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: qsTr("STATS")
                             font.pixelSize: 8
                             leftPadding: 2
                             rightPadding: 2
                         }
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: qsTr("ACTIVITY")
                             font.pixelSize: 8
                             leftPadding: 2
                             rightPadding: 2
                         }
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: qsTr("AWARDS")
                             font.pixelSize: 8
                             leftPadding: 2
                             rightPadding: 2
                         }
                         TabButton {
-                            width: intelligenceTabs.width / 7
                             text: root.mapLayers && root.mapLayers.unreadAlertCount > 0
                                 ? qsTr("ALERTS %1").arg(root.mapLayers.unreadAlertCount)
                                 : qsTr("ALERTS")
@@ -1834,6 +1956,154 @@ Rectangle {
                                     }
                                 }
 
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: qsTr("LAYER STYLE")
+                                    color: root.secondaryCyan
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+                                ComboBox {
+                                    id: layerStyleSelector
+                                    Layout.fillWidth: true
+                                    model: root.mapLayers ? root.mapLayers.layerModel : null
+                                    textRole: "label"
+                                    valueRole: "layerId"
+                                    font.pixelSize: 9
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Select the layer whose appearance is being edited")
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Text {
+                                        text: qsTr("Color")
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                    }
+                                    TextField {
+                                        id: layerColorField
+                                        Layout.fillWidth: true
+                                        text: root.mapLayers && root.mapLayers.layerModel
+                                            ? root.mapLayers.layerModel.layerColor(
+                                                  layerStyleSelector.currentValue) : "#ffffff"
+                                        placeholderText: "#RRGGBB"
+                                        font.pixelSize: 9
+                                        onEditingFinished: {
+                                            if (root.mapLayers && root.mapLayers.layerModel)
+                                                root.mapLayers.layerModel.setLayerColor(
+                                                    layerStyleSelector.currentValue, text)
+                                        }
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Text {
+                                        text: qsTr("Opacity")
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        Layout.preferredWidth: 44
+                                    }
+                                    Slider {
+                                        id: layerOpacitySlider
+                                        Layout.fillWidth: true
+                                        from: 0.05
+                                        to: 1.0
+                                        stepSize: 0.05
+                                        value: root.mapLayers && root.mapLayers.layerModel
+                                            ? root.mapLayers.layerModel.layerOpacity(
+                                                  layerStyleSelector.currentValue) : 1.0
+                                        onMoved: if (root.mapLayers && root.mapLayers.layerModel)
+                                            root.mapLayers.layerModel.setLayerOpacity(
+                                                layerStyleSelector.currentValue, value)
+                                    }
+                                    Text {
+                                        text: Math.round(layerOpacitySlider.value * 100) + "%"
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        Layout.preferredWidth: 28
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Text {
+                                        text: qsTr("Width")
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        Layout.preferredWidth: 44
+                                    }
+                                    Slider {
+                                        id: layerThicknessSlider
+                                        Layout.fillWidth: true
+                                        from: 0.5
+                                        to: 8.0
+                                        stepSize: 0.5
+                                        value: root.mapLayers && root.mapLayers.layerModel
+                                            ? root.mapLayers.layerModel.layerThickness(
+                                                  layerStyleSelector.currentValue) : 1.0
+                                        onMoved: if (root.mapLayers && root.mapLayers.layerModel)
+                                            root.mapLayers.layerModel.setLayerThickness(
+                                                layerStyleSelector.currentValue, value)
+                                    }
+                                    Text {
+                                        text: layerThicknessSlider.value.toFixed(1)
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        Layout.preferredWidth: 28
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Text {
+                                        text: qsTr("Labels")
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        Layout.preferredWidth: 44
+                                    }
+                                    Slider {
+                                        id: layerLabelDensitySlider
+                                        Layout.fillWidth: true
+                                        from: 0
+                                        to: 100
+                                        stepSize: 10
+                                        value: root.mapLayers && root.mapLayers.layerModel
+                                            ? root.mapLayers.layerModel.labelDensity(
+                                                  layerStyleSelector.currentValue) : 100
+                                        onMoved: if (root.mapLayers && root.mapLayers.layerModel)
+                                            root.mapLayers.layerModel.setLabelDensity(
+                                                layerStyleSelector.currentValue, Math.round(value))
+                                    }
+                                    Text {
+                                        text: Math.round(layerLabelDensitySlider.value) + "%"
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                        Layout.preferredWidth: 28
+                                    }
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 5
+                                    Button {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Export map config")
+                                        font.pixelSize: 8
+                                        onClicked: root.exportMapConfiguration()
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Export presets, roster preferences/rules, layer styles, temporal decay and map viewport")
+                                    }
+                                    Button {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Import map config")
+                                        font.pixelSize: 8
+                                        onClicked: mapConfigurationImportDialog.open()
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Import the complete map configuration bundle")
+                                    }
+                                }
                                 Text {
                                     Layout.fillWidth: true
                                     text: qsTr("BASE MAP")
@@ -1980,6 +2250,23 @@ Rectangle {
                                         onActivated: root.mapLayers.sourceFilter = currentText
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Source")
+                                    }
+                                    ComboBox {
+                                        Layout.fillWidth: true
+                                        model: root.mapLayers
+                                            ? root.mapLayers.availablePropagationTypes : []
+                                        textRole: "label"
+                                        currentIndex: root.mapLayers
+                                            ? Math.max(0, root.mapLayers.availablePropagationModes
+                                                       .indexOf(root.mapLayers.propagationFilter)) : 0
+                                        font.pixelSize: 10
+                                        onActivated: function(index) {
+                                            if (root.mapLayers && root.mapLayers.availablePropagationTypes[index])
+                                                root.mapLayers.propagationFilter =
+                                                    root.mapLayers.availablePropagationTypes[index].code
+                                        }
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Propagation")
                                     }
                                 }
                                 RowLayout {
@@ -2216,6 +2503,61 @@ Rectangle {
                                         }
                                         ToolTip.visible: hovered
                                         ToolTip.text: qsTr("Time before live grid activity fades out")
+                                    }
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: qsTr("TEMPORAL LEGEND / SOURCE DECAY")
+                                    color: root.secondaryCyan
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                }
+                                Repeater {
+                                    model: root.mapLayers ? root.mapLayers.temporalLegend : []
+                                    delegate: RowLayout {
+                                        required property var modelData
+                                        Layout.fillWidth: true
+                                        spacing: 4
+                                        Rectangle {
+                                            Layout.preferredWidth: 8
+                                            Layout.preferredHeight: 8
+                                            radius: 4
+                                            color: modelData.color
+                                        }
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: qsTr("%1 · %2 / %3 / %4")
+                                                .arg(modelData.label)
+                                                .arg(modelData.freshLabel)
+                                                .arg(modelData.fadingLabel)
+                                                .arg(modelData.staleLabel)
+                                            color: root.textSecondary
+                                            font.pixelSize: 8
+                                            elide: Text.ElideRight
+                                        }
+                                        ComboBox {
+                                            Layout.preferredWidth: 68
+                                            model: [5, 15, 30, 60, 120]
+                                            currentIndex: {
+                                                var values = [5, 15, 30, 60, 120]
+                                                var current = Number(modelData.decayMinutes)
+                                                var found = values.indexOf(current)
+                                                return found >= 0 ? found : 1
+                                            }
+                                            font.pixelSize: 8
+                                            onActivated: {
+                                                if (!root.mapLayers)
+                                                    return
+                                                var next = {}
+                                                var sourceValues = root.mapLayers.sourceDecayMinutes || {}
+                                                for (var key in sourceValues)
+                                                    next[key] = sourceValues[key]
+                                                next[modelData.source] = Number(currentText)
+                                                root.mapLayers.sourceDecayMinutes = next
+                                            }
+                                            ToolTip.visible: hovered
+                                            ToolTip.text: qsTr("Decay lifetime for this source")
+                                        }
                                     }
                                 }
                                 CheckBox {
@@ -2895,6 +3237,156 @@ Rectangle {
                             }
                             RowLayout {
                                 Layout.fillWidth: true
+                                Text {
+                                    text: qsTr("SCOPE")
+                                    color: root.secondaryCyan
+                                    font.pixelSize: 8
+                                    font.bold: true
+                                }
+                                ComboBox {
+                                    Layout.fillWidth: true
+                                    model: root.mapLayers
+                                        ? root.mapLayers.availableRosterScopes : ["All bands"]
+                                    currentIndex: root.mapLayers
+                                        ? Math.max(0, model.indexOf(root.mapLayers.rosterScope)) : 0
+                                    font.pixelSize: 8
+                                    onActivated: root.mapLayers.rosterScope = currentText
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes")
+                                }
+                                ComboBox {
+                                    Layout.preferredWidth: 98
+                                    model: root.mapLayers
+                                        ? root.mapLayers.availableRosterDxccScopes : ["All"]
+                                    currentIndex: root.mapLayers
+                                        ? Math.max(0, model.indexOf(root.mapLayers.rosterDxccScope)) : 0
+                                    font.pixelSize: 8
+                                    onActivated: root.mapLayers.rosterDxccScope = currentText
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Limit the roster to your DXCC or to other DXCCs")
+                                }
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+                                CheckBox {
+                                    text: qsTr("LoTW")
+                                    checked: root.mapLayers ? root.mapLayers.rosterUsesLoTW : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterUsesLoTW = checked
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Keep stations with a LoTW confirmation within the configured age")
+                                }
+                                CheckBox {
+                                    text: qsTr("eQSL")
+                                    checked: root.mapLayers ? root.mapLayers.rosterUsesEQSL : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterUsesEQSL = checked
+                                }
+                                CheckBox {
+                                    text: qsTr("OQRS")
+                                    checked: root.mapLayers ? root.mapLayers.rosterUsesOQRS : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterUsesOQRS = checked
+                                }
+                                CheckBox {
+                                    text: qsTr("Spotted me")
+                                    checked: root.mapLayers ? root.mapLayers.rosterSpottedMeOnly : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterSpottedMeOnly = checked
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Use only PSK Reporter spots heard by your callsign")
+                                }
+                                CheckBox {
+                                    text: qsTr("RR73=CQ")
+                                    checked: root.mapLayers ? root.mapLayers.rosterTreatRr73AsCq : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterTreatRr73AsCq = checked
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Treat messages containing RR73 as CQ when CQ-only is enabled")
+                                }
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                CheckBox {
+                                    text: qsTr("Min SNR")
+                                    checked: root.mapLayers ? root.mapLayers.rosterMinSnrEnabled : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterMinSnrEnabled = checked
+                                }
+                                SpinBox {
+                                    Layout.preferredWidth: 72
+                                    from: -60
+                                    to: 30
+                                    editable: true
+                                    value: root.mapLayers ? root.mapLayers.rosterMinSnr : -25
+                                    enabled: root.mapLayers && root.mapLayers.rosterMinSnrEnabled
+                                    font.pixelSize: 8
+                                    textFromValue: function(value, locale) { return value + " dB" }
+                                    valueFromText: function(text, locale) {
+                                        var parsed = parseInt(text)
+                                        return isNaN(parsed) ? -25 : parsed
+                                    }
+                                    onValueModified: {
+                                        if (root.mapLayers) root.mapLayers.rosterMinSnr = value
+                                    }
+                                }
+                                CheckBox {
+                                    text: qsTr("Max DT")
+                                    checked: root.mapLayers ? root.mapLayers.rosterMaxDtEnabled : false
+                                    font.pixelSize: 8
+                                    onToggled: root.mapLayers.rosterMaxDtEnabled = checked
+                                }
+                                TextField {
+                                    Layout.preferredWidth: 64
+                                    text: root.mapLayers ? Number(root.mapLayers.rosterMaxDt).toFixed(2) : "0.50"
+                                    enabled: root.mapLayers && root.mapLayers.rosterMaxDtEnabled
+                                    font.pixelSize: 8
+                                    selectByMouse: true
+                                    validator: DoubleValidator { bottom: 0.01; top: 10.0; decimals: 2 }
+                                    onEditingFinished: {
+                                        if (root.mapLayers) {
+                                            var parsed = parseFloat(text)
+                                            if (!isNaN(parsed)) root.mapLayers.rosterMaxDt = parsed
+                                        }
+                                    }
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: qsTr("provider filters are OR")
+                                    color: root.textSecondary
+                                    font.pixelSize: 8
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                visible: root.mapLayers && root.mapLayers.rosterUsesLoTW
+                                Text {
+                                    text: qsTr("LoTW age")
+                                    color: root.textSecondary
+                                    font.pixelSize: 8
+                                }
+                                SpinBox {
+                                    Layout.preferredWidth: 76
+                                    from: 1
+                                    to: 3650
+                                    editable: true
+                                    value: root.mapLayers ? root.mapLayers.rosterMaxLoTWDays : 810
+                                    font.pixelSize: 8
+                                    textFromValue: function(value, locale) { return value + " d" }
+                                    valueFromText: function(text, locale) {
+                                        var parsed = parseInt(text)
+                                        return isNaN(parsed) ? 810 : parsed
+                                    }
+                                    onValueModified: {
+                                        if (root.mapLayers) root.mapLayers.rosterMaxLoTWDays = value
+                                    }
+                                }
+                                Item { Layout.fillWidth: true }
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
                                 ComboBox {
                                     Layout.fillWidth: true
                                     model: root.mapLayers
@@ -2948,6 +3440,13 @@ Rectangle {
                                     onClicked: root.showRosterRules = !root.showRosterRules
                                     ToolTip.visible: hovered
                                     ToolTip.text: qsTr("Create wanted, ignored or watched rules with optional band and mode scopes")
+                                }
+                                ToolButton {
+                                    text: qsTr("Matrix")
+                                    enabled: !!root.mapLayers
+                                    onClicked: root.showRosterMatrix = !root.showRosterMatrix
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Select NEW categories and inspect wanted or exception matrices")
                                 }
                             }
                             RowLayout {
@@ -3070,6 +3569,117 @@ Rectangle {
                             }
                             Rectangle {
                                 Layout.fillWidth: true
+                                Layout.preferredHeight: visible ? 176 : 0
+                                visible: root.showRosterMatrix && !!root.mapLayers
+                                clip: true
+                                color: "#101a28"
+                                border.width: 1
+                                border.color: root.glassBorder
+                                radius: 3
+
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 5
+                                    spacing: 3
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: qsTr("NEW / WANTED MATRIX")
+                                            color: root.secondaryCyan
+                                            font.pixelSize: 8
+                                            font.bold: true
+                                        }
+                                        Text {
+                                            text: qsTr("wanted %1 · exceptions %2")
+                                                .arg(root.mapLayers.rosterWantedMatrix.length)
+                                                .arg(root.mapLayers.rosterExceptionMatrix.length)
+                                            color: root.textSecondary
+                                            font.pixelSize: 8
+                                        }
+                                    }
+                                    Flow {
+                                        Layout.fillWidth: true
+                                        spacing: 2
+                                        Repeater {
+                                            model: root.mapLayers.availableRosterWantedTypes
+                                            delegate: CheckBox {
+                                                required property string modelData
+                                                text: modelData
+                                                font.pixelSize: 8
+                                                checked: root.mapLayers.rosterWantedTypes.indexOf(modelData) >= 0
+                                                onToggled: {
+                                                    var types = root.mapLayers.rosterWantedTypes.slice()
+                                                    var index = types.indexOf(modelData)
+                                                    if (checked && index < 0)
+                                                        types.push(modelData)
+                                                    else if (!checked && index >= 0)
+                                                        types.splice(index, 1)
+                                                    root.mapLayers.rosterWantedTypes = types
+                                                }
+                                                ToolTip.visible: hovered
+                                                ToolTip.text: qsTr("Use this entity in NEW and UNCONFIRMED calculations")
+                                            }
+                                        }
+                                    }
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        Layout.fillHeight: true
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            Text {
+                                                text: qsTr("WANTED")
+                                                color: root.accentGreen
+                                                font.pixelSize: 8
+                                                font.bold: true
+                                            }
+                                            ListView {
+                                                Layout.fillWidth: true
+                                                Layout.fillHeight: true
+                                                clip: true
+                                                model: root.mapLayers.rosterWantedMatrix
+                                                delegate: Text {
+                                                    required property var modelData
+                                                    width: parent ? parent.width : 0
+                                                    text: modelData.type + "=" + modelData.value
+                                                        + (modelData.band ? "  " + modelData.band : "")
+                                                        + (modelData.mode ? "  " + modelData.mode : "")
+                                                    color: root.textPrimary
+                                                    font.pixelSize: 8
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+                                        }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            Text {
+                                                text: qsTr("EXCEPTIONS")
+                                                color: "#ff8c8c"
+                                                font.pixelSize: 8
+                                                font.bold: true
+                                            }
+                                            ListView {
+                                                Layout.fillWidth: true
+                                                Layout.fillHeight: true
+                                                clip: true
+                                                model: root.mapLayers.rosterExceptionMatrix
+                                                delegate: Text {
+                                                    required property var modelData
+                                                    width: parent ? parent.width : 0
+                                                    text: modelData.type + "=" + modelData.value
+                                                        + (modelData.band ? "  " + modelData.band : "")
+                                                        + (modelData.mode ? "  " + modelData.mode : "")
+                                                    color: root.textPrimary
+                                                    font.pixelSize: 8
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            Rectangle {
+                                Layout.fillWidth: true
                                 Layout.preferredHeight: visible ? 156 : 0
                                 visible: root.showRosterRules && !!root.mapLayers
                                 clip: true
@@ -3102,9 +3712,10 @@ Rectangle {
                                         ComboBox {
                                             id: rosterRuleType
                                             Layout.preferredWidth: 86
-                                            model: ["CALL", "GRID", "DXCC", "WPX", "CQ", "ITU",
-                                                    "STATE", "CONTINENT", "COUNTY", "POTA", "IOTA",
-                                                    "OQRS", "BAND", "MODE"]
+                                            model: root.mapLayers
+                                                ? root.mapLayers.availableRosterRuleTypes
+                                                : ["CALL", "GRID", "DXCC", "WPX", "POTA", "CQ", "ITU",
+                                                   "STATE", "COUNTY", "CONTINENT", "IOTA", "OQRS", "BAND", "MODE"]
                                             font.pixelSize: 8
                                         }
                                         TextField {
@@ -3305,7 +3916,7 @@ Rectangle {
                                     required property var modelData
                                     required property int index
                                     width: rosterList.width
-                                    height: 70
+                                    height: 86
                                     radius: 3
                                     color: modelData.watched
                                         ? "#182538"
@@ -3346,7 +3957,8 @@ Rectangle {
                                                 text: modelData.huntReason || ""
                                                 color: root.rosterStatusColor(modelData.status)
                                                 font.pixelSize: 8
-                                                elide: Text.ElideRight
+                                                wrapMode: Text.Wrap
+                                                maximumLineCount: 3
                                             }
                                         }
                                         Rectangle {
@@ -3608,6 +4220,52 @@ Rectangle {
                                             text: qsTr("%1 QSO · %2 QSL")
                                                 .arg(modelData.qso)
                                                 .arg(modelData.confirmed)
+                                            color: root.textSecondary
+                                            font.pixelSize: 8
+                                        }
+                                    }
+                                }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 1
+                                    color: root.glassBorder
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: qsTr("PROPAGATION TYPES")
+                                        color: root.secondaryCyan
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                    }
+                                    Text {
+                                        text: {
+                                            var summary = statisticsContent.stats.propagationSummary || {}
+                                            return qsTr("%1 classified · %2 unknown")
+                                                .arg(summary.classified || 0).arg(summary.unknown || 0)
+                                        }
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                    }
+                                }
+                                Repeater {
+                                    model: statisticsContent.stats.propagation || []
+                                    delegate: RowLayout {
+                                        required property var modelData
+                                        Layout.fillWidth: true
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.label
+                                            color: modelData.qso > 0
+                                                ? root.textPrimary : root.textSecondary
+                                            font.pixelSize: 8
+                                        }
+                                        Text {
+                                            text: qsTr("%1 QSO · %2 QSL · %3%")
+                                                .arg(modelData.qso)
+                                                .arg(modelData.confirmed)
+                                                .arg(Number(modelData.percent || 0).toFixed(1))
                                             color: root.textSecondary
                                             font.pixelSize: 8
                                         }
@@ -4084,6 +4742,66 @@ Rectangle {
                                     onActivated: root.mapLayers.awardGoal = currentText
                                 }
                             }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+                                ComboBox {
+                                    Layout.fillWidth: true
+                                    model: root.mapLayers
+                                        ? root.mapLayers.availableAwardEndorsements : ["Mixed"]
+                                    currentIndex: root.mapLayers
+                                        ? Math.max(0, model.indexOf(
+                                                       root.mapLayers.awardEndorsement || "Mixed")) : 0
+                                    enabled: root.mapLayers
+                                        && root.mapLayers.activeAwardProgram !== "None"
+                                    font.pixelSize: 8
+                                    onActivated: root.mapLayers.awardEndorsement = currentText
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Award endorsement band")
+                                }
+                                ComboBox {
+                                    Layout.preferredWidth: 92
+                                    model: root.mapLayers
+                                        ? root.mapLayers.availableAwardConfirmations : ["Any"]
+                                    currentIndex: root.mapLayers
+                                        ? Math.max(0, model.indexOf(
+                                                       root.mapLayers.awardConfirmation)) : 0
+                                    enabled: root.mapLayers
+                                        && root.mapLayers.activeAwardProgram !== "None"
+                                    font.pixelSize: 8
+                                    onActivated: root.mapLayers.awardConfirmation = currentText
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: qsTr("Confirmation source used for the confirmed score")
+                                }
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 3
+                                TextField {
+                                    Layout.fillWidth: true
+                                    placeholderText: qsTr("Operator callsign")
+                                    text: root.mapLayers ? root.mapLayers.awardCallsign : ""
+                                    font.pixelSize: 8
+                                    selectByMouse: true
+                                    onEditingFinished: root.mapLayers.awardCallsign = text
+                                }
+                                TextField {
+                                    Layout.preferredWidth: 72
+                                    placeholderText: qsTr("From YYYY-MM-DD")
+                                    text: root.mapLayers ? root.mapLayers.awardFromDate : ""
+                                    font.pixelSize: 8
+                                    selectByMouse: true
+                                    onEditingFinished: root.mapLayers.awardFromDate = text
+                                }
+                                TextField {
+                                    Layout.preferredWidth: 72
+                                    placeholderText: qsTr("To YYYY-MM-DD")
+                                    text: root.mapLayers ? root.mapLayers.awardToDate : ""
+                                    font.pixelSize: 8
+                                    selectByMouse: true
+                                    onEditingFinished: root.mapLayers.awardToDate = text
+                                }
+                            }
                             Text {
                                 Layout.fillWidth: true
                                 text: root.mapLayers
@@ -4161,6 +4879,69 @@ Rectangle {
                                         + "\n"
                                         + qsTr("Select %1 as the active roster award")
                                               .arg(modelData.label)
+                                }
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: root.mapLayers && root.mapLayers.activeAwardProgram !== "None"
+                                    ? qsTr("MISSING LIVE ENTITIES (%1)")
+                                          .arg(root.mapLayers.awardMissing.length) : ""
+                                color: root.secondaryCyan
+                                font.pixelSize: 8
+                                font.bold: true
+                                visible: root.mapLayers && root.mapLayers.awardMissing.length > 0
+                            }
+                            ListView {
+                                id: awardMissingList
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: root.mapLayers
+                                    && root.mapLayers.awardMissing.length > 0
+                                    ? Math.min(180, root.mapLayers.awardMissing.length * 38) : 0
+                                visible: root.mapLayers && root.mapLayers.awardMissing.length > 0
+                                clip: true
+                                spacing: 3
+                                model: root.mapLayers ? root.mapLayers.awardMissing : []
+                                delegate: Rectangle {
+                                    required property var modelData
+                                    width: awardMissingList.width
+                                    height: 34
+                                    radius: 3
+                                    color: "#1b1824"
+                                    border.color: root.accentAmber
+                                    border.width: 1
+                                    Column {
+                                        anchors.fill: parent
+                                        anchors.margins: 4
+                                        spacing: 1
+                                        Text {
+                                            text: qsTr("%1 · %2 · %3")
+                                                .arg(modelData.entity)
+                                                .arg(modelData.call)
+                                                .arg(modelData.grid || "no grid")
+                                            color: root.textPrimary
+                                            font.pixelSize: 8
+                                            font.bold: true
+                                        }
+                                        Text {
+                                            text: qsTr("%1 / %2 — open roster and map")
+                                                .arg(modelData.band || "All bands")
+                                                .arg(modelData.mode || "All modes")
+                                            color: root.textSecondary
+                                            font.pixelSize: 7
+                                        }
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            if (!root.mapLayers) return
+                                            root.mapLayers.rosterTextMode = "Only"
+                                            root.mapLayers.rosterTextFilter = modelData.call
+                                            root.mapLayers.selectGrid(modelData.grid)
+                                            intelligenceTabs.currentIndex = 1
+                                        }
+                                    }
                                 }
                             }
                                 Item {
@@ -4249,6 +5030,14 @@ Rectangle {
         mutedColor: root.textSecondary
     }
 
+    FileDialog {
+        id: mapConfigurationImportDialog
+        title: qsTr("Import Decodium map configuration")
+        fileMode: FileDialog.OpenFile
+        nameFilters: [qsTr("Decodium map configuration (*.json)"), qsTr("JSON files (*.json)")]
+        onAccepted: root.importMapConfiguration(selectedFile)
+    }
+
     Shortcut {
         sequence: "Ctrl+Shift+M"
         enabled: root.visible && root.mapOperations
@@ -4315,9 +5104,13 @@ Rectangle {
         }
         function onDxCallChanged() {
             root.syncTxState()
+            if (root.qsoViewportFocused)
+                root.focusActiveQso()
         }
         function onDxGridChanged() {
             root.syncTxState()
+            if (root.qsoViewportFocused)
+                root.focusActiveQso()
         }
         function onCurrentTxChanged() {
             root.syncTxState()

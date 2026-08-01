@@ -10,6 +10,7 @@
 #include "DecodiumPropagationManager.h"
 #include "MapExternalOverlayService.h"
 #include "MapIntelligenceService.h"
+#include "CallsignIntelligenceService.h"
 #include "MapLayerModel.h"
 #include "DecodiumProfileSettings.h"
 #include "Sequencer/QsoSequencerRules.hpp"
@@ -9835,6 +9836,39 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     // DXCC lookup (cty.dat)
     m_dxccLookup = new DxccLookup();
+    m_callsignIntelligence = new CallsignIntelligenceService(this);
+    m_callsignIntelligence->setDxccLookup(m_dxccLookup);
+    m_callsignIntelligence->setOperatorCallsign(m_callsign);
+    connect(this, &DecodiumBridge::callsignChanged, this, [this]() {
+        if (m_callsignIntelligence) {
+            m_callsignIntelligence->setOperatorCallsign(m_callsign);
+        }
+    });
+    connect(this, &DecodiumBridge::dxCallChanged, this, [this]() {
+        if (m_callsignIntelligence) {
+            m_callsignIntelligence->notifyQsoStarted(m_dxCall);
+        }
+    });
+    connect(m_callsignIntelligence, &CallsignIntelligenceService::enrichmentReady,
+            this, [this](const QString& call, const QVariantMap& fields) {
+        const QString active = Radio::base_callsign(m_dxCall).trimmed().toUpper();
+        const QString incoming = Radio::base_callsign(call).trimmed().toUpper();
+        if (active.isEmpty() || active != incoming) {
+            return;
+        }
+        if (m_dxGrid.trimmed().isEmpty()) {
+            const QString grid = fields.value(QStringLiteral("grid")).toString().trimmed().toUpper();
+            if (!grid.isEmpty()) {
+                setDxGrid(grid);
+            }
+        }
+        if (m_nextLogName.trimmed().isEmpty()) {
+            m_nextLogName = fields.value(QStringLiteral("name")).toString().trimmed();
+        }
+        if (m_nextLogQth.trimmed().isEmpty()) {
+            m_nextLogQth = fields.value(QStringLiteral("qth")).toString().trimmed();
+        }
+    });
     bridgeLog(QStringLiteral("DXCC: load deferred until Main.qml ready"));
     m_usStateData = new UsStateDataManager(this);
     connect(m_usStateData, &UsStateDataManager::statusMessage, this, [this](const QString& msg) {
@@ -10344,6 +10378,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 
     loadSettings();
     if (m_mapIntelligenceService) {
+        m_mapIntelligenceService->setRosterStationCall(m_callsign);
         m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
     }
     refreshMapMoonOverlay();
@@ -10435,6 +10470,11 @@ QObject * DecodiumBridge::propagationManager() const
 QObject * DecodiumBridge::mapIntelligenceService() const
 {
     return m_mapIntelligenceService;
+}
+
+QObject * DecodiumBridge::callsignIntelligence() const
+{
+    return m_callsignIntelligence;
 }
 
 bool DecodiumBridge::usingLegacyBackendForTx() const
@@ -14837,6 +14877,9 @@ void DecodiumBridge::setCallsign(const QString& v) {
         m_callsign = v;
         emit callsignChanged();
         refreshPskReporterLocalStation();
+        if (m_mapIntelligenceService) {
+            m_mapIntelligenceService->setRosterStationCall(m_callsign);
+        }
         if (m_dxCluster)   m_dxCluster->setCallsign(m_callsign);
         regenerateTxMessages();
     }
@@ -17123,6 +17166,10 @@ void DecodiumBridge::setDxCall(const QString& v) {
         // partner in autoSequenceStep. 127 = sentinel "no data".
         if (!resumedFromMemory) {
             m_currentPartnerSnrDb = 127;
+        }
+        if (previousBase != nextBase) {
+            m_nextLogName.clear();
+            m_nextLogQth.clear();
         }
         QString const activeQueueCall = normalizedBaseCall(next);
         if (!activeQueueCall.isEmpty()) {
@@ -35667,6 +35714,15 @@ void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
         recentStallCount = m_ft8MicroStallGuard.recentStallCount();
     }
     if (activated) {
+        if (!m_gpuPanadapterFftStallGuard.exchange(true)) {
+            // GPU FFT retries perform work on the scene-graph path.  Once the
+            // FT8 guard observes real main-thread stalls, keep that path out
+            // of the recovery loop until several clean periods have passed.
+            m_lastGpuPanadapterProbeMs = nowMs;
+            setGpuPanadapterFftAvailable(false,
+                QStringLiteral("FT8 main-thread micro-stall guard"));
+            bridgeLog(QStringLiteral("Panadapter GPU FFT paused by FT8 micro-stall guard; async CPU fallback remains active"));
+        }
         if (legacyBackendAvailable()) {
             m_legacyBackend->setFt8DeepThreadPenalty(true);
         }
@@ -35696,6 +35752,12 @@ void DecodiumBridge::noteFt8AdaptivePeriod(qint64 periodId)
 
     if (legacyBackendAvailable()) {
         m_legacyBackend->setFt8DeepThreadPenalty(false);
+    }
+    if (m_gpuPanadapterFftStallGuard.exchange(false)) {
+        // Do not blindly re-enable the GPU path: make it eligible for the
+        // normal probe after the FT8 guard has observed clean periods.
+        m_lastGpuPanadapterProbeMs = 0;
+        bridgeLog(QStringLiteral("Panadapter GPU FFT retry eligible after FT8 micro-stall guard restored"));
     }
     bridgeLog(QStringLiteral("FT8 micro-stall guard restored: %1 clean periods, normal DEEP thread budget active")
                   .arg(decodium::decode::Ft8MicroStallGuard::CleanPeriodsToRestore));
@@ -36306,7 +36368,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
                                     const QString& propMode = QString(),
                                     const QString& satellite = QString(),
                                     const QString& satMode = QString(),
-                                    const QString& freqRx = QString());
+                                    const QString& freqRx = QString(),
+                                    const QString& name = QString(),
+                                    const QString& qth = QString());
 
 QVariantMap DecodiumBridge::pendingLogQsoPreview() const
 {
@@ -36984,6 +37048,9 @@ void DecodiumBridge::logQsoNow()
         clearPromptLogSnapshot();
         clearPendingAutoLogSnapshot();
         m_qsoLogged = true;
+        if (m_callsignIntelligence) {
+            m_callsignIntelligence->notifyQsoLogged(legacyCompletedCall);
+        }
         clearTxArmedAfterCompletedQso(legacyCompletedCall, QStringLiteral("legacy-log"));
         emit statusMessage("Log QSO via backend legacy");
         return;
@@ -37115,7 +37182,8 @@ void DecodiumBridge::logQsoNow()
     // 2) Log ADIF (decodium_log.adi) — per import/export e B4 check
     QByteArray const adifRecord = bridgeAdifRecordText(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
                                                        logRptSent, logRptRcvd, m_callsign, m_grid,
-                                                       logComments, logPropMode, logSatellite, logSatMode, logFreqRx).toUtf8();
+                                                       logComments, logPropMode, logSatellite, logSatMode, logFreqRx,
+                                                       m_nextLogName, m_nextLogQth).toUtf8();
     traceLogStep(QStringLiteral("adif-record-built"));
     appendAdifRecord(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
                      logRptSent, logRptRcvd,
@@ -37184,6 +37252,9 @@ void DecodiumBridge::logQsoNow()
     clearPromptLogSnapshot();
     clearPendingAutoLogSnapshot();
     m_qsoLogged = true;  // impedisce doppio log per questo QSO
+    if (m_callsignIntelligence) {
+        m_callsignIntelligence->notifyQsoLogged(logDxCall);
+    }
     clearTxArmedAfterCompletedQso(logDxCall, QStringLiteral("log"));
     emit statusMessage("QSO loggato: " + logDxCall);
     traceLogStep(QStringLiteral("done"));
@@ -42182,6 +42253,8 @@ void DecodiumBridge::onSpectrumTimer()
             bool const acceleratedLegacyVisual =
                 !directVisualFastFeed
                 && m_legacyPcmSpectrumFeed
+                && !m_lowCpuModeEnabled
+                && !m_gpuPanadapterFftStallGuard.load()
                 && m_forceGpuPanadapterFft.load()
                 && m_gpuPanadapterFftAvailable.load();
             qint64 minPanadapterIntervalMs = directVisualFastFeed
@@ -42253,8 +42326,15 @@ void DecodiumBridge::onSpectrumTimer()
             float const freqMaxHz = static_cast<int>(nfbSnapshot / freqPerBin) * freqPerBin;
             uint64_t const serial = ++m_panadapterComputeSerial;
 
-            bool const forceGpuPanadapterFft = m_forceGpuPanadapterFft.load();
-            bool gpuPanadapterFftAvailable = m_gpuPanadapterFftAvailable.load();
+            bool const gpuPanadapterFftAllowed =
+                !m_lowCpuModeEnabled
+                && !m_gpuPanadapterFftStallGuard.load();
+            bool const forceGpuPanadapterFft =
+                m_forceGpuPanadapterFft.load()
+                && gpuPanadapterFftAllowed;
+            bool gpuPanadapterFftAvailable =
+                m_gpuPanadapterFftAvailable.load()
+                && gpuPanadapterFftAllowed;
             if (!gpuPanadapterFftAvailable
                 && forceGpuPanadapterFft
                 && !remoteWaterfallNeedsCpu
@@ -43055,7 +43135,7 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
     }
 }
 
-void DecodiumBridge::startAudioCapture()
+void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
 {
     MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
                                QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
@@ -43346,6 +43426,34 @@ void DecodiumBridge::startAudioCapture()
         .arg(static_cast<int>(channel))
         .arg(rxFramesPerBuffer);
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (watchdogRecovery && m_soundInput) {
+        // Keep the QAudioSource object alive for a watchdog recovery.  On
+        // Qt 6.11 + PipeWire, a stop/delete/create cycle can leave a posted
+        // QtMultimedia event aimed at a retired backend object and abort with
+        // "pure virtual method called" on the main thread.
+        bridgeLog(QStringLiteral("SoundInput::restart non-destructive watchdog recovery device=%1 id=%2")
+                      .arg(selectedDevice.description(),
+                           audioDeviceIdSettingForLog(selectedDeviceId)));
+        m_lastAudioCaptureStartKey = startKey;
+        m_lastAudioCaptureStartMs = nowMs;
+        m_activeRxInputDeviceName = selectedDevice.description().trimmed();
+        m_activeRxInputDeviceId = selectedDeviceId;
+        m_rxAudioStartupStartMs = nowMs;
+        m_pendingRxAudioStartupHealthLog = true;
+        m_audioUnhealthyStartMs = 0;
+        m_audioWatchdogIgnoreUntilMs = nowMs + 5000;
+        if (m_audioSink) {
+            m_audioSink->resetDecimationPhase();
+        }
+        m_soundInput->restart(selectedDevice, rxFramesPerBuffer, m_audioSink,
+                              downSampleFactor, channel);
+        m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
+        trace.addDetail(QStringLiteral("watchdog_safe_recovery=1 selected=[%1] selected_id=%2")
+                            .arg(selectedDevice.description(),
+                                 audioDeviceIdSettingForLog(selectedDeviceId)));
+        emit statusMessage(QStringLiteral("Audio RX recovery in corso: ") + selectedDevice.description());
+        return;
+    }
     bool const recentAudioStart =
         m_soundInput
         && m_lastAudioCaptureStartMs > 0
@@ -43593,7 +43701,6 @@ void DecodiumBridge::handleAudioHealth(double rms,
     constexpr qint64 kOverdriveWarnMs = 3000;
     constexpr qint64 kOverdriveLogCooldownMs = 10000;
     constexpr qint64 kUnhealthyMs = 8000;
-    constexpr qint64 kRestartCooldownMs = 45000;
     constexpr qint64 kLogCooldownMs = 10000;
 
     const double crestFactor = rms > 1e-9 ? peak / rms : 999.0;
@@ -43695,26 +43802,25 @@ void DecodiumBridge::handleAudioHealth(double rms,
         squareLikeBlock ? QStringLiteral("square-like")
                         : clippedBlock ? QStringLiteral("clipped")
                                        : QStringLiteral("flat");
-    const QString reason =
-        QStringLiteral("%1 RX audio rms=%2 peak=%3 crest=%4 range=%5 clipped=%6/%7 unhealthy_ms=%8")
-            .arg(kind)
-            .arg(rms, 0, 'g', 4)
-            .arg(peak, 0, 'g', 4)
-            .arg(crestFactor, 0, 'g', 4)
-            .arg(dynamicRange)
-            .arg(clippedSamples)
-            .arg(samples)
-            .arg(unhealthyForMs);
-
-    if (now - m_lastAudioWatchdogRestartMs < kRestartCooldownMs) {
-        if (now - m_lastAudioWatchdogLogMs >= kLogCooldownMs) {
-            bridgeLog(QStringLiteral("Audio watchdog: unhealthy RX audio in cooldown (%1)").arg(reason));
-            m_lastAudioWatchdogLogMs = now;
-        }
-        return;
+    // This callback is proof that capture is alive.  A silent, clipped or
+    // square-like PCM stream may need user intervention, but tearing down a
+    // healthy QAudioSource cannot repair its content and is unsafe on Qt 6.11
+    // PipeWire: immediate source recreation can deliver a stale Multimedia
+    // event to a retired backend object.  Keep the Auto-CQ health gate armed,
+    // report the condition, and reserve capture recovery for the no-callback
+    // watchdog paths (waterfall/post-TX recovery).
+    if (now - m_lastAudioWatchdogLogMs >= kLogCooldownMs) {
+        bridgeLog(QStringLiteral("Audio watchdog: RX stream still delivers %1 samples; capture retained rms=%2 peak=%3 crest=%4 range=%5 clipped=%6/%7 unhealthy_ms=%8")
+                      .arg(kind)
+                      .arg(rms, 0, 'g', 4)
+                      .arg(peak, 0, 'g', 4)
+                      .arg(crestFactor, 0, 'g', 4)
+                      .arg(dynamicRange)
+                      .arg(clippedSamples)
+                      .arg(samples)
+                      .arg(unhealthyForMs));
+        m_lastAudioWatchdogLogMs = now;
     }
-
-    restartAudioCaptureFromWatchdog(reason);
 }
 
 void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMode)
@@ -43864,7 +43970,6 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
     bridgeLog(QStringLiteral("Audio watchdog: restarting RX capture (%1)").arg(reason));
     emit statusMessage(QStringLiteral("Audio RX riavviato: watchdog audio"));
 
-    stopAudioCapture();
     m_audioWatchdogIgnoreUntilMs = now + 5000;
     resetRxPeriodAccumulation(true);
     m_spectrumBuf.clear();
@@ -43880,11 +43985,45 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         m_asyncAudioPos.store(0, std::memory_order_release);
     }
 
+    // A source that is still delivering a Qt audio stream gets a safe reset
+    // first.  The full stop/delete/create lifecycle is delayed until we know
+    // that no PCM callback followed the reset; this avoids the Qt 6.11
+    // PipeWire pure-virtual abort observed during immediate recreation.
+    if (m_soundInput && !m_tciAudioCaptureActive) {
+        quint64 const recoverySerial = ++m_audioWatchdogRecoverySerial;
+        startAudioCapture(true);
+        QTimer::singleShot(3500, this, [this, recoverySerial, now, reason]() {
+            if (recoverySerial != m_audioWatchdogRecoverySerial
+                || !m_monitoring
+                || m_transmitting
+                || m_tuning
+                || !m_soundInput
+                || m_tciAudioCaptureActive) {
+                return;
+            }
+            if (m_lastAudioHealthMs >= now) {
+                bridgeLog(QStringLiteral("Audio watchdog: non-destructive recovery received PCM callback (%1)")
+                              .arg(reason));
+                return;
+            }
+
+            bridgeLog(QStringLiteral("Audio watchdog: safe recovery produced no PCM callback; escalating to full reopen (%1)")
+                          .arg(reason));
+            stopAudioCapture();
+            startAudioCapture();
+        });
+        return;
+    }
+
+    stopAudioCapture();
     startAudioCapture();
 }
 
 void DecodiumBridge::stopAudioCapture()
 {
+    // Cancel a pending watchdog fallback before any deliberate stop (mode or
+    // device change) can replace the capture configuration.
+    ++m_audioWatchdogRecoverySerial;
     m_lastAudioCaptureStartKey.clear();
     m_lastAudioCaptureStartMs = 0;
     if (m_tciAudioCaptureActive) {
@@ -47678,7 +47817,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
                                     const QString& propMode,
                                     const QString& satellite,
                                     const QString& satMode,
-                                    const QString& freqRx)
+                                    const QString& freqRx,
+                                    const QString& name,
+                                    const QString& qth)
 {
     double const freqMhz = freqHz / 1e6;
     QString const normalizedMode = mode.trimmed().toUpper();
@@ -47711,6 +47852,12 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
             + bridgeAdifField(QStringLiteral("STATION_CALLSIGN"), myCall);
     if (!myGrid.trimmed().isEmpty()) {
         record += bridgeAdifField(QStringLiteral("MY_GRIDSQUARE"), myGrid);
+    }
+    if (!name.trimmed().isEmpty()) {
+        record += bridgeAdifField(QStringLiteral("NAME"), name.trimmed());
+    }
+    if (!qth.trimmed().isEmpty()) {
+        record += bridgeAdifField(QStringLiteral("QTH"), qth.trimmed());
     }
     QString const cleanComments = comments.trimmed();
     if (!cleanComments.isEmpty()) {
@@ -47760,7 +47907,8 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     QString const adifRecord =
         bridgeAdifRecordText(dxCall, dxGrid, freqHz, mode, timeOnUtc, timeOffUtc,
                              rstSent, rstRcvd, m_callsign, m_grid,
-                             comments, propMode, satellite, satMode, freqRx)
+                             comments, propMode, satellite, satMode, freqRx,
+                             m_nextLogName, m_nextLogQth)
         + QStringLiteral("<EOR>\n");
     ts << adifRecord;
 

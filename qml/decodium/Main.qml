@@ -1151,6 +1151,8 @@ ApplicationWindow {
             shutdownLoader(bugReportDialogLoader)
         if (typeof settingsDialogLoader !== "undefined")
             shutdownLoader(settingsDialogLoader)
+        if (typeof callsignLookupWindowLoader !== "undefined")
+            shutdownLoader(callsignLookupWindowLoader)
         if (typeof logWindowLoader !== "undefined")
             shutdownLoader(logWindowLoader)
         if (typeof mamWindowLoader !== "undefined")
@@ -10471,6 +10473,45 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             }
         }
     }
+
+    // Callsign Intelligence resta lazy: con l'impostazione predefinita OFF non
+    // crea alcuna finestra quando cambia il DX call. Se l'utente abilita
+    // l'apertura automatica, il servizio chiede questa finestra dopo aver
+    // avviato lookup/cache e il contenuto segue il risultato in tempo reale.
+    Loader {
+        id: callsignLookupWindowLoader
+        anchors.fill: parent
+        active: false
+        asynchronous: true
+        source: "components/CallsignLookupWindow.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: CallsignLookupWindow")
+            if (item)
+                item.service = bridge ? bridge.callsignIntelligence : null
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
+    }
+
+    Connections {
+        target: bridge && bridge.callsignIntelligence ? bridge.callsignIntelligence : null
+        ignoreUnknownSignals: true
+        function onLookupWindowRequested() {
+            mainWindow.runWhenLoaded(callsignLookupWindowLoader, function(item) {
+                if (item)
+                    item.openForCall(bridge.callsignIntelligence.currentCall)
+            })
+        }
+        function onLookupWindowCloseRequested() {
+            if (callsignLookupWindowLoader.item)
+                callsignLookupWindowLoader.item.close()
+        }
+    }
+
     Connections {
         target: settingsDialogLoader.item
         ignoreUnknownSignals: true

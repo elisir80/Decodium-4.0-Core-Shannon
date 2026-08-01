@@ -470,6 +470,10 @@ void WorldMapItem::hoverMoveEvent(QHoverEvent* event)
     setCursor(Qt::PointingHandCursor);
     Q_EMIT coverageCellHovered(cell, event->position().x(),
                                event->position().y());
+    Q_EMIT coverageCellSegmentHovered(
+        cell, event->position().x(), event->position().y(),
+        cell.value(QStringLiteral("splitSegment"),
+                   QStringLiteral("Combined")).toString());
 }
 
 void WorldMapItem::hoverLeaveEvent(QHoverEvent* event)

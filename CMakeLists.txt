@@ -513,6 +513,8 @@ set (wsjtx_CXXSRCS
   src/services/DecodiumDxCluster.h
   src/services/DxccLookup.cpp
   src/services/DxccLookup.h
+  src/services/CallsignIntelligenceService.cpp
+  src/services/CallsignIntelligenceService.h
   src/bridge/DecodiumLegacyLinkCompat.cpp
   Network/wsprnet.cpp
   WSPR/WSPRBandHopping.cpp
@@ -1872,6 +1874,8 @@ add_executable (decodium_qml
   src/services/DecodiumDxCluster.h
   src/services/DxccLookup.cpp
   src/services/DxccLookup.h
+  src/services/CallsignIntelligenceService.cpp
+  src/services/CallsignIntelligenceService.h
   ${DECODIUM_QML_LEGACY_SRCS}
   ${wsjtx_GENUISRCS}
   ${wsjtx_RESOURCES_RCC}

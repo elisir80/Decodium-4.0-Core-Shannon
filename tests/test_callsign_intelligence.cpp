@@ -1,0 +1,143 @@
+#include "src/services/CallsignIntelligenceService.h"
+
+#include <QFile>
+#include <QSignalSpy>
+#include <QStandardPaths>
+#include <QTemporaryDir>
+#include <QtTest>
+
+class CallsignIntelligenceTest final : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void initTestCase()
+    {
+        // Keep the SQLite cache and profile settings outside the user's live
+        // Decodium configuration when the test suite runs.
+        QStandardPaths::setTestModeEnabled(true);
+    }
+
+    void importsProviderDataAndUsesCache()
+    {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const QString path = directory.filePath(QStringLiteral("eqsl.csv"));
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Text));
+        file.write("Callsign,Grid Square,Name,QTH,State\nIU8LMC,JN70ES,Salvatore,Malta,MT\n");
+        file.close();
+
+        CallsignIntelligenceService service;
+        const bool originalAutoOpen = service.autoOpenOnQsoStart();
+        service.setAutoOpenOnQsoStart(false);
+        QVERIFY(!service.autoOpenOnQsoStart());
+        QVERIFY(service.importDatabase(QStringLiteral("eqsl"), path));
+        service.clearCache(QStringLiteral("IU8LMC"));
+
+        service.lookup(QStringLiteral("iu8lmc"));
+        QCOMPARE(service.result().value(QStringLiteral("call")).toString(), QStringLiteral("IU8LMC"));
+        QCOMPARE(service.result().value(QStringLiteral("grid")).toString(), QStringLiteral("JN70ES"));
+        QCOMPARE(service.result().value(QStringLiteral("name")).toString(), QStringLiteral("Salvatore"));
+        QVERIFY(service.result().value(QStringLiteral("eqsl")).toBool());
+        QVERIFY(!service.cacheHit());
+
+        service.lookup(QStringLiteral("IU8LMC"));
+        QVERIFY(service.cacheHit());
+        QVERIFY(service.databases().size() >= 5);
+        service.setAutoOpenOnQsoStart(originalAutoOpen);
+    }
+
+    void importsLotwHeaderlessActivity()
+    {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const QString path = directory.filePath(QStringLiteral("lotw.csv"));
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Text));
+        file.write("K1ABC,2026-07-31,12:00:00\n");
+        file.close();
+
+        CallsignIntelligenceService service;
+        QVERIFY(service.importDatabase(QStringLiteral("lotw"), path));
+        service.clearCache(QStringLiteral("K1ABC"));
+        service.lookup(QStringLiteral("K1ABC"));
+        QVERIFY(service.result().value(QStringLiteral("lotw")).toBool());
+        QCOMPARE(service.result().value(QStringLiteral("lastUpload")).toString(), QStringLiteral("2026-07-31"));
+    }
+
+    void qsoHooksHonorDefaultsAndSettings()
+    {
+        CallsignIntelligenceService service;
+        const bool originalAutoOpen = service.autoOpenOnQsoStart();
+        const bool originalAutoClose = service.autoCloseAfterLogging();
+        service.setAutoOpenOnQsoStart(false);
+        service.setAutoCloseAfterLogging(false);
+        QSignalSpy openSpy(&service, &CallsignIntelligenceService::lookupWindowRequested);
+        QSignalSpy closeSpy(&service, &CallsignIntelligenceService::lookupWindowCloseRequested);
+
+        service.notifyQsoStarted(QStringLiteral("K1ABC"));
+        QCOMPARE(openSpy.count(), 0);
+        service.setAutoOpenOnQsoStart(true);
+        service.setAutoCloseAfterLogging(true);
+        service.notifyQsoStarted(QStringLiteral("K1ABC"));
+        QCOMPARE(openSpy.count(), 1);
+        service.notifyQsoLogged(QStringLiteral("K1ABC"));
+        QCOMPARE(closeSpy.count(), 1);
+        service.setAutoOpenOnQsoStart(originalAutoOpen);
+        service.setAutoCloseAfterLogging(originalAutoClose);
+    }
+
+    void importsClubLogOqrsAndEmitsEnrichment()
+    {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+
+        const QString oqrsPath = directory.filePath(QStringLiteral("oqrs.json"));
+        QFile oqrs(oqrsPath);
+        QVERIFY(oqrs.open(QIODevice::WriteOnly | QIODevice::Text));
+        oqrs.write("[[\"Z9TEST\",\"2026-08-01\",\"20m\",\"FT8\"]]");
+        oqrs.close();
+
+        CallsignIntelligenceService service;
+        service.clearCache(QStringLiteral("Z9TEST"));
+        QVERIFY(service.importDatabase(QStringLiteral("clublog_oqrs"), oqrsPath));
+        service.lookup(QStringLiteral("Z9TEST"));
+        QVERIFY(service.result().value(QStringLiteral("oqrs")).toBool());
+        QVERIFY(service.result().value(QStringLiteral("confirmed")).toBool());
+
+        const QString profilePath = directory.filePath(QStringLiteral("profile.csv"));
+        QFile profile(profilePath);
+        QVERIFY(profile.open(QIODevice::WriteOnly | QIODevice::Text));
+        QStringList fccFields(12);
+        fccFields[0] = QStringLiteral("EN");
+        fccFields[1] = QStringLiteral("Z9TEST");
+        fccFields[7] = QStringLiteral("Test Operator");
+        fccFields[10] = QStringLiteral("Malta");
+        fccFields[11] = QStringLiteral("MT");
+        profile.write((fccFields.join(QLatin1Char('|')) + QLatin1Char('\n')).toUtf8());
+        profile.close();
+        QVERIFY(service.importDatabase(QStringLiteral("fcc_uls"), profilePath));
+
+        const QString enrichmentPath = directory.filePath(QStringLiteral("enrichment.csv"));
+        QFile enrichment(enrichmentPath);
+        QVERIFY(enrichment.open(QIODevice::WriteOnly | QIODevice::Text));
+        enrichment.write("CALL,GRID\nZ9TEST,JN70ES\n");
+        enrichment.close();
+        QVERIFY(service.importDatabase(QStringLiteral("eqsl"), enrichmentPath));
+
+        QSignalSpy enrichmentSpy(&service, &CallsignIntelligenceService::enrichmentReady);
+        const bool originalEnrichment = service.enrichMissingFields();
+        service.setEnrichMissingFields(true);
+        service.lookup(QStringLiteral("Z9TEST"), true);
+        QCOMPARE(enrichmentSpy.count(), 1);
+        const QList<QVariant> arguments = enrichmentSpy.at(0);
+        QCOMPARE(arguments.at(0).toString(), QStringLiteral("Z9TEST"));
+        QCOMPARE(arguments.at(1).toMap().value(QStringLiteral("grid")).toString(), QStringLiteral("JN70ES"));
+        QCOMPARE(service.result().value(QStringLiteral("provider")).toString(), QStringLiteral("fcc_uls, eqsl, clublog_oqrs"));
+        service.setEnrichMissingFields(originalEnrichment);
+    }
+};
+
+QTEST_MAIN(CallsignIntelligenceTest)
+#include "test_callsign_intelligence.moc"

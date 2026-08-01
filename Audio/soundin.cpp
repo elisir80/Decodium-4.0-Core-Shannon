@@ -967,6 +967,7 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
       return;
     }
 
+#if defined(Q_OS_MACOS)
   qDebug() << "SoundInput: forced restart for" << device.description();
   stop ();
 
@@ -980,11 +981,57 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
         guard->start (deviceCopy, framesPerBuffer, sinkGuard.data(), downSampleFactor, channel);
       }
   };
-
-#if defined(Q_OS_MACOS)
   QTimer::singleShot (850, this, delayedStart);
 #else
-  QTimer::singleShot (0, this, delayedStart);
+  // PipeWire may still have a QtMultimedia event queued after QAudioSource::stop().
+  // Destroying the source and recreating it in the same recovery turn can leave
+  // that event targeting a retired backend object (QTBUG-style pure-virtual abort).
+  // Reuse an equivalent source first; the bridge escalates to a full reopen only
+  // when no PCM callback arrives after this non-destructive recovery attempt.
+  QAudioFormat const format = makeInputFormat(device, downSampleFactor, channel);
+  QString const deviceId = audioDeviceIdForKey(device);
+  bool const sameStream =
+      m_stream
+      && m_sink == sink
+      && m_deviceDescription == device.description()
+      && m_deviceId == deviceId
+      && m_sampleRate == format.sampleRate()
+      && m_channelCount == format.channelCount()
+      && m_channelSelector == static_cast<int>(channel);
+
+  if (!sameStream)
+    {
+      qWarning() << "SoundInput: watchdog recovery needs a new source for"
+                 << device.description();
+      start (device, framesPerBuffer, sink, downSampleFactor, channel);
+      return;
+    }
+
+  qDebug() << "SoundInput: non-destructive PipeWire recovery for" << device.description();
+  m_sink = sink;
+  m_sink->setInputGainLinear (m_inputGain);
+  m_expectedSuspend_ = false;
+  m_stream->reset ();
+
+  QPointer<SoundInput> guard {this};
+  QPointer<AudioDevice> sinkGuard {sink};
+  QTimer::singleShot (120, this, [guard, sinkGuard] {
+    if (!guard || !sinkGuard || !guard->m_stream)
+      {
+        return;
+      }
+
+    QAudio::State const state = guard->m_stream->state ();
+    if (state == QAudio::SuspendedState)
+      {
+        guard->m_stream->resume ();
+      }
+    else if (state != QAudio::ActiveState)
+      {
+        guard->m_stream->start (sinkGuard.data ());
+      }
+    guard->checkStream ();
+  });
 #endif
 }
 
