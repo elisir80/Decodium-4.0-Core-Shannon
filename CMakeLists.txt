@@ -513,6 +513,8 @@ set (wsjtx_CXXSRCS
   src/services/DecodiumDxCluster.h
   src/services/DxccLookup.cpp
   src/services/DxccLookup.h
+  src/services/CallsignIntelligenceService.cpp
+  src/services/CallsignIntelligenceService.h
   src/bridge/DecodiumLegacyLinkCompat.cpp
   Network/wsprnet.cpp
   WSPR/WSPRBandHopping.cpp

@@ -92,6 +92,9 @@ the repeated QML layout warnings seen during startup.
 - Removed the circular `TabBar`/`TabButton` width bindings in the Live Map
   intelligence panel. The tab controls now use Qt's own sizing logic, so the
   repeated `Binding loop detected` warnings no longer appear at startup.
+- Added the callsign intelligence service to the legacy `wsjtx` packaging
+  target as well as the QML frontend target, so all release configurations link
+  the complete callsign feature set.
 - Preserved the Metal-first graphics path and the CPU fallback paths for the
   panadapter and Live Map.
 
