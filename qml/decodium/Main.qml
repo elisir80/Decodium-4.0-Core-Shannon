@@ -4243,7 +4243,7 @@ ApplicationWindow {
 	                                        Text {
 	                                            anchors.centerIn: parent
 	                                            text: "AUTO"
-	                                            color: bridge && bridge.autoRxInputLevel ? secondaryCyan : textDim
+	                                            color: bridge && bridge.autoRxInputLevel ? secondaryCyan : textSecondary
 	                                            font.pixelSize: 7
 	                                            font.bold: true
 	                                        }

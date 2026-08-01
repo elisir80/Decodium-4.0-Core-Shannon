@@ -2816,7 +2816,7 @@ Dialog {
                             color: textSecondary
                             font.pixelSize: 12
                             Layout.preferredWidth: 100
-                            ToolTip.visible: alcTargetHover.containsMouse
+                            ToolTip.visible: alcTargetHover.hovered
                             ToolTip.delay: 600
                             ToolTip.text: qsTr("ALC scale 0-100. FT8/data: typically 15-25. Values >60 risk overdriving the PA.")
                             HoverHandler { id: alcTargetHover }
