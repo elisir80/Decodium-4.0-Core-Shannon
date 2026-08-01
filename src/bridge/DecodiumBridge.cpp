@@ -14232,6 +14232,26 @@ void DecodiumBridge::setPskReporterEnabled(bool v)
     emit pskReporterConnectedChanged();
 }
 
+void DecodiumBridge::setPskReporterTimeSpanMinutes(int minutes)
+{
+    // PSK Reporter accepts a negative number of seconds. Keep the UI and
+    // persisted value on the requested 5-minute grid even if a profile was
+    // edited manually or was created by an older build.
+    minutes = qBound(5, minutes, 60);
+    minutes = qBound(5, ((minutes + 2) / 5) * 5, 60);
+    if (m_pskReporterTimeSpanMinutes == minutes) {
+        return;
+    }
+
+    m_pskReporterTimeSpanMinutes = minutes;
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
+    s.setValue(QStringLiteral("PskReporterTimeSpanMinutes"), minutes);
+    s.sync();
+    emit pskReporterTimeSpanMinutesChanged();
+    emit settingValueChanged(QStringLiteral("PskReporterTimeSpanMinutes"), minutes);
+}
+
 void DecodiumBridge::setFtThreads(int v)
 {
     const int clamped = std::clamp(v, 1, kMaxFtDecodeThreads);
@@ -25239,6 +25259,11 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
 
 void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
 {
+    if (key == QStringLiteral("PskReporterTimeSpanMinutes")) {
+        setPskReporterTimeSpanMinutes(value.toInt());
+        return;
+    }
+
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     if (isProfileServiceCompatibilitySetting(key)) {
@@ -28834,6 +28859,7 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("pskReporterEnabled",m_pskReporterEnabled);
     s.setValue("PSKReporter",m_pskReporterEnabled);
     s.setValue("PSKReporterTCPIP", getSetting(QStringLiteral("PSKReporterTCPIP"), false).toBool());
+    s.setValue("PskReporterTimeSpanMinutes", m_pskReporterTimeSpanMinutes);
     s.setValue("DirectVisualAudioCaptureUnsafe", m_directVisualAudioCaptureUnsafe);
     s.setValue("ftThreads",         m_ftThreads);
     s.setValue("ftThreadsAuto",     m_ftThreadsAuto);
@@ -29080,7 +29106,7 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
     // Query reale a PSK Reporter:
     //   GET https://retrieve.pskreporter.info/query
     //     ?senderCallsign=XXX       (callsign cercato come trasmittente)
-    //     &flowStartSeconds=-3600   (ultima ora)
+    //     &flowStartSeconds=-N      (N = intervallo configurato, 5-60 min)
     //     &rptlimit=50              (max 50 spot)
     //     &rronly=1                 (solo reception reports, XML compatto)
     // Risposta: XML con elementi <receptionReport frequency="7074000" ... />.
@@ -29088,8 +29114,9 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
     QNetworkAccessManager* nam = new QNetworkAccessManager(this);
     QUrl url(QStringLiteral("https://retrieve.pskreporter.info/query"));
     QUrlQuery q;
+    int const spanMinutes = m_pskReporterTimeSpanMinutes;
     q.addQueryItem(QStringLiteral("senderCallsign"), call);
-    q.addQueryItem(QStringLiteral("flowStartSeconds"), QStringLiteral("-3600"));
+    q.addQueryItem(QStringLiteral("flowStartSeconds"), QString::number(-spanMinutes * 60));
     q.addQueryItem(QStringLiteral("rptlimit"), QStringLiteral("50"));
     q.addQueryItem(QStringLiteral("rronly"), QStringLiteral("1"));
     url.setQuery(q);
@@ -29109,7 +29136,7 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
     connect(reply, &QNetworkReply::finished, timeout, &QTimer::deleteLater);
     timeout->start();
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, nam]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, spanMinutes]() {
         // 1.0.376 (sec #2): cap 1 MiB sulla risposta, come fetchPskHeardBy.
         static constexpr qsizetype kPskSearchMaxReplyBytes = 1024 * 1024;
         QVariant const contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
@@ -29158,8 +29185,9 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
                 else                  band = QString::number(mhz, 'f', 1) + QStringLiteral("MHz");
                 bandSet.insert(band);
             }
-            bridgeLog(QStringLiteral("PSK Reporter search '%1': found=%2 bands=%3")
+            bridgeLog(QStringLiteral("PSK Reporter search '%1': span=%2min found=%3 bands=%4")
                           .arg(m_pskSearchCallsign)
+                          .arg(spanMinutes)
                           .arg(found ? "YES" : "NO")
                           .arg(bandSet.size()));
         } else {
@@ -29195,7 +29223,7 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
 // ============================================================
 // DX-Pedition Mode Fase 3 — PSK Reporter "heard-by"
 // Stessa query/endpoint di searchPskReporter, ma con senderCallsign = il MIO
-// call: PSK Reporter risponde con chi MI ha ricevuto nell'ultima ora. Parser
+// call: PSK Reporter risponde con chi MI ha ricevuto nell'intervallo scelto. Parser
 // esteso: receiverCallsign / receiverLocator / sNR / frequency per ogni
 // <receptionReport>. distKm via calcDistance() esistente (grid2deg+azdist),
 // dxcc via m_dxccLookup esistente (cty.dat). Nessun NAM/thread/lib nuovo.
@@ -29238,8 +29266,9 @@ void DecodiumBridge::fetchPskHeardBy()
     QNetworkAccessManager* nam = new QNetworkAccessManager(this);
     QUrl url(QStringLiteral("https://retrieve.pskreporter.info/query"));
     QUrlQuery q;
+    int const spanMinutes = m_pskReporterTimeSpanMinutes;
     q.addQueryItem(QStringLiteral("senderCallsign"), call);     // il MIO call = chi trasmette
-    q.addQueryItem(QStringLiteral("flowStartSeconds"), QStringLiteral("-3600"));
+    q.addQueryItem(QStringLiteral("flowStartSeconds"), QString::number(-spanMinutes * 60));
     q.addQueryItem(QStringLiteral("rptlimit"), QStringLiteral("50"));
     q.addQueryItem(QStringLiteral("rronly"), QStringLiteral("1"));
     url.setQuery(q);
@@ -29258,7 +29287,7 @@ void DecodiumBridge::fetchPskHeardBy()
     connect(reply, &QNetworkReply::finished, timeout, &QTimer::deleteLater);
     timeout->start();
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, call, myGrid]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, call, myGrid, spanMinutes]() {
         QVariant const contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
         bool const declaredTooLarge =
             contentLength.isValid()
@@ -29358,8 +29387,9 @@ void DecodiumBridge::fetchPskHeardBy()
                 row.insert(QStringLiteral("ituZone"), ituZone);
                 rows.append(row);
             }
-            bridgeLog(QStringLiteral("PSK heard-by '%1': %2 ricevitori, %3 DXCC, maxKm=%4")
+            bridgeLog(QStringLiteral("PSK heard-by '%1': span=%2min receivers=%3 DXCC=%4 maxKm=%5")
                           .arg(call)
+                          .arg(spanMinutes)
                           .arg(rows.size())
                           .arg(dxccSet.size())
                           .arg(static_cast<int>(maxKm)));
@@ -34751,6 +34781,12 @@ void DecodiumBridge::loadSettings()
     m_asyncDecodeEnabled=s.value("asyncDecodeEnabled",false).toBool();
     m_pskReporterEnabled=s.value("pskReporterEnabled",
                                   s.value("PSKReporter", false)).toBool();
+    m_pskReporterTimeSpanMinutes = qBound(5,
+                                           s.value("PskReporterTimeSpanMinutes", 60).toInt(),
+                                           60);
+    m_pskReporterTimeSpanMinutes = qBound(5,
+                                           ((m_pskReporterTimeSpanMinutes + 2) / 5) * 5,
+                                           60);
     m_worldMapDisplayed = s.value(QStringLiteral("WorldMapDisplayed"), true).toBool();
     m_directVisualAudioCaptureUnsafe = s.value(QStringLiteral("DirectVisualAudioCaptureUnsafe"), false).toBool();
     m_ftThreadsAuto = s.value(QStringLiteral("ftThreadsAuto"),
@@ -35095,6 +35131,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit ft8ApEnabledChanged();
     emit deepSearchEnabledChanged();
     emit pskReporterEnabledChanged();
+    emit pskReporterTimeSpanMinutesChanged();
     emit cloudlogEnabledChanged();
     emit cloudlogUrlChanged();
     emit cloudlogApiKeyChanged();

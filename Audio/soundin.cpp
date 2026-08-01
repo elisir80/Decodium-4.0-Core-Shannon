@@ -1006,7 +1006,24 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
                  << device.description()
                  << "state=" << static_cast<int>(m_stream->state())
                  << "error=" << static_cast<int>(m_stream->error());
-      stop();
+
+      // Do not use stop() here.  Its normal Linux teardown uses deleteLater(),
+      // which leaves a StoppedState PipeWire source registered with the event
+      // dispatcher until the next deferred-delete pass.  After a PipeWire
+      // service restart that source can start emitting Invalid socket notifier
+      // events before the deferred delete is reached, starving this thread and
+      // preventing the delayed recovery from ever running.
+      //
+      // restart() is already executing on SoundInput's owning thread, not from
+      // the QAudioSource stateChanged callback.  It is therefore safe to tear
+      // down this terminal source synchronously.  The replacement remains
+      // delayed below so QtMultimedia/PipeWire has time to settle and no new
+      // source is created in the same event turn.
+      QAudioSource *terminalSource = m_stream.take();
+      QObject::disconnect(terminalSource, nullptr, this, nullptr);
+      qInfo() << "SoundInput: destroying terminal PipeWire source before recovery"
+              << device.description();
+      delete terminalSource;
 
       constexpr int kPipeWireRecoveryDelayMs = 2000;
       quint64 const recoveryGeneration = ++m_deferredRestartGeneration;

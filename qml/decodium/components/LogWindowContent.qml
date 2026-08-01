@@ -604,6 +604,43 @@ Rectangle {
                         onDoubleClicked: { if (appEngine) { appEngine.dxCall = modelData.call; appEngine.dxGrid = modelData.grid } }
                     }
 
+                    // Same context action in the detached/floating log view.
+                    TapHandler {
+                        acceptedButtons: Qt.RightButton
+                        enabled: String(modelData.call || "").trim().length > 0
+                        onTapped: logCallContextMenu.popup()
+                    }
+
+                    Menu {
+                        id: logCallContextMenu
+                        MenuItem {
+                            text: qsTr("Copy Callsign")
+                            height: 32
+                            onTriggered: {
+                                if (bridge)
+                                    bridge.copyToClipboard(String(modelData.call || "").trim())
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: textPrimary
+                                font.pixelSize: 12
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: parent.highlighted
+                                       ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.25)
+                                       : "transparent"
+                            }
+                        }
+                        background: Rectangle {
+                            implicitWidth: 150
+                            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+                            border.color: glassBorder
+                            radius: 6
+                        }
+                    }
+
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: 8; anchors.rightMargin: 8; spacing: 0
                         Text { text: index === selectedIndex ? "\u25B6" : ""; font.pixelSize: 7; color: primaryBlue; Layout.preferredWidth: 10 }

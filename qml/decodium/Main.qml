@@ -3395,7 +3395,8 @@ ApplicationWindow {
                 visible: !bridge.pskSearching && bridge.pskSearchFound
 
                 Text {
-                    text: "Active on bands:"
+                    text: qsTr("Active on bands during the last %1 minutes:")
+                          .arg(bridge.pskReporterTimeSpanMinutes)
                     font.pixelSize: 12
                     color: textSecondary
                 }

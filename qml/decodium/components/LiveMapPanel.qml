@@ -335,7 +335,8 @@ Rectangle {
         if (layerId === "confirmed")
             return qsTr("Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.")
         if (layerId === "psk")
-            return qsTr("Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.")
+            return qsTr("Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.")
+                    .arg(engine ? engine.pskReporterTimeSpanMinutes : 60)
         if (layerId === "pota")
             return qsTr("Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.")
         if (layerId === "states")
@@ -2500,7 +2501,8 @@ Rectangle {
                                         ToolTip.visible: hovered
                                         ToolTip.text: root.mapLayerEnabled("offline")
                                             ? qsTr("Unavailable while Offline mode is enabled")
-                                            : qsTr("Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.")
+                                            : qsTr("Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.")
+                                                .arg(root.engine ? root.engine.pskReporterTimeSpanMinutes : 60)
                                     }
                                 }
                                 RowLayout {
@@ -2872,7 +2874,8 @@ Rectangle {
                                     text: root.engine && root.engine.pskHeardByCount > 0
                                         ? qsTr("PSK Reporter: %1 receivers found")
                                               .arg(root.engine.pskHeardByCount)
-                                        : qsTr("PSK Reporter: no receivers loaded for the last hour")
+                                        : qsTr("PSK Reporter: no receivers loaded for the last %1 minutes")
+                                              .arg(root.engine ? root.engine.pskReporterTimeSpanMinutes : 60)
                                     color: root.engine && root.engine.pskHeardByCount > 0
                                         ? "#ba7cff" : root.textSecondary
                                     font.pixelSize: 9

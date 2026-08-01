@@ -108,7 +108,7 @@ Item {
     }
 
     // ===========================================================================
-    // Meta strip: "heard by N · last Ns" (+ a subtle live dot when fetching).
+    // Meta strip: "heard by N · N min · last Ns" (+ a subtle live dot when fetching).
     // ===========================================================================
     Rectangle {
         id: meta
@@ -121,7 +121,8 @@ Item {
             Text {
                 text: {
                     var n = root.bridge ? Number(root.bridge.pskHeardByCount) : 0
-                    return "heard by " + n
+                    var span = root.bridge ? Number(root.bridge.pskReporterTimeSpanMinutes) : 60
+                    return "heard by " + n + " · " + span + " min"
                 }
                 color: root.cTextDim
                 font.pixelSize: 10

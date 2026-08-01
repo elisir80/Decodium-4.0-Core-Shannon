@@ -843,6 +843,44 @@ Popup {
                         }
                     }
 
+                    // Keep the usual left-click selection intact while offering
+                    // a quick clipboard action for a logged station.
+                    TapHandler {
+                        acceptedButtons: Qt.RightButton
+                        enabled: String(modelData.call || "").trim().length > 0
+                        onTapped: qsoCallContextMenu.popup()
+                    }
+
+                    Menu {
+                        id: qsoCallContextMenu
+                        MenuItem {
+                            text: qsTr("Copy Callsign")
+                            height: 32
+                            onTriggered: {
+                                if (bridge)
+                                    bridge.copyToClipboard(String(modelData.call || "").trim())
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: textPrimary
+                                font.pixelSize: 12
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: parent.highlighted
+                                       ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.25)
+                                       : "transparent"
+                            }
+                        }
+                        background: Rectangle {
+                            implicitWidth: 150
+                            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
+                            border.color: glassBorder
+                            radius: 6
+                        }
+                    }
+
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 10; anchors.rightMargin: 10

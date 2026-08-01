@@ -277,6 +277,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int        pskHeardByDxccCount READ pskHeardByDxccCount NOTIFY pskHeardByChanged)
     Q_PROPERTY(double     pskHeardByMaxKm     READ pskHeardByMaxKm     NOTIFY pskHeardByChanged)
     Q_PROPERTY(bool       pskHeardByFetching  READ pskHeardByFetching  NOTIFY pskHeardByFetchingChanged)
+    Q_PROPERTY(int        pskReporterTimeSpanMinutes READ pskReporterTimeSpanMinutes WRITE setPskReporterTimeSpanMinutes NOTIFY pskReporterTimeSpanMinutesChanged)
     Q_PROPERTY(bool       pskReporterEnabled  READ pskReporterEnabled  WRITE setPskReporterEnabled  NOTIFY pskReporterEnabledChanged)
     Q_PROPERTY(bool       pskReporterConnected READ pskReporterConnected NOTIFY pskReporterConnectedChanged)
 
@@ -793,6 +794,8 @@ public:
     int         pskHeardByDxccCount()  const { return m_pskHeardByDxccCount; }
     double      pskHeardByMaxKm()      const { return m_pskHeardByMaxKm; }
     bool        pskHeardByFetching()   const { return m_pskHeardByFetching; }
+    int         pskReporterTimeSpanMinutes() const { return m_pskReporterTimeSpanMinutes; }
+    void setPskReporterTimeSpanMinutes(int minutes);
     bool        pskReporterEnabled()   const { return m_pskReporterEnabled; }
     void setPskReporterEnabled(bool v);
     bool        pskReporterConnected() const;
@@ -1626,6 +1629,7 @@ signals:
     void pskSearchBandsChanged();
     void pskHeardByChanged();
     void pskHeardByFetchingChanged();
+    void pskReporterTimeSpanMinutesChanged();
     void fontScaleChanged();
     void nfaChanged(); void nfbChanged();
     void ndepthChanged(); void ncontestChanged();
@@ -2464,6 +2468,7 @@ private:
     double       m_pskHeardByMaxKm {0.0};
     bool         m_pskHeardByFetching {false};
     qint64       m_pskHeardByLastFetchMs {0};   // rate-limit guard (QDateTime msecs)
+    int          m_pskReporterTimeSpanMinutes {60};
     bool        m_pskReporterEnabled {false};
     int         m_ftThreads {3};
     bool        m_ftThreadsAuto {true};

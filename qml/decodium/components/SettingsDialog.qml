@@ -5479,6 +5479,21 @@ Dialog {
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
+                        Text { text: qsTr("Query history:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        DecoComboBox {
+                            id: pskReporterTimeSpanCombo
+                            model: ["5 min", "10 min", "15 min", "20 min", "25 min", "30 min",
+                                    "35 min", "40 min", "45 min", "50 min", "55 min", "60 min"]
+                            currentIndex: Math.max(0, Math.min(11, Math.round(bridge.pskReporterTimeSpanMinutes / 5) - 1))
+                            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+                            onActivated: {
+                                bridge.pskReporterTimeSpanMinutes = (currentIndex + 1) * 5
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            popup: SettingsComboPopup { combo: pskReporterTimeSpanCombo }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("PSK Reporter look-back period for callsign search and heard-by results.")
+                        }
 
                         // ── DX Cluster ──
                         Text { text: qsTr("DX CLUSTER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
