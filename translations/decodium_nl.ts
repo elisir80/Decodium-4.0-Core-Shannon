@@ -4779,6 +4779,222 @@ Fout: %2</translation>
         <source>now</source>
         <translation>nu</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON-bestanden (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium-kaartconfiguratie (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — lijst en kaart openen</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 geclassificeerd · %2 onbekend</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Automatisch passend maken op actief QSO</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Band voor diploma-endorsement</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Kleur</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Dekking</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Breedte</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Labels</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Bevestigingsbron gebruikt voor de score van bevestigde</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Huidige band/mode gebruiken de op de kaart gekozen band en mode; Digitale modes omvat FT, JT, Q en andere digitale modes</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW-leeftijd</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Vervaltijd van deze bron</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>UITZONDERINGEN</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Kaartconfiguratie exporteren</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Kaartconfiguratie importeren</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Decodium-kaartconfiguratie importeren</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Het volledige kaartconfiguratiepakket importeren</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Voorinstellingen, lijstvoorkeuren/regels, laagstijlen, tijdsverval en kaartuitsnede exporteren</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>Van JJJJ-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>Tot JJJJ-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Historie onder de cursor: %1 · Live onder de cursor: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Stations met een LoTW-bevestiging binnen de ingestelde leeftijd behouden</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>LAAGSTIJL</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>De lijst beperken tot uw DXCC of tot andere DXCC&apos;s</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>ONTBREKENDE LIVE-ENTITEITEN (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matrix</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>MATRIX NIEUW / GEZOCHT</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Call van de operator</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>PROPAGATIETYPES</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Propagatie</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>BEREIK</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>GEZOCHT</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>Hebben mij gespot</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Vorige weergave herstellen</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Vorige kaartweergave herstellen</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Kies de NIEUW-categorieën en bekijk de matrices van gezocht of uitzonderingen</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Kies de laag waarvan het uiterlijk wordt bewerkt</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>TIJDLEGENDA / BRONVERVAL</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Berichten met RR73 als CQ behandelen wanneer alleen-CQ aan staat</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Alleen PSK Reporter-spots gebruiken die door uw call zijn gehoord</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Deze entiteit gebruiken in berekeningen voor NIEUW en ONBEVESTIGD</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>aanbiedersfilters werken met OF</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>gereed</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>gezocht %1 · uitzonderingen %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16174,6 +16390,110 @@ Gebruik Hoog als u het niet zeker weet.</translation>
         <source>↻  Refresh</source>
         <translation>↻  Vernieuwen</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 records</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-sleutel</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Toepassingswachtwoord</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>E-mail</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Verversen</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>OQRS verversen</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Automatisch openen wanneer een QSO start</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>Het opzoekpaneel openen</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Ontbrekende velden aanvullen</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>CALLSIGN-INTELLIGENTIE</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Het paneel sluiten na het QSO</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Automatisch sluiten na loggen</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>LOKALE DATABASES</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Databases en CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Cacheduur (minuten)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Grid, naam en QTH in de volgende logregel</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Importeren</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Callsign-database importeren</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Lokaal opzoeken met DXCC-terugval, SQLite-cache en bij te werken aanbieders. De Club Log-inloggegevens worden via het secure settings-kanaal in de sleutelhanger bewaard.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Optioneel lokaal bestandspad</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Kiezen</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Cache wissen</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>nooit bijgewerkt</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>geen records</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19966,6 +20286,86 @@ Rechtermuisklik voor invoeg- en verwijderopties.</translation>
         <source>No statistics for the current logbook filters</source>
         <translation>Geen statistieken voor de huidige logboekfilters</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · gewerkt %2 · bevestigd %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>DIPLOMAVOORTGANG · CUMULATIEF</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Diplomafocus</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>DETAIL · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>QSO-detail openen</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>LOGBOEKSTATISTIEKEN</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>Geen gedateerde QSO voor historische voortgang</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>PERIODEVERGELIJKING</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PROFIELEN / CALLS</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>doel %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO&apos;s</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>TOPBANDEN · MODES · DXCC · WPX · GRIDS</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20043,6 +20443,172 @@ Rechtermuisklik voor invoeg- en verwijderopties.</translation>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO met %1 gereed - TX%2 in het volgende volledige slot</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>CACHE</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Callsign-intelligentie</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Callsign-intelligentie — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ-/ITU-zone</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Sluiten</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Bevestigingen</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / continent</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Opzoeken</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Opzoeken…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>Externe opzoekacties</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Naam</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Aanbieder</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>Dienst niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Laatste resultaat: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC-terugval</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>geen aanduiding</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>niet beschikbaar</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 bijgewerkt</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Bijgewerkt</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>Bijwerken van %1 mislukt: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>Bijwerken van %1 mislukt: onbekend formaat</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>%1 wordt bijgewerkt...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Club Log OQRS wordt bijgewerkt...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>Bijwerken is al bezig</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>Callsign-cache gewist</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Ongeldige call</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: API-sleutel, e-mail, toepassingswachtwoord en operatorcall zijn vereist</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log niet beschikbaar: lokale terugval gebruikt (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>Callsign-database niet beschikbaar: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Fout</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC-terugval: geen aanbiedersprofiel beschikbaar</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Onbekend gegevensformaat of geen records</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>Geen enkele aanbieder vond de call</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>Geen lokale records: de externe aanbieders worden geprobeerd...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>Gereed: lokale callsign-database beschikbaar</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>Externe aanbieders niet beschikbaar: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Resultaat van Club Log met lokale terugval</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Resultaat uit de lokale cache</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Resultaat uit de lokale databases</translation>
     </message>
 </context>
 </TS>

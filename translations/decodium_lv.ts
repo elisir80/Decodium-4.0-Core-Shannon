@@ -4783,6 +4783,222 @@ Error: %2</translation>
         <source>now</source>
         <translation>tagad</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON faili (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium kartes konfigurācija (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — atvērt sarakstu un karti</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 klasificēti · %2 nezināmi</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Automātiski pielāgot aktīvajam QSO</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Diploma apstiprinājuma josla</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Krāsa</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Necaurspīdīgums</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Platums</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Etiķetes</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Apstiprinājuma avots, ko izmanto apstiprināto vērtējumam</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Pašreizējā josla/režīms izmanto kartē izvēlēto joslu un režīmu; Digitālie režīmi ietver FT, JT, Q un citus digitālos režīmus</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW vecums</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Šī avota izgaišanas ilgums</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>IZŅĒMUMI</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Eksportēt kartes konfigurāciju</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Importēt kartes konfigurāciju</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Importēt Decodium kartes konfigurāciju</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Importēt pilnu kartes konfigurācijas komplektu</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Eksportēt sagataves, saraksta iestatījumus/noteikumus, slāņu stilus, laika izgaišanu un kartes skatu</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>No GGGG-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>Līdz GGGG-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Vēsture zem kursora: %1 · Tiešraide zem kursora: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Paturēt stacijas ar LoTW apstiprinājumu iestatītajā vecumā</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>SLĀŅA STILS</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>Ierobežot sarakstu ar savu DXCC vai citiem DXCC</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>TRŪKSTOŠĀS TIEŠRAIDES VIENĪBAS (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matrica</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>JAUNO / MEKLĒTO MATRICA</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Operatora izsaukums</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>IZPLATĪŠANĀS VEIDI</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Izplatīšanās</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>TVĒRUMS</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>MEKLĒTIE</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>Spotēja mani</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Atjaunot iepriekšējo skatu</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Atjaunot iepriekšējo kartes skatu</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Izvēlieties JAUNO kategorijas un apskatiet meklēto vai izņēmumu matricas</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Izvēlieties slāni, kura izskats tiek rediģēts</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>LAIKA LEĢENDA / AVOTU IZGAIŠANA</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Uzskatīt ziņojumus ar RR73 par CQ, kad ieslēgts tikai-CQ</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Izmantot tikai PSK Reporter spotus, ko dzirdējis jūsu izsaukums</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Izmantot šo vienību JAUNO un NEAPSTIPRINĀTO aprēķinos</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>pakalpojumu filtri ir VAI</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>gatavs</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>meklētie %1 · izņēmumi %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16177,6 +16393,110 @@ Noklusējums: IZSL.</translation>
         <source>● active</source>
         <translation>● aktīvs</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 ieraksti</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API atslēga</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Lietotnes parole</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>E-pasts</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Atsvaidzināt</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>Atsvaidzināt OQRS</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Automātiski atvērt, sākoties QSO</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>Atvērt meklēšanas paneli</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Aizpildīt trūkstošos laukus</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>IZSAUKUMU INTELIĢENCE</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Aizvērt paneli pēc QSO</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Automātiski aizvērt pēc reģistrēšanas</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>VIETĒJĀS DATUBĀZES</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Datubāzes un CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Keša ilgums (minūtes)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Kvadrāts, vārds un QTH nākamajā ierakstā</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Importēt</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Importēt izsaukumu datubāzi</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Vietēja meklēšana ar DXCC rezervi, SQLite kešu un atjaunināmiem pakalpojumiem. Club Log akreditācijas dati tiek glabāti atslēgu saišķī caur secure settings kanālu.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Neobligāts vietējā faila ceļš</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Izvēlēties</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Iztīrīt kešu</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>nekad nav atjaunināts</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>nav ierakstu</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19969,6 +20289,86 @@ Right click for insert and delete options.</translation>
         <source>No statistics for the current logbook filters</source>
         <translation>Nav statistikas pašreizējiem žurnāla filtriem</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Izsaukumi %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · sazināti %2 · apstiprināti %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>DIPLOMA PROGRESS · KUMULATĪVI</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Diploma fokuss</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>DETALIZĒJUMS · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>Atvērt QSO detalizējumu</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>ŽURNĀLA STATISTIKA</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>Nav datētu QSO vēsturiskajai progresijai</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>PERIODU SALĪDZINĀJUMS</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PROFILI / IZSAUKUMI</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>mērķis %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>GALVENĀS JOSLAS · REŽĪMI · DXCC · WPX · KVADRĀTI</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20046,6 +20446,172 @@ Right click for insert and delete options.</translation>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO ar %1 sagatavots - TX%2 nākamajā pilnajā intervālā</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>KEŠS</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Izsaukumu inteliģence</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Izsaukumu inteliģence — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ / ITU zona</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Aizvērt</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / kontinents</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Meklēšana</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Meklēšana…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>Ārējie meklējumi</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Vārds</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Pakalpojums</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>Pakalpojums nav pieejams</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Pēdējais rezultāts: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC rezerve</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>nav norādes</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>nav pieejams</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 atjaunināts</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Atjaunināts</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>%1 atjaunināšana neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>%1 atjaunināšana neizdevās: neatpazīts formāts</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>Atjaunina %1...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Atjaunina Club Log OQRS...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>Atjaunināšana jau notiek</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>Izsaukumu kešs iztīrīts</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Nederīgs izsaukums</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: nepieciešama API atslēga, e-pasts, lietotnes parole un operatora izsaukums</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log nav pieejams: izmantota vietējā rezerve (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>Izsaukumu datubāze nav pieejama: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Kļūda</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC rezerve: nav pieejams neviens pakalpojuma profils</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Neatpazīts datu formāts vai nav ierakstu</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>Neviens pakalpojums neatrada izsaukumu</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>Nav vietējo ierakstu: mēģinu attālos pakalpojumus...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>Gatavs: vietējā izsaukumu datubāze ir pieejama</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>Attālie pakalpojumi nav pieejami: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Rezultāts no Club Log ar vietējo rezervi</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Rezultāts no vietējā keša</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Rezultāts no vietējām datubāzēm</translation>
     </message>
 </context>
 </TS>

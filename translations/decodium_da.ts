@@ -4770,6 +4770,222 @@ Fejl: %2</translation>
         <source>now</source>
         <translation>nu</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON-filer (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium-kortkonfiguration (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — åbn liste og kort</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 klassificeret · %2 ukendte</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Tilpas automatisk til aktivt QSO</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Bånd til diplompåtegning</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Farve</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Uigennemsigtighed</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Bredde</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Etiketter</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Bekræftelseskilde brugt til antallet af bekræftede</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Aktuelt bånd/mode bruger kortets valgte bånd og mode; Digitale modes omfatter FT, JT, Q og andre digitale modes</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW-alder</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Henfaldstid for denne kilde</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>UNDTAGELSER</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Eksportér kortkonfiguration</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Importér kortkonfiguration</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Importér Decodium-kortkonfiguration</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Importér hele kortkonfigurationspakken</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Eksportér forudindstillinger, listens indstillinger/regler, lagstile, tidsmæssigt henfald og kortudsnit</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>Fra ÅÅÅÅ-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>Til ÅÅÅÅ-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Historik under markøren: %1 · Live under markøren: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Behold stationer med en LoTW-bekræftelse inden for den valgte alder</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>LAGSTIL</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>Begræns listen til dit DXCC eller til andre DXCC</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>MANGLENDE LIVE-ENHEDER (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matrix</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>MATRIX NYE / EFTERSØGTE</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Operatørens kald</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>PROPAGATIONSTYPER</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Propagation</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>OMFANG</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>EFTERSØGTE</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>Har spottet mig</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Gendan forrige visning</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Gendan forrige kortvisning</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Vælg NYE-kategorier og se matricer over eftersøgte eller undtagelser</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Vælg det lag hvis udseende du redigerer</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>TIDSLEGENDE / KILDEHENFALD</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Behandl meddelelser med RR73 som CQ, når kun-CQ er slået til</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Brug kun PSK Reporter-spots hørt af dit kald</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Brug denne enhed i beregninger for NYE og UBEKRÆFTEDE</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>udbyderfiltre kombineres med ELLER</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>klar</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>eftersøgte %1 · undtagelser %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16162,6 +16378,110 @@ Hvis du er i tvivl, brug Høj.</translation>
         <source>↻  Refresh</source>
         <translation>↻  Opdater</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 poster</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-nøgle</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Programadgangskode</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>E-mail</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Opdater</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>Opdater OQRS</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Åbn automatisk når et QSO starter</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>Åbn opslagspanelet</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Udfyld manglende felter</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>KALDEINTELLIGENS</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Luk panelet efter QSO&apos;et</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Luk automatisk efter logning</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>LOKALE DATABASER</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Databaser og CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Cachens varighed (minutter)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Gitter, navn og QTH i næste log</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Importér</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Importér kaldedatabase</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Lokalt opslag med DXCC-reserve, SQLite-cache og udbydere der kan opdateres. Club Log-legitimationsoplysninger gemmes i nøgleringen via secure settings-kanalen.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Valgfri lokal filsti</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Vælg</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Tøm cache</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>aldrig opdateret</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>ingen poster</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19955,6 +20275,86 @@ Højre klik for at indsætte eller slette elementer.</translation>
         <source>No statistics for the current logbook filters</source>
         <translation>Ingen statistik for de aktuelle logbogsfiltre</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Kald %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · kørt %2 · bekræftet %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>DIPLOMFORLØB · KUMULATIVT</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Diplomfokus</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>DETALJER · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>Åbn QSO-detaljer</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>LOGBOGSSTATISTIK</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>Ingen daterede QSO til historisk forløb</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>PERIODESAMMENLIGNING</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PROFILER / KALD</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>mål %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO&apos;er</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>TOP BÅND · MODES · DXCC · WPX · GITRE</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20032,6 +20432,172 @@ Højre klik for at indsætte eller slette elementer.</translation>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO med %1 klar - TX%2 i næste hele slot</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>CACHE</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Kaldeintelligens</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Kaldeintelligens — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ-/ITU-zone</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Luk</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Bekræftelser</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / kontinent</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Opslag</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Opslag…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>Eksterne opslag</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Navn</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Udbyder</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>Tjeneste utilgængelig</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Seneste resultat: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC-reserve</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>ingen oplysning</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>utilgængelig</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 opdateret</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Opdateret</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>Opdatering af %1 mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>Opdatering af %1 mislykkedes: ukendt format</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>Opdaterer %1...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Opdaterer Club Log OQRS...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>Opdatering er allerede i gang</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>Kaldecachen er tømt</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Ugyldigt kald</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: API-nøgle, e-mail, programadgangskode og operatørkald er påkrævet</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log utilgængelig: brugte lokal reserve (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>Kaldedatabase utilgængelig: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Fejl</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC-reserve: ingen udbyderprofil tilgængelig</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Ukendt dataformat eller ingen poster</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>Ingen udbyder fandt kaldet</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>Ingen lokale poster: prøver de eksterne udbydere...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>Klar: lokal kaldedatabase er tilgængelig</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>Eksterne udbydere utilgængelige: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Resultat fra Club Log med lokal reserve</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Resultat fra lokal cache</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Resultat fra lokale databaser</translation>
     </message>
 </context>
 </TS>

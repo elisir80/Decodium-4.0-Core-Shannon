@@ -4769,6 +4769,222 @@ Error: %2</source>
         <source>now</source>
         <translation>現在</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON ファイル (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium 地図設定 (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — リストと地図を開く</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 分類済 · %2 不明</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>進行中の QSO に自動で合わせる</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>アワード エンドースメントのバンド</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>色</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>不透明度</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>幅</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>ラベル</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>確認済のスコアに使う確認情報の出どころ</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>「現在のバンド/モード」は地図で選んだバンドとモードを使います。「デジタルモード」には FT・JT・Q などのデジタルモードが含まれます</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW の経過時間</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>この情報源が消えるまでの時間</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>例外</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>地図設定を書き出す</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>地図設定を読み込む</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Decodium の地図設定を読み込む</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>地図設定一式をまとめて読み込みます</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>プリセット・リストの設定とルール・レイヤーの見た目・時間減衰・地図の表示範囲を書き出します</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>開始 YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>終了 YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>履歴のカーソル位置: %1 · ライブのカーソル位置: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>設定した期間内に LoTW 確認がある局を残します</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>レイヤーの見た目</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>リストを自局の DXCC または他の DXCC に絞り込みます</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>未取得のライブ エンティティ (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>マトリクス</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>新規 / 未交信 マトリクス</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>運用者のコールサイン</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>伝播の種類</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>伝播</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>範囲</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>未交信</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>自局を受信した局</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>前の表示に戻す</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>前の地図表示に戻す</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>「新規」のカテゴリーを選び、未交信や例外のマトリクスを確認します</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>見た目を編集するレイヤーを選びます</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>時間の凡例 / 情報源の減衰</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>「CQ のみ」が有効なとき、RR73 を含むメッセージを CQ として扱います</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>自局のコールサインが受信した PSK Reporter のスポットだけを使います</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>このエンティティを「新規」と「未確認」の計算に使います</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>提供元のフィルターは OR 条件です</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>準備完了</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>未交信 %1 · 例外 %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16162,6 +16378,110 @@ If unsure, use High.</source>
         <source>↻  Refresh</source>
         <translation>↻  更新</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 件</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API キー</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>アプリケーション パスワード</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>メール</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>更新</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>OQRS を更新</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>QSO の開始時に自動で開く</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>検索パネルを開く</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>不足している項目を補完</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>コールサイン インテリジェンス</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>QSO のあとにパネルを閉じる</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>記録後に自動で閉じる</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>ローカル データベース</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>データベースと CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>キャッシュの保持時間 (分)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>次のログにグリッド・名前・QTH を入れる</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>読み込み</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>コールサイン データベースを読み込む</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>DXCC の代替・SQLite キャッシュ・更新可能な提供元を備えたローカル検索です。Club Log の資格情報は secure settings 経由でキーチェーンに保存されます。</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>ローカル ファイルのパス (任意)</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>選択</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>キャッシュを消去</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>未更新</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>レコードなし</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19954,6 +20274,86 @@ Right click for insert and delete options.</source>
         <source>No statistics for the current logbook filters</source>
         <translation>現在のログブックの絞り込みに対する統計はありません</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+コールサイン %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · 交信済 %2 · 確認済 %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>アワードの進捗 · 累計</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>対象のアワード</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>詳細分析 · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>QSO の詳細分析を開く</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>ログブック統計</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>履歴の推移に使える日付付き QSO がありません</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>期間の比較</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>プロファイル / コールサイン</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>目標 %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>上位バンド · モード · DXCC · WPX · グリッド</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20031,6 +20431,172 @@ Right click for insert and delete options.</source>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>%1 との QSO を準備 - 次の完全なスロットで TX%2</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>キャッシュ</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>コールサイン インテリジェンス</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>コールサイン インテリジェンス — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ / ITU ゾーン</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>閉じる</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>確認</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / 大陸</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>検索</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>検索…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>外部検索</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>名前</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>提供元</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>サービスを利用できません</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>最後の結果: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC の代替</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>情報なし</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>利用不可</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 を更新しました</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>更新済</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>%1 の更新に失敗しました: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>%1 の更新に失敗しました: 形式を認識できません</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>%1 を更新中...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Club Log OQRS を更新中...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>更新はすでに実行中です</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>コールサインのキャッシュを消去しました</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>無効なコールサイン</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: API キー・メール・アプリケーションパスワード・運用者のコールサインが必要です</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log を利用できません: ローカルの代替を使用しました (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>コールサイン データベースを利用できません: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>エラー</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC の代替: 利用できる提供元プロファイルがありません</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>データ形式を認識できないか、レコードがありません</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>どの提供元でもコールサインが見つかりませんでした</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>ローカルにレコードがありません: 外部の提供元を試します...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>準備完了: ローカルのコールサイン データベースが使えます</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>外部の提供元を利用できません: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Club Log の結果 (ローカルの代替あり)</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>ローカル キャッシュの結果</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>ローカル データベースの結果</translation>
     </message>
 </context>
 </TS>

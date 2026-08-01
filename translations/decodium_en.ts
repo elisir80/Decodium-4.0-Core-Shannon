@@ -4779,6 +4779,222 @@ Error: %2</translation>
         <source>now</source>
         <translation>now</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON files (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium map configuration (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — open roster and map</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 classified · %2 unknown</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Auto-fit active QSO</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Award endorsement band</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Color</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Opacity</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Width</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Labels</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Confirmation source used for the confirmed score</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW age</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Decay lifetime for this source</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>EXCEPTIONS</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Export map config</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Import map config</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Import Decodium map configuration</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Import the complete map configuration bundle</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>From YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>To YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Historical hover: %1 · Live hover: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Keep stations with a LoTW confirmation within the configured age</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>LAYER STYLE</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>Limit the roster to your DXCC or to other DXCCs</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>MISSING LIVE ENTITIES (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matrix</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>NEW / WANTED MATRIX</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Operator callsign</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>PROPAGATION TYPES</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Propagation</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>SCOPE</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>WANTED</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>Spotted me</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Restore previous view</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Restore previous map view</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Select NEW categories and inspect wanted or exception matrices</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Select the layer whose appearance is being edited</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>TEMPORAL LEGEND / SOURCE DECAY</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Treat messages containing RR73 as CQ when CQ-only is enabled</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Use only PSK Reporter spots heard by your callsign</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Use this entity in NEW and UNCONFIRMED calculations</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>provider filters are OR</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>ready</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>wanted %1 · exceptions %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16174,6 +16390,110 @@ If unsure, use High.</translation>
         <source>↻  Refresh</source>
         <translation>↻  Refresh</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 records</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API key</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Application password</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>Email</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Refresh</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>Refresh OQRS</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Open automatically when a QSO starts</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>Open the lookup panel</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Fill in missing fields</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>CALLSIGN INTELLIGENCE</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Close the panel after the QSO</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Close automatically after logging</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>LOCAL DATABASES</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Databases and CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Cache lifetime (minutes)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Grid, name and QTH in the next log entry</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Import</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Import callsign database</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Local lookup with DXCC fallback, SQLite cache and updatable providers. Club Log credentials are stored in the keychain through the secure settings channel.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Optional local file path</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Choose</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Clear cache</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>never updated</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>no records</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19966,6 +20286,86 @@ Right click for insert and delete options.</translation>
         <source>No statistics for the current logbook filters</source>
         <translation>No statistics for the current logbook filters</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · worked %2 · confirmed %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>AWARD PROGRESSION · CUMULATIVE</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Award focus</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>DRILL-DOWN · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>Open QSO drill-down</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>LOGBOOK STATISTICS</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>No dated QSO available for historical progression</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>PERIOD COMPARISON</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PROFILES / CALLSIGNS</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>target %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSOs</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>TOP BANDS · MODES · DXCC · WPX · GRIDS</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20043,6 +20443,172 @@ Right click for insert and delete options.</translation>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO with %1 armed - TX%2 at next full slot</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>CACHE</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Callsign intelligence</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Callsign intelligence — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ / ITU zone</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Close</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Confirmations</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / continent</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Lookup</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Lookup…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>External lookups</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Provider</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>Service unavailable</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Last result: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC fallback</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>no indication</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>unavailable</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 updated</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Updated</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>%1 update failed: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>%1 update failed: unrecognised format</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>Updating %1...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Updating Club Log OQRS...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>Update already in progress</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>Callsign cache cleared</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Invalid callsign</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: API key, email, application password and operator callsign are required</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log unavailable: local fallback used (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>Callsign database unavailable: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC fallback: no provider profile available</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Unrecognised data format or no records</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>No provider found the callsign</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>No local records: trying the remote providers...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>Ready: local callsign database available</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>Remote providers unavailable: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Result from Club Log with local fallback</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Result from the local cache</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Result from the local databases</translation>
     </message>
 </context>
 </TS>

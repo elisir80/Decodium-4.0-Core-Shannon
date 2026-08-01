@@ -4775,6 +4775,222 @@ Errore: %2</translation>
         <source>now</source>
         <translation>adesso</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>File JSON (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Configurazione della mappa Decodium (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — apri elenco e mappa</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 classificati · %2 sconosciuti</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Adatta automaticamente al QSO attivo</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Banda di convalida del diploma</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Colore</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Opacità</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Larghezza</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Etichette</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Fonte di conferma usata per il conteggio dei confermati</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Banda/modo corrente usano la banda e il modo selezionati sulla mappa; Modi digitali comprende FT, JT, Q e altri modi digitali</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>Età LoTW</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Tempo di decadimento di questa fonte</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>ECCEZIONI</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Esporta la configurazione della mappa</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Importa la configurazione della mappa</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Importa la configurazione della mappa Decodium</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Importa il pacchetto completo di configurazione della mappa</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Esporta preimpostazioni, preferenze e regole dell&apos;elenco, stili dei livelli, decadimento temporale e inquadratura della mappa</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>Da AAAA-MM-GG</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>A AAAA-MM-GG</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Storico sotto il puntatore: %1 · Diretta sotto il puntatore: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Mantieni le stazioni con conferma LoTW entro l&apos;età impostata</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>STILE DEL LIVELLO</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>Limita l&apos;elenco al tuo DXCC o ad altri DXCC</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>ENTITÀ IN DIRETTA MANCANTI (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matrice</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>MATRICE NUOVI / RICERCATI</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Nominativo dell&apos;operatore</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>TIPI DI PROPAGAZIONE</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Propagazione</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>AMBITO</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>RICERCATI</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>Mi hanno spottato</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Ripristina la vista precedente</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Ripristina la vista precedente della mappa</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Scegli le categorie NUOVI ed esamina le matrici di ricercati o eccezioni</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Scegli il livello di cui stai modificando l&apos;aspetto</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>LEGENDA TEMPORALE / DECADIMENTO DELLE FONTI</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Tratta i messaggi che contengono RR73 come CQ quando è attivo solo-CQ</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Usa solo gli spot di PSK Reporter sentiti dal tuo nominativo</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Usa questa entità nei calcoli di NUOVI e NON CONFERMATI</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>i filtri provider sono in OR</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>pronto</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>ricercati %1 · eccezioni %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16191,6 +16407,110 @@ Nel dubbio, usa Alta.</translation>
         <source>● active</source>
         <translation>● attivo</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 record</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Chiave API</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Password applicazione</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>Email</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>Aggiorna OQRS</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Apertura automatica all&apos;avvio QSO</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>Apri il pannello lookup</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Arricchimento campi mancanti</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>INTELLIGENZA NOMINATIVI</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Chiudi il pannello dopo il QSO</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Chiusura automatica dopo logging</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>DATABASE LOCALI</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Database e CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Durata cache (minuti)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Grid, nome e QTH nel prossimo log</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Importa</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Importa database callsign</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Percorso file locale opzionale</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Scegli</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Svuota cache</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>mai aggiornato</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>nessun record</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19988,6 +20308,86 @@ Fare clic con il tasto destro per inserire ed eliminare le opzioni.</translation
         <source>No statistics for the current logbook filters</source>
         <translation>Nessuna statistica per i filtri correnti del registro</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Nominativi %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · collegati %2 · confermati %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>AVANZAMENTO DIPLOMA · CUMULATIVO</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Diploma in evidenza</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>DETTAGLIO · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>Apri il dettaglio dei QSO</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>STATISTICHE DEL REGISTRO</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>Nessun QSO con data per l&apos;andamento storico</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>CONFRONTO TRA PERIODI</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PROFILI / NOMINATIVI</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>obiettivo %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>BANDE · MODI · DXCC · WPX · GRIGLIE PRINCIPALI</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20065,6 +20465,172 @@ Fare clic con il tasto destro per inserire ed eliminare le opzioni.</translation
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO con %1 pronto - TX%2 al prossimo intervallo intero</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>CACHE</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Intelligenza nominativi</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Intelligenza nominativi — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>Zona CQ / ITU</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Conferme</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / continente</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Ricerca</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Ricerca…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>Lookup esterni</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Nome</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Provider</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>Service non disponibile</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Ultimo risultato: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>fallback DXCC</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>nessuna indicazione</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>non disponibile</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 aggiornato</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Aggiornato</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>Aggiornamento %1 fallito: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>Aggiornamento %1 fallito: formato non riconosciuto</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>Aggiornamento %1 in corso...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Aggiornamento Club Log OQRS in corso...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>Aggiornamento già in corso</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>Cache callsign svuotata</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Callsign non valido</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: API key, email, application password e callsign operatore richiesti</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log non disponibile: usato fallback locale (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>Database callsign non disponibile: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>Fallback DXCC: nessun profilo provider disponibile</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Formato dati non riconosciuto o nessun record</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>Nessun provider ha trovato il callsign</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>Nessun record locale: provo i provider remoti...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>Pronto: database locale callsign disponibile</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>Provider remoti non disponibile: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Risultato da Club Log con fallback locale</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Risultato da cache locale</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Risultato da database locali</translation>
     </message>
 </context>
 </TS>

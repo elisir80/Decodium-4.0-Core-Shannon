@@ -4768,6 +4768,222 @@ Error: %2</source>
         <source>now</source>
         <translation>現在</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON 檔案 (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium 地圖設定 (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — 開啟列表與地圖</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 已分類 · %2 未知</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>自動適配目前 QSO</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>獎狀認證波段</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>顏色</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>不透明度</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>寬度</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>標籤</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>用於已確認計分的確認來源</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>「目前波段/模式」使用地圖上選定的波段與模式；「數位模式」包含 FT、JT、Q 等數位模式</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW 時長</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>此來源的衰減時長</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>例外</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>匯出地圖設定</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>匯入地圖設定</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>匯入 Decodium 地圖設定</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>匯入完整的地圖設定包</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>匯出預設、列表偏好與規則、圖層樣式、時間衰減與地圖視野</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>起 YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>至 YYYY-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>歷史停留: %1 · 即時停留: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>保留在設定時長內有 LoTW 確認的電台</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>圖層樣式</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>將列表限定為本站 DXCC 或其他 DXCC</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>缺少的即時實體 (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>矩陣</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>新增 / 待通聯矩陣</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>操作員呼號</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>傳播類型</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>傳播</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>範圍</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>待通聯</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>收到過我</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>恢復上一個檢視</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>恢復上一個地圖檢視</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>選擇「新增」類別並查看待通聯或例外矩陣</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>選擇正在編輯外觀的圖層</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>時間圖例 / 來源衰減</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>啟用「僅 CQ」時，將含 RR73 的訊息視為 CQ</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>僅使用你的呼號收到的 PSK Reporter 點報</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>在「新增」與「未確認」統計中使用該實體</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>服務方篩選為「或」關係</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>就緒</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>待通聯 %1 · 例外 %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16162,6 +16378,110 @@ If unsure, use High.</source>
         <source>↻  Refresh</source>
         <translation>↻  重新整理</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 筆記錄</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API 金鑰</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>應用程式密碼</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>電子郵件</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>重新整理</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>重新整理 OQRS</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>開始 QSO 時自動開啟</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>開啟查詢面板</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>補齊缺少欄位</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>呼號智慧</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>QSO 結束後關閉面板</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>記錄後自動關閉</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>本機資料庫</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>資料庫與 CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>快取時長（分鐘）</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>在下一筆日誌中包含網格、姓名與 QTH</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>匯入</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>匯入呼號資料庫</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>本機查詢，具 DXCC 回退、SQLite 快取與可更新的服務方。Club Log 憑證透過 secure settings 通道儲存在金鑰鏈中。</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>選填的本機檔案路徑</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>選擇</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>清空快取</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>從未更新</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>無記錄</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19953,6 +20273,86 @@ Right click for insert and delete options.</source>
         <source>No statistics for the current logbook filters</source>
         <translation>目前日誌篩選條件下沒有統計資料</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+呼號 %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · 已通聯 %2 · 已確認 %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>獎狀進度 · 累計</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>關注的獎狀</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>下鑽 · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>開啟 QSO 下鑽</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>日誌統計</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>沒有帶日期的 QSO 可用於歷史進度</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>週期對比</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>設定檔 / 呼號</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>目標 %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>主要波段 · 模式 · DXCC · WPX · 網格</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20030,6 +20430,172 @@ Right click for insert and delete options.</source>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>與 %1 的 QSO 已就緒 - 下一個完整時槽發送 TX%2</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>快取</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>呼號智慧</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>呼號智慧 — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ / ITU 分區</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>確認</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / 大洲</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>查詢</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>查詢…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>外部查詢</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>姓名</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>服務方</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>服務不可用</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>最後結果: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC 回退</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>無資訊</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>不可用</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 已更新</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>已更新</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>%1 更新失敗: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>%1 更新失敗: 格式無法辨識</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>正在更新 %1...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>正在更新 Club Log OQRS...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>更新已在進行中</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>呼號快取已清空</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>呼號無效</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: 需要 API 金鑰、電子郵件、應用程式密碼與操作員呼號</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log 不可用: 已使用本機回退 (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>呼號資料庫不可用: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>錯誤</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC 回退: 無可用的服務方設定</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>資料格式無法辨識或沒有記錄</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>沒有服務方找到該呼號</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>沒有本機記錄: 正在嘗試遠端服務方...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>就緒: 本機呼號資料庫可用</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>遠端服務方不可用: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>來自 Club Log 的結果（含本機回退）</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>來自本機快取的結果</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>來自本機資料庫的結果</translation>
     </message>
 </context>
 </TS>

@@ -4769,6 +4769,222 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>now</source>
         <translation>most</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>JSON-fájlok (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Decodium térképbeállítás (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — lista és térkép megnyitása</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 besorolva · %2 ismeretlen</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Automatikus igazítás az aktív QSO-hoz</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Diploma-igazolás sávja</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Szín</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Átlátszatlanság</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Szélesség</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Címkék</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>A megerősítettek pontszámához használt megerősítési forrás</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Az aktuális sáv/mód a térképen kiválasztott sávot és módot használja; a Digitális módok tartalmazza az FT, JT, Q és további digitális módokat</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>LoTW kora</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Ennek a forrásnak az elhalványulási ideje</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>KIVÉTELEK</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Térképbeállítás exportálása</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Térképbeállítás importálása</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Decodium térképbeállítás importálása</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>A teljes térképbeállítás-csomag importálása</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Előbeállítások, lista-beállítások/szabályok, rétegstílusok, időbeli elhalványulás és térképkivágat exportálása</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>Ettől: ÉÉÉÉ-HH-NN</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>Eddig: ÉÉÉÉ-HH-NN</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Előzmény a kurzor alatt: %1 · Élő a kurzor alatt: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>A beállított időn belüli LoTW-megerősítéssel rendelkező állomások megtartása</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>RÉTEGSTÍLUS</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>A lista szűkítése a saját DXCC-re vagy más DXCC-kre</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>HIÁNYZÓ ÉLŐ EGYSÉGEK (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Mátrix</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>ÚJ / KERESETT MÁTRIX</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Operátor hívójele</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>TERJEDÉSI TÍPUSOK</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Terjedés</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>HATÓKÖR</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>KERESETT</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>Engem spottoltak</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Előző nézet visszaállítása</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Az előző térképnézet visszaállítása</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Válaszd ki az ÚJ kategóriákat, és nézd meg a keresett vagy kivétel mátrixokat</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Válaszd ki azt a réteget, amelynek a megjelenését szerkeszted</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>IDŐBELI JELMAGYARÁZAT / FORRÁSOK ELHALVÁNYULÁSA</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Az RR73-at tartalmazó üzenetek CQ-ként kezelése, ha a csak-CQ be van kapcsolva</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Csak a hívójeled által hallott PSK Reporter spotok használata</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Ennek az egységnek a használata az ÚJ és NEM MEGERŐSÍTETT számításokban</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>a szolgáltatói szűrők VAGY kapcsolatban vannak</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>kész</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>keresett %1 · kivételek %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16032,6 +16248,110 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>↻  Refresh</source>
         <translation>↻  Frissítés</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 rekord</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-kulcs</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Alkalmazásjelszó</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>E-mail</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Frissítés</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>OQRS frissítése</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Automatikus megnyitás a QSO indulásakor</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>A keresőpanel megnyitása</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Hiányzó mezők kitöltése</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>HÍVÓJEL-INTELLIGENCIA</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>A panel bezárása a QSO után</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Automatikus bezárás naplózás után</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>HELYI ADATBÁZISOK</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Adatbázisok és CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Gyorsítótár élettartama (perc)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Grid, név és QTH a következő naplóbejegyzésben</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Importálás</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Hívójel-adatbázis importálása</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Helyi keresés DXCC-tartalékkal, SQLite gyorsítótárral és frissíthető szolgáltatókkal. A Club Log hitelesítő adatai a kulcstartóban tárolódnak a secure settings csatornán keresztül.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Nem kötelező helyi fájlútvonal</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Válassz</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Gyorsítótár ürítése</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>soha nem frissült</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>nincs rekord</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19820,6 +20140,86 @@ Jobb klikk a beillesztési és törlési lehetőségekhez.</translation>
         <source>No statistics for the current logbook filters</source>
         <translation>Nincs statisztika a jelenlegi naplószűrőkhöz</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Hívójelek %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · meglévő %2 · megerősítve %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>DIPLOMA ELŐREHALADÁS · HALMOZOTT</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Kiemelt diploma</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>RÉSZLETEZÉS · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>QSO részletezés megnyitása</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>NAPLÓSTATISZTIKA</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>Nincs dátumozott QSO a történeti előrehaladáshoz</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>IDŐSZAKOK ÖSSZEHASONLÍTÁSA</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PROFILOK / HÍVÓJELEK</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>cél %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO-k</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>VEZETŐ SÁVOK · MÓDOK · DXCC · WPX · GRIDEK</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -19897,6 +20297,172 @@ Jobb klikk a beillesztési és törlési lehetőségekhez.</translation>
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO %1 állomással előkészítve - TX%2 a következő teljes időrésben</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>GYORSÍTÓTÁR</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Hívójel-intelligencia</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Hívójel-intelligencia — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>CQ / ITU zóna</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Bezárás</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Megerősítések</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / kontinens</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Keresés</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Keresés…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>Külső keresések</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Név</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Szolgáltató</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>A szolgáltatás nem érhető el</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Utolsó eredmény: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>DXCC tartalék</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>nincs adat</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>nem érhető el</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 frissítve</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Frissítve</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>A(z) %1 frissítése sikertelen: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>A(z) %1 frissítése sikertelen: ismeretlen formátum</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>%1 frissítése folyamatban...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>Club Log OQRS frissítése folyamatban...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>A frissítés már folyamatban van</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>A hívójel-gyorsítótár kiürítve</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Érvénytelen hívójel</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: API-kulcs, e-mail, alkalmazásjelszó és operátor-hívójel szükséges</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>A Club Log nem érhető el: helyi tartalék használva (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>A hívójel-adatbázis nem érhető el: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Hiba</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>DXCC tartalék: nincs elérhető szolgáltatói profil</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Ismeretlen adatformátum vagy nincs rekord</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>Egyik szolgáltató sem találta meg a hívójelet</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>Nincs helyi rekord: próbálom a távoli szolgáltatókat...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>Kész: a helyi hívójel-adatbázis elérhető</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>A távoli szolgáltatók nem érhetők el: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Eredmény a Club Logból, helyi tartalékkal</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Eredmény a helyi gyorsítótárból</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Eredmény a helyi adatbázisokból</translation>
     </message>
 </context>
 </TS>

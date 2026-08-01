@@ -4771,6 +4771,222 @@ Error: %2</translation>
         <source>now</source>
         <translation>ara</translation>
     </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>Fitxers JSON (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Configuració del mapa Decodium (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — obre la llista i el mapa</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 classificats · %2 desconeguts</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Ajusta automàticament al QSO actiu</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Banda d&apos;aval del diploma</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Color</translation>
+    </message>
+    <message>
+        <source>Opacity</source>
+        <translation>Opacitat</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Amplada</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Etiquetes</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Font de confirmació usada per al recompte de confirmats</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Banda/mode actual fan servir la banda i el mode seleccionats al mapa; Modes digitals inclou FT, JT, Q i altres modes digitals</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>Max DT</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>Min SNR</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>Antiguitat LoTW</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Temps de decaïment d&apos;aquesta font</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>EXCEPCIONS</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Exporta la configuració del mapa</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Importa la configuració del mapa</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Importa la configuració del mapa Decodium</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Importa el paquet complet de configuració del mapa</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Exporta configuracions, preferències i regles de la llista, estils de capa, decaïment temporal i enquadrament del mapa</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>Des de AAAA-MM-DD</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>Fins a AAAA-MM-DD</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Sobre l&apos;històric: %1 · Sobre el directe: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Mantén les estacions amb confirmació LoTW dins de l&apos;antiguitat configurada</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>ESTIL DE CAPA</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>Limita la llista al teu DXCC o a altres DXCC</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>ENTITATS EN DIRECTE QUE FALTEN (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matriu</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>MATRIU NOUS / BUSCATS</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Indicatiu de l&apos;operador</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>TIPUS DE PROPAGACIÓ</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Propagació</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>ÀMBIT</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>BUSCATS</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>M&apos;han spotat</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Restaura la vista anterior</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Restaura la vista anterior del mapa</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Tria les categories NOUS i consulta les matrius de buscats o excepcions</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Tria la capa de la qual n&apos;estàs editant l&apos;aspecte</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>LLEGENDA TEMPORAL / DECAÏMENT DE FONTS</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Tracta els missatges amb RR73 com a CQ quan només-CQ està actiu</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Usa només els spots de PSK Reporter sentits pel teu indicatiu</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Usa aquesta entitat als càlculs de NOUS i SENSE CONFIRMAR</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>els filtres de proveïdor són en OR</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>a punt</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>buscats %1 · excepcions %2</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -16165,6 +16381,110 @@ En cas de dubte, fes servir Alta.</translation>
         <source>↻  Refresh</source>
         <translation>↻  Actualitza</translation>
     </message>
+    <message>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <source>%1 record</source>
+        <translation>%1 registres</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Clau API</translation>
+    </message>
+    <message>
+        <source>Application password</source>
+        <translation>Contrasenya d&apos;aplicació</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>Correu electrònic</translation>
+    </message>
+    <message>
+        <source>Aggiorna</source>
+        <translation>Actualitza</translation>
+    </message>
+    <message>
+        <source>Aggiorna OQRS</source>
+        <translation>Actualitza OQRS</translation>
+    </message>
+    <message>
+        <source>Apertura automatica all&apos;avvio QSO</source>
+        <translation>Obertura automàtica en iniciar el QSO</translation>
+    </message>
+    <message>
+        <source>Apri il pannello lookup</source>
+        <translation>Obre el tauler de consulta</translation>
+    </message>
+    <message>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Emplena els camps que falten</translation>
+    </message>
+    <message>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>INTEL·LIGÈNCIA D&apos;INDICATIUS</translation>
+    </message>
+    <message>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Tanca el tauler després del QSO</translation>
+    </message>
+    <message>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Tancament automàtic després de registrar</translation>
+    </message>
+    <message>
+        <source>DATABASE LOCALI</source>
+        <translation>BASES DE DADES LOCALS</translation>
+    </message>
+    <message>
+        <source>Database e CSV (*)</source>
+        <translation>Bases de dades i CSV (*)</translation>
+    </message>
+    <message>
+        <source>Durata cache (minuti)</source>
+        <translation>Durada de la memòria cau (minuts)</translation>
+    </message>
+    <message>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Graella, nom i QTH al pròxim registre</translation>
+    </message>
+    <message>
+        <source>Importa</source>
+        <translation>Importa</translation>
+    </message>
+    <message>
+        <source>Importa database callsign</source>
+        <translation>Importa la base de dades d&apos;indicatius</translation>
+    </message>
+    <message>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Consulta local amb recurs DXCC, memòria cau SQLite i proveïdors actualitzables. Les credencials de Club Log es desen al clauer mitjançant el canal secure settings.</translation>
+    </message>
+    <message>
+        <source>Percorso file locale opzionale</source>
+        <translation>Camí de fitxer local opcional</translation>
+    </message>
+    <message>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <source>Scegli</source>
+        <translation>Tria</translation>
+    </message>
+    <message>
+        <source>Svuota cache</source>
+        <translation>Buida la memòria cau</translation>
+    </message>
+    <message>
+        <source>mai aggiornato</source>
+        <translation>mai actualitzat</translation>
+    </message>
+    <message>
+        <source>nessun record</source>
+        <translation>cap registre</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -19957,6 +20277,86 @@ Fes clic amb el botó dret per a les opcions d&apos;inserció i eliminació.</tr
         <source>No statistics for the current logbook filters</source>
         <translation>Cap estadística per als filtres actuals del quadern</translation>
     </message>
+    <message>
+        <source>%1 QSO</source>
+        <translation>%1 QSO</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3 DXCC</source>
+        <translation>%1 QSO · %2 QSL · %3 DXCC</translation>
+    </message>
+    <message>
+        <source>QSL %1 (%2)</source>
+        <translation>QSL %1 (%2)</translation>
+    </message>
+    <message>
+        <source>JSON</source>
+        <translation>JSON</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL
+Calls %3/%4 · DXCC %5/%6</source>
+        <translation>%1 QSO · %2 QSL
+Indicatius %3/%4 · DXCC %5/%6</translation>
+    </message>
+    <message>
+        <source>%1 · worked %2 · confirmed %3</source>
+        <translation>%1 · treballats %2 · confirmats %3</translation>
+    </message>
+    <message>
+        <source>AWARD PROGRESSION · CUMULATIVE</source>
+        <translation>PROGRESSIÓ DEL DIPLOMA · ACUMULADA</translation>
+    </message>
+    <message>
+        <source>Award focus</source>
+        <translation>Diploma en focus</translation>
+    </message>
+    <message>
+        <source>Grid %1/%2 · WPX %3/%4</source>
+        <translation>Grid %1/%2 · WPX %3/%4</translation>
+    </message>
+    <message>
+        <source>DRILL-DOWN · %1</source>
+        <translation>DETALL · %1</translation>
+    </message>
+    <message>
+        <source>Open QSO drill-down</source>
+        <translation>Obre el detall dei QSO</translation>
+    </message>
+    <message>
+        <source>LOGBOOK STATISTICS</source>
+        <translation>ESTADÍSTIQUES DEL QUADERN</translation>
+    </message>
+    <message>
+        <source>No dated QSO available for historical progression</source>
+        <translation>Cap QSO amb data per a la progressió històrica</translation>
+    </message>
+    <message>
+        <source>PERIOD COMPARISON</source>
+        <translation>COMPARACIÓ DE PERÍODES</translation>
+    </message>
+    <message>
+        <source>PROFILES / CALLSIGNS</source>
+        <translation>PERFILS / INDICATIUS</translation>
+    </message>
+    <message>
+        <source>target %1</source>
+        <translation>objectiu %1</translation>
+    </message>
+    <message>
+        <source>QSOs</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</source>
+        <translation>QSO %1 → %2 (%3)
+DXCC %4 · Grid %5 · WPX %6</translation>
+    </message>
+    <message>
+        <source>TOP BANDS · MODES · DXCC · WPX · GRIDS</source>
+        <translation>BANDES · MODES · DXCC · WPX · GRAELLES PRINCIPALS</translation>
+    </message>
 </context>
 <context>
     <name>MapLogbookPanel</name>
@@ -20034,6 +20434,172 @@ Fes clic amb el botó dret per a les opcions d&apos;inserció i eliminació.</tr
     <message>
         <source>QSO with %1 armed - TX%2 at next full slot</source>
         <translation>QSO amb %1 preparat - TX%2 al pròxim interval complet</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignLookupWindow</name>
+    <message>
+        <source>CACHE</source>
+        <translation>MEMÒRIA CAU</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence</source>
+        <translation>Intel·ligència d&apos;indicatius</translation>
+    </message>
+    <message>
+        <source>Callsign intelligence — %1</source>
+        <translation>Intel·ligència d&apos;indicatius — %1</translation>
+    </message>
+    <message>
+        <source>CQ / ITU zone</source>
+        <translation>Zona CQ / ITU</translation>
+    </message>
+    <message>
+        <source>Chiudi</source>
+        <translation>Tanca</translation>
+    </message>
+    <message>
+        <source>Conferme</source>
+        <translation>Confirmacions</translation>
+    </message>
+    <message>
+        <source>DXCC / continente</source>
+        <translation>DXCC / continent</translation>
+    </message>
+    <message>
+        <source>Lookup</source>
+        <translation>Consulta</translation>
+    </message>
+    <message>
+        <source>Lookup…</source>
+        <translation>Consulta…</translation>
+    </message>
+    <message>
+        <source>Lookup esterni</source>
+        <translation>Consultes externes</translation>
+    </message>
+    <message>
+        <source>Nome</source>
+        <translation>Nom</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Proveïdor</translation>
+    </message>
+    <message>
+        <source>Service non disponibile</source>
+        <translation>Servei no disponible</translation>
+    </message>
+    <message>
+        <source>Ultimo risultato: %1</source>
+        <translation>Últim resultat: %1</translation>
+    </message>
+    <message>
+        <source>fallback DXCC</source>
+        <translation>recurs DXCC</translation>
+    </message>
+    <message>
+        <source>nessuna indicazione</source>
+        <translation>cap indicació</translation>
+    </message>
+    <message>
+        <source>non disponibile</source>
+        <translation>no disponible</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>%1 aggiornato</source>
+        <translation>%1 actualitzat</translation>
+    </message>
+    <message>
+        <source>Aggiornato</source>
+        <translation>Actualitzat</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: %2</source>
+        <translation>Ha fallat l&apos;actualització de %1: %2</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 fallito: formato non riconosciuto</source>
+        <translation>Ha fallat l&apos;actualització de %1: format no reconegut</translation>
+    </message>
+    <message>
+        <source>Aggiornamento %1 in corso...</source>
+        <translation>S&apos;està actualitzant %1...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento Club Log OQRS in corso...</source>
+        <translation>S&apos;està actualitzant Club Log OQRS...</translation>
+    </message>
+    <message>
+        <source>Aggiornamento già in corso</source>
+        <translation>Ja hi ha una actualització en curs</translation>
+    </message>
+    <message>
+        <source>Cache callsign svuotata</source>
+        <translation>S&apos;ha buidat la memòria cau d&apos;indicatius</translation>
+    </message>
+    <message>
+        <source>Callsign non valido</source>
+        <translation>Indicatiu no vàlid</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, email, application password e callsign operatore richiesti</source>
+        <translation>Club Log OQRS: calen clau API, correu, contrasenya d&apos;aplicació i indicatiu de l&apos;operador</translation>
+    </message>
+    <message>
+        <source>Club Log non disponibile: usato fallback locale (%1)</source>
+        <translation>Club Log no disponible: s&apos;ha usat el recurs local (%1)</translation>
+    </message>
+    <message>
+        <source>Database callsign non disponibile: %1</source>
+        <translation>Base de dades d&apos;indicatius no disponible: %1</translation>
+    </message>
+    <message>
+        <source>Errore</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>Fallback DXCC: nessun profilo provider disponibile</source>
+        <translation>Recurs DXCC: cap perfil de proveïdor disponible</translation>
+    </message>
+    <message>
+        <source>Formato dati non riconosciuto o nessun record</source>
+        <translation>Format de dades no reconegut o cap registre</translation>
+    </message>
+    <message>
+        <source>Nessun provider ha trovato il callsign</source>
+        <translation>Cap proveïdor ha trobat l&apos;indicatiu</translation>
+    </message>
+    <message>
+        <source>Nessun record locale: provo i provider remoti...</source>
+        <translation>Cap registre local: provo els proveïdors remots...</translation>
+    </message>
+    <message>
+        <source>Pronto: database locale callsign disponibile</source>
+        <translation>A punt: base de dades local d&apos;indicatius disponible</translation>
+    </message>
+    <message>
+        <source>Provider remoti non disponibile: %1</source>
+        <translation>Proveïdors remots no disponibles: %1</translation>
+    </message>
+    <message>
+        <source>Risultato da Club Log con fallback locale</source>
+        <translation>Resultat de Club Log amb recurs local</translation>
+    </message>
+    <message>
+        <source>Risultato da cache locale</source>
+        <translation>Resultat de la memòria cau local</translation>
+    </message>
+    <message>
+        <source>Risultato da database locali</source>
+        <translation>Resultat de les bases de dades locals</translation>
     </message>
 </context>
 </TS>
