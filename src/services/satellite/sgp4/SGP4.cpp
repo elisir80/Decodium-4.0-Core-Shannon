@@ -2257,19 +2257,21 @@ namespace SGP4Funcs
 				printf("input start prop year mon day hr min sec \n");
 				// make sure there is no space at the end of the format specifiers in scanf!
 #ifdef _MSC_VER
-				scanf_s("%i %i %i %i %i %lf", &startyear, &startmon, &startday, &starthr, &startmin, &startsec);
+				int scanResult = scanf_s("%i %i %i %i %i %lf", &startyear, &startmon, &startday, &starthr, &startmin, &startsec);
 #else
-				scanf("%i %i %i %i %i %lf", &startyear, &startmon, &startday, &starthr, &startmin, &startsec);
+				int scanResult = scanf("%i %i %i %i %i %lf", &startyear, &startmon, &startday, &starthr, &startmin, &startsec);
 #endif
+				if (scanResult != 6) return;
 				fflush(stdin);
 				jday(startyear, startmon, startday, starthr, startmin, startsec, jdstart, jdstartF);
 
 				printf("input stop prop year mon day hr min sec \n");
 #ifdef _MSC_VER
-				scanf_s("%i %i %i %i %i %lf", &stopyear, &stopmon, &stopday, &stophr, &stopmin, &stopsec);
+				scanResult = scanf_s("%i %i %i %i %i %lf", &stopyear, &stopmon, &stopday, &stophr, &stopmin, &stopsec);
 #else
-				scanf("%i %i %i %i %i %lf", &stopyear, &stopmon, &stopday, &stophr, &stopmin, &stopsec);
+				scanResult = scanf("%i %i %i %i %i %lf", &stopyear, &stopmon, &stopday, &stophr, &stopmin, &stopsec);
 #endif
+				if (scanResult != 6) return;
 				fflush(stdin);
 				jday(stopyear, stopmon, stopday, stophr, stopmin, stopsec, jdstop, jdstopF);
 
@@ -2278,26 +2280,29 @@ namespace SGP4Funcs
 
 				printf("input time step in minutes \n");
 #ifdef _MSC_VER
-				scanf_s("%lf", &deltamin);
+				scanResult = scanf_s("%lf", &deltamin);
 #else
-				scanf("%lf", &deltamin);
+				scanResult = scanf("%lf", &deltamin);
 #endif
+				if (scanResult != 1) return;
 			}
 			// -------- enter start/stop year and days of year values -----------
 			if (typeinput == 'd')
 			{
 				printf("input start year dayofyr \n");
 #ifdef _MSC_VER
-				scanf_s("%i %lf", &startyear, &startdayofyr);
+				int scanResult = scanf_s("%i %lf", &startyear, &startdayofyr);
 #else
-				scanf("%i %lf", &startyear, &startdayofyr);
+				int scanResult = scanf("%i %lf", &startyear, &startdayofyr);
 #endif
+				if (scanResult != 2) return;
 				printf("input stop year dayofyr \n");
 #ifdef _MSC_VER
-				scanf_s("%i %lf", &stopyear, &stopdayofyr);
+				scanResult = scanf_s("%i %lf", &stopyear, &stopdayofyr);
 #else
-				scanf("%i %lf", &stopyear, &stopdayofyr);
+				scanResult = scanf("%i %lf", &stopyear, &stopdayofyr);
 #endif
+				if (scanResult != 2) return;
 
 				days2mdhms(startyear, startdayofyr, mon, day, hr, minute, sec);
 				jday(startyear, mon, day, hr, minute, sec, jdstart, jdstartF);
@@ -2309,30 +2314,32 @@ namespace SGP4Funcs
 
 				printf("input time step in minutes \n");
 #ifdef _MSC_VER
-				scanf_s("%lf", &deltamin);
+				scanResult = scanf_s("%lf", &deltamin);
 #else
 
-				scanf("%lf", &deltamin);
+				scanResult = scanf("%lf", &deltamin);
 #endif
+				if (scanResult != 1) return;
 			}
 			// ------------------ enter start/stop mfe values -------------------
 			if (typeinput == 'm')
 			{
 #ifdef _MSC_VER
 				printf("input start min from epoch \n");
-				scanf_s("%lf", &startmfe);
+				int scanResult = scanf_s("%lf", &startmfe);
 				printf("input stop min from epoch \n");
-				scanf_s("%lf", &stopmfe);
+				scanResult = scanf_s("%lf", &stopmfe);
 				printf("input time step in minutes \n");
-				scanf_s("%lf", &deltamin);
+				scanResult = scanf_s("%lf", &deltamin);
 #else
 				printf("input start min from epoch \n");
-				scanf("%lf", &startmfe);
+				int scanResult = scanf("%lf", &startmfe);
 				printf("input stop min from epoch \n");
-				scanf("%lf", &stopmfe);
+				scanResult = scanf("%lf", &stopmfe);
 				printf("input time step in minutes \n");
-				scanf("%lf", &deltamin);
+				scanResult = scanf("%lf", &deltamin);
 #endif
+				if (scanResult != 1) return;
 			}
 		}
 
