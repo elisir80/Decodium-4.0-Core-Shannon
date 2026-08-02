@@ -16,13 +16,13 @@
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="66"/>
         <source>Confirm Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Apstiprināt dzēšanu</translation>
     </message>
     <message numerus="yes">
         <location filename="../widgets/AbstractLogWindow.cpp" line="67"/>
         <source>Are you sure you want to delete the %n selected QSO(s) from the log?</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Vai tiešām vēlaties dzēst %n atlasīto QSO ierakstu no žurnāla?</numerusform>
             <numerusform></numerusform>
             <numerusform></numerusform>
         </translation>
