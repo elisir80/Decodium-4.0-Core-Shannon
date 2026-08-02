@@ -52,10 +52,13 @@ SatelliteTrackingService::SatelliteTrackingService(QObject* parent)
                            QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
         settings.beginGroup(QStringLiteral("SatelliteRotator"));
         m_rotatorHost = settings.value(QStringLiteral("Host"), m_rotatorHost).toString().trimmed();
-        m_rotatorPort = qBound(1, settings.value(QStringLiteral("Port"), m_rotatorPort).toInt(), 65535);
-        m_rotatorEnabled = settings.value(QStringLiteral("Enabled"), false).toBool();
         QString const configuredProtocol = settings.value(
             QStringLiteral("Protocol"), QStringLiteral("PSTRotator")).toString();
+        m_rotatorPort = qBound(
+            1, settings.value(QStringLiteral("Port"),
+                              RotatorService::defaultPortForProtocol(configuredProtocol)).toInt(),
+            65535);
+        m_rotatorEnabled = settings.value(QStringLiteral("Enabled"), false).toBool();
         settings.endGroup();
         m_rotator->setProtocol(configuredProtocol);
         m_rotator->setHost(m_rotatorHost);
@@ -222,7 +225,16 @@ void SatelliteTrackingService::setRotatorEnabled(bool enabled)
 void SatelliteTrackingService::setRotatorProtocol(const QString& protocol)
 {
     if (!m_rotator) return;
+    QString const previousProtocol = m_rotator->protocol();
+    bool const followedDefaultPort =
+        m_rotatorPort == RotatorService::defaultPortForProtocol(previousProtocol);
     m_rotator->setProtocol(protocol);
+    if (followedDefaultPort) {
+        int const recommendedPort =
+            RotatorService::defaultPortForProtocol(m_rotator->protocol());
+        if (recommendedPort != m_rotatorPort)
+            setRotatorPort(recommendedPort);
+    }
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     settings.beginGroup(QStringLiteral("SatelliteRotator"));

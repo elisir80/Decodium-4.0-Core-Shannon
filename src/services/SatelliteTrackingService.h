@@ -207,7 +207,7 @@ private:
     bool m_tracking {false};
     bool m_autoRotator {false};
     QString m_rotatorHost {QStringLiteral("127.0.0.1")};
-    int m_rotatorPort {4533};
+    int m_rotatorPort {12000};
     bool m_rotatorEnabled {false};
     QString m_statusMessage;
     QString m_sourceUrl;

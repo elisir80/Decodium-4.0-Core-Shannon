@@ -13,15 +13,21 @@ Dialog {
     id: astroWindow
     title: "Astronomical Data"
     modal: false
-    width: Math.max(480, Math.min(620, (parent ? parent.width : 620) - 48))
-    height: Math.max(430, Math.min(720, (parent ? parent.height : 720) - 48))
+    width: nativeHostWindow && parent
+           ? Math.max(480, parent.width - 24)
+           : Math.max(480, Math.min(620, (parent ? parent.width : 620) - 48))
+    height: nativeHostWindow && parent
+            ? Math.max(430, parent.height - 24)
+            : Math.max(430, Math.min(720, (parent ? parent.height : 720) - 48))
     padding: 16
-    closePolicy: Popup.CloseOnEscape
+    closePolicy: nativeHostWindow ? Popup.NoAutoClose : Popup.CloseOnEscape
+    property var nativeHostWindow: null
     property bool positionInitialized: false
     property int minimumResizeWidth: 480
     property int minimumResizeHeight: 430
 
     function clampToParent() {
+        if (nativeHostWindow) return
         if (!parent) return
         x = Math.max(0, Math.min(x, parent.width - width))
         y = Math.max(0, Math.min(y, parent.height - height))
@@ -32,6 +38,39 @@ Dialog {
         x = Math.max(0, Math.round((parent.width - width) / 2))
         y = Math.max(0, Math.round((parent.height - height) / 2))
         positionInitialized = true
+    }
+
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("Astro native move failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        astroWindow.close()
+    }
+
+    function requestWindowMinimize() {
+        if (nativeHostWindow && typeof nativeHostWindow.minimizeHostedWindow === "function") {
+            nativeHostWindow.minimizeHostedWindow()
+            return
+        }
+        astroWindowMinimized = true
+        astroWindow.close()
     }
 
     function displayPropagationValue(value, placeholder) {
@@ -73,6 +112,12 @@ Dialog {
     property color textSecondary: bridge.themeManager.textSecondary
     property color glassBorder: bridge.themeManager.glassBorder
 
+    // A Dialog hosted by a separate QQuickWindow does not inherit the
+    // ApplicationWindow's attached Material palette on every platform.
+    Material.theme: bridge.themeManager.isLightTheme ? Material.Light : Material.Dark
+    Material.accent: bridge.themeManager.primaryColor
+    Material.primary: bridge.themeManager.secondaryColor
+
     background: Rectangle {
         color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
         border.color: secondaryCyan
@@ -90,29 +135,56 @@ Dialog {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            anchors.rightMargin: 80
+            // Keep the drag handle away from the satellite, minimize and
+            // close controls.  The handle used to overlap the satellite
+            // button on compact dialog widths and consumed its click.
+            anchors.rightMargin: 160
             acceptedButtons: Qt.LeftButton
             preventStealing: true
             property point pressGlobalPos: Qt.point(0, 0)
             property point pressWindowPos: Qt.point(0, 0)
+            property bool nativeMoveActive: false
             cursorShape: Qt.SizeAllCursor
             onPressed: function(mouse) {
                 pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
-                pressWindowPos = Qt.point(astroWindow.x, astroWindow.y)
+                pressWindowPos = astroWindow.nativeHostWindow
+                        ? Qt.point(astroWindow.nativeHostWindow.x,
+                                   astroWindow.nativeHostWindow.y)
+                        : Qt.point(astroWindow.x, astroWindow.y)
                 astroWindow.positionInitialized = true
+                nativeMoveActive = astroWindow.startNativeHostMove()
                 mouse.accepted = true
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
+                if (nativeMoveActive) return
                 var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
-                astroWindow.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
-                astroWindow.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
-                astroWindow.clampToParent()
+                if (astroWindow.nativeHostWindow) {
+                    astroWindow.nativeHostWindow.x = pressWindowPos.x
+                            + currentGlobalPos.x - pressGlobalPos.x
+                    astroWindow.nativeHostWindow.y = pressWindowPos.y
+                            + currentGlobalPos.y - pressGlobalPos.y
+                } else {
+                    astroWindow.x = pressWindowPos.x
+                            + currentGlobalPos.x - pressGlobalPos.x
+                    astroWindow.y = pressWindowPos.y
+                            + currentGlobalPos.y - pressGlobalPos.y
+                    astroWindow.clampToParent()
+                }
                 mouse.accepted = true
+            }
+            onReleased: {
+                nativeMoveActive = false
+                astroWindow.finishNativeHostMove()
+            }
+            onCanceled: {
+                nativeMoveActive = false
+                astroWindow.finishNativeHostMove()
             }
         }
 
         RowLayout {
+            z: 3
             anchors.fill: parent
             anchors.margins: 16
             spacing: 10
@@ -127,6 +199,8 @@ Dialog {
             Item { Layout.fillWidth: true }
 
             ToolButton {
+                id: satelliteTrackingButton
+                z: 3
                 text: "🛰"
                 ToolTip.visible: hovered
                 ToolTip.text: qsTr("Satellite tracking")
@@ -138,6 +212,7 @@ Dialog {
             }
 
             Rectangle {
+                z: 3
                 width: 28
                 height: 28
                 radius: 4
@@ -159,10 +234,7 @@ Dialog {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        astroWindowMinimized = true
-                        astroWindow.close()
-                    }
+                    onClicked: astroWindow.requestWindowMinimize()
                 }
 
                 ToolTip.visible: astroMinMA.containsMouse
@@ -171,6 +243,7 @@ Dialog {
             }
 
             Rectangle {
+                z: 3
                 width: 28
                 height: 28
                 radius: 4
@@ -192,7 +265,7 @@ Dialog {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: astroWindow.close()
+                    onClicked: astroWindow.requestWindowClose()
                 }
 
                 ToolTip.visible: astroCloseMA.containsMouse

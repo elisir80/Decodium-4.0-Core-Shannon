@@ -3,8 +3,10 @@
 #include <QHostAddress>
 #include <QObject>
 #include <QStringList>
+#include <QVector>
 
 class QTimer;
+class QTcpSocket;
 class QUdpSocket;
 
 class RotatorService final : public QObject
@@ -13,10 +15,12 @@ class RotatorService final : public QObject
 
     Q_PROPERTY(QString protocol READ protocol WRITE setProtocol NOTIFY configurationChanged)
     Q_PROPERTY(QStringList protocols READ protocols CONSTANT)
+    Q_PROPERTY(QString transport READ transport NOTIFY configurationChanged)
     Q_PROPERTY(QString host READ host WRITE setHost NOTIFY configurationChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY configurationChanged)
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(bool transportReady READ transportReady NOTIFY transportChanged)
+    Q_PROPERTY(bool feedbackSupported READ feedbackSupported NOTIFY configurationChanged)
     Q_PROPERTY(bool feedbackAvailable READ feedbackAvailable NOTIFY feedbackChanged)
     Q_PROPERTY(qint64 lastFeedbackMs READ lastFeedbackMs NOTIFY feedbackChanged)
     Q_PROPERTY(double currentAzimuth READ currentAzimuth NOTIFY feedbackChanged)
@@ -42,10 +46,13 @@ public:
 
     QString protocol() const { return m_protocol; }
     QStringList protocols() const;
+    static int defaultPortForProtocol(const QString& protocol);
+    QString transport() const;
     QString host() const { return m_host; }
     int port() const { return m_port; }
     bool enabled() const { return m_enabled; }
-    bool transportReady() const { return m_enabled && m_commandSocket != nullptr; }
+    bool transportReady() const;
+    bool feedbackSupported() const;
     bool feedbackAvailable() const { return m_feedbackAvailable; }
     qint64 lastFeedbackMs() const { return m_lastFeedbackMs; }
     double currentAzimuth() const { return m_currentAzimuth; }
@@ -85,7 +92,7 @@ public:
                      bool hasElevation = true);
     void stopTracking();
     void emergencyStop();
-    void park();
+    Q_INVOKABLE void park();
     void pollFeedback();
 
     Q_INVOKABLE bool setTarget(double azimuth, double elevation = 0.0,
@@ -114,6 +121,7 @@ private slots:
     void onTrackingTick();
     void onFeedbackTick();
     void onReadyRead();
+    void onTcpReadyRead();
 
 private:
     QByteArray wrapCommand(const QByteArray& body) const;
@@ -123,6 +131,10 @@ private:
     void sendStopCommand();
     void sendParkCommand();
     void sendPayload(const QByteArray& payload);
+    void sendTcpCommand(const QByteArray& command);
+    void ensureTcpConnected();
+    void flushTcpCommand();
+    void closeTcpConnection();
     void writePayload(const QByteArray& payload, const QHostAddress& address);
     void configureFeedbackSocket();
     void closeFeedbackSocket();
@@ -130,11 +142,12 @@ private:
     void setFeedback(double azimuth, bool hasAzimuth,
                      double elevation, bool hasElevation);
     static QString normalizedProtocol(const QString& protocol);
+    static bool isHamlibProtocol(const QString& protocol);
     static double normalizeAzimuth(double value);
 
     QString m_protocol {QStringLiteral("PSTRotator")};
     QString m_host {QStringLiteral("127.0.0.1")};
-    int m_port {12040};
+    int m_port {12000};
     bool m_enabled {false};
     bool m_feedbackAvailable {false};
     qint64 m_lastFeedbackMs {0};
@@ -160,9 +173,13 @@ private:
     QString m_resolvedHost;
     QHostAddress m_resolvedAddress;
     QByteArray m_pendingPayload;
+    QByteArray m_pendingTcpCommand;
+    QByteArray m_tcpReadBuffer;
+    QVector<double> m_tcpNumericFeedback;
 
     QUdpSocket* m_commandSocket {nullptr};
     QUdpSocket* m_feedbackSocket {nullptr};
+    QTcpSocket* m_tcpSocket {nullptr};
     QTimer* m_trackingTimer {nullptr};
     QTimer* m_feedbackTimer {nullptr};
 };

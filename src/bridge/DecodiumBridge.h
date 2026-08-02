@@ -278,6 +278,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(double     pskHeardByMaxKm     READ pskHeardByMaxKm     NOTIFY pskHeardByChanged)
     Q_PROPERTY(bool       pskHeardByFetching  READ pskHeardByFetching  NOTIFY pskHeardByFetchingChanged)
     Q_PROPERTY(int        pskReporterTimeSpanMinutes READ pskReporterTimeSpanMinutes WRITE setPskReporterTimeSpanMinutes NOTIFY pskReporterTimeSpanMinutesChanged)
+    Q_PROPERTY(bool       pskMapSpotFetching READ pskMapSpotFetching NOTIFY pskMapSpotFetchingChanged)
+    Q_PROPERTY(int        pskMapSpotWindowMinutes READ pskMapSpotWindowMinutes WRITE setPskMapSpotWindowMinutes NOTIFY pskMapSpotWindowMinutesChanged)
     Q_PROPERTY(bool       pskReporterEnabled  READ pskReporterEnabled  WRITE setPskReporterEnabled  NOTIFY pskReporterEnabledChanged)
     Q_PROPERTY(bool       pskReporterConnected READ pskReporterConnected NOTIFY pskReporterConnectedChanged)
 
@@ -796,6 +798,9 @@ public:
     bool        pskHeardByFetching()   const { return m_pskHeardByFetching; }
     int         pskReporterTimeSpanMinutes() const { return m_pskReporterTimeSpanMinutes; }
     void setPskReporterTimeSpanMinutes(int minutes);
+    bool        pskMapSpotFetching() const { return m_pskMapSpotFetching; }
+    int         pskMapSpotWindowMinutes() const { return m_pskMapSpotWindowMinutes; }
+    void setPskMapSpotWindowMinutes(int minutes);
     bool        pskReporterEnabled()   const { return m_pskReporterEnabled; }
     void setPskReporterEnabled(bool v);
     bool        pskReporterConnected() const;
@@ -1080,6 +1085,8 @@ public slots:
 
 private:
     void saveSettingsInternal(bool asynchronous);
+    void fetchPskReporterSnapshot(int spanMinutes, bool mapRequest, bool force);
+    void syncPskMapSpotWindowToMap();
 
     struct ExternalAdifUploadPending {
         QString dxCall;
@@ -1182,6 +1189,9 @@ public:
     // DX-Pedition Mode Fase 3 — fetch "heard-by" (chi riceve il MIO segnale).
     // Async, riusa il pattern HTTP di searchPskReporter. Rate-limit 60s interno.
     Q_INVOKABLE void fetchPskHeardBy();
+    // Live Map PSK snapshot: independently configurable 5–60 minute look-back.
+    Q_INVOKABLE void fetchPskMapSpots();
+    Q_INVOKABLE void refreshPskMapSpots();
 
     // LED
     Q_INVOKABLE void refreshLedStatus() {}
@@ -1358,6 +1368,8 @@ public:
                                      int height,
                                      bool detached,
                                      bool minimized);
+    Q_INVOKABLE void saveWindowStatesAsync(const QVariantMap& states,
+                                           const QVariantMap& layoutSettings = QVariantMap());
     // 1.0.263 (fork-only) — cancella tutte le WindowState/* salvate e emette signal
     // windowLayoutResetRequested(): il QML poi ripristina default position+size e re-docka
     // tutte le finestre floating. Utile quando le finestre finiscono su monitor disconnessi
@@ -1630,6 +1642,8 @@ signals:
     void pskHeardByChanged();
     void pskHeardByFetchingChanged();
     void pskReporterTimeSpanMinutesChanged();
+    void pskMapSpotFetchingChanged();
+    void pskMapSpotWindowMinutesChanged();
     void fontScaleChanged();
     void nfaChanged(); void nfbChanged();
     void ndepthChanged(); void ncontestChanged();
@@ -2473,6 +2487,9 @@ private:
     bool         m_pskHeardByFetching {false};
     qint64       m_pskHeardByLastFetchMs {0};   // rate-limit guard (QDateTime msecs)
     int          m_pskReporterTimeSpanMinutes {60};
+    bool         m_pskMapSpotFetching {false};
+    qint64       m_pskMapSpotLastFetchMs {0};
+    int          m_pskMapSpotWindowMinutes {15};
     bool        m_pskReporterEnabled {false};
     int         m_ftThreads {3};
     bool        m_ftThreadsAuto {true};

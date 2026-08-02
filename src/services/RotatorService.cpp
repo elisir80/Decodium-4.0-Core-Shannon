@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QHostInfo>
 #include <QRegularExpression>
+#include <QTcpSocket>
 #include <QTimer>
 #include <QUdpSocket>
 #include <QtMath>
@@ -24,6 +25,7 @@ RotatorService::RotatorService(QObject* parent)
     : QObject(parent),
       m_commandSocket(new QUdpSocket(this)),
       m_feedbackSocket(new QUdpSocket(this)),
+      m_tcpSocket(new QTcpSocket(this)),
       m_trackingTimer(new QTimer(this)),
       m_feedbackTimer(new QTimer(this))
 {
@@ -35,6 +37,31 @@ RotatorService::RotatorService(QObject* parent)
             this, &RotatorService::onFeedbackTick);
     connect(m_feedbackSocket, &QUdpSocket::readyRead,
             this, &RotatorService::onReadyRead);
+    connect(m_tcpSocket, &QTcpSocket::connected, this, [this]() {
+        emit transportChanged();
+        setStatus(QStringLiteral("Hamlib rotctld connected"));
+        flushTcpCommand();
+    });
+    connect(m_tcpSocket, &QTcpSocket::disconnected, this, [this]() {
+        m_tcpReadBuffer.clear();
+        m_tcpNumericFeedback.clear();
+        if (m_feedbackAvailable) {
+            m_feedbackAvailable = false;
+            emit feedbackChanged();
+        }
+        emit transportChanged();
+        if (m_enabled && isHamlibProtocol(m_protocol))
+            setStatus(QStringLiteral("Hamlib rotctld disconnected"));
+    });
+    connect(m_tcpSocket, &QTcpSocket::errorOccurred, this,
+            [this](QAbstractSocket::SocketError) {
+        if (m_enabled && isHamlibProtocol(m_protocol)) {
+            emit transportChanged();
+            setStatus(QStringLiteral("Hamlib rotctld: %1").arg(m_tcpSocket->errorString()));
+        }
+    });
+    connect(m_tcpSocket, &QTcpSocket::readyRead,
+            this, &RotatorService::onTcpReadyRead);
 }
 
 RotatorService::~RotatorService()
@@ -47,14 +74,50 @@ RotatorService::~RotatorService()
 
 QStringList RotatorService::protocols() const
 {
-    return {QStringLiteral("PSTRotator"), QStringLiteral("CatRotator")};
+    return {QStringLiteral("PSTRotator"), QStringLiteral("CatRotator"),
+            QStringLiteral("Hamlib rotctld")};
 }
 
 QString RotatorService::normalizedProtocol(const QString& protocol)
 {
-    return protocol.compare(QStringLiteral("CatRotator"), Qt::CaseInsensitive) == 0
-        ? QStringLiteral("CatRotator")
-        : QStringLiteral("PSTRotator");
+    if (protocol.contains(QStringLiteral("hamlib"), Qt::CaseInsensitive)
+        || protocol.contains(QStringLiteral("rotctld"), Qt::CaseInsensitive)) {
+        return QStringLiteral("Hamlib rotctld");
+    }
+    if (protocol.compare(QStringLiteral("CatRotator"), Qt::CaseInsensitive) == 0)
+        return QStringLiteral("CatRotator");
+    return QStringLiteral("PSTRotator");
+}
+
+bool RotatorService::isHamlibProtocol(const QString& protocol)
+{
+    return normalizedProtocol(protocol) == QStringLiteral("Hamlib rotctld");
+}
+
+int RotatorService::defaultPortForProtocol(const QString& protocol)
+{
+    return isHamlibProtocol(protocol) ? 4533 : 12000;
+}
+
+QString RotatorService::transport() const
+{
+    return isHamlibProtocol(m_protocol) ? QStringLiteral("TCP")
+                                        : QStringLiteral("UDP");
+}
+
+bool RotatorService::transportReady() const
+{
+    if (!m_enabled) return false;
+    if (isHamlibProtocol(m_protocol)) {
+        return m_tcpSocket
+            && m_tcpSocket->state() == QAbstractSocket::ConnectedState;
+    }
+    return m_commandSocket != nullptr;
+}
+
+bool RotatorService::feedbackSupported() const
+{
+    return m_protocol != QStringLiteral("CatRotator");
 }
 
 double RotatorService::normalizeAzimuth(double value)
@@ -69,16 +132,29 @@ void RotatorService::setProtocol(const QString& protocol)
     QString const normalized = normalizedProtocol(protocol);
     if (normalized == m_protocol) return;
     if (m_tracking) stopTracking();
+    bool const wasEnabled = m_enabled;
     m_protocol = normalized;
     m_feedbackAvailable = false;
     m_lastFeedbackMs = 0;
     closeFeedbackSocket();
-    configureFeedbackSocket();
+    closeTcpConnection();
+    m_tcpReadBuffer.clear();
+    m_tcpNumericFeedback.clear();
+    m_pendingTcpCommand.clear();
+    if (wasEnabled) {
+        configureFeedbackSocket();
+        if (isHamlibProtocol(m_protocol)) ensureTcpConnected();
+    }
     emit configurationChanged();
+    emit transportChanged();
     emit feedbackChanged();
-    setStatus(m_protocol == QStringLiteral("PSTRotator")
-                  ? QStringLiteral("PSTRotator selected")
-                  : QStringLiteral("CatRotator selected; UDP feedback unavailable"));
+    if (m_protocol == QStringLiteral("PSTRotator")) {
+        setStatus(QStringLiteral("PSTRotator selected; UDP %1").arg(m_port));
+    } else if (m_protocol == QStringLiteral("CatRotator")) {
+        setStatus(QStringLiteral("CatRotator selected; UDP feedback unavailable"));
+    } else {
+        setStatus(QStringLiteral("Hamlib rotctld selected; TCP %1").arg(m_port));
+    }
 }
 
 void RotatorService::setHost(const QString& host)
@@ -89,6 +165,10 @@ void RotatorService::setHost(const QString& host)
     m_resolvedHost.clear();
     m_resolvedAddress.clear();
     ++m_resolutionGeneration;
+    if (isHamlibProtocol(m_protocol)) {
+        closeTcpConnection();
+        if (m_enabled) ensureTcpConnected();
+    }
     emit configurationChanged();
 }
 
@@ -101,8 +181,11 @@ void RotatorService::setPort(int port)
     m_feedbackAvailable = false;
     m_lastFeedbackMs = 0;
     closeFeedbackSocket();
+    closeTcpConnection();
     configureFeedbackSocket();
+    if (isHamlibProtocol(m_protocol) && m_enabled) ensureTcpConnected();
     emit configurationChanged();
+    emit transportChanged();
     emit feedbackChanged();
 }
 
@@ -116,12 +199,21 @@ void RotatorService::setEnabled(bool enabled)
     if (m_enabled) {
         configureFeedbackSocket();
         m_feedbackTimer->start();
-        setStatus(m_protocol == QStringLiteral("PSTRotator")
-                      ? QStringLiteral("PSTRotator ready")
-                      : QStringLiteral("CatRotator ready; feedback unavailable"));
+        if (isHamlibProtocol(m_protocol)) {
+            ensureTcpConnected();
+            setStatus(QStringLiteral("Hamlib rotctld connecting to %1:%2")
+                          .arg(m_host).arg(m_port));
+        } else {
+            setStatus(m_protocol == QStringLiteral("PSTRotator")
+                          ? QStringLiteral("PSTRotator ready on UDP %1").arg(m_port)
+                          : QStringLiteral("CatRotator ready on UDP %1; feedback unavailable")
+                                .arg(m_port));
+        }
     } else {
         m_feedbackTimer->stop();
         closeFeedbackSocket();
+        closeTcpConnection();
+        m_pendingTcpCommand.clear();
         m_feedbackAvailable = false;
         m_lastFeedbackMs = 0;
         setStatus(QStringLiteral("Rotator disabled"));
@@ -323,6 +415,16 @@ void RotatorService::park()
 
 void RotatorService::sendCurrentTarget()
 {
+    if (isHamlibProtocol(m_protocol)) {
+        sendPayload(QByteArray("P ")
+                    + QByteArray::number(m_targetAzimuth, 'f', 1)
+                    + QByteArray(" ")
+                    + QByteArray::number(m_targetHasElevation
+                                             ? m_targetElevation : 0.0, 'f', 1)
+                    + QByteArray("\n"));
+        m_lastCommandMs = QDateTime::currentMSecsSinceEpoch();
+        return;
+    }
     QByteArray const azimuthText = m_targetHasElevation
         ? QByteArray::number(m_targetAzimuth, 'f', 1)
         : QByteArray::number(qRound(m_targetAzimuth));
@@ -340,11 +442,19 @@ void RotatorService::sendCurrentTarget()
 
 void RotatorService::sendStopCommand()
 {
+    if (isHamlibProtocol(m_protocol)) {
+        sendPayload(QByteArray("S\n"));
+        return;
+    }
     sendPayload(wrapCommand(QByteArray("<STOP>1</STOP>")));
 }
 
 void RotatorService::sendParkCommand()
 {
+    if (isHamlibProtocol(m_protocol)) {
+        sendPayload(QByteArray("K\n"));
+        return;
+    }
     if (m_protocol == QStringLiteral("PSTRotator")) {
         sendPayload(wrapCommand(QByteArray("<PARK>1</PARK>")));
         return;
@@ -373,7 +483,13 @@ void RotatorService::onTrackingTick()
 
 void RotatorService::pollFeedback()
 {
-    if (!m_enabled || m_protocol != QStringLiteral("PSTRotator")) return;
+    if (!m_enabled) return;
+    if (isHamlibProtocol(m_protocol)) {
+        ensureTcpConnected();
+        sendPayload(QByteArray("p\n"));
+        return;
+    }
+    if (m_protocol != QStringLiteral("PSTRotator")) return;
     configureFeedbackSocket();
     sendPayload(wrapCommand(QByteArray("AZ?")));
     sendPayload(wrapCommand(QByteArray("EL?")));
@@ -381,13 +497,13 @@ void RotatorService::pollFeedback()
 
 void RotatorService::onFeedbackTick()
 {
-    if (!m_enabled || m_protocol != QStringLiteral("PSTRotator")) return;
+    if (!m_enabled || !feedbackSupported()) return;
     pollFeedback();
     if (m_feedbackAvailable
         && QDateTime::currentMSecsSinceEpoch() - m_lastFeedbackMs > kFeedbackTimeoutMs) {
         m_feedbackAvailable = false;
         emit feedbackChanged();
-        setStatus(QStringLiteral("PSTRotator feedback timeout"));
+        setStatus(QStringLiteral("%1 feedback timeout").arg(m_protocol));
     }
 }
 
@@ -414,6 +530,46 @@ void RotatorService::onReadyRead()
         double elevation = hasElevation
             ? elevationMatch.captured(1).replace(',', '.').toDouble() : m_currentElevation;
         setFeedback(azimuth, hasAzimuth, elevation, hasElevation);
+    }
+}
+
+void RotatorService::onTcpReadyRead()
+{
+    if (!m_tcpSocket) return;
+    m_tcpReadBuffer.append(m_tcpSocket->readAll());
+    while (true) {
+        int const newline = m_tcpReadBuffer.indexOf('\n');
+        if (newline < 0) break;
+        QByteArray line = m_tcpReadBuffer.left(newline).trimmed();
+        m_tcpReadBuffer.remove(0, newline + 1);
+        if (line.isEmpty()) continue;
+
+        QString const text = QString::fromUtf8(line).trimmed();
+        if (text.startsWith(QStringLiteral("RPRT"), Qt::CaseInsensitive)) {
+            bool ok = false;
+            int const code = text.section(QLatin1Char(' '), 1, 1).toInt(&ok);
+            if (ok && code != 0) {
+                m_tcpNumericFeedback.clear();
+                setStatus(QStringLiteral("Hamlib rotctld error %1").arg(code));
+            }
+            continue;
+        }
+
+        QString valueText = text;
+        if (text.startsWith(QStringLiteral("Azimuth:"), Qt::CaseInsensitive)) {
+            valueText = text.section(QLatin1Char(':'), 1).trimmed();
+        } else if (text.startsWith(QStringLiteral("Elevation:"), Qt::CaseInsensitive)) {
+            valueText = text.section(QLatin1Char(':'), 1).trimmed();
+        }
+        bool ok = false;
+        double const value = valueText.toDouble(&ok);
+        if (!ok || !qIsFinite(value)) continue;
+        m_tcpNumericFeedback.append(value);
+        if (m_tcpNumericFeedback.size() >= 2) {
+            setFeedback(m_tcpNumericFeedback.at(0), true,
+                        m_tcpNumericFeedback.at(1), true);
+            m_tcpNumericFeedback.clear();
+        }
     }
 }
 
@@ -453,8 +609,58 @@ void RotatorService::closeFeedbackSocket()
     }
 }
 
+void RotatorService::ensureTcpConnected()
+{
+    if (!m_enabled || !isHamlibProtocol(m_protocol) || !m_tcpSocket) return;
+    QAbstractSocket::SocketState const state = m_tcpSocket->state();
+    if (state == QAbstractSocket::ConnectedState
+        || state == QAbstractSocket::ConnectingState) {
+        return;
+    }
+    m_tcpSocket->connectToHost(m_host, static_cast<quint16>(m_port));
+    emit transportChanged();
+}
+
+void RotatorService::flushTcpCommand()
+{
+    if (!m_tcpSocket
+        || m_tcpSocket->state() != QAbstractSocket::ConnectedState
+        || m_pendingTcpCommand.isEmpty()) {
+        return;
+    }
+    QByteArray command = m_pendingTcpCommand;
+    m_pendingTcpCommand.clear();
+    m_tcpSocket->write(command);
+}
+
+void RotatorService::sendTcpCommand(const QByteArray& command)
+{
+    if (!m_tcpSocket || command.isEmpty()) return;
+    if (m_tcpSocket->state() != QAbstractSocket::ConnectedState) {
+        // Keep only the newest command while the asynchronous connection is
+        // being established. This avoids a backlog of stale tracking targets.
+        m_pendingTcpCommand = command;
+        ensureTcpConnected();
+        return;
+    }
+    m_tcpSocket->write(command);
+}
+
+void RotatorService::closeTcpConnection()
+{
+    if (!m_tcpSocket) return;
+    m_pendingTcpCommand.clear();
+    if (m_tcpSocket->state() != QAbstractSocket::UnconnectedState)
+        m_tcpSocket->abort();
+    emit transportChanged();
+}
+
 void RotatorService::sendPayload(const QByteArray& payload)
 {
+    if (isHamlibProtocol(m_protocol)) {
+        sendTcpCommand(payload);
+        return;
+    }
     if (!m_commandSocket || payload.isEmpty() || m_host.trimmed().isEmpty()) return;
     QHostAddress address;
     if (address.setAddress(m_host)) {

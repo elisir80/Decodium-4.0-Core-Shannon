@@ -14302,6 +14302,40 @@ void DecodiumBridge::setPskReporterTimeSpanMinutes(int minutes)
     emit settingValueChanged(QStringLiteral("PskReporterTimeSpanMinutes"), minutes);
 }
 
+void DecodiumBridge::syncPskMapSpotWindowToMap()
+{
+    if (!m_mapIntelligenceService) {
+        return;
+    }
+
+    QVariantMap decayMinutes = m_mapIntelligenceService->sourceDecayMinutes();
+    if (decayMinutes.value(QStringLiteral("psk")).toInt() == m_pskMapSpotWindowMinutes) {
+        return;
+    }
+
+    decayMinutes.insert(QStringLiteral("psk"), m_pskMapSpotWindowMinutes);
+    m_mapIntelligenceService->setSourceDecayMinutes(decayMinutes);
+}
+
+void DecodiumBridge::setPskMapSpotWindowMinutes(int minutes)
+{
+    minutes = qBound(5, minutes, 60);
+    minutes = qBound(5, ((minutes + 2) / 5) * 5, 60);
+    if (m_pskMapSpotWindowMinutes == minutes) {
+        syncPskMapSpotWindowToMap();
+        return;
+    }
+
+    m_pskMapSpotWindowMinutes = minutes;
+    QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
+    s.setValue(QStringLiteral("PskMapSpotWindowMinutes"), minutes);
+    s.sync();
+    syncPskMapSpotWindowToMap();
+    emit pskMapSpotWindowMinutesChanged();
+    emit settingValueChanged(QStringLiteral("PskMapSpotWindowMinutes"), minutes);
+}
+
 void DecodiumBridge::setFtThreads(int v)
 {
     const int clamped = std::clamp(v, 1, kMaxFtDecodeThreads);
@@ -25326,6 +25360,10 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         setPskReporterTimeSpanMinutes(value.toInt());
         return;
     }
+    if (key == QStringLiteral("PskMapSpotWindowMinutes")) {
+        setPskMapSpotWindowMinutes(value.toInt());
+        return;
+    }
 
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
@@ -28926,6 +28964,7 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("PSKReporter",m_pskReporterEnabled);
     s.setValue("PSKReporterTCPIP", getSetting(QStringLiteral("PSKReporterTCPIP"), false).toBool());
     s.setValue("PskReporterTimeSpanMinutes", m_pskReporterTimeSpanMinutes);
+    s.setValue("PskMapSpotWindowMinutes", m_pskMapSpotWindowMinutes);
     s.setValue("DirectVisualAudioCaptureUnsafe", m_directVisualAudioCaptureUnsafe);
     s.setValue("ftThreads",         m_ftThreads);
     s.setValue("ftThreadsAuto",     m_ftThreadsAuto);
@@ -29064,6 +29103,10 @@ void DecodiumBridge::shutdown()
         m_omniRigCat->disconnectRig();
     else if (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat->connected())
         m_hamlibCat->disconnectRig();
+    // Window/layout snapshots are flushed by the serial settings writer.  The
+    // close path waits for the final queued snapshot before saveSettings()
+    // writes the rest of the application state.
+    settingsWriteThreadPool().waitForDone(5000);
     saveSettings();
 }
 
@@ -29297,6 +29340,21 @@ void DecodiumBridge::searchPskReporter(const QString& callsign)
 // ============================================================
 void DecodiumBridge::fetchPskHeardBy()
 {
+    fetchPskReporterSnapshot(m_pskReporterTimeSpanMinutes, false, false);
+}
+
+void DecodiumBridge::fetchPskMapSpots()
+{
+    fetchPskReporterSnapshot(m_pskMapSpotWindowMinutes, true, false);
+}
+
+void DecodiumBridge::refreshPskMapSpots()
+{
+    fetchPskReporterSnapshot(m_pskMapSpotWindowMinutes, true, true);
+}
+
+void DecodiumBridge::fetchPskReporterSnapshot(int spanMinutes, bool mapRequest, bool force)
+{
     static constexpr qsizetype kPskHeardByMaxReplyBytes = 1024 * 1024;
     static constexpr qsizetype kPskHeardByMaxTagAttrs = 4096;
     static constexpr int kPskHeardByMaxRows = 50;
@@ -29304,11 +29362,13 @@ void DecodiumBridge::fetchPskHeardBy()
     static constexpr int kPskHeardByMaxGridLen = 8;
 
     if (offlineMode()) {
-        emit statusMessage(QStringLiteral("Offline: PSK Reporter fetch disabled"));
+        emit statusMessage(mapRequest
+            ? QStringLiteral("Offline: PSK Reporter map fetch disabled")
+            : QStringLiteral("Offline: PSK Reporter fetch disabled"));
         return;
     }
-    if (m_pskHeardByFetching) {
-        bridgeLog(QStringLiteral("PSK heard-by: fetch gia' in corso, ignoro"));
+    if (m_pskHeardByFetching || m_pskMapSpotFetching) {
+        bridgeLog(QStringLiteral("PSK Reporter: fetch gia' in corso, ignoro"));
         return;
     }
     QString const call = m_callsign.trimmed().toUpper();
@@ -29316,30 +29376,39 @@ void DecodiumBridge::fetchPskHeardBy()
         bridgeLog(QStringLiteral("PSK heard-by: callsign vuoto, no-op"));
         return;
     }
-    // Rate-limit: max 1 fetch / 60s.
+    // Rate-limit each independent consumer to one periodic request per minute.
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-    if (m_pskHeardByLastFetchMs > 0 && (nowMs - m_pskHeardByLastFetchMs) < 60000) {
-        bridgeLog(QStringLiteral("PSK heard-by: rate-limit 60s (%1ms fa), ignoro")
-                      .arg(nowMs - m_pskHeardByLastFetchMs));
+    qint64& lastFetchMs = mapRequest ? m_pskMapSpotLastFetchMs : m_pskHeardByLastFetchMs;
+    if (!force && lastFetchMs > 0 && (nowMs - lastFetchMs) < 60000) {
+        bridgeLog(QStringLiteral("PSK %1: rate-limit 60s (%2ms fa), ignoro")
+                      .arg(mapRequest ? QStringLiteral("map") : QStringLiteral("heard-by"))
+                      .arg(nowMs - lastFetchMs));
         return;
     }
-    m_pskHeardByLastFetchMs = nowMs;
-    m_pskHeardByFetching = true;
-    emit pskHeardByFetchingChanged();
+    lastFetchMs = nowMs;
+    if (mapRequest) {
+        m_pskMapSpotFetching = true;
+        emit pskMapSpotFetchingChanged();
+    } else {
+        m_pskHeardByFetching = true;
+        emit pskHeardByFetchingChanged();
+    }
 
     QString const myGrid = m_grid.trimmed();
 
     QNetworkAccessManager* nam = new QNetworkAccessManager(this);
     QUrl url(QStringLiteral("https://retrieve.pskreporter.info/query"));
     QUrlQuery q;
-    int const spanMinutes = m_pskReporterTimeSpanMinutes;
+    spanMinutes = qBound(5, ((qBound(5, spanMinutes, 60) + 2) / 5) * 5, 60);
     q.addQueryItem(QStringLiteral("senderCallsign"), call);     // il MIO call = chi trasmette
     q.addQueryItem(QStringLiteral("flowStartSeconds"), QString::number(-spanMinutes * 60));
     q.addQueryItem(QStringLiteral("rptlimit"), QStringLiteral("50"));
     q.addQueryItem(QStringLiteral("rronly"), QStringLiteral("1"));
     url.setQuery(q);
     QNetworkRequest req(url);
-    req.setRawHeader("User-Agent", "Decodium/4.0 (+pskreporter heard-by)");
+    req.setRawHeader("User-Agent", mapRequest
+                     ? "Decodium/4.0 (+pskreporter live map)"
+                     : "Decodium/4.0 (+pskreporter heard-by)");
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                      QNetworkRequest::NoLessSafeRedirectPolicy);
     QNetworkReply* reply = nam->get(req);
@@ -29353,7 +29422,7 @@ void DecodiumBridge::fetchPskHeardBy()
     connect(reply, &QNetworkReply::finished, timeout, &QTimer::deleteLater);
     timeout->start();
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, call, myGrid, spanMinutes]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, nam, call, myGrid, spanMinutes, mapRequest]() {
         QVariant const contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
         bool const declaredTooLarge =
             contentLength.isValid()
@@ -29453,29 +29522,37 @@ void DecodiumBridge::fetchPskHeardBy()
                 row.insert(QStringLiteral("ituZone"), ituZone);
                 rows.append(row);
             }
-            bridgeLog(QStringLiteral("PSK heard-by '%1': span=%2min receivers=%3 DXCC=%4 maxKm=%5")
+            bridgeLog(QStringLiteral("PSK %1 '%2': span=%3min receivers=%4 DXCC=%5 maxKm=%6")
+                          .arg(mapRequest ? QStringLiteral("map") : QStringLiteral("heard-by"))
                           .arg(call)
                           .arg(spanMinutes)
                           .arg(rows.size())
                           .arg(dxccSet.size())
                           .arg(static_cast<int>(maxKm)));
         } else if (tooLarge) {
-            bridgeLog(QStringLiteral("PSK heard-by '%1': risposta troppo grande, scartata").arg(call));
+            bridgeLog(QStringLiteral("PSK %1 '%2': risposta troppo grande, scartata")
+                          .arg(mapRequest ? QStringLiteral("map") : QStringLiteral("heard-by"), call));
         } else {
-            bridgeLog(QStringLiteral("PSK heard-by '%1': network error: %2")
-                          .arg(call, errStr));
+            bridgeLog(QStringLiteral("PSK %1 '%2': network error: %3")
+                          .arg(mapRequest ? QStringLiteral("map") : QStringLiteral("heard-by"),
+                               call, errStr));
         }
 
-        m_pskHeardByList = rows;
-        m_pskHeardByCount = static_cast<int>(rows.size());
-        m_pskHeardByDxccCount = static_cast<int>(dxccSet.size());
-        m_pskHeardByMaxKm = maxKm;
-        m_pskHeardByFetching = false;
-        if (m_mapIntelligenceService && validSnapshot) {
-            m_mapIntelligenceService->replacePskHeardBySpots(rows, call, myGrid);
+        if (mapRequest) {
+            if (m_mapIntelligenceService && validSnapshot) {
+                m_mapIntelligenceService->replacePskHeardBySpots(rows, call, myGrid);
+            }
+            m_pskMapSpotFetching = false;
+            emit pskMapSpotFetchingChanged();
+        } else {
+            m_pskHeardByList = rows;
+            m_pskHeardByCount = static_cast<int>(rows.size());
+            m_pskHeardByDxccCount = static_cast<int>(dxccSet.size());
+            m_pskHeardByMaxKm = maxKm;
+            m_pskHeardByFetching = false;
+            emit pskHeardByChanged();
+            emit pskHeardByFetchingChanged();
         }
-        emit pskHeardByChanged();
-        emit pskHeardByFetchingChanged();
     });
 }
 
@@ -34857,6 +34934,15 @@ void DecodiumBridge::loadSettings()
     m_pskReporterTimeSpanMinutes = qBound(5,
                                            ((m_pskReporterTimeSpanMinutes + 2) / 5) * 5,
                                            60);
+    // The Live Map uses a separate and much shorter PSK Reporter window than
+    // callsign search / heard-by results. Migrate an existing map decay value
+    // once so established profiles retain their chosen lifetime.
+    int const legacyPskMapWindow = s.value(QStringLiteral("Decay/psk"), 15).toInt();
+    m_pskMapSpotWindowMinutes = qBound(5,
+        s.value(QStringLiteral("PskMapSpotWindowMinutes"), legacyPskMapWindow).toInt(), 60);
+    m_pskMapSpotWindowMinutes = qBound(5,
+        ((m_pskMapSpotWindowMinutes + 2) / 5) * 5, 60);
+    syncPskMapSpotWindowToMap();
     m_worldMapDisplayed = s.value(QStringLiteral("WorldMapDisplayed"), true).toBool();
     m_directVisualAudioCaptureUnsafe = s.value(QStringLiteral("DirectVisualAudioCaptureUnsafe"), false).toBool();
     m_ftThreadsAuto = s.value(QStringLiteral("ftThreadsAuto"),
@@ -35202,6 +35288,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit deepSearchEnabledChanged();
     emit pskReporterEnabledChanged();
     emit pskReporterTimeSpanMinutesChanged();
+    emit pskMapSpotWindowMinutesChanged();
     emit cloudlogEnabledChanged();
     emit cloudlogUrlChanged();
     emit cloudlogApiKeyChanged();
@@ -35311,6 +35398,56 @@ void DecodiumBridge::saveWindowState(const QString& key,
     s.setValue(QStringLiteral("minimized"), minimized);
     s.endGroup();
     s.sync();
+}
+
+void DecodiumBridge::saveWindowStatesAsync(const QVariantMap& states,
+                                           const QVariantMap& layoutSettings)
+{
+    if (states.isEmpty() && layoutSettings.isEmpty()) {
+        return;
+    }
+
+    // Copy the plain-value snapshot and create QSettings inside the writer
+    // thread.  QSettings is a QObject: creating it on the GUI thread and
+    // deleting it in a worker can leave its deferred UpdateRequest event
+    // queued against a dead object, causing a crash in QSettings::event().
+    // Keeping its full lifetime in one worker thread also moves all INI work
+    // away from the panadapter/UI event loop.
+    settingsWriteThreadPool().start(QRunnable::create([states, layoutSettings]() {
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                           QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(settings);
+
+        for (auto it = layoutSettings.constBegin(); it != layoutSettings.constEnd(); ++it) {
+            QString const key = it.key().trimmed();
+            if (!key.isEmpty()) {
+                settings.setValue(key, it.value());
+            }
+        }
+
+        static constexpr const char* fields[] = {
+            "x", "y", "width", "height", "detached", "minimized"
+        };
+        for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
+            QString const key = it.key().trimmed();
+            QVariantMap const state = it.value().toMap();
+            if (key.isEmpty() || state.isEmpty()) {
+                continue;
+            }
+
+            settings.beginGroup(QStringLiteral("WindowState/%1").arg(key));
+            for (const char* field : fields) {
+                QString const fieldName = QString::fromLatin1(field);
+                auto const value = state.constFind(fieldName);
+                if (value != state.constEnd()) {
+                    settings.setValue(fieldName, value.value());
+                }
+            }
+            settings.endGroup();
+        }
+
+        settings.sync();
+    }));
 }
 
 // 1.0.263 (fork-only) — Reset Layout

@@ -220,6 +220,25 @@ cd squashfs-root
 ./AppRun
 ```
 
+#### Linux Wayland + NVIDIA: stalli FT8/Qt Quick
+
+Su sistemi Linux con sessione **Wayland** e GPU/driver **NVIDIA** — in particolare
+CachyOS — alcuni stack Qt 6 possono presentare stalli di circa un secondo nella
+sincronizzazione Qt Quick. Il sintomo e' un waterfall apparentemente attivo ma
+decode FT8 intermittente o bloccato.
+
+Se si verifica questo problema, avviare l'AppImage con VSync disabilitato:
+
+```bash
+QSG_NO_VSYNC=1 ./Decodium*.AppImage
+```
+
+Il workaround e' stato verificato con Decodium 1.0.517 su CachyOS, NVIDIA e
+Wayland: mantiene attivi il waterfall GPU, la Live Map e il decode FT8 evitando
+gli stalli QSG. Non e' necessario su sistemi che funzionano normalmente e non
+si applica a Windows o macOS. La disabilitazione del VSync puo causare tearing
+o aumentare l'uso della GPU.
+
 ### Configurazione iniziale consigliata
 
 #### 1. Stazione
@@ -645,6 +664,25 @@ Some distributions require `libfuse2`, or manual extraction:
 cd squashfs-root
 ./AppRun
 ```
+
+#### Linux Wayland + NVIDIA: FT8/Qt Quick stalls
+
+On Linux systems running a **Wayland** session with an **NVIDIA** GPU/driver —
+especially CachyOS — some Qt 6 graphics stacks can exhibit approximately
+one-second Qt Quick synchronisation stalls. The waterfall may appear active
+while FT8 decoding becomes intermittent or stops.
+
+If this occurs, start the AppImage with VSync disabled:
+
+```bash
+QSG_NO_VSYNC=1 ./Decodium*.AppImage
+```
+
+This workaround was verified with Decodium 1.0.517 on CachyOS, NVIDIA and
+Wayland: it keeps the GPU waterfall, Live Map and FT8 decoding active while
+avoiding the QSG stalls. It is not needed on systems that work normally and
+does not apply to Windows or macOS. Disabling VSync can cause screen tearing or
+increase GPU usage.
 
 ### Recommended First-Time Configuration
 

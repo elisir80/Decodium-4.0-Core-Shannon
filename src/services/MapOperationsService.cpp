@@ -388,7 +388,14 @@ QStringList MapOperationsService::rotatorProtocols() const
 {
     return m_rotatorService ? m_rotatorService->protocols()
                             : QStringList {QStringLiteral("PSTRotator"),
-                                            QStringLiteral("CatRotator")};
+                                            QStringLiteral("CatRotator"),
+                                            QStringLiteral("Hamlib rotctld")};
+}
+
+QString MapOperationsService::rotatorTransport() const
+{
+    return m_rotatorService ? m_rotatorService->transport()
+                            : QStringLiteral("UDP");
 }
 
 bool MapOperationsService::rotatorFeedbackAvailable() const
@@ -507,12 +514,14 @@ void MapOperationsService::loadSettings()
     m_rotatorHost =
         settings.value(QStringLiteral("RotatorHost"),
                        QStringLiteral("127.0.0.1")).toString().trimmed();
-    m_rotatorPort =
-        qBound(1, settings.value(QStringLiteral("RotatorPort"), 12040).toInt(), 65535);
-    m_rotatorEnabled =
-        settings.value(QStringLiteral("RotatorEnabled"), false).toBool();
     m_rotatorProtocol = settings.value(QStringLiteral("RotatorProtocol"),
                                        QStringLiteral("PSTRotator")).toString();
+    m_rotatorPort =
+        qBound(1, settings.value(QStringLiteral("RotatorPort"),
+                                 RotatorService::defaultPortForProtocol(m_rotatorProtocol)).toInt(),
+               65535);
+    m_rotatorEnabled =
+        settings.value(QStringLiteral("RotatorEnabled"), false).toBool();
     m_rotatorTrackingIntervalMs = qBound(
         250, settings.value(QStringLiteral("RotatorTrackingIntervalMs"), 1000).toInt(), 10000);
     m_rotatorSafetyEnabled = settings.value(QStringLiteral("RotatorSafetyEnabled"), true).toBool();
@@ -706,8 +715,16 @@ void MapOperationsService::setRotatorEnabled(bool enabled)
 void MapOperationsService::setRotatorProtocol(const QString& protocol)
 {
     if (!m_rotatorService) return;
+    bool const followedDefaultPort =
+        m_rotatorPort == RotatorService::defaultPortForProtocol(m_rotatorProtocol);
     m_rotatorService->setProtocol(protocol);
     m_rotatorProtocol = m_rotatorService->protocol();
+    if (followedDefaultPort) {
+        int const recommendedPort =
+            RotatorService::defaultPortForProtocol(m_rotatorProtocol);
+        if (recommendedPort != m_rotatorPort)
+            setRotatorPort(recommendedPort);
+    }
     saveSetting(QStringLiteral("RotatorProtocol"), m_rotatorProtocol);
     emit rotatorSettingsChanged();
 }

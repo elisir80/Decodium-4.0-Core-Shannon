@@ -150,7 +150,8 @@ ApplicationWindow {
                 x: Math.round(safeNumber(g.x, 0)),
                 y: Math.round(safeNumber(g.y, 0)),
                 width: Math.round(safeNumber(g.width, preferredMinimumWidth)),
-                height: Math.round(safeNumber(g.height, preferredMinimumHeight))
+                height: Math.round(safeNumber(g.height, preferredMinimumHeight)),
+                screen: screen
             }
         }
 
@@ -161,7 +162,8 @@ ApplicationWindow {
                 x: Math.round(safeNumber(screen.virtualX, 0)),
                 y: Math.round(safeNumber(screen.virtualY, 0)),
                 width: Math.round(widthValue),
-                height: Math.round(heightValue)
+                height: Math.round(heightValue),
+                screen: screen
             }
         }
         return null
@@ -229,7 +231,8 @@ ApplicationWindow {
                 centerY >= g.y && centerY < g.y + g.height) {
                 return {
                     x: Math.max(g.x, Math.min(savedX, g.x + Math.max(0, g.width - winW))),
-                    y: Math.max(g.y, Math.min(savedY, g.y + Math.max(0, g.height - winH)))
+                    y: Math.max(g.y, Math.min(savedY, g.y + Math.max(0, g.height - winH))),
+                    screen: g.screen
                 }
             }
         }
@@ -237,7 +240,8 @@ ApplicationWindow {
         var fallback = screens[0]
         return {
             x: Math.round(fallback.x + Math.max(0, (fallback.width - winW) / 2)),
-            y: Math.round(fallback.y + Math.max(0, (fallback.height - winH) / 2))
+            y: Math.round(fallback.y + Math.max(0, (fallback.height - winH) / 2)),
+            screen: fallback.screen
         }
     }
 
@@ -267,6 +271,8 @@ ApplicationWindow {
         if (!windowRef)
             return
         var pos = clampWindowPosition(windowRef.x, windowRef.y, windowRef.width, windowRef.height)
+        if (pos.screen && windowRef.screen !== pos.screen)
+            windowRef.screen = pos.screen
         windowRef.x = pos.x
         windowRef.y = pos.y
         scheduleWindowStateSave()
@@ -346,20 +352,21 @@ ApplicationWindow {
             colSlot3.targetPanelWidth = slot3Width
     }
 
-    function persistDecodePanelWidths() {
+    function captureDecodePanelWidths() {
+        var layoutSettings = ({})
         if (!bridge)
-            return
+            return layoutSettings
 
         if (typeof colSlot0 !== "undefined" && colSlot0 &&
             !colSlot0.slotCollapsed && colSlot0.width >= classicMinWidthForSlot(0)) {
             savedPeriod1PanelWidth = Math.round(colSlot0.width)
-            bridge.setSetting("uiFullSpectrumPanelWidth", savedPeriod1PanelWidth)
+            layoutSettings.uiFullSpectrumPanelWidth = savedPeriod1PanelWidth
         }
 
         if (typeof colSlot1 !== "undefined" && colSlot1 &&
             !colSlot1.slotCollapsed && colSlot1.width >= classicMinWidthForSlot(1)) {
             savedRxFreqPanelWidth = Math.round(colSlot1.width)
-            bridge.setSetting("uiSignalRxPanelWidth", savedRxFreqPanelWidth)
+            layoutSettings.uiSignalRxPanelWidth = savedRxFreqPanelWidth
         }
 
         if (typeof colSlot2 !== "undefined" && colSlot2) {
@@ -367,7 +374,7 @@ ApplicationWindow {
             if (slot2Width >= 280) {
                 savedLiveMapPanelWidth = Math.round(slot2Width)
                 colSlot2.targetPanelWidth = savedLiveMapPanelWidth
-                bridge.setSetting("uiLiveMapPanelWidth", savedLiveMapPanelWidth)
+                layoutSettings.uiLiveMapPanelWidth = savedLiveMapPanelWidth
             }
         }
 
@@ -377,12 +384,13 @@ ApplicationWindow {
             if (slot3Width >= 320) {
                 savedDxClusterColumnWidth = Math.round(slot3Width)
                 colSlot3.targetPanelWidth = savedDxClusterColumnWidth
-                bridge.setSetting("uiDxClusterColumnWidth", savedDxClusterColumnWidth)
+                layoutSettings.uiDxClusterColumnWidth = savedDxClusterColumnWidth
             }
         }
 
         decodePanelLayoutSaved = true
-        bridge.setSetting("uiDecodePanelsLayoutSaved", true)
+        layoutSettings.uiDecodePanelsLayoutSaved = true
+        return layoutSettings
     }
 
     Component.onCompleted: {
@@ -465,12 +473,14 @@ ApplicationWindow {
     // Timer che salva le impostazioni 2s dopo ogni modifica (debounce)
     Timer {
         id: saveTimer
+        objectName: "settingsSaveTimer"
         interval: 2000
         repeat: false
         onTriggered: bridge.saveSettingsAsync()
     }
     Timer {
         id: windowStateSaveTimer
+        objectName: "windowStateSaveTimer"
         interval: 500
         repeat: false
         onTriggered: persistWindowLayouts()
@@ -595,6 +605,11 @@ ApplicationWindow {
         var restoredY = safeNumber(state.y, NaN)
         if (isFinite(restoredX) && isFinite(restoredY)) {
             var pos = clampWindowPosition(restoredX, restoredY, windowRef.width, windowRef.height)
+            // Hidden QQuickWindows start on the primary display. Associate
+            // the saved target screen before applying virtual coordinates so
+            // Qt does not silently pull external-monitor windows back.
+            if (pos.screen && windowRef.screen !== pos.screen)
+                windowRef.screen = pos.screen
             windowRef.x = pos.x
             windowRef.y = pos.y
         }
@@ -635,28 +650,36 @@ ApplicationWindow {
     }
 
     function persistWindowLayouts() {
-        persistDecodePanelWidths()
-        bridge.saveWindowState("mainWindow", Math.round(x), Math.round(y), Math.round(width), Math.round(height), false, visibility === Window.Minimized)
-        bridge.saveWindowState("waterfallWindow", Math.round(waterfallWindow.x), Math.round(waterfallWindow.y), Math.round(waterfallWindow.width), Math.round(waterfallWindow.height), waterfallDetached, waterfallMinimized)
-        bridge.saveWindowState("logFloatingWindow", Math.round(logFloatingWindow.x), Math.round(logFloatingWindow.y), Math.round(logFloatingWindow.width), Math.round(logFloatingWindow.height), logWindowDetached, logWindowMinimized)
-        bridge.saveWindowState("astroFloatingWindow", Math.round(astroFloatingWindow.x), Math.round(astroFloatingWindow.y), Math.round(astroFloatingWindow.width), Math.round(astroFloatingWindow.height), astroWindowDetached, astroWindowMinimized)
-        bridge.saveWindowState("macroFloatingWindow", Math.round(macroFloatingWindow.x), Math.round(macroFloatingWindow.y), Math.round(macroFloatingWindow.width), Math.round(macroFloatingWindow.height), macroDialogDetached, macroDialogMinimized)
-        bridge.saveWindowState("rigFloatingWindow", Math.round(rigFloatingWindow.x), Math.round(rigFloatingWindow.y), Math.round(rigFloatingWindow.width), Math.round(rigFloatingWindow.height), rigControlDetached, rigControlMinimized)
-        bridge.saveWindowState("period1FloatingWindow", Math.round(period1FloatingWindow.x), Math.round(period1FloatingWindow.y), Math.round(period1FloatingWindow.width), Math.round(period1FloatingWindow.height), period1Detached, period1Minimized)
-        bridge.saveWindowState("period2FloatingWindow", Math.round(period2FloatingWindow.x), Math.round(period2FloatingWindow.y), Math.round(period2FloatingWindow.width), Math.round(period2FloatingWindow.height), period2Detached, period2Minimized)
-        bridge.saveWindowState("rxFreqFloatingWindow", Math.round(rxFreqFloatingWindow.x), Math.round(rxFreqFloatingWindow.y), Math.round(rxFreqFloatingWindow.width), Math.round(rxFreqFloatingWindow.height), rxFreqDetached, rxFreqMinimized)
-        bridge.saveWindowState("txPanelFloatingWindow", Math.round(txPanelFloatingWindow.x), Math.round(txPanelFloatingWindow.y), Math.round(txPanelFloatingWindow.width), Math.round(txPanelFloatingWindow.height), txPanelDetached, txPanelMinimized)
-        bridge.saveWindowState("liveMapFloatingWindow", Math.round(liveMapFloatingWindow.x), Math.round(liveMapFloatingWindow.y), Math.round(liveMapFloatingWindow.width), Math.round(liveMapFloatingWindow.height), liveMapDetached, false)
-        bridge.saveWindowState("decoSyncMonitorWindow", Math.round(decoSyncMonitorWindow.x), Math.round(decoSyncMonitorWindow.y), Math.round(decoSyncMonitorWindow.width), Math.round(decoSyncMonitorWindow.height), false, decoSyncMonitorWindow.visibility === Window.Minimized)
-        // 1.0.275 — DX Cluster floating window
-        if (dxClusterFloatingWindow) {
-            bridge.saveWindowState("dxClusterFloatingWindow",
-                Math.round(dxClusterFloatingWindow.x),
-                Math.round(dxClusterFloatingWindow.y),
-                Math.round(dxClusterFloatingWindow.width),
-                Math.round(dxClusterFloatingWindow.height),
-                dxClusterDetached, dxClusterMinimized)
+        function snapshot(windowRef, detached, minimized) {
+            return {
+                x: Math.round(windowRef.x),
+                y: Math.round(windowRef.y),
+                width: Math.round(windowRef.width),
+                height: Math.round(windowRef.height),
+                detached: !!detached,
+                minimized: !!minimized
+            }
         }
+
+        var states = ({})
+        states.mainWindow = snapshot(mainWindow, false, visibility === Window.Minimized)
+        states.waterfallWindow = snapshot(waterfallWindow, waterfallDetached, waterfallMinimized)
+        states.logFloatingWindow = snapshot(logFloatingWindow, logWindowDetached, logWindowMinimized)
+        states.astroFloatingWindow = snapshot(astroFloatingWindow, astroWindowDetached, astroWindowMinimized)
+        states.satelliteFloatingWindow = snapshot(satelliteFloatingWindow, satelliteWindowDetached, false)
+        states.macroFloatingWindow = snapshot(macroFloatingWindow, macroDialogDetached, macroDialogMinimized)
+        states.rigFloatingWindow = snapshot(rigFloatingWindow, rigControlDetached, rigControlMinimized)
+        states.period1FloatingWindow = snapshot(period1FloatingWindow, period1Detached, period1Minimized)
+        states.period2FloatingWindow = snapshot(period2FloatingWindow, period2Detached, period2Minimized)
+        states.rxFreqFloatingWindow = snapshot(rxFreqFloatingWindow, rxFreqDetached, rxFreqMinimized)
+        states.txPanelFloatingWindow = snapshot(txPanelFloatingWindow, txPanelDetached, txPanelMinimized)
+        states.liveMapFloatingWindow = snapshot(liveMapFloatingWindow, liveMapDetached, false)
+        states.decoSyncMonitorWindow = snapshot(decoSyncMonitorWindow, false, decoSyncMonitorWindow.visibility === Window.Minimized)
+        // 1.0.275 — DX Cluster floating window
+        if (dxClusterFloatingWindow)
+            states.dxClusterFloatingWindow = snapshot(dxClusterFloatingWindow, dxClusterDetached, dxClusterMinimized)
+
+        bridge.saveWindowStatesAsync(states, captureDecodePanelWidths())
     }
 
     // 1.0.263 (fork-only) — Reset Layout: ricevi signal dal backend e ripristina
@@ -669,6 +692,9 @@ ApplicationWindow {
             waterfallDetached = false;   waterfallMinimized = false
             logWindowDetached = false;   logWindowMinimized = false
             astroWindowDetached = false; astroWindowMinimized = false
+            satelliteWindowDetached = false
+            if (astroFloatingWindow) astroFloatingWindow.hide()
+            if (satelliteFloatingWindow) satelliteFloatingWindow.hide()
             macroDialogDetached = false; macroDialogMinimized = false
             rigControlDetached = false;  rigControlMinimized = false
             period1Detached = false;     period1Minimized = false
@@ -940,6 +966,7 @@ ApplicationWindow {
     property bool logWindowMinimized: false
     property bool astroWindowDetached: false
     property bool astroWindowMinimized: false
+    property bool satelliteWindowDetached: false
     property bool macroDialogDetached: false
     property bool macroDialogMinimized: false
     property bool rigControlDetached: false
@@ -1134,6 +1161,7 @@ ApplicationWindow {
     onLogWindowMinimizedChanged: scheduleWindowStateSave()
     onAstroWindowDetachedChanged: scheduleWindowStateSave()
     onAstroWindowMinimizedChanged: scheduleWindowStateSave()
+    onSatelliteWindowDetachedChanged: scheduleWindowStateSave()
     onMacroDialogDetachedChanged: scheduleWindowStateSave()
     onMacroDialogMinimizedChanged: scheduleWindowStateSave()
     onRigControlDetachedChanged: scheduleWindowStateSave()
@@ -2097,8 +2125,15 @@ ApplicationWindow {
         runWhenLoaded(logWindowLoader, function(item) { item.open() })
     }
     function openMacroDialog() { runWhenLoaded(macroDialogLoader, function(item) { item.open() }) }
-    function openAstroWindow() { runWhenLoaded(astroWindowLoader, function(item) { item.open() }) }
-    function openSatelliteWindow() { runWhenLoaded(satelliteWindowLoader, function(item) { item.open() }) }
+    function openAstroWindow() {
+        astroWindowDetached = true
+        astroWindowMinimized = false
+        astroFloatingWindow.showHostedWindow()
+    }
+    function openSatelliteWindow() {
+        satelliteWindowDetached = true
+        satelliteFloatingWindow.showHostedWindow()
+    }
     function openSettingsDialog() {
         runWhenLoaded(settingsDialogLoader, function(item) { item.open() })
     }
@@ -10403,7 +10438,10 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
     Loader {
         id: satelliteWindowLoader
-        anchors.fill: parent
+        // A Popup/Dialog must keep its own dimensions.  Filling the main
+        // window here forces the loaded SatelliteWindow to become a giant
+        // transparent overlay and stretches every child layout with it.
+        anchors.centerIn: parent
         active: false
         asynchronous: true
         source: "components/SatelliteWindow.qml"
@@ -12433,7 +12471,6 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         height: 600
         minimumWidth: 600
         minimumHeight: 400
-        visible: false
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
         title: "QSO Log - Decodium"
         color: "transparent"
@@ -12539,141 +12576,185 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
     }
 
-    // ========== DETACHABLE ASTRO WINDOW ==========
+    // ========== NATIVE ASTRONOMICAL DATA WINDOW ==========
+    // The complete Astro dialog is hosted by a real top-level Window.  Its
+    // coordinates are desktop-global, so the system move operation can cross
+    // monitor boundaries and WindowState can restore the same display later.
     Window {
         id: astroFloatingWindow
-        width: 500
-        height: 550
-        minimumWidth: 400
-        minimumHeight: 400
-        visible: false
+        property bool contentRequested: false
+        width: 680
+        height: 780
+        minimumWidth: 520
+        minimumHeight: 520
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-        title: "Astro - Decodium"
+        title: qsTr("Astronomical Data - Decodium")
         color: "transparent"
 
-        x: mainWindow.x + mainWindow.width + 20
-        y: mainWindow.y + 100
-        Component.onCompleted: mainWindow.restoreFloatingWindowState(astroFloatingWindow, "astroFloatingWindow", "astroWindowDetached", "astroWindowMinimized")
+        x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
+        y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(astroFloatingWindow)
+        }
+
+        function showHostedWindow() {
+            contentRequested = true
+            show()
+            raise()
+            requestActivate()
+            if (astroFloatingLoader.item && !astroFloatingLoader.item.visible)
+                astroFloatingLoader.item.open()
+        }
+
+        function hideHostedWindow() {
+            astroWindowDetached = false
+            astroWindowMinimized = false
+            mainWindow.scheduleWindowStateSave()
+            hide()
+        }
+
+        function minimizeHostedWindow() {
+            astroWindowMinimized = true
+            mainWindow.scheduleWindowStateSave()
+            astroFloatingWindow.hide()
+        }
+
+        Component.onCompleted: mainWindow.restoreFloatingWindowState(
+                                   astroFloatingWindow,
+                                   "astroFloatingWindow",
+                                   "astroWindowDetached",
+                                   "astroWindowMinimized")
         onXChanged: mainWindow.scheduleWindowStateSave()
         onYChanged: mainWindow.scheduleWindowStateSave()
         onWidthChanged: mainWindow.scheduleWindowStateSave()
         onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onVisibleChanged: {
+            if (visible) {
+                contentRequested = true
+                if (astroFloatingLoader.item && !astroFloatingLoader.item.visible)
+                    astroFloatingLoader.item.open()
+            }
+        }
 
         onClosing: function(close) {
-            astroWindowDetached = false
+            if (!mainWindow.applicationClosing) {
+                astroWindowDetached = false
+                astroWindowMinimized = false
+            }
+            mainWindow.scheduleWindowStateSave()
             close.accepted = true
         }
 
-        Rectangle {
+        Loader {
+            id: astroFloatingLoader
             anchors.fill: parent
-            color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
-            radius: 10
-            border.color: secondaryCyan
-            border.width: 2
-
-            FloatingResizeHandles {
-                targetWindow: astroFloatingWindow
-                maxWidth: 1400
-                maxHeight: 1200
+            active: astroFloatingWindow.contentRequested
+            asynchronous: true
+            source: "components/AstroWindow.qml"
+            onLoaded: {
+                item.nativeHostWindow = astroFloatingWindow
+                item.open()
             }
+        }
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: astroFloatingWindow
+            maxWidth: 1600
+            maxHeight: 1400
+        }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 40
-                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.95)
-                    radius: 6
-
-                    MouseArea {
-                        id: astroFloatDragArea
-                        z: 2
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.right: parent.right
-                        anchors.rightMargin: 88
-                        acceptedButtons: Qt.LeftButton
-                        preventStealing: true
-                        property point pressGlobalPos: Qt.point(0, 0)
-                        property point pressWindowPos: Qt.point(0, 0)
-                        property bool nativeMoveActive: false
-                        cursorShape: Qt.SizeAllCursor
-                        onPressed: function(mouse) {
-                            pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
-                            pressWindowPos = Qt.point(astroFloatingWindow.x, astroFloatingWindow.y)
-                            nativeMoveActive = mainWindow.startNativeFloatingWindowMove(astroFloatingWindow)
-                            mouse.accepted = true
-                        }
-                        onPositionChanged: function(mouse) {
-                            if (!pressed)
-                                return
-                            if (nativeMoveActive)
-                                return
-                            mainWindow.dragFloatingWindowToGlobal(astroFloatingWindow,
-                                                                  pressWindowPos,
-                                                                  pressGlobalPos,
-                                                                  mapToGlobal(mouse.x, mouse.y))
-                            mouse.accepted = true
-                        }
-                        onReleased: {
-                            nativeMoveActive = false
-                            mainWindow.finishFloatingWindowDrag(astroFloatingWindow)
-                        }
-                        onCanceled: {
-                            nativeMoveActive = false
-                            mainWindow.finishFloatingWindowDrag(astroFloatingWindow)
-                        }
-                    }
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 12
-
-                        Text { text: "⋮⋮"; font.pixelSize: 14; color: textSecondary }
-                        Text { text: "🌙 Astronomical Data"; font.pixelSize: 16; font.bold: true; color: secondaryCyan }
-                        Item { Layout.fillWidth: true }
-
-                        Rectangle {
-                            width: 28; height: 28; radius: 4
-                            color: astroFloatMinMA.containsMouse ? Qt.rgba(255/255, 193/255, 7/255, 0.3) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.1)
-                            border.color: astroFloatMinMA.containsMouse ? "#ffc107" : glassBorder
-                            Text { anchors.centerIn: parent; text: "−"; font.pixelSize: 18; font.bold: true; color: astroFloatMinMA.containsMouse ? "#ffc107" : textPrimary }
-                            MouseArea { id: astroFloatMinMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: { astroWindowMinimized = true; astroFloatingWindow.hide() }
-                            }
-                        }
-
-                        Rectangle {
-                            width: 28; height: 28; radius: 4
-                            color: astroFloatCloseMA.containsMouse ? Qt.rgba(244/255, 67/255, 54/255, 0.3) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.1)
-                            border.color: astroFloatCloseMA.containsMouse ? bridge.themeManager.ledRed : glassBorder
-                            Text { anchors.centerIn: parent; text: "✕"; font.pixelSize: 12; font.bold: true; color: astroFloatCloseMA.containsMouse ? bridge.themeManager.ledRed : textPrimary }
-                            MouseArea { id: astroFloatCloseMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: { astroWindowDetached = false; astroWindowMinimized = false; astroFloatingWindow.close() }
-                            }
-                        }
-                    }
-                }
-
-                Loader {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    active: astroFloatingWindow.visible
-                    asynchronous: true
-                    sourceComponent: astroContentComponent
-                }
-            }
+        Shortcut {
+            enabled: astroFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: astroFloatingWindow.hideHostedWindow()
         }
     }
 
-    Component {
-        id: astroContentComponent
-        AstroWindowContent { }
+    // ========== NATIVE SATELLITE TRACKING WINDOW ==========
+    Window {
+        id: satelliteFloatingWindow
+        property bool contentRequested: false
+        width: 880
+        height: 740
+        minimumWidth: 640
+        minimumHeight: 560
+        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        title: qsTr("Satellite tracking - Decodium")
+        color: "transparent"
+
+        x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
+        y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(satelliteFloatingWindow)
+        }
+
+        function showHostedWindow() {
+            contentRequested = true
+            show()
+            raise()
+            requestActivate()
+            if (satelliteFloatingLoader.item && !satelliteFloatingLoader.item.visible)
+                satelliteFloatingLoader.item.open()
+        }
+
+        function hideHostedWindow() {
+            satelliteWindowDetached = false
+            mainWindow.scheduleWindowStateSave()
+            hide()
+        }
+
+        Component.onCompleted: mainWindow.restoreFloatingWindowState(
+                                   satelliteFloatingWindow,
+                                   "satelliteFloatingWindow",
+                                   "satelliteWindowDetached",
+                                   "")
+        onXChanged: mainWindow.scheduleWindowStateSave()
+        onYChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onVisibleChanged: {
+            if (visible) {
+                contentRequested = true
+                if (satelliteFloatingLoader.item && !satelliteFloatingLoader.item.visible)
+                    satelliteFloatingLoader.item.open()
+            }
+        }
+        onClosing: function(close) {
+            if (!mainWindow.applicationClosing)
+                satelliteWindowDetached = false
+            mainWindow.scheduleWindowStateSave()
+            close.accepted = true
+        }
+
+        Loader {
+            id: satelliteFloatingLoader
+            anchors.fill: parent
+            active: satelliteFloatingWindow.contentRequested
+            asynchronous: true
+            source: "components/SatelliteWindow.qml"
+            onLoaded: {
+                item.nativeHostWindow = satelliteFloatingWindow
+                item.open()
+            }
+        }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: satelliteFloatingWindow
+            maxWidth: 1800
+            maxHeight: 1400
+        }
+
+        Shortcut {
+            enabled: satelliteFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: satelliteFloatingWindow.hideHostedWindow()
+        }
     }
 
     // ========== DETACHABLE MACRO WINDOW ==========

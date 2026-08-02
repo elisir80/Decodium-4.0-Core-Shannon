@@ -55,6 +55,7 @@ class MapOperationsService final : public QObject
     Q_PROPERTY(int rotatorPort READ rotatorPort WRITE setRotatorPort NOTIFY rotatorSettingsChanged)
     Q_PROPERTY(bool rotatorEnabled READ rotatorEnabled WRITE setRotatorEnabled NOTIFY rotatorSettingsChanged)
     Q_PROPERTY(QString rotatorProtocol READ rotatorProtocol WRITE setRotatorProtocol NOTIFY rotatorSettingsChanged)
+    Q_PROPERTY(QString rotatorTransport READ rotatorTransport NOTIFY rotatorSettingsChanged)
     Q_PROPERTY(QStringList rotatorProtocols READ rotatorProtocols CONSTANT)
     Q_PROPERTY(bool rotatorFeedbackAvailable READ rotatorFeedbackAvailable NOTIFY rotatorFeedbackChanged)
     Q_PROPERTY(qint64 rotatorLastFeedbackMs READ rotatorLastFeedbackMs NOTIFY rotatorFeedbackChanged)
@@ -119,6 +120,7 @@ public:
     int rotatorPort() const { return m_rotatorPort; }
     bool rotatorEnabled() const { return m_rotatorEnabled; }
     QString rotatorProtocol() const { return m_rotatorProtocol; }
+    QString rotatorTransport() const;
     QStringList rotatorProtocols() const;
     bool rotatorFeedbackAvailable() const;
     qint64 rotatorLastFeedbackMs() const;
@@ -350,7 +352,7 @@ private:
     bool m_exportInProgress {false};
     bool m_offlineMode {false};
     QString m_rotatorHost {QStringLiteral("127.0.0.1")};
-    int m_rotatorPort {12040};
+    int m_rotatorPort {12000};
     bool m_rotatorEnabled {false};
     QString m_rotatorProtocol {QStringLiteral("PSTRotator")};
     int m_rotatorTrackingIntervalMs {1000};

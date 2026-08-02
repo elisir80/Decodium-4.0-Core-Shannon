@@ -335,8 +335,8 @@ Rectangle {
         if (layerId === "confirmed")
             return qsTr("Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.")
         if (layerId === "psk")
-            return qsTr("Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.")
-                    .arg(engine ? engine.pskReporterTimeSpanMinutes : 60)
+            return qsTr("PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.")
+                    .arg(engine ? engine.pskMapSpotWindowMinutes : 15)
         if (layerId === "pota")
             return qsTr("Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.")
         if (layerId === "states")
@@ -412,9 +412,9 @@ Rectangle {
         if (!visible || !engine || !mapLayers || !mapLayers.layerModel
                 || !mapLayers.layerModel.layerEnabled("psk")
                 || mapLayers.layerModel.layerEnabled("offline")
-                || engine.pskHeardByFetching)
+                || engine.pskMapSpotFetching)
             return
-        engine.fetchPskHeardBy()
+        engine.fetchPskMapSpots()
     }
 
     function updateMoonOverlay() {
@@ -677,6 +677,15 @@ Rectangle {
         id: pskInitialFetchTimer
         interval: 1200
         repeat: false
+        onTriggered: root.requestPskData()
+    }
+
+    Timer {
+        id: pskMapRefreshTimer
+        interval: 65000
+        repeat: true
+        running: root.visible && root.mapLayerEnabled("psk")
+                 && !root.mapLayerEnabled("offline")
         onTriggered: root.requestPskData()
     }
 
@@ -2491,18 +2500,65 @@ Rectangle {
                                     }
                                     Item { Layout.fillWidth: true }
                                     Button {
-                                        text: root.engine && root.engine.pskHeardByFetching
+                                        text: root.engine && root.engine.pskMapSpotFetching
                                             ? qsTr("Loading PSK...")
                                             : qsTr("Refresh PSK")
                                         font.pixelSize: 9
-                                        enabled: root.engine && !root.engine.pskHeardByFetching
+                                        enabled: root.engine && !root.engine.pskMapSpotFetching
+                                            && root.mapLayerEnabled("psk")
                                             && !root.mapLayerEnabled("offline")
-                                        onClicked: root.engine.fetchPskHeardBy()
+                                        onClicked: root.engine.refreshPskMapSpots()
                                         ToolTip.visible: hovered
                                         ToolTip.text: root.mapLayerEnabled("offline")
                                             ? qsTr("Unavailable while Offline mode is enabled")
-                                            : qsTr("Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.")
-                                                .arg(root.engine ? root.engine.pskReporterTimeSpanMinutes : 60)
+                                            : !root.mapLayerEnabled("psk")
+                                                ? qsTr("Enable the PSK layer to retrieve PSK Reporter spots")
+                                                : qsTr("Refresh PSK Reporter spots for the Live Map. PSK upload is independent.")
+                                    }
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    visible: root.mapLayers
+                                        && root.mapLayers.pskLayerEnabled
+                                    spacing: 5
+                                    Text {
+                                        text: qsTr("PSK spots")
+                                        color: "#ba7cff"
+                                        font.pixelSize: 9
+                                    }
+                                    ComboBox {
+                                        Layout.fillWidth: true
+                                        model: [
+                                            { label: qsTr("5 min"), value: 5 },
+                                            { label: qsTr("10 min"), value: 10 },
+                                            { label: qsTr("15 min"), value: 15 },
+                                            { label: qsTr("20 min"), value: 20 },
+                                            { label: qsTr("25 min"), value: 25 },
+                                            { label: qsTr("30 min"), value: 30 },
+                                            { label: qsTr("35 min"), value: 35 },
+                                            { label: qsTr("40 min"), value: 40 },
+                                            { label: qsTr("45 min"), value: 45 },
+                                            { label: qsTr("50 min"), value: 50 },
+                                            { label: qsTr("55 min"), value: 55 },
+                                            { label: qsTr("60 min"), value: 60 }
+                                        ]
+                                        textRole: "label"
+                                        valueRole: "value"
+                                        currentIndex: root.engine
+                                            ? Math.max(0, Math.min(11,
+                                                Math.round(root.engine.pskMapSpotWindowMinutes / 5) - 1))
+                                            : 2
+                                        font.pixelSize: 9
+                                        enabled: root.engine && !root.engine.pskMapSpotFetching
+                                            && !root.mapLayerEnabled("offline")
+                                        onActivated: {
+                                            if (!root.engine)
+                                                return
+                                            root.engine.pskMapSpotWindowMinutes = Number(currentValue)
+                                            root.engine.refreshPskMapSpots()
+                                        }
+                                        ToolTip.visible: hovered
+                                        ToolTip.text: qsTr("Look-back and expiry period for PSK Reporter spots displayed on the Live Map")
                                     }
                                 }
                                 RowLayout {
@@ -2698,7 +2754,13 @@ Rectangle {
                                     font.bold: true
                                 }
                                 Repeater {
-                                    model: root.mapLayers ? root.mapLayers.temporalLegend : []
+                                    model: {
+                                        if (!root.mapLayers)
+                                            return []
+                                        return root.mapLayers.temporalLegend.filter(function(entry) {
+                                            return entry.source !== "psk"
+                                        })
+                                    }
                                     delegate: RowLayout {
                                         required property var modelData
                                         Layout.fillWidth: true
@@ -2871,12 +2933,11 @@ Rectangle {
                                 }
                                 Text {
                                     Layout.fillWidth: true
-                                    text: root.engine && root.engine.pskHeardByCount > 0
-                                        ? qsTr("PSK Reporter: %1 receivers found")
-                                              .arg(root.engine.pskHeardByCount)
-                                        : qsTr("PSK Reporter: no receivers loaded for the last %1 minutes")
-                                              .arg(root.engine ? root.engine.pskReporterTimeSpanMinutes : 60)
-                                    color: root.engine && root.engine.pskHeardByCount > 0
+                                    text: root.engine && root.engine.pskMapSpotFetching
+                                        ? qsTr("PSK Reporter: refreshing Live Map spots…")
+                                        : qsTr("PSK Reporter Live Map window: %1 minutes")
+                                              .arg(root.engine ? root.engine.pskMapSpotWindowMinutes : 15)
+                                    color: root.engine && root.engine.pskMapSpotFetching
                                         ? "#ba7cff" : root.textSecondary
                                     font.pixelSize: 9
                                     wrapMode: Text.Wrap
@@ -3242,13 +3303,19 @@ Rectangle {
                                                 root.mapOperations.rotatorHost = text
                                         }
                                     }
+                                    Label {
+                                        text: root.mapOperations
+                                              ? root.mapOperations.rotatorTransport : "UDP"
+                                        color: root.textSecondary
+                                        font.pixelSize: 8
+                                    }
                                     SpinBox {
                                         Layout.preferredWidth: 88
                                         from: 1
                                         to: 65535
                                         editable: true
                                         value: root.mapOperations
-                                            ? root.mapOperations.rotatorPort : 12040
+                                            ? root.mapOperations.rotatorPort : 12000
                                         font.pixelSize: 8
                                         onValueModified: {
                                             if (root.mapOperations)
