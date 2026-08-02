@@ -5219,6 +5219,82 @@ Error: %2</source>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>Получить приёмники, слышавшие ваш позывной за последние %1 мин. Отправка PSK от этого не зависит.</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 мин</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 мин</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 мин</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 мин</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 мин</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 мин</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 мин</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 мин</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 мин</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 мин</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 мин</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 мин</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>Споты PSK</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Включите слой PSK, чтобы получать споты PSK Reporter</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Период ретроспективы и истечения для спотов PSK Reporter на Live Map</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>Окно Live Map для PSK Reporter: %1 мин</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: обновление спотов Live Map…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>Обновить споты PSK Reporter для Live Map. Отправка PSK от этого не зависит.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Отчёты о приёме PSK Reporter для вашего позывного за последние %1 мин. Отправка PSK из Decodium при этом не нужна.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6464,6 +6540,14 @@ Right-click: disconnect</source>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>Активен на диапазонах за последние %1 мин:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Астрономические данные - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Сопровождение спутников - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21118,6 +21202,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>Недоступно</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Хост</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP или имя хоста</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>Порт команд</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>Порт команд %1</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>Ручное движение</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>Повернуть азимут +10°</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>Повернуть азимут −10°</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>Изменить угол места +5°</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>Изменить угол места −5°</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>Служба ротора недоступна</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>Включите «Ротор включён», чтобы отправлять команды</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>Сопровождение спутников активно • включите «Ротор включён», чтобы отправлять команды</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>Сопровождение спутников активно • команды ротора отправляются асинхронно</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>Сопровождение спутников активно • ожидание спутника над горизонтом</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • команды и обратная связь на одном порту</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP-порт команд: %1 • порт обратной связи: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP-порт команд: %1 • обратная связь недоступна</translation>
     </message>
 </context>
 <context>

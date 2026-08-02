@@ -5216,6 +5216,82 @@ Error: %2</source>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>取得過去 %1 分鐘內收到你呼號的接收台。PSK 上傳與此無關。</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 分鐘</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 分鐘</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 分鐘</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 分鐘</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 分鐘</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 分鐘</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 分鐘</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 分鐘</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 分鐘</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 分鐘</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 分鐘</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 分鐘</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>PSK 點報</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>啟用 PSK 圖層以取得 PSK Reporter 點報</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>在 Live Map 上顯示的 PSK Reporter 點報的回溯與過期時長</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>PSK Reporter 的 Live Map 時間範圍: %1 分鐘</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: 正在重新載入 Live Map 點報…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>為 Live Map 重新載入 PSK Reporter 點報。PSK 上傳與此無關。</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>過去 %1 分鐘內 PSK Reporter 對你呼號的接收報告。無需啟用 Decodium 的 PSK 上傳。</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6460,6 +6536,14 @@ Right-click: disconnect</source>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>最近 %1 分鐘內活躍的波段:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>天文資料 - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>衛星追蹤 - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21083,6 +21167,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>不可用</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>主機</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP 或主機名稱</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>命令連接埠</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>%1 命令連接埠</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>手動移動</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>方位角 +10°</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>方位角 −10°</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>仰角 +5°</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>仰角 −5°</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>旋轉器服務不可用</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>啟用「已啟用旋轉器」以傳送命令</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>衛星追蹤已啟用 • 啟用「已啟用旋轉器」以傳送命令</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>衛星追蹤已啟用 • 旋轉器命令以非同步方式傳送</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>衛星追蹤已啟用 • 正在等待衛星升出地平線</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • 命令與回饋使用同一連接埠</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP 命令連接埠: %1 • 回饋連接埠: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP 命令連接埠: %1 • 回饋不可用</translation>
     </message>
 </context>
 <context>

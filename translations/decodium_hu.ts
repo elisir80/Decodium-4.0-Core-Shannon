@@ -5217,6 +5217,82 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>Az elmúlt %1 percben a hívójeledet halló vevők lekérése. A PSK-feltöltés ettől független.</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 perc</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 perc</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 perc</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 perc</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 perc</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 perc</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 perc</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 perc</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 perc</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 perc</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 perc</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 perc</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>PSK spotok</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Kapcsold be a PSK réteget a PSK Reporter spotok lekéréséhez</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>A Live Map-en megjelenő PSK Reporter spotok visszatekintési és lejárati időszaka</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>PSK Reporter Live Map időablak: %1 perc</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: a Live Map spotjainak frissítése…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>A PSK Reporter spotok frissítése a Live Map-hez. A PSK-feltöltés ettől független.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>PSK Reporter vételi jelentések a hívójeledre az elmúlt %1 percben. A Decodium PSK-feltöltésének nem kell bekapcsolva lennie.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6461,6 +6537,14 @@ Jobb kattintás: lecsatlakozás</translation>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>Az elmúlt %1 percben aktív sávok:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Csillagászati adatok - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Műholdkövetés - Decodium</translation>
     </message>
 </context>
 <context>
@@ -20950,6 +21034,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>Nem érhető el</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Gazdagép</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP vagy gazdagépnév</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>Parancsport</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>%1 parancsport</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>Kézi mozgatás</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>Azimut mozgatása +10°</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>Azimut mozgatása −10°</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>Emelkedés mozgatása +5°</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>Emelkedés mozgatása −5°</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>A forgatószolgáltatás nem érhető el</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>Kapcsold be a „Forgató bekapcsolva” beállítást a parancsok küldéséhez</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>Műholdkövetés aktív • kapcsold be a „Forgató bekapcsolva” beállítást a parancsok küldéséhez</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>Műholdkövetés aktív • a forgató parancsai aszinkron módon mennek</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>Műholdkövetés aktív • várakozás a horizont fölé emelkedő műholdra</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • parancsok és visszajelzés ugyanazon a porton</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP parancsport: %1 • visszajelzési port: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP parancsport: %1 • nincs visszajelzés</translation>
     </message>
 </context>
 <context>

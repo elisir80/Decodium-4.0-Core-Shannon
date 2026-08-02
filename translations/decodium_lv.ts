@@ -5231,6 +5231,82 @@ Error: %2</translation>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>Iegūt uztvērējus, kas pēdējās %1 minūtēs dzirdēja jūsu izsaukumu. PSK augšupielāde ir neatkarīga.</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 min</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 min</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 min</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 min</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 min</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 min</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 min</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 min</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 min</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 min</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 min</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 min</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>PSK spoti</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Ieslēdziet PSK slāni, lai iegūtu PSK Reporter spotus</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Atskatīšanās un derīguma periods PSK Reporter spotiem, kas rādīti Live Map</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>PSK Reporter Live Map logs: %1 minūtes</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: atsvaidzina Live Map spotus…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>Atsvaidzināt PSK Reporter spotus Live Map vajadzībām. PSK augšupielāde ir neatkarīga.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>PSK Reporter uztveršanas ziņojumi jūsu izsaukumam pēdējās %1 minūtēs. Decodium PSK augšupielādei nav jābūt ieslēgtai.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6475,6 +6551,14 @@ Labais klikšķis: atvienot</translation>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>Aktīvs joslās pēdējās %1 minūtēs:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Astronomiskie dati - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Satelītu izsekošana - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21099,6 +21183,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>Nav pieejams</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Resursdators</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP vai resursdatora nosaukums</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>Komandu ports</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>%1 komandu ports</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>Manuāla kustība</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>Pārvietot azimutu +10°</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>Pārvietot azimutu −10°</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>Pārvietot elevāciju +5°</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>Pārvietot elevāciju −5°</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>Rotora pakalpojums nav pieejams</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>Ieslēdziet “Rotors ieslēgts”, lai sūtītu komandas</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>Satelītu izsekošana aktīva • ieslēdziet “Rotors ieslēgts”, lai sūtītu komandas</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>Satelītu izsekošana aktīva • rotora komandas tiek sūtītas asinhroni</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>Satelītu izsekošana aktīva • gaida satelītu virs horizonta</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • komandas un atgriezeniskā saite uz viena porta</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP komandu ports: %1 • atgriezeniskās saites ports: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP komandu ports: %1 • atgriezeniskā saite nav pieejama</translation>
     </message>
 </context>
 <context>

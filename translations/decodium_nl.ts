@@ -5227,6 +5227,82 @@ Fout: %2</translation>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>Ontvangers ophalen die uw call de laatste %1 minuten hoorden. De PSK-upload staat hier los van.</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 min</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 min</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 min</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 min</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 min</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 min</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 min</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 min</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 min</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 min</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 min</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 min</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>PSK-spots</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Schakel de PSK-laag in om PSK Reporter-spots op te halen</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Terugkijk- en vervalperiode voor PSK Reporter-spots op de Live Map</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>PSK Reporter Live Map-venster: %1 minuten</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: Live Map-spots worden ververst…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>PSK Reporter-spots voor de Live Map verversen. De PSK-upload staat hier los van.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Ontvangstrapporten van PSK Reporter voor uw call in de laatste %1 minuten. De PSK-upload van Decodium hoeft niet aan te staan.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6471,6 +6547,14 @@ Rechtermuisklik: verbinding verbreken</translation>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>Actief op banden gedurende de laatste %1 minuten:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Astronomische gegevens - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Satellietvolging - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21096,6 +21180,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>Niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Host</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP of hostnaam</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>Opdrachtpoort</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>%1-opdrachtpoort</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>Handmatige beweging</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>Azimut +10° verplaatsen</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>Azimut −10° verplaatsen</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>Elevatie +5° verplaatsen</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>Elevatie −5° verplaatsen</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>Rotordienst niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>Schakel ‘Rotor ingeschakeld’ in om opdrachten te verzenden</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>Satellietvolging actief • schakel ‘Rotor ingeschakeld’ in om opdrachten te verzenden</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>Satellietvolging actief • rotoropdrachten worden asynchroon verzonden</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>Satellietvolging actief • wachten op de satelliet boven de horizon</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • opdrachten en terugkoppeling op dezelfde poort</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP-opdrachtpoort: %1 • terugkoppelpoort: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP-opdrachtpoort: %1 • terugkoppeling niet beschikbaar</translation>
     </message>
 </context>
 <context>

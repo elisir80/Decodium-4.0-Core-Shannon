@@ -5217,6 +5217,82 @@ Error: %2</source>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>直近 %1 分間にあなたのコールサインを受信した局を取得します。PSK 送信とは無関係です。</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 分</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 分</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 分</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 分</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 分</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 分</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 分</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 分</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 分</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 分</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 分</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 分</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>PSK スポット</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>PSK Reporter のスポットを取得するには PSK レイヤーを有効にしてください</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Live Map に表示する PSK Reporter スポットのさかのぼり期間と有効期限です</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>PSK Reporter の Live Map 期間: %1 分</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: Live Map のスポットを更新中…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>Live Map 用に PSK Reporter のスポットを更新します。PSK 送信とは無関係です。</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>直近 %1 分間の、あなたのコールサインに対する PSK Reporter の受信報告です。Decodium の PSK 送信を有効にする必要はありません。</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6461,6 +6537,14 @@ Right-click: disconnect</source>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>直近 %1 分間に運用のあったバンド:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>天文データ - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>衛星追尾 - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21084,6 +21168,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>利用不可</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>ホスト</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP またはホスト名</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>コマンド ポート</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>%1 コマンド ポート</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>手動操作</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>方位角を +10° 動かす</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>方位角を −10° 動かす</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>仰角を +5° 動かす</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>仰角を −5° 動かす</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>ローテーター サービスを利用できません</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>コマンドを送るには「ローテーター有効」をオンにしてください</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>衛星追尾が有効です • コマンドを送るには「ローテーター有効」をオンにしてください</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>衛星追尾が有効です • ローテーターのコマンドは非同期で送られます</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>衛星追尾が有効です • 衛星が地平線より上に出るのを待っています</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • コマンドとフィードバックは同じポート</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP コマンド ポート: %1 • フィードバック ポート: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP コマンド ポート: %1 • フィードバックは利用できません</translation>
     </message>
 </context>
 <context>

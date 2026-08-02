@@ -5218,6 +5218,82 @@ Fejl: %2</translation>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>Hent modtagere der hørte dit kald i de seneste %1 minutter. PSK-upload er uafhængig.</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 min</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 min</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 min</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 min</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 min</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 min</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 min</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 min</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 min</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 min</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 min</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 min</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>PSK-spots</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Aktivér PSK-laget for at hente PSK Reporter-spots</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Tilbageblik og udløbsperiode for PSK Reporter-spots vist på Live Map</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>PSK Reporter Live Map-vindue: %1 minutter</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: opdaterer Live Map-spots…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>Opdater PSK Reporter-spots til Live Map. PSK-upload er uafhængig.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>PSK Reporter-modtagerapporter for dit kald i de seneste %1 minutter. Decodiums PSK-upload behøver ikke være slået til.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6463,6 +6539,14 @@ Højreklik: afbryd</translation>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>Aktiv på bånd i de seneste %1 minutter:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Astronomiske data - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Satellitsporing - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21085,6 +21169,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>Utilgængelig</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Vært</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP eller værtsnavn</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>Kommandoport</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>%1-kommandoport</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>Manuel bevægelse</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>Flyt azimut +10°</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>Flyt azimut −10°</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>Flyt elevation +5°</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>Flyt elevation −5°</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>Rotortjeneste utilgængelig</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>Aktivér ‘Rotor aktiveret’ for at sende kommandoer</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>Satellitsporing aktiv • aktivér ‘Rotor aktiveret’ for at sende kommandoer</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>Satellitsporing aktiv • rotorkommandoer sendes asynkront</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>Satellitsporing aktiv • venter på satellitten over horisonten</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • kommandoer og feedback på samme port</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>UDP-kommandoport: %1 • feedbackport: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>UDP-kommandoport: %1 • feedback utilgængelig</translation>
     </message>
 </context>
 <context>

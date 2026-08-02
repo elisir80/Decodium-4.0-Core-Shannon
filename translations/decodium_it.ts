@@ -5223,6 +5223,82 @@ Errore: %2</translation>
         <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
         <translation>Recupera i ricevitori che hanno sentito il tuo nominativo negli ultimi %1 minuti. L&apos;invio PSK è indipendente.</translation>
     </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 min</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 min</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 min</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 min</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 min</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 min</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 min</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 min</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 min</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 min</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 min</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 min</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>Spot PSK</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Attiva il livello PSK per recuperare gli spot di PSK Reporter</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Periodo di consultazione all&apos;indietro e di scadenza degli spot di PSK Reporter mostrati sulla Live Map</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>Finestra Live Map di PSK Reporter: %1 minuti</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: aggiornamento degli spot della Live Map…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>Aggiorna gli spot di PSK Reporter per la Live Map. L&apos;invio PSK è indipendente.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Rapporti di ricezione di PSK Reporter per il tuo nominativo negli ultimi %1 minuti. Non serve che l&apos;invio PSK di Decodium sia attivo.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6479,6 +6555,14 @@ Clic destro: disconnetti</translation>
     <message>
         <source>Active on bands during the last %1 minutes:</source>
         <translation>Attivo sulle bande negli ultimi %1 minuti:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Dati astronomici - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Inseguimento satelliti - Decodium</translation>
     </message>
 </context>
 <context>
@@ -21118,6 +21202,78 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Unavailable</source>
         <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <source>AZ ±10° • EL ±5°</source>
+        <translation>AZ ±10° • EL ±5°</translation>
+    </message>
+    <message>
+        <source>Host</source>
+        <translation>Host</translation>
+    </message>
+    <message>
+        <source>IP or hostname</source>
+        <translation>IP o nome host</translation>
+    </message>
+    <message>
+        <source>Command port</source>
+        <translation>Porta comandi</translation>
+    </message>
+    <message>
+        <source>%1 command port</source>
+        <translation>Porta comandi %1</translation>
+    </message>
+    <message>
+        <source>Manual movement</source>
+        <translation>Movimento manuale</translation>
+    </message>
+    <message>
+        <source>Move azimuth +10°</source>
+        <translation>Muovi l&apos;azimut +10°</translation>
+    </message>
+    <message>
+        <source>Move azimuth −10°</source>
+        <translation>Muovi l&apos;azimut −10°</translation>
+    </message>
+    <message>
+        <source>Move elevation +5°</source>
+        <translation>Muovi l&apos;elevazione +5°</translation>
+    </message>
+    <message>
+        <source>Move elevation −5°</source>
+        <translation>Muovi l&apos;elevazione −5°</translation>
+    </message>
+    <message>
+        <source>Rotator service unavailable</source>
+        <translation>Servizio del rotore non disponibile</translation>
+    </message>
+    <message>
+        <source>Enable ‘Rotator enabled’ to send commands</source>
+        <translation>Attiva «Rotore attivo» per inviare comandi</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • enable ‘Rotator enabled’ to send commands</source>
+        <translation>Inseguimento satelliti attivo • attiva «Rotore attivo» per inviare comandi</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • rotator commands are sent asynchronously</source>
+        <translation>Inseguimento satelliti attivo • i comandi del rotore sono inviati in modo asincrono</translation>
+    </message>
+    <message>
+        <source>Satellite tracking active • waiting for the satellite above the horizon</source>
+        <translation>Inseguimento satelliti attivo • in attesa del satellite sopra l&apos;orizzonte</translation>
+    </message>
+    <message>
+        <source>TCP rotctld: %1:%2 • commands + feedback on same port</source>
+        <translation>TCP rotctld: %1:%2 • comandi e feedback sulla stessa porta</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback port: %2</source>
+        <translation>Porta comandi UDP: %1 • porta feedback: %2</translation>
+    </message>
+    <message>
+        <source>UDP command port: %1 • feedback unavailable</source>
+        <translation>Porta comandi UDP: %1 • feedback non disponibile</translation>
     </message>
 </context>
 <context>
