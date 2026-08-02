@@ -1260,8 +1260,8 @@ private slots:
         QFile file(adifPath);
         QVERIFY(file.open(QIODevice::WriteOnly));
         file.write("Decodium ADIF\n<EOH>\n");
-        // Decodium's normal ADI records intentionally omit COUNTRY, CONT,
-        // CQZ and ITUZ.  The map must derive those values from cty.dat.
+        // Older or imported ADI records may omit COUNTRY, CONT, CQZ and ITUZ.
+        // The map must still derive those values from cty.dat.
         file.write(field("CALL", "SV1ABC")
                    + field("GRIDSQUARE", "KM18")
                    + field("BAND", "20m")

@@ -1635,7 +1635,18 @@ Dialog {
                         Text { text: qsTr("STATION DETAILS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("My Call:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Text {
+                            text: qsTr("My Call:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                            Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            HoverHandler { id: myCallInfoHover }
+                            ToolTip.visible: myCallInfoHover.hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.")
+                        }
                         DecoTextField {
                             text: bridge.callsign; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
@@ -1686,11 +1697,23 @@ Dialog {
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
                         }
-                        Text { text: qsTr("Op Call:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Text {
+                            text: qsTr("Op Call:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                            Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            HoverHandler { id: opCallInfoHover }
+                            ToolTip.visible: opCallInfoHover.hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.")
+                        }
                         DecoTextField {
                             text: bridge.getSetting("OpCall", ""); Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
+                            placeholderText: qsTr("Optional operator callsign")
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onTextChanged: bridge.setSetting("OpCall", text)
                         }
@@ -1699,11 +1722,23 @@ Dialog {
                         Text { text: qsTr("STATION INFO"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("Station Name:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Text {
+                            text: qsTr("Station label:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                            Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            HoverHandler { id: stationLabelInfoHover }
+                            ToolTip.visible: stationLabelInfoHover.hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.")
+                        }
                         DecoTextField {
                             text: bridge.stationName; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
+                            placeholderText: qsTr("Optional - e.g. Home station")
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onTextChanged: {
                                 bridge.stationName = text
@@ -1722,11 +1757,23 @@ Dialog {
                             }
                         }
 
-                        Text { text: qsTr("Rig Info:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Text {
+                            text: qsTr("Rig / radio:")
+                            color: textSecondary
+                            font.pixelSize: 12
+                            Layout.preferredWidth: 100
+                            Layout.preferredHeight: controlHeight
+                            verticalAlignment: Text.AlignVCenter
+                            HoverHandler { id: rigInfoHover }
+                            ToolTip.visible: rigInfoHover.hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.")
+                        }
                         DecoTextField {
                             text: bridge.stationRigInfo; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             color: textPrimary; font.pixelSize: controlFontSize
                             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
+                            placeholderText: qsTr("Optional - e.g. Icom IC-7100")
                             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
                             onTextChanged: {
                                 bridge.stationRigInfo = text
@@ -2982,6 +3029,10 @@ Dialog {
                                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
                             popup.width: Math.max(audioInDevCombo.width, 560)
                             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered && Qt.platform.os === "linux"
+                            ToolTip.delay: 600
+                            ToolTip.text: qsTr("Linux: entries marked 'Pulse/PipeWire monitor' capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user's default capture source.")
                         }
                         Text { text: qsTr("Input Channel:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
                         DecoComboBox {
@@ -6177,11 +6228,58 @@ Dialog {
                         }
                         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
-                        // ── N1MM Logger+ / EasyLog (binary UDP) ──
-                        Text { text: qsTr("N1MM / EasyLog"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+                        // ── N1MM Logger+ / HRD Logbook / EasyLog (ADIF UDP) ──
+                        Text { text: qsTr("N1MM / HRD LOGBOOK / EASYLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("Enable N1MM:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        Text {
+                            text: qsTr("Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.")
+                            color: textSecondary
+                            font.pixelSize: 11
+                            wrapMode: Text.Wrap
+                            Layout.columnSpan: 4
+                            Layout.fillWidth: true
+                        }
+
+                        Item { Layout.fillWidth: true; Layout.preferredWidth: labelWidth }
+                        Button {
+                            id: hrdLogbookPresetButton
+                            text: qsTr("Use HRD Logbook preset")
+                            implicitHeight: controlHeight
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            onClicked: {
+                                // HRD's QSO Forwarding receives the same ADIF-over-UDP
+                                // stream configured as "N1MM Logger+ Broadcasts" in WSJT-X.
+                                bridge.setSetting("BroadcastToN1MM", true)
+                                bridge.setSetting("N1MMServer", "127.0.0.1")
+                                bridge.setSetting("N1MMServerPort", 2333)
+                                n1mmEnableCheck.checked = true
+                                n1mmServerField.text = "127.0.0.1"
+                                n1mmPortSpin.value = 2333
+                            }
+                            background: Rectangle {
+                                color: hrdLogbookPresetButton.hovered
+                                       ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.18)
+                                       : bgMedium
+                                border.color: secondaryCyan
+                                radius: 4
+                            }
+                            contentItem: Text {
+                                text: hrdLogbookPresetButton.text
+                                color: secondaryCyan
+                                font.pixelSize: 11
+                                font.bold: true
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            hoverEnabled: true
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 400
+                            ToolTip.text: qsTr("Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.")
+                        }
+
+                        Text { text: qsTr("Enable output:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         CheckBox {
                             id: n1mmEnableCheck
                             checked: boolSetting("BroadcastToN1MM", false)
@@ -6189,7 +6287,7 @@ Dialog {
                             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                             contentItem: Text { text: ""; leftPadding: 24 }
                         }
-                        Text { text: qsTr("N1MM Port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        Text { text: qsTr("UDP Port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         SpinBox {
                             id: n1mmPortSpin
                             from: 1; to: 65535; value: Number(bridge.getSetting("N1MMServerPort", 2333)); editable: true
@@ -6201,8 +6299,9 @@ Dialog {
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
 
-                        Text { text: qsTr("N1MM Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+                        Text { text: qsTr("UDP Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
                         DecoTextField {
+                            id: n1mmServerField
                             text: bridge.getSetting("N1MMServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: 3; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
                             enabled: n1mmEnableCheck.checked
                             opacity: enabled ? 1.0 : 0.5

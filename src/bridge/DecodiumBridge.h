@@ -2351,6 +2351,10 @@ private:
     // possono legarsi. La progressione QSO sotto è reference-alias alla struct.
     decodium::seq::QsoSequencerState m_seqState;
     QString m_tx1, m_tx2, m_tx3, m_tx4, m_tx5, m_tx6;
+    // Operator-selected CQ tokens between "CQ" and our callsign (for
+    // example "CQ WWA").  Auto CQ must not discard them when TX6 is rebuilt.
+    QString m_customCqPrefix;
+    bool m_skipCustomCqPrefixRecovery {false};
     int&    m_currentTx = m_seqState.currentTx;
     QString& m_dxCall = m_seqState.dxCall;
     QString& m_dxGrid = m_seqState.dxGrid;
@@ -3168,7 +3172,9 @@ private:
                           const QString& propMode = QString(),
                           const QString& satellite = QString(),
                           const QString& satMode = QString(),
-                          const QString& freqRx = QString());
+                          const QString& freqRx = QString(),
+                          int cqZone = 0,
+                          int ituZone = 0);
 
     // LotW lite
     bool          m_lotwEnabled  {false};

@@ -985,6 +985,7 @@ static void retireAudioSink(QAudioSink *sink, QBuffer *buffer, const QString& re
 
 #ifdef Q_OS_LINUX
 static constexpr char kLinuxPulseSourcePrefix[] = "Pulse/PipeWire: ";
+static constexpr char kLinuxPulseMonitorSourcePrefix[] = "Pulse/PipeWire monitor: ";
 static constexpr char kLinuxPulseSinkPrefix[] = "Pulse/PipeWire: ";
 
 static QStringList linuxAlsaCardsForLog()
@@ -1012,11 +1013,27 @@ static QString linuxPulseSourceNameFromShortLine(const QString& line)
         return {};
     }
 
-    const QString name = fields.at(1).trimmed();
-    if (name.isEmpty() || name.endsWith(QStringLiteral(".monitor"))) {
+    // PipeWire exposes the audio playing on a sink as a PulseAudio source
+    // whose name ends in ".monitor". It is a valid capture source and is
+    // precisely what browser WebSDR/KiwiSDR users need, so do not discard it.
+    return fields.at(1).trimmed();
+}
+
+static bool linuxPulseSourceIsMonitor(const QString& sourceName)
+{
+    return sourceName.trimmed().endsWith(QStringLiteral(".monitor"), Qt::CaseInsensitive);
+}
+
+static QString linuxPulseSourceDisplayName(const QString& sourceName)
+{
+    const QString source = sourceName.trimmed();
+    if (source.isEmpty()) {
         return {};
     }
-    return name;
+    const char* const prefix = linuxPulseSourceIsMonitor(source)
+        ? kLinuxPulseMonitorSourcePrefix
+        : kLinuxPulseSourcePrefix;
+    return QString::fromLatin1(prefix) + source;
 }
 
 static QString linuxPulseSinkNameFromShortLine(const QString& line)
@@ -1090,9 +1107,14 @@ static QString linuxPulseSourceNameFromDisplay(QString value)
 {
     value = value.trimmed();
     const QString prefix = QString::fromLatin1(kLinuxPulseSourcePrefix);
-    return value.startsWith(prefix, Qt::CaseInsensitive)
-        ? value.mid(prefix.size()).trimmed()
-        : QString();
+    const QString monitorPrefix = QString::fromLatin1(kLinuxPulseMonitorSourcePrefix);
+    if (value.startsWith(monitorPrefix, Qt::CaseInsensitive)) {
+        return value.mid(monitorPrefix.size()).trimmed();
+    }
+    if (value.startsWith(prefix, Qt::CaseInsensitive)) {
+        return value.mid(prefix.size()).trimmed();
+    }
+    return {};
 }
 
 static QString linuxPulseSinkNameFromDisplay(QString value)
@@ -3846,6 +3868,34 @@ static bool isPlausibleDecodedCallsign(QString const& token)
 {
     return isStrictAmateurCallsign(token)
         || isSpecialEventStyleCallsign(token);
+}
+
+static QString customCqPrefixFromMessage(QString const& message, QString const& myCall)
+{
+    QStringList const tokens = message.trimmed().toUpper().split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    QString const call = normalizedTxCallToken(myCall);
+    if (tokens.size() < 3 || tokens.first() != QStringLiteral("CQ") || call.isEmpty()) {
+        return {};
+    }
+
+    int const callIndex = tokens.indexOf(call);
+    if (callIndex <= 1) {
+        return {};
+    }
+    return tokens.mid(0, callIndex).join(QLatin1Char(' '));
+}
+
+static QString ftxCqMessageWithCustomPrefix(QString const& standardMessage, QString const& customPrefix)
+{
+    QStringList const standardTokens = standardMessage.split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    QStringList const prefixTokens = customPrefix.trimmed().toUpper().split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    if (standardTokens.size() < 2 || standardTokens.first() != QStringLiteral("CQ")
+        || prefixTokens.size() < 2 || prefixTokens.first() != QStringLiteral("CQ")) {
+        return standardMessage;
+    }
+    return prefixTokens.join(QLatin1Char(' '))
+        + QLatin1Char(' ')
+        + standardTokens.mid(1).join(QLatin1Char(' '));
 }
 
 static bool isSyntheticLabCallsign(QString const& token)
@@ -15104,10 +15154,18 @@ void DecodiumBridge::regenerateTxMessages()
         return;
     }
 
-    // TX6 — CQ: sempre rigenerato da callsign+grid quando il modo lo consente.
+    // TX6 — rebuild callsign/grid while retaining an operator-entered CQ
+    // modifier such as "CQ WWA".  The legacy widget path does this through
+    // m_CQtype; the QML bridge needs to retain it independently as well.
     // I nominativi speciali non standard (es. II9MESC) in FT8/FT4/FT2 devono
     // usare type-4 senza locator, altrimenti il packing standard li tronca.
-    QString newTx6 = standardFtxCqMessage(m_callsign, grid4, mode);
+    if (m_skipCustomCqPrefixRecovery) {
+        m_skipCustomCqPrefixRecovery = false;
+    } else if (m_customCqPrefix.isEmpty()) {
+        m_customCqPrefix = customCqPrefixFromMessage(m_tx6, m_callsign);
+    }
+    QString newTx6 = ftxCqMessageWithCustomPrefix(
+        standardFtxCqMessage(m_callsign, grid4, mode), m_customCqPrefix);
     setTx6(newTx6);
 
     // TX1-5: rigenerati solo se dxCall è noto
@@ -23131,7 +23189,10 @@ void DecodiumBridge::setTxMessage(int n, const QString& message)
     case 3: setTx3(normalized); break;
     case 4: setTx4(normalized); break;
     case 5: setTx5(normalized); break;
-    case 6: setTx6(normalized); break;
+    case 6:
+        m_customCqPrefix = customCqPrefixFromMessage(normalized, m_callsign);
+        setTx6(normalized);
+        break;
     default: break;
     }
 }
@@ -23180,6 +23241,8 @@ QString DecodiumBridge::validateTxMessage(const QString& message) const
 
 void DecodiumBridge::resetStandardTxMessages()
 {
+    m_customCqPrefix.clear();
+    m_skipCustomCqPrefixRecovery = true;
     regenerateTxMessages();
 }
 
@@ -28141,7 +28204,7 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
             addrInfo = m_udpMessageClient->server_address().toString()
                        + QStringLiteral(":") + QString::number(m_udpMessageClient->server_port());
         }
-        emit statusMessage(QStringLiteral("QSO %1 -> UDP %2 (%3 destinatari)")
+        emit statusMessage(QStringLiteral("QSO %1 -> UDP %2 (%3 datagrammi in coda)")
                            .arg(dxCall, addrInfo)
                            .arg(totalTargets));
     } else if (!m_udpNoTargetWarningSent) {
@@ -28205,8 +28268,11 @@ void DecodiumBridge::udpSendN1mmLoggedQso(const QString& dxCall, const QByteArra
 
     QString const serverName = getSetting(QStringLiteral("N1MMServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
     quint16 const port = udpPortFromSettingValue(getSetting(QStringLiteral("N1MMServerPort"), 2333), 2333);
-    if (udpSendRawAdifDatagram(QStringLiteral("N1MM raw ADIF"), serverName, port, dxCall, adifRecord)) {
-        emit statusMessage(QStringLiteral("QSO %1 -> N1MM/EasyLog %2:%3")
+    // This is the ADIF-over-UDP stream used by WSJT-X's “N1MM Logger+
+    // Broadcasts” option. HRD Logbook QSO Forwarding accepts that same stream
+    // on its WSJT-X receive port (normally 2333).
+    if (udpSendRawAdifDatagram(QStringLiteral("N1MM / HRD ADIF UDP"), serverName, port, dxCall, adifRecord)) {
+        emit statusMessage(QStringLiteral("QSO %1 -> UDP ADIF (N1MM / HRD) %2:%3 queued")
                            .arg(dxCall, serverName)
                            .arg(port));
     }
@@ -29903,7 +29969,11 @@ void DecodiumBridge::genStdMsgs(const QString& hisCall, const QString& hisGrid)
                                  m_sendRR73, false, mode));           // RR73 o RRR
     setTx5(standardFtxQsoMessage(5, hisCall, m_callsign, mygr, rptSent,
                                  m_sendRR73, false, mode));           // 73
-    setTx6(standardFtxCqMessage(m_callsign, mygr, mode));              // CQ
+    if (m_customCqPrefix.isEmpty()) {
+        m_customCqPrefix = customCqPrefixFromMessage(m_tx6, m_callsign);
+    }
+    setTx6(ftxCqMessageWithCustomPrefix(
+        standardFtxCqMessage(m_callsign, mygr, mode), m_customCqPrefix)); // CQ
     Q_UNUSED(hisGrid)
 }
 
@@ -36587,7 +36657,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
                                     const QString& satMode = QString(),
                                     const QString& freqRx = QString(),
                                     const QString& name = QString(),
-                                    const QString& qth = QString());
+                                    const QString& qth = QString(),
+                                    int cqZone = 0,
+                                    int ituZone = 0);
 
 QVariantMap DecodiumBridge::pendingLogQsoPreview() const
 {
@@ -37380,6 +37452,21 @@ void DecodiumBridge::logQsoNow()
         }
     }
 
+    // CQZ/ITUZ are optional ADIF fields. Add them only after a successful
+    // cty.dat lookup: emitting a literal zero makes external loggers record
+    // an invalid zone rather than leaving an unknown zone unset.
+    int logCqZone = 0;
+    int logItuZone = 0;
+    if (m_dxccLookup && m_dxccLookup->isLoaded()) {
+        DxccEntity const entity = m_dxccLookup->lookup(logDxCall);
+        if (entity.cqZone >= 1 && entity.cqZone <= 40) {
+            logCqZone = entity.cqZone;
+        }
+        if (entity.ituZone >= 1 && entity.ituZone <= 90) {
+            logItuZone = entity.ituZone;
+        }
+    }
+
     // 1) Log custom (all.txt) — compatibilità esistente
     QString logPath = logAllTxtPath();
     QDir().mkpath(QFileInfo(logPath).absolutePath());
@@ -37400,11 +37487,12 @@ void DecodiumBridge::logQsoNow()
     QByteArray const adifRecord = bridgeAdifRecordText(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
                                                        logRptSent, logRptRcvd, m_callsign, m_grid,
                                                        logComments, logPropMode, logSatellite, logSatMode, logFreqRx,
-                                                       m_nextLogName, m_nextLogQth).toUtf8();
+                                                       m_nextLogName, m_nextLogQth, logCqZone, logItuZone).toUtf8();
     traceLogStep(QStringLiteral("adif-record-built"));
     appendAdifRecord(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
                      logRptSent, logRptRcvd,
-                     logComments, logPropMode, logSatellite, logSatMode, logFreqRx);
+                     logComments, logPropMode, logSatellite, logSatMode, logFreqRx,
+                     logCqZone, logItuZone);
     traceLogStep(QStringLiteral("adif-appended"));
 
     // 3) Inoltro ai log esterni compatibili WSJT-X UDP / N1MM.
@@ -46702,8 +46790,7 @@ void DecodiumBridge::refreshAudioDeviceCache(const QString& reason,
             qInfo().noquote() << QStringLiteral("[AUDIODEV] PULSE SOURCE %1").arg(line);
             const QString pulseSourceName = linuxPulseSourceNameFromShortLine(line);
             if (!pulseSourceName.isEmpty()) {
-                const QString displayName =
-                    QString::fromLatin1(kLinuxPulseSourcePrefix) + pulseSourceName;
+                const QString displayName = linuxPulseSourceDisplayName(pulseSourceName);
                 if (!inputNames.contains(displayName, Qt::CaseInsensitive)) {
                     inputNames.append(displayName);
                 }
@@ -48116,7 +48203,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
                                     const QString& satMode,
                                     const QString& freqRx,
                                     const QString& name,
-                                    const QString& qth)
+                                    const QString& qth,
+                                    int cqZone,
+                                    int ituZone)
 {
     double const freqMhz = freqHz / 1e6;
     QString const normalizedMode = mode.trimmed().toUpper();
@@ -48149,6 +48238,12 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
             + bridgeAdifField(QStringLiteral("STATION_CALLSIGN"), myCall);
     if (!myGrid.trimmed().isEmpty()) {
         record += bridgeAdifField(QStringLiteral("MY_GRIDSQUARE"), myGrid);
+    }
+    if (cqZone >= 1 && cqZone <= 40) {
+        record += bridgeAdifField(QStringLiteral("CQZ"), QString::number(cqZone));
+    }
+    if (ituZone >= 1 && ituZone <= 90) {
+        record += bridgeAdifField(QStringLiteral("ITUZ"), QString::number(ituZone));
     }
     if (!name.trimmed().isEmpty()) {
         record += bridgeAdifField(QStringLiteral("NAME"), name.trimmed());
@@ -48189,7 +48284,9 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
                                        const QString& propMode,
                                        const QString& satellite,
                                        const QString& satMode,
-                                       const QString& freqRx)
+                                       const QString& freqRx,
+                                       int cqZone,
+                                       int ituZone)
 {
     QString const logPath = ensureAdifLogPath();
     QDir().mkpath(QFileInfo(logPath).absolutePath());
@@ -48205,7 +48302,7 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
         bridgeAdifRecordText(dxCall, dxGrid, freqHz, mode, timeOnUtc, timeOffUtc,
                              rstSent, rstRcvd, m_callsign, m_grid,
                              comments, propMode, satellite, satMode, freqRx,
-                             m_nextLogName, m_nextLogQth)
+                             m_nextLogName, m_nextLogQth, cqZone, ituZone)
         + QStringLiteral("<EOR>\n");
     ts << adifRecord;
 
