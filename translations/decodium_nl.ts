@@ -16742,6 +16742,70 @@ Gebruik Hoog als u het niet zeker weet.</translation>
         <source>Query history:</source>
         <translation>Zoekgeschiedenis:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP-poort:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>Uitvoer inschakelen:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>Voorinstelling voor HRD Logbook gebruiken</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>Set / radio:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>Stationslabel:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>Call van de operator (optioneel)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>Optioneel - bijv. Thuisstation</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Optioneel - bijv. Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>De actieve call die Decodium uitzendt en als STATION_CALLSIGN in ADIF schrijft.</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Optionele verouderde instelling voor het operatorcall. Vervangt nooit My Call bij zenden of STATION_CALLSIGN in ADIF.</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Optioneel beschrijvend label voor dit station of deze opstelling. Het is geen call en geen radiomodel.</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Optionele beschrijving van de transceiver of radio, bijvoorbeeld Icom IC-7100. Als het veld leeg blijft, gebruikt Decodium voor de PSK Reporter-metagegevens de CAT-setnaam, indien beschikbaar.</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Schakelt de N1MM-compatibele ADIF-UDP-uitvoer in en stelt 127.0.0.1:2333 in. Schakel in HRD Logbook UDP Receive / WSJT-X QSO Forwarding in op poort 2333.</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Gebruik deze ADIF-UDP-uitvoer voor N1MM Logger+ of QSO Forwarding van HRD Logbook. HRD luistert normaal op 127.0.0.1:2333; dit is iets anders dan de primaire WSJT-X UDP-server hierboven.</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: items met &apos;Pulse/PipeWire monitor&apos; nemen het geluid op dat op die PipeWire/PulseAudio-sink speelt, handig voor WebSDR/KiwiSDR-geluid in de browser. Een Pulse/PipeWire-bron kiezen vereist pactl en wijzigt de standaardopnamebron van de huidige gebruiker.</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

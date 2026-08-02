@@ -16600,6 +16600,70 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>Query history:</source>
         <translation>Lekérdezési előzmények:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP-port:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>Kimenet engedélyezése:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>HRD Logbook előbeállítás használata</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>Készülék / rádió:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>Állomás címkéje:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>Operátor hívójele (nem kötelező)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>Nem kötelező - pl. Otthoni állomás</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Nem kötelező - pl. Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Az aktív hívójel, amelyet a Decodium ad és STATION_CALLSIGN néven ír az ADIF-be.</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Nem kötelező, örökölt operátor-hívójel beállítás. Soha nem váltja fel a My Call értéket adáskor, sem a STATION_CALLSIGN mezőt az ADIF-ben.</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Nem kötelező leíró címke ehhez az állomáshoz vagy összeállításhoz. Nem hívójel és nem rádiótípus.</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Nem kötelező transceiver- vagy rádióleírás, például Icom IC-7100. Ha üresen marad, a Decodium a CAT készüléknevét használja, ha elérhető, a PSK Reporter metaadatokhoz.</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Bekapcsolja az N1MM-kompatibilis ADIF UDP kimenetet, és beállítja a 127.0.0.1:2333 címet. A HRD Logbookban engedélyezd az UDP Receive / WSJT-X QSO Forwarding funkciót a 2333-as porton.</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Ezt az ADIF UDP kimenetet használd az N1MM Logger+ vagy a HRD Logbook QSO Forwarding funkciójához. A HRD általában a 127.0.0.1:2333 címen figyel; ez nem azonos a fenti elsődleges WSJT-X UDP-kiszolgálóval.</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: a &apos;Pulse/PipeWire monitor&apos; jelölésű bejegyzések az adott PipeWire/PulseAudio kimeneten szóló hangot rögzítik, ami hasznos a böngészőbeli WebSDR/KiwiSDR hanghoz. Pulse/PipeWire forrás választásához pactl kell, és megváltoztatja a jelenlegi felhasználó alapértelmezett felvételi forrását.</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

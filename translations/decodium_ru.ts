@@ -16744,6 +16744,70 @@ If unsure, use High.</source>
         <source>Query history:</source>
         <translation>История запросов:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP-порт:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>Включить вывод:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>Использовать предустановку HRD Logbook</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>Трансивер / радио:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>Метка станции:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>Позывной оператора (необязательно)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>Необязательно - напр. Домашняя станция</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Необязательно - напр. Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Активный позывной, который Decodium передаёт и записывает в ADIF как STATION_CALLSIGN.</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Необязательная устаревшая настройка позывного оператора. Она никогда не заменяет My Call при передаче или STATION_CALLSIGN в ADIF.</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Необязательная описательная метка для этой станции или установки. Это не позывной и не модель трансивера.</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Необязательное описание трансивера или радио, например Icom IC-7100. Если поле пустое, Decodium использует для метаданных PSK Reporter имя трансивера из CAT, когда оно доступно.</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Включает совместимый с N1MM вывод ADIF по UDP и задаёт 127.0.0.1:2333. В HRD Logbook включите UDP Receive / WSJT-X QSO Forwarding на порту 2333.</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Используйте этот вывод ADIF по UDP для N1MM Logger+ или QSO Forwarding в HRD Logbook. HRD обычно слушает 127.0.0.1:2333; это не то же самое, что основной UDP-сервер WSJT-X выше.</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: записи с пометкой «Pulse/PipeWire monitor» захватывают звук, воспроизводимый на этом приёмнике PipeWire/PulseAudio, что удобно для звука WebSDR/KiwiSDR в браузере. Выбор источника Pulse/PipeWire требует pactl и меняет источник записи по умолчанию у текущего пользователя.</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

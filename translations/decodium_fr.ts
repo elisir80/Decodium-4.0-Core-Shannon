@@ -16732,6 +16732,70 @@ En cas de doute, utilisez Élevée.</translation>
         <source>Query history:</source>
         <translation>Historique des requêtes :</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>Port UDP :</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>Activer la sortie :</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>Utiliser le préréglage HRD Logbook</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>Poste / radio :</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>Libellé de la station :</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>Indicatif de l&apos;opérateur (facultatif)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>Facultatif - par ex. Station fixe</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Facultatif - par ex. Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>L&apos;indicatif actif que Decodium émet et inscrit comme STATION_CALLSIGN dans l&apos;ADIF.</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Réglage hérité et facultatif de l&apos;indicatif de l&apos;opérateur. Il ne remplace jamais My Call à l&apos;émission ni STATION_CALLSIGN dans l&apos;ADIF.</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Libellé descriptif facultatif pour cette station ou cette installation. Ce n&apos;est ni un indicatif ni un modèle de poste.</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Description facultative du transceiver ou du poste, par exemple Icom IC-7100. Si le champ est vide, Decodium utilise le nom du poste issu du CAT, lorsqu&apos;il est disponible, pour les métadonnées PSK Reporter.</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Active la sortie ADIF par UDP compatible N1MM et fixe 127.0.0.1:2333. Dans HRD Logbook, activez UDP Receive / WSJT-X QSO Forwarding sur le port 2333.</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Utilisez cette sortie ADIF par UDP pour N1MM Logger+ ou pour le QSO Forwarding d&apos;HRD Logbook. HRD écoute normalement sur 127.0.0.1:2333 ; c&apos;est différent du serveur UDP WSJT-X principal ci-dessus.</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux : les entrées marquées « Pulse/PipeWire monitor » capturent l&apos;audio joué sur cette sortie PipeWire/PulseAudio, utile pour l&apos;audio WebSDR/KiwiSDR dans le navigateur. Choisir une source Pulse/PipeWire nécessite pactl et modifie la source de capture par défaut de l&apos;utilisateur courant.</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

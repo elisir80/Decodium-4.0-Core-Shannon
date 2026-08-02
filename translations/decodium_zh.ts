@@ -16730,6 +16730,70 @@ If unsure, use High.</source>
         <source>Query history:</source>
         <translation>查询历史:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP 端口:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>启用输出:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>使用 HRD Logbook 预设</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>电台 / 设备:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>电台标签:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>操作员呼号（可选）</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>可选 - 例如 家庭电台</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>可选 - 例如 Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Decodium 发射并写入 ADIF 中 STATION_CALLSIGN 的当前呼号。</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>可选的旧式操作员呼号设置。它绝不会替代发射用的 My Call 或 ADIF 中的 STATION_CALLSIGN。</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>此电台或操作配置的可选描述标签。它不是呼号，也不是设备型号。</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>可选的收发信机或设备描述，例如 Icom IC-7100。留空时，Decodium 会在可用时使用 CAT 的设备名作为 PSK Reporter 的元数据。</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>启用与 N1MM 兼容的 ADIF UDP 输出，并设置为 127.0.0.1:2333。请在 HRD Logbook 中于端口 2333 启用 UDP Receive / WSJT-X QSO Forwarding。</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>将此 ADIF UDP 输出用于 N1MM Logger+ 或 HRD Logbook 的 QSO Forwarding。HRD 通常监听 127.0.0.1:2333；这与上面的主 WSJT-X UDP 服务器不同。</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: 标记为 “Pulse/PipeWire monitor” 的条目会采集该 PipeWire/PulseAudio 输出上正在播放的音频，适合浏览器中的 WebSDR/KiwiSDR 音频。选择 Pulse/PipeWire 源需要 pactl，并会更改当前用户的默认采集源。</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

@@ -16730,6 +16730,70 @@ Hvis du er i tvivl, brug Høj.</translation>
         <source>Query history:</source>
         <translation>Forespørgselshistorik:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP-port:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>Aktivér output:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>Brug HRD Logbook-forudindstilling</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>Rig / radio:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>Stationsetiket:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>Operatørkald (valgfrit)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>Valgfrit - fx Hjemmestation</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Valgfrit - fx Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Det aktive kald som Decodium sender og skriver som STATION_CALLSIGN i ADIF.</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Valgfri ældre indstilling for operatørkald. Den erstatter aldrig My Call ved sending eller STATION_CALLSIGN i ADIF.</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Valgfri beskrivende etiket for denne station eller opstilling. Det er ikke et kald eller en radiomodel.</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Valgfri beskrivelse af transceiver eller radio, fx Icom IC-7100. Hvis feltet er tomt, bruger Decodium CAT-navnet på riggen, når det er tilgængeligt, til PSK Reporter-metadata.</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Aktiverer det N1MM-kompatible ADIF-UDP-output og sætter 127.0.0.1:2333. Aktivér UDP Receive / WSJT-X QSO Forwarding på port 2333 i HRD Logbook.</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Brug dette ADIF-UDP-output til N1MM Logger+ eller HRD Logbook QSO Forwarding. HRD lytter normalt på 127.0.0.1:2333; det er ikke det samme som den primære WSJT-X UDP-server ovenfor.</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: poster mærket &apos;Pulse/PipeWire monitor&apos; optager den lyd, der afspilles på den pågældende PipeWire/PulseAudio-sink, nyttigt til WebSDR/KiwiSDR-lyd i browseren. Valg af en Pulse/PipeWire-kilde kræver pactl og ændrer den aktuelle brugers standardoptagekilde.</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

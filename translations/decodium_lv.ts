@@ -16745,6 +16745,70 @@ Noklusējums: IZSL.</translation>
         <source>Query history:</source>
         <translation>Vaicājumu vēsture:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP ports:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>Iespējot izvadi:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>Izmantot HRD Logbook sagatavi</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>Iekārta / radio:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>Stacijas etiķete:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>Operatora izsaukums (neobligāts)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>Neobligāti - piem., Mājas stacija</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Neobligāti - piem., Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Aktīvais izsaukums, ko Decodium raida un ieraksta ADIF kā STATION_CALLSIGN.</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Neobligāts mantots operatora izsaukuma iestatījums. Tas nekad neaizstāj My Call raidīšanai vai STATION_CALLSIGN ADIF failā.</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Neobligāta aprakstoša etiķete šai stacijai vai iekārtu kopumam. Tas nav izsaukums vai radio modelis.</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Neobligāts uztvērēja-raidītāja vai radio apraksts, piemēram, Icom IC-7100. Ja atstāts tukšs, Decodium PSK Reporter metadatiem izmanto CAT iekārtas nosaukumu, ja tas ir pieejams.</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Iespējo ar N1MM saderīgu ADIF UDP izvadi un iestata 127.0.0.1:2333. HRD Logbook programmā ieslēdziet UDP Receive / WSJT-X QSO Forwarding uz porta 2333.</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Izmantojiet šo ADIF UDP izvadi N1MM Logger+ vai HRD Logbook QSO Forwarding vajadzībām. HRD parasti klausās uz 127.0.0.1:2333; tas atšķiras no augstāk esošā galvenā WSJT-X UDP servera.</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: ieraksti ar atzīmi &apos;Pulse/PipeWire monitor&apos; tver skaņu, kas atskaņojas attiecīgajā PipeWire/PulseAudio izvadē, kas noder WebSDR/KiwiSDR skaņai pārlūkā. Pulse/PipeWire avota izvēlei nepieciešams pactl, un tā maina pašreizējā lietotāja noklusēto tveršanas avotu.</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>

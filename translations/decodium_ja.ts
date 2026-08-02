@@ -16730,6 +16730,70 @@ If unsure, use High.</source>
         <source>Query history:</source>
         <translation>問い合わせ履歴:</translation>
     </message>
+    <message>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <source>UDP Port:</source>
+        <translation>UDP ポート:</translation>
+    </message>
+    <message>
+        <source>Enable output:</source>
+        <translation>出力を有効化:</translation>
+    </message>
+    <message>
+        <source>Use HRD Logbook preset</source>
+        <translation>HRD Logbook のプリセットを使う</translation>
+    </message>
+    <message>
+        <source>Rig / radio:</source>
+        <translation>リグ / 無線機:</translation>
+    </message>
+    <message>
+        <source>Station label:</source>
+        <translation>局のラベル:</translation>
+    </message>
+    <message>
+        <source>Optional operator callsign</source>
+        <translation>運用者のコールサイン (任意)</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Home station</source>
+        <translation>任意 - 例: 自宅局</translation>
+    </message>
+    <message>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>任意 - 例: Icom IC-7100</translation>
+    </message>
+    <message>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Decodium が送信し、ADIF に STATION_CALLSIGN として書き込む現在のコールサインです。</translation>
+    </message>
+    <message>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>運用者コールサインの旧来の任意設定です。送信時の My Call や ADIF の STATION_CALLSIGN を置き換えることはありません。</translation>
+    </message>
+    <message>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>この局や運用設備につける任意の説明ラベルです。コールサインでも無線機の型名でもありません。</translation>
+    </message>
+    <message>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>トランシーバーや無線機の説明 (任意)。例: Icom IC-7100。空欄の場合、Decodium は PSK Reporter のメタデータに CAT のリグ名を（取得できれば）使います。</translation>
+    </message>
+    <message>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>N1MM 互換の ADIF UDP 出力を有効にし、127.0.0.1:2333 を設定します。HRD Logbook 側ではポート 2333 で UDP Receive / WSJT-X QSO Forwarding を有効にしてください。</translation>
+    </message>
+    <message>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>この ADIF UDP 出力は N1MM Logger+ や HRD Logbook の QSO Forwarding 用です。HRD は通常 127.0.0.1:2333 で待ち受けます。上の主 WSJT-X UDP サーバーとは別物です。</translation>
+    </message>
+    <message>
+        <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
+        <translation>Linux: 「Pulse/PipeWire monitor」と付いた項目は、その PipeWire/PulseAudio シンクで再生中の音声を取り込みます。ブラウザーの WebSDR/KiwiSDR の音声に便利です。Pulse/PipeWire のソースを選ぶには pactl が必要で、現在のユーザーの既定の録音ソースが変わります。</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
