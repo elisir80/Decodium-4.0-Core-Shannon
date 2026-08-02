@@ -319,6 +319,10 @@ Searched paths:
         <source>🌙 Astronomical Data</source>
         <translation>🌙 天文数据</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>卫星跟踪</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2355,6 +2359,26 @@ or contact DXLab support at DXLab@groups.io.</source>
         <source>Socket error: %1</source>
         <translation>套接字错误：%1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>离线模式下无法发送命令。</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>离线模式下无法发送点报。</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>离线模式下已禁用 DX 集群</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>离线模式下已暂停 DX 集群</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>DX 集群就绪；按需连接</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2384,6 +2408,10 @@ or contact DXLab support at DXLab@groups.io.</source>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Feed 时间：%1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>离线: 使用缓存的传播数据</translation>
     </message>
 </context>
 <context>
@@ -2505,6 +2533,18 @@ or contact DXLab support at DXLab@groups.io.</source>
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>无法启动安装程序。</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>离线: 已禁用下载</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>离线: 已禁用更新检查</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>在线: 已启用更新检查</translation>
     </message>
 </context>
 <context>
@@ -4984,6 +5024,198 @@ Error: %2</source>
         <source>wanted %1 · exceptions %2</source>
         <translation>待通联 %1 · 例外 %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>新增</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>未确认</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>有效</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>已过期</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>可见</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>地平线以下</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>跟踪</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>归位</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>旋转器</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>停止时归位</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>安全</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>距离</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · 跟踪</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>刷新</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>清空缓存</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>样式</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>缓存已过期 · 正在更新</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>回退已启用: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>反馈不可用</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>点报已过期</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>点报还有 %1 秒有效</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>服务方未声明有效期</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>图像文件 (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>世界栅格 (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>导入离线栅格</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>导入离线世界栅格</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>导入合法获得的等距圆柱投影世界栅格，例如 Natural Earth 的导出。Decodium 只保存本地私有副本，不下载瓦片。</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>本地地图集、OpenStreetMap/OpenTopoMap、GEBCO 水深、NASA GIBS 与 MapTiler。若某个服务方失败，将尝试已配置的回退。</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>极光传播预报。时间图例显示来源的时长与有效期。</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>F2 临界频率预报，用于估计短波路径的电离层支持。</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>最高可用频率预报。时间图例显示获取时间、有效期与视觉衰减。</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>由当前 foF2 图推导的 NVIS 预报，作为独立的操作图层保留。</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>偶发 E 层概率预报。缓存数据在有效期后淡出，并持续标记为过期。</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>离线模式会暂停云端与网络服务，保留 ADIF、日志、缓存与无线电活动可用，并可使用用户导入的世界栅格。</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>暂停云端与网络服务，保留本地 ADIF、日志、缓存与无线电活动可用，并使用本地地图集或导入的栅格包。</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: 未加载最近 %1 分钟的接收台</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>在过去 %1 分钟内向 PSK Reporter 报告收到你呼号的接收台。无需启用 Decodium 的 PSK 上传。</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>获取过去 %1 分钟内收到你呼号的接收台。PSK 上传与此无关。</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5427,6 +5659,10 @@ Error: %2</source>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>取消</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>复制呼号</translation>
     </message>
 </context>
 <context>
@@ -6220,6 +6456,10 @@ Right-click: disconnect</source>
         <location filename="../qml/decodium/Main.qml" line="11513"/>
         <source>Alert on My Call</source>
         <translation>我的呼号提醒</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>最近 %1 分钟内活跃的波段:</translation>
     </message>
 </context>
 <context>
@@ -16482,6 +16722,14 @@ If unsure, use High.</source>
         <source>nessun record</source>
         <translation>无记录</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>PSK Reporter 用于呼号搜索与被谁收到结果的回溯时长。</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>查询历史:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20247,6 +20495,38 @@ Right click for insert and delete options.</source>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>月下点 %1°, %2°  照度 %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · 有效至 %1</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>有效至 %1</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>有效期不可用</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>%1 小时前</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>%1 分钟前</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>%1 秒前</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>无采样</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>传播预报 · 时长 / 有效期 / 衰减</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -20597,6 +20877,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>来自本地数据库的结果</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>离线: 已禁用呼号的远程更新</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>离线: 未请求远程记录</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>离线: 仅使用本地呼号缓存与数据库</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>在线: 已启用呼号的远程服务方</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>跟踪</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>旋转器归位</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>停止旋转器</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>已启用旋转器</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>旋转器主机</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>旋转器反馈</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>自动旋转器</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>自动多普勒</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>多普勒</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>方位角</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>仰角</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>距离</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>可见性</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>观测点</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>协议</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>跟踪的频率</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>TLE 时长</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>刷新 TLE</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>预测 24 小时</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>即将到来的过境</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>正在计算过境…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>正在后台计算…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>所选时间段内没有过境</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>卫星服务不可用</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 卫星跟踪</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>正在更新…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>不可用</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>当前</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>过期</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>加载中</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>离线缓存</translation>
     </message>
 </context>
 </TS>

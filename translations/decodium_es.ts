@@ -333,6 +333,10 @@ Searched paths:
         <source>🌙 Astronomical Data</source>
         <translation>🌙 Datos astronómicos</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>Seguimiento de satélites</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2430,6 +2434,26 @@ o contacte al soporte de  DXLab en DXLab@groups.io</translation>
         <source>Socket error: %1</source>
         <translation>Error de socket: %1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>No se puede enviar el comando en modo sin conexión.</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>No se puede enviar el spot en modo sin conexión.</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>DX Cluster desactivado en modo sin conexión</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>DX Cluster en pausa en modo sin conexión</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>DX Cluster listo; se conecta cuando se solicita</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2459,6 +2483,10 @@ o contacte al soporte de  DXLab en DXLab@groups.io</translation>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Hora del dato: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>Sin conexión: se usan datos de propagación en caché</translation>
     </message>
 </context>
 <context>
@@ -2580,6 +2608,18 @@ o contacte al soporte de  DXLab en DXLab@groups.io</translation>
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>No se pudo iniciar el instalador.</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>Sin conexión: descargas desactivadas</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>Sin conexión: comprobación de actualizaciones desactivada</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>En línea: comprobación de actualizaciones activada</translation>
     </message>
 </context>
 <context>
@@ -5140,6 +5180,198 @@ Error: %2</translation>
         <source>wanted %1 · exceptions %2</source>
         <translation>buscados %1 · excepciones %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NUEVO</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>SIN CONFIRMAR</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>VÁLIDO</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>CADUCADO</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>VISIBLE</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>BAJO EL HORIZONTE</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>SEGUIR</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>APARCAR</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>Rotor</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>Aparcar al parar</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>Seguridad</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>distancia</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · seguimiento</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>actualizar</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>Vaciar la caché</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>ESTILO</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>Caché obsoleta · actualización en curso</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>Recurso activo: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>Retorno no disponible</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>Spot caducado</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>Spot válido aún %1 s</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>El proveedor no declara la validez</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Archivos de imagen (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Ráster del mundo (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>Importar un ráster sin conexión</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>Importar un ráster del mundo sin conexión</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>Importa un ráster del mundo equirectangular obtenido legalmente, como una exportación de Natural Earth. Decodium guarda una copia local privada y no descarga teselas.</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>Atlas local, OpenStreetMap/OpenTopoMap, batimetría GEBCO, NASA GIBS y MapTiler. Si un proveedor falla, se prueba el recurso configurado.</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>Previsión de propagación auroral. La leyenda temporal muestra la antigüedad y la validez de la fuente.</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>Previsión de la frecuencia crítica F2, usada para estimar el soporte ionosférico de los caminos HF.</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>Previsión de la frecuencia máxima utilizable. La leyenda temporal indica la hora de adquisición, la validez y el desvanecimiento visual.</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>Previsión NVIS derivada del mapa foF2 actual; se mantiene como capa operativa separada.</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>Previsión de probabilidad de E esporádica. Los datos en caché se desvanecen tras su ventana de validez y quedan marcados como obsoletos.</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>El modo sin conexión pausa los servicios de red, mantiene disponibles ADIF, cuaderno, caché y actividad de radio, y puede usar un ráster del mundo importado por el usuario.</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>Pausar los servicios de red, mantener disponibles ADIF, cuaderno, caché y actividad de radio locales, y usar el atlas local o el paquete de ráster importado.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: ningún receptor cargado para los últimos %1 minutos</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Receptores que informaron a PSK Reporter de haber oído tu indicativo durante los últimos %1 minutos. No hace falta que la subida PSK de Decodium esté activada.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>Recuperar los receptores que oyeron tu indicativo durante los últimos %1 minutos. La subida PSK es independiente.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5595,6 +5827,10 @@ Error: %2</translation>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>Copiar el indicativo</translation>
     </message>
 </context>
 <context>
@@ -6388,6 +6624,10 @@ Clic derecho: desconectar</translation>
         <location filename="../qml/decodium/Main.qml" line="4864"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
         <translation>Perfiles listos: aplican en bloque los ajustes FT2/decode. Detalles en Setup -&gt; TX.</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>Activo en las bandas durante los últimos %1 minutos:</translation>
     </message>
 </context>
 <context>
@@ -16823,6 +17063,14 @@ En caso de duda, usa Alta.</translation>
         <source>nessun record</source>
         <translation>ningún registro</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>Periodo de consulta hacia atrás de PSK Reporter para la búsqueda de indicativos y los resultados de quién te oyó.</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>Historial de consultas:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20757,6 +21005,38 @@ Clic derecho para insertar y eliminar opciones.</translation>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>Punto sublunar %1°, %2°  Iluminación %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · válido hasta %1</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>válido hasta %1</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>validez no disponible</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>hace %1 h</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>hace %1 min</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>hace %1 s</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>sin muestra</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>PREVISIÓN DE PROPAGACIÓN · antigüedad / validez / desvanecimiento</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -21107,6 +21387,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>Resultado de las bases de datos locales</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>Sin conexión: actualizaciones remotas de indicativos desactivadas</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>Sin conexión: ningún registro remoto solicitado</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>Sin conexión: solo caché y bases de datos locales de indicativos</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>En línea: proveedores remotos de indicativos activados</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>Seguir</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>Aparcar el rotor</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>Parar el rotor</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>Rotor activado</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>Host del rotor</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>Retorno del rotor</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>Rotor automático</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>Doppler automático</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>Doppler</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>Azimut</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>Elevación</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>Distancia</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>Visibilidad</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>Observador</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protocolo</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>Frecuencia seguida</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>Antigüedad del TLE</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>Actualizar el TLE</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>Predicción 24 h</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>Pasadas próximas</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>Calculando pasadas…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>Cálculo en curso en segundo plano…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>Ninguna pasada en el intervalo seleccionado</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>Servicio de satélites no disponible</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 Seguimiento de satélites</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>Actualizando…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>No disponible</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>actual</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>obsoleto</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>cargando</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>caché sin conexión</translation>
     </message>
 </context>
 </TS>

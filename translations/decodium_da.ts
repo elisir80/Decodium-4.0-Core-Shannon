@@ -321,6 +321,10 @@ Searched paths:
         <source>🌙 Astronomical Data</source>
         <translation>🌙 Astronomiske data</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>Satellitsporing</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2357,6 +2361,26 @@ eller kontakt DXLab support på DXLab@groups.io.</translation>
         <source>Socket error: %1</source>
         <translation>Socket-fejl: %1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>Kan ikke sende kommando i offlinetilstand.</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>Kan ikke sende spot i offlinetilstand.</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>DX Cluster slået fra i offlinetilstand</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>DX Cluster sat på pause i offlinetilstand</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>DX Cluster klar; forbind når det ønskes</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2386,6 +2410,10 @@ eller kontakt DXLab support på DXLab@groups.io.</translation>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Feed-tid: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>Offline: bruger propagationsdata fra cachen</translation>
     </message>
 </context>
 <context>
@@ -2507,6 +2535,18 @@ eller kontakt DXLab support på DXLab@groups.io.</translation>
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>Kunne ikke starte installationsprogrammet.</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>Offline: downloads slået fra</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>Offline: kontrol af opdateringer slået fra</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>Online: kontrol af opdateringer slået til</translation>
     </message>
 </context>
 <context>
@@ -4986,6 +5026,198 @@ Fejl: %2</translation>
         <source>wanted %1 · exceptions %2</source>
         <translation>eftersøgte %1 · undtagelser %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NY</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>UBEKRÆFTET</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>GYLDIG</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>UDLØBET</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>SYNLIG</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>UNDER HORISONTEN</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>FØLG</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>PARKÉR</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>Rotor</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>Parkér ved stop</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>Sikkerhed</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>afstand</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · sporing</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>opdater</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>Tøm cache</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>STIL</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>Forældet cache · opdatering i gang</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>Reserve aktiv: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>Feedback utilgængelig</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>Spot udløbet</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>Spot gyldigt endnu %1 s</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>Udbyderen angiver ikke gyldigheden</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Billedfiler (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Verdensraster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>Importér offline-raster</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>Importér offline-verdensraster</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>Importér et lovligt anskaffet ækvirektangulært verdensraster, fx en Natural Earth-eksport. Decodium gemmer en privat lokal kopi og henter ikke fliser.</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>Lokalt atlas, OpenStreetMap/OpenTopoMap, GEBCO-batymetri, NASA GIBS og MapTiler. Hvis en udbyder fejler, prøves den konfigurerede reserve.</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>Prognose for auroral propagation. Tidslegenden viser kildens alder og gyldighed.</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>Prognose for F2-kritisk frekvens, brugt til at vurdere ionosfærisk støtte på HF-veje.</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>Prognose for maksimalt anvendelig frekvens. Tidslegenden viser hentetidspunkt, gyldighed og visuel falmning.</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>NVIS-prognose udledt af det aktuelle foF2-kort; den holdes som et separat operationelt lag.</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>Prognose for sandsynligheden for sporadisk E. Cachede data falmer efter gyldighedsvinduet og forbliver mærket som forældede.</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>Offlinetilstand sætter sky-/netværkstjenester på pause, holder ADIF, logbog, cache og radioaktivitet tilgængelige og kan bruge et importeret verdensraster fra brugeren.</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>Sæt sky-/netværkstjenester på pause, hold lokal ADIF, logbog, cache og radioaktivitet tilgængelige, og brug det lokale atlas eller det importerede rasterpakke.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: ingen modtagere indlæst for de seneste %1 minutter</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Modtagere der i de seneste %1 minutter har rapporteret til PSK Reporter, at de hørte dit kald. Decodiums PSK-upload behøver ikke være slået til.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>Hent modtagere der hørte dit kald i de seneste %1 minutter. PSK-upload er uafhængig.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5430,6 +5662,10 @@ Fejl: %2</translation>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>Annuller</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>Kopiér kald</translation>
     </message>
 </context>
 <context>
@@ -6223,6 +6459,10 @@ Højreklik: afbryd</translation>
         <location filename="../qml/decodium/Main.qml" line="11513"/>
         <source>Alert on My Call</source>
         <translation>Alarm ved mit kaldesignal</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>Aktiv på bånd i de seneste %1 minutter:</translation>
     </message>
 </context>
 <context>
@@ -16482,6 +16722,14 @@ Hvis du er i tvivl, brug Høj.</translation>
         <source>nessun record</source>
         <translation>ingen poster</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>PSK Reporter-tilbageblik for kaldesøgning og hørt-af-resultater.</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>Forespørgselshistorik:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20248,6 +20496,38 @@ Højre klik for at indsætte eller slette elementer.</translation>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>Subpunkt %1°, %2°  Belysning %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · gyldig til %1</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>gyldig til %1</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>gyldighed utilgængelig</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>%1 t gammel</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>%1 min gammel</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>%1 s gammel</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>ingen måling</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>PROPAGATIONSPROGNOSE · alder / gyldighed / falmning</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -20598,6 +20878,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>Resultat fra lokale databaser</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>Offline: eksterne kaldeopdateringer er slået fra</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>Offline: ingen eksterne poster anmodet</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>Offline: kun lokal cache og kaldedatabaser</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>Online: eksterne kaldeudbydere er slået til</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>Følg</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>Parkér rotoren</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>Stop rotoren</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>Rotor aktiveret</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>Rotorvært</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>Rotorfeedback</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>Automatisk rotor</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>Automatisk Doppler</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>Doppler</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>Azimut</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>Elevation</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>Afstand</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>Synlighed</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>Observatør</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protokol</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>Sporet frekvens</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>TLE-alder</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>Opdater TLE</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>Forudsig 24 t</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>Kommende passager</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>Beregner passager…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>Beregning kører i baggrunden…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>Ingen passage i det valgte interval</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>Satellittjeneste utilgængelig</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 Satellitsporing</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>Opdaterer…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>Utilgængelig</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>aktuel</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>forældet</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>indlæser</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>offline-cache</translation>
     </message>
 </context>
 </TS>

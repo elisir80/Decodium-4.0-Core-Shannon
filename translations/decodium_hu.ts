@@ -319,6 +319,10 @@ Keresett útvonalak:%1</translation>
         <source>🌙 Astronomical Data</source>
         <translation>🌙 Csillagászati adatok</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>Műholdkövetés</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2360,6 +2364,26 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
         <source>Socket error: %1</source>
         <translation>Socket hiba: %1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>Offline módban nem lehet parancsot küldeni.</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>Offline módban nem lehet spotot küldeni.</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>A DX Cluster offline módban kikapcsolva</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>A DX Cluster offline módban szünetel</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>A DX Cluster készen áll; kérésre csatlakozik</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2389,6 +2413,10 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Feed idő: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>Offline: gyorsítótárazott terjedési adatok használata</translation>
     </message>
 </context>
 <context>
@@ -2510,6 +2538,18 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>A telepítő nem indítható el.</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>Offline: a letöltések kikapcsolva</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>Offline: a frissítések ellenőrzése kikapcsolva</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>Online: a frissítések ellenőrzése bekapcsolva</translation>
     </message>
 </context>
 <context>
@@ -4985,6 +5025,198 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>wanted %1 · exceptions %2</source>
         <translation>keresett %1 · kivételek %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>ÚJ</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>NEM MEGERŐSÍTETT</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>ÉRVÉNYES</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>LEJÁRT</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>LÁTHATÓ</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>HORIZONT ALATT</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>KÖVETÉS</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>PARKOLÁS</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>Forgató</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>Parkolás leállításkor</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>Biztonság</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>távolság</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · követés</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>frissítés</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>Gyorsítótár ürítése</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>STÍLUS</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>Elavult gyorsítótár · frissítés folyamatban</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>Tartalék aktív: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>A visszajelzés nem érhető el</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>A spot lejárt</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>A spot még %1 s-ig érvényes</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>A szolgáltató nem adja meg az érvényességet</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Képfájlok (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Világraszter (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>Offline raszter importálása</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>Offline világraszter importálása</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>Importálj jogszerűen beszerzett, ekvirektanguláris világrasztert, például Natural Earth exportot. A Decodium privát helyi másolatot tárol, és nem tölt le csempéket.</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>Helyi atlasz, OpenStreetMap/OpenTopoMap, GEBCO batimetria, NASA GIBS és MapTiler. Ha egy szolgáltató hibázik, a beállított tartalék következik.</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>Sarkifényes terjedési előrejelzés. Az időbeli jelmagyarázat a forrás korát és érvényességét mutatja.</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>F2 kritikus frekvencia előrejelzése, a rövidhullámú útvonalak ionoszférikus támogatásának becsléséhez.</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>A maximálisan használható frekvencia előrejelzése. Az időbeli jelmagyarázat mutatja a lekérés idejét, az érvényességet és a vizuális elhalványulást.</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>A jelenlegi foF2 térképből származó NVIS előrejelzés; külön működési rétegként marad.</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>A szórványos E valószínűségének előrejelzése. A gyorsítótárazott adatok az érvényességi ablak után elhalványulnak, és elavultként maradnak megjelölve.</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>Az offline mód szünetelteti a felhő- és hálózati szolgáltatásokat, elérhetően tartja az ADIF-et, a naplót, a gyorsítótárat és a rádiós tevékenységet, és használhat felhasználó által importált világrasztert.</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>A felhő- és hálózati szolgáltatások szüneteltetése, a helyi ADIF, napló, gyorsítótár és rádiós tevékenység elérhetően tartása, valamint a helyi atlasz vagy az importált rasztercsomag használata.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: az elmúlt %1 percre nem töltődött be vevő</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Vevők, amelyek az elmúlt %1 percben jelezték a PSK Reporternek, hogy hallották a hívójeledet. A Decodium PSK-feltöltésének nem kell bekapcsolva lennie.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>Az elmúlt %1 percben a hívójeledet halló vevők lekérése. A PSK-feltöltés ettől független.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5428,6 +5660,10 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>Mégse</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>Hívójel másolása</translation>
     </message>
 </context>
 <context>
@@ -6221,6 +6457,10 @@ Jobb kattintás: lecsatlakozás</translation>
         <location filename="../qml/decodium/Main.qml" line="11513"/>
         <source>Alert on My Call</source>
         <translation>Riasztás saját hívójelre</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>Az elmúlt %1 percben aktív sávok:</translation>
     </message>
 </context>
 <context>
@@ -16352,6 +16592,14 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>nessun record</source>
         <translation>nincs rekord</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>A PSK Reporter visszatekintési időszaka a hívójel-kereséshez és a „ki hallott” eredményekhez.</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>Lekérdezési előzmények:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20113,6 +20361,38 @@ Jobb klikk a beillesztési és törlési lehetőségekhez.</translation>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>Talppont %1°, %2°  Megvilágítás %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · érvényes eddig: %1</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>érvényes eddig: %1</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>az érvényesség nem érhető el</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>%1 órás</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>%1 perces</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>%1 másodperces</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>nincs minta</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>TERJEDÉSI ELŐREJELZÉS · kor / érvényesség / elhalványulás</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -20463,6 +20743,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>Eredmény a helyi adatbázisokból</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>Offline: a távoli hívójel-frissítések kikapcsolva</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>Offline: nem kértünk távoli rekordot</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>Offline: csak helyi hívójel-gyorsítótár és adatbázisok</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>Online: a távoli hívójel-szolgáltatók bekapcsolva</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>Követés</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>Rotor parkolása</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>Rotor leállítása</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>Forgató bekapcsolva</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>Forgató gazdagép</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>Forgató visszajelzés</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>Automatikus forgató</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>Automatikus Doppler</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>Doppler</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>Azimut</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>Emelkedés</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>Távolság</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>Láthatóság</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>Megfigyelő</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protokoll</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>Követett frekvencia</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>TLE kora</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>TLE frissítése</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>Előrejelzés 24 ó</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>Következő áthaladások</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>Áthaladások számítása…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>A számítás a háttérben fut…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>Nincs áthaladás a kiválasztott időszakban</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>A műholdszolgáltatás nem érhető el</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 Műholdkövetés</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>Frissítés…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>Nem érhető el</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>aktuális</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>elavult</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>betöltés</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>offline gyorsítótár</translation>
     </message>
 </context>
 </TS>

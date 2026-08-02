@@ -327,6 +327,10 @@ Searched paths:
         <source>🌙 Astronomical Data</source>
         <translation>🌙 Astronomiskie dati</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>Satelītu izsekošana</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2370,6 +2374,26 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <source>Socket error: %1</source>
         <translation>Ligzdas kļūda: %1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>Bezsaistes režīmā nevar nosūtīt komandu.</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>Bezsaistes režīmā nevar nosūtīt spotu.</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>DX Cluster izslēgts bezsaistes režīmā</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>DX Cluster apturēts bezsaistes režīmā</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>DX Cluster gatavs; savienojas pēc pieprasījuma</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2399,6 +2423,10 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Plūsmas laiks: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>Bezsaistē: izmanto kešotos izplatīšanās datus</translation>
     </message>
 </context>
 <context>
@@ -2520,6 +2548,18 @@ or contact DXLab support at DXLab@groups.io.</translation>
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>Neizdevās palaist instalētāju.</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>Bezsaistē: lejupielādes izslēgtas</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>Bezsaistē: atjauninājumu pārbaude izslēgta</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>Tiešsaistē: atjauninājumu pārbaude ieslēgta</translation>
     </message>
 </context>
 <context>
@@ -4999,6 +5039,198 @@ Error: %2</translation>
         <source>wanted %1 · exceptions %2</source>
         <translation>meklētie %1 · izņēmumi %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>JAUNS</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>NEAPSTIPRINĀTS</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>DERĪGS</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>BEIDZIES</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>REDZAMS</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>ZEM HORIZONTA</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>SEKOT</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>NOVIETOT</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>Rotors</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>Novietot, apturot</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>Drošība</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>attālums</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · izsekošana</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>atsvaidzināt</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>Iztīrīt kešu</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>STILS</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>Novecojis kešs · notiek atjaunināšana</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>Rezerve aktīva: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>Atgriezeniskā saite nav pieejama</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>Spots beidzies</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>Spots derīgs vēl %1 s</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>Pakalpojums nenorāda derīgumu</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Attēlu faili (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Pasaules rastrs (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>Importēt bezsaistes rastru</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>Importēt bezsaistes pasaules rastru</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>Importējiet likumīgi iegūtu ekvirektangulāru pasaules rastru, piemēram, Natural Earth eksportu. Decodium saglabā privātu vietējo kopiju un nelejupielādē elementus.</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>Vietējais atlants, OpenStreetMap/OpenTopoMap, GEBCO batimetrija, NASA GIBS un MapTiler. Ja pakalpojums neizdodas, tiek mēģināta konfigurētā rezerve.</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>Polārblāzmas izplatīšanās prognoze. Laika leģenda rāda avota vecumu un derīgumu.</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>F2 kritiskās frekvences prognoze, ko izmanto, lai novērtētu jonosfēras atbalstu HF ceļiem.</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>Maksimālās izmantojamās frekvences prognoze. Laika leģenda norāda iegūšanas laiku, derīgumu un vizuālo izgaišanu.</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>NVIS prognoze, kas iegūta no pašreizējās foF2 kartes; tā paliek atsevišķs darbības slānis.</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>Sporādiskā E varbūtības prognoze. Kešotie dati pēc derīguma loga izgaist un paliek atzīmēti kā novecojuši.</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>Bezsaistes režīms aptur mākoņa/tīkla pakalpojumus, saglabā pieejamu ADIF, žurnālu, kešu un radio darbību, un var izmantot lietotāja importētu pasaules rastru.</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>Apturēt mākoņa/tīkla pakalpojumus, saglabāt pieejamu vietējo ADIF, žurnālu, kešu un radio darbību, un izmantot vietējo atlantu vai importēto rastru komplektu.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: pēdējām %1 minūtēm nav ielādēts neviens uztvērējs</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Uztvērēji, kas pēdējās %1 minūtēs ziņojuši PSK Reporter, ka dzirdējuši jūsu izsaukumu. Decodium PSK augšupielādei nav jābūt ieslēgtai.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>Iegūt uztvērējus, kas pēdējās %1 minūtēs dzirdēja jūsu izsaukumu. PSK augšupielāde ir neatkarīga.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5442,6 +5674,10 @@ Error: %2</translation>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>Atcelt</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>Kopēt izsaukumu</translation>
     </message>
 </context>
 <context>
@@ -6235,6 +6471,10 @@ Labais klikšķis: atvienot</translation>
         <location filename="../qml/decodium/Main.qml" line="4864"/>
         <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
         <translation>Gatavie profili: kopā lieto FT2/dekodēšanas pārslēdzējus. Detaļas sadaļā Setup -&gt; TX.</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>Aktīvs joslās pēdējās %1 minūtēs:</translation>
     </message>
 </context>
 <context>
@@ -16497,6 +16737,14 @@ Noklusējums: IZSL.</translation>
         <source>nessun record</source>
         <translation>nav ierakstu</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>PSK Reporter atskatīšanās periods izsaukumu meklēšanai un dzirdējušo rezultātiem.</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>Vaicājumu vēsture:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20262,6 +20510,38 @@ Right click for insert and delete options.</translation>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>Apakšpunkts %1°, %2°  Apgaismojums %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · derīgs līdz %1</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>derīgs līdz %1</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>derīgums nav pieejams</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>%1 h vecs</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>%1 min vecs</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>%1 s vecs</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>nav parauga</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>IZPLATĪŠANĀS PROGNOZE · vecums / derīgums / izgaišana</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -20612,6 +20892,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>Rezultāts no vietējām datubāzēm</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>Bezsaistē: attālie izsaukumu atjauninājumi izslēgti</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>Bezsaistē: attālie ieraksti netika pieprasīti</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>Bezsaistē: tikai vietējais kešs un izsaukumu datubāzes</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>Tiešsaistē: attālie izsaukumu pakalpojumi ieslēgti</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>Sekot</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>Novietot rotoru</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>Apturēt rotoru</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>Rotors ieslēgts</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>Rotora resursdators</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>Rotora atgriezeniskā saite</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>Automātisks rotors</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>Automātisks Doplers</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>Doplers</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>Azimuts</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>Elevācija</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>Attālums</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>Redzamība</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>Novērotājs</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Protokols</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>Sekotā frekvence</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>TLE vecums</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>Atsvaidzināt TLE</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>Prognoze 24 h</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>Gaidāmās pārlidošanas</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>Aprēķina pārlidošanas…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>Aprēķins notiek fonā…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>Izvēlētajā intervālā nav pārlidošanas</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>Satelītu pakalpojums nav pieejams</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 Satelītu izsekošana</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>Atjaunina…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>Nav pieejams</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>pašreizējs</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>novecojis</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>ielādē</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>bezsaistes kešs</translation>
     </message>
 </context>
 </TS>

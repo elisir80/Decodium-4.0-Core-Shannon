@@ -319,6 +319,10 @@ Searched paths:
         <source>🌙 Astronomical Data</source>
         <translation>🌙 天文データ</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>衛星追尾</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2355,6 +2359,26 @@ DXLab@groups.ioに相談してください.</translation>
         <source>Socket error: %1</source>
         <translation>ソケットエラー: %1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>オフラインモードではコマンドを送信できません。</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>オフラインモードではスポットを送信できません。</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>オフラインモードでは DX クラスターは無効です</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>オフラインモードでは DX クラスターは一時停止します</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>DX クラスターは準備完了です。要求時に接続します</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2384,6 +2408,10 @@ DXLab@groups.ioに相談してください.</translation>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | フィード時刻: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>オフライン: キャッシュした伝播データを使用します</translation>
     </message>
 </context>
 <context>
@@ -2505,6 +2533,18 @@ DXLab@groups.ioに相談してください.</translation>
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>インストーラーを起動できませんでした。</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>オフライン: ダウンロードは無効です</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>オフライン: 更新の確認は無効です</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>オンライン: 更新の確認が有効です</translation>
     </message>
 </context>
 <context>
@@ -4985,6 +5025,198 @@ Error: %2</source>
         <source>wanted %1 · exceptions %2</source>
         <translation>未交信 %1 · 例外 %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>新規</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>未確認</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>有効</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>期限切れ</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>可視</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>地平線下</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>追尾</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>パーク</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>ローテーター</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>停止時にパークする</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>安全</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>距離</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · 追尾</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>更新</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>キャッシュを消去</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>スタイル</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>キャッシュが古い · 更新中</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>代替を使用中: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>フィードバックを取得できません</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>スポットの期限切れ</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>スポットはあと %1 秒有効</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>提供元が有効期限を示していません</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>画像ファイル (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>世界ラスター (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>オフライン ラスターを読み込む</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>オフラインの世界ラスターを読み込む</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>正距円筒図法の世界ラスターを、Natural Earth の書き出しなど適法に入手したものから読み込みます。Decodium はローカルに私的な複製を保存し、タイルのダウンロードは行いません。</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>ローカルのアトラス、OpenStreetMap/OpenTopoMap、GEBCO 水深、NASA GIBS、MapTiler を使います。提供元が失敗した場合は設定した代替を試します。</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>オーロラ伝播の予報です。時間の凡例には情報源の経過時間と有効期限が示されます。</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>F2 臨界周波数の予報です。HF 経路の電離層による支援を見積もるのに使います。</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>最高使用可能周波数の予報です。時間の凡例には取得時刻・有効期限・表示の減衰が示されます。</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>現在の foF2 マップから求めた NVIS の予報です。独立した運用レイヤーとして扱われます。</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>スポラディック E の発生確率の予報です。キャッシュしたデータは有効期限を過ぎると薄くなり、古いものとして表示され続けます。</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>オフラインモードはクラウド/ネットワークのサービスを止め、ADIF・ログブック・キャッシュ・無線の動作は使えるまま保ち、利用者が読み込んだ世界ラスターを使えます。</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>クラウド/ネットワークのサービスを止め、ローカルの ADIF・ログブック・キャッシュ・無線の動作は使えるまま保ち、ローカルのアトラスまたは読み込んだラスターパックを使います。</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: 直近 %1 分間の受信局は読み込まれていません</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>直近 %1 分間に、あなたのコールサインを受信したと PSK Reporter に報告した局です。Decodium の PSK 送信を有効にする必要はありません。</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>直近 %1 分間にあなたのコールサインを受信した局を取得します。PSK 送信とは無関係です。</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5428,6 +5660,10 @@ Error: %2</source>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>キャンセル</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>コールサインをコピー</translation>
     </message>
 </context>
 <context>
@@ -6221,6 +6457,10 @@ Right-click: disconnect</source>
         <location filename="../qml/decodium/Main.qml" line="11513"/>
         <source>Alert on My Call</source>
         <translation>自局コールでアラート</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>直近 %1 分間に運用のあったバンド:</translation>
     </message>
 </context>
 <context>
@@ -16482,6 +16722,14 @@ If unsure, use High.</source>
         <source>nessun record</source>
         <translation>レコードなし</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>コールサイン検索と受信報告の結果に使う PSK Reporter のさかのぼり期間です。</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>問い合わせ履歴:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20247,6 +20495,38 @@ Right click for insert and delete options.</source>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>直下点 %1°, %2°  輝面比 %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · %1 まで有効</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>%1 まで有効</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>有効期限は不明</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>%1 時間前</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>%1 分前</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>%1 秒前</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>サンプルなし</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>伝播予報 · 経過時間 / 有効期限 / 減衰</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -20597,6 +20877,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>ローカル データベースの結果</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>オフライン: コールサインの外部更新は無効です</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>オフライン: 外部レコードは要求していません</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>オフライン: ローカルのキャッシュとコールサイン データベースのみ</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>オンライン: コールサインの外部提供元が有効です</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>追尾</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>ローテーターをパーク</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>ローテーターを停止</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>ローテーター有効</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>ローテーターのホスト</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>ローテーターのフィードバック</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>ローテーター自動</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>ドップラー自動</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>ドップラー</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>方位角</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>仰角</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>距離</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>可視性</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>観測地</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>プロトコル</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>追尾中の周波数</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>TLE の経過時間</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>TLE を更新</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>24 時間の予測</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>次のパス</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>パスを計算中…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>バックグラウンドで計算中…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>選択した期間にパスはありません</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>衛星サービスを利用できません</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 衛星追尾</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>更新中…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>利用不可</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>最新</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>古い</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>読み込み中</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>オフライン キャッシュ</translation>
     </message>
 </context>
 </TS>

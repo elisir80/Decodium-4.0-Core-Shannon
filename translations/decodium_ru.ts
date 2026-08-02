@@ -322,6 +322,10 @@ Searched paths:
         <source>🌙 Astronomical Data</source>
         <translation>🌙 Астрономические данные</translation>
     </message>
+    <message>
+        <source>Satellite tracking</source>
+        <translation>Сопровождение спутников</translation>
+    </message>
 </context>
 <context>
     <name>AsyncModeWidget</name>
@@ -2357,6 +2361,26 @@ or contact DXLab support at DXLab@groups.io.</source>
         <source>Socket error: %1</source>
         <translation>Ошибка сокета: %1</translation>
     </message>
+    <message>
+        <source>Cannot send command in Offline mode.</source>
+        <translation>В автономном режиме нельзя отправить команду.</translation>
+    </message>
+    <message>
+        <source>Cannot send spot in Offline mode.</source>
+        <translation>В автономном режиме нельзя отправить спот.</translation>
+    </message>
+    <message>
+        <source>DX Cluster disabled in Offline mode</source>
+        <translation>DX-кластер отключён в автономном режиме</translation>
+    </message>
+    <message>
+        <source>DX Cluster paused in Offline mode</source>
+        <translation>DX-кластер приостановлен в автономном режиме</translation>
+    </message>
+    <message>
+        <source>DX Cluster ready; connect when requested</source>
+        <translation>DX-кластер готов; подключается по запросу</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumPropagationManager</name>
@@ -2386,6 +2410,10 @@ or contact DXLab support at DXLab@groups.io.</source>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Время данных: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>Автономно: используются кэшированные данные о прохождении</translation>
     </message>
 </context>
 <context>
@@ -2507,6 +2535,18 @@ or contact DXLab support at DXLab@groups.io.</source>
         <location filename="../DecodiumUpdater.cpp" line="323"/>
         <source>Could not start the installer.</source>
         <translation>Не удалось запустить установщик.</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>Автономно: загрузки отключены</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>Автономно: проверка обновлений отключена</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>Онлайн: проверка обновлений включена</translation>
     </message>
 </context>
 <context>
@@ -4987,6 +5027,198 @@ Error: %2</source>
         <source>wanted %1 · exceptions %2</source>
         <translation>нужные %1 · исключения %2</translation>
     </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>max EL</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>min EL</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>НОВЫЙ</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>НЕПОДТВЕРЖДЁННЫЙ</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>ДЕЙСТВИТЕЛЕН</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>ИСТЁК</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>ВИДЕН</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>НИЖЕ ГОРИЗОНТА</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>СОПРОВОЖДЕНИЕ</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>STOP</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>ПАРКОВКА</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>Ротор</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>Парковать при остановке</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>Безопасность</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>дальность</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · сопровождение</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>обновить</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>Очистить кэш</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>СТИЛЬ</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>Кэш устарел · выполняется обновление</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>Запасной вариант активен: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>Обратная связь недоступна</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>Спот истёк</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>Спот действителен ещё %1 с</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>Служба не указывает срок действия</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Файлы изображений (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Растр мира (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>Импортировать автономный растр</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>Импортировать автономный растр мира</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>Импортируйте законно полученный равнопромежуточный растр мира, например экспорт Natural Earth. Decodium хранит частную локальную копию и не загружает тайлы.</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>Локальный атлас, OpenStreetMap/OpenTopoMap, батиметрия GEBCO, NASA GIBS и MapTiler. Если служба недоступна, пробуется настроенный запасной вариант.</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>Прогноз аврорального прохождения. Временная легенда показывает возраст и срок действия источника.</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>Прогноз критической частоты F2, используемый для оценки ионосферной поддержки КВ-трасс.</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>Прогноз максимальной применимой частоты. Временная легенда показывает время получения, срок действия и визуальное затухание.</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>Прогноз NVIS, полученный из текущей карты foF2; остаётся отдельным рабочим слоем.</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>Прогноз вероятности спорадического слоя E. Кэшированные данные затухают после окна действия и остаются помеченными как устаревшие.</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>Автономный режим приостанавливает облачные и сетевые службы, оставляет доступными ADIF, журнал, кэш и работу в эфире и может использовать импортированный пользователем растр мира.</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>Приостановить облачные и сетевые службы, оставить доступными локальные ADIF, журнал, кэш и работу в эфире и использовать локальный атлас или импортированный пакет растра.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: приёмники за последние %1 мин не загружены</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Приёмники, сообщившие в PSK Reporter, что слышали ваш позывной за последние %1 мин. Отправка PSK из Decodium при этом не нужна.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>Получить приёмники, слышавшие ваш позывной за последние %1 мин. Отправка PSK от этого не зависит.</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5431,6 +5663,10 @@ Error: %2</source>
         <location filename="../qml/decodium/components/LogWindow.qml" line="1102"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Copy Callsign</source>
+        <translation>Копировать позывной</translation>
     </message>
 </context>
 <context>
@@ -6224,6 +6460,10 @@ Right-click: disconnect</source>
         <location filename="../qml/decodium/Main.qml" line="11513"/>
         <source>Alert on My Call</source>
         <translation>Оповещение на мой позывной</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>Активен на диапазонах за последние %1 мин:</translation>
     </message>
 </context>
 <context>
@@ -16496,6 +16736,14 @@ If unsure, use High.</source>
         <source>nessun record</source>
         <translation>нет записей</translation>
     </message>
+    <message>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>Период ретроспективы PSK Reporter для поиска позывных и результатов «кто слышал».</translation>
+    </message>
+    <message>
+        <source>Query history:</source>
+        <translation>История запросов:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -20281,6 +20529,38 @@ Right click for insert and delete options.</source>
         <source>Sublunar point %1°, %2°  Illumination %3%</source>
         <translation>Подлунная точка %1°, %2°  Освещённость %3%</translation>
     </message>
+    <message>
+        <source>  · valid to %1</source>
+        <translation>  · действителен до %1</translation>
+    </message>
+    <message>
+        <source>valid to %1</source>
+        <translation>действителен до %1</translation>
+    </message>
+    <message>
+        <source>validity unavailable</source>
+        <translation>срок действия неизвестен</translation>
+    </message>
+    <message>
+        <source>%1h old</source>
+        <translation>%1 ч назад</translation>
+    </message>
+    <message>
+        <source>%1m old</source>
+        <translation>%1 мин назад</translation>
+    </message>
+    <message>
+        <source>%1s old</source>
+        <translation>%1 с назад</translation>
+    </message>
+    <message>
+        <source>no sample</source>
+        <translation>нет данных</translation>
+    </message>
+    <message>
+        <source>PROPAGATION FORECAST · age / validity / decay</source>
+        <translation>ПРОГНОЗ ПРОХОЖДЕНИЯ · возраст / срок действия / затухание</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -20631,6 +20911,168 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Risultato da database locali</source>
         <translation>Результат из локальных баз данных</translation>
+    </message>
+    <message>
+        <source>Offline: aggiornamenti remoti callsign disabilitati</source>
+        <translation>Автономно: удалённые обновления позывных отключены</translation>
+    </message>
+    <message>
+        <source>Offline: nessun record remoto richiesto</source>
+        <translation>Автономно: удалённые записи не запрашивались</translation>
+    </message>
+    <message>
+        <source>Offline: solo cache e database callsign locali</source>
+        <translation>Автономно: только локальный кэш и базы позывных</translation>
+    </message>
+    <message>
+        <source>Online: provider remoto callsign abilitati</source>
+        <translation>Онлайн: удалённые службы позывных включены</translation>
+    </message>
+</context>
+<context>
+    <name>SatelliteWindow</name>
+    <message>
+        <source>AZ %1° / EL %2°</source>
+        <translation>AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>AZ %1°→%2°</source>
+        <translation>AZ %1°→%2°</translation>
+    </message>
+    <message>
+        <source>LOS %1</source>
+        <translation>LOS %1</translation>
+    </message>
+    <message>
+        <source>max %1°</source>
+        <translation>max %1°</translation>
+    </message>
+    <message>
+        <source>Track</source>
+        <translation>Сопровождение</translation>
+    </message>
+    <message>
+        <source>Rotor PARK</source>
+        <translation>Парковка ротора</translation>
+    </message>
+    <message>
+        <source>Rotor STOP</source>
+        <translation>Стоп ротора</translation>
+    </message>
+    <message>
+        <source>Rotator enabled</source>
+        <translation>Ротор включён</translation>
+    </message>
+    <message>
+        <source>Rotator host</source>
+        <translation>Хост ротора</translation>
+    </message>
+    <message>
+        <source>Rotor feedback</source>
+        <translation>Обратная связь ротора</translation>
+    </message>
+    <message>
+        <source>Auto rotator</source>
+        <translation>Авторотор</translation>
+    </message>
+    <message>
+        <source>Auto Doppler</source>
+        <translation>Автодоплер</translation>
+    </message>
+    <message>
+        <source>Doppler</source>
+        <translation>Доплер</translation>
+    </message>
+    <message>
+        <source>Azimuth</source>
+        <translation>Азимут</translation>
+    </message>
+    <message>
+        <source>Elevation</source>
+        <translation>Угол места</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>Дальность</translation>
+    </message>
+    <message>
+        <source>Visibility</source>
+        <translation>Видимость</translation>
+    </message>
+    <message>
+        <source>Observer</source>
+        <translation>Наблюдатель</translation>
+    </message>
+    <message>
+        <source>Protocol</source>
+        <translation>Протокол</translation>
+    </message>
+    <message>
+        <source>Tracked frequency</source>
+        <translation>Отслеживаемая частота</translation>
+    </message>
+    <message>
+        <source>TLE age</source>
+        <translation>Давность TLE</translation>
+    </message>
+    <message>
+        <source>Refresh TLE</source>
+        <translation>Обновить TLE</translation>
+    </message>
+    <message>
+        <source>Predict 24 h</source>
+        <translation>Прогноз на 24 ч</translation>
+    </message>
+    <message>
+        <source>Upcoming passes</source>
+        <translation>Ближайшие проходы</translation>
+    </message>
+    <message>
+        <source>Calculating passes…</source>
+        <translation>Расчёт проходов…</translation>
+    </message>
+    <message>
+        <source>Calculation running in background…</source>
+        <translation>Расчёт выполняется в фоне…</translation>
+    </message>
+    <message>
+        <source>No pass in the selected interval</source>
+        <translation>В выбранном интервале нет проходов</translation>
+    </message>
+    <message>
+        <source>Satellite service unavailable</source>
+        <translation>Служба спутников недоступна</translation>
+    </message>
+    <message>
+        <source>🛰 Satellite tracking</source>
+        <translation>🛰 Сопровождение спутников</translation>
+    </message>
+    <message>
+        <source>Updating…</source>
+        <translation>Обновление…</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>Недоступно</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>текущее</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>устарело</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>загрузка</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>автономный кэш</translation>
     </message>
 </context>
 </TS>
