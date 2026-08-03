@@ -25,6 +25,7 @@
 #include "DecodiumThemeManager.h"
 #include "DecodiumSubManagers.h"
 #include "DecodiumCatManager.h"
+#include "DecodiumCat4OmManager.h"
 #include "DecodiumOmniRigManager.h"
 #include "DecodiumTransceiverManager.h"
 #include "DecodeListModel.h"
@@ -350,6 +351,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString                       activeCatProfile READ activeCatProfile NOTIFY activeCatProfileChanged)
     Q_PROPERTY(QStringList                   catProfileList READ catProfileList NOTIFY catProfilesChanged)
     Q_PROPERTY(DecodiumCatManager*           nativeCat       READ nativeCat       CONSTANT)
+    Q_PROPERTY(DecodiumCat4OmManager*        cat4OmCat       READ cat4OmCat       CONSTANT)
     Q_PROPERTY(DecodiumOmniRigManager*       omniRigCat      READ omniRigCat      CONSTANT)
     Q_PROPERTY(DecodiumTransceiverManager*   hamlibCat       READ hamlibCat       CONSTANT)
     Q_PROPERTY(DecodiumDxCluster*   dxCluster       READ dxCluster       CONSTANT)
@@ -815,6 +817,7 @@ public:
     BandManager*         bandManager()  const { return m_bandManager; }
     QObject*                     catManagerObj() const {
         if (m_catBackend == "native")   return (QObject*)m_nativeCat;
+        if (m_catBackend == "cat4om")   return (QObject*)m_cat4OmCat;
         if (m_catBackend == "omnirig")  return (QObject*)m_omniRigCat;
         return (QObject*)m_hamlibCat;
     }
@@ -823,6 +826,7 @@ public:
     QString                      activeCatProfile() const;
     QStringList                  catProfileList() const;
     DecodiumCatManager*          nativeCat()     const { return m_nativeCat; }
+    DecodiumCat4OmManager*       cat4OmCat()     const { return m_cat4OmCat; }
     DecodiumOmniRigManager*      omniRigCat()    const { return m_omniRigCat; }
     DecodiumTransceiverManager*  hamlibCat()     const { return m_hamlibCat; }
     DecodiumDxCluster*   dxCluster()    const { return m_dxCluster; }
@@ -1171,6 +1175,16 @@ public:
                                           int maxBytes = 16384) const;
     Q_INVOKABLE QVariantMap writeFileBytes(const QString& path,
                                            const QString& base64) const;
+    Q_INVOKABLE QString defaultFt2LinkReceivedFilesDirectory() const;
+    Q_INVOKABLE quint64 saveFt2LinkReceivedFileAsync(
+        const QString& directory,
+        const QString& fileName,
+        const QString& text,
+        const QString& base64,
+        bool binary,
+        bool preserveExisting = true);
+    Q_INVOKABLE quint64 openFt2LinkReceivedFilesDirectoryAsync(
+        const QString& directory = QString());
     Q_INVOKABLE bool openExternalUrl(const QString& url);
     Q_INVOKABLE void openWavForDecode(const QString& path);
     Q_INVOKABLE void openWavFolderDecode(const QString& folderPath);
@@ -1777,6 +1791,10 @@ signals:
                                    quint32 mailboxId,
                                    const QString& state,
                                    const QString& detail);
+    void ft2LinkReceivedFileSaveFinished(quint64 requestId,
+                                         QVariantMap result);
+    void ft2LinkReceivedFilesDirectoryOpenFinished(quint64 requestId,
+                                                    QVariantMap result);
     void wsprUploadEnabledChanged();
     void catManagerChanged();
     void catBackendChanged();
@@ -2518,6 +2536,7 @@ private:
     MacroManager*         m_macroManager  {nullptr};
     BandManager*          m_bandManager   {nullptr};
     DecodiumCatManager*           m_nativeCat     {nullptr};
+    DecodiumCat4OmManager*        m_cat4OmCat     {nullptr};
     DecodiumOmniRigManager*       m_omniRigCat    {nullptr};
     DecodiumTransceiverManager*   m_hamlibCat     {nullptr};
     QString                       m_catBackend    {"hamlib"};
@@ -2564,6 +2583,7 @@ private:
     DecodiumCloudlogLite*    m_cloudlog    {nullptr};
     DecodiumQrzLogbookLite*  m_qrzLogbook  {nullptr};
     QHash<quint32, ExternalAdifUploadPending> m_externalAdifUploads;
+    std::atomic<quint64> m_ft2LinkReceivedFileIoSerial {0};
     DecodiumWsprUploader*    m_wsprUploader{nullptr};
     bool                  m_wsprUploadEnabled {false};
 

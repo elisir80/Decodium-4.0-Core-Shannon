@@ -65,6 +65,7 @@ constexpr int kLocalStoreVersion = 1;
 constexpr int kMaxRelayHopCount = 9;
 constexpr int kMaxTextFilePayloadBytes = 16384;
 constexpr int kAckRepeatCount = 3;
+constexpr quint64 kInboundAckDebounceMs = 250u;
 constexpr int kHelloAckTurnaroundDelayMs = 3500;
 // Live RX samples come from Decodium's decimated detector/audio tap. TX audio
 // is rendered at 48 kHz for the sound device, but the decoder sees 12 kHz PCM.
@@ -2350,6 +2351,8 @@ QVariantMap broadcastMap (QString const& fromCall,
                           QStringList const& alertTags,
                           quint64 atMs)
 {
+  bool const outgoing = source.compare (
+      QStringLiteral ("TX"), Qt::CaseInsensitive) == 0;
   qint64 qsyDialFrequencyHz = 0;
   QString qsyLabel;
   QString qsyReason;
@@ -2357,6 +2360,21 @@ QVariantMap broadcastMap (QString const& fromCall,
       text, &qsyDialFrequencyHz, &qsyLabel, &qsyReason);
 
   QVariantMap map;
+  // Keep the dedicated broadcast fields, but also expose the common chat-row
+  // shape so QML can render connectionless traffic in the message timeline.
+  map.insert (QStringLiteral ("sessionId"), 0);
+  map.insert (QStringLiteral ("remoteCall"),
+              outgoing ? QStringLiteral ("ALL") : fromCall);
+  map.insert (QStringLiteral ("direction"), outgoing ? 0 : 1);
+  map.insert (QStringLiteral ("directionName"),
+              outgoing ? QStringLiteral ("Outgoing")
+                       : QStringLiteral ("Incoming"));
+  map.insert (QStringLiteral ("delivery"), outgoing ? 1 : 2);
+  map.insert (QStringLiteral ("deliveryName"),
+              outgoing ? QStringLiteral ("Sent")
+                       : QStringLiteral ("Received"));
+  map.insert (QStringLiteral ("kind"), QStringLiteral ("BCAST"));
+  map.insert (QStringLiteral ("broadcast"), true);
   map.insert (QStringLiteral ("fromCall"), fromCall);
   map.insert (QStringLiteral ("text"), text);
   map.insert (QStringLiteral ("source"), source);
@@ -4720,6 +4738,11 @@ FT2LinkQmlAdapter::FT2LinkQmlAdapter (QObject* parent)
         static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
   });
 
+  m_inboundAckTimer.setSingleShot (true);
+  connect (&m_inboundAckTimer, &QTimer::timeout, this, [this] {
+    runPendingInboundAcks ();
+  });
+
   m_liveOutboundRetryTimer.setSingleShot (true);
   connect (&m_liveOutboundRetryTimer, &QTimer::timeout, this, [this] {
     runLiveOutboundRetryCheck ();
@@ -5560,17 +5583,24 @@ bool FT2LinkQmlAdapter::transmitBroadcastRadio (QString const& text, quint64 now
     }
 
   QString const trimmed = text.trimmed ();
+  if (trimmed.isEmpty ())
+    {
+      setLastError (QStringLiteral ("FT2-Link broadcast message is empty"));
+      return false;
+    }
+
+  // BCAST TX is an explicit operator command.  As with CONNECT, once it has
+  // been accepted it must remain queued until CCA/LBT permits transmission;
+  // do not inherit a one-shot strict-LBT cancellation from the UI sniffer.
+  m_nextRadioTxStrictLbt = false;
+  m_nextRadioTxStrictLbtCancelMs = 24000;
+
   QString const localCall = normalizeCallsign (
       QString::fromStdString (m_model.localStation ().call));
   QString const wireText = localCall.isEmpty ()
       ? trimmed
       : QStringLiteral ("D4B1|%1|%2").arg (localCall, trimmed);
   QByteArray const payloadBytes = wireText.toUtf8 ();
-  if (payloadBytes.isEmpty ())
-    {
-      setLastError (QStringLiteral ("FT2-Link broadcast message is empty"));
-      return false;
-    }
   std::vector<std::uint8_t> payload;
   payload.assign (
       reinterpret_cast<std::uint8_t const*> (payloadBytes.constData ()),
@@ -6841,6 +6871,12 @@ bool FT2LinkQmlAdapter::startSessionRadioHandshake (QString const& remoteCall,
       return false;
     }
 
+  // CONNECT is an operator command, not a disposable opportunistic TX.  Once
+  // accepted it must remain queued until CCA/LBT allows the HELLO to leave;
+  // never inherit a one-shot strict-LBT cancellation armed by the UI sniffer.
+  m_nextRadioTxStrictLbt = false;
+  m_nextRadioTxStrictLbtCancelMs = 24000;
+
   int const before = sessionCount ();
   std::string error;
   if (isCallBlocked (normalizedRemote))
@@ -7182,6 +7218,13 @@ bool FT2LinkQmlAdapter::transmitApplicationPayloadRadio (
     {
       setLastError (QStringLiteral (
           "FT2-Link application TX requires a wide profile"));
+      return false;
+    }
+  if (m_liveOutbound.find (sessionId) != m_liveOutbound.end ()
+      || m_liveOutboundRetries.find (sessionId) != m_liveOutboundRetries.end ())
+    {
+      setLastError (QStringLiteral (
+          "FT2-Link application TX already pending for this session"));
       return false;
     }
 
@@ -7906,6 +7949,12 @@ bool FT2LinkQmlAdapter::transmitFileRadio (quint16 sessionId,
   planExtras.insert (QStringLiteral ("fileBytes"), contentBytes.size ());
   planExtras.insert (QStringLiteral ("sha256"), checksum);
 
+  // SEND FILE is an explicit operator command.  Once accepted, it must stay
+  // in the normal CCA/LBT queue and must not inherit a one-shot strict-LBT
+  // cancellation left by another UI action.
+  m_nextRadioTxStrictLbt = false;
+  m_nextRadioTxStrictLbtCancelMs = 24000;
+
   if (!transmitApplicationPayloadRadio (
           sessionId,
           envelope,
@@ -8005,6 +8054,11 @@ bool FT2LinkQmlAdapter::transmitFileRadioBytes (quint16 sessionId,
   planExtras.insert (QStringLiteral ("fileBinary"), true);
   planExtras.insert (QStringLiteral ("sha256"), checksum);
 
+  // Binary file transfers have the same persistent operator-command
+  // semantics as text files.
+  m_nextRadioTxStrictLbt = false;
+  m_nextRadioTxStrictLbtCancelMs = 24000;
+
   if (!transmitApplicationPayloadRadio (
           sessionId,
           envelope,
@@ -8033,6 +8087,41 @@ bool FT2LinkQmlAdapter::transmitFileRadioBytes (quint16 sessionId,
   m_liveOutboundMailboxDeliveredState.erase (sessionId);
   m_liveOutboundFormId.erase (sessionId);
   m_liveOutboundBulletinId.erase (sessionId);
+  return true;
+}
+
+bool FT2LinkQmlAdapter::applicationRadioTxReady (quint16 sessionId) const
+{
+  AppSession const* session = m_model.session (sessionId);
+  if (!session || session->state != AppSessionState::Connected
+      || (session->negotiated.profile != Profile::Wide500
+          && session->negotiated.profile != Profile::Wide2300))
+    {
+      return false;
+    }
+
+  // Do not let a queued SEND FILE replace a transfer that is still waiting
+  // for ACK/retry, or collide with an inbound ARQ window on the same session.
+  if (m_liveOutbound.find (sessionId) != m_liveOutbound.end ()
+      || m_liveOutboundRetries.find (sessionId) != m_liveOutboundRetries.end ()
+      || m_pendingInboundAckDueMs.find (sessionId)
+          != m_pendingInboundAckDueMs.end ())
+    {
+      return false;
+    }
+
+  std::map<std::uint16_t,
+           std::unique_ptr<decodium::ft2link::InboundTransfer> >::const_iterator
+      inbound = m_liveInbound.find (sessionId);
+  if (inbound != m_liveInbound.end ())
+    {
+      std::map<std::uint16_t, bool>::const_iterator delivered =
+          m_liveInboundDelivered.find (sessionId);
+      if (delivered == m_liveInboundDelivered.end () || !delivered->second)
+        {
+          return false;
+        }
+    }
   return true;
 }
 
@@ -10534,7 +10623,11 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
           return true;
         }
 
+      std::size_t const acknowledgedBefore =
+          transfer->second->acknowledgedCount ();
       transfer->second->handleAckFrame (frame);
+      bool const ackAdvanced =
+          transfer->second->acknowledgedCount () > acknowledgedBefore;
       logFt2LinkDiagnostic (
           QStringLiteral (
               "[Ft2Link][ARQ] ack session=%1 base=%2 bitmap=0x%3"
@@ -10618,7 +10711,14 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
         }
       else
         {
-          setTransportState (QStringLiteral ("Waiting ACK"));
+          if (!ackAdvanced)
+            {
+              setTransportState (QStringLiteral ("Duplicate ACK"));
+            }
+          else if (!queueLiveOutboundWindowAfterAck (frame.sessionId, nowMs))
+            {
+              return false;
+            }
         }
       clearLastError ();
       return true;
@@ -10922,21 +11022,22 @@ bool FT2LinkQmlAdapter::ingestRadioFrameBytes (QByteArray const& frameBytes,
       setTransportState (QStringLiteral ("DATA RX"));
     }
 
-  bool const ackSafeAfterCurrentBurst =
+  bool const endOfMessage =
       (frame.flags & decodium::ft2link::FlagEndOfMessage) != 0;
-  if (autoAck && ackSafeAfterCurrentBurst
-      && !requestAckRadioTx (ack, *session, nowMs))
+  if (autoAck && endOfMessage)
     {
-      return false;
+      m_pendingInboundAckDueMs.erase (frame.sessionId);
+      schedulePendingInboundAckCheck (
+          static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
+      if (!requestAckRadioTx (ack, *session, nowMs))
+        {
+          return false;
+        }
     }
-  if (autoAck && !ackSafeAfterCurrentBurst)
+  if (autoAck && !endOfMessage)
     {
-      setTransportState (QStringLiteral ("DATA RX wait EOM"));
-      qInfo() << "[Ft2Link] ACK deferred until EOM"
-              << "session=" << frame.sessionId
-              << "seq=" << frame.sequence
-              << "profile=" << QString::fromStdString (
-                     decodium::ft2link::profileName (frame.profile));
+      scheduleInboundAck (frame.sessionId);
+      setTransportState (QStringLiteral ("DATA RX ACK pending"));
     }
   if (closeAfterAck && !closeSession (frame.sessionId, nowMs))
     {
@@ -11172,6 +11273,9 @@ bool FT2LinkQmlAdapter::closeSession (quint16 sessionId, quint64 nowMs)
   m_liveInboundDelivered.erase (sessionId);
   m_liveInboundDeliveredAtMs.erase (sessionId);
   m_liveInboundDeliveredHash.erase (sessionId);
+  m_pendingInboundAckDueMs.erase (sessionId);
+  schedulePendingInboundAckCheck (
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ()));
   m_liveOutboundRetries.erase (sessionId);
   m_helloRetries.erase (sessionId);
   m_liveW2300RateControllers.erase (sessionId);
@@ -21245,6 +21349,202 @@ bool FT2LinkQmlAdapter::requestAckRadioTx (Frame const& ack,
                   true,
                   ack.sessionId,
                   false);
+  return true;
+}
+
+void FT2LinkQmlAdapter::scheduleInboundAck (quint16 sessionId)
+{
+  quint64 const nowMs =
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+  m_pendingInboundAckDueMs[sessionId] = nowMs + kInboundAckDebounceMs;
+  schedulePendingInboundAckCheck (nowMs);
+}
+
+void FT2LinkQmlAdapter::runPendingInboundAcks ()
+{
+  quint64 const nowMs =
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+  std::vector<std::uint16_t> dueSessions;
+  for (std::map<std::uint16_t, quint64>::const_iterator it =
+           m_pendingInboundAckDueMs.begin ();
+       it != m_pendingInboundAckDueMs.end ();
+       ++it)
+    {
+      if (it->second <= nowMs)
+        {
+          dueSessions.push_back (it->first);
+        }
+    }
+
+  for (std::uint16_t const sessionId : dueSessions)
+    {
+      m_pendingInboundAckDueMs.erase (sessionId);
+      AppSession const* session = m_model.session (sessionId);
+      std::map<std::uint16_t,
+               std::unique_ptr<decodium::ft2link::InboundTransfer> >::const_iterator
+          inbound = m_liveInbound.find (sessionId);
+      if (!session || session->state != AppSessionState::Connected
+          || inbound == m_liveInbound.end () || !inbound->second)
+        {
+          continue;
+        }
+
+      Frame const ack = inbound->second->makeAckFrame ();
+      logFt2LinkDiagnostic (
+          QStringLiteral (
+              "[Ft2Link][ARQ] window ACK session=%1 base=%2 bitmap=0x%3"
+              " received=%4")
+              .arg (sessionId)
+              .arg (ack.ackBase)
+              .arg (QString::number (ack.ackBitmap, 16)
+                        .rightJustified (4, QLatin1Char ('0')))
+              .arg (inbound->second->receivedCount ()));
+      if (requestAckRadioTx (ack, *session, nowMs))
+        {
+          setTransportState (QStringLiteral ("Window ACK queued"));
+        }
+    }
+
+  schedulePendingInboundAckCheck (nowMs);
+}
+
+void FT2LinkQmlAdapter::schedulePendingInboundAckCheck (quint64 nowMs)
+{
+  if (m_pendingInboundAckDueMs.empty ())
+    {
+      m_inboundAckTimer.stop ();
+      return;
+    }
+
+  quint64 nextMs = std::numeric_limits<quint64>::max ();
+  for (std::map<std::uint16_t, quint64>::const_iterator it =
+           m_pendingInboundAckDueMs.begin ();
+       it != m_pendingInboundAckDueMs.end ();
+       ++it)
+    {
+      nextMs = std::min (nextMs, it->second);
+    }
+  quint64 const delayMs = nextMs > nowMs ? nextMs - nowMs : 0u;
+  m_inboundAckTimer.start (
+      static_cast<int> (std::min<quint64> (delayMs, 2147483647u)));
+}
+
+bool FT2LinkQmlAdapter::queueLiveOutboundWindowAfterAck (quint16 sessionId,
+                                                         quint64 nowMs)
+{
+  std::map<std::uint16_t,
+           std::unique_ptr<decodium::ft2link::OutboundTransfer> >::iterator
+      transfer = m_liveOutbound.find (sessionId);
+  std::map<std::uint16_t, LiveOutboundRetry>::iterator retry =
+      m_liveOutboundRetries.find (sessionId);
+  AppSession const* session = m_model.session (sessionId);
+  if (transfer == m_liveOutbound.end () || !transfer->second
+      || retry == m_liveOutboundRetries.end () || !session)
+    {
+      setTransportState (QStringLiteral ("Waiting ACK"));
+      return true;
+    }
+
+  transfer->second->makeUnacknowledgedDue (nowMs);
+  std::vector<Frame> const frames = transfer->second->framesToSend (nowMs);
+  if (frames.empty ())
+    {
+      setTransportState (QStringLiteral ("Waiting ACK"));
+      return true;
+    }
+
+  bool selectiveRetry = false;
+  for (Frame const& frame : frames)
+    {
+      if (transfer->second->attemptsForSequence (frame.sequence) > 1)
+        {
+          selectiveRetry = true;
+          break;
+        }
+    }
+
+  decodium::ft2link::WideTxAudioPlanOptions options;
+  options.profile = retry->second.profile;
+  options.w2300RateMode = options.profile == Profile::Wide2300
+      ? (selectiveRetry
+         ? effectiveW2300RateMode (W2300RateMode::Robust)
+         : currentLiveW2300RateMode (*session))
+      : W2300RateMode::Fast;
+  options.sampleRate = 48000.0;
+  if (options.profile == Profile::Wide500)
+    {
+      options.interBurstGapSamples = 48000u;
+    }
+
+  WideTxAudioPlan const audioPlan =
+      decodium::ft2link::buildWideTxAudioPlanForFrames (frames, options);
+  if (!audioPlan.ok)
+    {
+      setLastError (audioPlan.error.empty ()
+                    ? QStringLiteral ("FT2-Link ARQ window build failed")
+                    : QString::fromStdString (audioPlan.error));
+      return false;
+    }
+
+  QVector<float> const samples = toGuardedWideSampleVector (
+      audioPlan.samples, audioPlan.sampleRate);
+  QVariantMap plan = radioTxPlanMap (audioPlan, true);
+  for (QVariantMap::const_iterator it = retry->second.plan.constBegin ();
+       it != retry->second.plan.constEnd ();
+       ++it)
+    {
+      if (!plan.contains (it.key ()))
+        {
+          plan.insert (it.key (), it.value ());
+        }
+    }
+  QStringList sequences;
+  for (Frame const& frame : frames)
+    {
+      sequences << QString::number (frame.sequence);
+    }
+  plan.insert (QStringLiteral ("sessionId"), sessionId);
+  plan.insert (QStringLiteral ("requestedAtMs"),
+               QVariant::fromValue<qulonglong> (
+                   static_cast<qulonglong> (nowMs)));
+  plan.insert (QStringLiteral ("arqFrameCount"),
+               static_cast<int> (frames.size ()));
+  plan.insert (QStringLiteral ("arqSequences"),
+               sequences.join (QLatin1Char (',')));
+  plan.insert (QStringLiteral ("arqWindowAdvance"), true);
+  plan.insert (QStringLiteral ("selectiveRetry"), selectiveRetry);
+  plan.insert (QStringLiteral ("deepRateEnabled"), m_deepRateEnabled);
+
+  quint64 const schedulerNowMs =
+      static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+  purgeQueuedLiveOutboundRetries (sessionId);
+  retry->second.samples = samples;
+  retry->second.plan = plan;
+  retry->second.attempts = 1u;
+  retry->second.nextRetryMs =
+      schedulerNowMs + liveOutboundRetryDelayMs (plan);
+  scheduleLiveOutboundRetryCheck (schedulerNowMs);
+
+  m_lastRadioTxPlan = plan;
+  emit radioTxPlanChanged ();
+  logFt2LinkDiagnostic (
+      QStringLiteral (
+          "[Ft2Link][ARQ] advance session=%1 frames=%2 sequences=%3"
+          " selectiveRetry=%4")
+          .arg (sessionId)
+          .arg (frames.size ())
+          .arg (sequences.join (QLatin1Char (',')))
+          .arg (selectiveRetry ? 1 : 0));
+  enqueueRadioTx (retry->second.displayMessage,
+                  samples,
+                  plan,
+                  nowMs,
+                  false,
+                  sessionId,
+                  true);
+  setTransportState (selectiveRetry
+                     ? QStringLiteral ("Selective retry")
+                     : QStringLiteral ("ARQ window TX"));
   return true;
 }
 

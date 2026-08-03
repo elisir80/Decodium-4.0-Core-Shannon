@@ -34,6 +34,14 @@ Dialog {
         return bridge.catBackend === "tci" || bridge.catManager.portType === "tci"
     }
 
+    function usesCat4OmControls() {
+        return bridge.catBackend === "cat4om" || bridge.catManager.portType === "cat4om"
+    }
+
+    function usesProtocolCatOnly() {
+        return usesTciControls() || usesCat4OmControls()
+    }
+
     onAboutToShow: ensureInitialPosition()
 
     property color bgDeep:        bridge.themeManager.bgDeep
@@ -179,7 +187,7 @@ Dialog {
                 }
 
                 Repeater {
-                    model: [["native","Nativo (QSerialPort)"],["omnirig","OmniRig"],["hamlib","Hamlib (300+ radio)"],["tci","TCI"]]
+                    model: [["native","Nativo (QSerialPort)"],["omnirig","OmniRig"],["hamlib","Hamlib (300+ radio)"],["tci","TCI"],["cat4om","Cat4OM"]]
                     delegate: Rectangle {
                         property string bk: modelData[0]
                         property bool active: bridge.catBackend === bk
@@ -377,14 +385,54 @@ Dialog {
                         }
                     }
 
+                    Text {
+                        text: qsTr("Management:"); color: textSecondary; font.pixelSize: 12
+                        visible: rigDialog.usesCat4OmControls()
+                    }
+                    DecoTextField {
+                        Layout.fillWidth: true; implicitHeight: controlHeight
+                        visible: rigDialog.usesCat4OmControls()
+                        text: rigDialog.usesCat4OmControls() ? bridge.catManager.managementEndpoint : ""
+                        placeholderText: "127.0.0.1:5000"
+                        color: textPrimary; font.pixelSize: controlFontSize
+                        onEditingFinished: bridge.catManager.managementEndpoint = text.trim()
+                        background: Rectangle { color: bgMedium; border.color: activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                    }
+
+                    Text {
+                        text: qsTr("Control:"); color: textSecondary; font.pixelSize: 12
+                        visible: rigDialog.usesCat4OmControls()
+                    }
+                    DecoTextField {
+                        Layout.fillWidth: true; implicitHeight: controlHeight
+                        visible: rigDialog.usesCat4OmControls()
+                        text: rigDialog.usesCat4OmControls() ? bridge.catManager.controlEndpoint : ""
+                        placeholderText: "127.0.0.1:5001"
+                        color: textPrimary; font.pixelSize: controlFontSize
+                        onEditingFinished: bridge.catManager.controlEndpoint = text.trim()
+                        background: Rectangle { color: bgMedium; border.color: activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                    }
+
+                    Text {
+                        text: qsTr("Ownership:"); color: textSecondary; font.pixelSize: 12
+                        visible: rigDialog.usesCat4OmControls()
+                    }
+                    CheckBox {
+                        visible: rigDialog.usesCat4OmControls()
+                        text: qsTr("Request control automatically")
+                        checked: rigDialog.usesCat4OmControls() ? bridge.catManager.autoRequestOwnership : true
+                        onToggled: bridge.catManager.autoRequestOwnership = checked
+                        contentItem: Text { text: parent.text; leftPadding: 4; color: textPrimary; font.pixelSize: 11; verticalAlignment: Text.AlignVCenter }
+                    }
+
                     // Porta seriale (visibile se portType=serial/usb)
                     Text {
                         text: "Porta:"; color: textSecondary; font.pixelSize: 12
-                        visible: bridge.catBackend !== "tci" && bridge.catManager.portType !== "network" && bridge.catManager.portType !== "tci"
+                        visible: bridge.catManager.portType === "serial" || bridge.catManager.portType === "usb"
                     }
                     RowLayout {
                         Layout.fillWidth: true; spacing: 4
-                        visible: bridge.catBackend !== "tci" && bridge.catManager.portType !== "network" && bridge.catManager.portType !== "tci"
+                        visible: bridge.catManager.portType === "serial" || bridge.catManager.portType === "usb"
                         DecoComboBox {
                             id: portCombo
                             Layout.fillWidth: true; implicitHeight: controlHeight
@@ -500,9 +548,9 @@ Dialog {
                     DecoComboBox {
                         id: pttCombo
                         Layout.fillWidth: true; implicitHeight: controlHeight
-                        enabled: !rigDialog.usesTciControls()
-                        model: rigDialog.usesTciControls() ? ["CAT"] : bridge.catManager.pttMethodList
-                        Component.onCompleted: { var i = find(rigDialog.usesTciControls() ? "CAT" : bridge.catManager.pttMethod); currentIndex = i>=0?i:0 }
+                        enabled: !rigDialog.usesProtocolCatOnly()
+                        model: rigDialog.usesProtocolCatOnly() ? ["CAT"] : bridge.catManager.pttMethodList
+                        Component.onCompleted: { var i = find(rigDialog.usesProtocolCatOnly() ? "CAT" : bridge.catManager.pttMethod); currentIndex = i>=0?i:0 }
                         contentItem: Text { leftPadding: 8; text: pttCombo.displayText; color: pttCombo.enabled ? textPrimary : textSecondary; font.pixelSize: controlFontSize; verticalAlignment: Text.AlignVCenter; height: pttCombo.height }
                         background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         delegate: ItemDelegate {

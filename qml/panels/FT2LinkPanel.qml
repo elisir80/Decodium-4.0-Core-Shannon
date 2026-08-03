@@ -109,6 +109,11 @@ Rectangle {
     property string typingSummaryText: ""
     property string fileTransferStatus: ""
     property string receivedFileStatus: ""
+    property bool receivedFileAutoSave: settingBool("uiFt2LinkReceivedFileAutoSave", false)
+    property string receivedFileDirectory: settingString("uiFt2LinkReceivedFileDirectory", "")
+    property var receivedFileSaveRequests: ({})
+    property var receivedFilePendingTransfers: ({})
+    property int receivedFileIoPendingCount: 0
     property string bulletinStatus: ""
     property bool alertTagsDirty: false
     property string selectedFilePath: ""
@@ -235,6 +240,16 @@ Rectangle {
     onBbsGroupFilterChanged: {
         persistSetting("uiFt2LinkBbsGroupFilter", bbsGroupFilter)
         refreshBulletins()
+    }
+    onReceivedFileAutoSaveChanged: {
+        persistSetting("uiFt2LinkReceivedFileAutoSave", receivedFileAutoSave)
+        if (receivedFileAutoSave)
+            scheduleReceivedFileAutoSave()
+    }
+    onReceivedFileDirectoryChanged: {
+        persistSetting("uiFt2LinkReceivedFileDirectory", receivedFileDirectory)
+        if (receivedFileAutoSave)
+            scheduleReceivedFileAutoSave()
     }
 
     function coerceBool(value, fallback) {
@@ -453,7 +468,19 @@ Rectangle {
     }
 
     function refreshBroadcasts() {
+        var previousCount = broadcasts.length
+        var wasAtEnd = messageListAtEnd()
         broadcasts = ft2Link ? ft2Link.broadcasts() : []
+        if (toolPageIndex !== 4 || broadcasts.length === 0)
+            return
+        if (wasAtEnd || broadcasts.length <= previousCount) {
+            chatUnreadBelow = false
+            chatScrollPinned = true
+            Qt.callLater(scrollChatToEnd)
+        } else if (broadcasts.length > previousCount) {
+            chatUnreadBelow = true
+            chatScrollPinned = false
+        }
     }
 
     function refreshAlerts() {
@@ -507,6 +534,8 @@ Rectangle {
     function refreshReceivedFiles() {
         receivedFiles = ft2Link ? ft2Link.receivedFiles() : []
         receivedFileUnreadCount = countUnreadReceivedFiles(receivedFiles)
+        if (receivedFileAutoSave)
+            scheduleReceivedFileAutoSave()
     }
 
     function refreshBbsFileServer() {
@@ -1007,6 +1036,11 @@ Rectangle {
             refreshBulletins()
             toolPageIndex = 3
             break
+        case 4:
+            toolPageIndex = 4
+            refreshBroadcasts()
+            Qt.callLater(scrollChatToEnd)
+            break
         case 6:
             toolPageIndex = 6
             loadPresenceEditor()
@@ -1393,6 +1427,17 @@ Rectangle {
         return String(item.receivedUtc || "--")
     }
 
+    function receivedFilesCountText() {
+        var text = qsTr("%n item", "", receivedFiles.length)
+        if (receivedFileUnreadCount > 0)
+            text += qsTr(" / %n unread", "", receivedFileUnreadCount)
+        return text
+    }
+
+    function receivedFilePendingText() {
+        return qsTr("%n save pending", "", receivedFileIoPendingCount)
+    }
+
     function markReceivedFileRead(item, read, showStatus) {
         if (!ft2Link || !item)
             return false
@@ -1404,9 +1449,10 @@ Rectangle {
         refreshFileTransfers()
         refreshReceivedFiles()
         if (showStatus !== false) {
-            var fileName = String(item.fileName || "received file")
-            receivedFileStatus = read ? ("Marked read " + fileName)
-                                      : ("Marked unread " + fileName)
+            var fileName = String(item.fileName || qsTr("received file"))
+            receivedFileStatus = read
+                                 ? qsTr("Marked read %1").arg(fileName)
+                                 : qsTr("Marked unread %1").arg(fileName)
         }
         return true
     }
@@ -1426,21 +1472,21 @@ Rectangle {
         refreshFileTransfers()
         refreshReceivedFiles()
         receivedFileStatus = changed > 0
-                             ? ("Marked read " + changed + " received file"
-                                + (changed === 1 ? "" : "s"))
-                             : "No unread received files"
+                             ? qsTr("Marked read %n received file", "", changed)
+                             : qsTr("No unread received files")
     }
 
     function deleteReceivedFile(item) {
         if (!ft2Link || !item || typeof ft2Link.deleteReceivedFile !== "function")
             return
-        var name = String(item.fileName || "received file")
+        var name = String(item.fileName || qsTr("received file"))
         if (ft2Link.deleteReceivedFile(Number(item.id || 0))) {
             refreshFileTransfers()
             refreshReceivedFiles()
-            receivedFileStatus = "Deleted " + name
+            receivedFileStatus = qsTr("Deleted %1").arg(name)
         } else {
-            receivedFileStatus = "Delete failed: " + String(ft2Link.lastError || "")
+            receivedFileStatus = qsTr("Delete failed: %1")
+                                 .arg(String(ft2Link.lastError || ""))
         }
     }
 
@@ -1451,70 +1497,241 @@ Rectangle {
         refreshFileTransfers()
         refreshReceivedFiles()
         receivedFileStatus = removed > 0
-                             ? ("Deleted " + removed + " read received file"
-                                + (removed === 1 ? "" : "s"))
-                             : "No read received files"
+                             ? qsTr("Deleted %n read received file", "", removed)
+                             : qsTr("No read received files")
+    }
+
+    function receivedFileHasContent(item) {
+        return !!item && (String(item.content || "").length > 0
+                          || String(item.contentBase64 || "").length > 0)
+    }
+
+    function effectiveReceivedFileDirectory() {
+        var configured = String(receivedFileDirectory || "").trim()
+        if (configured.length > 0)
+            return configured
+        if (bridge
+                && typeof bridge.defaultFt2LinkReceivedFilesDirectory === "function")
+            return String(bridge.defaultFt2LinkReceivedFilesDirectory() || "")
+        return ""
+    }
+
+    function receivedFileLeafName(path) {
+        var normalized = String(path || "").replace(/\\/g, "/")
+        var slash = normalized.lastIndexOf("/")
+        return slash >= 0 ? normalized.substring(slash + 1) : normalized
+    }
+
+    function receivedFileParentDirectory(path) {
+        var normalized = String(path || "").replace(/\\/g, "/")
+        var slash = normalized.lastIndexOf("/")
+        if (slash < 0)
+            return ""
+        if (slash === 2 && normalized.charAt(1) === ":")
+            return normalized.substring(0, 3)
+        return slash === 0 ? "/" : normalized.substring(0, slash)
+    }
+
+    function receivedFilePathHint(directory, fileName) {
+        var base = String(directory || "").replace(/[\\/]+$/, "")
+        var leaf = String(fileName || "ft2link_received.bin")
+        return base.length > 0 ? (base + "/" + leaf) : leaf
+    }
+
+    function cloneReceivedFileMap(source) {
+        var clone = ({})
+        for (var key in source)
+            clone[key] = source[key]
+        return clone
+    }
+
+    function queueReceivedFileSave(item, directory, preserveExisting, automatic) {
+        if (!item || !receivedFileHasContent(item)) {
+            receivedFileStatus = qsTr("Received file has no content")
+            return false
+        }
+        if (!bridge
+                || typeof bridge.saveFt2LinkReceivedFileAsync !== "function") {
+            receivedFileStatus = qsTr("Asynchronous file saving is unavailable")
+            return false
+        }
+        var transferId = Number(item.id || 0)
+        var transferKey = String(transferId)
+        if (transferId <= 0 || receivedFilePendingTransfers[transferKey]) {
+            if (transferId > 0)
+                receivedFileStatus = qsTr("Save already in progress")
+            return false
+        }
+
+        var fileName = String(item.fileName || "ft2link_received.bin").trim()
+        if (fileName.length === 0)
+            fileName = "ft2link_received.bin"
+        var requestId = Number(bridge.saveFt2LinkReceivedFileAsync(
+                                   String(directory || ""),
+                                   fileName,
+                                   String(item.content || ""),
+                                   String(item.contentBase64 || ""),
+                                   !!item.binary,
+                                   preserveExisting !== false))
+        if (requestId <= 0) {
+            receivedFileStatus = qsTr("Unable to queue received file save")
+            return false
+        }
+
+        var requests = cloneReceivedFileMap(receivedFileSaveRequests)
+        requests[String(requestId)] = {
+            transferId: transferId,
+            fileName: fileName,
+            automatic: automatic === true
+        }
+        receivedFileSaveRequests = requests
+        var pending = cloneReceivedFileMap(receivedFilePendingTransfers)
+        pending[transferKey] = requestId
+        receivedFilePendingTransfers = pending
+        receivedFileIoPendingCount += 1
+        receivedFileStatus = automatic
+                             ? qsTr("Auto-saving %1...").arg(fileName)
+                             : qsTr("Saving %1...").arg(fileName)
+        return true
     }
 
     function saveReceivedFile(item) {
-        if (!item)
-            return
-        var content = String(item.content || "")
-        var contentBase64 = String(item.contentBase64 || "")
-        var binary = !!item.binary
-        if (content.length === 0 && contentBase64.length === 0) {
-            receivedFileStatus = "Received file has no content"
-            return
-        }
-        var fileName = String(item.fileName || "ft2link_received.txt").trim()
-        if (fileName.length === 0)
-            fileName = "ft2link_received.txt"
-        fileName = fileName.replace(/[\\/:*?"<>|]/g, "_")
+        return queueReceivedFileSave(item,
+                                     effectiveReceivedFileDirectory(),
+                                     true,
+                                     false)
+    }
 
-        var path = ""
-        if (bridge && typeof bridge.saveFileDialog === "function")
-            path = bridge.saveFileDialog("Save FT2-Link received file",
-                                         fileName,
-                                         ["All files (*)",
-                                          "Text files (*.txt *.md *.log *.csv *.json)",
-                                          "Images (*.png *.jpg *.jpeg *.gif *.bmp)"])
-        if (path.length === 0) {
-            if (!binary && content.length > 0) {
-                copyPlainText(content)
-                markReceivedFileRead(item, true, false)
-                receivedFileStatus = "Copied " + fileName
-            } else {
-                receivedFileStatus = "Save cancelled"
+    function saveReceivedFileAs(item) {
+        if (!item || !receivedFileHasContent(item)) {
+            receivedFileStatus = qsTr("Received file has no content")
+            return false
+        }
+        if (!bridge || typeof bridge.saveFileDialog !== "function") {
+            receivedFileStatus = qsTr("Save As is unavailable")
+            return false
+        }
+        var fileName = String(item.fileName || "ft2link_received.bin").trim()
+        if (fileName.length === 0)
+            fileName = "ft2link_received.bin"
+        var path = bridge.saveFileDialog(
+                    qsTr("Save FT2-Link received file as"),
+                    receivedFilePathHint(effectiveReceivedFileDirectory(), fileName),
+                    [qsTr("All files (*)"),
+                     qsTr("Text files (*.txt *.md *.log *.csv *.json)"),
+                     qsTr("Images (*.png *.jpg *.jpeg *.gif *.bmp)")])
+        if (String(path || "").length === 0) {
+            receivedFileStatus = qsTr("Save As cancelled")
+            return false
+        }
+        var directory = receivedFileParentDirectory(path)
+        var selectedName = receivedFileLeafName(path)
+        if (directory.length > 0)
+            receivedFileDirectory = directory
+        var saveItem = {
+            id: item.id,
+            fileName: selectedName,
+            content: item.content,
+            contentBase64: item.contentBase64,
+            binary: item.binary
+        }
+        return queueReceivedFileSave(saveItem, directory, false, false)
+    }
+
+    function chooseReceivedFileDirectory() {
+        if (!bridge || typeof bridge.openDirectoryDialog !== "function") {
+            receivedFileStatus = qsTr("Folder selection is unavailable")
+            return
+        }
+        var path = bridge.openDirectoryDialog(
+                    qsTr("Select FT2-Link received files folder"),
+                    effectiveReceivedFileDirectory())
+        if (String(path || "").length === 0)
+            return
+        receivedFileDirectory = String(path)
+        receivedFileStatus = qsTr("Receive folder: %1").arg(receivedFileDirectory)
+    }
+
+    function openReceivedFileDirectory() {
+        if (!bridge
+                || typeof bridge.openFt2LinkReceivedFilesDirectoryAsync !== "function") {
+            receivedFileStatus = qsTr("Open folder is unavailable")
+            return
+        }
+        bridge.openFt2LinkReceivedFilesDirectoryAsync(
+                    effectiveReceivedFileDirectory())
+        receivedFileStatus = qsTr("Opening received files folder...")
+    }
+
+    function scheduleReceivedFileAutoSave() {
+        Qt.callLater(function() {
+            if (root && typeof root.autoSavePendingReceivedFiles === "function")
+                root.autoSavePendingReceivedFiles()
+        })
+    }
+
+    function autoSavePendingReceivedFiles() {
+        if (!receivedFileAutoSave)
+            return
+        var directory = effectiveReceivedFileDirectory()
+        for (var i = 0; i < receivedFiles.length; ++i) {
+            var item = receivedFiles[i]
+            if (!item || !item.unread || !receivedFileHasContent(item))
+                continue
+            var transferKey = String(Number(item.id || 0))
+            if (receivedFilePendingTransfers[transferKey])
+                continue
+            queueReceivedFileSave(item, directory, true, true)
+        }
+    }
+
+    function finishReceivedFileSave(requestId, result) {
+        var requestKey = String(Number(requestId || 0))
+        var metadata = receivedFileSaveRequests[requestKey]
+        if (!metadata)
+            return
+
+        var requests = cloneReceivedFileMap(receivedFileSaveRequests)
+        delete requests[requestKey]
+        receivedFileSaveRequests = requests
+        var pending = cloneReceivedFileMap(receivedFilePendingTransfers)
+        delete pending[String(Number(metadata.transferId || 0))]
+        receivedFilePendingTransfers = pending
+        receivedFileIoPendingCount = Math.max(0, receivedFileIoPendingCount - 1)
+
+        if (!(result && result.ok)) {
+            var errorText = String(result && result.error
+                                   ? result.error : qsTr("unknown error"))
+            receivedFileStatus = metadata.automatic
+                                 ? qsTr("Auto-save failed: %1").arg(errorText)
+                                 : qsTr("Save failed: %1").arg(errorText)
+            return
+        }
+
+        var savedItem = null
+        for (var i = 0; i < receivedFiles.length; ++i) {
+            if (Number(receivedFiles[i].id || 0) === Number(metadata.transferId || 0)) {
+                savedItem = receivedFiles[i]
+                break
             }
-            return
         }
-        if (binary && bridge && typeof bridge.writeFileBytes === "function") {
-            var byteResult = bridge.writeFileBytes(path, contentBase64)
-            if (byteResult && byteResult.ok) {
-                markReceivedFileRead(item, true, false)
-                receivedFileStatus = "Saved " + fileName + " "
-                                     + String(byteResult.bytes || item.sizeBytes || 0) + " B"
-            } else {
-                receivedFileStatus = "Save failed: "
-                                     + String(byteResult && byteResult.error
-                                              ? byteResult.error : "unknown")
-            }
-            return
-        }
-        if (!bridge || typeof bridge.writeTextFile !== "function") {
-            copyPlainText(content)
-            markReceivedFileRead(item, true, false)
-            receivedFileStatus = "Save unavailable, copied " + fileName
-            return
-        }
-        var result = bridge.writeTextFile(path, content)
-        if (result && result.ok) {
-            markReceivedFileRead(item, true, false)
-            receivedFileStatus = "Saved " + fileName
-        } else {
-            receivedFileStatus = "Save failed: "
-                                 + String(result && result.error ? result.error : "unknown")
-        }
+        if (savedItem)
+            markReceivedFileRead(savedItem, true, false)
+        receivedFileStatus = metadata.automatic
+                             ? qsTr("Auto-saved %1").arg(
+                                   String(result.path || metadata.fileName))
+                             : qsTr("Saved %1").arg(
+                                   String(result.path || metadata.fileName))
+    }
+
+    function finishReceivedFileDirectoryOpen(result) {
+        if (result && result.ok)
+            receivedFileStatus = qsTr("Opened %1").arg(
+                        String(result.path || qsTr("receive folder")))
+        else
+            receivedFileStatus = qsTr("Open folder failed: %1").arg(
+                        String(result && result.error
+                               ? result.error : qsTr("unknown error")))
     }
 
     function bulletinDate(item) {
@@ -2265,13 +2482,21 @@ Rectangle {
     // e non trasmetteva nulla, confondendo l'utente).
     function connectStationRadio(call) {
         if (!ft2Link || !call)
-            return
+            return false
+        var wanted = normalizeStationCall(call)
+        if (wanted.length === 0 || !stationConnectEnabled(wanted))
+            return false
+        var accepted = requestSlotSniffedTx("CONNECT",
+                                            "HELLO " + wanted,
+                                            false,
+                                            ({ call: String(call) }))
+        if (!accepted)
+            return false
+        pendingConnectCall = wanted
         if (!ft2Link.radioTxArmed)
             ft2Link.setRadioTxArmed(true)
-        requestSlotSniffedTx("CONNECT",
-                             "HELLO " + normalizeStationCall(call),
-                             false,
-                             ({ call: String(call) }))
+        databaseActionText = "CONNECT queued: " + wanted
+        return true
     }
 
     function transmitBeacon(cq) {
@@ -2394,12 +2619,24 @@ Rectangle {
 
     function armOrTransmitBroadcast() {
         if (!ft2Link)
-            return
-        if (!ft2Link.radioTxArmed) {
-            ft2Link.setRadioTxArmed(true)
-            return
+            return false
+        if (broadcastTxPending()) {
+            databaseActionText = slotSnifferLine()
+            return false
         }
-        sendBroadcastText()
+        if (!ft2Link.radioTxArmed)
+            ft2Link.setRadioTxArmed(true)
+        return sendBroadcastText()
+    }
+
+    function broadcastTxPending() {
+        return slotSnifferActive() && slotSnifferAction === "BCAST"
+    }
+
+    function broadcastTxButtonText() {
+        if (broadcastTxPending())
+            return "BCAST queued..."
+        return "BCAST TX"
     }
 
     function armOrTransmitPathFinderRequest() {
@@ -2454,12 +2691,50 @@ Rectangle {
 
     function armOrTransmitFile() {
         if (!ft2Link)
-            return
-        if (!ft2Link.radioTxArmed) {
-            ft2Link.setRadioTxArmed(true)
-            return
+            return false
+        if (fileTxPending()) {
+            fileTransferStatus = slotSnifferActive()
+                                 ? slotSnifferLine()
+                                 : "FILE transfer already in progress"
+            return false
         }
-        sendFileText()
+        if (!ft2Link.radioTxArmed)
+            ft2Link.setRadioTxArmed(true)
+        return sendFileText()
+    }
+
+    function fileTxInFlight() {
+        if (ft2Link && selectedSessionId > 0
+                && typeof ft2Link.applicationRadioTxReady === "function"
+                && ft2Link.applicationRadioTxReady(selectedSessionId))
+            return false
+        var target = String(selectedRemoteCall || "").trim().toUpperCase()
+        for (var i = fileTransfers.length - 1; i >= 0; --i) {
+            var transfer = fileTransfers[i]
+            if (String(transfer.direction || "") !== "Outgoing")
+                continue
+            if (target.length > 0
+                    && String(transfer.toCall || "").trim().toUpperCase() !== target)
+                continue
+            var state = String(transfer.state || "").trim().toUpperCase()
+            if (state === "PENDING" || state === "QUEUED"
+                    || state === "SENDING" || state === "RETRY")
+                return true
+        }
+        return false
+    }
+
+    function fileTxPending() {
+        return (slotSnifferActive() && slotSnifferAction === "FILE")
+               || fileTxInFlight()
+    }
+
+    function fileTxButtonText() {
+        if (slotSnifferActive() && slotSnifferAction === "FILE")
+            return "FILE queued..."
+        if (fileTxInFlight())
+            return "FILE sending..."
+        return "SEND FILE"
     }
 
     function armOrTransmitBulletin() {
@@ -2535,21 +2810,37 @@ Rectangle {
 
     function sendBroadcastText() {
         if (!ft2Link)
-            return
-        requestSlotSniffedTx("BCAST", "BCAST", false, ({}))
-    }
-
-    function sendBroadcastTextNow() {
-        if (!ft2Link)
-            return
+            return false
         var text = broadcastText.text.trim()
         if (text.length === 0)
-            return
+            return false
+        var accepted = requestSlotSniffedTx("BCAST", "BCAST", false,
+                                            ({ text: text }))
+        if (accepted)
+            databaseActionText = "BCAST queued"
+        return accepted
+    }
+
+    function sendBroadcastTextNow(queuedText) {
+        if (!ft2Link)
+            return false
+        var text = String(queuedText || "").trim()
+        if (text.length === 0)
+            text = broadcastText.text.trim()
+        if (text.length === 0)
+            return false
+        if (!ft2Link.radioTxArmed)
+            ft2Link.setRadioTxArmed(true)
         if (ft2Link.transmitBroadcastRadio(text, nowMs())) {
-            broadcastText.text = ""
+            if (broadcastText.text.trim() === text)
+                broadcastText.text = ""
             refreshBroadcasts()
             refreshAlerts()
+            databaseActionText = "BCAST accepted for TX"
+            return true
         }
+        databaseActionText = "BCAST TX failed: " + String(ft2Link.lastError || "unknown")
+        return false
     }
 
     function prepareQsyBroadcast() {
@@ -3495,48 +3786,81 @@ Rectangle {
 
     function sendFileText() {
         if (!ft2Link || selectedSessionId === 0)
-            return
+            return false
         if (!guardWideTx("FILE"))
-            return
+            return false
         var content = String(selectedFileContent || "")
         var contentBase64 = String(selectedFileBase64 || "")
         if (selectedFileName.length === 0 || selectedFileBytes <= 0
                 || (selectedFileBinary && contentBase64.length === 0)
                 || (!selectedFileBinary && content.length === 0)) {
             fileTransferStatus = "Select a file first"
-            return
+            return false
         }
         var bytes = selectedFileBytes > 0 ? selectedFileBytes : utf8ByteCount(content)
         if (bytes > filePayloadLimitBytes) {
             fileTransferStatus = "File too large: " + bytes + " B / max "
                                  + filePayloadLimitBytes + " B"
-            return
+            return false
         }
         var toCall = String(selectedRemoteCall || "").trim().toUpperCase()
         if (toCall.length === 0) {
             fileTransferStatus = "No active QSO target"
-            return
+            return false
         }
         var fileName = selectedFileName.length > 0 ? selectedFileName : baseFileName(selectedFilePath)
         if (fileName.length === 0)
             fileName = "file.txt"
-        var queued = selectedFileBinary
+        var accepted = requestSlotSniffedTx(
+                    "FILE", "FILE " + fileName, false,
+                    ({ sessionId: selectedSessionId,
+                       toCall: toCall,
+                       fileName: fileName,
+                       content: content,
+                       contentBase64: contentBase64,
+                       binary: selectedFileBinary,
+                       bytes: bytes }))
+        if (accepted)
+            fileTransferStatus = "FILE queued " + fileName + " " + bytes
+                                 + " B; waiting for TX"
+        return accepted
+    }
+
+    function sendFileTextNow(payload) {
+        if (!ft2Link || !payload)
+            return false
+        var sessionId = Number(payload.sessionId || 0)
+        var toCall = String(payload.toCall || "").trim().toUpperCase()
+        var fileName = String(payload.fileName || "file.txt")
+        var bytes = Number(payload.bytes || 0)
+        if (sessionId <= 0 || toCall.length === 0 || fileName.length === 0) {
+            fileTransferStatus = "FILE TX failed: invalid queued request"
+            return false
+        }
+        if (!ft2Link.radioTxArmed)
+            ft2Link.setRadioTxArmed(true)
+        var queued = !!payload.binary
                      ? (typeof ft2Link.transmitFileRadioBytes === "function"
-                        && ft2Link.transmitFileRadioBytes(selectedSessionId,
+                        && ft2Link.transmitFileRadioBytes(sessionId,
                                                           toCall,
                                                           fileName,
-                                                          contentBase64,
+                                                          String(payload.contentBase64 || ""),
                                                           nowMs()))
-                     : ft2Link.transmitFileRadio(selectedSessionId,
+                     : ft2Link.transmitFileRadio(sessionId,
                                                  toCall,
                                                  fileName,
-                                                 content,
+                                                 String(payload.content || ""),
                                                  nowMs())
         if (queued) {
-            fileTransferStatus = "FILE queued " + fileName + " " + bytes + " B"
+            fileTransferStatus = "FILE accepted for TX " + fileName + " "
+                                 + bytes + " B"
             refreshFileTransfers()
             refreshSessions()
+            return true
         }
+        fileTransferStatus = "FILE TX failed: "
+                             + String(ft2Link.lastError || "unknown")
+        return false
     }
 
     function utf8ByteCount(text) {
@@ -3932,9 +4256,25 @@ Rectangle {
         return Math.max(0, Math.ceil((slotSnifferUntilMs - nowMs()) / 1000))
     }
 
-    function slotSnifferBusyReason(requireSlotClear) {
+    function slotSnifferBusyReason(requireSlotClear, action, payload) {
         if (ft2Link && ft2Link.transportBusy)
             return "TX busy"
+        if (String(action || "") === "FILE" && ft2Link) {
+            var fileSessionId = Number(payload && payload.sessionId || 0)
+            var fileSessionConnected = false
+            for (var i = 0; i < sessions.length; ++i) {
+                if (Number(sessions[i].sessionId || 0) === fileSessionId
+                        && String(sessions[i].stateName || "") === "Connected") {
+                    fileSessionConnected = true
+                    break
+                }
+            }
+            if (!fileSessionConnected)
+                return "session unavailable"
+            if (typeof ft2Link.applicationRadioTxReady === "function"
+                    && !ft2Link.applicationRadioTxReady(fileSessionId))
+                return "session busy"
+        }
         if (ft2Link && ft2Link.liveChannelLbtBusy)
             return "channel busy"
         if (requireSlotClear && cqSlotBusy())
@@ -3945,7 +4285,9 @@ Rectangle {
     function slotSnifferLine() {
         if (!slotSnifferActive())
             return slotSnifferStatus
-        var reason = slotSnifferBusyReason(slotSnifferRequireSlotClear)
+        var reason = slotSnifferBusyReason(slotSnifferRequireSlotClear,
+                                           slotSnifferAction,
+                                           slotSnifferPayload)
         if (reason.length > 0)
             return "SNIFF " + slotSnifferLabel + " " + reason
         return "SNIFF " + slotSnifferLabel + " " + slotSnifferRemainingSeconds() + "s"
@@ -3984,9 +4326,15 @@ Rectangle {
         if (!slotSnifferActive())
             return
         var now = nowMs()
-        var reason = slotSnifferBusyReason(slotSnifferRequireSlotClear)
+        var reason = slotSnifferBusyReason(slotSnifferRequireSlotClear,
+                                           slotSnifferAction,
+                                           slotSnifferPayload)
         if (reason.length > 0) {
-            if (now >= slotSnifferDeadlineMs) {
+            var persistentWait = slotSnifferAction === "CONNECT"
+                                 || slotSnifferAction === "BCAST"
+                                 || (slotSnifferAction === "FILE"
+                                     && reason !== "session unavailable")
+            if (now >= slotSnifferDeadlineMs && !persistentWait) {
                 clearSlotSniffer("SNIFF abort: " + reason)
                 databaseActionText = slotSnifferStatus
                 return
@@ -4014,14 +4362,22 @@ Rectangle {
         }
         if (key === "CONNECT") {
             if (payload && payload.call) {
-                armStrictNextTx()
                 startRadioSession(String(payload.call))
             }
             return
         }
         if (key === "BCAST") {
-            armStrictNextTx()
-            sendBroadcastTextNow()
+            sendBroadcastTextNow(String(payload && payload.text || ""))
+            return
+        }
+        if (key === "FILE") {
+            if (!sendFileTextNow(payload)
+                    && String(ft2Link && ft2Link.lastError || "")
+                       .indexOf("already pending") >= 0)
+                requestSlotSniffedTx("FILE",
+                                     "FILE " + String(payload && payload.fileName || ""),
+                                     false,
+                                     payload)
             return
         }
         if (key === "DIGI") {
@@ -4613,6 +4969,12 @@ Rectangle {
         ignoreUnknownSignals: true
         function onDeepSearchEnabledChanged() { root.applyCapabilities() }
         function onLowCpuModeEnabledChanged() { root.applyCapabilities() }
+        function onFt2LinkReceivedFileSaveFinished(requestId, result) {
+            root.finishReceivedFileSave(requestId, result)
+        }
+        function onFt2LinkReceivedFilesDirectoryOpenFinished(requestId, result) {
+            root.finishReceivedFileDirectoryOpen(result)
+        }
         function onExternalAdifUploadStatus(uploadId, state, detail) {
             if (!ft2Link || typeof ft2Link.markLogbookUpload !== "function")
                 return
@@ -5790,6 +6152,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     visible: root.selectedMessages.length === 0
+                             && root.toolPageIndex !== 4
                              && root.broadcasts.length > 0
                     text: root.latestBroadcastLine()
                     elide: Text.ElideRight
@@ -5890,7 +6253,8 @@ Rectangle {
                         anchors.fill: parent
                         clip: true
                         spacing: 4
-                        model: root.selectedMessages
+                        model: root.toolPageIndex === 4
+                               ? root.broadcasts : root.selectedMessages
                         boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: ScrollBar {
                             policy: ScrollBar.AsNeeded
@@ -5951,7 +6315,10 @@ Rectangle {
                         Text {
                             anchors.centerIn: parent
                             visible: messageList.count === 0
-                            text: root.selectedSessionId > 0 ? "No messages" : "Select a session"
+                            text: root.toolPageIndex === 4
+                                  ? "No broadcast messages"
+                                  : (root.selectedSessionId > 0
+                                     ? "No messages" : "Select a session")
                             font.family: root.mono
                             font.pixelSize: 11
                             color: root.textSecondary
@@ -5966,7 +6333,7 @@ Rectangle {
                         text: "DOWN"
                         implicitWidth: 62
                         accent: root.chatUnreadBelow && root.chatUnreadPulse ? root.green : root.cyan
-                        visible: root.selectedMessages.length > 0 && !root.messageListAtEnd()
+                        visible: messageList.count > 0 && !root.messageListAtEnd()
                         tip: root.chatUnreadBelow ? "New messages below" : "Scroll to latest"
                         onClicked: root.scrollChatToEnd()
                     }
@@ -6006,7 +6373,7 @@ Rectangle {
                             spacing: 6
 
                             Text {
-                                text: "RECEIVED FILES"
+                                text: qsTr("RECEIVED FILES")
                                 font.family: root.mono
                                 font.pixelSize: 11
                                 font.bold: true
@@ -6014,11 +6381,7 @@ Rectangle {
                             }
 
                             Text {
-                                text: String(root.receivedFiles.length) + " item"
-                                      + (root.receivedFiles.length === 1 ? "" : "s")
-                                      + (root.receivedFileUnreadCount > 0
-                                         ? (" / " + root.receivedFileUnreadCount + " unread")
-                                         : "")
+                                text: root.receivedFilesCountText()
                                 font.family: root.mono
                                 font.pixelSize: 10
                                 color: root.receivedFileUnreadCount > 0
@@ -6027,9 +6390,9 @@ Rectangle {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: root.receivedFiles.length > 0
-                                      ? "Use SAVE to write a received file to disk"
-                                      : "No received files"
+                                text: root.receivedFileIoPendingCount > 0
+                                      ? root.receivedFilePendingText()
+                                      : root.effectiveReceivedFileDirectory()
                                 elide: Text.ElideRight
                                 font.family: root.mono
                                 font.pixelSize: 10
@@ -6037,20 +6400,45 @@ Rectangle {
                             }
 
                             SmallButton {
-                                text: "MARK ALL READ"
-                                implicitWidth: 104
+                                text: root.receivedFileAutoSave
+                                      ? qsTr("AUTO ON") : qsTr("AUTO OFF")
+                                implicitWidth: 70
+                                accent: root.receivedFileAutoSave ? root.green : root.textSecondary
+                                tip: qsTr("Automatically save new files in the receive folder")
+                                onClicked: root.receivedFileAutoSave = !root.receivedFileAutoSave
+                            }
+
+                            SmallButton {
+                                text: qsTr("FOLDER")
+                                implicitWidth: 58
+                                accent: root.cyan
+                                tip: qsTr("Choose the received files folder")
+                                onClicked: root.chooseReceivedFileDirectory()
+                            }
+
+                            SmallButton {
+                                text: qsTr("OPEN")
+                                implicitWidth: 48
+                                accent: root.cyan
+                                tip: qsTr("Open the received files folder")
+                                onClicked: root.openReceivedFileDirectory()
+                            }
+
+                            SmallButton {
+                                text: qsTr("READ ALL")
+                                implicitWidth: 70
                                 accent: root.amber
                                 enabled: root.receivedFileUnreadCount > 0
-                                tip: "Clear unread marker for all received files"
+                                tip: qsTr("Clear unread marker for all received files")
                                 onClicked: root.markAllReceivedFilesRead()
                             }
 
                             SmallButton {
-                                text: "CLEAR READ"
-                                implicitWidth: 86
+                                text: qsTr("CLEAR")
+                                implicitWidth: 52
                                 accent: root.red
                                 enabled: !!ft2Link && root.receivedFiles.length > root.receivedFileUnreadCount
-                                tip: "Delete received files already marked read"
+                                tip: qsTr("Delete received files already marked read")
                                 onClicked: root.clearReadReceivedFiles()
                             }
                         }
@@ -6087,10 +6475,11 @@ Rectangle {
                                     spacing: 6
 
                                     Text {
-                                        Layout.preferredWidth: 42
+                                        Layout.preferredWidth: 36
                                         text: rxFilePanelDelegate.modelData.unread
-                                              ? "NEW"
-                                              : (rxFilePanelDelegate.modelData.imageLike ? "IMG" : "FILE")
+                                              ? qsTr("NEW")
+                                              : (rxFilePanelDelegate.modelData.imageLike
+                                                 ? qsTr("IMG") : qsTr("FILE"))
                                         elide: Text.ElideRight
                                         font.family: root.mono
                                         font.pixelSize: 10
@@ -6101,7 +6490,7 @@ Rectangle {
                                     }
 
                                     Text {
-                                        Layout.preferredWidth: 76
+                                        Layout.preferredWidth: 64
                                         text: String(rxFilePanelDelegate.modelData.senderCall || "--")
                                         elide: Text.ElideRight
                                         font.family: root.mono
@@ -6111,7 +6500,7 @@ Rectangle {
                                     }
 
                                     Text {
-                                        Layout.preferredWidth: 150
+                                        Layout.preferredWidth: 110
                                         text: String(rxFilePanelDelegate.modelData.fileName || "")
                                         elide: Text.ElideRight
                                         font.family: root.mono
@@ -6120,7 +6509,7 @@ Rectangle {
                                     }
 
                                     Text {
-                                        Layout.preferredWidth: 104
+                                        Layout.preferredWidth: 90
                                         text: root.receivedFileDate(rxFilePanelDelegate.modelData)
                                         elide: Text.ElideRight
                                         font.family: root.mono
@@ -6129,7 +6518,7 @@ Rectangle {
                                     }
 
                                     Text {
-                                        Layout.preferredWidth: 66
+                                        Layout.preferredWidth: 52
                                         text: String(rxFilePanelDelegate.modelData.sizeBytes || 0) + " B"
                                         elide: Text.ElideRight
                                         font.family: root.mono
@@ -6147,49 +6536,63 @@ Rectangle {
                                     }
 
                                     SmallButton {
-                                        text: "SAVE"
+                                        text: qsTr("SAVE")
                                         implicitWidth: 48
                                         accent: root.green
-                                        enabled: String(rxFilePanelDelegate.modelData.content || "").length > 0
-                                                 || String(rxFilePanelDelegate.modelData.contentBase64 || "").length > 0
-                                        tip: "Save received file to disk"
+                                        enabled: root.receivedFileHasContent(rxFilePanelDelegate.modelData)
+                                                 && !root.receivedFilePendingTransfers[
+                                                     String(Number(rxFilePanelDelegate.modelData.id || 0))]
+                                        tip: qsTr("Save to the configured receive folder")
                                         onClicked: root.saveReceivedFile(rxFilePanelDelegate.modelData)
                                     }
 
                                     SmallButton {
-                                        text: rxFilePanelDelegate.modelData.unread ? "READ" : "UNREAD"
+                                        text: qsTr("SAVE AS")
                                         implicitWidth: 58
+                                        accent: root.cyan
+                                        enabled: root.receivedFileHasContent(rxFilePanelDelegate.modelData)
+                                                 && !root.receivedFilePendingTransfers[
+                                                     String(Number(rxFilePanelDelegate.modelData.id || 0))]
+                                        tip: qsTr("Save with another name or in another folder")
+                                        onClicked: root.saveReceivedFileAs(rxFilePanelDelegate.modelData)
+                                    }
+
+                                    SmallButton {
+                                        text: rxFilePanelDelegate.modelData.unread
+                                              ? qsTr("READ") : qsTr("UNREAD")
+                                        implicitWidth: 54
                                         accent: rxFilePanelDelegate.modelData.unread ? root.amber : root.textSecondary
                                         enabled: !!ft2Link
                                         tip: rxFilePanelDelegate.modelData.unread
-                                             ? "Mark received file as read"
-                                             : "Mark received file as unread"
+                                             ? qsTr("Mark received file as read")
+                                             : qsTr("Mark received file as unread")
                                         onClicked: root.markReceivedFileRead(rxFilePanelDelegate.modelData,
                                                                               !!rxFilePanelDelegate.modelData.unread,
                                                                               true)
                                     }
 
                                     SmallButton {
-                                        text: "COPY"
-                                        implicitWidth: 52
+                                        text: qsTr("COPY")
+                                        implicitWidth: 48
                                         accent: root.cyan
                                         enabled: String(rxFilePanelDelegate.modelData.content || "").length > 0
-                                        tip: "Copy received file content"
+                                        tip: qsTr("Copy received file content")
                                         onClicked: {
                                             var text = String(rxFilePanelDelegate.modelData.content || "")
                                             root.copyPlainText(text)
                                             root.markReceivedFileRead(rxFilePanelDelegate.modelData, true, false)
-                                            root.receivedFileStatus = "Copied "
-                                                                      + String(rxFilePanelDelegate.modelData.fileName || "received file")
+                                            root.receivedFileStatus = qsTr("Copied %1").arg(
+                                                        String(rxFilePanelDelegate.modelData.fileName
+                                                               || qsTr("received file")))
                                         }
                                     }
 
                                     SmallButton {
-                                        text: "DEL"
-                                        implicitWidth: 40
+                                        text: qsTr("DEL")
+                                        implicitWidth: 36
                                         accent: root.red
                                         enabled: !!ft2Link
-                                        tip: "Delete this received file entry"
+                                        tip: qsTr("Delete this received file entry")
                                         onClicked: root.deleteReceivedFile(rxFilePanelDelegate.modelData)
                                     }
                                 }
@@ -6198,7 +6601,7 @@ Rectangle {
                             Text {
                                 anchors.centerIn: parent
                                 visible: receivedFileListPanel.count === 0
-                                text: "No received files"
+                                text: qsTr("No received files")
                                 font.family: root.mono
                                 font.pixelSize: 10
                                 color: root.textSecondary
@@ -6211,8 +6614,10 @@ Rectangle {
                             text: root.receivedFileStatus.length > 0
                                   ? root.receivedFileStatus
                                   : (root.receivedFiles.length > 0
-                                     ? "Select SAVE to write a received file"
-                                     : "No received files")
+                                     ? qsTr("Folder: %1").arg(
+                                           root.effectiveReceivedFileDirectory())
+                                     : qsTr("Waiting for files in %1").arg(
+                                           root.effectiveReceivedFileDirectory()))
                             elide: Text.ElideMiddle
                             font.family: root.mono
                             font.pixelSize: 10
@@ -6600,7 +7005,8 @@ Rectangle {
                                     text: "LOAD TXT"
                                     implicitWidth: 78
                                     accent: root.cyan
-                                    enabled: !!bridge && typeof bridge.openFileDialog === "function"
+                                    enabled: !root.fileTxPending()
+                                             && !!bridge && typeof bridge.openFileDialog === "function"
                                              && typeof bridge.readTextFile === "function"
                                     tip: "Load a local text file, max 16 KiB"
                                     onClicked: root.loadFileText()
@@ -6610,7 +7016,8 @@ Rectangle {
                                     text: "LOAD BIN"
                                     implicitWidth: 78
                                     accent: root.amber
-                                    enabled: !!bridge && typeof bridge.openFileDialog === "function"
+                                    enabled: !root.fileTxPending()
+                                             && !!bridge && typeof bridge.openFileDialog === "function"
                                              && typeof bridge.readFileBytes === "function"
                                     tip: "Load a local binary file, max 16 KiB"
                                     onClicked: root.loadFileBytes()
@@ -6620,22 +7027,24 @@ Rectangle {
                                     text: "CLEAR"
                                     implicitWidth: 54
                                     accent: root.red
-                                    enabled: root.selectedFileName.length > 0
+                                    enabled: !root.fileTxPending()
+                                             && root.selectedFileName.length > 0
                                     tip: "Clear selected file"
                                     onClicked: root.clearSelectedFile()
                                 }
 
                                 SmallButton {
-                                    text: ft2Link && ft2Link.radioTxArmed ? "SEND FILE" : "ARM FILE"
-                                    implicitWidth: 88
+                                    text: root.fileTxButtonText()
+                                    implicitWidth: root.fileTxPending() ? 116 : 88
                                     accent: root.cyan
-                                    enabled: !!ft2Link && root.selectedSessionConnected
+                                    enabled: !!ft2Link && !root.fileTxPending()
+                                             && root.selectedSessionConnected
                                              && root.selectedFileName.length > 0
                                              && root.selectedFileBytes > 0
                                              && root.selectedFileBytes <= root.filePayloadLimitBytes
-                                    tip: ft2Link && ft2Link.radioTxArmed
-                                         ? "Transmit file over FT2-Link"
-                                         : "Arm file transmit"
+                                    tip: root.fileTxPending()
+                                         ? "File request accepted; waiting or transmitting automatically"
+                                         : "Queue file and transmit automatically when ready"
                                     onClicked: root.armOrTransmitFile()
                                 }
                             }
@@ -6999,7 +7408,7 @@ Rectangle {
                                         spacing: 6
 
                                         Text {
-                                            Layout.preferredWidth: 42
+                                            Layout.preferredWidth: 36
                                             text: modelData.binary ? "BIN" : "TXT"
                                             font.family: root.mono
                                             font.pixelSize: 9
@@ -7353,7 +7762,7 @@ Rectangle {
                                     Layout.minimumWidth: 0
                                     Layout.preferredHeight: 32
                                     placeholderText: "Broadcast message"
-                                    enabled: true
+                                    enabled: !root.broadcastTxPending()
                                     font.family: root.mono
                                     font.pixelSize: 12
                                     maximumLength: 256
@@ -7372,12 +7781,15 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: ft2Link && ft2Link.radioTxArmed ? "BCAST TX" : "ARM B"
-                                    implicitWidth: 74
+                                    text: root.broadcastTxButtonText()
+                                    implicitWidth: root.broadcastTxPending() ? 112 : 82
                                     implicitHeight: 30
                                     accent: root.alerts.length > 0 ? root.red : root.amber
-                                    enabled: !!ft2Link && broadcastText.text.trim().length > 0
-                                    tip: ft2Link && ft2Link.radioTxArmed ? "Transmit broadcast" : "Arm broadcast transmit"
+                                    enabled: !!ft2Link && !root.broadcastTxPending()
+                                             && broadcastText.text.trim().length > 0
+                                    tip: root.broadcastTxPending()
+                                         ? "Broadcast queued; waiting for a clear transmit opportunity"
+                                         : "Queue broadcast and transmit automatically when ready"
                                     onClicked: root.armOrTransmitBroadcast()
                                 }
                             }
@@ -10338,7 +10750,7 @@ Rectangle {
                                 spacing: 6
 
                                 Text {
-                                    text: "RECEIVED FILES"
+                                    text: qsTr("RECEIVED FILES")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     font.bold: true
@@ -10346,11 +10758,7 @@ Rectangle {
                                 }
 
                                 Text {
-                                    text: String(root.receivedFiles.length) + " item"
-                                          + (root.receivedFiles.length === 1 ? "" : "s")
-                                          + (root.receivedFileUnreadCount > 0
-                                             ? (" / " + root.receivedFileUnreadCount + " unread")
-                                             : "")
+                                    text: root.receivedFilesCountText()
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.receivedFileUnreadCount > 0
@@ -10359,9 +10767,9 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: root.receivedFiles.length > 0
-                                          ? "Use SAVE to write a received file to disk"
-                                          : "No received files"
+                                    text: root.receivedFileIoPendingCount > 0
+                                          ? root.receivedFilePendingText()
+                                          : root.effectiveReceivedFileDirectory()
                                     elide: Text.ElideRight
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -10369,20 +10777,45 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "MARK ALL READ"
-                                    implicitWidth: 104
+                                    text: root.receivedFileAutoSave
+                                          ? qsTr("AUTO ON") : qsTr("AUTO OFF")
+                                    implicitWidth: 70
+                                    accent: root.receivedFileAutoSave ? root.green : root.textSecondary
+                                    tip: qsTr("Automatically save new files in the receive folder")
+                                    onClicked: root.receivedFileAutoSave = !root.receivedFileAutoSave
+                                }
+
+                                SmallButton {
+                                    text: qsTr("FOLDER")
+                                    implicitWidth: 58
+                                    accent: root.cyan
+                                    tip: qsTr("Choose the received files folder")
+                                    onClicked: root.chooseReceivedFileDirectory()
+                                }
+
+                                SmallButton {
+                                    text: qsTr("OPEN")
+                                    implicitWidth: 48
+                                    accent: root.cyan
+                                    tip: qsTr("Open the received files folder")
+                                    onClicked: root.openReceivedFileDirectory()
+                                }
+
+                                SmallButton {
+                                    text: qsTr("READ ALL")
+                                    implicitWidth: 70
                                     accent: root.amber
                                     enabled: root.receivedFileUnreadCount > 0
-                                    tip: "Clear unread marker for all received files"
+                                    tip: qsTr("Clear unread marker for all received files")
                                     onClicked: root.markAllReceivedFilesRead()
                                 }
 
                                 SmallButton {
-                                    text: "CLEAR READ"
-                                    implicitWidth: 86
+                                    text: qsTr("CLEAR")
+                                    implicitWidth: 52
                                     accent: root.red
                                     enabled: !!ft2Link && root.receivedFiles.length > root.receivedFileUnreadCount
-                                    tip: "Delete received files already marked read"
+                                    tip: qsTr("Delete received files already marked read")
                                     onClicked: root.clearReadReceivedFiles()
                                 }
                             }
@@ -10421,8 +10854,9 @@ Rectangle {
                                         Text {
                                             Layout.preferredWidth: 42
                                             text: rxFileDelegate.modelData.unread
-                                                  ? "NEW"
-                                                  : (rxFileDelegate.modelData.imageLike ? "IMG" : "FILE")
+                                                  ? qsTr("NEW")
+                                                  : (rxFileDelegate.modelData.imageLike
+                                                     ? qsTr("IMG") : qsTr("FILE"))
                                             elide: Text.ElideRight
                                             font.family: root.mono
                                             font.pixelSize: 10
@@ -10433,7 +10867,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            Layout.preferredWidth: 76
+                                            Layout.preferredWidth: 64
                                             text: String(rxFileDelegate.modelData.senderCall || "--")
                                             elide: Text.ElideRight
                                             font.family: root.mono
@@ -10443,7 +10877,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            Layout.preferredWidth: 150
+                                            Layout.preferredWidth: 110
                                             text: String(rxFileDelegate.modelData.fileName || "")
                                             elide: Text.ElideRight
                                             font.family: root.mono
@@ -10452,7 +10886,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            Layout.preferredWidth: 104
+                                            Layout.preferredWidth: 90
                                             text: root.receivedFileDate(rxFileDelegate.modelData)
                                             elide: Text.ElideRight
                                             font.family: root.mono
@@ -10461,7 +10895,7 @@ Rectangle {
                                         }
 
                                         Text {
-                                            Layout.preferredWidth: 66
+                                            Layout.preferredWidth: 52
                                             text: String(rxFileDelegate.modelData.sizeBytes || 0) + " B"
                                             elide: Text.ElideRight
                                             font.family: root.mono
@@ -10479,49 +10913,63 @@ Rectangle {
                                         }
 
                                         SmallButton {
-                                            text: "SAVE"
+                                            text: qsTr("SAVE")
                                             implicitWidth: 48
                                             accent: root.green
-                                            enabled: String(rxFileDelegate.modelData.content || "").length > 0
-                                                     || String(rxFileDelegate.modelData.contentBase64 || "").length > 0
-                                            tip: "Save received file to disk"
+                                            enabled: root.receivedFileHasContent(rxFileDelegate.modelData)
+                                                     && !root.receivedFilePendingTransfers[
+                                                         String(Number(rxFileDelegate.modelData.id || 0))]
+                                            tip: qsTr("Save to the configured receive folder")
                                             onClicked: root.saveReceivedFile(rxFileDelegate.modelData)
                                         }
 
                                         SmallButton {
-                                            text: rxFileDelegate.modelData.unread ? "READ" : "UNREAD"
+                                            text: qsTr("SAVE AS")
                                             implicitWidth: 58
+                                            accent: root.cyan
+                                            enabled: root.receivedFileHasContent(rxFileDelegate.modelData)
+                                                     && !root.receivedFilePendingTransfers[
+                                                         String(Number(rxFileDelegate.modelData.id || 0))]
+                                            tip: qsTr("Save with another name or in another folder")
+                                            onClicked: root.saveReceivedFileAs(rxFileDelegate.modelData)
+                                        }
+
+                                        SmallButton {
+                                            text: rxFileDelegate.modelData.unread
+                                                  ? qsTr("READ") : qsTr("UNREAD")
+                                            implicitWidth: 54
                                             accent: rxFileDelegate.modelData.unread ? root.amber : root.textSecondary
                                             enabled: !!ft2Link
                                             tip: rxFileDelegate.modelData.unread
-                                                 ? "Mark received file as read"
-                                                 : "Mark received file as unread"
+                                                 ? qsTr("Mark received file as read")
+                                                 : qsTr("Mark received file as unread")
                                             onClicked: root.markReceivedFileRead(rxFileDelegate.modelData,
                                                                                   !!rxFileDelegate.modelData.unread,
                                                                                   true)
                                         }
 
                                         SmallButton {
-                                            text: "COPY"
-                                            implicitWidth: 52
+                                            text: qsTr("COPY")
+                                            implicitWidth: 48
                                             accent: root.cyan
                                             enabled: String(rxFileDelegate.modelData.content || "").length > 0
-                                            tip: "Copy received file content"
+                                            tip: qsTr("Copy received file content")
                                             onClicked: {
                                                 var text = String(rxFileDelegate.modelData.content || "")
                                                 root.copyPlainText(text)
                                                 root.markReceivedFileRead(rxFileDelegate.modelData, true, false)
-                                                root.receivedFileStatus = "Copied "
-                                                                          + String(rxFileDelegate.modelData.fileName || "received file")
+                                                root.receivedFileStatus = qsTr("Copied %1").arg(
+                                                            String(rxFileDelegate.modelData.fileName
+                                                                   || qsTr("received file")))
                                             }
                                         }
 
                                         SmallButton {
-                                            text: "DEL"
-                                            implicitWidth: 40
+                                            text: qsTr("DEL")
+                                            implicitWidth: 36
                                             accent: root.red
                                             enabled: !!ft2Link
-                                            tip: "Delete this received file entry"
+                                            tip: qsTr("Delete this received file entry")
                                             onClicked: root.deleteReceivedFile(rxFileDelegate.modelData)
                                         }
                                     }
@@ -10530,7 +10978,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: receivedFileList.count === 0
-                                    text: "No received files"
+                                    text: qsTr("No received files")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -10543,8 +10991,10 @@ Rectangle {
                                 text: root.receivedFileStatus.length > 0
                                       ? root.receivedFileStatus
                                       : (root.receivedFiles.length > 0
-                                         ? "Select SAVE to write a received file"
-                                         : "No received files")
+                                         ? qsTr("Folder: %1").arg(
+                                               root.effectiveReceivedFileDirectory())
+                                         : qsTr("Waiting for files in %1").arg(
+                                               root.effectiveReceivedFileDirectory()))
                                 elide: Text.ElideMiddle
                                 font.family: root.mono
                                 font.pixelSize: 10

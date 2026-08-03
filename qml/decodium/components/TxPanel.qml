@@ -4,6 +4,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 import "../../panels"
 
 Item {
@@ -376,6 +377,10 @@ Item {
     }
 
     readonly property bool isFt2LinkMode: displayModeName(engine ? engine.mode : "") === "FT2-Link"
+    readonly property string normalizedOperatingMode: String(engine ? engine.mode : "").trim().toUpperCase()
+    readonly property bool isWsprBeaconMode: normalizedOperatingMode === "WSPR"
+                                               || normalizedOperatingMode === "FST4W"
+                                               || normalizedOperatingMode.indexOf("FST4W-") === 0
     readonly property var ft2LinkHiddenTxPanelIds: ({
         "mam": true,
         "deep": true,
@@ -704,7 +709,7 @@ Item {
                         }
 
                         Rectangle {
-                            visible: engine && String(engine.mode || "").toUpperCase() === "WSPR"
+                            visible: engine && txPanel.isWsprBeaconMode
                             width: Math.max(94, Math.round(108 * txPanel.toolbarScale))
                             height: txPanel.toolbarButtonHeight
                             radius: 5
@@ -1991,20 +1996,48 @@ Item {
         }
     }
 
-    Popup {
+    Window {
         id: logConfirmPopup
-        parent: Overlay.overlay
-        modal: true
-        dim: false
-        focus: true
+        visible: false
+        transientParent: txPanel.Window.window
+        modality: Qt.ApplicationModal
+        flags: Qt.Dialog | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        title: qsTr("Confirm QSO logging")
+        color: "transparent"
         width: 570
         height: 560
-        x: parent ? Math.round((parent.width - width) / 2) : 0
-        y: parent ? Math.round((parent.height - height) / 2) : 0
-        // Closing this popup marks the QSO as skipped. Keep that operation
-        // explicit so an accidental click outside cannot clear the active QSO.
-        closePolicy: Popup.NoAutoClose
-        onOpened: {
+
+        function centerOnHostWindow() {
+            var host = transientParent
+            var targetX = host ? host.x + Math.round((host.width - width) / 2) : x
+            var targetY = host ? host.y + Math.round((host.height - height) / 2) : y
+            var available = null
+            var centerX = host ? host.x + host.width / 2 : targetX + width / 2
+            var centerY = host ? host.y + host.height / 2 : targetY + height / 2
+            if (Qt.application && Qt.application.screens) {
+                for (var i = 0; i < Qt.application.screens.length; ++i) {
+                    var screenInfo = Qt.application.screens[i]
+                    var geometry = screenInfo.availableGeometry
+                    if (centerX >= geometry.x && centerX < geometry.x + geometry.width
+                            && centerY >= geometry.y && centerY < geometry.y + geometry.height) {
+                        available = geometry
+                        break
+                    }
+                }
+                if (!available && Qt.application.screens.length > 0)
+                    available = Qt.application.screens[0].availableGeometry
+            }
+            if (available) {
+                targetX = Math.max(available.x,
+                                   Math.min(targetX, available.x + available.width - width))
+                targetY = Math.max(available.y,
+                                   Math.min(targetY, available.y + available.height - height))
+            }
+            x = Math.round(targetX)
+            y = Math.round(targetY)
+        }
+
+        function open() {
             txPanel.refreshLogPreview()
             txPanel.syncLogSatelliteFields()
             logCommentField.text = txPanel.logPreviewComment
@@ -2013,23 +2046,39 @@ Item {
             logTimeOffField.text = txPanel.logPreviewTimeOff
             txPanel.logClusterSpotAvailable = !!(engine && engine.dxCluster && engine.dxCluster.connected)
             txPanel.logClusterSpotChecked = txPanel.logClusterSpotAvailable && !!engine.autoSpotEnabled
+            centerOnHostWindow()
+            show()
+            raise()
+            requestActivate()
+            Qt.callLater(function() {
+                if (logGridField)
+                    logGridField.forceActiveFocus()
+            })
         }
-        onClosed: {
-            if (txPanel.logPromptRequestedByBridge && !txPanel.logPromptAccepted
-                    && engine && engine.rejectPromptedLogQso) {
-                engine.rejectPromptedLogQso()
+
+        // Closing this application-modal native window marks the QSO as
+        // skipped.  Unlike an in-scene Popup, it remains above detached
+        // always-on-top traffic windows and cannot be hidden behind them.
+        onVisibleChanged: {
+            if (!visible) {
+                if (txPanel.logPromptRequestedByBridge && !txPanel.logPromptAccepted
+                        && engine && engine.rejectPromptedLogQso) {
+                    engine.rejectPromptedLogQso()
+                }
+                txPanel.logPromptRequestedByBridge = false
+                txPanel.logPromptAccepted = false
             }
-            txPanel.logPromptRequestedByBridge = false
-            txPanel.logPromptAccepted = false
         }
-        background: Rectangle {
+
+        Rectangle {
+            anchors.fill: parent
             radius: 10
             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.96)
             border.color: accentGreen
             border.width: 1
         }
 
-        contentItem: ColumnLayout {
+        ColumnLayout {
             anchors.fill: parent
             anchors.margins: 16
             spacing: 12
@@ -2052,7 +2101,7 @@ Item {
                 }
             }
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: glassBorder }
+            Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: glassBorder }
 
             GridLayout {
                 Layout.fillWidth: true

@@ -322,6 +322,88 @@ private Q_SLOTS:
         QStringLiteral ("readonly property string peerLabel")));
     QVERIFY (source.contains (
         QStringLiteral ("width: messageList.width")));
+    QVERIFY (source.contains (
+        QStringLiteral ("root.toolPageIndex === 4")));
+    QVERIFY (source.contains (
+        QStringLiteral ("? root.broadcasts : root.selectedMessages")));
+    QVERIFY (source.contains (
+        QStringLiteral ("No broadcast messages")));
+    QVERIFY (source.contains (
+        QStringLiteral ("function broadcastTxPending()")));
+    QVERIFY (source.contains (
+        QStringLiteral ("return sendBroadcastText()")));
+    QVERIFY (source.contains (
+        QStringLiteral ("({ text: text })")));
+    QVERIFY (source.contains (
+        QStringLiteral ("slotSnifferAction === \"BCAST\"")));
+    QVERIFY (source.contains (
+        QStringLiteral ("sendBroadcastTextNow(String(payload && payload.text || \"\"))")));
+    QVERIFY (source.contains (
+        QStringLiteral ("function fileTxPending()")));
+    QVERIFY (source.contains (
+        QStringLiteral ("return sendFileText()")));
+    QVERIFY (source.contains (
+        QStringLiteral ("reason !== \"session unavailable\"")));
+    QVERIFY (source.contains (
+        QStringLiteral ("if (key === \"FILE\")")));
+    QVERIFY (source.contains (
+        QStringLiteral ("sendFileTextNow(payload)")));
+    QVERIFY (source.contains (
+        QStringLiteral ("applicationRadioTxReady")));
+  }
+
+  void qmlConnectKeepsOnePersistentQueuedRequest ()
+  {
+    QFile qml {
+      QStringLiteral (DECODIUM_SOURCE_DIR "/qml/panels/FT2LinkPanel.qml")};
+    QVERIFY2 (qml.open (QIODevice::ReadOnly | QIODevice::Text),
+              qPrintable (qml.errorString ()));
+    QString const source = QString::fromUtf8 (qml.readAll ());
+
+    int const connectIndex = source.indexOf (
+        QStringLiteral ("function connectStationRadio(call)"));
+    int const connectEnd = source.indexOf (
+        QStringLiteral ("\n    function "), connectIndex + 1);
+    QVERIFY (connectIndex >= 0);
+    QString const connectBody = source.mid (
+        connectIndex, connectEnd - connectIndex);
+    QVERIFY (connectBody.contains (
+        QStringLiteral ("pendingConnectCall = wanted")));
+    QVERIFY (connectBody.contains (
+        QStringLiteral ("if (!accepted)")));
+    QVERIFY (connectBody.contains (
+        QStringLiteral ("!stationConnectEnabled(wanted)")));
+
+    int const continueIndex = source.indexOf (
+        QStringLiteral ("function continueSlotSniffer()"));
+    int const continueEnd = source.indexOf (
+        QStringLiteral ("\n    function "), continueIndex + 1);
+    QVERIFY (continueIndex >= 0);
+    QString const continueBody = source.mid (
+        continueIndex, continueEnd - continueIndex);
+    QVERIFY (continueBody.contains (
+        QStringLiteral ("slotSnifferAction === \"CONNECT\"")));
+    QVERIFY (continueBody.contains (
+        QStringLiteral ("slotSnifferAction === \"BCAST\"")));
+    QVERIFY (continueBody.contains (
+        QStringLiteral ("slotSnifferAction === \"FILE\"")));
+
+    int const dispatchIndex = source.indexOf (
+        QStringLiteral ("function dispatchSlotSnifferAction(action, payload)"));
+    int const dispatchEnd = source.indexOf (
+        QStringLiteral ("\n    function "), dispatchIndex + 1);
+    QVERIFY (dispatchIndex >= 0);
+    QString const dispatchBody = source.mid (
+        dispatchIndex, dispatchEnd - dispatchIndex);
+    int const connectBranch = dispatchBody.indexOf (
+        QStringLiteral ("if (key === \"CONNECT\")"));
+    int const broadcastBranch = dispatchBody.indexOf (
+        QStringLiteral ("if (key === \"BCAST\")"), connectBranch);
+    QVERIFY (connectBranch >= 0);
+    QVERIFY (broadcastBranch > connectBranch);
+    QVERIFY (!dispatchBody.mid (
+        connectBranch, broadcastBranch - connectBranch).contains (
+            QStringLiteral ("armStrictNextTx()")));
   }
 
   void adapterExposesStationsSessionsAndMessages ()
@@ -2282,6 +2364,13 @@ private Q_SLOTS:
     QVariantMap firstBroadcast = adapter.broadcasts ().first ().toMap ();
     QCOMPARE (firstBroadcast.value ("source").toString (), QStringLiteral ("TX"));
     QCOMPARE (firstBroadcast.value ("fromCall").toString (), QStringLiteral ("IU8LMC"));
+    QCOMPARE (firstBroadcast.value ("remoteCall").toString (), QStringLiteral ("ALL"));
+    QCOMPARE (firstBroadcast.value ("directionName").toString (),
+              QStringLiteral ("Outgoing"));
+    QCOMPARE (firstBroadcast.value ("deliveryName").toString (),
+              QStringLiteral ("Sent"));
+    QCOMPARE (firstBroadcast.value ("kind").toString (), QStringLiteral ("BCAST"));
+    QVERIFY (firstBroadcast.value ("broadcast").toBool ());
     QVERIFY (firstBroadcast.value ("alert").toBool ());
 
     adapter.setRadioTxArmed (true);
@@ -2311,6 +2400,13 @@ private Q_SLOTS:
     QVariantMap secondBroadcast = adapter.broadcasts ().last ().toMap ();
     QCOMPARE (secondBroadcast.value ("source").toString (), QStringLiteral ("RX"));
     QCOMPARE (secondBroadcast.value ("fromCall").toString (), QStringLiteral ("K1ABC"));
+    QCOMPARE (secondBroadcast.value ("remoteCall").toString (), QStringLiteral ("K1ABC"));
+    QCOMPARE (secondBroadcast.value ("directionName").toString (),
+              QStringLiteral ("Incoming"));
+    QCOMPARE (secondBroadcast.value ("deliveryName").toString (),
+              QStringLiteral ("Received"));
+    QCOMPARE (secondBroadcast.value ("kind").toString (), QStringLiteral ("BCAST"));
+    QVERIFY (secondBroadcast.value ("broadcast").toBool ());
     QVERIFY (secondBroadcast.value ("alert").toBool ());
   }
 
@@ -3746,6 +3842,18 @@ private Q_SLOTS:
               QStringLiteral ("server.txt"));
     QCOMPARE (shared.first ().toMap ().value ("requestCount").toInt (), 0);
 
+    auto acknowledgeSingleFrameTransfer = [&server, sessionId] (
+        quint64 nowMs) {
+      decodium::ft2link::Frame const ack =
+          decodium::ft2link::makeAckFrame (
+              decodium::ft2link::Profile::Wide2300,
+              sessionId,
+              0u,
+              0x0001u);
+      return server.ingestRadioFrameBytes (
+          frameBytes (ack), QStringLiteral ("K1ABC"), nowMs, false);
+    };
+
     QVERIFY (server.transmitBbsSharedFileListRadio (sessionId, 3000));
     QCOMPARE (radioSpy.size (), 1);
     QVariantMap listPlan = radioSpy.takeFirst ()[2].toMap ();
@@ -3753,6 +3861,7 @@ private Q_SLOTS:
     QVERIFY (listPlan.value (QStringLiteral ("bbsFileServer")).toBool ());
     QCOMPARE (server.transportState (), QStringLiteral ("BBS LIST TX"));
     server.notifyRadioTxFinished ();
+    QVERIFY (acknowledgeSingleFrameTransfer (3100));
 
     QVERIFY (server.transmitBbsSharedFileRadio (
         sessionId, QStringLiteral ("server.txt"), 4000));
@@ -3762,6 +3871,7 @@ private Q_SLOTS:
     QCOMPARE (filePlan.value (QStringLiteral ("fileName")).toString (),
               QStringLiteral ("server.txt"));
     server.notifyRadioTxFinished ();
+    QVERIFY (acknowledgeSingleFrameTransfer (4100));
     QCOMPARE (server.fileTransferCount (), 1);
     QVERIFY (fileSpy.size () >= 1);
     QVariantMap outgoing = server.fileTransfers ().first ().toMap ();
@@ -3779,6 +3889,7 @@ private Q_SLOTS:
     listPlan = radioSpy.takeFirst ()[2].toMap ();
     QVERIFY (listPlan.value (QStringLiteral ("bbsFileList")).toBool ());
     server.notifyRadioTxFinished ();
+    QVERIFY (acknowledgeSingleFrameTransfer (5100));
 
     radioSpy.clear ();
     QVERIFY (server.appendIncomingText (
@@ -3787,6 +3898,7 @@ private Q_SLOTS:
     filePlan = radioSpy.takeFirst ()[2].toMap ();
     QVERIFY (filePlan.value (QStringLiteral ("file")).toBool ());
     server.notifyRadioTxFinished ();
+    QVERIFY (acknowledgeSingleFrameTransfer (6100));
     shared = server.bbsSharedFiles ();
     QCOMPARE (shared.first ().toMap ().value ("requestCount").toInt (), 2);
 
@@ -4369,6 +4481,137 @@ private Q_SLOTS:
     QVariantMap plan = request[2].toMap ();
     QVERIFY (plan.value ("queued").toBool ());
     QVERIFY (plan.value ("lbtDeferred").toBool ());
+  }
+
+  void connectCommandQueuesOnceAndTransmitsWhenChannelClears ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter caller;
+    caller.setLocalStation ("TESTA", "JN70", "Salvo");
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+    QVERIFY (caller.observeStation (
+        "TESTB", "JN71", "Martino",
+        true, true, true, true, true, 2, 0, nowMs));
+
+    QVector<short> busySamples;
+    busySamples.reserve (1200);
+    for (int i = 0; i < 1200; ++i)
+      {
+        busySamples.push_back (i % 2 == 0 ? 12000 : -12000);
+      }
+    QVERIFY (!caller.ingestRxSamples (busySamples, "", nowMs));
+    QVERIFY (caller.liveChannelLbtBusy ());
+
+    QSignalSpy radioSpy {&caller, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    caller.setRadioTxArmed (true);
+    caller.armStrictListenBeforeTransmit (5000);
+    QVERIFY (caller.startSessionRadioHandshake ("TESTB", nowMs + 1u));
+    QCOMPARE (caller.sessionCount (), 1);
+    QCOMPARE (caller.sessionInfo (caller.activeSessionId ()).value (
+                  "stateName").toString (),
+              QStringLiteral ("Calling"));
+    QCOMPARE (radioSpy.size (), 0);
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 3000);
+    QCOMPARE (radioSpy.size (), 1);
+    QVariantMap const plan = radioSpy.takeFirst ()[2].toMap ();
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("HELLO"));
+    QVERIFY (plan.value ("queued").toBool ());
+    QVERIFY (plan.value ("lbtDeferred").toBool ());
+    QVERIFY (!plan.value ("strictLbt").toBool ());
+    caller.notifyRadioTxFinished ();
+  }
+
+  void broadcastCommandQueuesOnceAndTransmitsWhenChannelClears ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter sender;
+    sender.setLocalStation ("TESTA", "JN70", "Salvo");
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+
+    QVector<short> busySamples;
+    busySamples.reserve (1200);
+    for (int i = 0; i < 1200; ++i)
+      {
+        busySamples.push_back (i % 2 == 0 ? 12000 : -12000);
+      }
+    QVERIFY (!sender.ingestRxSamples (busySamples, "", nowMs));
+    QVERIFY (sender.liveChannelLbtBusy ());
+
+    QSignalSpy radioSpy {&sender, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    sender.setRadioTxArmed (true);
+    sender.armStrictListenBeforeTransmit (5000);
+    QVERIFY (sender.transmitBroadcastRadio (
+        QStringLiteral ("QUEUED BCAST"), nowMs + 1u));
+    QCOMPARE (sender.broadcastCount (), 1);
+    QCOMPARE (radioSpy.size (), 0);
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 3000);
+    QCOMPARE (radioSpy.size (), 1);
+    QVariantMap const plan = radioSpy.takeFirst ()[2].toMap ();
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("BCAST"));
+    QVERIFY (plan.value ("queued").toBool ());
+    QVERIFY (plan.value ("lbtDeferred").toBool ());
+    QVERIFY (!plan.value ("strictLbt").toBool ());
+    sender.notifyRadioTxFinished ();
+  }
+
+  void fileCommandQueuesOnceAndTransmitsWhenChannelClears ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter sender;
+    sender.setLocalStation ("TESTA", "JN70", "Salvo");
+    quint16 const sessionId =
+        connectWideSession (sender, "TESTB", "JN71", 1000);
+    QVERIFY (sessionId != 0u);
+    QVERIFY (sender.applicationRadioTxReady (sessionId));
+    quint64 const nowMs =
+        static_cast<quint64> (QDateTime::currentMSecsSinceEpoch ());
+
+    QVector<short> busySamples;
+    busySamples.reserve (1200);
+    for (int i = 0; i < 1200; ++i)
+      {
+        busySamples.push_back (i % 2 == 0 ? 12000 : -12000);
+      }
+    QVERIFY (!sender.ingestRxSamples (busySamples, "", nowMs));
+    QVERIFY (sender.liveChannelLbtBusy ());
+
+    QSignalSpy radioSpy {&sender, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    sender.setRadioTxArmed (true);
+    sender.armStrictListenBeforeTransmit (5000);
+    QVERIFY (sender.transmitFileRadio (
+        sessionId,
+        QStringLiteral ("TESTB"),
+        QStringLiteral ("queued.txt"),
+        QStringLiteral ("queued file payload"),
+        nowMs + 1u));
+    QVERIFY (!sender.applicationRadioTxReady (sessionId));
+    QCOMPARE (radioSpy.size (), 0);
+    QCOMPARE (sender.fileTransfers ().size (), 1);
+
+    sender.setRadioTxArmed (true);
+    QVERIFY (!sender.transmitFileRadio (
+        sessionId,
+        QStringLiteral ("TESTB"),
+        QStringLiteral ("duplicate.txt"),
+        QStringLiteral ("must not replace the queued transfer"),
+        nowMs + 2u));
+    QCOMPARE (sender.fileTransfers ().size (), 1);
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 3000);
+    QCOMPARE (radioSpy.size (), 1);
+    QVariantMap const plan = radioSpy.takeFirst ()[2].toMap ();
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("FILE"));
+    QVERIFY (plan.value ("queued").toBool ());
+    QVERIFY (plan.value ("lbtDeferred").toBool ());
+    QVERIFY (!plan.value ("strictLbt").toBool ());
+    sender.notifyRadioTxFinished ();
   }
 
   void radioTxUsesPreTxCcaForWallClockRequests ()
@@ -5222,6 +5465,162 @@ private Q_SLOTS:
     QVERIFY2 (report.value ("allDecoded").toBool (),
               qPrintable (QJsonDocument::fromVariant (report).toJson (
                   QJsonDocument::Compact)));
+  }
+
+  void nonTerminalDataWindowQueuesSelectiveAckAsynchronously ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter receiver;
+    receiver.setLocalStation ("IU8LMC", "JN70", "Salvo");
+    quint16 const sessionId =
+        connectWideSession (receiver, "TESTB", "JN71", 1000u);
+    QVERIFY (sessionId != 0u);
+
+    std::vector<std::uint8_t> payload (1400u, 0x46u);
+    decodium::ft2link::OutboundTransfer tx {
+      decodium::ft2link::Profile::Wide2300, sessionId, payload
+    };
+    tx.setWindowSize (4u);
+    std::vector<decodium::ft2link::Frame> const frames =
+        tx.framesToSend (2000u);
+    QCOMPARE (frames.size (), static_cast<std::size_t> (4u));
+
+    QSignalSpy radioSpy {
+      &receiver, &FT2LinkQmlAdapter::radioTxAudioRequested
+    };
+    QVERIFY (receiver.ingestRadioFrameBytes (
+        frameBytes (frames[0]), "TESTB", 2100u, true));
+    QVERIFY (receiver.ingestRadioFrameBytes (
+        frameBytes (frames[2]), "TESTB", 2200u, true));
+    QVERIFY (receiver.ingestRadioFrameBytes (
+        frameBytes (frames[3]), "TESTB", 2300u, true));
+    QCOMPARE (radioSpy.size (), 0);
+
+    QTRY_VERIFY_WITH_TIMEOUT (radioSpy.size () >= 1, 1500);
+    QVariantMap const plan = radioSpy.takeFirst ()[2].toMap ();
+    QCOMPARE (plan.value ("kind").toString (), QStringLiteral ("ACK"));
+    QCOMPARE (plan.value ("ackBase").toUInt (), 1u);
+    QCOMPARE (plan.value ("ackBitmap").toUInt (), 0x0006u);
+    receiver.notifyRadioTxFinished ();
+  }
+
+  void partialAckQueuesSelectiveRetryAndNextFramesImmediately ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter sender;
+    sender.setLocalStation ("TESTA", "JN70", "Salvo");
+    quint16 const sessionId =
+        connectWideSession (sender, "TESTB", "JN71", 1000u);
+    QVERIFY (sessionId != 0u);
+
+    QSignalSpy radioSpy {&sender, &FT2LinkQmlAdapter::radioTxAudioRequested};
+    sender.setRadioTxArmed (true);
+    QVERIFY (sender.transmitFileRadio (
+        sessionId,
+        QStringLiteral ("TESTB"),
+        QStringLiteral ("window.txt"),
+        QString (1800, QLatin1Char ('F')),
+        2000u));
+    QCOMPARE (radioSpy.size (), 1);
+    QVariantMap const firstPlan = radioSpy.takeFirst ()[2].toMap ();
+    QCOMPARE (firstPlan.value ("arqSequences").toString (),
+              QStringLiteral ("0,1,2,3"));
+    sender.notifyRadioTxFinished ();
+
+    decodium::ft2link::Frame const ack =
+        decodium::ft2link::makeAckFrame (
+            decodium::ft2link::Profile::Wide2300,
+            sessionId,
+            1u,
+            0x0006u);
+    QVERIFY (sender.ingestRadioFrameBytes (
+        frameBytes (ack), "TESTB", 3000u, false));
+    QCOMPARE (radioSpy.size (), 1);
+
+    QVariantMap const nextPlan = radioSpy.takeFirst ()[2].toMap ();
+    QVERIFY (nextPlan.value ("arqWindowAdvance").toBool ());
+    QVERIFY (nextPlan.value ("selectiveRetry").toBool ());
+    QCOMPARE (nextPlan.value ("arqSequences").toString (),
+              QStringLiteral ("1,4,5,6"));
+    QCOMPARE (nextPlan.value ("w2300RateModeName").toString (),
+              QStringLiteral ("ROBUST"));
+    sender.notifyRadioTxFinished ();
+  }
+
+  void multiWindowFileCompletesThroughAudioArqLoopback ()
+  {
+    qRegisterMetaType<QVector<float>> ("QVector<float>");
+
+    FT2LinkQmlAdapter sender;
+    FT2LinkQmlAdapter receiver;
+    sender.setLocalStation ("TESTA", "JN70", "Salvo");
+    receiver.setLocalStation ("TESTB", "JN71", "Martino");
+    quint16 const senderSession =
+        connectWideSession (sender, "TESTB", "JN71", 1000u);
+    quint16 const receiverSession =
+        connectWideSession (receiver, "TESTA", "JN70", 1000u);
+    QVERIFY (senderSession != 0u);
+    QCOMPARE (receiverSession, senderSession);
+
+    QSignalSpy senderRadio {
+      &sender, &FT2LinkQmlAdapter::radioTxAudioRequested
+    };
+    QSignalSpy receiverRadio {
+      &receiver, &FT2LinkQmlAdapter::radioTxAudioRequested
+    };
+    QString const content (1800, QLatin1Char ('L'));
+    sender.setRadioTxArmed (true);
+    QVERIFY (sender.transmitFileRadio (
+        senderSession,
+        QStringLiteral ("TESTB"),
+        QStringLiteral ("multi-window.txt"),
+        content,
+        2000u));
+
+    bool delivered = false;
+    for (int window = 0; window < 8 && !delivered; ++window)
+      {
+        QVector<float> dataSamples;
+        QVariantMap dataPlan;
+        QVERIFY2 (takeRadioRequest (
+                      senderRadio, &dataSamples, &dataPlan, nullptr, 5000),
+                  "missing next ARQ data window");
+        sender.notifyRadioTxFinished ();
+        QVERIFY (ingestWideSamples (
+            receiver, dataSamples, QStringLiteral ("TESTA"),
+            3000u + static_cast<quint64> (window) * 2000u));
+
+        QVector<float> ackSamples;
+        QVariantMap ackPlan;
+        QVERIFY2 (takeRadioRequest (
+                      receiverRadio, &ackSamples, &ackPlan, nullptr, 5000),
+                  "missing asynchronous window ACK");
+        QCOMPARE (ackPlan.value ("kind").toString (), QStringLiteral ("ACK"));
+        receiver.notifyRadioTxFinished ();
+        QVERIFY (ingestWideSamples (
+            sender, ackSamples, QStringLiteral ("TESTB"),
+            4000u + static_cast<quint64> (window) * 2000u));
+
+        QVariantMap const outgoing = findRecord (
+            sender.fileTransfers (),
+            QStringLiteral ("fileName"),
+            QStringLiteral ("multi-window.txt"));
+        delivered = outgoing.value ("state").toString ()
+            == QStringLiteral ("Delivered");
+      }
+
+    QVERIFY (delivered);
+    QVariantMap const incoming = findRecord (
+        receiver.fileTransfers (),
+        QStringLiteral ("fileName"),
+        QStringLiteral ("multi-window.txt"));
+    QVERIFY (!incoming.isEmpty ());
+    QCOMPARE (incoming.value ("state").toString (),
+              QStringLiteral ("Received"));
+    QCOMPARE (incoming.value ("content").toString (), content);
+    QCOMPARE (senderRadio.size (), 0);
   }
 };
 

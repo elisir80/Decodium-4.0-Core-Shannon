@@ -2341,6 +2341,64 @@ private Q_SLOTS:
     QVERIFY (decoded.payload == plan.frames.front ().payload);
   }
 
+  void wideRxAudioBufferDecodesCombinedW2300WindowInSequence ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::OutboundTransfer;
+    using decodium::ft2link::Profile;
+    using decodium::ft2link::W2300DecodeMetrics;
+    using decodium::ft2link::W2300RateMode;
+    using decodium::ft2link::W2300RxAudioBuffer;
+    using decodium::ft2link::W2300WaveformConfig;
+    using decodium::ft2link::WideTxAudioPlan;
+    using decodium::ft2link::WideTxAudioPlanOptions;
+
+    std::vector<std::uint8_t> payload (1400u, 0x46u);
+    OutboundTransfer tx {Profile::Wide2300, 0x6611u, payload};
+    tx.setWindowSize (4u);
+    std::vector<Frame> const frames = tx.framesToSend (0u);
+    QCOMPARE (frames.size (), static_cast<std::size_t> (4u));
+    for (Frame const& frame : frames)
+      {
+        QVERIFY ((frame.flags & decodium::ft2link::FlagEndOfMessage) == 0u);
+      }
+
+    WideTxAudioPlanOptions options;
+    options.profile = Profile::Wide2300;
+    options.w2300RateMode = W2300RateMode::Fast;
+    options.sampleRate = 48000.0;
+    WideTxAudioPlan const plan =
+        decodium::ft2link::buildWideTxAudioPlanForFrames (frames, options);
+    QVERIFY2 (plan.ok, plan.error.c_str ());
+
+    std::vector<float> pcmWave = plan.samples;
+    for (float& sample : pcmWave)
+      {
+        int const pcm = qBound (-32768, qRound (sample * 30000.0f), 32767);
+        sample = static_cast<float> (static_cast<short> (pcm)) / 32768.0f;
+      }
+    std::vector<float> rxWave = fil4Decimate48kTo12k (pcmWave);
+    rxWave.insert (rxWave.end (), 8000u, 0.0f);
+
+    W2300WaveformConfig config;
+    config.sampleRate = 12000.0;
+    config.rateMode = W2300RateMode::Fast;
+    config.maxDecodeMillis = 2500;
+    W2300RxAudioBuffer rx {config};
+    rx.append (rxWave);
+
+    for (std::uint16_t sequence = 0u; sequence < 4u; ++sequence)
+      {
+        Frame decoded;
+        W2300DecodeMetrics metrics;
+        std::string error;
+        QVERIFY2 (rx.decodeNext (&decoded, &metrics, &error), error.c_str ());
+        QCOMPARE (decoded.sessionId, static_cast<std::uint16_t> (0x6611u));
+        QCOMPARE (decoded.sequence, sequence);
+        QVERIFY (decoded.payload == frames[sequence].payload);
+      }
+  }
+
   void wideTxAudioPlanDecodesShortW2300WithRuntimeGuard ()
   {
     using decodium::ft2link::Frame;
@@ -2626,6 +2684,33 @@ private Q_SLOTS:
       {
         QCOMPARE (plan.frames[i].sequence, pendingWindow[i].sequence);
       }
+  }
+
+  void selectiveAckImmediatelyRefillsArqWindow ()
+  {
+    using decodium::ft2link::Frame;
+    using decodium::ft2link::OutboundTransfer;
+    using decodium::ft2link::Profile;
+
+    std::vector<std::uint8_t> payload (1600u, 0x41u);
+    OutboundTransfer tx {Profile::Wide2300, 0x5a5bu, payload};
+    tx.setWindowSize (4u);
+    tx.setRetryMs (8000u);
+
+    std::vector<Frame> const first = tx.framesToSend (100u);
+    QCOMPARE (first.size (), static_cast<std::size_t> (4u));
+    tx.handleAckFrame (decodium::ft2link::makeAckFrame (
+        Profile::Wide2300, 0x5a5bu, 1u, 0x0006u));
+    tx.makeUnacknowledgedDue (200u);
+
+    std::vector<Frame> const next = tx.framesToSend (200u);
+    QCOMPARE (next.size (), static_cast<std::size_t> (4u));
+    QCOMPARE (next[0].sequence, static_cast<std::uint16_t> (1u));
+    QCOMPARE (next[1].sequence, static_cast<std::uint16_t> (4u));
+    QCOMPARE (next[2].sequence, static_cast<std::uint16_t> (5u));
+    QCOMPARE (next[3].sequence, static_cast<std::uint16_t> (6u));
+    QCOMPARE (tx.attemptsForSequence (1u), 2);
+    QCOMPARE (tx.attemptsForSequence (4u), 1);
   }
 };
 

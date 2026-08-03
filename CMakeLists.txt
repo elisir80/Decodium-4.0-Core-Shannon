@@ -501,6 +501,8 @@ set (wsjtx_CXXSRCS
   src/radio/DecodiumCatManager.h
   src/radio/DecodiumOmniRigManager.cpp
   src/radio/DecodiumOmniRigManager.h
+  src/radio/DecodiumCat4OmManager.cpp
+  src/radio/DecodiumCat4OmManager.h
   src/radio/DecodiumTransceiverManager.cpp
   src/radio/DecodiumTransceiverManager.h
   src/services/DecodiumAlertManager.cpp
@@ -1833,6 +1835,8 @@ add_executable (decodium_qml
   src/radio/DecodiumCatManager.h
   src/radio/DecodiumOmniRigManager.cpp
   src/radio/DecodiumOmniRigManager.h
+  src/radio/DecodiumCat4OmManager.cpp
+  src/radio/DecodiumCat4OmManager.h
   src/radio/DecodiumTransceiverManager.cpp
   src/radio/DecodiumTransceiverManager.h
   src/services/DecodiumAlertManager.cpp

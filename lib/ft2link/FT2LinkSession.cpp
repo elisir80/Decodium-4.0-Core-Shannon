@@ -111,6 +111,17 @@ std::vector<Frame> OutboundTransfer::framesToSend (std::uint64_t nowMs)
   return out;
 }
 
+void OutboundTransfer::makeUnacknowledgedDue (std::uint64_t nowMs)
+{
+  for (PendingFrame& pending : m_frames)
+    {
+      if (!pending.acknowledged && pending.attempts > 0)
+        {
+          pending.nextRetryMs = nowMs;
+        }
+    }
+}
+
 void OutboundTransfer::handleAckFrame (Frame const& ack)
 {
   if (ack.type != FrameType::Ack || ack.sessionId != m_sessionId || ack.profile != m_profile)

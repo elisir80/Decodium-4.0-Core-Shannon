@@ -23,6 +23,7 @@ public:
   void setMaxAttempts (int attempts);
 
   std::vector<Frame> framesToSend (std::uint64_t nowMs);
+  void makeUnacknowledgedDue (std::uint64_t nowMs);
   void handleAckFrame (Frame const& ack);
 
   bool complete () const;

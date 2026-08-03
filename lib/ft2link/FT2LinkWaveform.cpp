@@ -2065,6 +2065,10 @@ std::vector<W2300DecodeCandidate> extractW2300PacketCandidatesFromDecisions (
   std::sort (candidates.begin (), candidates.end (),
              [] (W2300DecodeCandidate const& lhs,
                  W2300DecodeCandidate const& rhs) {
+               if (lhs.metrics.sampleOffset != rhs.metrics.sampleOffset)
+                 {
+                   return lhs.metrics.sampleOffset < rhs.metrics.sampleOffset;
+                 }
                return lhs.metrics.quality > rhs.metrics.quality;
              });
   return candidates;
@@ -3352,7 +3356,10 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
       {
         return;
       }
-    if (!best.ok || outcome.candidate.metrics.quality > best.metrics.quality)
+    if (!best.ok
+        || outcome.candidate.metrics.sampleOffset < best.metrics.sampleOffset
+        || (outcome.candidate.metrics.sampleOffset == best.metrics.sampleOffset
+            && outcome.candidate.metrics.quality > best.metrics.quality))
       {
         best = outcome.candidate;
         if (requirePhysicalFrame)
@@ -3387,7 +3394,6 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
         return;
       }
 
-    std::atomic_bool foundCandidate {false};
     auto searchPhaseRange = [&, basis, residualOffsets, driftSearch,
                              searchConfig, includeEstimatedOffsets] (
                                  std::size_t beginPhase,
@@ -3395,7 +3401,7 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
       W2300PhaseSearchOutcome outcome;
       for (std::size_t phase = beginPhase; phase < endPhase; ++phase)
         {
-          if (foundCandidate.load () || timedOut ())
+          if (timedOut ())
             {
               return outcome;
             }
@@ -3441,7 +3447,6 @@ bool findW2300DecodeCandidate (std::vector<float> const& wave,
                       considerCandidate (&outcome, candidate);
                       if (outcome.candidate.ok)
                         {
-                          foundCandidate.store (true);
                           return outcome;
                         }
                     }

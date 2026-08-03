@@ -760,6 +760,14 @@ Dialog {
         return bridge.catBackend === "tci" || activeCatPortType() === "tci"
     }
 
+    function usesCat4OmControls() {
+        return bridge.catBackend === "cat4om" || activeCatPortType() === "cat4om"
+    }
+
+    function usesProtocolCatOnly() {
+        return usesTciControls() || usesCat4OmControls()
+    }
+
     function activePttMethod() {
         var controller = activeCatController()
         if (!controller || controller.pttMethod === undefined || controller.pttMethod === null)
@@ -1804,42 +1812,6 @@ Dialog {
                             contentItem: TextInput { text: stPowerSpin.textFromValue(stPowerSpin.value, stPowerSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !stPowerSpin.editable; validator: stPowerSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                         }
-                        Text { text: qsTr("WSPR Power:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                        DecoComboBox {
-                            id: wsprPowerCombo
-                            model: bridge.wsprPowerOptions()
-                            Layout.fillWidth: true
-                            Layout.minimumWidth: fieldMinWidth
-                            implicitHeight: controlHeight
-                            function optionIndexFor(dbm) {
-                                var needle = String(Number(dbm || 37)) + " dBm"
-                                for (var i = 0; i < model.length; ++i) {
-                                    if (String(model[i]).indexOf(needle) === 0)
-                                        return i
-                                }
-                                return 11
-                            }
-                            currentIndex: optionIndexFor(bridge.wsprPowerDbm)
-                            onActivated: function(index) {
-                                if (index < 0 || index >= model.length)
-                                    return
-                                var dbm = parseInt(String(model[index] || ""), 10)
-                                if (!isNaN(dbm)) {
-                                    bridge.wsprPowerDbm = dbm
-                                    settingsDialog.scheduleSettingsPersist()
-                                }
-                            }
-                            Connections {
-                                target: bridge
-                                function onWsprPowerDbmChanged() {
-                                    wsprPowerCombo.currentIndex = wsprPowerCombo.optionIndexFor(bridge.wsprPowerDbm)
-                                }
-                            }
-                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
-                            contentItem: Text { text: parent.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
-                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
-                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
-                        }
                     }
                 }
 
@@ -1866,7 +1838,7 @@ Dialog {
                         Row {
                             Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 6
                             Repeater {
-                                model: [["native",qsTr("Native (15 radios)")],["hamlib",qsTr("Hamlib (300+ radios)")],["tci","TCI"],["omnirig","OmniRig"]]
+                                model: [["native",qsTr("Native (15 radios)")],["hamlib",qsTr("Hamlib (300+ radios)")],["tci","TCI"],["omnirig","OmniRig"],["cat4om","Cat4OM"]]
                                 delegate: Rectangle {
                                     property string bk: modelData[0]
                                     property bool active: bridge.catBackend === bk
@@ -2038,9 +2010,13 @@ Dialog {
                         Text { text: qsTr("CAT CONTROL"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-                        Text { text: qsTr("Rig:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text {
+                            visible: !settingsDialog.usesCat4OmControls()
+                            text: qsTr("Rig:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
                         DecoComboBox {
                             id: rigCombo
+                            visible: !settingsDialog.usesCat4OmControls()
                             model: bridge.catBackend === "tci" ? ["TCI Client RX1", "TCI Client RX2"] : (bridge.catManager ? bridge.catManager.rigList : []); Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
                             Layout.minimumWidth: wideFieldMinWidth
                             property string filterText: ""
@@ -2185,6 +2161,123 @@ Dialog {
                                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AlwaysOn }
                                     }
                                 }
+                            }
+                        }
+
+                        Text {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: qsTr("Management:")
+                            color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
+                        DecoTextField {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: settingsDialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.managementEndpoint : ""
+                            Layout.fillWidth: true; Layout.columnSpan: 3
+                            Layout.minimumWidth: wideFieldMinWidth; implicitHeight: controlHeight
+                            placeholderText: "127.0.0.1:5000"
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            selectByMouse: true
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                if (bridge.catManager) bridge.catManager.managementEndpoint = text.trim()
+                                settingsDialog.scheduleCatPersist()
+                            }
+                        }
+
+                        Text {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: qsTr("Control:")
+                            color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
+                        DecoTextField {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: settingsDialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.controlEndpoint : ""
+                            Layout.fillWidth: true; Layout.columnSpan: 3
+                            Layout.minimumWidth: wideFieldMinWidth; implicitHeight: controlHeight
+                            placeholderText: "127.0.0.1:5001"
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            selectByMouse: true
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                if (bridge.catManager) bridge.catManager.controlEndpoint = text.trim()
+                                settingsDialog.scheduleCatPersist()
+                            }
+                        }
+
+                        Text {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: qsTr("Radio group:")
+                            color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
+                        DecoComboBox {
+                            id: cat4OmGroupCombo
+                            visible: settingsDialog.usesCat4OmControls()
+                            model: settingsDialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.groupList : []
+                            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+                            currentIndex: settingsDialog.usesCat4OmControls() && bridge.catManager ? find(bridge.catManager.groupId) : -1
+                            onActivated: {
+                                if (bridge.catManager) bridge.catManager.groupId = currentText
+                                settingsDialog.scheduleCatPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text {
+                                text: cat4OmGroupCombo.currentIndex >= 0 ? cat4OmGroupCombo.displayText : qsTr("Automatic discovery")
+                                color: cat4OmGroupCombo.currentIndex >= 0 ? textPrimary : textSecondary
+                                font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight
+                            }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup: SettingsComboPopup { combo: cat4OmGroupCombo }
+                        }
+
+                        Text {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: qsTr("Radio:")
+                            color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
+                        DecoComboBox {
+                            id: cat4OmRadioCombo
+                            visible: settingsDialog.usesCat4OmControls()
+                            model: settingsDialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.radioList : []
+                            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+                            currentIndex: settingsDialog.usesCat4OmControls() && bridge.catManager ? find(bridge.catManager.radioId) : -1
+                            onActivated: {
+                                if (bridge.catManager) bridge.catManager.radioId = currentText
+                                settingsDialog.scheduleCatPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text {
+                                text: cat4OmRadioCombo.currentIndex >= 0 ? cat4OmRadioCombo.displayText : qsTr("First available radio")
+                                color: cat4OmRadioCombo.currentIndex >= 0 ? textPrimary : textSecondary
+                                font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight
+                            }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup: SettingsComboPopup { combo: cat4OmRadioCombo }
+                        }
+
+                        Text {
+                            visible: settingsDialog.usesCat4OmControls()
+                            text: qsTr("Ownership:")
+                            color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
+                        RowLayout {
+                            visible: settingsDialog.usesCat4OmControls()
+                            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 12
+                            CheckBox {
+                                checked: settingsDialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.autoRequestOwnership : true
+                                text: qsTr("Request control automatically")
+                                onToggled: {
+                                    if (bridge.catManager) bridge.catManager.autoRequestOwnership = checked
+                                    settingsDialog.scheduleCatPersist()
+                                }
+                                contentItem: Text { text: parent.text; color: textPrimary; font.pixelSize: 12; leftPadding: 26; verticalAlignment: Text.AlignVCenter }
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: settingsDialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.connectionDetail : ""
+                                color: bridge.catConnected ? accentGreen : textSecondary
+                                font.pixelSize: 11; elide: Text.ElideRight
                             }
                         }
 
@@ -2441,13 +2534,13 @@ Dialog {
                         Text { text: qsTr("PTT Method:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         DecoComboBox {
                             id: pttCombo
-                            enabled: !settingsDialog.usesTciControls()
-                            model: settingsDialog.usesTciControls()
+                            enabled: !settingsDialog.usesProtocolCatOnly()
+                            model: settingsDialog.usesProtocolCatOnly()
                                    ? ["CAT"]
                                    : (bridge.catManager && bridge.catManager.pttMethodList ? bridge.catManager.pttMethodList : ["CAT","DTR","RTS","VOX"])
                             Layout.fillWidth: true; implicitHeight: controlHeight
                             currentIndex: {
-                                if (settingsDialog.usesTciControls())
+                                if (settingsDialog.usesProtocolCatOnly())
                                     return 0
                                 var methods = (bridge.catManager && bridge.catManager.pttMethodList)
                                               ? bridge.catManager.pttMethodList
@@ -2516,9 +2609,10 @@ Dialog {
                             popup: SettingsComboPopup { combo: pttPortCombo }
                         }
                         Item { visible: settingsDialog.usesSeparatePttPort(); Layout.fillWidth: true; Layout.columnSpan: 2 }
-                        Text { text: qsTr("Poll Interval (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+                        Text { visible: !settingsDialog.usesCat4OmControls(); text: qsTr("Poll Interval (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
                         SpinBox {
                             id: pollSpin
+                            visible: !settingsDialog.usesCat4OmControls()
                             from: 1; to: 99; value: bridge.catManager ? bridge.catManager.pollInterval : 3; editable: true
                             implicitHeight: controlHeight; Layout.fillWidth: true
                             onValueChanged: {

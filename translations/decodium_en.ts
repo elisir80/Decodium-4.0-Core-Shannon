@@ -12828,6 +12828,22 @@ Error(%2): %3</translation>
 <context>
     <name>RigControlDialog</name>
     <message>
+        <source>Management:</source>
+        <translation>Management:</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Ownership:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Request control automatically</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="13"/>
         <source>CAT — Transceiver Settings</source>
         <translation>CAT — Transceiver Settings</translation>
@@ -12989,6 +13005,34 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</transl
 </context>
 <context>
     <name>SettingsDialog</name>
+    <message>
+        <source>Management:</source>
+        <translation>Management:</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Radio group:</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Automatic discovery</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>First available radio</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Ownership:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Request control automatically</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
@@ -21272,5 +21316,95 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <source>offline cache</source>
         <translation>offline cache</translation>
     </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n item</numerusform><numerusform>%n items</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n unread</numerusform><numerusform> / %n unread</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n save pending</numerusform><numerusform>%n saves pending</numerusform></translation>
+    </message>
+    <message><source>received file</source><translation>received file</translation></message>
+    <message><source>Marked read %1</source><translation>Marked read %1</translation></message>
+    <message><source>Marked unread %1</source><translation>Marked unread %1</translation></message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>Marked read %n received file</numerusform><numerusform>Marked read %n received files</numerusform></translation>
+    </message>
+    <message><source>No unread received files</source><translation>No unread received files</translation></message>
+    <message><source>Deleted %1</source><translation>Deleted %1</translation></message>
+    <message><source>Delete failed: %1</source><translation>Delete failed: %1</translation></message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>Deleted %n read received file</numerusform><numerusform>Deleted %n read received files</numerusform></translation>
+    </message>
+    <message><source>No read received files</source><translation>No read received files</translation></message>
+    <message><source>Received file has no content</source><translation>Received file has no content</translation></message>
+    <message><source>Asynchronous file saving is unavailable</source><translation>Asynchronous file saving is unavailable</translation></message>
+    <message><source>Save already in progress</source><translation>Save already in progress</translation></message>
+    <message><source>Unable to queue received file save</source><translation>Unable to queue received file save</translation></message>
+    <message><source>Auto-saving %1...</source><translation>Auto-saving %1...</translation></message>
+    <message><source>Saving %1...</source><translation>Saving %1...</translation></message>
+    <message><source>Save As is unavailable</source><translation>Save As is unavailable</translation></message>
+    <message><source>Save FT2-Link received file as</source><translation>Save FT2-Link received file as</translation></message>
+    <message><source>All files (*)</source><translation>All files (*)</translation></message>
+    <message><source>Text files (*.txt *.md *.log *.csv *.json)</source><translation>Text files (*.txt *.md *.log *.csv *.json)</translation></message>
+    <message><source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source><translation>Images (*.png *.jpg *.jpeg *.gif *.bmp)</translation></message>
+    <message><source>Save As cancelled</source><translation>Save As cancelled</translation></message>
+    <message><source>Folder selection is unavailable</source><translation>Folder selection is unavailable</translation></message>
+    <message><source>Select FT2-Link received files folder</source><translation>Select FT2-Link received files folder</translation></message>
+    <message><source>Receive folder: %1</source><translation>Receive folder: %1</translation></message>
+    <message><source>Open folder is unavailable</source><translation>Open folder is unavailable</translation></message>
+    <message><source>Opening received files folder...</source><translation>Opening received files folder...</translation></message>
+    <message><source>unknown error</source><translation>unknown error</translation></message>
+    <message><source>Auto-save failed: %1</source><translation>Auto-save failed: %1</translation></message>
+    <message><source>Save failed: %1</source><translation>Save failed: %1</translation></message>
+    <message><source>Auto-saved %1</source><translation>Auto-saved %1</translation></message>
+    <message><source>Saved %1</source><translation>Saved %1</translation></message>
+    <message><source>Opened %1</source><translation>Opened %1</translation></message>
+    <message><source>receive folder</source><translation>receive folder</translation></message>
+    <message><source>Open folder failed: %1</source><translation>Open folder failed: %1</translation></message>
+    <message><source>RECEIVED FILES</source><translation>RECEIVED FILES</translation></message>
+    <message><source>AUTO ON</source><translation>AUTO ON</translation></message>
+    <message><source>AUTO OFF</source><translation>AUTO OFF</translation></message>
+    <message><source>Automatically save new files in the receive folder</source><translation>Automatically save new files in the receive folder</translation></message>
+    <message><source>FOLDER</source><translation>FOLDER</translation></message>
+    <message><source>Choose the received files folder</source><translation>Choose the received files folder</translation></message>
+    <message><source>OPEN</source><translation>OPEN</translation></message>
+    <message><source>Open the received files folder</source><translation>Open the received files folder</translation></message>
+    <message><source>READ ALL</source><translation>READ ALL</translation></message>
+    <message><source>Clear unread marker for all received files</source><translation>Clear unread marker for all received files</translation></message>
+    <message><source>CLEAR</source><translation>CLEAR</translation></message>
+    <message><source>Delete received files already marked read</source><translation>Delete received files already marked read</translation></message>
+    <message><source>NEW</source><translation>NEW</translation></message>
+    <message><source>IMG</source><translation>IMG</translation></message>
+    <message><source>FILE</source><translation>FILE</translation></message>
+    <message><source>SAVE</source><translation>SAVE</translation></message>
+    <message><source>Save to the configured receive folder</source><translation>Save to the configured receive folder</translation></message>
+    <message><source>SAVE AS</source><translation>SAVE AS</translation></message>
+    <message><source>Save with another name or in another folder</source><translation>Save with another name or in another folder</translation></message>
+    <message><source>READ</source><translation>READ</translation></message>
+    <message><source>UNREAD</source><translation>UNREAD</translation></message>
+    <message><source>Mark received file as read</source><translation>Mark received file as read</translation></message>
+    <message><source>Mark received file as unread</source><translation>Mark received file as unread</translation></message>
+    <message><source>COPY</source><translation>COPY</translation></message>
+    <message><source>Copy received file content</source><translation>Copy received file content</translation></message>
+    <message><source>Copied %1</source><translation>Copied %1</translation></message>
+    <message><source>DEL</source><translation>DEL</translation></message>
+    <message><source>Delete this received file entry</source><translation>Delete this received file entry</translation></message>
+    <message><source>No received files</source><translation>No received files</translation></message>
+    <message><source>Folder: %1</source><translation>Folder: %1</translation></message>
+    <message><source>Waiting for files in %1</source><translation>Waiting for files in %1</translation></message>
+    <message><source>Cannot create receive directory: %1</source><translation>Cannot create receive directory: %1</translation></message>
+    <message><source>Received binary file has no data</source><translation>Received binary file has no data</translation></message>
+    <message><source>Received binary file has invalid Base64 data</source><translation>Received binary file has invalid Base64 data</translation></message>
+    <message><source>The system file manager could not open the receive directory</source><translation>The system file manager could not open the receive directory</translation></message>
 </context>
 </TS>

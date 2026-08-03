@@ -288,6 +288,7 @@ static QString normalizedCatBackendForSettings(QString value)
     if (value != QStringLiteral("native")
         && value != QStringLiteral("hamlib")
         && value != QStringLiteral("tci")
+        && value != QStringLiteral("cat4om")
         && value != QStringLiteral("omnirig")) {
         return QStringLiteral("hamlib");
     }
@@ -325,6 +326,7 @@ static QStringList catProfileSnapshotGroups()
     return {
         QStringLiteral("CAT_Native"),
         QStringLiteral("Transceiver"),
+        QStringLiteral("CAT_Cat4OM"),
         QStringLiteral("CAT_OmniRig")
     };
 }
@@ -5990,7 +5992,9 @@ static inline bool embeddedLegacyRigControlEnabledForBackend(const QString& back
     // manager own the COM object so the embedded legacy backend cannot issue a
     // second PM_DIG_U/SetMode request that some Kenwood INI files map to FSK
     // or plain USB instead of USB-D.
-    return backend.trimmed().compare(QStringLiteral("omnirig"), Qt::CaseInsensitive) != 0;
+    QString const normalized = backend.trimmed().toLower();
+    return normalized != QStringLiteral("omnirig")
+        && normalized != QStringLiteral("cat4om");
 }
 
 static inline bool legacyOwnsRigControl(DecodiumLegacyBackend* legacy)
@@ -6038,48 +6042,74 @@ static inline bool catSignalMatchesBackend(QString const& activeBackend, QString
         || (active == QStringLiteral("tci") && signal == QStringLiteral("hamlib"));
 }
 
-static inline bool activeCatCanPtt(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
-                                   DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+static inline DecodiumCat4OmManager* activeCat4OmManager(
+    DecodiumCatManager* native, DecodiumCat4OmManager* explicitManager = nullptr)
 {
+    if (explicitManager) return explicitManager;
+    QObject* const owner = native ? native->parent() : nullptr;
+    return owner
+        ? owner->findChild<DecodiumCat4OmManager*>(QString(), Qt::FindDirectChildrenOnly)
+        : nullptr;
+}
+
+static inline bool activeCatCanPtt(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
+                                   DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
+                                   DecodiumCat4OmManager* c = nullptr)
+{
+    c = activeCat4OmManager(n, c);
     auto const isVox = [](QString const& method) {
         return method.trimmed().compare(QStringLiteral("VOX"), Qt::CaseInsensitive) == 0;
     };
     if (b == QStringLiteral("native") && n && isVox(n->pttMethod())) return false;
     if (b == QStringLiteral("omnirig") && o && isVox(o->pttMethod())) return false;
-    if (b != QStringLiteral("native") && b != QStringLiteral("omnirig") && h && isVox(h->pttMethod())) return false;
+    if (b != QStringLiteral("native") && b != QStringLiteral("cat4om")
+        && b != QStringLiteral("omnirig") && h && isVox(h->pttMethod())) return false;
     if (useLegacyRigControlFallback(legacy, b)) return true;
     if (b=="native") return n->canPtt();
+    if (b=="cat4om") return c && c->canPtt();
     if (b=="omnirig" && o) return o->canPtt();
     return h->canPtt();
 }
 
 static inline bool activeCatUsesVoxPtt(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
-                                       DecodiumOmniRigManager* o = nullptr)
+                                       DecodiumOmniRigManager* o = nullptr,
+                                       DecodiumCat4OmManager* c = nullptr)
 {
+    c = activeCat4OmManager(n, c);
     auto const isVox = [](QString const& method) {
         return method.trimmed().compare(QStringLiteral("VOX"), Qt::CaseInsensitive) == 0;
     };
     if (b == QStringLiteral("native")) return n && isVox(n->pttMethod());
+    if (b == QStringLiteral("cat4om")) return c && isVox(c->pttMethod());
     if (b == QStringLiteral("omnirig")) return o && isVox(o->pttMethod());
     return h && isVox(h->pttMethod());
 }
 
 static inline void activeCatSetPtt(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b, bool on,
-                                   DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+                                   DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
+                                   DecodiumCat4OmManager* c = nullptr)
 {
+    c = activeCat4OmManager(n, c);
     if (useLegacyRigControlFallback(legacy, b)) {
         legacy->setRigPtt(on);
         return;
     }
     if (b=="native") n->setRigPtt(on);
+    else if (b=="cat4om") { if (c) c->setRigPtt(on); }
     else if (b=="omnirig" && o) o->setRigPtt(on);
     else h->setRigPtt(on);
 }
 
 static inline void activeCatSetTxPtt(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
                                      bool on, double txDialHz,
-                                     DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+                                     DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
+                                     DecodiumCat4OmManager* c = nullptr)
 {
+    c = activeCat4OmManager(n, c);
+    if (b == QStringLiteral("cat4om") && c && !useLegacyRigControlFallback(legacy, b)) {
+        c->setRigTxFrequencyAndPttAsync(txDialHz, on);
+        return;
+    }
     if (on && txDialHz > 0.0 && isHamlibFamilyBackend(b) && h
         && !useLegacyRigControlFallback(legacy, b)) {
         qDebug().noquote()
@@ -6091,13 +6121,19 @@ static inline void activeCatSetTxPtt(DecodiumCatManager* n, DecodiumTransceiverM
         return;
     }
 
-    activeCatSetPtt(n, h, b, on, o, legacy);
+    activeCatSetPtt(n, h, b, on, o, legacy, c);
 }
 
 static inline bool activeCatSetTxPttAsync(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b,
                                           bool on, double txDialHz,
-                                          DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+                                          DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
+                                          DecodiumCat4OmManager* c = nullptr)
 {
+    c = activeCat4OmManager(n, c);
+    if (b == QStringLiteral("cat4om") && c && !useLegacyRigControlFallback(legacy, b)) {
+        c->setRigTxFrequencyAndPttAsync(txDialHz, on);
+        return true;
+    }
     if (on && txDialHz > 0.0 && isHamlibFamilyBackend(b) && h
         && !useLegacyRigControlFallback(legacy, b)) {
         qDebug().noquote()
@@ -6112,6 +6148,7 @@ static inline bool activeCatSetTxPttAsync(DecodiumCatManager* n, DecodiumTransce
     Q_UNUSED(n)
     Q_UNUSED(o)
     Q_UNUSED(legacy)
+    Q_UNUSED(c)
     return false;
 }
 
@@ -6149,21 +6186,27 @@ static QString audioDeviceCacheSignature(QList<QAudioDevice> const& inputs,
 }
 
 static inline void activeCatSetFreq(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b, double hz,
-                                    DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr)
+                                    DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
+                                    DecodiumCat4OmManager* c = nullptr)
 {
+    c = activeCat4OmManager(n, c);
     if (useLegacyRigControlFallback(legacy, b)) {
         legacy->setDialFrequency(hz);
         return;
     }
     if (b=="native") n->setRigFrequency(hz);
+    else if (b=="cat4om") { if (c) c->setRigFrequency(hz); }
     else if (b=="omnirig" && o) o->setRigFrequency(hz);
     else h->setRigFrequency(hz);
 }
 
 static inline void activeCatSetTxFreq(DecodiumCatManager* n, DecodiumTransceiverManager* h, const QString& b, double hz,
-                                      DecodiumOmniRigManager* o = nullptr)
+                                      DecodiumOmniRigManager* o = nullptr,
+                                      DecodiumCat4OmManager* c = nullptr)
 {
+    c = activeCat4OmManager(n, c);
     if (b=="native") n->setRigTxFrequency(hz);
+    else if (b=="cat4om") { if (c) c->setRigTxFrequency(hz); }
     else if (b=="omnirig" && o) o->setRigTxFrequency(hz);
     else h->setRigTxFrequency(hz);
 }
@@ -9466,10 +9509,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         return workingFrequencyForBandMode(bandLambda, mode);
     });
     m_nativeCat       = new DecodiumCatManager(this);
+    m_cat4OmCat       = new DecodiumCat4OmManager(this);
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
     applyStartupCatProfileSnapshot();
     m_nativeCat->loadSettings();
+    m_cat4OmCat->loadSettings();
     m_omniRigCat->loadSettings();
     m_hamlibCat->loadSettings();
     m_dxCluster       = new DecodiumDxCluster(this);
@@ -10258,6 +10303,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         });
     };
     connectCatSignals(m_nativeCat, "native");
+    connectCatSignals(m_cat4OmCat, "cat4om");
     connectCatSignals(m_omniRigCat, "omnirig");
     connectCatSignals(m_hamlibCat, "hamlib");
 
@@ -10280,6 +10326,27 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, syncHamlibTelemetry);
     connect(m_hamlibCat, &DecodiumTransceiverManager::connectedChanged,
             this, syncHamlibTelemetry);
+
+    auto syncCat4OmTelemetry = [this]() {
+        if (!m_cat4OmCat
+            || m_catBackend != QStringLiteral("cat4om")
+            || !m_cat4OmCat->connected()) {
+            if (m_catBackend == QStringLiteral("cat4om")) {
+                updateRigTelemetry(0.0, 0.0, 0.0);
+            }
+            return;
+        }
+        updateRigTelemetry(m_cat4OmCat->powerWatts(), m_cat4OmCat->swr(),
+                           m_cat4OmCat->alc(), m_cat4OmCat->alcValid());
+    };
+    connect(m_cat4OmCat, &DecodiumCat4OmManager::powerWattsChanged,
+            this, syncCat4OmTelemetry);
+    connect(m_cat4OmCat, &DecodiumCat4OmManager::swrChanged,
+            this, syncCat4OmTelemetry);
+    connect(m_cat4OmCat, &DecodiumCat4OmManager::alcChanged,
+            this, syncCat4OmTelemetry);
+    connect(m_cat4OmCat, &DecodiumCat4OmManager::connectedChanged,
+            this, syncCat4OmTelemetry);
     connect(m_hamlibCat, &DecodiumTransceiverManager::tciPcmSamplesReady,
             this, &DecodiumBridge::onTciPcmSamplesReady, Qt::QueuedConnection);
     connect(m_hamlibCat, &DecodiumTransceiverManager::tciModActiveChanged,
@@ -11047,6 +11114,7 @@ void DecodiumBridge::runPostQmlStartupServices()
     });
 
     bool const autoConn = (m_catBackend == QStringLiteral("native")) ? m_nativeCat->catAutoConnect()
+                        : (m_catBackend == QStringLiteral("cat4om")) ? m_cat4OmCat->catAutoConnect()
                         : (m_catBackend == QStringLiteral("omnirig")) ? m_omniRigCat->catAutoConnect()
                                                                       : m_hamlibCat->catAutoConnect();
     // Auto Connect is the explicit preference; lastSuccessfulCatConnected
@@ -15665,13 +15733,7 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
         return;
     }
 
-    QString const rigMode = configuredCatRigMode();
-    if (!rigMode.isEmpty()
-        && isHamlibFamilyBackend(m_catBackend)
-        && m_hamlibCat
-        && m_hamlibCat->connected()) {
-        m_hamlibCat->setRigMode(rigMode);
-    }
+    applyConfiguredCatRigMode(reason + QStringLiteral("/mode"));
     activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend, dialHz, m_omniRigCat, m_legacyBackend);
     syncActiveCatTxSplitFrequency(reason + QStringLiteral("/dial"));
     bridgeLog(QStringLiteral("CAT local QSY requested by %1: %2 Hz via %3")
@@ -15727,11 +15789,14 @@ bool DecodiumBridge::hamlibCatFrequencySettleActive(const QString& reason) const
 
 bool DecodiumBridge::catSplitOperationActiveForMode() const
 {
-    if (!isHamlibFamilyBackend(m_catBackend) || !m_hamlibCat) {
+    if (!isHamlibFamilyBackend(m_catBackend)
+        && m_catBackend != QStringLiteral("cat4om")) {
         return false;
     }
 
-    QString const splitMode = normalizedCatSplitMode(m_hamlibCat->splitMode());
+    QObject const* activeCat = catManagerObj();
+    if (!activeCat) return false;
+    QString const splitMode = normalizedCatSplitMode(activeCat->property("splitMode").toString());
     if (splitMode != QStringLiteral("rig") && splitMode != QStringLiteral("emulate")) {
         return false;
     }
@@ -15792,6 +15857,9 @@ double DecodiumBridge::catSplitTxDialFrequencyHz() const
     if (dialHz <= 0.0 && isHamlibFamilyBackend(m_catBackend) && m_hamlibCat) {
         dialHz = m_hamlibCat->frequency();
     }
+    if (dialHz <= 0.0 && m_catBackend == QStringLiteral("cat4om") && m_cat4OmCat) {
+        dialHz = m_cat4OmCat->frequency();
+    }
     if (dialHz <= 0.0) {
         dialHz = m_frequency;
     }
@@ -15804,11 +15872,13 @@ double DecodiumBridge::catSplitTxDialFrequencyHz() const
 
 void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
 {
+    QObject* const activeCat = catManagerObj();
     if (legacyOwnsRigControl(m_legacyBackend)
         || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)
-        || !isHamlibFamilyBackend(m_catBackend)
-        || !m_hamlibCat
-        || !m_hamlibCat->connected()) {
+        || (!isHamlibFamilyBackend(m_catBackend)
+            && m_catBackend != QStringLiteral("cat4om"))
+        || !activeCat
+        || !activeCat->property("connected").toBool()) {
         return;
     }
 
@@ -15817,15 +15887,15 @@ void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
         return;
     }
 
-    QString const splitMode = normalizedCatSplitMode(m_hamlibCat->splitMode());
+    QString const splitMode = normalizedCatSplitMode(activeCat->property("splitMode").toString());
     if (splitMode == QStringLiteral("none")) {
         return;
     }
 
     double const txDialHz = catSplitTxDialFrequencyHz();
     if (txDialHz <= 0.0
-        && !m_hamlibCat->split()
-        && m_hamlibCat->txFrequency() <= 1.0) {
+        && !activeCat->property("split").toBool()
+        && activeCat->property("txFrequency").toDouble() <= 1.0) {
         return;
     }
 
@@ -22539,6 +22609,11 @@ void DecodiumBridge::startTx()
         && startTxDialHz > 0.0
         && isHamlibFamilyBackend(m_catBackend)
         && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend);
+    bool const cat4OmAsyncPtt =
+        !tciAudioTx
+        && !voxPtt
+        && startTxCanPtt
+        && m_catBackend == QStringLiteral("cat4om");
     if (!hamlibAsyncFakeSplitPtt) {
         syncActiveCatTxSplitFrequency(QStringLiteral("startTx"));
     }
@@ -22547,7 +22622,7 @@ void DecodiumBridge::startTx()
         QElapsedTimer catTimer;
         catTimer.start();
         bool asyncPtt = false;
-        if (hamlibAsyncFakeSplitPtt) {
+        if (hamlibAsyncFakeSplitPtt || cat4OmAsyncPtt) {
             asyncPtt = activeCatSetTxPttAsync(m_nativeCat, m_hamlibCat, m_catBackend,
                                               true, startTxDialHz,
                                               m_omniRigCat, m_legacyBackend);
@@ -23289,6 +23364,7 @@ void DecodiumBridge::stopTx()
 
     bool const catReportsPttActive =
         (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
+        || (m_catBackend == QStringLiteral("cat4om") && m_cat4OmCat && m_cat4OmCat->pttActive())
         || (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->pttActive())
         || (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->pttActive());
     bool const pttReleaseNeeded =
@@ -23731,6 +23807,7 @@ void DecodiumBridge::stopTune()
 
     bool const catReportsPttActive =
         (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
+        || (m_catBackend == QStringLiteral("cat4om") && m_cat4OmCat && m_cat4OmCat->pttActive())
         || (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->pttActive())
         || (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->pttActive());
     bool const pttReleaseNeeded =
@@ -24607,6 +24684,7 @@ QString DecodiumBridge::suggestedCatProfileName() const
     if (backend == QStringLiteral("HAMLIB")) backend = QStringLiteral("Hamlib");
     else if (backend == QStringLiteral("NATIVE")) backend = QStringLiteral("Native");
     else if (backend == QStringLiteral("TCI")) backend = QStringLiteral("TCI");
+    else if (backend == QStringLiteral("CAT4OM")) backend = QStringLiteral("Cat4OM");
     else if (backend == QStringLiteral("OMNIRIG")) backend = QStringLiteral("OmniRig");
 
     QString name = QStringLiteral("%1 %2").arg(rig, backend).trimmed();
@@ -24622,6 +24700,7 @@ bool DecodiumBridge::saveCatProfile(const QString& rawName)
     }
 
     if (m_nativeCat) m_nativeCat->saveSettings();
+    if (m_cat4OmCat) m_cat4OmCat->saveSettings();
     if (m_hamlibCat) m_hamlibCat->saveSettings();
     if (m_omniRigCat) m_omniRigCat->saveSettings();
 
@@ -24758,6 +24837,7 @@ bool DecodiumBridge::loadCatProfile(const QString& rawName)
 
     halt();
     if (m_nativeCat) m_nativeCat->disconnectRig();
+    if (m_cat4OmCat) m_cat4OmCat->disconnectRig();
     if (m_omniRigCat) m_omniRigCat->disconnectRig();
     if (m_hamlibCat) m_hamlibCat->disconnectRig();
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
@@ -24858,6 +24938,7 @@ void DecodiumBridge::setCatBackend(const QString& v)
     if (normalized != QStringLiteral("native")
         && normalized != QStringLiteral("hamlib")
         && normalized != QStringLiteral("tci")
+        && normalized != QStringLiteral("cat4om")
         && normalized != QStringLiteral("omnirig")) {
         normalized = QStringLiteral("hamlib");
     }
@@ -24868,6 +24949,7 @@ void DecodiumBridge::setCatBackend(const QString& v)
     // seriale QSerialPort del backend nativo). Evita conflitti "serial port
     // already open" quando si alterna fra omnirig, hamlib e native.
     if (m_nativeCat)  m_nativeCat->disconnectRig();
+    if (m_cat4OmCat)  m_cat4OmCat->disconnectRig();
     if (m_omniRigCat) m_omniRigCat->disconnectRig();
     if (m_hamlibCat)  m_hamlibCat->disconnectRig();
     // Lasciamo girare gli eventi in modo che i deleteLater() dei QAxObject
@@ -24969,6 +25051,14 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
         if (m_nativeCat && m_nativeCat->connected()) {
             bridgeLog(QStringLiteral("CAT rig mode sync (%1): native -> %2").arg(reason, rigMode));
             m_nativeCat->setRigMode(rigMode);
+        }
+        return;
+    }
+
+    if (m_catBackend == QStringLiteral("cat4om")) {
+        if (m_cat4OmCat && m_cat4OmCat->connected()) {
+            bridgeLog(QStringLiteral("CAT rig mode sync (%1): cat4om -> %2").arg(reason, rigMode));
+            m_cat4OmCat->setRigMode(rigMode);
         }
         return;
     }
@@ -25360,6 +25450,7 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         setPskReporterTimeSpanMinutes(value.toInt());
         return;
     }
+
     if (key == QStringLiteral("PskMapSpotWindowMinutes")) {
         setPskMapSpotWindowMinutes(value.toInt());
         return;
@@ -29038,6 +29129,7 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     if (!asynchronous && m_dxCluster) m_dxCluster->saveSettings();
     // CAT managers — persist serial port, baud rate, rig name etc.
     if (!asynchronous && m_nativeCat)   m_nativeCat->saveSettings();
+    if (!asynchronous && m_cat4OmCat)   m_cat4OmCat->saveSettings();
     if (!asynchronous && m_hamlibCat)   m_hamlibCat->saveSettings();
     if (!asynchronous && m_omniRigCat)  m_omniRigCat->saveSettings();
     // UI state (posizioni finestre, impostazioni panadapter)
@@ -29099,6 +29191,8 @@ void DecodiumBridge::shutdown()
     teardownAudioCapture();
     if (m_catBackend == "native" && m_nativeCat->connected())
         m_nativeCat->disconnectRig();
+    else if (m_catBackend == "cat4om" && m_cat4OmCat->connected())
+        m_cat4OmCat->disconnectRig();
     else if (m_catBackend == "omnirig" && m_omniRigCat->connected())
         m_omniRigCat->disconnectRig();
     else if (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat->connected())
@@ -29170,12 +29264,15 @@ void DecodiumBridge::retryRigConnection()
     // errori "serial port already open / Access denied" quando l'utente
     // passa da OmniRig a Hamlib (OmniRig.exe tiene la COM via COM object).
     if (m_catBackend != "native"  && m_nativeCat)  m_nativeCat->disconnectRig();
+    if (m_catBackend != "cat4om"  && m_cat4OmCat)  m_cat4OmCat->disconnectRig();
     if (m_catBackend != "omnirig" && m_omniRigCat) m_omniRigCat->disconnectRig();
     if (!isHamlibFamilyBackend(m_catBackend) && m_hamlibCat)  m_hamlibCat->disconnectRig();
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
     if (m_catBackend == "native" && m_nativeCat) {
         m_nativeCat->connectRig();
+    } else if (m_catBackend == "cat4om" && m_cat4OmCat) {
+        m_cat4OmCat->connectRig();
     } else if (m_catBackend == "omnirig" && m_omniRigCat) {
         m_omniRigCat->connectRig();
     } else if (m_hamlibCat) {
@@ -34976,6 +35073,7 @@ void DecodiumBridge::loadSettings()
     if (m_catBackend != QStringLiteral("native")
         && m_catBackend != QStringLiteral("hamlib")
         && m_catBackend != QStringLiteral("tci")
+        && m_catBackend != QStringLiteral("cat4om")
         && m_catBackend != QStringLiteral("omnirig")) {
         m_catBackend = QStringLiteral("hamlib");
     }
@@ -35129,6 +35227,9 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     if (m_nativeCat) {
         m_nativeCat->loadSettings();
     }
+    if (m_cat4OmCat) {
+        m_cat4OmCat->loadSettings();
+    }
     if (m_omniRigCat) {
         m_omniRigCat->loadSettings();
     }
@@ -35166,6 +35267,8 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     if (previousCatBackend != m_catBackend) {
         if (previousCatBackend == QStringLiteral("native") && m_nativeCat->connected()) {
             m_nativeCat->disconnectRig();
+        } else if (previousCatBackend == QStringLiteral("cat4om") && m_cat4OmCat->connected()) {
+            m_cat4OmCat->disconnectRig();
         } else if (previousCatBackend == QStringLiteral("omnirig") && m_omniRigCat->connected()) {
             m_omniRigCat->disconnectRig();
         } else if (isHamlibFamilyBackend(previousCatBackend) && m_hamlibCat->connected()) {
@@ -35209,6 +35312,10 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
         if (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->connected()) {
             updateRigTelemetry(m_hamlibCat->powerWatts(), m_hamlibCat->swr(),
                                m_hamlibCat->alc(), m_hamlibCat->alcValid());  // 1.0.323
+        } else if (m_catBackend == QStringLiteral("cat4om")
+                   && m_cat4OmCat && m_cat4OmCat->connected()) {
+            updateRigTelemetry(m_cat4OmCat->powerWatts(), m_cat4OmCat->swr(),
+                               m_cat4OmCat->alc(), m_cat4OmCat->alcValid());
         } else {
             updateRigTelemetry(0.0, 0.0, 0.0);
         }
@@ -47692,6 +47799,218 @@ static QString localDialogPath(QString path)
     return QDir::toNativeSeparators(path);
 }
 
+static QString safeFt2LinkReceivedDirectoryName(QString name)
+{
+    name = name.trimmed();
+    name.replace(
+        QRegularExpression(QStringLiteral("[<>:\"/\\\\|?*\\x00-\\x1f]")),
+        QStringLiteral("_"));
+    while (name.endsWith(QLatin1Char(' '))
+           || name.endsWith(QLatin1Char('.'))) {
+        name.chop(1);
+    }
+    return name.isEmpty() ? QStringLiteral("Default") : name.left(80);
+}
+
+static QString ft2LinkReceivedText(char const* sourceText)
+{
+    return QCoreApplication::translate("FT2LinkPanel", sourceText);
+}
+
+static QString defaultFt2LinkReceivedFilesDirectoryPath()
+{
+    QString root = QStandardPaths::writableLocation(
+        QStandardPaths::DownloadLocation);
+    if (root.trimmed().isEmpty()) {
+        root = QStandardPaths::writableLocation(
+            QStandardPaths::DocumentsLocation);
+    }
+    if (root.trimmed().isEmpty()) {
+        root = QDir::homePath();
+    }
+
+    QString instanceName = QCoreApplication::applicationName().trimmed();
+    qsizetype const separator = instanceName.lastIndexOf(
+        QStringLiteral(" - "));
+    if (separator >= 0) {
+        instanceName = instanceName.mid(separator + 3).trimmed();
+    } else {
+        instanceName = QStringLiteral("Default");
+    }
+    instanceName = safeFt2LinkReceivedDirectoryName(instanceName);
+
+    return QDir(root).absoluteFilePath(
+        QStringLiteral("Decodium/FT2-Link Received/%1").arg(instanceName));
+}
+
+static QString localDirectoryPathOrDefault(QString path)
+{
+    path = path.trimmed();
+    if (path.startsWith(QLatin1String("file:"))) {
+        path = QUrl(path).toLocalFile();
+    }
+    if (path.isEmpty()) {
+        path = defaultFt2LinkReceivedFilesDirectoryPath();
+    }
+    return QDir::cleanPath(QFileInfo(path).absoluteFilePath());
+}
+
+static QString safeFt2LinkReceivedFileName(QString fileName)
+{
+    fileName = fileName.trimmed();
+    fileName.replace(QLatin1Char('\\'), QLatin1Char('/'));
+    fileName = fileName.section(QLatin1Char('/'), -1);
+    fileName.replace(
+        QRegularExpression(QStringLiteral("[<>:\"/\\\\|?*\\x00-\\x1f]")),
+        QStringLiteral("_"));
+    while (fileName.endsWith(QLatin1Char(' '))
+           || fileName.endsWith(QLatin1Char('.'))) {
+        fileName.chop(1);
+    }
+    if (fileName.isEmpty() || fileName == QLatin1String(".")
+        || fileName == QLatin1String("..")) {
+        fileName = QStringLiteral("ft2link_received.bin");
+    }
+
+    QString const baseName = QFileInfo(fileName).completeBaseName().toUpper();
+    static QRegularExpression const windowsReserved(
+        QStringLiteral("^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$"),
+        QRegularExpression::CaseInsensitiveOption);
+    if (windowsReserved.match(baseName).hasMatch()) {
+        fileName.prepend(QLatin1Char('_'));
+    }
+
+    constexpr qsizetype kMaxFileNameLength = 180;
+    if (fileName.size() > kMaxFileNameLength) {
+        QFileInfo const info(fileName);
+        QString const suffix = info.suffix();
+        QString stem = info.completeBaseName();
+        qsizetype const suffixSpace = suffix.isEmpty() ? 0 : suffix.size() + 1;
+        stem.truncate(qMax<qsizetype>(1,
+                                     kMaxFileNameLength - suffixSpace));
+        fileName = suffix.isEmpty()
+            ? stem
+            : stem + QLatin1Char('.') + suffix;
+    }
+    return fileName;
+}
+
+static QString uniqueFt2LinkReceivedFilePath(QDir const& directory,
+                                             QString const& safeFileName)
+{
+    QString candidate = directory.absoluteFilePath(safeFileName);
+    if (!QFileInfo::exists(candidate)) {
+        return candidate;
+    }
+
+    QFileInfo const info(safeFileName);
+    QString const stem = info.completeBaseName().isEmpty()
+        ? QStringLiteral("ft2link_received")
+        : info.completeBaseName();
+    QString const suffix = info.suffix();
+    for (int index = 2; index < 100000; ++index) {
+        QString const numbered = suffix.isEmpty()
+            ? QStringLiteral("%1 (%2)").arg(stem).arg(index)
+            : QStringLiteral("%1 (%2).%3").arg(stem).arg(index).arg(suffix);
+        candidate = directory.absoluteFilePath(numbered);
+        if (!QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+    }
+
+    return directory.absoluteFilePath(
+        QStringLiteral("%1-%2%3")
+            .arg(stem)
+            .arg(QDateTime::currentDateTimeUtc().toString(
+                QStringLiteral("yyyyMMdd-HHmmss-zzz")))
+            .arg(suffix.isEmpty() ? QString() : QLatin1Char('.') + suffix));
+}
+
+static QVariantMap writeFt2LinkReceivedFile(QString const& requestedDirectory,
+                                            QString const& requestedFileName,
+                                            QString const& text,
+                                            QString const& base64,
+                                            bool binary,
+                                            bool preserveExisting)
+{
+    QVariantMap result;
+    result.insert(QStringLiteral("ok"), false);
+    result.insert(QStringLiteral("path"), QString());
+    result.insert(QStringLiteral("directory"), QString());
+    result.insert(QStringLiteral("fileName"), QString());
+    result.insert(QStringLiteral("bytes"), 0);
+
+    QString const directoryPath =
+        localDirectoryPathOrDefault(requestedDirectory);
+    QDir directory(directoryPath);
+    if (!directory.exists() && !QDir().mkpath(directoryPath)) {
+        result.insert(QStringLiteral("error"),
+                      ft2LinkReceivedText(
+                          "Cannot create receive directory: %1")
+                          .arg(directoryPath));
+        return result;
+    }
+
+    QString const safeFileName =
+        safeFt2LinkReceivedFileName(requestedFileName);
+    // Multiple automatic saves may complete in parallel.  Serialize only the
+    // short destination-selection/commit section on the worker pool so two
+    // files with the same radio-provided name cannot overwrite one another.
+    static QMutex receivedFileWriteMutex;
+    QMutexLocker const writeLock(&receivedFileWriteMutex);
+    QString const targetPath = preserveExisting
+        ? uniqueFt2LinkReceivedFilePath(directory, safeFileName)
+        : directory.absoluteFilePath(safeFileName);
+
+    QByteArray bytes;
+    if (binary) {
+        QByteArray const encoded = base64.trimmed().toLatin1();
+        if (encoded.isEmpty()) {
+            result.insert(QStringLiteral("error"),
+                          ft2LinkReceivedText(
+                              "Received binary file has no data"));
+            return result;
+        }
+        bytes = QByteArray::fromBase64(
+            encoded, QByteArray::AbortOnBase64DecodingErrors);
+        if (bytes.isEmpty()) {
+            result.insert(QStringLiteral("error"),
+                          ft2LinkReceivedText(
+                              "Received binary file has invalid Base64 data"));
+            return result;
+        }
+    } else {
+        bytes = text.toUtf8();
+    }
+
+    QSaveFile file(targetPath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        result.insert(QStringLiteral("path"), targetPath);
+        return result;
+    }
+    if (file.write(bytes) != bytes.size()) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        result.insert(QStringLiteral("path"), targetPath);
+        file.cancelWriting();
+        return result;
+    }
+    if (!file.commit()) {
+        result.insert(QStringLiteral("error"), file.errorString());
+        result.insert(QStringLiteral("path"), targetPath);
+        return result;
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("path"), QDir::toNativeSeparators(targetPath));
+    result.insert(QStringLiteral("directory"),
+                  QDir::toNativeSeparators(directoryPath));
+    result.insert(QStringLiteral("fileName"), QFileInfo(targetPath).fileName());
+    result.insert(QStringLiteral("bytes"), bytes.size());
+    result.insert(QStringLiteral("error"), QString());
+    return result;
+}
+
 static QString dialogFilterString(const QStringList& nameFilters)
 {
     return nameFilters.isEmpty() ? QString() : nameFilters.join(QStringLiteral(";;"));
@@ -47930,6 +48249,95 @@ QVariantMap DecodiumBridge::writeFileBytes(const QString& path,
     result.insert(QStringLiteral("ok"), true);
     result.insert(QStringLiteral("error"), QString());
     return result;
+}
+
+QString DecodiumBridge::defaultFt2LinkReceivedFilesDirectory() const
+{
+    return QDir::toNativeSeparators(
+        defaultFt2LinkReceivedFilesDirectoryPath());
+}
+
+quint64 DecodiumBridge::saveFt2LinkReceivedFileAsync(
+    const QString& directory,
+    const QString& fileName,
+    const QString& text,
+    const QString& base64,
+    bool binary,
+    bool preserveExisting)
+{
+    quint64 const requestId =
+        m_ft2LinkReceivedFileIoSerial.fetch_add(
+            1u, std::memory_order_relaxed) + 1u;
+    QPointer<DecodiumBridge> guard(this);
+    auto* task = QRunnable::create([
+        guard,
+        requestId,
+        directory,
+        fileName,
+        text,
+        base64,
+        binary,
+        preserveExisting
+    ] {
+        QVariantMap const result = writeFt2LinkReceivedFile(
+            directory, fileName, text, base64, binary, preserveExisting);
+        if (!guard) {
+            return;
+        }
+        QMetaObject::invokeMethod(guard, [guard, requestId, result] {
+            if (guard) {
+                emit guard->ft2LinkReceivedFileSaveFinished(requestId, result);
+            }
+        }, Qt::QueuedConnection);
+    });
+    QThreadPool::globalInstance()->start(task, -1);
+    return requestId;
+}
+
+quint64 DecodiumBridge::openFt2LinkReceivedFilesDirectoryAsync(
+    const QString& directory)
+{
+    quint64 const requestId =
+        m_ft2LinkReceivedFileIoSerial.fetch_add(
+            1u, std::memory_order_relaxed) + 1u;
+    QString const path = localDirectoryPathOrDefault(directory);
+    QPointer<DecodiumBridge> guard(this);
+    auto* task = QRunnable::create([guard, requestId, path] {
+        QVariantMap result;
+        bool const ok = QDir(path).exists() || QDir().mkpath(path);
+        result.insert(QStringLiteral("ok"), ok);
+        result.insert(QStringLiteral("path"),
+                      QDir::toNativeSeparators(path));
+        result.insert(QStringLiteral("error"),
+                      ok ? QString()
+                         : ft2LinkReceivedText(
+                               "Cannot create receive directory: %1")
+                               .arg(path));
+        if (!guard) {
+            return;
+        }
+        QMetaObject::invokeMethod(guard, [guard, requestId, result] () mutable {
+            if (!guard) {
+                return;
+            }
+            if (result.value(QStringLiteral("ok")).toBool()) {
+                bool const opened = QDesktopServices::openUrl(
+                    QUrl::fromLocalFile(
+                        result.value(QStringLiteral("path")).toString()));
+                if (!opened) {
+                    result.insert(QStringLiteral("ok"), false);
+                    result.insert(
+                        QStringLiteral("error"),
+                        ft2LinkReceivedText(
+                            "The system file manager could not open the receive directory"));
+                }
+            }
+            emit guard->ft2LinkReceivedFilesDirectoryOpenFinished(
+                requestId, result);
+        }, Qt::QueuedConnection);
+    });
+    QThreadPool::globalInstance()->start(task, -1);
+    return requestId;
 }
 
 bool DecodiumBridge::openExternalUrl(const QString& url)

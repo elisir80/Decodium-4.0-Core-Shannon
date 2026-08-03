@@ -386,6 +386,7 @@ public:
                                            QString const& fileName,
                                            QString const& contentBase64,
                                            quint64 nowMs);
+  Q_INVOKABLE bool applicationRadioTxReady (quint16 sessionId) const;
   Q_INVOKABLE bool transmitBulletinRadio (quint16 sessionId,
                                           QString const& group,
                                           QString const& title,
@@ -760,6 +761,11 @@ private:
   bool requestAckRadioTx (decodium::ft2link::Frame const& ack,
                           decodium::ft2link::AppSession const& session,
                           quint64 nowMs);
+  void scheduleInboundAck (quint16 sessionId);
+  void runPendingInboundAcks ();
+  void schedulePendingInboundAckCheck (quint64 nowMs);
+  bool queueLiveOutboundWindowAfterAck (quint16 sessionId,
+                                        quint64 nowMs);
   bool queueBeaconRadio (bool cq,
                          quint64 nowMs,
                          bool requireArm,
@@ -1393,6 +1399,7 @@ private:
   std::map<std::uint16_t, bool> m_liveInboundDelivered;
   std::map<std::uint16_t, std::uint64_t> m_liveInboundDeliveredAtMs;
   std::map<std::uint16_t, QString> m_liveInboundDeliveredHash;
+  std::map<std::uint16_t, quint64> m_pendingInboundAckDueMs;
   std::map<std::uint16_t, LiveOutboundRetry> m_liveOutboundRetries;
   std::map<std::uint16_t, HelloRetry> m_helloRetries;
   std::map<std::uint16_t, decodium::ft2link::W2300RateController> m_liveW2300RateControllers;
@@ -1472,6 +1479,7 @@ private:
   bool m_loadingLocalStore {false};
   std::deque<RadioTxQueueItem> m_radioTxQueue;
   QTimer m_radioTxQueueTimer;
+  QTimer m_inboundAckTimer;
   QTimer m_liveOutboundRetryTimer;
   QTimer m_helloRetryTimer;
   QTimer m_autoBeaconTimer;

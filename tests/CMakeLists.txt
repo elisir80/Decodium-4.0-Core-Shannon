@@ -117,6 +117,13 @@ add_executable (test_rotator_service
 target_link_libraries (test_rotator_service Qt6::Test Qt6::Core Qt6::Gui Qt6::Network)
 add_test (NAME test_rotator_service COMMAND $<TARGET_FILE:test_rotator_service>)
 
+add_executable (test_cat4om_manager
+  test_cat4om_manager.cpp
+  ../src/radio/DecodiumCat4OmManager.cpp
+  ../src/radio/DecodiumCat4OmManager.h)
+target_link_libraries (test_cat4om_manager Qt6::Test Qt6::Core Qt6::Network Qt6::WebSockets)
+add_test (NAME test_cat4om_manager COMMAND $<TARGET_FILE:test_cat4om_manager>)
+
 add_executable (test_udp_client_id test_udp_client_id.cpp)
 target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
