@@ -12917,6 +12917,22 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
         <source>Advanced</source>
         <translation>詳細設定</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>制御:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>管理:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>占有:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>自動的に制御を要求する</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16877,6 +16893,38 @@ If unsure, use High.</source>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: 「Pulse/PipeWire monitor」と付いた項目は、その PipeWire/PulseAudio シンクで再生中の音声を取り込みます。ブラウザーの WebSDR/KiwiSDR の音声に便利です。Pulse/PipeWire のソースを選ぶには pactl が必要で、現在のユーザーの既定の録音ソースが変わります。</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>制御:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>管理:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>占有:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>自動的に制御を要求する</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>自動検出</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>最初に利用できる無線機</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>無線機グループ:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>無線機:</translation>
     </message>
 </context>
 <context>
@@ -21259,6 +21307,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>オフライン キャッシュ</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>ファイル</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>フォルダー</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>新規</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>開く</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>既読</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>すべて既読</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>未読</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>名前を付けて保存</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>コピー</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>消去</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>自動 ON</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>自動 OFF</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>受信したファイル</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>すべてのファイル (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>画像 (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>テキスト ファイル (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>フォルダー: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>受信フォルダー: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>受信フォルダー</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>受信ファイル</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>不明なエラー</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>受信したファイルはありません</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>既読の受信ファイルはありません</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>未読の受信ファイルはありません</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>%1 のファイルを待っています</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>受信したファイルのフォルダーを選びます</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>FT2-Link で受信したファイルのフォルダーを選択</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>受信したファイルのフォルダーを開く</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>受信したファイルのフォルダーを開いています...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>%1 を開きました</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>フォルダーを開けませんでした: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>フォルダーを開く操作は利用できません</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>フォルダーの選択は利用できません</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>受信フォルダーを作成できません: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>システムのファイル マネージャーは受信フォルダーを開けませんでした</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>新しいファイルを受信フォルダーに自動保存します</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>設定した受信フォルダーに保存します</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>別の名前や別のフォルダーに保存します</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>FT2-Link で受信したファイルに名前を付けて保存</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>「名前を付けて保存」を中止しました</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>「名前を付けて保存」は利用できません</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>保存はすでに実行中です</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>非同期のファイル保存は利用できません</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>受信ファイルの保存をキューに入れられません</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>%1 を保存中...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>%1 を保存しました</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>保存に失敗しました: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>%1 を自動保存中...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>%1 を自動保存しました</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>自動保存に失敗しました: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>受信ファイルの内容をコピー</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>%1 をコピーしました</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>受信ファイルを既読にする</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>受信ファイルを未読にする</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>%1 を既読にしました</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>%1 を未読にしました</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>すべての受信ファイルの未読マークを外します</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>既読になっている受信ファイルを削除します</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>この受信ファイルの項目を削除</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>%1 を削除しました</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>削除に失敗しました: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>受信したバイナリ ファイルの Base64 データが不正です</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>受信したバイナリ ファイルにデータがありません</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>受信ファイルに内容がありません</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n 件</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / 未読 %n 件</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>保存待ち %n 件</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>既読の受信ファイルを %n 件削除しました</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>受信ファイルを %n 件既読にしました</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>CAT4OM 制御: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>CAT4OM 管理: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>CAT4OM 無線機 %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>CAT4OM の %1 に失敗しました: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>CAT4OM の %1 要求がタイムアウトしました: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>CAT4OM の管理 %1 に失敗しました: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM がグループ %1、無線機 %2 (%3) に接続しました。</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>CAT4OM 制御のハンドシェイク中...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>CAT4OM 管理のハンドシェイク中...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>CAT4OM 制御プロトコルが一致しません。</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>CAT4OM 管理プロトコルが一致しません。</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>CAT4OM 制御が接続を拒否しました: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>CAT4OM 管理が接続を拒否しました: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>CAT4OM 制御が不正な JSON を送信しました: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>CAT4OM 管理が不正な JSON を送信しました: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>CAT4OM 制御のウェルカム応答にクライアント ID がありませんでした。</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>CAT4OM 管理のウェルカム応答にクライアント ID がありませんでした。</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>CAT4OM グループを開始しました。状態を更新中...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM に設定済みの無線機グループがありません。</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>CAT4OM 管理を利用できません。%1 で制御を試します...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1。%2 秒後に再試行します。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium は読み取り専用です。制御の占有は別のクライアントが保持しています。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: 接続のハンドシェイクがタイムアウトしました。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: キューにあった %1 件のコマンドを破棄しました: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: 再度検出を実行する前に切断してください。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: 検出の前に管理接続が閉じられました。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: モード %1 は無線機 %2 では対応していません。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: 無線機 %1 は %2 を公開していません。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: 無線機 %1 は接続されていません。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: 切断の前に PTT を解放しています...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>接続済み — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>%1 の CAT4OM 制御に接続中...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>%1 の CAT4OM 管理に接続中...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>CAT4OM グループを検出中...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>CAT4OM グループ %1 を開始中...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>設定した制御エンドポイントを試します。</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>制御</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>管理</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>制御接続が切断されました</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>制御接続に失敗しました</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>切断が要求されました</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>制御占有の要求がタイムアウトしました</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>未選択</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>状態不明</translation>
     </message>
 </context>
 </TS>

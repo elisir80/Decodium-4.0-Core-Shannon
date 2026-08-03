@@ -12932,6 +12932,22 @@ Padoms: aizveriet OmniRig no Windows sistēmas teknes ikonas, pēc tam vēlreiz 
         <source>Advanced</source>
         <translation>Papildu</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>Vadība:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Pārvaldība:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Ekskluzīva kontrole:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Automātiski pieprasīt vadību</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16892,6 +16908,38 @@ Noklusējums: IZSL.</translation>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: ieraksti ar atzīmi &apos;Pulse/PipeWire monitor&apos; tver skaņu, kas atskaņojas attiecīgajā PipeWire/PulseAudio izvadē, kas noder WebSDR/KiwiSDR skaņai pārlūkā. Pulse/PipeWire avota izvēlei nepieciešams pactl, un tā maina pašreizējā lietotāja noklusēto tveršanas avotu.</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Vadība:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Pārvaldība:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Ekskluzīva kontrole:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Automātiski pieprasīt vadību</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Automātiska atklāšana</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Pirmais pieejamais radio</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Radio grupa:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Radio:</translation>
     </message>
 </context>
 <context>
@@ -21274,6 +21322,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>bezsaistes kešs</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>FAILS</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>MAPE</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>JAUNS</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>ATVĒRT</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>LASĪTS</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>LASĪT VISUS</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>NELASĪTS</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>SAGLABĀT</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>SAGLABĀT KĀ</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>KOPĒT</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>DZĒST</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>NOTĪRĪT</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO IESL</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO IZSL</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>SAŅEMTIE FAILI</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Visi faili (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Attēli (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Teksta faili (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Mape: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Saņemšanas mape: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>saņemšanas mape</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>saņemtais fails</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>nezināma kļūda</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Nav saņemtu failu</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Nav lasītu saņemtu failu</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Nav nelasītu saņemtu failu</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>Gaida failus mapē %1</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Izvēlieties saņemto failu mapi</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Izvēlieties FT2-Link saņemto failu mapi</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>Atvērt saņemto failu mapi</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>Atver saņemto failu mapi...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>Atvērts %1</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>Neizdevās atvērt mapi: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>Mapes atvēršana nav pieejama</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>Mapes izvēle nav pieejama</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>Nevar izveidot saņemšanas mapi: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>Sistēmas failu pārvaldnieks nevarēja atvērt saņemšanas mapi</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Automātiski saglabāt jaunos failus saņemšanas mapē</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Saglabāt konfigurētajā saņemšanas mapē</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Saglabāt ar citu nosaukumu vai citā mapē</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>Saglabāt FT2-Link saņemto failu kā</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>Saglabāt kā atcelts</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>Saglabāt kā nav pieejams</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>Saglabāšana jau notiek</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>Asinhrona failu saglabāšana nav pieejama</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>Nevar ierindot saņemtā faila saglabāšanu</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>Saglabā %1...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>Saglabāts %1</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>Saglabāšana neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>Automātiski saglabā %1...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>Automātiski saglabāts %1</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>Automātiskā saglabāšana neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>Kopēt saņemtā faila saturu</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>Kopēts %1</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Atzīmēt saņemto failu kā lasītu</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Atzīmēt saņemto failu kā nelasītu</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>Atzīmēts kā lasīts: %1</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>Atzīmēts kā nelasīts: %1</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Noņemt nelasīta atzīmi visiem saņemtajiem failiem</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>Dzēst saņemtos failus, kas jau atzīmēti kā lasīti</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Dzēst šo saņemtā faila ierakstu</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>Dzēsts %1</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>Dzēšana neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>Saņemtajā binārajā failā ir nederīgi Base64 dati</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>Saņemtajā binārajā failā nav datu</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>Saņemtajam failam nav satura</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n vienumu</numerusform><numerusform>%n vienums</numerusform><numerusform>%n vienumi</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n nelasītu</numerusform><numerusform> / %n nelasīts</numerusform><numerusform> / %n nelasīti</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n saglabāšanu gaida</numerusform><numerusform>%n saglabāšana gaida</numerusform><numerusform>%n saglabāšanas gaida</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>Dzēsti %n lasīti saņemtie faili</numerusform><numerusform>Dzēsts %n lasīts saņemtais fails</numerusform><numerusform>Dzēsti %n lasīti saņemtie faili</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>Atzīmēti %n saņemtie faili kā lasīti</numerusform><numerusform>Atzīmēts %n saņemtais fails kā lasīts</numerusform><numerusform>Atzīmēti %n saņemtie faili kā lasīti</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>CAT4OM vadība: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>CAT4OM pārvaldība: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>CAT4OM radio %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>CAT4OM %1 neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>CAT4OM %1 pieprasījumam iestājās noildze: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>CAT4OM pārvaldība %1 neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM pievienojies grupai %1, radio %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>CAT4OM vadības rokasspiediens...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>CAT4OM pārvaldības rokasspiediens...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>CAT4OM vadības protokols nesakrīt.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>CAT4OM pārvaldības protokols nesakrīt.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>CAT4OM vadība noraidīja savienojumu: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>CAT4OM pārvaldība noraidīja savienojumu: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>CAT4OM vadība nosūtīja nederīgu JSON: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>CAT4OM pārvaldība nosūtīja nederīgu JSON: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>CAT4OM vadības sveiciens nesniedza klienta ID.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>CAT4OM pārvaldības sveiciens nesniedza klienta ID.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>CAT4OM grupa sākta; atsvaidzina statusu...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM nav konfigurētu radio grupu.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>CAT4OM pārvaldība nav pieejama; mēģina vadību uz %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1; mēģinās vēlreiz pēc %2 s.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium ir tikai lasāms; ekskluzīvā vadība pieder citam klientam.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: savienojuma rokasspiedienam iestājās noildze.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: atmestas %1 rindā esošās komandas: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: atvienojieties, pirms atkal palaižat atklāšanu.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: pārvaldības savienojums tika aizvērts pirms atklāšanas.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: režīmu %1 radio %2 neatbalsta.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: radio %1 nepiedāvā %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: radio %1 nav pievienots.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: atbrīvo PTT pirms atvienošanās...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Savienots — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>Savienojas ar CAT4OM vadību uz %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>Savienojas ar CAT4OM pārvaldību uz %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>Meklē CAT4OM grupas...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>Sāk CAT4OM grupu %1...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>Mēģina konfigurēto vadības galapunktu.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>vadība</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>pārvaldība</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>vadības savienojums pārtrūka</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>vadības savienojums neizdevās</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>pieprasīta atvienošanās</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>ekskluzīvās vadības pieprasījumam iestājās noildze</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>nav izvēlēts</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>stāvoklis nezināms</translation>
     </message>
 </context>
 </TS>

@@ -12787,6 +12787,22 @@ Tipp: zárja be az OmniRiget a Windows tálca ikonjából, majd nyomja meg újra
         <source>Advanced</source>
         <translation>Speciális</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>Vezérlés:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Kezelés:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Kizárólagos vezérlés:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Vezérlés automatikus kérése</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16747,6 +16763,38 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: a &apos;Pulse/PipeWire monitor&apos; jelölésű bejegyzések az adott PipeWire/PulseAudio kimeneten szóló hangot rögzítik, ami hasznos a böngészőbeli WebSDR/KiwiSDR hanghoz. Pulse/PipeWire forrás választásához pactl kell, és megváltoztatja a jelenlegi felhasználó alapértelmezett felvételi forrását.</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Vezérlés:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Kezelés:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Kizárólagos vezérlés:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Vezérlés automatikus kérése</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Automatikus felderítés</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Első elérhető rádió</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Rádiócsoport:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Rádió:</translation>
     </message>
 </context>
 <context>
@@ -21125,6 +21173,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>offline gyorsítótár</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>FÁJL</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>MAPPA</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>ÚJ</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>MEGNYITÁS</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>OLVASOTT</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>ÖSSZES OLVASOTT</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>OLVASATLAN</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>MENTÉS</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>MENTÉS MÁSKÉNT</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>MÁSOLÁS</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>TÖRL</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>TÖRLÉS</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO BE</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO KI</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>FOGADOTT FÁJLOK</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Minden fájl (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Képek (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Szövegfájlok (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Mappa: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Fogadási mappa: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>fogadási mappa</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>fogadott fájl</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>ismeretlen hiba</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Nincs fogadott fájl</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Nincs olvasott fogadott fájl</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Nincs olvasatlan fogadott fájl</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>Fájlokra várva itt: %1</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Válaszd ki a fogadott fájlok mappáját</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Válaszd ki az FT2-Link fogadott fájljainak mappáját</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>A fogadott fájlok mappájának megnyitása</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>A fogadott fájlok mappájának megnyitása...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>%1 megnyitva</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>A mappa megnyitása nem sikerült: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>A mappa megnyitása nem érhető el</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>A mappa kiválasztása nem érhető el</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>A fogadási mappa nem hozható létre: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>A rendszer fájlkezelője nem tudta megnyitni a fogadási mappát</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Az új fájlok automatikus mentése a fogadási mappába</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Mentés a beállított fogadási mappába</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Mentés más néven vagy másik mappába</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>FT2-Link fogadott fájl mentése másként</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>A Mentés másként megszakítva</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>A Mentés másként nem érhető el</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>A mentés már folyamatban van</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>Az aszinkron fájlmentés nem érhető el</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>A fogadott fájl mentése nem sorolható be</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>%1 mentése...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>%1 mentve</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>A mentés nem sikerült: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>%1 automatikus mentése...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>%1 automatikusan mentve</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>Az automatikus mentés nem sikerült: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>A fogadott fájl tartalmának másolása</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>%1 másolva</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Fogadott fájl megjelölése olvasottként</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Fogadott fájl megjelölése olvasatlanként</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>%1 olvasottként megjelölve</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>%1 olvasatlanként megjelölve</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Az olvasatlan jelölés eltávolítása az összes fogadott fájlról</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>A már olvasottként megjelölt fogadott fájlok törlése</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Ennek a fogadott fájl bejegyzésnek a törlése</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>%1 törölve</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>A törlés nem sikerült: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>A fogadott bináris fájl érvénytelen Base64 adatot tartalmaz</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>A fogadott bináris fájl nem tartalmaz adatot</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>A fogadott fájlnak nincs tartalma</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n elem</numerusform><numerusform>%n elem</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n olvasatlan</numerusform><numerusform> / %n olvasatlan</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n mentés függőben</numerusform><numerusform>%n mentés függőben</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>%n olvasott fogadott fájl törölve</numerusform><numerusform>%n olvasott fogadott fájl törölve</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>%n fogadott fájl olvasottként megjelölve</numerusform><numerusform>%n fogadott fájl olvasottként megjelölve</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>CAT4OM vezérlés: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>CAT4OM kezelés: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>CAT4OM rádió %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>A CAT4OM %1 nem sikerült: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>A CAT4OM %1 kérés túllépte az időkorlátot: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>A CAT4OM %1 kezelés nem sikerült: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>A CAT4OM csatlakozott a(z) %1 csoporthoz, rádió %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>CAT4OM vezérlési kézfogás...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>CAT4OM kezelési kézfogás...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>A CAT4OM vezérlési protokoll nem egyezik.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>A CAT4OM kezelési protokoll nem egyezik.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>A CAT4OM vezérlés elutasította a kapcsolatot: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>A CAT4OM kezelés elutasította a kapcsolatot: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>A CAT4OM vezérlés érvénytelen JSON-t küldött: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>A CAT4OM kezelés érvénytelen JSON-t küldött: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>A CAT4OM vezérlés üdvözlete nem adott ügyfél-azonosítót.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>A CAT4OM kezelés üdvözlete nem adott ügyfél-azonosítót.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>A CAT4OM csoport elindult; állapot frissítése...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>A CAT4OM-nak nincs beállított rádiócsoportja.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>A CAT4OM kezelés nem érhető el; vezérlés próbája itt: %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1; újrapróbálkozás %2 s múlva.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: a Decodium csak olvasható; a kizárólagos vezérlés egy másik ügyfélé.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: a kapcsolatfelvétel túllépte az időkorlátot.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: %1 sorban álló parancs eldobva: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: bontsd a kapcsolatot, mielőtt újra felderítést indítasz.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: a kezelési kapcsolat lezárult a felderítés előtt.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: a(z) %1 módot a(z) %2 rádió nem támogatja.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: a(z) %1 rádió nem teszi elérhetővé: %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: a(z) %1 rádió nincs csatlakoztatva.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: PTT elengedése a kapcsolat bontása előtt...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Csatlakoztatva — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>Csatlakozás a CAT4OM vezérléshez itt: %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>Csatlakozás a CAT4OM kezeléshez itt: %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>CAT4OM csoportok felderítése...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>CAT4OM %1 csoport indítása...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>A beállított vezérlési végpont próbája.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>vezérlés</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>kezelés</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>a vezérlési kapcsolat megszakadt</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>a vezérlési kapcsolat nem sikerült</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>kapcsolatbontás kérve</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>a kizárólagos vezérlés kérése túllépte az időkorlátot</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>nincs kiválasztva</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>ismeretlen állapot</translation>
     </message>
 </context>
 </TS>

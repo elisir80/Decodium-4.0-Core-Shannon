@@ -12917,6 +12917,22 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
         <source>Advanced</source>
         <translation>進階</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>控制:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>管理:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>獨占控制:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>自動請求控制權</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16877,6 +16893,38 @@ If unsure, use High.</source>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: 標記為「Pulse/PipeWire monitor」的項目會擷取該 PipeWire/PulseAudio 輸出上正在播放的音訊，適合瀏覽器中的 WebSDR/KiwiSDR 音訊。選擇 Pulse/PipeWire 來源需要 pactl，並會變更目前使用者的預設擷取來源。</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>控制:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>管理:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>獨占控制:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>自動請求控制權</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>自動探索</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>第一個可用的電台</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>電台群組:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>電台:</translation>
     </message>
 </context>
 <context>
@@ -21258,6 +21306,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>離線快取</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>檔案</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>資料夾</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>新增</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>開啟</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>已讀</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>全部已讀</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>未讀</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>儲存</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>另存新檔</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>複製</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>刪除</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>自動 開</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>自動 關</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>已接收檔案</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>所有檔案 (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>圖像 (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>文字檔 (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>資料夾: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>接收資料夾: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>接收資料夾</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>已接收檔案</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>未知錯誤</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>沒有已接收檔案</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>沒有已讀的接收檔案</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>沒有未讀的接收檔案</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>正在等待 %1 中的檔案</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>選擇已接收檔案的資料夾</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>選擇 FT2-Link 已接收檔案的資料夾</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>開啟已接收檔案的資料夾</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>正在開啟已接收檔案的資料夾...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>已開啟 %1</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>開啟資料夾失敗: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>開啟資料夾不可用</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>資料夾選擇不可用</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>無法建立接收資料夾: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>系統檔案管理員無法開啟接收資料夾</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>自動將新檔案儲存到接收資料夾</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>儲存到已設定的接收資料夾</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>以其他名稱或在其他資料夾中儲存</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>將 FT2-Link 已接收檔案另存為</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>已取消另存新檔</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>另存新檔不可用</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>儲存已在進行中</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>非同步檔案儲存不可用</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>無法將已接收檔案的儲存加入佇列</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>正在儲存 %1...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>已儲存 %1</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>儲存失敗: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>正在自動儲存 %1...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>已自動儲存 %1</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>自動儲存失敗: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>複製已接收檔案的內容</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>已複製 %1</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>將已接收檔案標為已讀</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>將已接收檔案標為未讀</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>已將 %1 標為已讀</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>已將 %1 標為未讀</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>清除所有已接收檔案的未讀標記</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>刪除已標為已讀的接收檔案</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>刪除此已接收檔案項目</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>已刪除 %1</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>刪除失敗: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>已接收的二進位檔案包含無效的 Base64 資料</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>已接收的二進位檔案沒有資料</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>已接收檔案沒有內容</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n 項</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n 則未讀</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n 項儲存待處理</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>已刪除 %n 個已讀的接收檔案</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>已將 %n 個接收檔案標為已讀</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>CAT4OM 控制: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>CAT4OM 管理: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>CAT4OM 電台 %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>CAT4OM %1 失敗: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>CAT4OM %1 請求逾時: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>CAT4OM 管理 %1 失敗: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM 已連線到群組 %1，電台 %2 (%3)。</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>CAT4OM 控制交握中...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>CAT4OM 管理交握中...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>CAT4OM 控制通訊協定不相符。</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>CAT4OM 管理通訊協定不相符。</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>CAT4OM 控制拒絕了連線: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>CAT4OM 管理拒絕了連線: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>CAT4OM 控制傳送了無效的 JSON: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>CAT4OM 管理傳送了無效的 JSON: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>CAT4OM 控制的歡迎訊息未提供用戶端 ID。</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>CAT4OM 管理的歡迎訊息未提供用戶端 ID。</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>CAT4OM 群組已啟動；正在重新整理狀態...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM 沒有已設定的電台群組。</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>CAT4OM 管理不可用；正在嘗試 %1 上的控制...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1；%2 秒後重試。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium 為唯讀；獨占控制權由其他用戶端持有。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: 連線交握逾時。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: 已丟棄 %1 條排隊命令: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: 再次執行探索前請先中斷連線。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: 探索之前管理連線已關閉。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: 電台 %2 不支援模式 %1。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: 電台 %1 未提供 %2。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: 電台 %1 未連線。</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: 中斷前正在釋放 PTT...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>已連線 — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>正在連線 %1 上的 CAT4OM 控制...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>正在連線 %1 上的 CAT4OM 管理...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>正在探索 CAT4OM 群組...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>正在啟動 CAT4OM 群組 %1...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>正在嘗試已設定的控制端點。</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>控制</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>管理</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>控制連線已中斷</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>控制連線失敗</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>已請求中斷連線</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>獨占控制請求逾時</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>未選擇</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>狀態未知</translation>
     </message>
 </context>
 </TS>

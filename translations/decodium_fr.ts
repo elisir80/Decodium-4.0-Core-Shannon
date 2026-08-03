@@ -12919,6 +12919,22 @@ Astuce : fermez OmniRig depuis l'icône de la zone de notification de Windows, p
         <source>Advanced</source>
         <translation>Avancé</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>Contrôle :</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Gestion :</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Contrôle exclusif :</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Demander le contrôle automatiquement</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16879,6 +16895,38 @@ En cas de doute, utilisez Élevée.</translation>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux : les entrées marquées « Pulse/PipeWire monitor » capturent l&apos;audio joué sur cette sortie PipeWire/PulseAudio, utile pour l&apos;audio WebSDR/KiwiSDR dans le navigateur. Choisir une source Pulse/PipeWire nécessite pactl et modifie la source de capture par défaut de l&apos;utilisateur courant.</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Contrôle :</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Gestion :</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Contrôle exclusif :</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Demander le contrôle automatiquement</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Découverte automatique</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Premier poste disponible</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Groupe de postes :</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Poste :</translation>
     </message>
 </context>
 <context>
@@ -21260,6 +21308,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>cache hors ligne</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>FICHIER</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>DOSSIER</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NOUVEAU</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>OUVRIR</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>LU</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>TOUT LIRE</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>NON LU</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>ENREGISTRER</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>ENREGISTRER SOUS</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>COPIER</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>SUPPR</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>EFFACER</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO ACT</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO DÉS</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>FICHIERS REÇUS</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Tous les fichiers (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Images (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Fichiers texte (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Dossier : %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Dossier de réception : %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>dossier de réception</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>fichier reçu</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>erreur inconnue</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Aucun fichier reçu</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Aucun fichier reçu lu</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Aucun fichier reçu non lu</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>En attente de fichiers dans %1</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Choisir le dossier des fichiers reçus</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Sélectionner le dossier des fichiers reçus FT2-Link</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>Ouvrir le dossier des fichiers reçus</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>Ouverture du dossier des fichiers reçus...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>%1 ouvert</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>Échec de l&apos;ouverture du dossier : %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>L&apos;ouverture du dossier est indisponible</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>La sélection du dossier est indisponible</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>Impossible de créer le dossier de réception : %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>Le gestionnaire de fichiers du système n&apos;a pas pu ouvrir le dossier de réception</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Enregistrer automatiquement les nouveaux fichiers dans le dossier de réception</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Enregistrer dans le dossier de réception configuré</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Enregistrer sous un autre nom ou dans un autre dossier</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>Enregistrer sous le fichier reçu FT2-Link</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>Enregistrer sous annulé</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>Enregistrer sous est indisponible</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>Un enregistrement est déjà en cours</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>L&apos;enregistrement asynchrone des fichiers est indisponible</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>Impossible de mettre en file l&apos;enregistrement du fichier reçu</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>Enregistrement de %1...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>%1 enregistré</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>Échec de l&apos;enregistrement : %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>Enregistrement automatique de %1...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>%1 enregistré automatiquement</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>Échec de l&apos;enregistrement automatique : %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>Copier le contenu du fichier reçu</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>%1 copié</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Marquer le fichier reçu comme lu</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Marquer le fichier reçu comme non lu</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>%1 marqué comme lu</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>%1 marqué comme non lu</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Retirer la marque non lu de tous les fichiers reçus</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>Supprimer les fichiers reçus déjà marqués comme lus</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Supprimer cette entrée de fichier reçu</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>%1 supprimé</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>Échec de la suppression : %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>Le fichier binaire reçu contient des données Base64 non valides</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>Le fichier binaire reçu ne contient aucune donnée</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>Le fichier reçu n&apos;a aucun contenu</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n élément</numerusform><numerusform>%n éléments</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n non lu</numerusform><numerusform> / %n non lus</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n enregistrement en attente</numerusform><numerusform>%n enregistrements en attente</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>%n fichier reçu lu supprimé</numerusform><numerusform>%n fichiers reçus lus supprimés</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>%n fichier reçu marqué comme lu</numerusform><numerusform>%n fichiers reçus marqués comme lus</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>Contrôle CAT4OM : %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>Gestion CAT4OM : %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>Poste CAT4OM %1 : %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>Échec de %1 CAT4OM : %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>La demande %1 CAT4OM a expiré : %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>Échec de la gestion %1 CAT4OM : %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM connecté au groupe %1, poste %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>Établissement de la liaison de contrôle CAT4OM...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>Établissement de la liaison de gestion CAT4OM...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>Le protocole de contrôle CAT4OM ne correspond pas.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>Le protocole de gestion CAT4OM ne correspond pas.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>Le contrôle CAT4OM a refusé la connexion : %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>La gestion CAT4OM a refusé la connexion : %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>Le contrôle CAT4OM a envoyé du JSON non valide : %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>La gestion CAT4OM a envoyé du JSON non valide : %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>Le message d&apos;accueil du contrôle CAT4OM n&apos;a pas fourni d&apos;ID client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>Le message d&apos;accueil de la gestion CAT4OM n&apos;a pas fourni d&apos;ID client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>Groupe CAT4OM démarré ; actualisation de l&apos;état...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM n&apos;a aucun groupe de postes configuré.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>Gestion CAT4OM indisponible ; tentative de contrôle sur %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM : %1 ; nouvel essai dans %2 s.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM : Decodium est en lecture seule ; le contrôle exclusif appartient à un autre client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM : la liaison a expiré.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM : %1 commandes en file abandonnées : %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM : déconnectez-vous avant de relancer la découverte.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM : la connexion de gestion s&apos;est fermée avant la découverte.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM : le mode %1 n&apos;est pas pris en charge par le poste %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM : le poste %1 n&apos;expose pas %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM : le poste %1 n&apos;est pas connecté.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM : libération du PTT avant déconnexion...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Connecté — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>Connexion au contrôle CAT4OM sur %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>Connexion à la gestion CAT4OM sur %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>Découverte des groupes CAT4OM...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>Démarrage du groupe CAT4OM %1...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>Tentative sur le point de contrôle configuré.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>contrôle</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>gestion</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>la connexion de contrôle a été perdue</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>la connexion de contrôle a échoué</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>déconnexion demandée</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>la demande de contrôle exclusif a expiré</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>non sélectionné</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>état inconnu</translation>
     </message>
 </context>
 </TS>

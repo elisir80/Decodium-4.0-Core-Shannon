@@ -12920,6 +12920,22 @@ Consell: tanqueu l'OmniRig des de la icona de la safata de Windows i torneu a pr
         <source>Advanced</source>
         <translation>Avançades</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Gestió:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Control exclusiu:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Demana el control automàticament</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16880,6 +16896,38 @@ En cas de dubte, fes servir Alta.</translation>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: les entrades marcades com a &apos;Pulse/PipeWire monitor&apos; capturen l&apos;àudio que sona en aquell destí de PipeWire/PulseAudio, útil per a l&apos;àudio de WebSDR/KiwiSDR al navegador. Triar una font Pulse/PipeWire requereix pactl i canvia la font de captura predeterminada de l&apos;usuari actual.</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Gestió:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Control exclusiu:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Demana el control automàticament</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Detecció automàtica</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Primera ràdio disponible</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Grup de ràdios:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Ràdio:</translation>
     </message>
 </context>
 <context>
@@ -21262,6 +21310,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>memòria cau sense connexió</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>FITXER</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>CARPETA</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NOU</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>OBRE</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>LLEGIT</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>LLEGIR-HO TOT</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>NO LLEGIT</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>DESA</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>ANOMENA I DESA</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>COPIA</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>ELIM</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>NETEJA</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO ACT</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO DES</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>FITXERS REBUTS</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Tots els fitxers (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Imatges (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Fitxers de text (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Carpeta: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Carpeta de recepció: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>carpeta de recepció</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>fitxer rebut</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>error desconegut</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Cap fitxer rebut</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Cap fitxer rebut llegit</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Cap fitxer rebut sense llegir</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>S&apos;esperen fitxers a %1</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Tria la carpeta dels fitxers rebuts</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Selecciona la carpeta dels fitxers rebuts d&apos;FT2-Link</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>Obre la carpeta dels fitxers rebuts</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>S&apos;està obrint la carpeta dels fitxers rebuts...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>S&apos;ha obert %1</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>No s&apos;ha pogut obrir la carpeta: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>L&apos;obertura de la carpeta no està disponible</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>La selecció de la carpeta no està disponible</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>No es pot crear la carpeta de recepció: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>El gestor de fitxers del sistema no ha pogut obrir la carpeta de recepció</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Desa automàticament els fitxers nous a la carpeta de recepció</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Desa a la carpeta de recepció configurada</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Desa amb un altre nom o en una altra carpeta</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>Anomena i desa el fitxer rebut d&apos;FT2-Link</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>S&apos;ha cancel·lat Anomena i desa</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>Anomena i desa no està disponible</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>Ja hi ha un desament en curs</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>El desament asíncron de fitxers no està disponible</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>No es pot encuar el desament del fitxer rebut</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>S&apos;està desant %1...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>S&apos;ha desat %1</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>El desament ha fallat: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>Desament automàtic de %1...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>S&apos;ha desat automàticament %1</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>El desament automàtic ha fallat: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>Copia el contingut del fitxer rebut</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>S&apos;ha copiat %1</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Marca el fitxer rebut com a llegit</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Marca el fitxer rebut com a no llegit</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>S&apos;ha marcat com a llegit %1</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>S&apos;ha marcat com a no llegit %1</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Elimina la marca de no llegit de tots els fitxers rebuts</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>Elimina els fitxers rebuts ja marcats com a llegits</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Elimina aquesta entrada de fitxer rebut</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>S&apos;ha eliminat %1</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>L&apos;eliminació ha fallat: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>El fitxer binari rebut conté dades Base64 no vàlides</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>El fitxer binari rebut no conté dades</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>El fitxer rebut no té contingut</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n element</numerusform><numerusform>%n elements</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n sense llegir</numerusform><numerusform> / %n sense llegir</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n desament pendent</numerusform><numerusform>%n desaments pendents</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>S&apos;ha eliminat %n fitxer rebut llegit</numerusform><numerusform>S&apos;han eliminat %n fitxers rebuts llegits</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>S&apos;ha marcat com a llegit %n fitxer rebut</numerusform><numerusform>S&apos;han marcat com a llegits %n fitxers rebuts</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>Control CAT4OM: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>Gestió CAT4OM: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>Ràdio CAT4OM %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>%1 de CAT4OM ha fallat: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>La sol·licitud %1 de CAT4OM ha excedit el temps: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>La gestió %1 de CAT4OM ha fallat: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM connectat al grup %1, ràdio %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>Establint la connexió de control CAT4OM...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>Establint la connexió de gestió CAT4OM...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>El protocol de control CAT4OM no coincideix.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>El protocol de gestió CAT4OM no coincideix.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>El control CAT4OM ha rebutjat la connexió: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>La gestió CAT4OM ha rebutjat la connexió: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>El control CAT4OM ha enviat JSON no vàlid: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>La gestió CAT4OM ha enviat JSON no vàlid: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>La benvinguda del control CAT4OM no ha proporcionat cap ID de client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>La benvinguda de la gestió CAT4OM no ha proporcionat cap ID de client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>S&apos;ha iniciat el grup CAT4OM; s&apos;està actualitzant l&apos;estat...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM no té cap grup de ràdios configurat.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>La gestió CAT4OM no està disponible; s&apos;està provant el control a %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1; es reintentarà en %2 s.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium és de només lectura; el control exclusiu el té un altre client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: l&apos;establiment de la connexió ha excedit el temps.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: s&apos;han descartat %1 ordres en cua: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: desconnecta abans de tornar a executar la detecció.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: la connexió de gestió s&apos;ha tancat abans de la detecció.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: el mode %1 no és compatible amb la ràdio %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: la ràdio %1 no exposa %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: la ràdio %1 no està connectada.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: s&apos;està alliberant el PTT abans de desconnectar...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Connectat — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>S&apos;està connectant al control CAT4OM a %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>S&apos;està connectant a la gestió CAT4OM a %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>S&apos;estan detectant els grups CAT4OM...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>S&apos;està iniciant el grup CAT4OM %1...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>S&apos;està provant el punt de control configurat.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>control</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>gestió</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>s&apos;ha perdut la connexió de control</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>la connexió de control ha fallat</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>s&apos;ha demanat la desconnexió</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>la sol·licitud de control exclusiu ha excedit el temps</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>no seleccionat</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>estat desconegut</translation>
     </message>
 </context>
 </TS>

@@ -16951,6 +16951,10 @@ Nel dubbio, usa Alta.</translation>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: le voci marcate &apos;Pulse/PipeWire monitor&apos; catturano l&apos;audio che suona su quella destinazione PipeWire/PulseAudio, utile per l&apos;audio di WebSDR/KiwiSDR nel browser. Scegliere una sorgente Pulse/PipeWire richiede pactl e cambia la sorgente di cattura predefinita dell&apos;utente corrente.</translation>
     </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Radio:</translation>
+    </message>
 </context>
 <context>
     <name>SoundInput</name>
@@ -21428,5 +21432,184 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message><source>Received binary file has no data</source><translation>Il file binario ricevuto non contiene dati</translation></message>
     <message><source>Received binary file has invalid Base64 data</source><translation>Il file binario ricevuto contiene dati Base64 non validi</translation></message>
     <message><source>The system file manager could not open the receive directory</source><translation>Il gestore file di sistema non ha potuto aprire la cartella di ricezione</translation></message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>Controllo CAT4OM: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>Gestione CAT4OM: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>Radio CAT4OM %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>%1 di CAT4OM non riuscito: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>La richiesta %1 di CAT4OM è scaduta: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>La gestione %1 di CAT4OM non è riuscita: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM collegato al gruppo %1, radio %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>Handshake di controllo CAT4OM...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>Handshake di gestione CAT4OM...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>Il protocollo di controllo CAT4OM non corrisponde.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>Il protocollo di gestione CAT4OM non corrisponde.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>Il controllo CAT4OM ha rifiutato la connessione: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>La gestione CAT4OM ha rifiutato la connessione: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>Il controllo CAT4OM ha inviato JSON non valido: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>La gestione CAT4OM ha inviato JSON non valido: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>Il benvenuto del controllo CAT4OM non ha fornito un ID client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>Il benvenuto della gestione CAT4OM non ha fornito un ID client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>Gruppo CAT4OM avviato; aggiornamento dello stato...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM non ha gruppi radio configurati.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>Gestione CAT4OM non disponibile; provo il controllo su %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1; nuovo tentativo tra %2 s.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium è in sola lettura; il controllo esclusivo è di un altro client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: l&apos;handshake di connessione è scaduto.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: scartati %1 comandi in coda: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: disconnetti prima di eseguire di nuovo il rilevamento.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: la connessione di gestione si è chiusa prima del rilevamento.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: il modo %1 non è supportato dalla radio %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: la radio %1 non espone %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: la radio %1 non è collegata.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: rilascio del PTT prima di disconnettere...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Collegato — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>Connessione al controllo CAT4OM su %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>Connessione alla gestione CAT4OM su %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>Rilevamento dei gruppi CAT4OM...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>Avvio del gruppo CAT4OM %1...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>Provo l&apos;endpoint di controllo configurato.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>controllo</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>gestione</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>connessione di controllo caduta</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>connessione di controllo non riuscita</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>disconnessione richiesta</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>la richiesta di controllo esclusivo è scaduta</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>non selezionato</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>stato sconosciuto</translation>
+    </message>
 </context>
 </TS>

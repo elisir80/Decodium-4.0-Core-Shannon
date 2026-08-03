@@ -12917,6 +12917,22 @@ Tip: luk OmniRig fra Windows-proceslinjeikonet, og tryk derefter på Forbind ige
         <source>Advanced</source>
         <translation>Avanceret</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>Kontrol:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Administration:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Ejerskab:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Anmod om kontrol automatisk</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16877,6 +16893,38 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: poster mærket &apos;Pulse/PipeWire monitor&apos; optager den lyd, der afspilles på den pågældende PipeWire/PulseAudio-sink, nyttigt til WebSDR/KiwiSDR-lyd i browseren. Valg af en Pulse/PipeWire-kilde kræver pactl og ændrer den aktuelle brugers standardoptagekilde.</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Kontrol:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Administration:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Ejerskab:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Anmod om kontrol automatisk</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Automatisk opdagelse</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Første tilgængelige radio</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Radiogruppe:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Radio:</translation>
     </message>
 </context>
 <context>
@@ -21260,6 +21308,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>offline-cache</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>FIL</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>MAPPE</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NY</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>ÅBN</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>LÆST</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>LÆS ALLE</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>ULÆST</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>GEM</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>GEM SOM</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>KOPIÉR</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>SLET</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>RYD</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO TIL</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO FRA</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>MODTAGNE FILER</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Alle filer (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Billeder (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Tekstfiler (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Mappe: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Modtagemappe: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>modtagemappe</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>modtaget fil</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>ukendt fejl</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Ingen modtagne filer</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Ingen læste modtagne filer</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Ingen ulæste modtagne filer</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>Venter på filer i %1</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Vælg mappen til modtagne filer</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Vælg mappen til FT2-Link-modtagne filer</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>Åbn mappen med modtagne filer</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>Åbner mappen med modtagne filer...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>Åbnede %1</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>Kunne ikke åbne mappen: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>Åbn mappe er utilgængelig</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>Valg af mappe er utilgængeligt</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>Kan ikke oprette modtagemappen: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>Systemets filhåndtering kunne ikke åbne modtagemappen</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Gem automatisk nye filer i modtagemappen</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Gem i den konfigurerede modtagemappe</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Gem med et andet navn eller i en anden mappe</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>Gem FT2-Link-modtaget fil som</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>Gem som annulleret</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>Gem som er utilgængeligt</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>Der gemmes allerede</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>Asynkron filgemning er utilgængelig</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>Kan ikke sætte gemning af modtaget fil i kø</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>Gemmer %1...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>Gemte %1</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>Gemning mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>Gemmer automatisk %1...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>Gemte automatisk %1</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>Automatisk gemning mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>Kopiér indholdet af den modtagne fil</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>Kopierede %1</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Markér modtaget fil som læst</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Markér modtaget fil som ulæst</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>Markerede %1 som læst</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>Markerede %1 som ulæst</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Fjern ulæst-markeringen for alle modtagne filer</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>Slet modtagne filer der allerede er markeret som læst</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Slet denne post for modtaget fil</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>Slettede %1</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>Sletning mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>Den modtagne binære fil har ugyldige Base64-data</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>Den modtagne binære fil har ingen data</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>Den modtagne fil har intet indhold</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n post</numerusform><numerusform>%n poster</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n ulæst</numerusform><numerusform> / %n ulæste</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n gemning afventer</numerusform><numerusform>%n gemninger afventer</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>Slettede %n læst modtaget fil</numerusform><numerusform>Slettede %n læste modtagne filer</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>Markerede %n modtaget fil som læst</numerusform><numerusform>Markerede %n modtagne filer som læst</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>CAT4OM-kontrol: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>CAT4OM-administration: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>CAT4OM-radio %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>CAT4OM %1 mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>CAT4OM-anmodningen %1 fik timeout: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>CAT4OM-administration %1 mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM forbundet til gruppe %1, radio %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>CAT4OM-kontrolhåndtryk...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>CAT4OM-administrationshåndtryk...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>CAT4OM-kontrolprotokollen stemmer ikke.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>CAT4OM-administrationsprotokollen stemmer ikke.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>CAT4OM-kontrol afviste forbindelsen: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>CAT4OM-administration afviste forbindelsen: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>CAT4OM-kontrol sendte ugyldig JSON: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>CAT4OM-administration sendte ugyldig JSON: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>CAT4OM-kontrollens velkomst gav ikke et klient-ID.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>CAT4OM-administrationens velkomst gav ikke et klient-ID.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>CAT4OM-gruppen er startet; opdaterer status...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM har ingen konfigurerede radiogrupper.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>CAT4OM-administration er utilgængelig; prøver kontrol på %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1; forsøger igen om %2 s.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium er skrivebeskyttet; kontrollen ejes af en anden klient.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: forbindelseshåndtrykket fik timeout.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: kasserede %1 kommandoer i kø: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: afbryd forbindelsen før du kører opdagelse igen.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: administrationsforbindelsen blev lukket før opdagelsen.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: mode %1 understøttes ikke af radio %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: radio %1 udstiller ikke %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: radio %1 er ikke forbundet.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: frigiver PTT før afbrydelse...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Forbundet — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>Forbinder til CAT4OM-kontrol på %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>Forbinder til CAT4OM-administration på %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>Opdager CAT4OM-grupper...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>Starter CAT4OM-gruppe %1...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>Prøver det konfigurerede kontrolslutpunkt.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>kontrol</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>administration</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>kontrolforbindelsen faldt ud</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>kontrolforbindelsen mislykkedes</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>afbrydelse anmodet</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>anmodningen om ejerskab fik timeout</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>ikke valgt</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>tilstand ukendt</translation>
     </message>
 </context>
 </TS>

@@ -12929,6 +12929,22 @@ Tip: sluit OmniRig via het Windows-systeemvakpictogram en druk daarna opnieuw op
         <source>Advanced</source>
         <translation>Geavanceerd</translation>
     </message>
+    <message>
+        <source>Control:</source>
+        <translation>Bediening:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Beheer:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Exclusieve controle:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Automatisch bediening aanvragen</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
@@ -16889,6 +16905,38 @@ Gebruik Hoog als u het niet zeker weet.</translation>
     <message>
         <source>Linux: entries marked &apos;Pulse/PipeWire monitor&apos; capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user&apos;s default capture source.</source>
         <translation>Linux: items met &apos;Pulse/PipeWire monitor&apos; nemen het geluid op dat op die PipeWire/PulseAudio-sink speelt, handig voor WebSDR/KiwiSDR-geluid in de browser. Een Pulse/PipeWire-bron kiezen vereist pactl en wijzigt de standaardopnamebron van de huidige gebruiker.</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Bediening:</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Beheer:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Exclusieve controle:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Automatisch bediening aanvragen</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Automatische detectie</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Eerste beschikbare radio</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Radiogroep:</translation>
+    </message>
+    <message>
+        <source>Radio:</source>
+        <translation>Radio:</translation>
     </message>
 </context>
 <context>
@@ -21271,6 +21319,476 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>offline cache</source>
         <translation>offlinecache</translation>
+    </message>
+</context>
+<context>
+    <name>FT2LinkPanel</name>
+    <message>
+        <source>FILE</source>
+        <translation>BESTAND</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>MAP</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NIEUW</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>OPENEN</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>GELEZEN</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>ALLES GELEZEN</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>ONGELEZEN</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>OPSLAAN</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>OPSLAAN ALS</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>KOPIËREN</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>VERW</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>WISSEN</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO AAN</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO UIT</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>ONTVANGEN BESTANDEN</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Alle bestanden (*)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Afbeeldingen (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Tekstbestanden (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Map: %1</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Ontvangstmap: %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>ontvangstmap</translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>ontvangen bestand</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>onbekende fout</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Geen ontvangen bestanden</translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Geen gelezen ontvangen bestanden</translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Geen ongelezen ontvangen bestanden</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>Wachten op bestanden in %1</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Kies de map voor ontvangen bestanden</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Selecteer de map voor door FT2-Link ontvangen bestanden</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>De map met ontvangen bestanden openen</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>Map met ontvangen bestanden wordt geopend...</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>%1 geopend</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>Map openen mislukt: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>Map openen is niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>Mapselectie is niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>Kan de ontvangstmap niet maken: %1</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>De bestandsbeheerder van het systeem kon de ontvangstmap niet openen</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Nieuwe bestanden automatisch opslaan in de ontvangstmap</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Opslaan in de ingestelde ontvangstmap</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Opslaan onder een andere naam of in een andere map</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>Door FT2-Link ontvangen bestand opslaan als</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>Opslaan als geannuleerd</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>Opslaan als is niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>Opslaan is al bezig</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>Asynchroon opslaan van bestanden is niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>Kan het opslaan van het ontvangen bestand niet in de wachtrij zetten</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>%1 wordt opgeslagen...</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>%1 opgeslagen</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>Opslaan mislukt: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>%1 wordt automatisch opgeslagen...</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>%1 automatisch opgeslagen</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>Automatisch opslaan mislukt: %1</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>Inhoud van het ontvangen bestand kopiëren</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>%1 gekopieerd</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Ontvangen bestand als gelezen markeren</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Ontvangen bestand als ongelezen markeren</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>%1 als gelezen gemarkeerd</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>%1 als ongelezen gemarkeerd</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Ongelezen-markering voor alle ontvangen bestanden verwijderen</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>Ontvangen bestanden verwijderen die al als gelezen zijn gemarkeerd</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Dit item van het ontvangen bestand verwijderen</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>%1 verwijderd</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>Verwijderen mislukt: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>Het ontvangen binaire bestand bevat ongeldige Base64-gegevens</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>Het ontvangen binaire bestand bevat geen gegevens</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>Het ontvangen bestand heeft geen inhoud</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation><numerusform>%n item</numerusform><numerusform>%n items</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation><numerusform> / %n ongelezen</numerusform><numerusform> / %n ongelezen</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation><numerusform>%n opslag in behandeling</numerusform><numerusform>%n opslagen in behandeling</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation><numerusform>%n gelezen ontvangen bestand verwijderd</numerusform><numerusform>%n gelezen ontvangen bestanden verwijderd</numerusform></translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation><numerusform>%n ontvangen bestand als gelezen gemarkeerd</numerusform><numerusform>%n ontvangen bestanden als gelezen gemarkeerd</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCat4OmManager</name>
+    <message>
+        <source>CAT4OM control: %1</source>
+        <translation>CAT4OM-bediening: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management: %1</source>
+        <translation>CAT4OM-beheer: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM radio %1: %2</source>
+        <translation>CAT4OM-radio %1: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 failed: %2</source>
+        <translation>CAT4OM %1 mislukt: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM %1 request timed out: %2</source>
+        <translation>CAT4OM-verzoek %1 is verlopen: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM management %1 failed: %2</source>
+        <translation>CAT4OM-beheer %1 mislukt: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM connected to group %1, radio %2 (%3).</source>
+        <translation>CAT4OM verbonden met groep %1, radio %2 (%3).</translation>
+    </message>
+    <message>
+        <source>CAT4OM control handshake...</source>
+        <translation>CAT4OM-bedieningshandshake...</translation>
+    </message>
+    <message>
+        <source>CAT4OM management handshake...</source>
+        <translation>CAT4OM-beheerhandshake...</translation>
+    </message>
+    <message>
+        <source>CAT4OM control protocol mismatch.</source>
+        <translation>CAT4OM-bedieningsprotocol komt niet overeen.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management protocol mismatch.</source>
+        <translation>CAT4OM-beheerprotocol komt niet overeen.</translation>
+    </message>
+    <message>
+        <source>CAT4OM control rejected the connection: %1</source>
+        <translation>CAT4OM-bediening heeft de verbinding geweigerd: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management rejected the connection: %1</source>
+        <translation>CAT4OM-beheer heeft de verbinding geweigerd: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control sent invalid JSON: %1</source>
+        <translation>CAT4OM-bediening heeft ongeldige JSON verzonden: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM management sent invalid JSON: %1</source>
+        <translation>CAT4OM-beheer heeft ongeldige JSON verzonden: %1</translation>
+    </message>
+    <message>
+        <source>CAT4OM control welcome did not provide a client ID.</source>
+        <translation>De welkomstboodschap van CAT4OM-bediening bevatte geen client-ID.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management welcome did not provide a client ID.</source>
+        <translation>De welkomstboodschap van CAT4OM-beheer bevatte geen client-ID.</translation>
+    </message>
+    <message>
+        <source>CAT4OM group started; refreshing status...</source>
+        <translation>CAT4OM-groep gestart; status wordt ververst...</translation>
+    </message>
+    <message>
+        <source>CAT4OM has no configured radio groups.</source>
+        <translation>CAT4OM heeft geen ingestelde radiogroepen.</translation>
+    </message>
+    <message>
+        <source>CAT4OM management unavailable; trying control at %1...</source>
+        <translation>CAT4OM-beheer niet beschikbaar; bediening wordt geprobeerd op %1...</translation>
+    </message>
+    <message>
+        <source>CAT4OM: %1; retry in %2 s.</source>
+        <translation>CAT4OM: %1; nieuwe poging over %2 s.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: Decodium is read-only; control ownership is held by another client.</source>
+        <translation>CAT4OM: Decodium is alleen-lezen; de exclusieve bediening is van een andere client.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: connection handshake timed out.</source>
+        <translation>CAT4OM: verbindingshandshake is verlopen.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: discarded %1 queued command(s): %2</source>
+        <translation>CAT4OM: %1 opdrachten in de wachtrij verworpen: %2</translation>
+    </message>
+    <message>
+        <source>CAT4OM: disconnect before running discovery again.</source>
+        <translation>CAT4OM: verbreek de verbinding voordat u opnieuw zoekt.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: management connection closed before discovery.</source>
+        <translation>CAT4OM: de beheerverbinding is gesloten vóór de detectie.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: mode %1 is not supported by radio %2.</source>
+        <translation>CAT4OM: mode %1 wordt niet ondersteund door radio %2.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 does not expose %2.</source>
+        <translation>CAT4OM: radio %1 biedt %2 niet aan.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: radio %1 is not connected.</source>
+        <translation>CAT4OM: radio %1 is niet verbonden.</translation>
+    </message>
+    <message>
+        <source>CAT4OM: releasing PTT before disconnect...</source>
+        <translation>CAT4OM: PTT wordt losgelaten vóór het verbreken...</translation>
+    </message>
+    <message>
+        <source>Connected — %1/%2 — %3</source>
+        <translation>Verbonden — %1/%2 — %3</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM control at %1...</source>
+        <translation>Verbinden met CAT4OM-bediening op %1...</translation>
+    </message>
+    <message>
+        <source>Connecting to CAT4OM management at %1...</source>
+        <translation>Verbinden met CAT4OM-beheer op %1...</translation>
+    </message>
+    <message>
+        <source>Discovering CAT4OM groups...</source>
+        <translation>CAT4OM-groepen zoeken...</translation>
+    </message>
+    <message>
+        <source>Starting CAT4OM group %1...</source>
+        <translation>CAT4OM-groep %1 wordt gestart...</translation>
+    </message>
+    <message>
+        <source>Trying the configured control endpoint.</source>
+        <translation>Het ingestelde bedieningseindpunt wordt geprobeerd.</translation>
+    </message>
+    <message>
+        <source>control</source>
+        <translation>bediening</translation>
+    </message>
+    <message>
+        <source>management</source>
+        <translation>beheer</translation>
+    </message>
+    <message>
+        <source>control connection dropped</source>
+        <translation>bedieningsverbinding verbroken</translation>
+    </message>
+    <message>
+        <source>control connection failed</source>
+        <translation>bedieningsverbinding mislukt</translation>
+    </message>
+    <message>
+        <source>disconnect requested</source>
+        <translation>verbreken aangevraagd</translation>
+    </message>
+    <message>
+        <source>ownership request timed out</source>
+        <translation>aanvraag voor exclusieve bediening is verlopen</translation>
+    </message>
+    <message>
+        <source>not selected</source>
+        <translation>niet geselecteerd</translation>
+    </message>
+    <message>
+        <source>state unknown</source>
+        <translation>status onbekend</translation>
     </message>
 </context>
 </TS>
