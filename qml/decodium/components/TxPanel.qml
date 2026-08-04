@@ -144,12 +144,14 @@ Item {
         // active panel may own the prompt for the current QSO.
         if (!engine || !handleLogPrompt || !txPanel.visible)
             return
-        // Presa in carico: da qui in poi la conferma la apre questo pannello.
-        // Va detto subito, non dopo aver mostrato la finestra: il bridge
-        // aspetta mezzo secondo prima di aprire il dialogo nativo di riserva,
-        // e su una macchina lenta si vedrebbero due conferme.
-        if (engine.notifyLogPromptShown)
-            engine.notifyLogPromptShown()
+        // NIENTE presa in carico qui. C'era, ed era un errore: subito sotto
+        // esiste una seconda uscita anticipata (finestra ospite non visibile).
+        // Dichiarare "ci penso io" prima di quella uscita disarmava il dialogo
+        // nativo di riserva e il QSO spariva senza che comparisse nulla.
+        // La presa in carico la fa logConfirmPopup.open() DOPO show(), cioe'
+        // quando la finestra e' davvero comparsa; i gestori delle Connections
+        // QML sono sincroni, quindi arriva comunque entro il mezzo secondo di
+        // attesa del bridge e la doppia conferma non si ripresenta.
         var hostWindow = txPanel.Window.window
         if (hostWindow) {
             if (!hostWindow.visible)
