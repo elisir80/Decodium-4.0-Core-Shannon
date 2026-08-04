@@ -20,8 +20,6 @@ written to the log.
   does not return: QML `Connections` handlers run synchronously, so the claim
   still reaches the bridge well within its half-second grace period.
 
-### Note on version numbering
+### Included from upstream
 
-This release is built on 1.0.522 and does not include upstream 1.0.523; it is
-deliberately limited to the fix above so it can ship immediately. Upstream
-1.0.523 will be merged separately.
+- 1.0.523: repository cleanup and version alignment.
