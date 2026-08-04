@@ -37344,6 +37344,40 @@ void DecodiumBridge::showLogQsoPromptDialog()
         }
     });
 
+    // Questa finestra di riserva e' fatta di widget, non di QML: lasciata a se
+    // stessa esce con lo stile nativo del sistema e stona con il resto
+    // dell'interfaccia. Le si passano i colori del tema attivo, cosi' anche il
+    // ripiego resta in tinta; leggendoli dalla palette segue da solo i temi
+    // chiari e quelli scuri.
+    if (m_themeManager) {
+        auto const hex = [](const QColor& c) { return c.name(QColor::HexRgb); };
+        dialog->setStyleSheet(QStringLiteral(
+            "QDialog { background-color: %1; }"
+            "QLabel { color: %2; background: transparent; }"
+            "QCheckBox { color: %2; background: transparent; }"
+            "QCheckBox:disabled { color: %3; }"
+            "QLineEdit, QComboBox {"
+            " background-color: %4; color: %2;"
+            " border: 1px solid %5; border-radius: 4px; padding: 4px 6px;"
+            " selection-background-color: %6; selection-color: %1; }"
+            "QLineEdit:focus, QComboBox:focus { border: 1px solid %6; }"
+            "QLineEdit:disabled, QComboBox:disabled { color: %3; }"
+            "QComboBox QAbstractItemView {"
+            " background-color: %4; color: %2; border: 1px solid %5;"
+            " selection-background-color: %6; selection-color: %1; }"
+            "QPushButton {"
+            " background-color: %4; color: %2; border: 1px solid %5;"
+            " border-radius: 4px; padding: 6px 18px; min-width: 84px; }"
+            "QPushButton:hover, QPushButton:default { border-color: %6; color: %6; }"
+            "QPushButton:pressed { background-color: %5; }")
+                                  .arg(hex(m_themeManager->bgDeep()),
+                                       hex(m_themeManager->textPrimary()),
+                                       hex(m_themeManager->textSecondary()),
+                                       hex(m_themeManager->bgMedium()),
+                                       hex(m_themeManager->borderColor()),
+                                       hex(m_themeManager->accentColor())));
+    }
+
     dialog->show();
     dialog->raise();
     dialog->activateWindow();

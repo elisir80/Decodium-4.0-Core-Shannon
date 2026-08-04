@@ -2017,6 +2017,33 @@ Item {
         width: 570
         height: 560
 
+        // Geometria di uno schermo con le proprieta' che QML espone davvero.
+        // Gli elementi di Qt.application.screens sono QQuickScreenInfo e NON
+        // hanno availableGeometry (quella e' di QScreen, lato C++): leggerla
+        // dava undefined, e l'eccezione usciva da open() prima di show(). La
+        // finestra a tema non compariva mai e restava solo il dialogo nativo
+        // di riserva, fuori dallo stile dell'applicazione.
+        function screenGeometry(info) {
+            if (!info)
+                return null
+            var w = Number(info.desktopAvailableWidth)
+            var h = Number(info.desktopAvailableHeight)
+            if (!isFinite(w) || w <= 0)
+                w = Number(info.width)
+            if (!isFinite(h) || h <= 0)
+                h = Number(info.height)
+            if (!isFinite(w) || w <= 0 || !isFinite(h) || h <= 0)
+                return null
+            var vx = Number(info.virtualX)
+            var vy = Number(info.virtualY)
+            return {
+                x: isFinite(vx) ? vx : 0,
+                y: isFinite(vy) ? vy : 0,
+                width: w,
+                height: h
+            }
+        }
+
         function centerOnHostWindow() {
             var host = transientParent
             var targetX = host ? host.x + Math.round((host.width - width) / 2) : x
@@ -2026,8 +2053,9 @@ Item {
             var centerY = host ? host.y + host.height / 2 : targetY + height / 2
             if (Qt.application && Qt.application.screens) {
                 for (var i = 0; i < Qt.application.screens.length; ++i) {
-                    var screenInfo = Qt.application.screens[i]
-                    var geometry = screenInfo.availableGeometry
+                    var geometry = screenGeometry(Qt.application.screens[i])
+                    if (!geometry)
+                        continue
                     if (centerX >= geometry.x && centerX < geometry.x + geometry.width
                             && centerY >= geometry.y && centerY < geometry.y + geometry.height) {
                         available = geometry
@@ -2035,8 +2063,10 @@ Item {
                     }
                 }
                 if (!available && Qt.application.screens.length > 0)
-                    available = Qt.application.screens[0].availableGeometry
+                    available = screenGeometry(Qt.application.screens[0])
             }
+            if (!available)
+                available = screenGeometry(logConfirmPopup.screen)
             if (available) {
                 targetX = Math.max(available.x,
                                    Math.min(targetX, available.x + available.width - width))
@@ -2056,7 +2086,16 @@ Item {
             logTimeOffField.text = txPanel.logPreviewTimeOff
             txPanel.logClusterSpotAvailable = !!(engine && engine.dxCluster && engine.dxCluster.connected)
             txPanel.logClusterSpotChecked = txPanel.logClusterSpotAvailable && !!engine.autoSpotEnabled
-            centerOnHostWindow()
+            // Il centraggio non deve mai poter impedire l'apertura: questa e'
+            // l'unica finestra che avvisa il bridge, e senza avviso il QSO
+            // finisce nel dialogo di riserva. Meglio comparire in una
+            // posizione qualunque che non comparire.
+            try {
+                centerOnHostWindow()
+            } catch (centeringError) {
+                console.warn("logConfirmPopup: centraggio fallito,",
+                             "la finestra si apre comunque:", centeringError)
+            }
             show()
             raise()
             requestActivate()
