@@ -101,6 +101,10 @@ Windows installer, macOS DMGs for Apple Silicon and Intel, and Linux AppImages
 for x86_64 and aarch64. Each package is built by its matching GitHub Actions
 runner and checked for its required RTL-SDR runtime.
 
+- The Windows packaging helper also selects GNU C90 only for librtlsdr's
+  upstream legacy `getopt` utility target, preserving compatibility with the
+  current MSYS2 GCC toolchain without changing Decodium or the RTL-SDR DLL.
+
 ---
 
 ## Italiano
@@ -204,3 +208,7 @@ Questa release fornisce gli archivi sorgente dal tag `v1.0.527`, il programma
 di installazione Windows x64, DMG macOS per Apple Silicon e Intel e AppImage
 Linux per x86_64 e aarch64. Ogni pacchetto viene creato dal relativo runner
 GitHub Actions e verificato con il runtime RTL-SDR richiesto.
+
+- L'helper di packaging Windows seleziona GNU C90 solo per il target di utilità
+  `getopt` legacy a monte in librtlsdr: resta così compatibile con l'attuale
+  toolchain MSYS2 GCC senza modificare né Decodium né la DLL RTL-SDR.

@@ -56,6 +56,23 @@ if [[ -z "${source_dir}" || ! -f "${source_dir}/CMakeLists.txt" ]]; then
   exit 1
 fi
 
+# MSYS2 recently moved MinGW GCC to C23 by default.  librtlsdr 2.0.2 ships a
+# legacy getopt implementation for its command-line utilities which uses K&R
+# declarations and does not compile in that default mode.  Decodium only uses
+# the shared librtlsdr DLL, but keeping this helper target in GNU C90 lets the
+# upstream install complete without carrying a fork of its source.
+if [[ "${MSYSTEM:-}" == MINGW* ]]; then
+  cat >> "${source_dir}/src/CMakeLists.txt" <<'EOF'
+
+# Decodium CI compatibility: librtlsdr's bundled Windows getopt is K&R C.
+if (TARGET libgetopt_static)
+  set_property(TARGET libgetopt_static PROPERTY C_STANDARD 90)
+  set_property(TARGET libgetopt_static PROPERTY C_STANDARD_REQUIRED ON)
+  set_property(TARGET libgetopt_static PROPERTY C_EXTENSIONS ON)
+endif ()
+EOF
+fi
+
 rm -rf "${RTLSDR_PREFIX}"
 cmake_args=(
   -DCMAKE_BUILD_TYPE=Release
