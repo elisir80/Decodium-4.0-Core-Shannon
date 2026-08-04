@@ -37208,6 +37208,11 @@ static QString satelliteCodeFromDisplayText(const QString& displayText)
 
 void DecodiumBridge::showLogQsoPromptDialog()
 {
+    // Ultimo controllo: se nel frattempo un pannello ha aperto la finestra
+    // QML, non se ne apre una seconda per lo stesso QSO.
+    if (m_logPromptShownByQml && !m_logQsoPromptDialog) {
+        return;
+    }
     if (m_logQsoPromptDialog) {
         m_logQsoPromptDialog->show();
         m_logQsoPromptDialog->raise();

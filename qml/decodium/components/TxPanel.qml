@@ -144,6 +144,12 @@ Item {
         // active panel may own the prompt for the current QSO.
         if (!engine || !handleLogPrompt || !txPanel.visible)
             return
+        // Presa in carico: da qui in poi la conferma la apre questo pannello.
+        // Va detto subito, non dopo aver mostrato la finestra: il bridge
+        // aspetta mezzo secondo prima di aprire il dialogo nativo di riserva,
+        // e su una macchina lenta si vedrebbero due conferme.
+        if (engine.notifyLogPromptShown)
+            engine.notifyLogPromptShown()
         var hostWindow = txPanel.Window.window
         if (hostWindow) {
             if (!hostWindow.visible)
