@@ -97,6 +97,7 @@ jobs:
           fi
 
           echo "${HAMLIB_PREFIX}/bin" >> "$GITHUB_PATH"
+          echo "HAMLIB_PREFIX=${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
           echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> "$GITHUB_ENV"
           echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
           echo "Hamlib_INCLUDE_DIR=${HAMLIB_PREFIX}/include" >> "$GITHUB_ENV"
