@@ -81,7 +81,7 @@ if [[ "${MSYSTEM:-}" == MINGW* ]]; then
 
   rtl_dll="$(find "${tmpdir}/build" -type f -name 'librtlsdr.dll' | head -n1)"
   rtl_import_library="$(find "${tmpdir}/build" -type f -name 'librtlsdr.dll.a' | head -n1)"
-  rtl_export_header="$(find "${tmpdir}/build" -type f -name 'rtl-sdr_export.h' | head -n1)"
+  rtl_export_header="${source_dir}/include/rtl-sdr_export.h"
   if [[ -z "${rtl_dll}" || -z "${rtl_import_library}" || -z "${rtl_export_header}" ]]; then
     echo "error: MinGW librtlsdr build did not produce the required DLL, import library and export header" >&2
     exit 1
