@@ -37007,22 +37007,33 @@ void DecodiumBridge::promptLogQso()
     if (!m_logPromptOpen) {
         m_logPromptOpen = true;
         bridgeLog(QStringLiteral("logQso: QML prompt requested for %1").arg(m_promptLogCall));
-        QTimer::singleShot(0, this, [this]() {
-            if (m_mainQmlReady) {
-                emit logQsoPromptRequested();
-            } else {
-                showLogQsoPromptDialog();
-            }
-        });
-    } else {
-        QTimer::singleShot(0, this, [this]() {
-            if (m_mainQmlReady) {
-                emit logQsoPromptRequested();
-            } else {
-                showLogQsoPromptDialog();
-            }
-        });
     }
+    m_logPromptShownByQml = false;
+    QTimer::singleShot(0, this, [this]() {
+        if (!m_mainQmlReady) {
+            showLogQsoPromptDialog();
+            return;
+        }
+        emit logQsoPromptRequested();
+        // La finestra di conferma appartiene a UNA sola istanza di TxPanel
+        // (guardia handleLogPrompt && visible). In certi assetti nessuna e'
+        // idonea e la richiesta cadeva nel vuoto: il QSO restava non
+        // registrato senza che l'utente vedesse niente. Se nessuno conferma
+        // di averla aperta, si usa il dialogo nativo, che non dipende dal
+        // layout della finestra principale.
+        QTimer::singleShot(500, this, [this]() {
+            if (m_logPromptShownByQml || !m_logPromptOpen || m_qsoLogged) {
+                return;
+            }
+            bridgeLog(QStringLiteral("logQso: nessun pannello ha aperto la conferma, uso il dialogo nativo"));
+            showLogQsoPromptDialog();
+        });
+    });
+}
+
+void DecodiumBridge::notifyLogPromptShown()
+{
+    m_logPromptShownByQml = true;
 }
 
 void DecodiumBridge::requestManualLogQso()

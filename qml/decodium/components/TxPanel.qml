@@ -2052,6 +2052,11 @@ Item {
             show()
             raise()
             requestActivate()
+            // Dice al bridge che la finestra e' davvero comparsa: senza
+            // questo lui non sa se la richiesta e' stata raccolta, e dopo
+            // mezzo secondo apre il dialogo nativo di riserva.
+            if (engine && engine.notifyLogPromptShown)
+                engine.notifyLogPromptShown()
             Qt.callLater(function() {
                 if (logGridField)
                     logGridField.forceActiveFocus()

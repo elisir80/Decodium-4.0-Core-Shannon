@@ -1081,6 +1081,10 @@ public slots:
                                                         const QString& target);
     Q_INVOKABLE void confirmLogQso();
     Q_INVOKABLE void rejectPromptedLogQso();
+    // La QML segnala di aver davvero aperto la finestra di conferma. Se non
+    // arriva, il prompt e' stato scartato da una guardia (pannello TX non
+    // visibile) e si ricade sul dialogo nativo invece di perdere il QSO.
+    Q_INVOKABLE void notifyLogPromptShown();
     Q_INVOKABLE void promptLogQso();
     Q_INVOKABLE void requestManualLogQso();
     Q_INVOKABLE void shutdown();
@@ -1999,6 +2003,7 @@ private:
     void clearCompletedQsoTxFields(const QString& completedCall, const QString& reason);
     void clearTxArmedAfterCompletedQso(const QString& completedCall, const QString& reason);
     void showLogQsoPromptDialog();
+    bool m_logPromptShownByQml {false};
     void capturePromptLogSnapshot(const QVariantMap& preview);
     void clearPromptLogSnapshot();
     void capturePendingAutoLogSnapshot();
