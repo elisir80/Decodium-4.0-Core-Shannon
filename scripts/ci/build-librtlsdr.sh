@@ -56,23 +56,6 @@ if [[ -z "${source_dir}" || ! -f "${source_dir}/CMakeLists.txt" ]]; then
   exit 1
 fi
 
-# MSYS2 recently moved MinGW GCC to C23 by default.  librtlsdr 2.0.2 ships a
-# legacy getopt implementation for its command-line utilities which uses K&R
-# declarations and does not compile in that default mode.  Decodium only uses
-# the shared librtlsdr DLL, but keeping this helper target in GNU C90 lets the
-# upstream install complete without carrying a fork of its source.
-if [[ "${MSYSTEM:-}" == MINGW* ]]; then
-  cat >> "${source_dir}/src/CMakeLists.txt" <<'EOF'
-
-# Decodium CI compatibility: librtlsdr's bundled Windows getopt is K&R C.
-if (TARGET libgetopt_static)
-  set_property(TARGET libgetopt_static PROPERTY C_STANDARD 90)
-  set_property(TARGET libgetopt_static PROPERTY C_STANDARD_REQUIRED ON)
-  set_property(TARGET libgetopt_static PROPERTY C_EXTENSIONS ON)
-endif ()
-EOF
-fi
-
 rm -rf "${RTLSDR_PREFIX}"
 cmake_args=(
   -DCMAKE_BUILD_TYPE=Release
@@ -88,8 +71,31 @@ if [[ -n "${CMAKE_OSX_ARCHITECTURES:-}" ]]; then
   cmake_args+=("-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}")
 fi
 cmake -S "${source_dir}" -B "${tmpdir}/build" "${cmake_args[@]}"
-cmake --build "${tmpdir}/build" --parallel "${JOBS}"
-cmake --install "${tmpdir}/build"
+
+# MinGW GCC 16 defaults to C23.  librtlsdr's optional Windows command-line
+# tools contain an old getopt implementation that is not C23-compatible, but
+# Decodium needs only the shared library and import library.  Build and stage
+# exactly those two runtime development artefacts instead of unrelated tools.
+if [[ "${MSYSTEM:-}" == MINGW* ]]; then
+  cmake --build "${tmpdir}/build" --target rtlsdr --parallel "${JOBS}"
+
+  rtl_dll="$(find "${tmpdir}/build" -type f -name 'librtlsdr.dll' | head -n1)"
+  rtl_import_library="$(find "${tmpdir}/build" -type f -name 'librtlsdr.dll.a' | head -n1)"
+  rtl_export_header="$(find "${tmpdir}/build" -type f -name 'rtl-sdr_export.h' | head -n1)"
+  if [[ -z "${rtl_dll}" || -z "${rtl_import_library}" || -z "${rtl_export_header}" ]]; then
+    echo "error: MinGW librtlsdr build did not produce the required DLL, import library and export header" >&2
+    exit 1
+  fi
+
+  mkdir -p "${RTLSDR_PREFIX}/bin" "${RTLSDR_PREFIX}/include" "${RTLSDR_PREFIX}/lib"
+  cp "${source_dir}/include/rtl-sdr.h" "${RTLSDR_PREFIX}/include/"
+  cp "${rtl_export_header}" "${RTLSDR_PREFIX}/include/"
+  cp "${rtl_dll}" "${RTLSDR_PREFIX}/bin/"
+  cp "${rtl_import_library}" "${RTLSDR_PREFIX}/lib/"
+else
+  cmake --build "${tmpdir}/build" --parallel "${JOBS}"
+  cmake --install "${tmpdir}/build"
+fi
 
 test -f "${RTLSDR_PREFIX}/include/rtl-sdr.h"
 find "${RTLSDR_PREFIX}" -type f \( -name 'librtlsdr.so*' -o -name 'librtlsdr*.dylib' -o -name 'librtlsdr.dll' \) -print -quit | grep -q .
