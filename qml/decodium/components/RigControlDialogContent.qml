@@ -70,6 +70,33 @@ Rectangle {
             rowSpacing: 10
             columnSpacing: 12
 
+            // Row 0 — Rilevamento automatico della radio collegata
+            Text { text: qsTr("Auto-detect"); color: textSecondary; font.pixelSize: 12 }
+            Button {
+                id: detectButton
+                Layout.fillWidth: true
+                implicitHeight: 34
+                text: "🔍  " + qsTr("Detect my radio")
+                ToolTip.visible: hovered
+                ToolTip.delay: 500
+                ToolTip.text: qsTr("Reads what the system already knows: it opens no port and sends no command")
+                onClicked: detectResults.detectAndOpen("")
+                background: Rectangle {
+                    color: detectButton.hovered ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.18)
+                                                : Qt.rgba(1, 1, 1, 0.07)
+                    border.color: accentGreen
+                    radius: 4
+                }
+                contentItem: Text {
+                    text: detectButton.text
+                    color: accentGreen
+                    font.pixelSize: 12
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
             // Row 1 — Radio model
             Text { text: "Radio"; color: textSecondary; font.pixelSize: 12 }
             DecoComboBox {
@@ -387,4 +414,8 @@ Rectangle {
             }
         }
     }
+
+    // Esito del rilevamento automatico. E' un Popup, non un Item: non entra
+    // nel layout del pannello.
+    RigDetectResults { id: detectResults }
 }

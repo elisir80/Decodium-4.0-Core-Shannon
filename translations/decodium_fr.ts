@@ -6549,6 +6549,21 @@ Clic droit : se déconnecter</translation>
         <source>Satellite tracking - Decodium</source>
         <translation>Suivi des satellites - Decodium</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6493"/>
+        <source>Switch to the dark theme</source>
+        <translation>Passer au thème sombre</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6494"/>
+        <source>Switch to the light theme</source>
+        <translation>Passer au thème clair</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="15320"/>
+        <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
+        <translation>Decodium a trouvé une radio connectée à cet ordinateur. Appliquer la proposition règle le port CAT, le modèle et les périphériques audio, pour démarrer sans chercher le bon port COM.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -12943,6 +12958,84 @@ Astuce : fermez OmniRig depuis l'icône de la zone de notification de Windows, p
         <source>Search radio...</source>
         <translation>Rechercher une radio...</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
+        <source>Auto-detect</source>
+        <translation>Détection automatique</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
+        <source>Detect my radio</source>
+        <translation>Détecter ma radio</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Lit uniquement ce que le système sait déjà : n'ouvre aucun port et n'envoie aucune commande</translation>
+    </message>
+</context>
+<context>
+    <name>RigDetectResults</name>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
+        <source>Detected radios</source>
+        <translation>Radios détectées</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
+        <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
+        <translation>Rien n'a encore été modifié. Vérifiez la proposition, puis appliquez-la.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
+        <source>No serial device found. Is the radio on and the USB cable connected?</source>
+        <translation>Aucun périphérique série trouvé. La radio est-elle allumée et le câble USB branché ?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
+        <source>confidence %1%</source>
+        <translation>fiabilité %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
+        <source>CAT port: %1</source>
+        <translation>Port CAT : %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
+        <source> — %1 baud</source>
+        <translation> — %1 bauds</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
+        <source> (other ports of the same device: %1)</source>
+        <translation> (autres ports du même appareil : %1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
+        <source>Audio: in %1 / out %2</source>
+        <translation>Audio : entrée %1 / sortie %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <source>not found</source>
+        <translation>introuvable</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
+        <source>Apply</source>
+        <translation>Appliquer</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
+        <source>Also set the radio's audio devices</source>
+        <translation>Configurer aussi les périphériques audio de la radio</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="35"/>
+        <source>Close</source>
+        <translation>Fermer</translation>
+    </message>
 </context>
 <context>
     <name>SampleDownloader::impl</name>
@@ -16927,6 +17020,21 @@ En cas de doute, utilisez Élevée.</translation>
     <message>
         <source>Radio:</source>
         <translation>Poste :</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2016"/>
+        <source>Auto-detect:</source>
+        <translation>Détection automatique :</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2023"/>
+        <source>Detect my radio</source>
+        <translation>Détecter ma radio</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2026"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Lit uniquement ce que le système sait déjà : n'ouvre aucun port et n'envoie aucune commande</translation>
     </message>
 </context>
 <context>

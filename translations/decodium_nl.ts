@@ -6556,6 +6556,21 @@ Rechtermuisklik: verbinding verbreken</translation>
         <source>Satellite tracking - Decodium</source>
         <translation>Satellietvolging - Decodium</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6493"/>
+        <source>Switch to the dark theme</source>
+        <translation>Overschakelen naar het donkere thema</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6494"/>
+        <source>Switch to the light theme</source>
+        <translation>Overschakelen naar het lichte thema</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="15320"/>
+        <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
+        <translation>Decodium heeft een radio gevonden die op deze computer is aangesloten. Het voorstel stelt de CAT-poort, het model en de audioapparaten in, zodat u kunt beginnen zonder de juiste COM-poort te zoeken.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -12953,6 +12968,84 @@ Tip: sluit OmniRig via het Windows-systeemvakpictogram en druk daarna opnieuw op
         <source>Search radio...</source>
         <translation>Radio zoeken...</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
+        <source>Auto-detect</source>
+        <translation>Automatisch herkennen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
+        <source>Detect my radio</source>
+        <translation>Mijn radio herkennen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Leest alleen wat het systeem al weet: opent geen poort en stuurt geen opdrachten</translation>
+    </message>
+</context>
+<context>
+    <name>RigDetectResults</name>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
+        <source>Detected radios</source>
+        <translation>Gevonden radio's</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
+        <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
+        <translation>Er is nog niets gewijzigd. Controleer het voorstel en pas het daarna toe.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
+        <source>No serial device found. Is the radio on and the USB cable connected?</source>
+        <translation>Geen serieel apparaat gevonden. Staat de radio aan en is de USB-kabel aangesloten?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
+        <source>confidence %1%</source>
+        <translation>betrouwbaarheid %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
+        <source>CAT port: %1</source>
+        <translation>CAT-poort: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
+        <source> — %1 baud</source>
+        <translation> — %1 baud</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
+        <source> (other ports of the same device: %1)</source>
+        <translation> (andere poorten van hetzelfde apparaat: %1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
+        <source>Audio: in %1 / out %2</source>
+        <translation>Audio: ingang %1 / uitgang %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <source>not found</source>
+        <translation>niet gevonden</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
+        <source>Apply</source>
+        <translation>Toepassen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
+        <source>Also set the radio's audio devices</source>
+        <translation>Stel ook de audioapparaten van de radio in</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="35"/>
+        <source>Close</source>
+        <translation>Sluiten</translation>
+    </message>
 </context>
 <context>
     <name>SampleDownloader::impl</name>
@@ -16937,6 +17030,21 @@ Gebruik Hoog als u het niet zeker weet.</translation>
     <message>
         <source>Radio:</source>
         <translation>Radio:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2016"/>
+        <source>Auto-detect:</source>
+        <translation>Automatisch herkennen:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2023"/>
+        <source>Detect my radio</source>
+        <translation>Mijn radio herkennen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2026"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Leest alleen wat het systeem al weet: opent geen poort en stuurt geen opdrachten</translation>
     </message>
 </context>
 <context>

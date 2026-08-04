@@ -78,30 +78,34 @@ const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_oceanBlue {
     /* isLight        */ false
 };
 
+// Tema chiaro rifatto 1.0.526: schede bianche su fondo chiaro freddo, bordi
+// sottili e testo ardesia. L'identita' resta pero' nostra: l'accento e' un
+// verde-teal (non il blu/ciano altrui) e il fondo pagina e' appena piu'
+// grigio, cosi' le schede bianche si staccano invece di confondersi.
 const DecodiumThemeManager::ThemePalette DecodiumThemeManager::s_stellarLight {
-    /* bgDeep         */ QColor("#DDE6EE"),
-    /* bgMedium       */ QColor("#CFDBE6"),
-    /* bgLight        */ QColor("#F2F6FA"),
-    /* primaryColor   */ QColor("#2D6BB0"),
-    /* secondaryColor */ QColor("#1F8AA0"),
-    /* accentColor    */ QColor("#2D8956"),
-    /* warningColor   */ QColor("#B68726"),
-    /* errorColor     */ QColor("#C33D3D"),
-    /* textPrimary    */ QColor("#061325"),
-    /* textSecondary  */ QColor("#3D5572"),
-    /* successColor   */ QColor("#2D8956"),
-    /* glassOverlay   */ QColor(255, 255, 255, 200),
-    /* glassBorder    */ QColor("#8FA4B8"),
-    /* borderColor    */ QColor("#8FA4B8"),
-    /* borderSoft     */ QColor("#A9BDCE"),
-    /* panelColor     */ QColor("#F2F6FA"),
-    /* panelHeader    */ QColor("#E1EAF2"),
-    /* rowMatchBg     */ QColor("#A8E0BC"),
-    /* rowMatchBorder */ QColor("#2D8956"),
-    /* ledRed         */ QColor("#C33D3D"),
-    /* ledBlue        */ QColor("#2D6BB0"),
-    /* ledYellow      */ QColor("#B68726"),
-    /* ledMagenta     */ QColor("#6B5BAB"),
+    /* bgDeep         */ QColor("#EDF2F7"),   // fondo pagina
+    /* bgMedium       */ QColor("#E1E9F1"),   // fasce e barre
+    /* bgLight        */ QColor("#FFFFFF"),   // schede
+    /* primaryColor   */ QColor("#1F76D2"),   // blu dei comandi attivi
+    /* secondaryColor */ QColor("#0E9AAE"),   // teal di supporto
+    /* accentColor    */ QColor("#0E8C6A"),   // verde-teal: la nostra firma
+    /* warningColor   */ QColor("#B5741A"),
+    /* errorColor     */ QColor("#CE4038"),
+    /* textPrimary    */ QColor("#0E1A22"),   // ardesia quasi nera
+    /* textSecondary  */ QColor("#5C6E7E"),
+    /* successColor   */ QColor("#0E8C6A"),
+    /* glassOverlay   */ QColor(255, 255, 255, 214),
+    /* glassBorder    */ QColor("#CBD8E3"),   // filetti sottili
+    /* borderColor    */ QColor("#C3D2DF"),
+    /* borderSoft     */ QColor("#DFE8F0"),
+    /* panelColor     */ QColor("#FFFFFF"),
+    /* panelHeader    */ QColor("#EAF1F7"),
+    /* rowMatchBg     */ QColor(14, 140, 106, 36),
+    /* rowMatchBorder */ QColor("#0E8C6A"),
+    /* ledRed         */ QColor("#CE4038"),
+    /* ledBlue        */ QColor("#1F76D2"),
+    /* ledYellow      */ QColor("#B5741A"),
+    /* ledMagenta     */ QColor("#9B5FBF"),
     /* accentDim      */ QColor(),
     /* accentDeep     */ QColor(),
     /* pileColor      */ QColor(),

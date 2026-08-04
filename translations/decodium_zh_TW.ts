@@ -6545,6 +6545,21 @@ Right-click: disconnect</source>
         <source>Satellite tracking - Decodium</source>
         <translation>衛星追蹤 - Decodium</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6493"/>
+        <source>Switch to the dark theme</source>
+        <translation>切換到深色主題</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6494"/>
+        <source>Switch to the light theme</source>
+        <translation>切換到淺色主題</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="15320"/>
+        <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
+        <translation>Decodium 偵測到連接到本機的電台。套用該建議會設定 CAT 連接埠、機型和音訊裝置，不必再尋找正確的 COM 連接埠。</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -12941,6 +12956,84 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
         <source>Search radio...</source>
         <translation>搜尋電台...</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
+        <source>Auto-detect</source>
+        <translation>自動偵測</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
+        <source>Detect my radio</source>
+        <translation>偵測我的電台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>只讀取系統已知的資訊：不開啟任何連接埠，也不傳送任何指令</translation>
+    </message>
+</context>
+<context>
+    <name>RigDetectResults</name>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
+        <source>Detected radios</source>
+        <translation>偵測到的電台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
+        <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
+        <translation>尚未做出任何變更。請檢查建議後再套用。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
+        <source>No serial device found. Is the radio on and the USB cable connected?</source>
+        <translation>找不到序列裝置。電台是否已開機、USB 線是否已連接？</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
+        <source>confidence %1%</source>
+        <translation>可信度 %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
+        <source>CAT port: %1</source>
+        <translation>CAT 連接埠：%1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
+        <source> — %1 baud</source>
+        <translation> — %1 鮑率</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
+        <source> (other ports of the same device: %1)</source>
+        <translation>（同一裝置的其他連接埠：%1）</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
+        <source>Audio: in %1 / out %2</source>
+        <translation>音訊：輸入 %1 / 輸出 %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <source>not found</source>
+        <translation>找不到</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
+        <source>Apply</source>
+        <translation>套用</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
+        <source>Also set the radio's audio devices</source>
+        <translation>同時設定電台的音訊裝置</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="35"/>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
 </context>
 <context>
     <name>SampleDownloader::impl</name>
@@ -16925,6 +17018,21 @@ If unsure, use High.</source>
     <message>
         <source>Radio:</source>
         <translation>電台:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2016"/>
+        <source>Auto-detect:</source>
+        <translation>自動偵測：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2023"/>
+        <source>Detect my radio</source>
+        <translation>偵測我的電台</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2026"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>只讀取系統已知的資訊：不開啟任何連接埠，也不傳送任何指令</translation>
     </message>
 </context>
 <context>

@@ -6549,6 +6549,21 @@ Rechtsklick: trennen</translation>
         <source>Satellite tracking - Decodium</source>
         <translation>Satellitenverfolgung - Decodium</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6493"/>
+        <source>Switch to the dark theme</source>
+        <translation>Zum dunklen Design wechseln</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6494"/>
+        <source>Switch to the light theme</source>
+        <translation>Zum hellen Design wechseln</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="15320"/>
+        <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
+        <translation>Decodium hat ein an diesen Computer angeschlossenes Funkgerät gefunden. Mit dem Vorschlag werden CAT-Port, Modell und Audiogeräte eingestellt, sodass Sie ohne Suche nach dem richtigen COM-Port starten können.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -12943,6 +12958,84 @@ Tipp: OmniRig über das Windows-Infobereichssymbol schließen, dann erneut Verbi
         <source>Search radio...</source>
         <translation>Funkgerät suchen...</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
+        <source>Auto-detect</source>
+        <translation>Automatische Erkennung</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
+        <source>Detect my radio</source>
+        <translation>Mein Funkgerät erkennen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Liest nur, was das System bereits weiß: öffnet keinen Port und sendet keine Befehle</translation>
+    </message>
+</context>
+<context>
+    <name>RigDetectResults</name>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
+        <source>Detected radios</source>
+        <translation>Erkannte Funkgeräte</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
+        <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
+        <translation>Es wurde noch nichts geändert. Prüfen Sie den Vorschlag und wenden Sie ihn dann an.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
+        <source>No serial device found. Is the radio on and the USB cable connected?</source>
+        <translation>Kein serielles Gerät gefunden. Ist das Funkgerät eingeschaltet und das USB-Kabel angeschlossen?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
+        <source>confidence %1%</source>
+        <translation>Sicherheit %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
+        <source>CAT port: %1</source>
+        <translation>CAT-Port: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
+        <source> — %1 baud</source>
+        <translation> — %1 Baud</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
+        <source> (other ports of the same device: %1)</source>
+        <translation> (weitere Ports desselben Geräts: %1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
+        <source>Audio: in %1 / out %2</source>
+        <translation>Audio: Eingang %1 / Ausgang %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <source>not found</source>
+        <translation>nicht gefunden</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
+        <source>Apply</source>
+        <translation>Übernehmen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
+        <source>Also set the radio's audio devices</source>
+        <translation>Auch die Audiogeräte des Funkgeräts einstellen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="35"/>
+        <source>Close</source>
+        <translation>Schließen</translation>
+    </message>
 </context>
 <context>
     <name>SampleDownloader::impl</name>
@@ -16927,6 +17020,21 @@ Im Zweifel Hoch verwenden.</translation>
     <message>
         <source>Radio:</source>
         <translation>Funkgerät:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2016"/>
+        <source>Auto-detect:</source>
+        <translation>Automatische Erkennung:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2023"/>
+        <source>Detect my radio</source>
+        <translation>Mein Funkgerät erkennen</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2026"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Liest nur, was das System bereits weiß: öffnet keinen Port und sendet keine Befehle</translation>
     </message>
 </context>
 <context>

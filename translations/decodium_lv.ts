@@ -6560,6 +6560,21 @@ Labais klikšķis: atvienot</translation>
         <source>Satellite tracking - Decodium</source>
         <translation>Satelītu izsekošana - Decodium</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6493"/>
+        <source>Switch to the dark theme</source>
+        <translation>Pārslēgties uz tumšo motīvu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6494"/>
+        <source>Switch to the light theme</source>
+        <translation>Pārslēgties uz gaišo motīvu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="15320"/>
+        <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
+        <translation>Decodium atrada šim datoram pievienotu radioaparātu. Lietojot priekšlikumu, tiek iestatīts CAT ports, modelis un audio ierīces, lai varētu sākt bez pareizā COM porta meklēšanas.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -12956,6 +12971,84 @@ Padoms: aizveriet OmniRig no Windows sistēmas teknes ikonas, pēc tam vēlreiz 
         <source>Search radio...</source>
         <translation>Meklēt radio...</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
+        <source>Auto-detect</source>
+        <translation>Automātiskā noteikšana</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
+        <source>Detect my radio</source>
+        <translation>Noteikt manu radioaparātu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Nolasa tikai to, ko sistēma jau zina: neatver portus un nesūta komandas</translation>
+    </message>
+</context>
+<context>
+    <name>RigDetectResults</name>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
+        <source>Detected radios</source>
+        <translation>Atrastie radioaparāti</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
+        <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
+        <translation>Pagaidām nekas nav mainīts. Pārbaudiet priekšlikumu un pēc tam lietojiet to.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
+        <source>No serial device found. Is the radio on and the USB cable connected?</source>
+        <translation>Nav atrasta neviena seriālā ierīce. Vai radioaparāts ir ieslēgts un USB kabelis pievienots?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
+        <source>confidence %1%</source>
+        <translation>ticamība %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
+        <source>CAT port: %1</source>
+        <translation>CAT ports: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
+        <source> — %1 baud</source>
+        <translation> — %1 bodi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
+        <source> (other ports of the same device: %1)</source>
+        <translation> (citi tās pašas ierīces porti: %1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
+        <source>Audio: in %1 / out %2</source>
+        <translation>Audio: ieeja %1 / izeja %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <source>not found</source>
+        <translation>nav atrasts</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
+        <source>Apply</source>
+        <translation>Lietot</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
+        <source>Also set the radio's audio devices</source>
+        <translation>Iestatīt arī radioaparāta audio ierīces</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="35"/>
+        <source>Close</source>
+        <translation>Aizvērt</translation>
+    </message>
 </context>
 <context>
     <name>SampleDownloader::impl</name>
@@ -16940,6 +17033,21 @@ Noklusējums: IZSL.</translation>
     <message>
         <source>Radio:</source>
         <translation>Radio:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2016"/>
+        <source>Auto-detect:</source>
+        <translation>Automātiskā noteikšana:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2023"/>
+        <source>Detect my radio</source>
+        <translation>Noteikt manu radioaparātu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2026"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Nolasa tikai to, ko sistēma jau zina: neatver portus un nesūta komandas</translation>
     </message>
 </context>
 <context>

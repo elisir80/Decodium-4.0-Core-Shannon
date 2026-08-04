@@ -1282,6 +1282,10 @@ public:
     Q_INVOKABLE bool loadCatProfile(const QString& name);
     Q_INVOKABLE bool deleteCatProfile(const QString& name);
     Q_INVOKABLE bool renameCatProfile(const QString& oldName, const QString& newName);
+    // Rilevamento automatico della radio, fase 1: SOLO lettura di cio' che il
+    // sistema gia' sa (identita' USB delle porte, nomi delle schede audio).
+    // Non apre porte e non invia comandi, quindi e' sicuro anche in TX.
+    Q_INVOKABLE QVariantList detectConnectedRigs() const;
     Q_INVOKABLE QVariantMap ft2LinkEmailGatewayPasswordStatus(const QVariantMap& config) const;
     Q_INVOKABLE QVariantMap setFt2LinkEmailGatewayPassword(const QVariantMap& config,
                                                            const QString& password);

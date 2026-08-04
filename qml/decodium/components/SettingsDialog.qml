@@ -2010,6 +2010,38 @@ Dialog {
                         Text { text: qsTr("CAT CONTROL"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
                         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+                        // Rilevamento automatico: legge solo cio' che il sistema
+                        // gia' sa, non apre porte e non invia comandi.
+                        Text {
+                            text: qsTr("Auto-detect:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
+                        }
+                        Button {
+                            id: detectRigButton
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            implicitHeight: controlHeight
+                            text: "🔍  " + qsTr("Detect my radio")
+                            ToolTip.visible: hovered
+                            ToolTip.delay: 500
+                            ToolTip.text: qsTr("Reads what the system already knows: it opens no port and sends no command")
+                            onClicked: detectRigResults.detectAndOpen("")
+                            background: Rectangle {
+                                color: detectRigButton.hovered
+                                       ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.18)
+                                       : Qt.rgba(1, 1, 1, 0.07)
+                                border.color: accentGreen
+                                radius: 4
+                            }
+                            contentItem: Text {
+                                text: detectRigButton.text
+                                color: accentGreen
+                                font.pixelSize: 12
+                                font.bold: true
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                        }
+
                         Text {
                             visible: !settingsDialog.usesCat4OmControls()
                             text: qsTr("Rig:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100
@@ -9026,4 +9058,8 @@ Dialog {
             } // StackLayout
         } // RowLayout
     } // contentItem
+
+    // Esito del rilevamento automatico della radio. E' un Popup, non un Item:
+    // non entra nel layout delle impostazioni.
+    RigDetectResults { id: detectRigResults }
 }

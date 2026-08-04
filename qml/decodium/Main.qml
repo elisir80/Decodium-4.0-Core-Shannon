@@ -6466,6 +6466,51 @@ ApplicationWindow {
                                     onClicked: bridge.increaseFontScale()
                                 }
                             }
+
+                            // Chiaro/scuro, stessa forma e misura dei due sopra.
+                            // Mostra il simbolo di DOVE si va, non di dove si e':
+                            // premendo la luna si passa allo scuro.
+                            Rectangle {
+                                id: themeToggle
+                                width: 30; height: 24; radius: 4
+                                property bool lightNow: !!(bridge.themeManager && bridge.themeManager.isLightTheme)
+                                // Ricorda quale scuro si stava usando, cosi' il
+                                // ritorno non butta via Darkcodium per Ocean Blue.
+                                property string lastDarkTheme: "Ocean Blue"
+                                color: themeToggleMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+                                border.color: themeToggleMA.containsMouse ? secondaryCyan : glassBorder
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: themeToggle.lightNow ? "☾" : "☀"
+                                    font.pixelSize: 13
+                                    font.bold: true
+                                    color: textPrimary
+                                }
+
+                                ToolTip.visible: themeToggleMA.containsMouse
+                                ToolTip.delay: 600
+                                ToolTip.text: themeToggle.lightNow ? qsTr("Switch to the dark theme")
+                                                                   : qsTr("Switch to the light theme")
+
+                                MouseArea {
+                                    id: themeToggleMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        var tm = bridge.themeManager
+                                        if (!tm)
+                                            return
+                                        if (tm.isLightTheme) {
+                                            tm.currentTheme = themeToggle.lastDarkTheme
+                                        } else {
+                                            themeToggle.lastDarkTheme = tm.currentTheme
+                                            tm.currentTheme = "Stellar Light"
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         // Reset button
@@ -15220,5 +15265,60 @@ NumberAnimation {
         anchors.fill: parent
         visible: true
         onFinished: splash.visible = false
+    }
+
+    // ── Proposta di rilevamento radio al primo avvio ─────────────────────────
+    // Compare una sola volta, e solo a chi non ha ancora configurato il CAT:
+    // e' proprio la persona che non sa quale porta scegliere. Chi ha gia' una
+    // configurazione non viene disturbato. Il rilevamento e' passivo (nessuna
+    // porta aperta), e nulla cambia finche' non si preme Applica.
+    RigDetectResults {
+        id: firstRunRigDetect
+        onDismissed: bridge.setSetting("RigAutoDetectOffered", true)
+    }
+
+    Timer {
+        id: firstRunRigDetectTimer
+        interval: 8000          // dopo che le fasi di avvio si sono concluse
+        running: true
+        repeat: false
+        onTriggered: {
+            if (String(bridge.getSetting("RigAutoDetectOffered", false)) === "true")
+                return
+            // Il nominativo e' il segnale piu' affidabile di prima esecuzione:
+            // chi ha gia' usato il programma ce l'ha, e non dipende da quando
+            // il backend CAT finisce di caricare le proprie impostazioni.
+            var callsign = String(bridge.callsign || "").trim()
+            var cat = bridge.catManager
+            var catPort = cat ? String(cat.serialPort || "").trim() : ""
+            if (callsign.length > 0 && catPort.length > 0) {
+                console.log("[RigDetect] gia' configurato (" + callsign + " su " + catPort
+                            + "): nessuna proposta al primo avvio")
+                return
+            }
+            console.log("[RigDetect] prima esecuzione: nominativo='" + callsign
+                        + "' porta CAT='" + catPort + "'")
+
+            var found = bridge.detectConnectedRigs()
+            var worthShowing = false
+            for (var i = 0; i < found.length; ++i) {
+                if (found[i].confidence >= 60) {
+                    worthShowing = true
+                    break
+                }
+            }
+            if (!worthShowing) {
+                // Nulla di riconoscibile: si segna comunque, per non riproporsi
+                // a ogni avvio a chi non ha una radio collegata via USB.
+                bridge.setSetting("RigAutoDetectOffered", true)
+                return
+            }
+            console.log("[RigDetect] proposta mostrata: " + found.length + " candidati, il primo e' "
+                        + found[0].rigLabel + " su " + found[0].catPort)
+            firstRunRigDetect.candidates = found
+            firstRunRigDetect.introText =
+                qsTr("Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.")
+            firstRunRigDetect.open()
+        }
     }
 }
