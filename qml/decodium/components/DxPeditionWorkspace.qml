@@ -17,6 +17,9 @@ Item {
     // explicit handles so this component is self-describing / testable in isolation.
     property var bridge: (typeof appEngine !== 'undefined' ? appEngine : null)
     property var engine: (typeof appEngine !== 'undefined' ? appEngine : null)
+    // Vero quando il pannello TX e' staccato in finestra propria: in quel caso
+    // la conferma di log resta a quello staccato, non a questo.
+    property bool txPanelDetached: false
 
     // Wired by Main.qml's Loader.onLoaded — let the user leave the mode or open
     // Settings from inside the workspace (the classic footer/menu is collapsed here,
@@ -641,7 +644,11 @@ Item {
                         TxPanel {
                             anchors.fill: parent
                             engine: workspace.engine
-                            handleLogPrompt: false
+                            // In DX-Pedition il pannello TX di Main.qml e' dentro un
+                            // contenitore invisibile e la sua guardia lo esclude: se
+                            // anche questo restasse a false, la conferma di log non
+                            // si aprirebbe piu' e il QSO sembrerebbe non registrato.
+                            handleLogPrompt: !workspace.txPanelDetached
                             showAsyncIcon: false
                             showBandBar: false
                             // 1.0.344 — il pulsante MAM in TX Macros apre la finestra MAM

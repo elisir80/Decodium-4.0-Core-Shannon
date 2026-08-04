@@ -9939,6 +9939,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             onLoaded: {
                 item.bridge = bridge
                 item.engine = bridge
+                item.txPanelDetached = Qt.binding(function() { return mainWindow.txPanelDetached })
                 // Let the workspace exit the mode / open Settings (its EXIT + SETUP
                 // buttons) — the classic footer/menu is collapsed while DX-Ped is ON.
                 item.requestExitDxPedition.connect(function() {

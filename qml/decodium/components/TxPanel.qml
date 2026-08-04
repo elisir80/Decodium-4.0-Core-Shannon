@@ -148,7 +148,9 @@ Item {
         if (hostWindow) {
             if (!hostWindow.visible)
                 return
-            if (hostWindow.show)
+            if (hostWindow.visibility === Window.Minimized && hostWindow.showNormal)
+                hostWindow.showNormal()
+            else if (hostWindow.show)
                 hostWindow.show()
             if (hostWindow.raise)
                 hostWindow.raise()
