@@ -2032,6 +2032,26 @@ o contacta amb l&apos;assistència de DXLab a DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Actualització en curs...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Carregant...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Local</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>Fitxer no carregat</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX no iniciada</translation>
@@ -13090,6 +13110,105 @@ Consell: tanqueu l'OmniRig des de la icona de la safata de Windows i torneu a pr
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Funció experimental en desenvolupament</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>Utilitza la sortida FI del receptor:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>Manté la freqüència de sintonia de la ràdio per a la visualització, el registre i la descodificació mentre l'RTL-SDR se sintonitza a la sortida FI fixa del receptor.</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>Freqüència FI (Hz):</translation></message>
+    <message><source>IF sideband:</source><translation>Banda lateral FI:</translation></message>
+    <message><source>Automatic</source><translation>Automàtica</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>El mode automàtic utilitza LSB només amb el demodulador LSB; els modes de senyal feble com FT8 utilitzen USB.</translation></message>
+    <message><source>USB shift (Hz):</source><translation>Desplaçament USB (Hz):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>Desplaçament LSB (Hz):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>Inverteix l'espectre FI:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>Activeu-ho quan els senyals es moguin en direcció contrària al panadaptador perquè el mesclador FI del receptor inverteix l'espectre.</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>Mode FI: Decodium manté a la pantalla la freqüència de la ràdio i sintonitza l'RTL-SDR a la FI més el desplaçament USB/LSB seleccionat.</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>BASES DE DADES LOCALS</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - activitat dels usuaris</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - confirmacions rebudes</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - confirmacions rebudes</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - confirmacions rebudes</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>Cap registre</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Mai actualitzat</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Darrera actualització: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>Fitxer: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>Fitxer no trobat</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Camí de fitxer local opcional</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Importa la base de dades de nominatius</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Bases de dades i CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Importa</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Neteja la memòria cau global de consultes</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>Se suprimiran tots els resultats de consulta de nominatius emmagatzemats localment per a tots els proveïdors. Les bases de dades FCC, LoTW, eQSL i Club Log no se suprimiran. Voleu continuar?</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>Mode PC lent:</translation>
@@ -21097,6 +21216,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>Actualitzat: %1 noves, %2 confirmacions actualitzades</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 sincronitzat: %2 noves, %3 confirmacions actualitzades</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>Actualitzat</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Mai actualitzat</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Local</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - activitat dels usuaris</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - confirmacions rebudes</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - confirmacions rebudes</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - confirmacions rebudes</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 actualitzat</translation>

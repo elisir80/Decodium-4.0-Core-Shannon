@@ -152,6 +152,11 @@ public:
 
     Q_INVOKABLE void setRigFrequency(double hz);
     Q_INVOKABLE void setRigTxFrequency(double hz);
+    // Satellite half-duplex is deliberately separate from the normal FT
+    // audio-offset split path.  It programs two absolute VFO dial
+    // frequencies, then leaves PTT to the caller after its CAT settle guard.
+    bool prepareSatelliteHalfDuplex(double rxHz, double txHz);
+    bool restoreSatelliteHalfDuplexRx(double rxHz);
     Q_INVOKABLE void setRigTxFrequencyAndPtt(double hz, bool on);
     void setRigTxFrequencyAndPttAsync(double hz, bool on);
     Q_INVOKABLE void setRigPtt(bool on);

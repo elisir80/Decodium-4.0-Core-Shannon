@@ -22,6 +22,8 @@ env:
   QT_CACHE_ROOT: ".ci/cache/qt-macos-6.11.0-clang_64"
   HAMLIB_TAG: "4.7.0"
   HAMLIB_VERSION: "4.7.0"
+  RTLSDR_VERSION: "2.0.2"
+  DECODIUM_REQUIRE_RTLSDR: "ON"
   BOOST_VERSION: "1.85.0"
   BOOST_VERSION_UNDERSCORE: "1_85_0"
   FFTW_VERSION: "3.3.10"
@@ -278,6 +280,33 @@ jobs:
           echo "RIGCTLCOM_EXE=${HAMLIB_PREFIX}/bin/rigctlcom" >> "$GITHUB_ENV"
 
           "${HAMLIB_PREFIX}/bin/rigctl" --version
+
+      - name: Build pinned RTL-SDR Blog driver
+        run: |
+          set -euo pipefail
+          RTLSDR_PREFIX="${RUNNER_TEMP}/librtlsdr-${RTLSDR_VERSION}-macos-${{ matrix.compat_macos }}"
+          export MACOSX_DEPLOYMENT_TARGET="${{ matrix.compat_macos }}"
+          export CMAKE_OSX_ARCHITECTURES=x86_64
+          export CFLAGS="-arch x86_64 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} ${CFLAGS:-}"
+          export CXXFLAGS="-arch x86_64 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} ${CXXFLAGS:-}"
+          export LDFLAGS="-arch x86_64 -mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} ${LDFLAGS:-}"
+          if [[ -n "${SOURCE_DEPS_PREFIX:-}" ]]; then
+            export CPPFLAGS="-I${SOURCE_DEPS_PREFIX}/include ${CPPFLAGS:-}"
+            export LDFLAGS="-L${SOURCE_DEPS_PREFIX}/lib ${LDFLAGS}"
+            export PKG_CONFIG_PATH="${SOURCE_DEPS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+          fi
+          RTLSDR_VERSION="${RTLSDR_VERSION}" RTLSDR_PREFIX="${RTLSDR_PREFIX}" \
+            scripts/ci/build-librtlsdr.sh
+
+          RTLSDR_LIBRARY="$(find "${RTLSDR_PREFIX}/lib" -maxdepth 1 -type f -name 'librtlsdr*.dylib' | sort | head -n1)"
+          test -f "${RTLSDR_PREFIX}/include/rtl-sdr.h"
+          test -n "${RTLSDR_LIBRARY}"
+
+          echo "RTLSDR_PREFIX=${RTLSDR_PREFIX}" >> "$GITHUB_ENV"
+          echo "RtlSdr_INCLUDE_DIR=${RTLSDR_PREFIX}/include" >> "$GITHUB_ENV"
+          echo "RtlSdr_LIBRARY=${RTLSDR_LIBRARY}" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=${RTLSDR_PREFIX};${CMAKE_PREFIX_PATH}" >> "$GITHUB_ENV"
+          echo "DYLD_FALLBACK_LIBRARY_PATH=${RTLSDR_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
 
       - name: Build release assets
         run: |

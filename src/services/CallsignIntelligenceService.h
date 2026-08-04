@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QByteArray>
+#include <QFutureWatcher>
 #include <QHash>
 #include <QNetworkReply>
 #include <QObject>
@@ -32,10 +33,14 @@ class CallsignIntelligenceService final : public QObject
     Q_PROPERTY(bool enrichMissingFields READ enrichMissingFields WRITE setEnrichMissingFields NOTIFY settingsChanged)
     Q_PROPERTY(int cacheTtlMinutes READ cacheTtlMinutes WRITE setCacheTtlMinutes NOTIFY settingsChanged)
     Q_PROPERTY(QString operatorCallsign READ operatorCallsign WRITE setOperatorCallsign NOTIFY settingsChanged)
+    Q_PROPERTY(QString eqslUsername READ eqslUsername WRITE setEqslUsername NOTIFY settingsChanged)
+    Q_PROPERTY(QString eqslPassword READ eqslPassword WRITE setEqslPassword NOTIFY settingsChanged)
+    Q_PROPERTY(QString lotwUsername READ lotwUsername WRITE setLotwUsername NOTIFY settingsChanged)
     Q_PROPERTY(QString clubLogApiKey READ clubLogApiKey WRITE setClubLogApiKey NOTIFY settingsChanged)
     Q_PROPERTY(QString clubLogEmail READ clubLogEmail WRITE setClubLogEmail NOTIFY settingsChanged)
     Q_PROPERTY(QString clubLogApplicationPassword READ clubLogApplicationPassword WRITE setClubLogApplicationPassword NOTIFY settingsChanged)
     Q_PROPERTY(bool offlineMode READ offlineMode WRITE setOfflineMode NOTIFY offlineModeChanged)
+    Q_PROPERTY(bool databaseUpdatePending READ databaseUpdatePending NOTIFY databaseUpdatePendingChanged)
 
 public:
     explicit CallsignIntelligenceService(QObject* parent = nullptr);
@@ -61,6 +66,14 @@ public:
     void setCacheTtlMinutes(int value);
     QString operatorCallsign() const { return m_operatorCallsign; }
     void setOperatorCallsign(const QString& value);
+    QString eqslUsername() const { return m_eqslUsername.isEmpty() ? m_operatorCallsign : m_eqslUsername; }
+    void setEqslUsername(const QString& value);
+    QString eqslPassword() const { return m_eqslPassword; }
+    void setEqslPassword(const QString& value);
+    QString lotwUsername() const { return m_lotwUsername.isEmpty() ? m_operatorCallsign : m_lotwUsername; }
+    void setLotwUsername(const QString& value);
+    void setLotwPassword(const QString& value);
+    void setQrzApiKey(const QString& value);
     QString clubLogApiKey() const { return m_clubLogApiKey; }
     void setClubLogApiKey(const QString& value);
     QString clubLogEmail() const { return m_clubLogEmail; }
@@ -69,6 +82,7 @@ public:
     void setClubLogApplicationPassword(const QString& value);
     bool offlineMode() const { return m_offlineMode; }
     void setOfflineMode(bool offline);
+    bool databaseUpdatePending() const { return m_databaseUpdatePending; }
 
     void setDxccLookup(DxccLookup* lookup);
 
@@ -79,10 +93,20 @@ public:
     Q_INVOKABLE void openProviderLookup(const QString& provider = QString()) const;
     Q_INVOKABLE QVariantMap lookupForFields(const QString& callsign) const;
 
+    // DXCC cty.dat is loaded by DxccLookup rather than callsign_records.
+    void notifyDxccDataChanged();
+
     // Called by DecodiumBridge at the two semantic boundaries of a QSO.  The
     // defaults are OFF, so merely changing dxCall does not open a window.
     void notifyQsoStarted(const QString& callsign);
     void notifyQsoLogged(const QString& callsign);
+
+    // eQSL InBox, LoTW and QRZ confirmed ADIF are downloaded/imported here, but
+    // their confirmations must be merged into the active logbook owned by
+    // DecodiumBridge before the provider update ends.
+    void completeConfirmedAdifImport(const QString& provider, bool ok, int imported,
+                                     int updated, int sourceCount,
+                                     const QString& error = QString());
 
 signals:
     void currentCallChanged();
@@ -95,6 +119,8 @@ signals:
     void lookupWindowCloseRequested();
     void enrichmentReady(const QString& callsign, const QVariantMap& fields);
     void offlineModeChanged();
+    void databaseUpdatePendingChanged();
+    void confirmedAdifDownloaded(const QString& provider, const QString& path);
 
 private:
     struct ProviderSpec {
@@ -111,6 +137,7 @@ private:
     void saveSetting(const QString& key, const QVariant& value);
     void setStatus(const QString& value);
     void setPending(bool value);
+    void setDatabaseUpdatePending(bool value);
     QString normalizeCall(const QString& value) const;
     QVariantMap localLookup(const QString& callsign) const;
     QVariantMap cachedLookup(const QString& callsign) const;
@@ -119,6 +146,10 @@ private:
     void lookupRemoteClubLog(const QString& callsign);
     void handleRemoteLookupFinished(QNetworkReply* reply, const QString& callsign);
     void handleDatabaseReply(QNetworkReply* reply, const QString& provider);
+    void startDatabaseImport(const QString& provider, const QByteArray& data);
+    void startConfirmedAdifSave(const QString& provider, const QByteArray& data);
+    void startConfirmedAdifFileImport(const QString& provider, const QString& path);
+    void requestQrzConfirmedPage();
     bool importBytes(const QString& provider, const QByteArray& data, const QString& sourcePath);
     bool importDelimited(const QString& provider, const QByteArray& data);
     bool importAdif(const QString& provider, const QByteArray& data);
@@ -147,6 +178,13 @@ private:
     bool m_enrichMissingFields {false};
     int m_cacheTtlMinutes {1440};
     QString m_operatorCallsign;
+    QString m_eqslUsername;
+    QString m_eqslPassword;
+    QString m_lotwUsername;
+    QString m_lotwPassword;
+    QString m_lotwLastQsl;
+    QString m_pendingLotwLastQsl;
+    QString m_qrzApiKey;
     QString m_clubLogApiKey;
     QString m_clubLogEmail;
     QString m_clubLogApplicationPassword;
@@ -157,6 +195,11 @@ private:
     DxccLookup* m_dxccLookup {nullptr};
     QNetworkAccessManager* m_network {nullptr};
     QNetworkReply* m_activeReply {nullptr};
+    QFutureWatcher<QVariantMap>* m_databaseImportWatcher {nullptr};
+    bool m_databaseUpdatePending {false};
+    QString m_qrzAfterLogId;
+    int m_qrzPageCount {0};
+    QByteArray m_qrzAdifPayload;
     QSqlDatabase* m_database {nullptr};
     QString m_connectionName;
 };

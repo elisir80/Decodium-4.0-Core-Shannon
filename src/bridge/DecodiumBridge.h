@@ -16,10 +16,12 @@
 #include <QSet>
 #include <QDateTime>
 #include <QMutex>
+#include <QFutureWatcher>
 #include <QFont>
 #include <QAudioDevice>
 #include <QAudioFormat>
 #include <atomic>
+#include <functional>
 #include <memory>
 
 #include "DecodiumThemeManager.h"
@@ -59,9 +61,12 @@ struct DecodeUserFilterConfig;
 class SoundInput;
 class SoundOutput;
 class DecodiumAudioSink;
+class RtlSdrInput;
+class RtlSdrAudioOutput;
 class Modulator;
 class QAudioSink;
 class QBuffer;
+class QIODevice;
 class QMediaDevices;
 class QThreadPool;
 class NtpClient;
@@ -120,6 +125,14 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString audioOutputDevice READ audioOutputDevice WRITE setAudioOutputDevice NOTIFY audioOutputDeviceChanged)
     Q_PROPERTY(int audioInputChannel READ audioInputChannel WRITE setAudioInputChannel NOTIFY audioInputChannelChanged)
     Q_PROPERTY(int audioOutputChannel READ audioOutputChannel WRITE setAudioOutputChannel NOTIFY audioOutputChannelChanged)
+    Q_PROPERTY(bool rtlSdrSupported READ rtlSdrSupported CONSTANT)
+    Q_PROPERTY(QStringList rtlSdrDevices READ rtlSdrDevices NOTIFY rtlSdrDevicesChanged)
+    Q_PROPERTY(bool rtlSdrRunning READ rtlSdrRunning NOTIFY rtlSdrRunningChanged)
+    Q_PROPERTY(QString rtlSdrStatus READ rtlSdrStatus NOTIFY rtlSdrStatusChanged)
+    Q_PROPERTY(bool rtlSdrRfView READ rtlSdrRfView NOTIFY rtlSdrRfViewChanged)
+    Q_PROPERTY(int rtlSdrRfSampleRate READ rtlSdrRfSampleRate NOTIFY rtlSdrRfSampleRateChanged)
+    Q_PROPERTY(double rtlSdrRfCenterFrequency READ rtlSdrRfCenterFrequency NOTIFY rtlSdrRfCenterFrequencyChanged)
+    Q_PROPERTY(double rtlSdrRfSelectedFrequency READ rtlSdrRfSelectedFrequency NOTIFY rtlSdrRfSelectedFrequencyChanged)
 
     // === DECODE ===
     Q_PROPERTY(QVariantList decodeList READ decodeList NOTIFY decodeListChanged)
@@ -309,6 +322,12 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QObject* logManager READ logManager CONSTANT)
     Q_PROPERTY(QObject* propagationManager READ propagationManager CONSTANT)
     Q_PROPERTY(QObject* satelliteTracking READ satelliteTracking CONSTANT)
+    // FT2-Link satellite half-duplex is a distinct CAT state machine: it uses
+    // absolute RX/downlink and TX/uplink VFOs and never reuses the ordinary
+    // small audio-offset split path.
+    Q_PROPERTY(QVariantMap ft2LinkSatelliteHalfDuplexStatus
+               READ ft2LinkSatelliteHalfDuplexStatus
+               NOTIFY ft2LinkSatelliteHalfDuplexStatusChanged)
     Q_PROPERTY(QObject* mapIntelligenceService READ mapIntelligenceService CONSTANT)
     Q_PROPERTY(QObject* mapLayerService READ mapIntelligenceService CONSTANT)
     Q_PROPERTY(bool offlineMode READ offlineMode NOTIFY offlineModeChanged)
@@ -390,6 +409,8 @@ class DecodiumBridge : public QObject
     // === B6 — cty.dat AUTO-UPDATE ===
     Q_PROPERTY(bool    ctyDatUpdating  READ ctyDatUpdating  NOTIFY ctyDatUpdatingChanged)
     Q_PROPERTY(bool    call3TxtUpdating READ call3TxtUpdating NOTIFY call3TxtUpdatingChanged)
+    Q_PROPERTY(QVariantMap ctyDatState READ ctyDatState NOTIFY localDataStateChanged)
+    Q_PROPERTY(QVariantMap call3TxtState READ call3TxtState NOTIFY localDataStateChanged)
 
     // === B7 — COLOR HIGHLIGHTING ===
     Q_PROPERTY(QString colorCQ        READ colorCQ        WRITE setColorCQ        NOTIFY colorCQChanged)
@@ -584,6 +605,16 @@ public:
     void setAudioInputChannel(int);
     int audioOutputChannel() const;
     void setAudioOutputChannel(int);
+    bool rtlSdrSupported() const;
+    QStringList rtlSdrDevices() const;
+    bool rtlSdrRunning() const;
+    QString rtlSdrStatus() const;
+    bool rtlSdrRfView() const;
+    int rtlSdrRfSampleRate() const;
+    double rtlSdrRfCenterFrequency() const;
+    double rtlSdrRfSelectedFrequency() const;
+    Q_INVOKABLE void refreshRtlSdrDevices();
+    Q_INVOKABLE bool rtlSdrDirectSamplingAvailable(int deviceIndex) const;
 
     // Decode
     QVariantList decodeList() const;
@@ -914,6 +945,8 @@ public:
     // B6 — cty.dat
     bool ctyDatUpdating() const { return m_ctyDatUpdating; }
     bool call3TxtUpdating() const { return m_call3TxtUpdating; }
+    QVariantMap ctyDatState() const;
+    QVariantMap call3TxtState() const;
 
     // B7 — Color highlighting
     QString colorCQ()       const { return m_colorCQ; }
@@ -1055,6 +1088,7 @@ public slots:
     Q_INVOKABLE bool transmitFt2LinkAudio(const QString& text,
                                           const QVector<float>& wave,
                                           const QVariantMap& plan);
+    Q_INVOKABLE QVariantMap ft2LinkSatelliteHalfDuplexStatus() const;
     // Click su uno spot DX cluster nel waterfall: setta dxCall, txFrequency
     // sull'audio offset dello spot, abilita TX e avvia la sequenza QSO.
     Q_INVOKABLE void engageDxClusterSpot(const QString& call, int audioFreqHz);
@@ -1231,7 +1265,7 @@ public:
     Q_INVOKABLE void setFontScale(double s);
 
     // B6 — cty.dat / CALL3.TXT update
-    Q_INVOKABLE void checkCtyDatUpdate();
+    Q_INVOKABLE void checkCtyDatUpdate(bool forceDownload = false);
     Q_INVOKABLE void downloadCall3Txt();
 
     // B8 — Alert sounds
@@ -1487,6 +1521,7 @@ public:
 
 signals:
     void satelliteTrackingWindowRequested();
+    void ft2LinkSatelliteHalfDuplexStatusChanged();
     void spectrumDataReady(QVector<float> data);
     // Alta risoluzione: dB raw + range + frequenze exact — per PanadapterItem
     void panadapterDataReady(QVector<float> dbValues, float minDb, float maxDb,
@@ -1535,6 +1570,13 @@ signals:
     void audioOutputDeviceChanged();
     void audioInputChannelChanged();
     void audioOutputChannelChanged();
+    void rtlSdrDevicesChanged();
+    void rtlSdrRunningChanged();
+    void rtlSdrStatusChanged();
+    void rtlSdrRfViewChanged();
+    void rtlSdrRfSampleRateChanged();
+    void rtlSdrRfCenterFrequencyChanged();
+    void rtlSdrRfSelectedFrequencyChanged();
     void decodeListChanged();
     void rxDecodeListChanged();
     // 1.0.233 — DevOverlay metrics (perf monitoring Sprint 2).
@@ -1688,6 +1730,7 @@ signals:
     // B6 — cty.dat
     void ctyDatUpdatingChanged();
     void call3TxtUpdatingChanged();
+    void localDataStateChanged();
     // B7 — Color highlighting
     void colorCQChanged();
     void colorMyCallChanged();
@@ -1879,6 +1922,13 @@ private:
     void requestRigFrequencyFromBridge(double hz, const QString& reason);
     void schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs = 900);
     bool hamlibCatFrequencySettleActive(const QString& reason) const;
+    bool ft2LinkSatelliteHalfDuplexRequested() const;
+    bool ft2LinkSatelliteHalfDuplexOperationActive() const;
+    bool beginFt2LinkSatelliteHalfDuplexTx();
+    void restoreFt2LinkSatelliteHalfDuplexRx(const QString& reason, bool error);
+    void finishFt2LinkSatelliteHalfDuplexTx(const QString& reason, bool error);
+    void cancelFt2LinkSatelliteHalfDuplexTx(const QString& reason);
+    void setFt2LinkSatelliteHalfDuplexState(int state, const QString& detail = {});
     bool shouldIgnoreCatFrequencyDuringLocalQsy(double hz, const QString& backend);
     bool shouldIgnoreLegacyAudioFrequencyDuringLocalQsy(int hz, bool tx);
     bool catSplitOperationActiveForMode() const;
@@ -2716,6 +2766,21 @@ private:
     SoundOutput*       m_soundOutput {nullptr};
     Modulator*         m_modulator   {nullptr};
     DecodiumAudioSink* m_audioSink   {nullptr};
+    RtlSdrInput*       m_rtlSdrInput {nullptr};
+    QTimer*            m_rtlSdrRetuneTimer {nullptr};
+    QThread*           m_rtlSdrAudioThread {nullptr};
+    RtlSdrAudioOutput* m_rtlSdrAudioOutput {nullptr};
+    bool               m_rtlSdrAudioPlaybackRequested {false};
+    QByteArray         m_rtlSdrAudioPlaybackDeviceId;
+    int                m_rtlSdrAudioPlaybackSampleRate {0};
+    qint64             m_rtlSdrAudioRetryAfterMs {0};
+    QStringList        m_rtlSdrDevices;
+    QString            m_rtlSdrStatus;
+    int                m_rtlSdrRfSampleRate {0};
+    quint32            m_rtlSdrRfCenterFrequencyHz {0};
+    quint32            m_rtlSdrRfSelectedFrequencyHz {0};
+    bool               m_rtlSdrRfSpectrumInverted {false};
+    bool               m_rtlSdrDiscoveryPending {false};
     QString            m_lastAudioCaptureStartKey;
     qint64             m_lastAudioCaptureStartMs {0};
     QAudioSink*        m_txAudioSink  {nullptr};
@@ -2926,6 +2991,15 @@ private:
     int     m_cwWpm {20};
     int     m_cwSidetoneHz {700};
     bool    m_ft2LinkTxActive {false};
+    // 0 idle, 1 preparing TX VFO, 2 transmitting, 3 returning to RX VFO.
+    // The values are deliberately stable because they are exposed in a QML
+    // status map rather than as a writable control.
+    int     m_ft2LinkSatelliteHalfDuplexState {0};
+    quint64 m_ft2LinkSatelliteHalfDuplexSerial {0};
+    qint64  m_ft2LinkSatelliteHalfDuplexRxDialHz {0};
+    qint64  m_ft2LinkSatelliteHalfDuplexTxDialHz {0};
+    int     m_ft2LinkSatelliteHalfDuplexSettleMs {900};
+    QString m_ft2LinkSatelliteHalfDuplexDetail;
     qint64  m_ft2LinkPostTxAckGuardUntilMs {0};
     QString m_pendingFt2LinkText;
     QVector<float> m_pendingFt2LinkWave;
@@ -3060,6 +3134,9 @@ private:
     // B6 — cty.dat
     bool   m_ctyDatUpdating {false};
     bool   m_call3TxtUpdating {false};
+    QString m_ctyDatLastError;
+    QString m_call3TxtLastError;
+    int m_worldMapCall3RecordCount {0};
 
     // B7 — Color highlighting (default WSJT-X colors)
     QString m_colorCQ       {"#33FF33"};
@@ -3208,6 +3285,7 @@ private:
     mutable bool     m_qsoSearchCacheReady {false};
     bool             m_qsoSearchWarmupInProgress {false};
     std::atomic<quint64> m_qsoSearchCacheGeneration {0};
+    QFutureWatcher<QVariantMap>* m_confirmedAdifImportWatcher {nullptr};
     void invalidateQsoSearchCache();
     void appendAdifRecord(const QString& dxCall, const QString& dxGrid,
                           double freqHz, const QString& mode,
@@ -3221,6 +3299,7 @@ private:
                           const QString& freqRx = QString(),
                           int cqZone = 0,
                           int ituZone = 0);
+    void importConfirmedAdifIntoLogbookAsync(const QString& provider, const QString& path);
 
     // LotW lite
     bool          m_lotwEnabled  {false};
@@ -3284,6 +3363,17 @@ private:
     qint64 m_lastGpuPanadapterProbeMs {0};
     QList<QPointer<PanadapterItem>> m_panadapterItems;
 
+    // The IQ ring stores interleaved signed samples.  It is written in the
+    // bridge thread by a throttled reader signal and copied before the FFT
+    // worker starts, so no USB/GUI lock is required.
+    static constexpr int RTL_IQ_RING_SHORTS = 32768;
+    QVector<short> m_rtlSdrIqRing;
+    int m_rtlSdrIqWritePos {0};
+    int m_rtlSdrIqCount {0};
+    std::atomic_bool m_rtlSdrSpectrumBusy {false};
+    std::atomic<uint64_t> m_rtlSdrSpectrumSerial {0};
+    qint64 m_lastRtlSdrRfLogMs {0};
+
     mutable QMutex m_ft8MicroStallGuardMutex;
     decodium::decode::Ft8MicroStallGuard m_ft8MicroStallGuard;
 
@@ -3297,7 +3387,7 @@ private:
     QStringList ctyDatSearchPaths() const;
     bool applyCatProfileSnapshotToSettings(const QString& name, bool setActiveProfile);
     void applyStartupCatProfileSnapshot();
-    bool reloadDxccLookup(QString* loadedPath = nullptr);
+    void reloadDxccLookupAsync(const std::function<void(bool, const QString&)>& completion);
     QString extractDecodedCallsign(const QString& msg, bool isCQ) const;
     QString extractDecodedGrid(const QString& msg) const;
     QString lookupUsStateForDecode(const QString& call, const QString& gridHint) const;
@@ -3574,6 +3664,20 @@ private:
                                            const QString& reason,
                                            bool updateDisplayName);
     bool usingTciAudioInput() const;
+    bool rtlSdrEnabled() const;
+    bool rtlSdrGeneralReceiverConfigured() const;
+    bool rtlSdrGeneralReceiverActive() const;
+    void startRtlSdrCapture();
+    void stopRtlSdrCapture();
+    void scheduleRtlSdrRetune();
+    void applyRtlSdrSettings(const QString& reason);
+    void onRtlSdrIqSamplesReady(const QVector<short>& samples, int sampleRate,
+                                quint32 centerFrequencyHz);
+    void onRtlSdrPcmSamplesReady(const QVector<short>& samples);
+    void onRtlSdrAudioSamplesReady(const QVector<short>& samples, int sampleRate);
+    void processRtlSdrSpectrum();
+    void startRtlSdrAudioPlayback(int sampleRate);
+    void stopRtlSdrAudioPlayback(const QString& reason);
     bool startTciTxAudioStream(QVector<float> const& wave, QString const& mode,
                                unsigned symbolsLength, double framesPerSymbol,
                                double frequency, double toneSpacing,

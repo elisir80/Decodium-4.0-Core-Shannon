@@ -2043,6 +2043,49 @@ bool PanadapterItem::consumeUpdateBudgetLocked()
     return true;
 }
 
+void PanadapterItem::setExternalSpectrumActive(bool active)
+{
+    {
+        QMutexLocker lock(&m_mutex);
+        if (m_externalSpectrumActive == active)
+            return;
+
+        m_externalSpectrumActive = active;
+
+        // The PCM path owns a GPU FFT with a resolution derived from the
+        // decoder audio passband.  RTL-SDR supplies an already-computed RF
+        // spectrum instead.  Invalidate every PCM/GPU ownership marker when
+        // switching sources, otherwise a receiver restart can leave the old
+        // audio-bin count active and reject all subsequent RF frames.
+        m_gpuFftUiBinsExpected = 0;
+        m_gpuDirectTextureReady = false;
+        m_hasPendingPcmFrame = false;
+        m_lastGpuFftFrameMs = 0;
+        m_lastGpuFftReadbackMs = 0;
+        if (m_gpuFft) {
+            m_gpuFft->readbackPending = false;
+            m_gpuFft->readbackPendingSinceMs = 0;
+            ++m_gpuFft->readbackSerial;
+        }
+
+        m_bins.clear();
+        m_peakBins.clear();
+        m_avgStack.clear();
+        m_pendingWaterfallRows.clear();
+        m_spectrumDirty = true;
+        m_spectrumOverlayDirty = true;
+        m_loggedMismatchedSpectrumSuppressed = false;
+    }
+
+    resetWaterfall();
+    qInfo().noquote()
+        << "[PANDBG] Panadapter spectrum source switched"
+        << "source=" << (active ? "external_RF" : "decoder_PCM")
+        << "gpu_audio_fft_reset=1";
+    emit externalSpectrumActiveChanged();
+    update();
+}
+
 void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
                                       float minDb, float maxDb,
                                       float freqMinHz, float freqMaxHz)
@@ -2052,7 +2095,8 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
 
     qint64 const nowMs = monotonicMs();
     bool const gpuFftOwnsSpectrum =
-        !m_gpuFftFailed
+        !m_externalSpectrumActive
+        && !m_gpuFftFailed
         && m_gpuFftUiBinsExpected > 0;
     if (gpuFftOwnsSpectrum
         && dbValues.size() != m_gpuFftUiBinsExpected) {
@@ -2251,6 +2295,12 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
                                  float freqMaxHz,
                                  quint64 serial)
 {
+    {
+        QMutexLocker lock(&m_mutex);
+        if (m_externalSpectrumActive)
+            return true;
+    }
+
     QString reason;
     if (!gpuFftSupported(&reason)) {
         if (!m_loggedGpuFftRejected) {
@@ -2350,6 +2400,12 @@ bool PanadapterItem::addPcmFrameI16(const short* ring,
                                     float freqMaxHz,
                                     quint64 serial)
 {
+    {
+        QMutexLocker lock(&m_mutex);
+        if (m_externalSpectrumActive)
+            return true;
+    }
+
     if (!isVisible() || !window() || width() <= 0.0 || height() <= 0.0)
         return true;
 
@@ -2970,7 +3026,15 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
                              QColor(190, 190, 190));
     }
 
-    int const freqStep = viewRange > 3000.0f ? 500 : (viewRange > 1000.0f ? 200 : 100);
+    // Keep roughly ten readable grid labels at every scale. The old fixed
+    // 500 Hz step generated almost two thousand overlapping labels across a
+    // 960 kHz RTL-SDR view.
+    const double desiredStep = qMax(1.0, static_cast<double>(viewRange) / 10.0);
+    const double stepMagnitude = std::pow(10.0, std::floor(std::log10(desiredStep)));
+    const double normalizedStep = desiredStep / stepMagnitude;
+    const double niceMultiplier = normalizedStep <= 1.0 ? 1.0
+        : (normalizedStep <= 2.0 ? 2.0 : (normalizedStep <= 5.0 ? 5.0 : 10.0));
+    int const freqStep = qMax(1, qRound(niceMultiplier * stepMagnitude));
     p.setFont(panadapterMonoFont(9, QFont::Bold));
     int const firstGrid = (static_cast<int>(std::floor(viewStart / static_cast<float>(freqStep))) + 1) * freqStep;
     for (int f = firstGrid; f < static_cast<int>(viewStart + viewRange); f += freqStep) {
@@ -2979,9 +3043,15 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
             continue;
         p.setPen(QPen(QColor(40, 40, 40), 1));
         p.drawLine(x, 0, x, qMax(0, h - 16));
-        QString const label = f >= 1000
-            ? QStringLiteral("%1k").arg(static_cast<double>(f) / 1000.0, 0, 'f', 1)
-            : QString::number(f);
+        QString label;
+        if (qAbs(f) >= 1000000) {
+            label = QString::number(static_cast<double>(f) / 1000000.0, 'f',
+                                    viewRange < 1000000.0f ? 3 : 2);
+        } else if (qAbs(f) >= 1000) {
+            label = QStringLiteral("%1k").arg(static_cast<double>(f) / 1000.0, 0, 'f', 1);
+        } else {
+            label = QString::number(f);
+        }
         QFontMetrics const fm(p.font());
         int const tx = clampInt(x - fm.horizontalAdvance(label) / 2, 2, w - fm.horizontalAdvance(label) - 2);
         drawCrispOverlayText(p, tx, h - 3, label, QColor(235, 235, 235));
@@ -3794,6 +3864,8 @@ void PanadapterItem::recordGpuFftCompute()
     QString disableReason;
     {
         QMutexLocker lock(&m_mutex);
+        if (m_externalSpectrumActive)
+            return;
         if (m_gpuFft && m_gpuFft->readbackPending) {
             qint64 const pendingSince = m_gpuFft->readbackPendingSinceMs;
             qint64 const pendingAgeMs = pendingSince > 0 ? monotonicMs() - pendingSince : 0;
@@ -4274,6 +4346,11 @@ void PanadapterItem::recordGpuFftCompute()
 
         {
             QMutexLocker lock(&m_mutex);
+            if (m_externalSpectrumActive) {
+                m_gpuDirectTextureReady = false;
+                m_gpuFftUiBinsExpected = 0;
+                return;
+            }
             m_dataFreqMin = frame.freqMinHz;
             m_dataFreqMax = frame.freqMaxHz;
             m_waterfallRawBinsWidth = nBins;
@@ -4793,7 +4870,8 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     bool const gpuSpectrumGraph = spectrumGraphSupported() && !qsgFreqView.clipsData;
     bool const gpuDirectReady =
 #if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB)
-        m_gpuDirectTextureReady
+        !m_externalSpectrumActive
+        && m_gpuDirectTextureReady
         && !m_gpuFftFailed
         && m_gpuFft
         && m_gpuFft->directTexturePathActive

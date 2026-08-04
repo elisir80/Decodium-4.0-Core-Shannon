@@ -2029,6 +2029,26 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>正在更新...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>正在加载...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>本地</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>文件未加载</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX 未启动</translation>
@@ -13087,6 +13107,105 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>正在开发中的实验性功能</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>使用接收机中频输出：</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>保留电台调谐频率用于显示、日志和解码，同时将 RTL-SDR 调谐到接收机的固定中频输出。</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>中频频率 (Hz)：</translation></message>
+    <message><source>IF sideband:</source><translation>中频边带：</translation></message>
+    <message><source>Automatic</source><translation>自动</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>自动模式仅在使用 LSB 解调器时选择 LSB；FT8 等弱信号模式使用 USB。</translation></message>
+    <message><source>USB shift (Hz):</source><translation>USB 偏移 (Hz)：</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>LSB 偏移 (Hz)：</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>反转中频频谱：</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>当接收机的中频混频器导致频谱反转、信号在频谱窗中反向移动时启用此项。</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>中频模式：Decodium 在屏幕上保留电台频率，并将 RTL-SDR 调谐到中频加所选 USB/LSB 偏移。</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>本地数据库</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - 用户活动</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - 已收到的确认</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - 已收到的确认</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - 已收到的确认</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>无记录</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>从未更新</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>上次更新：%1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>文件：%1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>未找到文件</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>可选的本地文件路径</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>导入呼号数据库</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>数据库和 CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>导入</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>清除全局查询缓存</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>将删除所有提供商的本地呼号查询结果。不会删除 FCC、LoTW、eQSL 和 Club Log 数据库。继续吗？</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>低速电脑模式:</translation>
@@ -21094,6 +21213,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>已更新：%1 个新增，%2 个确认已更新</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 已同步：%2 个新增，%3 个确认已更新</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>已更新</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>从未更新</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>本地</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - 用户活动</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - 已收到的确认</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - 已收到的确认</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - 已收到的确认</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 已更新</translation>

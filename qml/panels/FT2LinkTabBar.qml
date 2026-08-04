@@ -33,6 +33,7 @@ Item {
         { id: "DB",   page: 13, w: 40 },
         { id: "PRE",  page: 14, w: 44 },
         { id: "FREQ", page: 15, w: 52 },
+        { id: "SAT",  page: 17, w: 44 },
         { id: "BLK",  page: 16, w: 44 },
         { id: "CLST", page: 8,  w: 50 }
     ]
@@ -64,7 +65,7 @@ Item {
             return textSecondary
         if (id === "CHAT" || id === "MAIL" || id === "STAT" || id === "CLST")
             return green
-        if (id === "FORM" || id === "BCAST" || id === "CALL" || id === "PATH" || id === "PRE")
+        if (id === "FORM" || id === "BCAST" || id === "CALL" || id === "PATH" || id === "PRE" || id === "SAT")
             return amber
         if (id === "DB" || id === "BLK")
             return red

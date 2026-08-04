@@ -245,6 +245,45 @@ ApplicationWindow {
         }
     }
 
+    // A saved window geometry may come from a larger monitor or from a
+    // previous multi-monitor setup.  Clamping only x/y leaves the window
+    // wider/taller than the current screen, which makes the right-hand part
+    // of panels such as Signal RX unreachable until the user resizes it.
+    function fitWindowSizeToAvailableScreen(windowRef, savedX, savedY) {
+        if (!windowRef)
+            return
+
+        var screens = availableScreenGeometries()
+        if (screens.length === 0)
+            return
+
+        var savedWidth = safeNumber(windowRef.width, 0)
+        var savedHeight = safeNumber(windowRef.height, 0)
+        var centerX = safeNumber(savedX, NaN) + savedWidth / 2
+        var centerY = safeNumber(savedY, NaN) + savedHeight / 2
+        var target = null
+
+        if (isFinite(centerX) && isFinite(centerY)) {
+            for (var i = 0; i < screens.length; ++i) {
+                var candidate = screens[i]
+                if (centerX >= candidate.x && centerX < candidate.x + candidate.width &&
+                    centerY >= candidate.y && centerY < candidate.y + candidate.height) {
+                    target = candidate
+                    break
+                }
+            }
+        }
+        if (!target)
+            target = screens[0]
+
+        var minimumWidthValue = Math.max(0, safeNumber(windowRef.minimumWidth, 0))
+        var minimumHeightValue = Math.max(0, safeNumber(windowRef.minimumHeight, 0))
+        var maximumWidth = Math.max(minimumWidthValue, target.width - 16)
+        var maximumHeight = Math.max(minimumHeightValue, target.height - 16)
+        windowRef.width = Math.min(savedWidth, maximumWidth)
+        windowRef.height = Math.min(savedHeight, maximumHeight)
+    }
+
     function dragFloatingWindowToGlobal(windowRef, pressWindowPos, pressGlobalPos, currentGlobalPos) {
         if (!windowRef || !pressWindowPos || !pressGlobalPos || !currentGlobalPos)
             return
@@ -408,7 +447,7 @@ ApplicationWindow {
         dxPeditionMode = false
         startupLog("dx-pedition mode: always start classic (restore disabled by user)")
         savedPeriod1PanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiFullSpectrumPanelWidth", 400), 400, 360)
-        savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 260)
+        savedRxFreqPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiSignalRxPanelWidth", 400), 400, 360)
         savedLiveMapPanelWidth = safeStoredPanelWidth(safeBridgeSetting("uiLiveMapPanelWidth", 360), 360, 280)
         fsLoadColumns()
         startupLog("decode panel settings restored")
@@ -422,6 +461,7 @@ ApplicationWindow {
         var pos
         var restoredX = safeNumber(state.x, NaN)
         var restoredY = safeNumber(state.y, NaN)
+        fitWindowSizeToAvailableScreen(mainWindow, restoredX, restoredY)
         if (isFinite(restoredX) && isFinite(restoredY)) {
             pos = clampWindowPosition(restoredX, restoredY, width, height)
         } else {
@@ -603,6 +643,7 @@ ApplicationWindow {
         if (restoredHeight > 0) windowRef.height = restoredHeight
         var restoredX = safeNumber(state.x, NaN)
         var restoredY = safeNumber(state.y, NaN)
+        fitWindowSizeToAvailableScreen(windowRef, restoredX, restoredY)
         if (isFinite(restoredX) && isFinite(restoredY)) {
             var pos = clampWindowPosition(restoredX, restoredY, windowRef.width, windowRef.height)
             // Hidden QQuickWindows start on the primary display. Associate
@@ -1724,7 +1765,7 @@ ApplicationWindow {
     function classicMinWidthForSlot(idx) {
         switch (classicIdInSlot(idx)) {
             case "fullspectrum": return 360
-            case "signalrx":     return 260
+            case "signalrx":     return 360
             case "livemap":      return 280
             case "txpanel":      return 320
             // La Waterfall, se messa in una COLONNA stretta, accetta geometria insolita
@@ -2883,6 +2924,53 @@ ApplicationWindow {
             if (c.id === "drift" && (!bridge || bridge.mode !== "WSPR")) continue
             if ((c.id === "dxcc" || c.id === "az") && !mainWindow.showDxccInfo) continue
             out.push(c)
+        }
+        return out
+    }
+
+    // Responsive column set for narrow embedded/floating monitors. The
+    // Message column must never overlap a trailing metadata column.
+    function fsColWidthForPanel(id, panelWidth) {
+        var base = fsColWidth(id)
+        var width = Math.max(0, Number(panelWidth) || 0)
+        if (width >= 760)
+            return base
+
+        // Persisted desktop widths are intentionally capped in compact
+        // panels; otherwise one old 200px DXCC width can evict Message/Dist.
+        var compact = {
+            utc: 66, db: 34, dt: 42, freq: 42, drift: 34,
+            dist: 52, dxcc: 120, az: 34
+        }
+        if (compact[id] !== undefined)
+            return Math.max(fsColMeta(id).minW, Math.min(base, compact[id]))
+        return base
+    }
+
+    function fsColumnsForWidth(panelWidth) {
+        var out = (fsVisibleColumns || []).slice()
+        var available = Math.max(0, Number(panelWidth) || 0)
+        var minMessageWidth = fsColMeta("msg").minW
+        var horizontalMargins = 16
+        var columnSpacing = 6
+        function requiredWidth(columns) {
+            var total = horizontalMargins + Math.max(0, columns.length - 1) * columnSpacing + minMessageWidth
+            for (var i = 0; i < columns.length; ++i) {
+                if (columns[i].id !== "msg")
+                    total += fsColWidthForPanel(columns[i].id, available)
+            }
+            return total
+        }
+
+        // Preserve Message and the core timing/frequency columns first.
+        var removable = ["az", "drift", "dxcc", "dist"]
+        for (var r = 0; r < removable.length && requiredWidth(out) > available; ++r) {
+            for (var i = 0; i < out.length; ++i) {
+                if (out[i].id === removable[r]) {
+                    out.splice(i, 1)
+                    break
+                }
+            }
         }
         return out
     }
@@ -8226,14 +8314,14 @@ ApplicationWindow {
                                         spacing: 6
 
                                         Repeater {
-                                            model: mainWindow.fsVisibleColumns
+                                            model: mainWindow.fsColumnsForWidth(period1Panel.width)
                                             delegate: Item {
                                                 id: fsHCell
                                                 readonly property var col: modelData
                                                 readonly property var meta: mainWindow.fsColMeta(col.id)
                                                 Layout.fillWidth: meta.fill
-                                                Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
-                                                Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                                Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidthForPanel(col.id, period1Panel.width)
+                                                Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidthForPanel(col.id, period1Panel.width)
                                                 Layout.fillHeight: true
 
                                                 Text {
@@ -8618,14 +8706,14 @@ NumberAnimation {
                                                 spacing: 6
 
                                                 Repeater {
-                                                    model: mainWindow.fsVisibleColumns
+                                                    model: mainWindow.fsColumnsForWidth(period1Panel.width)
                                                     delegate: Item {
                                                         id: fsCellE
                                                         readonly property var col: modelData
                                                         readonly property var meta: mainWindow.fsColMeta(col.id)
                                                         Layout.fillWidth: meta.fill
-                                                        Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
-                                                        Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                                        Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidthForPanel(col.id, period1Panel.width)
+                                                        Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidthForPanel(col.id, period1Panel.width)
                                                         Layout.fillHeight: true
                                                         clip: col.id === "dxcc"
                                                         Text {
@@ -8748,7 +8836,7 @@ NumberAnimation {
                             SplitView.preferredWidth: slotCollapsed ? 0 : targetPanelWidth
                             SplitView.minimumWidth: slotCollapsed ? 0 : mainWindow.classicMinWidthForSlot(1)
                             onWidthChanged: {
-                                if (!slotCollapsed && width >= 260 && Math.abs(targetPanelWidth - width) >= 1) {
+                                if (!slotCollapsed && width >= 360 && Math.abs(targetPanelWidth - width) >= 1) {
                                     targetPanelWidth = Math.round(width)
                                     if (!mainWindow.windowStateRestoreInProgress)
                                         mainWindow.scheduleWindowStateSave()
@@ -9006,7 +9094,7 @@ NumberAnimation {
                                         Item { visible: rxFreqPanel.freqColumnWidth > 0; Layout.preferredWidth: rxFreqPanel.dtFreqGapWidth }
                                         Text { visible: rxFreqPanel.freqColumnWidth > 0; text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
                                         Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
-                                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true }
+                                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
                                         Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
                                         Text { visible: rxFreqPanel.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
                                     }
@@ -9263,7 +9351,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		                                                Text { visible: rxFreqPanel.freqColumnWidth > 0; text: rxFrequencyDelegate.entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(rxFrequencyDelegate.entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: rxFrequencyDelegate.entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
                                                 Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
                                                 Rectangle { property int dotSize: Math.max(5, Math.round(6 * fs)); visible: rxFrequencyDelegate.entry.isLotw === true; width: dotSize; height: dotSize; Layout.preferredWidth: dotSize; Layout.preferredHeight: dotSize; Layout.alignment: Qt.AlignVCenter; radius: dotSize / 2; color: mainWindow.lotwMarkerColor(); border.color: mainWindow.boostedDecodeTextColor(textSecondary); border.width: 1 }
-                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
+                                                Text { text: rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(rxFrequencyDelegate.entry); font.strikeout: decodePanel.decodeEntryStrikeout(rxFrequencyDelegate.entry); color: getDxccColor(rxFrequencyDelegate.entry); Layout.fillWidth: true; Layout.minimumWidth: 0; elide: messageElideMode(rxFrequencyDelegate.entry.displayMessage || rxFrequencyDelegate.entry.message) }
 		                                                Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: decodePanel.distanceText(rxFrequencyDelegate.entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
 		                                                Text { visible: rxFreqPanel.azColumnWidth > 0; text: formatBearingDegrees(rxFrequencyDelegate.entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
 	                                            }
@@ -13428,14 +13516,14 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         spacing: 6
 
                         Repeater {
-                            model: mainWindow.fsVisibleColumns
+                            model: mainWindow.fsColumnsForWidth(period1FloatingWindow.width)
                             delegate: Item {
                                 id: fsHCellF
                                 readonly property var col: modelData
                                 readonly property var meta: mainWindow.fsColMeta(col.id)
                                 Layout.fillWidth: meta.fill
-                                Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
-                                Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                            Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidthForPanel(col.id, period1FloatingWindow.width)
+                            Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidthForPanel(col.id, period1FloatingWindow.width)
                                 Layout.fillHeight: true
                                 Text {
                                     anchors.fill: parent
@@ -13735,14 +13823,14 @@ NumberAnimation {
                                 spacing: 6
 
                                 Repeater {
-                                    model: mainWindow.fsVisibleColumns
+                                    model: mainWindow.fsColumnsForWidth(period1FloatingWindow.width)
                                     delegate: Item {
                                         id: fsCellF
                                         readonly property var col: modelData
                                         readonly property var meta: mainWindow.fsColMeta(col.id)
                                         Layout.fillWidth: meta.fill
-                                        Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidth(col.id)
-                                        Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidth(col.id)
+                                    Layout.preferredWidth: meta.fill ? -1 : mainWindow.fsColWidthForPanel(col.id, period1FloatingWindow.width)
+                                    Layout.minimumWidth: meta.fill ? meta.minW : mainWindow.fsColWidthForPanel(col.id, period1FloatingWindow.width)
                                         Layout.fillHeight: true
                                         clip: col.id === "dxcc"
                                         Text {
@@ -14146,7 +14234,7 @@ NumberAnimation {
 	                        Item { visible: rxFreqFloatingWindow.freqColumnWidth > 0; Layout.preferredWidth: rxFreqFloatingWindow.dtFreqGapWidth }
 	                        Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
 	                        Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
-	                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true }
+	                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
 	                        Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
 	                        Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
 	                    }
@@ -14340,7 +14428,7 @@ NumberAnimation {
 			                                Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: entry.freq || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(entry.isTx ? "#f1c40f" : secondaryCyan); font.bold: entry.isTx === true; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
                                 Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
                                 Rectangle { property int dotSize: Math.max(5, Math.round(6 * fs)); visible: entry.isLotw === true; width: dotSize; height: dotSize; Layout.preferredWidth: dotSize; Layout.preferredHeight: dotSize; Layout.alignment: Qt.AlignVCenter; radius: dotSize / 2; color: mainWindow.lotwMarkerColor(); border.color: mainWindow.boostedDecodeTextColor(textSecondary); border.width: 1 }
-                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: getDxccColor(entry); Layout.fillWidth: true; elide: messageElideMode(entry.displayMessage || entry.message) }
+                                Text { text: entry.displayMessage || entry.message || ""; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); font.bold: decodePanel.decodeEntryBold(entry); font.strikeout: decodePanel.decodeEntryStrikeout(entry); color: getDxccColor(entry); Layout.fillWidth: true; Layout.minimumWidth: 0; elide: messageElideMode(entry.displayMessage || entry.message) }
 		                                Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: decodePanel.distanceText(entry); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(textSecondary); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
 		                                Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: formatBearingDegrees(entry.dxBearing); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextFontPixelSize * fs); color: mainWindow.boostedDecodeTextColor(secondaryCyan); horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
                             }

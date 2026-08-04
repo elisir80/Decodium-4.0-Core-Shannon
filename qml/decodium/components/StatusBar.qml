@@ -628,7 +628,9 @@ Rectangle {
                     visible: gpuMonitorMouse.containsMouse
                     delay: 500
                     text: realGpuUsageAvailable
-                          ? "Real GPU usage for the Decodium process\n"
+                          ? (Qt.platform.os === "linux"
+                             ? "Approximate GPU-engine usage for the Decodium process\n"
+                             : "Real GPU usage for the Decodium process\n")
                             + gpuLoadText + " from system GPU counters\n"
                             + gpuFps + " rendered frames/s"
                           : "Process GPU counter unavailable\n"

@@ -441,6 +441,11 @@ cmake_args=(
 if [[ -n "${CMAKE_PREFIX_PATH:-}" ]]; then
   cmake_args+=("-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 fi
+case "${DECODIUM_REQUIRE_RTLSDR:-OFF}" in
+  1|ON|on|TRUE|true|YES|yes)
+    cmake_args+=("-DDECODIUM_REQUIRE_RTLSDR=ON")
+    ;;
+esac
 BOOST_ROOT_VALUE="${Boost_ROOT:-${BOOST_ROOT:-}}"
 if [[ -n "${BOOST_ROOT_VALUE}" ]]; then
   cmake_args+=("-DBoost_ROOT=${BOOST_ROOT_VALUE}" "-DBOOST_ROOT=${BOOST_ROOT_VALUE}")
@@ -467,6 +472,12 @@ if [[ -n "${Hamlib_INCLUDE_DIR:-}" ]]; then
 fi
 if [[ -n "${Hamlib_LIBRARY:-}" ]]; then
   cmake_args+=("-DHamlib_LIBRARY=${Hamlib_LIBRARY}")
+fi
+if [[ -n "${RtlSdr_INCLUDE_DIR:-}" ]]; then
+  cmake_args+=("-DRtlSdr_INCLUDE_DIR=${RtlSdr_INCLUDE_DIR}")
+fi
+if [[ -n "${RtlSdr_LIBRARY:-}" ]]; then
+  cmake_args+=("-DRtlSdr_LIBRARY=${RtlSdr_LIBRARY}")
 fi
 if [[ -n "${RIGCTL_EXE:-}" ]]; then
   cmake_args+=("-DRIGCTL_EXE=${RIGCTL_EXE}")
@@ -520,6 +531,21 @@ STAGED_ROOT_ABS="$(dirname "${STAGED_APP_ABS}")"
 echo "[4/7] Normalizing macOS bundle layout and runtime paths..."
 "${ROOT_DIR}/scripts/normalize-macos-app.sh" "${STAGED_APP_ABS}"
 verify_app_identity "${STAGED_APP_ABS}"
+case "${DECODIUM_REQUIRE_RTLSDR:-OFF}" in
+  1|ON|on|TRUE|true|YES|yes)
+    if ! find "${STAGED_APP_ABS}/Contents/Frameworks" -maxdepth 1 \
+        -type f -name 'librtlsdr*.dylib' -print -quit | grep -q .; then
+      echo "error: required RTL-SDR runtime library was not bundled"
+      exit 1
+    fi
+    if ! otool -L "${STAGED_APP_ABS}/Contents/MacOS/Decodium4" \
+        | awk 'NR>1 {print $1}' | grep -Eq '^@rpath/librtlsdr'; then
+      echo "error: Decodium4 is not linked to the bundled RTL-SDR runtime"
+      exit 1
+    fi
+    echo "RTL-SDR runtime bundled and linked"
+    ;;
+esac
 
 if [[ "$SKIP_COMPAT_CHECK" -eq 0 ]]; then
   echo "[5/7] Checking bundle compatibility target macOS ${COMPAT_MACOS}..."

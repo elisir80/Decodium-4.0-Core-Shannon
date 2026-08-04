@@ -1,4 +1,6 @@
 #include "DecodiumBridge.h"
+#include "Ft2LinkSatelliteHalfDuplex.h"
+#include "LinuxDrmGpuUsage.h"
 #include "DecodeListModel.h"
 #include "FtDecodeThreadBudget.hpp"
 #include "LegacyDecodeWindow.hpp"
@@ -60,6 +62,12 @@
 #include "widgets/itoneAndicw.h"
 #include "Decoder/decodedtext.h"
 #include "DecodiumAudioSink.h"
+#include "src/rtl/RtlSdrAudioOutput.h"
+#include "src/rtl/RtlSdrCapabilities.h"
+#include "src/rtl/RtlSdrDsp.h"
+#include "src/rtl/RtlSdrInput.h"
+#include "src/rtl/RtlSdrRfSpectrum.h"
+#include "src/rtl/RtlSdrTuningPlan.h"
 #include "Radio.hpp"
 #include "models/Bands.hpp"
 #include "models/FrequencyList.hpp"
@@ -1711,42 +1719,15 @@ bool decodiumCurrentProcessGpuTimeNs(quint64* gpuTimeNs)
     if (entries.isEmpty())
         return false;
 
-    static QRegularExpression const engineTimeRe(
-        QStringLiteral("^drm-engine-[^:]+:\\s*(\\d+)\\s*([a-zA-Z]*)"));
-    quint64 totalNs = 0;
-    bool found = false;
+    QList<decodium::gpu_usage::LinuxDrmFdInfo> descriptors;
+    descriptors.reserve(entries.size());
     for (QString const& entry : entries) {
         QFile file(fdInfoDir.absoluteFilePath(entry));
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             continue;
-
-        while (!file.atEnd()) {
-            QString const line = QString::fromLatin1(file.readLine()).trimmed();
-            QRegularExpressionMatch const match = engineTimeRe.match(line);
-            if (!match.hasMatch())
-                continue;
-
-            bool ok = false;
-            quint64 value = match.captured(1).toULongLong(&ok);
-            if (!ok)
-                continue;
-
-            QString const unit = match.captured(2).toLower();
-            if (unit == QStringLiteral("us"))
-                value *= 1000ULL;
-            else if (unit == QStringLiteral("ms"))
-                value *= 1000000ULL;
-
-            totalNs += value;
-            found = true;
-        }
+        descriptors.push_back({ entry, QString::fromLatin1(file.readAll()) });
     }
-
-    if (!found)
-        return false;
-    if (gpuTimeNs)
-        *gpuTimeNs = totalNs;
-    return true;
+    return decodium::gpu_usage::aggregateLinuxDrmEngineTimeNs(descriptors, gpuTimeNs);
 #else
     Q_UNUSED(gpuTimeNs);
     return false;
@@ -3219,7 +3200,7 @@ static ParsedAdifDocument loadAdifDocument(QString const& path)
 static bool writeAdifDocument(QString const& path, ParsedAdifDocument const& doc)
 {
     QDir().mkpath(QFileInfo(path).absolutePath());
-    QFile file(path);
+    QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         return false;
     }
@@ -3242,7 +3223,11 @@ static bool writeAdifDocument(QString const& path, ParsedAdifDocument const& doc
         }
         ts << "<EOR>\n";
     }
-    return true;
+    ts.flush();
+    if (ts.status() != QTextStream::Ok) {
+        return false;
+    }
+    return file.commit();
 }
 
 // Map a frequency in Hz to the standard band token used by ADIF / WSJT-X
@@ -9391,6 +9376,152 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     }, Qt::DirectConnection);
 
     m_mediaDevices = new QMediaDevices(this);
+    m_rtlSdrInput = new RtlSdrInput(this);
+    m_rtlSdrRetuneTimer = new QTimer(this);
+    m_rtlSdrAudioThread = new QThread(this);
+    m_rtlSdrAudioThread->setObjectName(QStringLiteral("RtlSdrAudioOutput"));
+    m_rtlSdrAudioOutput = new RtlSdrAudioOutput;
+    m_rtlSdrAudioOutput->moveToThread(m_rtlSdrAudioThread);
+    connect(m_rtlSdrAudioThread, &QThread::finished,
+            m_rtlSdrAudioOutput, &QObject::deleteLater);
+    connect(m_rtlSdrAudioOutput, &RtlSdrAudioOutput::statusChanged,
+            this, [this](const QString& message) {
+        if (m_rtlSdrStatus != message) {
+            m_rtlSdrStatus = message;
+            emit rtlSdrStatusChanged();
+        }
+        emit statusMessage(message);
+    }, Qt::QueuedConnection);
+    connect(m_rtlSdrAudioOutput, &RtlSdrAudioOutput::error,
+            this, [this](const QString& message) {
+        m_rtlSdrAudioPlaybackRequested = false;
+        m_rtlSdrAudioPlaybackDeviceId.clear();
+        m_rtlSdrAudioPlaybackSampleRate = 0;
+        m_rtlSdrAudioRetryAfterMs = QDateTime::currentMSecsSinceEpoch() + 3000;
+        m_rtlSdrStatus = message;
+        emit rtlSdrStatusChanged();
+        emit errorMessage(message);
+    }, Qt::QueuedConnection);
+    m_rtlSdrAudioThread->start(QThread::HighPriority);
+    m_rtlSdrRetuneTimer->setSingleShot(true);
+    connect(m_rtlSdrRetuneTimer, &QTimer::timeout, this, [this]() {
+        if (!m_monitoring
+            || m_transmitting
+            || m_tuning
+            || !rtlSdrEnabled()
+            || !getSetting(QStringLiteral("RtlSdrFollowDial"), true).toBool()) {
+            return;
+        }
+        bridgeLog(QStringLiteral("RTL-SDR applying debounced dial retune: %1 Hz")
+                      .arg(qRound64(m_frequency)));
+        startRtlSdrCapture();
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::statusChanged, this, [this](const QString& message) {
+        if (m_rtlSdrStatus != message) {
+            m_rtlSdrStatus = message;
+            emit rtlSdrStatusChanged();
+        }
+        emit statusMessage(message);
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::configurationAdjusted, this,
+            [this](const RtlSdrInput::Config& config, const QString& reason) {
+        if (config.mode == RtlSdrInput::Mode::SdrRadio
+            && getSetting(QStringLiteral("RtlSdrMode"), QStringLiteral("sdr"))
+                   .toString().compare(QStringLiteral("direct"), Qt::CaseInsensitive) == 0) {
+            setSetting(QStringLiteral("RtlSdrMode"), QStringLiteral("sdr"));
+        }
+        bridgeLog(QStringLiteral("RTL-SDR configuration adjusted: %1").arg(reason));
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::error, this, [this](const QString& message) {
+        m_rtlSdrStatus = message;
+        emit rtlSdrStatusChanged();
+        emit errorMessage(message);
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::started, this, [this](const QString& device) {
+        const RtlSdrInput::Config active = m_rtlSdrInput->activeConfig();
+        const bool rfViewWasVisible = rtlSdrRfView();
+        m_rtlSdrRfSampleRate = active.sampleRate;
+        emit rtlSdrRfSampleRateChanged();
+        emit rtlSdrRfCenterFrequencyChanged();
+        emit rtlSdrRfSelectedFrequencyChanged();
+        if (!rfViewWasVisible) {
+            emit rtlSdrRfViewChanged();
+        }
+        m_activeRxInputDeviceName = QStringLiteral("RTL-SDR: %1").arg(device);
+        m_activeRxInputDeviceId = QString::number(getSetting(QStringLiteral("RtlSdrDeviceIndex"), 0).toInt());
+        m_rxAudioStartupStartMs = QDateTime::currentMSecsSinceEpoch();
+        m_pendingRxAudioStartupHealthLog = true;
+        m_audioWatchdogIgnoreUntilMs = m_rxAudioStartupStartMs + 5000;
+        const QString message = QStringLiteral("RTL-SDR RX active: %1 (%2)")
+                                    .arg(device, RtlSdrInput::demodulatorName(active.demodulator));
+        if (m_rtlSdrStatus != message) {
+            m_rtlSdrStatus = message;
+            emit rtlSdrStatusChanged();
+        }
+        emit statusMessage(message);
+        if (getSetting(QStringLiteral("RtlSdrFollowDial"), true).toBool()) {
+            const qint64 desiredRf = qRound64(m_frequency);
+            if (qAbs(desiredRf - static_cast<qint64>(m_rtlSdrRfSelectedFrequencyHz)) > 1) {
+                bridgeLog(QStringLiteral(
+                    "RTL-SDR startup frequency guard: dial=%1 active_rf=%2; scheduling correction")
+                              .arg(desiredRf)
+                              .arg(m_rtlSdrRfSelectedFrequencyHz));
+                scheduleRtlSdrRetune();
+            }
+        }
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::retuned, this,
+            [this](quint32 centerFrequencyHz, int channelOffsetHz) {
+        const bool rfViewWasVisible = rtlSdrRfView();
+        m_rtlSdrSpectrumSerial.fetch_add(1);
+        m_rtlSdrIqCount = 0;
+        m_rtlSdrIqWritePos = 0;
+        m_lastPanadapterData.clear();
+        emit rtlSdrRfCenterFrequencyChanged();
+        emit rtlSdrRfSelectedFrequencyChanged();
+        if (!rfViewWasVisible) {
+            emit rtlSdrRfViewChanged();
+        }
+        bridgeLog(QStringLiteral("RTL-SDR in-place retune complete: dial=%1 input=%2 tuner=%3 Hz")
+                      .arg(m_rtlSdrRfSelectedFrequencyHz)
+                      .arg(static_cast<qint64>(centerFrequencyHz) + channelOffsetHz)
+                      .arg(centerFrequencyHz));
+
+        if (getSetting(QStringLiteral("RtlSdrFollowDial"), true).toBool()) {
+            const qint64 desiredRf = qRound64(m_frequency);
+            if (qAbs(desiredRf - static_cast<qint64>(m_rtlSdrRfSelectedFrequencyHz)) > 1) {
+                bridgeLog(QStringLiteral(
+                    "RTL-SDR retune frequency guard: dial=%1 active_rf=%2; coalescing latest dial")
+                              .arg(desiredRf)
+                              .arg(m_rtlSdrRfSelectedFrequencyHz));
+                scheduleRtlSdrRetune();
+            }
+        }
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::runningChanged, this, [this](bool) {
+        emit rtlSdrRunningChanged();
+        emit rtlSdrRfViewChanged();
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::stopped, this, [this]() {
+        // Do not hide an error that was emitted immediately before the reader
+        // stopped.  Normal manual stops and configuration changes get clear
+        // non-modal feedback in the Audio settings section.
+        if (!m_rtlSdrStatus.contains(QStringLiteral(" failed "), Qt::CaseInsensitive)) {
+            const QString message = QStringLiteral("RTL-SDR receiver stopped.");
+            if (m_rtlSdrStatus != message) {
+                m_rtlSdrStatus = message;
+                emit rtlSdrStatusChanged();
+            }
+            emit statusMessage(message);
+        }
+    });
+    connect(m_rtlSdrInput, &RtlSdrInput::iqSamplesReady,
+            this, &DecodiumBridge::onRtlSdrIqSamplesReady);
+    connect(m_rtlSdrInput, &RtlSdrInput::pcmSamplesReady,
+            this, &DecodiumBridge::onRtlSdrPcmSamplesReady);
+    connect(m_rtlSdrInput, &RtlSdrInput::audioSamplesReady,
+            this, &DecodiumBridge::onRtlSdrAudioSamplesReady);
+    refreshRtlSdrDevices();
     m_audioDeviceRefreshTimer = new QTimer(this);
     m_audioDeviceRefreshTimer->setSingleShot(true);
     connect(m_audioDeviceRefreshTimer, &QTimer::timeout, this, [this]() {
@@ -9998,9 +10129,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     }
     m_callsignIntelligence->setDxccLookup(m_dxccLookup);
     m_callsignIntelligence->setOperatorCallsign(m_callsign);
+    m_callsignIntelligence->setQrzApiKey(m_qrzLogbookApiKey);
+    m_callsignIntelligence->setLotwPassword(getSetting(QStringLiteral("Lotw_pwd"), QString()).toString());
     connect(this, &DecodiumBridge::callsignChanged, this, [this]() {
         if (m_callsignIntelligence) {
             m_callsignIntelligence->setOperatorCallsign(m_callsign);
+            m_callsignIntelligence->setLotwPassword(getSetting(QStringLiteral("Lotw_pwd"), QString()).toString());
         }
     });
     connect(this, &DecodiumBridge::dxCallChanged, this, [this]() {
@@ -10028,6 +10162,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             m_nextLogQth = fields.value(QStringLiteral("qth")).toString().trimmed();
         }
     });
+    connect(m_callsignIntelligence, &CallsignIntelligenceService::confirmedAdifDownloaded,
+            this, [this](const QString& provider, const QString& path) {
+                importConfirmedAdifIntoLogbookAsync(provider, path);
+            });
     bridgeLog(QStringLiteral("DXCC: load deferred until Main.qml ready"));
     m_usStateData = new UsStateDataManager(this);
     connect(m_usStateData, &UsStateDataManager::statusMessage, this, [this](const QString& msg) {
@@ -10606,6 +10744,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 DecodiumBridge::~DecodiumBridge()
 {
     beginDecodeCallbackShutdown();
+    if (m_confirmedAdifImportWatcher) {
+        m_confirmedAdifImportWatcher->disconnect(this);
+        m_confirmedAdifImportWatcher->waitForFinished();
+        delete m_confirmedAdifImportWatcher;
+        m_confirmedAdifImportWatcher = nullptr;
+    }
     // 1.0.238 (Phase 5.2 perf roadmap): ferma il worker di persistenza PRIMA
     // di teardown decoder/audio. Flush sincrono delle entry pendenti +
     // chiusura connessione SQLite "decode_history_worker" sul thread giusto.
@@ -10616,6 +10760,12 @@ DecodiumBridge::~DecodiumBridge()
     m_pendingDecodeReleaseQueue.clear();
     stopRx();
     teardownAudioCapture();
+    if (m_rtlSdrAudioOutput && m_rtlSdrAudioThread
+        && m_rtlSdrAudioThread->isRunning()) {
+        QMetaObject::invokeMethod(m_rtlSdrAudioOutput,
+                                  &RtlSdrAudioOutput::shutdown,
+                                  Qt::BlockingQueuedConnection);
+    }
     // Ferma TX/Tune prima di distruggere tutto
     if (m_txAudioSink || m_txPcmBuffer) {
         retireAudioSink(m_txAudioSink, m_txPcmBuffer, QStringLiteral("bridge-dtor"));
@@ -10646,6 +10796,8 @@ DecodiumBridge::~DecodiumBridge()
     safeQuitThread(m_workerThreadLegacyJt, "legacyJt");
     safeQuitThread(m_workerThreadFst4,   "fst4");
     safeQuitThread(m_soundInputThread,   "soundInput");
+    safeQuitThread(m_rtlSdrAudioThread,  "rtlSdrAudio");
+    m_rtlSdrAudioOutput = nullptr;
 }
 
 QObject * DecodiumBridge::propagationManager() const
@@ -10680,6 +10832,9 @@ QObject * DecodiumBridge::callsignIntelligence() const
 
 bool DecodiumBridge::usingLegacyBackendForTx() const
 {
+    if (rtlSdrEnabled()) {
+        return false;
+    }
     QString const normalizedMode = m_mode.trimmed().toUpper();
     if (isFt2LinkApplicationMode(m_mode)
         || bridgeOwnsFst4Audio(m_mode)
@@ -10691,6 +10846,12 @@ bool DecodiumBridge::usingLegacyBackendForTx() const
 
 bool DecodiumBridge::usingLegacyBackendForRx() const
 {
+    // RTL-SDR is a complete RX source. It must win before the embedded legacy
+    // backend is selected, otherwise startup opens the saved sound card and
+    // the dongle never receives a start request.
+    if (rtlSdrEnabled()) {
+        return false;
+    }
     // In no-CAT/lab operation the bridge already owns the JT4/JT9/JT65 PCM TX
     // path. Keep RX on the same bridge-owned audio/decode path, otherwise the
     // QML side can show waterfall energy while never dispatching the in-process
@@ -10709,6 +10870,9 @@ bool DecodiumBridge::usingLegacyBackendForRx() const
 
 bool DecodiumBridge::legacyBackendRequestedForRx() const
 {
+    if (rtlSdrEnabled()) {
+        return false;
+    }
     if (bridgeOwnsLegacyJtRxWhenCatSuppressed(m_mode)
         || bridgeOwnsFst4Audio(m_mode)) {
         return false;
@@ -10892,6 +11056,9 @@ void DecodiumBridge::loadDxccLookupAsync()
                               .arg(self->m_dxccLookup->entityCount())
                               .arg(loadedPath)
                               .arg(elapsedMs));
+                if (self->m_callsignIntelligence)
+                    self->m_callsignIntelligence->notifyDxccDataChanged();
+                emit self->localDataStateChanged();
                 self->refreshDecodeListDxcc();
             } else {
                 bridgeLog(QStringLiteral("DXCC async load finished without cty.dat in %1 ms")
@@ -11935,6 +12102,9 @@ void DecodiumBridge::scheduleLegacyPcmSpectrumRearm(const QString& reason)
 
 void DecodiumBridge::syncLegacyBackendState()
 {
+    if (rtlSdrEnabled()) {
+        return;
+    }
     if (!usingLegacyBackendForRx() && !useLegacyRigControlFallback(m_legacyBackend, m_catBackend)) {
         return;
     }
@@ -15303,6 +15473,10 @@ double DecodiumBridge::frequency() const { return m_frequency; }
 double DecodiumBridge::displayFrequency() const
 {
     if (m_transmitting || m_tuning) {
+        if (m_transmitting && ft2LinkSatelliteHalfDuplexOperationActive()
+            && m_ft2LinkSatelliteHalfDuplexTxDialHz > 0) {
+            return static_cast<double>(m_ft2LinkSatelliteHalfDuplexTxDialHz);
+        }
         double const txDialHz = catSplitTxDialFrequencyHz();
         if (txDialHz > 0.0) {
             return txDialHz;
@@ -15339,12 +15513,22 @@ void DecodiumBridge::setFrequency(double v) {
     if (m_bandManager) {
         m_bandManager->updateFromFrequency(v);
     }
-    if (frequencyChangedForRecovery && std::abs(v - oldFreq) > 50000.0) {
+    // RTL-SDR owns its own asynchronous retune/reopen cycle.  Sending it
+    // through the generic audio-capture recovery path would create a second
+    // restart while the user is dragging the RF dial.
+    if (frequencyChangedForRecovery && std::abs(v - oldFreq) > 50000.0
+        && !rtlSdrEnabled()) {
         scheduleMonitorRecovery(QStringLiteral("frequency QSY %1 -> %2 Hz")
                                     .arg(QString::number(oldFreq, 'f', 0),
                                          QString::number(v, 'f', 0)),
                                 monitorSessionId,
                                 monitorShouldStayActive);
+    }
+    if (frequencyChangedForRecovery
+        && rtlSdrEnabled()
+        && getSetting(QStringLiteral("RtlSdrFollowDial"), true).toBool()
+        && m_monitoring) {
+        scheduleRtlSdrRetune();
     }
 }
 
@@ -15873,6 +16057,13 @@ double DecodiumBridge::catSplitTxDialFrequencyHz() const
 
 void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
 {
+    // A satellite half-duplex operation owns both VFOs until the RX restore is
+    // complete.  The ordinary FT split code derives a few-kHz XIT from the
+    // audio offset and would otherwise overwrite the cross-band CAT state.
+    if (ft2LinkSatelliteHalfDuplexOperationActive()) {
+        return;
+    }
+
     QObject* const activeCat = catManagerObj();
     if (legacyOwnsRigControl(m_legacyBackend)
         || useLegacyRigControlFallback(m_legacyBackend, m_catBackend)
@@ -16885,6 +17076,421 @@ void DecodiumBridge::setTxOutputLevel(double v)
 QStringList DecodiumBridge::audioInputDevices() const { return m_audioInputDevices; }
 QStringList DecodiumBridge::audioOutputDevices() const { return m_audioOutputDevices; }
 QString DecodiumBridge::audioInputDevice() const { return m_audioInputDevice; }
+
+bool DecodiumBridge::rtlSdrSupported() const
+{
+    return RtlSdrInput::compiledIn();
+}
+
+QStringList DecodiumBridge::rtlSdrDevices() const
+{
+    return m_rtlSdrDevices;
+}
+
+bool DecodiumBridge::rtlSdrRunning() const
+{
+    return m_rtlSdrInput && m_rtlSdrInput->isRunning();
+}
+
+QString DecodiumBridge::rtlSdrStatus() const
+{
+    return m_rtlSdrStatus;
+}
+
+bool DecodiumBridge::rtlSdrRfView() const
+{
+    return rtlSdrEnabled() && m_rtlSdrInput && m_rtlSdrInput->isRunning()
+        && m_rtlSdrRfSampleRate > 0 && m_rtlSdrRfCenterFrequencyHz > 0;
+}
+
+int DecodiumBridge::rtlSdrRfSampleRate() const
+{
+    return m_rtlSdrRfSampleRate;
+}
+
+double DecodiumBridge::rtlSdrRfCenterFrequency() const
+{
+    return static_cast<double>(m_rtlSdrRfCenterFrequencyHz);
+}
+
+double DecodiumBridge::rtlSdrRfSelectedFrequency() const
+{
+    return static_cast<double>(m_rtlSdrRfSelectedFrequencyHz);
+}
+
+void DecodiumBridge::refreshRtlSdrDevices()
+{
+    if (m_rtlSdrDiscoveryPending) {
+        return;
+    }
+    m_rtlSdrDiscoveryPending = true;
+    m_rtlSdrStatus = QStringLiteral("RTL-SDR: searching for USB receivers…");
+    emit rtlSdrStatusChanged();
+
+    using RtlSdrDiscoveryResult = QPair<QStringList, QString>;
+    auto *watcher = new QFutureWatcher<RtlSdrDiscoveryResult>(this);
+    connect(watcher, &QFutureWatcher<RtlSdrDiscoveryResult>::finished,
+            this, [this, watcher]() {
+        const RtlSdrDiscoveryResult result = watcher->result();
+        watcher->deleteLater();
+        m_rtlSdrDiscoveryPending = false;
+        if (m_rtlSdrDevices != result.first) {
+            m_rtlSdrDevices = result.first;
+            emit rtlSdrDevicesChanged();
+        }
+        const QString status = result.second.isEmpty()
+            ? (m_rtlSdrDevices.isEmpty()
+                   ? QStringLiteral("RTL-SDR: no receiver detected")
+                   : QStringLiteral("RTL-SDR: %1 receiver(s) detected").arg(m_rtlSdrDevices.size()))
+            : result.second;
+        if (m_rtlSdrStatus != status) {
+            m_rtlSdrStatus = status;
+            emit rtlSdrStatusChanged();
+        }
+    });
+    watcher->setFuture(QtConcurrent::run([]() -> RtlSdrDiscoveryResult {
+        QString error;
+        return qMakePair(RtlSdrInput::enumerateDevices(&error), error);
+    }));
+}
+
+bool DecodiumBridge::rtlSdrDirectSamplingAvailable(int deviceIndex) const
+{
+    if (deviceIndex < 0 || deviceIndex >= m_rtlSdrDevices.size()) {
+        return false;
+    }
+    return !decodium::rtl_sdr::isRtlSdrBlogV4Identity(
+        m_rtlSdrDevices.at(deviceIndex));
+}
+
+bool DecodiumBridge::rtlSdrEnabled() const
+{
+    return getSetting(QStringLiteral("RtlSdrEnabled"), false).toBool();
+}
+
+bool DecodiumBridge::rtlSdrGeneralReceiverConfigured() const
+{
+    if (!rtlSdrEnabled()) {
+        return false;
+    }
+    return getSetting(QStringLiteral("RtlSdrDemodulator"), QStringLiteral("weak"))
+               .toString().trimmed().compare(QStringLiteral("weak"), Qt::CaseInsensitive) != 0;
+}
+
+bool DecodiumBridge::rtlSdrGeneralReceiverActive() const
+{
+    return rtlSdrGeneralReceiverConfigured()
+        && m_rtlSdrInput
+        && m_rtlSdrInput->isRunning()
+        && m_rtlSdrInput->activeConfig().demodulator
+               != RtlSdrDsp::Demodulator::WeakSignal;
+}
+
+namespace {
+RtlSdrDsp::Demodulator rtlSdrDemodulatorFromSetting(const QVariant& value)
+{
+    const QString name = value.toString().trimmed().toLower();
+    if (name == QStringLiteral("wfm")) return RtlSdrDsp::Demodulator::WideFm;
+    if (name == QStringLiteral("nfm")) return RtlSdrDsp::Demodulator::NarrowFm;
+    if (name == QStringLiteral("am")) return RtlSdrDsp::Demodulator::Am;
+    if (name == QStringLiteral("usb")) return RtlSdrDsp::Demodulator::Usb;
+    if (name == QStringLiteral("lsb")) return RtlSdrDsp::Demodulator::Lsb;
+    if (name == QStringLiteral("cw")) return RtlSdrDsp::Demodulator::Cw;
+    return RtlSdrDsp::Demodulator::WeakSignal;
+}
+}
+
+void DecodiumBridge::startRtlSdrCapture()
+{
+    if (!m_rtlSdrInput) {
+        return;
+    }
+    if (!RtlSdrInput::compiledIn()) {
+        const QString message = QStringLiteral("RTL-SDR support is not included in this build.");
+        if (m_rtlSdrStatus != message) {
+            m_rtlSdrStatus = message;
+            emit rtlSdrStatusChanged();
+        }
+        emit errorMessage(message);
+        return;
+    }
+
+    RtlSdrInput::Config config;
+    config.deviceIndex = qMax(0, getSetting(QStringLiteral("RtlSdrDeviceIndex"), 0).toInt());
+    config.demodulator = rtlSdrDemodulatorFromSetting(
+        getSetting(QStringLiteral("RtlSdrDemodulator"), QStringLiteral("weak")));
+    config.sampleRate = getSetting(QStringLiteral("RtlSdrSampleRate"), 240000).toInt();
+    if (!RtlSdrDsp::isSupportedSampleRateForDemodulator(config.sampleRate,
+                                                         config.demodulator)) {
+        config.sampleRate = config.demodulator == RtlSdrDsp::Demodulator::WideFm
+            ? 960000 : 240000;
+    }
+    config.ppmCorrection = qBound(-500, getSetting(QStringLiteral("RtlSdrPpmCorrection"), 0).toInt(), 500);
+    config.gainTenthsDb = qBound(-1, getSetting(QStringLiteral("RtlSdrGainTenthsDb"), -1).toInt(), 500);
+    config.digitalAgc = getSetting(QStringLiteral("RtlSdrDigitalAgc"), false).toBool();
+    config.biasTee = getSetting(QStringLiteral("RtlSdrBiasTee"), false).toBool();
+    config.audioGain = qBound(0.05, getSetting(QStringLiteral("RtlSdrAudioGain"), 1.0).toDouble(), 50.0);
+    config.mode = getSetting(QStringLiteral("RtlSdrMode"), QStringLiteral("sdr"))
+                          .toString().trimmed().compare(QStringLiteral("direct"), Qt::CaseInsensitive) == 0
+        ? RtlSdrInput::Mode::DirectSampling
+        : RtlSdrInput::Mode::SdrRadio;
+
+    const bool followDial = getSetting(QStringLiteral("RtlSdrFollowDial"), true).toBool();
+    const qint64 configuredFrequency = getSetting(QStringLiteral("RtlSdrFrequencyHz"),
+                                                   static_cast<qint64>(m_frequency)).toLongLong();
+    const qint64 selectedFrequency = followDial ? qRound64(m_frequency) : configuredFrequency;
+    constexpr qint64 kMinimumRtlFrequencyHz = 100000;
+    constexpr qint64 kMaximumRtlFrequencyHz = 1766000000;
+    const qint64 selectedRfFrequency = qBound<qint64>(kMinimumRtlFrequencyHz,
+                                                       selectedFrequency,
+                                                       kMaximumRtlFrequencyHz);
+    const bool ifEnabled = getSetting(QStringLiteral("RtlSdrIfEnabled"), false).toBool();
+    const QString requestedIfSideband = getSetting(
+        QStringLiteral("RtlSdrIfSideband"), QStringLiteral("auto"))
+                                            .toString().trimmed().toLower();
+    const bool useLsbIfShift = requestedIfSideband == QStringLiteral("lsb")
+        || (requestedIfSideband == QStringLiteral("auto")
+            && config.demodulator == RtlSdrDsp::Demodulator::Lsb);
+    decodium::rtl_sdr::TuningRequest tuningRequest;
+    tuningRequest.dialFrequencyHz = selectedRfFrequency;
+    tuningRequest.sampleRate = config.sampleRate;
+    tuningRequest.ifEnabled = ifEnabled;
+    tuningRequest.ifFrequencyHz = getSetting(
+        QStringLiteral("RtlSdrIfFrequencyHz"), 8830000).toLongLong();
+    tuningRequest.usbShiftHz = getSetting(
+        QStringLiteral("RtlSdrIfUsbShiftHz"), 1500).toLongLong();
+    tuningRequest.lsbShiftHz = getSetting(
+        QStringLiteral("RtlSdrIfLsbShiftHz"), -1500).toLongLong();
+    tuningRequest.sideband = useLsbIfShift
+        ? decodium::rtl_sdr::IfSideband::Lsb
+        : decodium::rtl_sdr::IfSideband::Usb;
+    tuningRequest.spectrumInverted = getSetting(
+        QStringLiteral("RtlSdrIfSpectrumInverted"), false).toBool();
+    const decodium::rtl_sdr::TuningPlan tuningPlan =
+        decodium::rtl_sdr::makeTuningPlan(tuningRequest,
+                                          kMinimumRtlFrequencyHz,
+                                          kMaximumRtlFrequencyHz);
+    QString modeAdjustment;
+    if (config.mode == RtlSdrInput::Mode::DirectSampling) {
+        const QString deviceIdentity = m_rtlSdrDevices.value(config.deviceIndex);
+        const auto blockReason = decodium::rtl_sdr::directSamplingBlockReason(
+            deviceIdentity, tuningPlan.selectedInputFrequencyHz);
+        if (blockReason
+            == decodium::rtl_sdr::DirectSamplingBlockReason::BlogV4UsesUpconverter) {
+            modeAdjustment = QStringLiteral(
+                "RTL-SDR Blog V4 uses its tuner and automatic HF upconverter; "
+                "Direct Sampling is unavailable on this receiver.");
+        } else if (blockReason
+                   == decodium::rtl_sdr::DirectSamplingBlockReason::OutsideHfRange) {
+            modeAdjustment = QStringLiteral(
+                "RTL-SDR Direct Sampling is limited to 500 kHz–24 MHz; "
+                "using SDR Radio at %1 Hz.").arg(tuningPlan.selectedInputFrequencyHz);
+        }
+        if (!modeAdjustment.isEmpty()) {
+            config.mode = RtlSdrInput::Mode::SdrRadio;
+            setSetting(QStringLiteral("RtlSdrMode"), QStringLiteral("sdr"));
+            bridgeLog(QStringLiteral("RTL-SDR mode fallback: %1").arg(modeAdjustment));
+            if (m_rtlSdrStatus != modeAdjustment) {
+                m_rtlSdrStatus = modeAdjustment;
+                emit rtlSdrStatusChanged();
+            }
+            emit statusMessage(modeAdjustment);
+        }
+    }
+    config.centerFrequencyHz = tuningPlan.hardwareCenterFrequencyHz;
+    config.channelOffsetHz = tuningPlan.channelOffsetHz;
+    config.spectrumInverted = tuningPlan.spectrumInverted;
+
+    const bool displayMappingChanged =
+        m_rtlSdrRfCenterFrequencyHz != tuningPlan.displayCenterFrequencyHz
+        || m_rtlSdrRfSelectedFrequencyHz != tuningPlan.displaySelectedFrequencyHz
+        || m_rtlSdrRfSpectrumInverted != tuningPlan.spectrumInverted;
+    if (displayMappingChanged) {
+        m_rtlSdrRfCenterFrequencyHz = tuningPlan.displayCenterFrequencyHz;
+        m_rtlSdrRfSelectedFrequencyHz = tuningPlan.displaySelectedFrequencyHz;
+        m_rtlSdrRfSpectrumInverted = tuningPlan.spectrumInverted;
+        m_rtlSdrSpectrumSerial.fetch_add(1);
+        m_rtlSdrIqCount = 0;
+        m_rtlSdrIqWritePos = 0;
+        m_lastPanadapterData.clear();
+        emit rtlSdrRfCenterFrequencyChanged();
+        emit rtlSdrRfSelectedFrequencyChanged();
+        emit rtlSdrRfViewChanged();
+    }
+
+    const RtlSdrInput::Config active = m_rtlSdrInput->activeConfig();
+    const bool sameReceiverConfiguration = m_rtlSdrInput->isRunning()
+        && active.deviceIndex == config.deviceIndex
+        && active.sampleRate == config.sampleRate
+        && active.ppmCorrection == config.ppmCorrection
+        && active.gainTenthsDb == config.gainTenthsDb
+        && active.digitalAgc == config.digitalAgc
+        && active.mode == config.mode
+        && active.demodulator == config.demodulator
+        && active.spectrumInverted == config.spectrumInverted
+        && active.biasTee == config.biasTee
+        && qFuzzyCompare(active.audioGain + 1.0, config.audioGain + 1.0);
+    const bool unchanged = sameReceiverConfiguration
+        && active.centerFrequencyHz == config.centerFrequencyHz
+        && active.channelOffsetHz == config.channelOffsetHz;
+    if (unchanged) {
+        return;
+    }
+
+    // Discard frames from the previous centre/rate before the reader replaces
+    // its USB stream.  The outstanding FFT task observes the bumped serial.
+    m_rtlSdrSpectrumSerial.fetch_add(1);
+    m_rtlSdrIqCount = 0;
+    m_rtlSdrIqWritePos = 0;
+    m_lastPanadapterData.clear();
+    if (sameReceiverConfiguration
+        && m_rtlSdrInput->retune(config.centerFrequencyHz, config.channelOffsetHz)) {
+        m_audioWatchdogIgnoreUntilMs = QDateTime::currentMSecsSinceEpoch() + 1500;
+        bridgeLog(QStringLiteral(
+            "RTL-SDR in-place retune requested dial=%1 input=%2 tuner=%3 offset=%4 if=%5 sideband=%6")
+                      .arg(selectedRfFrequency)
+                      .arg(tuningPlan.selectedInputFrequencyHz)
+                      .arg(config.centerFrequencyHz)
+                      .arg(config.channelOffsetHz)
+                      .arg(ifEnabled ? 1 : 0)
+                      .arg(useLsbIfShift ? QStringLiteral("LSB") : QStringLiteral("USB")));
+        return;
+    }
+    if (config.demodulator == RtlSdrDsp::Demodulator::WeakSignal) {
+        stopRtlSdrAudioPlayback(QStringLiteral("weak-signal demodulator selected"));
+    }
+    if (active.demodulator != config.demodulator) {
+        QMutexLocker locker(&m_audioBufferMutex);
+        m_audioBuffer.clear();
+        m_lastWaterfallAudioBufferSize = 0;
+    }
+
+    m_audioUnhealthyStartMs = 0;
+    m_audioWatchdogIgnoreUntilMs = QDateTime::currentMSecsSinceEpoch() + 5000;
+    bridgeLog(QStringLiteral("RTL-SDR capture requested device=%1 mode=%2 demod=%3 dial=%4 input=%5 tuner=%6 offset=%7 rate=%8 ppm=%9 gain_tenths=%10 digital_agc=%11 bias=%12 if=%13 sideband=%14 inverted=%15")
+                  .arg(config.deviceIndex)
+                  .arg(RtlSdrInput::modeName(config.mode))
+                  .arg(RtlSdrInput::demodulatorName(config.demodulator))
+                  .arg(selectedRfFrequency)
+                  .arg(tuningPlan.selectedInputFrequencyHz)
+                  .arg(config.centerFrequencyHz)
+                  .arg(config.channelOffsetHz)
+                  .arg(config.sampleRate)
+                  .arg(config.ppmCorrection)
+                  .arg(config.gainTenthsDb)
+                  .arg(config.digitalAgc ? 1 : 0)
+                  .arg(config.biasTee ? 1 : 0)
+                  .arg(ifEnabled ? 1 : 0)
+                  .arg(useLsbIfShift ? QStringLiteral("LSB") : QStringLiteral("USB"))
+                  .arg(tuningPlan.spectrumInverted ? 1 : 0));
+    m_rtlSdrInput->start(config);
+}
+
+void DecodiumBridge::stopRtlSdrCapture()
+{
+    if (m_rtlSdrRetuneTimer) {
+        m_rtlSdrRetuneTimer->stop();
+    }
+    if (m_rtlSdrInput) {
+        m_rtlSdrInput->stop();
+    }
+    m_rtlSdrSpectrumSerial.fetch_add(1);
+    m_rtlSdrIqCount = 0;
+    stopRtlSdrAudioPlayback(QStringLiteral("RTL-SDR capture stopped"));
+}
+
+void DecodiumBridge::scheduleRtlSdrRetune()
+{
+    if (!m_rtlSdrRetuneTimer) {
+        return;
+    }
+
+    // QML can emit many intermediate dial values while the user edits the
+    // frequency. Coalesce the burst before asking the reader for an in-place
+    // asynchronous retune. In IF mode this only remaps the displayed RF scale;
+    // the fixed IF stream remains untouched.
+    constexpr int kRtlSdrRetuneDebounceMs = 250;
+    m_rtlSdrRetuneTimer->start(kRtlSdrRetuneDebounceMs);
+}
+
+void DecodiumBridge::applyRtlSdrSettings(const QString& reason)
+{
+    const bool requestedGeneralReceiver = rtlSdrGeneralReceiverConfigured();
+    const bool activeGeneralReceiver = m_rtlSdrInput && m_rtlSdrInput->isActive()
+        && m_rtlSdrInput->activeConfig().demodulator
+               != RtlSdrDsp::Demodulator::WeakSignal;
+    const bool backendSelectionChanged =
+        reason.contains(QStringLiteral("RtlSdrEnabled"))
+        || (m_rtlSdrInput && m_rtlSdrInput->isActive()
+            && activeGeneralReceiver != requestedGeneralReceiver);
+    const bool monitorWasActive = m_monitoring || m_monitorRequested
+        || (m_legacyBackend && m_legacyBackend->monitoring());
+
+    if (backendSelectionChanged && monitorWasActive) {
+        // Rebuild the complete RX ownership state. Merely replacing the USB
+        // reader leaves the legacy backend monitoring and/or the FT decoder
+        // timers alive, which is how startup previously continued to decode
+        // the sound card while the user had selected WFM.
+        bridgeLog(QStringLiteral("RTL-SDR RX ownership change: %1").arg(reason));
+        ++m_periodTimerSessionId;
+        m_monitorRequested = false;
+        if (m_legacyBackend && m_legacyBackend->monitoring()) {
+            m_legacyBackend->setMonitoring(false);
+        }
+        m_periodTimer->stop();
+        m_asyncDecodeTimer->stop();
+        m_spectrumTimer->stop();
+        m_asyncDecodePending = false;
+        stopAudioCapture();
+        if (m_monitoring) {
+            m_monitoring = false;
+            emit monitoringChanged();
+        }
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        resetRxPeriodAccumulation(false);
+        QTimer::singleShot(0, this, [this]() {
+            if (!m_shuttingDown) {
+                startRx();
+            }
+        });
+        return;
+    }
+
+    if (!rtlSdrEnabled()) {
+        stopRtlSdrCapture();
+        if (m_monitoring) {
+            QTimer::singleShot(0, this, [this]() {
+                if (m_monitoring && !rtlSdrEnabled()) {
+                    startAudioCapture();
+                }
+            });
+        }
+        return;
+    }
+    if (!m_monitoring) {
+        return;
+    }
+    const RtlSdrDsp::Demodulator demodulator = rtlSdrDemodulatorFromSetting(
+        getSetting(QStringLiteral("RtlSdrDemodulator"), QStringLiteral("weak")));
+    const bool audioEnabled = getSetting(QStringLiteral("RtlSdrAudioEnabled"),
+                                         demodulator != RtlSdrDsp::Demodulator::WeakSignal).toBool();
+    if (!audioEnabled || demodulator == RtlSdrDsp::Demodulator::WeakSignal
+        || reason.contains(QStringLiteral("RtlSdrAudioOutputDevice"))) {
+        stopRtlSdrAudioPlayback(QStringLiteral("RTL-SDR receiver audio disabled"));
+    }
+    if (m_transmitting || m_tuning) {
+        emit statusMessage(QStringLiteral("RTL-SDR settings will apply after TX/Tune."));
+        return;
+    }
+    bridgeLog(QStringLiteral("RTL-SDR settings changed: %1").arg(reason));
+    if (m_soundInput || m_tciAudioCaptureActive) {
+        stopAudioCapture();
+    }
+    startRtlSdrCapture();
+}
 
 void DecodiumBridge::rememberAudioInputDeviceIdentity(QAudioDevice const& device,
                                                       const QString& reason,
@@ -19456,7 +20062,10 @@ void DecodiumBridge::startRx()
     m_ft8StartupPressureSlotDeferred = false;
     quint64 const monitorSessionId = ++m_periodTimerSessionId;
 
-    if (legacyTxBackendRequested() && !legacyBackendAvailable() && !ensureLegacyBackendAvailable()) {
+    if (!rtlSdrEnabled()
+        && legacyTxBackendRequested()
+        && !legacyBackendAvailable()
+        && !ensureLegacyBackendAvailable()) {
         m_monitorRequested = false;
         emit errorMessage(QStringLiteral("Backend legacy non disponibile per Fox/Hound"));
         return;
@@ -19515,7 +20124,12 @@ void DecodiumBridge::startRx()
         return;
     }
 
-    ensureDecodeWorkerForMode(m_mode);
+    const bool rtlGeneralReceiver = rtlSdrGeneralReceiverConfigured();
+    if (!rtlGeneralReceiver) {
+        ensureDecodeWorkerForMode(m_mode);
+    } else {
+        bridgeLog(QStringLiteral("startRx: RTL-SDR general receiver selected; digital decoder dispatch disabled"));
+    }
 
     updatePeriodTicksMax();
     m_legacyPcmSpectrumFeed = false;
@@ -19534,9 +20148,17 @@ void DecodiumBridge::startRx()
     }
     // Sincronizza il period timer al prossimo boundary UTC (FT8=15s, FT4=7.5s, FT2=3.75s).
     // Il session id impedisce a una singleShot vecchia di riattivare il timer dopo stop/cambio modo.
-    armPeriodTimerForCurrentMode(monitorSessionId, QStringLiteral("startRx"));
+    if (rtlGeneralReceiver) {
+        m_periodTimer->stop();
+        m_periodTicks = 0;
+        m_lastPeriodSlot = -1;
+        m_periodProgress = 0;
+        emit periodProgressChanged();
+    } else {
+        armPeriodTimerForCurrentMode(monitorSessionId, QStringLiteral("startRx"));
+    }
     m_spectrumTimer->start();
-    if (m_mode == "FT2") {
+    if (!rtlGeneralReceiver && m_mode == "FT2") {
         // store(release): vedi commento nel reset di setMode — il writer usa
         // CAS sul commit e un increment in volo verrà scartato correttamente.
         m_asyncAudioPos.store(0, std::memory_order_release);
@@ -19546,9 +20168,11 @@ void DecodiumBridge::startRx()
 
     startAudioCapture();
 
-    m_decoding = true;
+    m_decoding = !rtlGeneralReceiver;
     emit decodingChanged();
-    emit statusMessage("RX avviato - " + m_mode);
+    emit statusMessage(rtlGeneralReceiver
+                           ? QStringLiteral("RTL-SDR general receiver started")
+                           : QStringLiteral("RX avviato - %1").arg(m_mode));
     bridgeLog("startRx() done");
 }
 
@@ -21817,6 +22441,13 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
     }
 
     if (m_ft2LinkTxActive) {
+        if (ft2LinkSatelliteHalfDuplexOperationActive()) {
+            // PTT is already down.  Keep RX suspended until the explicit VFO
+            // restore has completed; returning early here prevents a receive
+            // restart on the uplink VFO.
+            restoreFt2LinkSatelliteHalfDuplexRx(reason, error);
+            return;
+        }
         qint64 const guardNowMs = QDateTime::currentMSecsSinceEpoch();
         m_ft2LinkPostTxAckGuardUntilMs = guardNowMs + 15000;
         m_ft2LinkTxActive = false;
@@ -22011,6 +22642,220 @@ void DecodiumBridge::sendCwAudio(const QString& text, qint64 dialFrequencyHz, in
     }
 }
 
+bool DecodiumBridge::ft2LinkSatelliteHalfDuplexRequested() const
+{
+    return getSetting(QStringLiteral("Ft2LinkSatelliteHalfDuplexEnabled"), false).toBool();
+}
+
+bool DecodiumBridge::ft2LinkSatelliteHalfDuplexOperationActive() const
+{
+    return m_ft2LinkSatelliteHalfDuplexState != 0;
+}
+
+void DecodiumBridge::setFt2LinkSatelliteHalfDuplexState(int state, const QString& detail)
+{
+    if (m_ft2LinkSatelliteHalfDuplexState == state
+        && m_ft2LinkSatelliteHalfDuplexDetail == detail) {
+        return;
+    }
+    m_ft2LinkSatelliteHalfDuplexState = state;
+    m_ft2LinkSatelliteHalfDuplexDetail = detail;
+    emit ft2LinkSatelliteHalfDuplexStatusChanged();
+}
+
+QVariantMap DecodiumBridge::ft2LinkSatelliteHalfDuplexStatus() const
+{
+    using decodium::ft2link_satellite::HalfDuplexConfiguration;
+    HalfDuplexConfiguration configuration;
+    configuration.enabled = ft2LinkSatelliteHalfDuplexRequested();
+    configuration.rxDialHz = getSetting(QStringLiteral("Ft2LinkSatelliteRxDialHz"), 0).toLongLong();
+    configuration.txDialHz = getSetting(QStringLiteral("Ft2LinkSatelliteTxDialHz"), 0).toLongLong();
+    configuration.settleMs = decodium::ft2link_satellite::normalizedSettleMs(
+        getSetting(QStringLiteral("Ft2LinkSatelliteCatSettleMs"), 900).toInt());
+
+    QString state = QStringLiteral("Idle");
+    switch (m_ft2LinkSatelliteHalfDuplexState) {
+    case 1: state = QStringLiteral("Preparing TX VFO"); break;
+    case 2: state = QStringLiteral("Transmitting"); break;
+    case 3: state = QStringLiteral("Returning to RX VFO"); break;
+    default: break;
+    }
+
+    QVariantMap result;
+    result.insert(QStringLiteral("enabled"), configuration.enabled);
+    result.insert(QStringLiteral("busy"), ft2LinkSatelliteHalfDuplexOperationActive());
+    result.insert(QStringLiteral("state"), state);
+    result.insert(QStringLiteral("detail"), m_ft2LinkSatelliteHalfDuplexDetail);
+    result.insert(QStringLiteral("rxDialHz"), ft2LinkSatelliteHalfDuplexOperationActive()
+                      ? m_ft2LinkSatelliteHalfDuplexRxDialHz : configuration.rxDialHz);
+    result.insert(QStringLiteral("txDialHz"), ft2LinkSatelliteHalfDuplexOperationActive()
+                      ? m_ft2LinkSatelliteHalfDuplexTxDialHz : configuration.txDialHz);
+    result.insert(QStringLiteral("settleMs"), ft2LinkSatelliteHalfDuplexOperationActive()
+                      ? m_ft2LinkSatelliteHalfDuplexSettleMs : configuration.settleMs);
+    result.insert(QStringLiteral("configurationError"),
+                  decodium::ft2link_satellite::validationError(configuration));
+    result.insert(QStringLiteral("supportedBackend"),
+                  m_catBackend == QStringLiteral("hamlib"));
+    result.insert(QStringLiteral("catConnected"),
+                  m_hamlibCat && m_hamlibCat->connected());
+    result.insert(QStringLiteral("rigSplitMode"),
+                  m_hamlibCat ? m_hamlibCat->splitMode() : QString());
+    return result;
+}
+
+bool DecodiumBridge::beginFt2LinkSatelliteHalfDuplexTx()
+{
+    using decodium::ft2link_satellite::HalfDuplexConfiguration;
+    HalfDuplexConfiguration configuration;
+    configuration.enabled = true;
+    configuration.rxDialHz = getSetting(QStringLiteral("Ft2LinkSatelliteRxDialHz"), 0).toLongLong();
+    configuration.txDialHz = getSetting(QStringLiteral("Ft2LinkSatelliteTxDialHz"), 0).toLongLong();
+    configuration.settleMs = decodium::ft2link_satellite::normalizedSettleMs(
+        getSetting(QStringLiteral("Ft2LinkSatelliteCatSettleMs"), 900).toInt());
+
+    QString const configurationError = decodium::ft2link_satellite::validationError(configuration);
+    if (!configurationError.isEmpty()) {
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex: %1").arg(configurationError));
+        return false;
+    }
+    if (ft2LinkSatelliteHalfDuplexOperationActive()) {
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex: a previous RX/TX transition is still active"));
+        return false;
+    }
+    if (m_catBackend != QStringLiteral("hamlib") || !m_hamlibCat || !m_hamlibCat->connected()) {
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex requires a connected Hamlib CAT rig"));
+        return false;
+    }
+    if (m_hamlibCat->splitMode().trimmed().compare(QStringLiteral("rig"), Qt::CaseInsensitive) != 0) {
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex requires Hamlib Split mode 'rig'"));
+        return false;
+    }
+    if (!m_hamlibCat->canPtt() || m_hamlibCat->pttActive()) {
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex requires idle CAT PTT (VOX is not supported)"));
+        return false;
+    }
+
+    m_ft2LinkSatelliteHalfDuplexRxDialHz = configuration.rxDialHz;
+    m_ft2LinkSatelliteHalfDuplexTxDialHz = configuration.txDialHz;
+    m_ft2LinkSatelliteHalfDuplexSettleMs = configuration.settleMs;
+    quint64 const serial = ++m_ft2LinkSatelliteHalfDuplexSerial;
+    setFt2LinkSatelliteHalfDuplexState(1,
+        QStringLiteral("CAT RX %1 Hz -> TX %2 Hz; waiting %3 ms before PTT")
+            .arg(configuration.rxDialHz)
+            .arg(configuration.txDialHz)
+            .arg(configuration.settleMs));
+
+    if (!m_hamlibCat->prepareSatelliteHalfDuplex(static_cast<double>(configuration.rxDialHz),
+                                                  static_cast<double>(configuration.txDialHz))) {
+        m_ft2LinkSatelliteHalfDuplexRxDialHz = 0;
+        m_ft2LinkSatelliteHalfDuplexTxDialHz = 0;
+        setFt2LinkSatelliteHalfDuplexState(0, QStringLiteral("CAT refused the satellite VFO preparation"));
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex: CAT refused the RX/TX VFO preparation"));
+        return false;
+    }
+
+    bridgeLog(QStringLiteral("[FT2SAT] TX prepare serial=%1 rx_hz=%2 tx_hz=%3 settle_ms=%4")
+                  .arg(serial)
+                  .arg(configuration.rxDialHz)
+                  .arg(configuration.txDialHz)
+                  .arg(configuration.settleMs));
+    emit statusMessage(QStringLiteral("FT2-Link satellite: preparing TX VFO before PTT"));
+
+    QTimer::singleShot(configuration.settleMs, this, [this, serial]() {
+        if (serial != m_ft2LinkSatelliteHalfDuplexSerial
+            || m_ft2LinkSatelliteHalfDuplexState != 1) {
+            return;
+        }
+        if (!m_hamlibCat || !m_hamlibCat->connected() || !m_hamlibCat->canPtt()) {
+            restoreFt2LinkSatelliteHalfDuplexRx(QStringLiteral("CAT became unavailable before PTT"), true);
+            return;
+        }
+        bool const rxReady = std::abs(m_hamlibCat->frequency()
+                                      - static_cast<double>(m_ft2LinkSatelliteHalfDuplexRxDialHz)) <= 1.0;
+        bool const txReady = std::abs(m_hamlibCat->txFrequency()
+                                      - static_cast<double>(m_ft2LinkSatelliteHalfDuplexTxDialHz)) <= 1.0;
+        if (!rxReady || !txReady || !m_hamlibCat->split()) {
+            restoreFt2LinkSatelliteHalfDuplexRx(QStringLiteral("CAT VFO state could not be verified before PTT"), true);
+            return;
+        }
+
+        startTx();
+        if (!m_transmitting) {
+            restoreFt2LinkSatelliteHalfDuplexRx(QStringLiteral("TX did not start after CAT preparation"), true);
+        } else {
+            setFt2LinkSatelliteHalfDuplexState(2, QStringLiteral("TX active; RX audio is suspended"));
+        }
+    });
+    return true;
+}
+
+void DecodiumBridge::finishFt2LinkSatelliteHalfDuplexTx(const QString& reason, bool error)
+{
+    bool const notifyAdapter = m_ft2LinkTxActive || ft2LinkSatelliteHalfDuplexOperationActive();
+    m_ft2LinkTxActive = false;
+    m_pendingFt2LinkText.clear();
+    m_pendingFt2LinkWave.clear();
+    m_pendingFt2LinkPlan.clear();
+    m_ft2LinkSatelliteHalfDuplexRxDialHz = 0;
+    m_ft2LinkSatelliteHalfDuplexTxDialHz = 0;
+    setFt2LinkSatelliteHalfDuplexState(0, reason);
+    restoreTxAudioSchedulingBoost(QStringLiteral("ft2sat-%1").arg(reason));
+    resumeRxAudioAfterTx(QStringLiteral("ft2sat-%1").arg(reason));
+    resumeNonAudioTxWork(QStringLiteral("ft2sat-%1").arg(reason));
+    bridgeLog(QStringLiteral("[FT2SAT] complete reason=%1 error=%2")
+                  .arg(reason).arg(error ? 1 : 0));
+    if (error) {
+        emit errorMessage(QStringLiteral("FT2-Link satellite half-duplex: %1").arg(reason));
+    } else {
+        emit statusMessage(QStringLiteral("FT2-Link satellite: RX restored"));
+    }
+    if (notifyAdapter) {
+        emit ft2LinkTxFinished();
+    }
+}
+
+void DecodiumBridge::restoreFt2LinkSatelliteHalfDuplexRx(const QString& reason, bool error)
+{
+    if (!ft2LinkSatelliteHalfDuplexOperationActive()) {
+        finishFt2LinkSatelliteHalfDuplexTx(reason, error);
+        return;
+    }
+
+    quint64 const serial = ++m_ft2LinkSatelliteHalfDuplexSerial;
+    setFt2LinkSatelliteHalfDuplexState(3, QStringLiteral("PTT off; restoring RX VFO"));
+    if (!m_hamlibCat || !m_hamlibCat->connected()
+        || !m_hamlibCat->restoreSatelliteHalfDuplexRx(
+               static_cast<double>(m_ft2LinkSatelliteHalfDuplexRxDialHz))) {
+        finishFt2LinkSatelliteHalfDuplexTx(reason + QStringLiteral("; CAT RX restore failed"), true);
+        return;
+    }
+
+    int const settleMs = qBound(250, m_ft2LinkSatelliteHalfDuplexSettleMs, 5000);
+    QTimer::singleShot(settleMs, this, [this, serial, reason, error]() {
+        if (serial != m_ft2LinkSatelliteHalfDuplexSerial
+            || m_ft2LinkSatelliteHalfDuplexState != 3) {
+            return;
+        }
+        bool const rxReady = m_hamlibCat && m_hamlibCat->connected()
+            && std::abs(m_hamlibCat->frequency()
+                        - static_cast<double>(m_ft2LinkSatelliteHalfDuplexRxDialHz)) <= 1.0
+            && !m_hamlibCat->split()
+            && m_hamlibCat->txFrequency() <= 1.0;
+        finishFt2LinkSatelliteHalfDuplexTx(
+            rxReady ? reason : reason + QStringLiteral("; CAT RX restore could not be verified"),
+            error || !rxReady);
+    });
+}
+
+void DecodiumBridge::cancelFt2LinkSatelliteHalfDuplexTx(const QString& reason)
+{
+    if (!ft2LinkSatelliteHalfDuplexOperationActive()) {
+        return;
+    }
+    ++m_ft2LinkSatelliteHalfDuplexSerial;
+    restoreFt2LinkSatelliteHalfDuplexRx(reason, false);
+}
+
 bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
                                           const QVector<float>& wave,
                                           const QVariantMap& plan)
@@ -22050,6 +22895,21 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
     m_pendingFt2LinkWave = wave;
     m_pendingFt2LinkPlan = plan;
     m_ft2LinkTxActive = true;
+
+    // Satellite half-duplex has an explicit CAT VFO/Ptt sequence.  Do not
+    // fall through to the normal startTx path until RX and TX VFOs have been
+    // programmed and have observed the configured settle guard.
+    if (ft2LinkSatelliteHalfDuplexRequested()) {
+        if (!beginFt2LinkSatelliteHalfDuplexTx()) {
+            m_ft2LinkTxActive = false;
+            m_pendingFt2LinkText.clear();
+            m_pendingFt2LinkWave.clear();
+            m_pendingFt2LinkPlan.clear();
+            emit ft2LinkTxFinished();
+            return false;
+        }
+        return true;
+    }
 
     int rxBufferedBeforeTx = 0;
     {
@@ -22108,6 +22968,15 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
 
 void DecodiumBridge::startTx()
 {
+    // RTL-SDR devices have no transmit chain.  Enforce receive-only operation
+    // in the backend as well as in QML so an auto-sequence or shortcut can
+    // never key an unrelated CAT/PTT configuration while RTL RX is selected.
+    if (rtlSdrEnabled()) {
+        const QString message = QStringLiteral("TX blocked: RTL-SDR receiver mode is receive-only.");
+        bridgeLog(message);
+        emit errorMessage(message);
+        return;
+    }
     // FT2-Link: la TX passa SOLO dal path dedicato (transmitFt2LinkAudio ->
     // m_ft2LinkTxActive=true). Blocca qui i TX del sequencer FTx standard
     // (AutoCQ/auto-seq) che in FT2-Link genererebbero un CQ non codificabile.
@@ -22395,9 +23264,18 @@ void DecodiumBridge::startTx()
         m_activeTxNumber = m_currentTx;
         m_activeTxMessage = msg.trimmed();
         applyConfiguredCatRigMode(QStringLiteral("startTx"));
-        syncActiveCatTxSplitFrequency(QStringLiteral("startTx"));
+        bool const satelliteHalfDuplex = ft2LinkSatelliteHalfDuplexOperationActive();
+        if (!satelliteHalfDuplex) {
+            syncActiveCatTxSplitFrequency(QStringLiteral("startTx"));
+        }
         bool const voxPtt = activeCatUsesVoxPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat);
-        if (!voxPtt && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+        if (satelliteHalfDuplex && m_hamlibCat) {
+            // The absolute RX/TX VFO pair was programmed before this call.
+            // Reissuing generic fake-split PTT here would collapse it to the
+            // FT audio offset, so assert only PTT after the settle guard.
+            m_hamlibCat->setRigPtt(true);
+            bridgeLog(QStringLiteral("[FT2SAT] PTT ON after CAT settle (macOS)"));
+        } else if (!voxPtt && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
             activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
                               true, catSplitTxDialFrequencyHz(),
                               m_omniRigCat, m_legacyBackend);
@@ -22434,7 +23312,7 @@ void DecodiumBridge::startTx()
         // FT2-Link deve restare pronto a ricevere ACK immediati: sospendere
         // l'input su macOS forza restart CoreAudio e puo' tagliare HELLO_ACK.
         if (m_soundInput
-            && !m_ft2LinkTxActive
+            && (!m_ft2LinkTxActive || satelliteHalfDuplex)
             && !(m_mode == "FT2" && m_asyncTxEnabled)) {
             m_soundInput->suspend();
             m_rxAudioSuspendedForTx = true;
@@ -22599,12 +23477,16 @@ void DecodiumBridge::startTx()
     m_activeTxNumber = m_currentTx;
     m_activeTxMessage = msg.trimmed();
     applyConfiguredCatRigMode(QStringLiteral("startTx"));
+    bool const satelliteHalfDuplex = ft2LinkSatelliteHalfDuplexOperationActive();
     bool const voxPtt = activeCatUsesVoxPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat);
-    double const startTxDialHz = catSplitTxDialFrequencyHz();
+    double const startTxDialHz = satelliteHalfDuplex
+        ? static_cast<double>(m_ft2LinkSatelliteHalfDuplexTxDialHz)
+        : catSplitTxDialFrequencyHz();
     bool const startTxCanPtt =
         activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend);
     bool const hamlibAsyncFakeSplitPtt =
         !tciAudioTx
+        && !satelliteHalfDuplex
         && !voxPtt
         && startTxCanPtt
         && startTxDialHz > 0.0
@@ -22615,11 +23497,20 @@ void DecodiumBridge::startTx()
         && !voxPtt
         && startTxCanPtt
         && m_catBackend == QStringLiteral("cat4om");
-    if (!hamlibAsyncFakeSplitPtt) {
+    if (!hamlibAsyncFakeSplitPtt && !satelliteHalfDuplex) {
         syncActiveCatTxSplitFrequency(QStringLiteral("startTx"));
     }
     int asyncPttAudioDelayMs = 0;
-    if (!tciAudioTx && !voxPtt && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+    if (satelliteHalfDuplex && m_hamlibCat && startTxCanPtt) {
+        QElapsedTimer catTimer;
+        catTimer.start();
+        m_hamlibCat->setRigPtt(true);
+        txTimelineLog(QStringLiteral("[TX-TL] ft2sat_ptt on=1 cat_ms=%1 rxDialHz=%2 txDialHz=%3")
+                      .arg(catTimer.elapsed())
+                      .arg(m_ft2LinkSatelliteHalfDuplexRxDialHz)
+                      .arg(m_ft2LinkSatelliteHalfDuplexTxDialHz));
+        bridgeLog(QStringLiteral("[FT2SAT] PTT ON after CAT settle"));
+    } else if (!tciAudioTx && !voxPtt && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
         QElapsedTimer catTimer;
         catTimer.start();
         bool asyncPtt = false;
@@ -22687,7 +23578,7 @@ void DecodiumBridge::startTx()
     // Anti-collisione: durante TX sync non dobbiamo ricatturare il nostro
     // stesso audio sul device RX. FT2 async resta full-duplex.
     if (m_monitoring && m_soundInput
-        && !m_ft2LinkTxActive
+        && (!m_ft2LinkTxActive || satelliteHalfDuplex)
         && !(m_mode == "FT2" && m_asyncTxEnabled)) {
         m_soundInput->suspend();
         m_rxAudioSuspendedForTx = true;
@@ -23363,6 +24254,7 @@ void DecodiumBridge::stopTx()
         return;
     }
 
+    bool const satelliteHalfDuplex = ft2LinkSatelliteHalfDuplexOperationActive();
     bool const catReportsPttActive =
         (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
         || (m_catBackend == QStringLiteral("cat4om") && m_cat4OmCat && m_cat4OmCat->pttActive())
@@ -23415,10 +24307,12 @@ void DecodiumBridge::stopTx()
     // CW-audio interrotto manualmente: disarma lo stato CW.
     m_cwTxActive = false;
     m_pendingCwText.clear();
-    m_ft2LinkTxActive = false;
-    m_pendingFt2LinkText.clear();
-    m_pendingFt2LinkWave.clear();
-    m_pendingFt2LinkPlan.clear();
+    if (!satelliteHalfDuplex) {
+        m_ft2LinkTxActive = false;
+        m_pendingFt2LinkText.clear();
+        m_pendingFt2LinkWave.clear();
+        m_pendingFt2LinkPlan.clear();
+    }
 
 #if defined(Q_OS_MAC)
     if (m_txAudioSink || m_txPcmBuffer) {
@@ -23439,6 +24333,10 @@ void DecodiumBridge::stopTx()
         m_transmitting = false;
         emit transmittingChanged();
         emit statusMessage("TX fermato");
+    }
+    if (satelliteHalfDuplex) {
+        cancelFt2LinkSatelliteHalfDuplexTx(QStringLiteral("TX cancelled by operator"));
+        return;
     }
     restoreTxAudioSchedulingBoost(QStringLiteral("stopTx"));
     resumeRxAudioAfterTx(QStringLiteral("stopTx"));
@@ -23468,6 +24366,10 @@ void DecodiumBridge::stopTx()
         emit transmittingChanged();
         emit statusMessage("TX fermato");
     }
+    if (satelliteHalfDuplex) {
+        cancelFt2LinkSatelliteHalfDuplexTx(QStringLiteral("TX cancelled by operator"));
+        return;
+    }
     restoreTxAudioSchedulingBoost(QStringLiteral("stopTx"));
     resumeRxAudioAfterTx(QStringLiteral("stopTx"));
     resumeNonAudioTxWork(QStringLiteral("stopTx"));
@@ -23475,6 +24377,12 @@ void DecodiumBridge::stopTx()
 
 void DecodiumBridge::startTune()
 {
+    if (rtlSdrEnabled()) {
+        const QString message = QStringLiteral("Tune blocked: RTL-SDR receiver mode is receive-only.");
+        bridgeLog(message);
+        emit errorMessage(message);
+        return;
+    }
     clearDeferredManualSyncTx(QStringLiteral("start-tune"));
 
     if (m_bridgeAudioTuneActive) {
@@ -25496,6 +26404,9 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         if (canonicalKey == QStringLiteral("CloudLogStationID") && m_cloudlog) {
             m_cloudlog->setStationId(qBound(0, value.toInt(), 999));
         }
+        if (canonicalKey == QStringLiteral("Lotw_pwd") && m_callsignIntelligence) {
+            m_callsignIntelligence->setLotwPassword(value.toString());
+        }
         emit settingValueChanged(canonicalKey, value);
         if (legacyKey != canonicalKey) {
             emit settingValueChanged(legacyKey, value);
@@ -25739,6 +26650,14 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
                                ? QStringLiteral("Time sync RF self-calibration enabled")
                                : QStringLiteral("Time sync RF self-calibration disabled"));
         }
+    }
+
+    if (key.startsWith(QStringLiteral("RtlSdr"))) {
+        // Coalesce QML field edits onto the next event-loop pass.  Changing a
+        // frequency or gain never performs USB I/O synchronously in the UI.
+        QTimer::singleShot(0, this, [this, key]() {
+            applyRtlSdrSettings(QStringLiteral("setting %1").arg(key));
+        });
     }
 
     // Sync legacy-owned keys to the legacy INI file so that the embedded
@@ -35189,6 +36108,10 @@ void DecodiumBridge::loadSettings()
         m_qrzLogbook->setApiKey(m_qrzLogbookApiKey);
         m_qrzLogbook->setReplaceDuplicates(m_qrzLogbookReplaceDuplicates);
     }
+    if (m_callsignIntelligence) {
+        m_callsignIntelligence->setQrzApiKey(m_qrzLogbookApiKey);
+        m_callsignIntelligence->setLotwPassword(getSetting(QStringLiteral("Lotw_pwd"), QString()).toString());
+    }
     // LotW
     m_lotwEnabled = s.value("lotwEnabled", false).toBool();
     m_showUsState = s.value("showUsState", true).toBool();
@@ -38921,6 +39844,7 @@ void DecodiumBridge::loadWorldMapCall3Cache()
             }
             self->m_worldMapCall3Loading = false;
             self->m_worldMapCall3Loaded = true;
+            self->m_worldMapCall3RecordCount = result.loaded;
             for (auto it = result.grids.cbegin(); it != result.grids.cend(); ++it) {
                 if (!self->m_worldMapGridByCall.contains(it.key())) {
                     self->m_worldMapGridByCall.insert(it.key(), it.value());
@@ -38935,6 +39859,7 @@ void DecodiumBridge::loadWorldMapCall3Cache()
                 bridgeLog(QStringLiteral("WorldMap CALL3 not found or empty; async lookup finished in %1 ms")
                               .arg(result.elapsedMs));
             }
+            emit self->localDataStateChanged();
         }, Qt::QueuedConnection);
     });
     task->setAutoDelete(true);
@@ -42528,6 +43453,17 @@ void DecodiumBridge::onPeriodTimer()
     m_periodProgress = (periodMs > 0) ? (msInSlot * 100 / periodMs) : 0;
     emit periodProgressChanged();
 
+    if (rtlSdrGeneralReceiverActive()) {
+        // WFM/NFM/AM/SSB/CW are continuous receiver modes. They must not run
+        // an FT/JT boundary decode or schedule digital TX from stale PCM.
+        m_periodTicks = 0;
+        if (m_periodProgress != 0) {
+            m_periodProgress = 0;
+            emit periodProgressChanged();
+        }
+        return;
+    }
+
     // === TX watchdog configurabile (allineato a mainwindow m_txWatchdogMode) ===
     // m_txWatchdogMode: 0=off, 1=time-based (monotonic real elapsed), 2=count-based (periodi)
     bool const txWatchdogSessionActive =
@@ -42864,6 +43800,15 @@ void DecodiumBridge::onSpectrumTimer()
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     if (m_lastPanadapterFrameMs <= 0) {
         m_lastPanadapterFrameMs = nowMs;
+    }
+
+    // An RTL-SDR is an RF source, not a sound card.  Its waterfall therefore
+    // comes from complex IQ and spans centre ± sampleRate/2.  Do this before
+    // the legacy 12 kHz PCM path so broadcast FM never appears as flat audio
+    // noise in an FT8-sized display.
+    if (rtlSdrRfView()) {
+        processRtlSdrSpectrum();
+        return;
     }
 
     // Copia i campioni recenti nel ring buffer waterfall (non viene consumato dal decoder).
@@ -43816,6 +44761,319 @@ void DecodiumBridge::onTciPcmSamplesReady(const QVector<short>& samples)
     }
 }
 
+void DecodiumBridge::onRtlSdrPcmSamplesReady(const QVector<short>& samples)
+{
+    if (samples.isEmpty()
+        || !m_monitoring
+        || !rtlSdrEnabled()
+        || !m_rtlSdrInput
+        || !m_rtlSdrInput->isRunning()
+        || m_rtlSdrInput->activeConfig().demodulator != RtlSdrDsp::Demodulator::WeakSignal
+        || m_transmitting
+        || m_tuning) {
+        return;
+    }
+
+    double sumSq = 0.0;
+    int minSample = 32767;
+    int maxSample = -32768;
+    int peakAbs = 0;
+    int clippedSamples = 0;
+    for (short sample : samples) {
+        const int value = sample;
+        const int absSample = value < 0 ? -value : value;
+        sumSq += static_cast<double>(value) * static_cast<double>(value);
+        if (value < minSample) minSample = value;
+        if (value > maxSample) maxSample = value;
+        if (absSample > peakAbs) peakAbs = absSample;
+        if (absSample >= 32700) ++clippedSamples;
+    }
+
+    {
+        QMutexLocker locker(&m_audioBufferMutex);
+        m_audioBuffer += samples;
+    }
+
+    for (short sample : samples) {
+        uint64_t writePosition = m_asyncAudioPos.load(std::memory_order_acquire);
+        m_asyncAudio[writePosition % ASYNC_BUF_SIZE] = sample;
+        m_asyncAudioPos.compare_exchange_strong(writePosition, writePosition + 1,
+                                                std::memory_order_release,
+                                                std::memory_order_relaxed);
+        if (m_wavManager) {
+            m_wavManager->feedSample(sample);
+        }
+    }
+    m_driftExpectedFrames.fetch_add(samples.size(), std::memory_order_relaxed);
+
+    const double rms = std::sqrt(sumSq / samples.size()) / 32768.0;
+    const double peak = static_cast<double>(peakAbs) / 32768.0;
+    const int dynamicRange = maxSample - minSample;
+    m_audioLevel = rms;
+    emit audioLevelChanged();
+    handleAudioHealth(rms, peak, dynamicRange, clippedSamples, samples.size());
+
+    if (isFt2LinkApplicationMode(m_mode) && m_monitoring
+        && !m_transmitting && !m_tuning) {
+        emit ft2LinkRxSamplesReady(samples,
+                                   static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
+    }
+
+    static qint64 lastLogMs = 0;
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (nowMs - lastLogMs >= 5000) {
+        lastLogMs = nowMs;
+        int buffered = 0;
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            buffered = m_audioBuffer.size();
+        }
+        bridgeLog(QStringLiteral("RTL-SDR PCM: chunk=%1 buffered=%2 rms=%3 peak=%4 range=%5 clipped=%6")
+                      .arg(samples.size())
+                      .arg(buffered)
+                      .arg(rms, 0, 'g', 4)
+                      .arg(peak, 0, 'g', 4)
+                      .arg(dynamicRange)
+                      .arg(clippedSamples));
+    }
+}
+
+void DecodiumBridge::onRtlSdrIqSamplesReady(const QVector<short>& samples,
+                                            int sampleRate,
+                                            quint32 centerFrequencyHz)
+{
+    if (samples.size() < RtlSdrRfSpectrum::kFftSize * 2
+        || !m_monitoring
+        || !rtlSdrEnabled()
+        || !m_rtlSdrInput
+        || !m_rtlSdrInput->isRunning()
+        || m_transmitting
+        || m_tuning
+        || sampleRate <= 0
+        || centerFrequencyHz == 0) {
+        return;
+    }
+
+    if (m_rtlSdrRfSampleRate != sampleRate) {
+        m_rtlSdrRfSampleRate = sampleRate;
+        emit rtlSdrRfSampleRateChanged();
+        emit rtlSdrRfViewChanged();
+    }
+
+    if (m_rtlSdrIqRing.size() != RTL_IQ_RING_SHORTS) {
+        m_rtlSdrIqRing.fill(0, RTL_IQ_RING_SHORTS);
+        m_rtlSdrIqWritePos = 0;
+        m_rtlSdrIqCount = 0;
+    }
+    const int copyCount = qMin(samples.size(), RTL_IQ_RING_SHORTS);
+    const short *source = samples.constData() + (samples.size() - copyCount);
+    const int firstCount = qMin(copyCount, RTL_IQ_RING_SHORTS - m_rtlSdrIqWritePos);
+    std::copy_n(source, firstCount, m_rtlSdrIqRing.begin() + m_rtlSdrIqWritePos);
+    const int secondCount = copyCount - firstCount;
+    if (secondCount > 0) {
+        std::copy_n(source + firstCount, secondCount, m_rtlSdrIqRing.begin());
+    }
+    m_rtlSdrIqWritePos = (m_rtlSdrIqWritePos + copyCount) % RTL_IQ_RING_SHORTS;
+    m_rtlSdrIqCount = qMin(RTL_IQ_RING_SHORTS, m_rtlSdrIqCount + copyCount);
+}
+
+void DecodiumBridge::startRtlSdrAudioPlayback(int sampleRate)
+{
+    if (sampleRate != RtlSdrDsp::kReceiverAudioSampleRate
+        || !m_rtlSdrAudioOutput
+        || !m_rtlSdrAudioThread
+        || !m_rtlSdrAudioThread->isRunning()
+        || QDateTime::currentMSecsSinceEpoch() < m_rtlSdrAudioRetryAfterMs) {
+        return;
+    }
+
+    const QString requestedName =
+        getSetting(QStringLiteral("RtlSdrAudioOutputDevice"), QString()).toString().trimmed();
+    QAudioDevice output;
+    QString matchReason = QStringLiteral("system-default");
+    if (requestedName.isEmpty()) {
+        output = cachedDefaultAudioOutput(QStringLiteral("RTL-SDR receiver audio"), false);
+    } else {
+        bool resolved = tryResolveAudioDeviceByIdentity(
+            cachedAudioOutputs(QStringLiteral("RTL-SDR receiver audio"), false),
+            requestedName, QString(), &output, &matchReason);
+        if (!resolved) {
+            output = cachedDefaultAudioOutput(QStringLiteral("RTL-SDR receiver audio fallback"), false);
+            matchReason = QStringLiteral("requested output not found; system-default fallback");
+        }
+    }
+    if (output.id().isEmpty()) {
+        const QString message = QStringLiteral("RTL-SDR audio output is unavailable: refresh audio devices in Settings > Audio.");
+        m_rtlSdrStatus = message;
+        emit rtlSdrStatusChanged();
+        emit statusMessage(message);
+        m_rtlSdrAudioRetryAfterMs = QDateTime::currentMSecsSinceEpoch() + 3000;
+        return;
+    }
+
+    if (m_rtlSdrAudioPlaybackRequested
+        && m_rtlSdrAudioPlaybackDeviceId == output.id()
+        && m_rtlSdrAudioPlaybackSampleRate == sampleRate) {
+        return;
+    }
+
+    m_rtlSdrAudioPlaybackRequested = true;
+    m_rtlSdrAudioPlaybackDeviceId = output.id();
+    m_rtlSdrAudioPlaybackSampleRate = sampleRate;
+    m_rtlSdrAudioRetryAfterMs = 0;
+    bridgeLog(QStringLiteral("RTL-SDR receiver audio start queued output=[%1] match=%2 thread=dedicated")
+                  .arg(output.description(), matchReason));
+    QPointer<RtlSdrAudioOutput> audioOutput(m_rtlSdrAudioOutput);
+    QMetaObject::invokeMethod(m_rtlSdrAudioOutput,
+                              [audioOutput, output, sampleRate]() {
+        if (audioOutput) {
+            audioOutput->start(output, sampleRate);
+        }
+    }, Qt::QueuedConnection);
+}
+
+void DecodiumBridge::stopRtlSdrAudioPlayback(const QString& reason)
+{
+    m_rtlSdrAudioPlaybackRequested = false;
+    m_rtlSdrAudioPlaybackDeviceId.clear();
+    m_rtlSdrAudioPlaybackSampleRate = 0;
+    if (!m_rtlSdrAudioOutput || !m_rtlSdrAudioThread
+        || !m_rtlSdrAudioThread->isRunning()) {
+        return;
+    }
+    QPointer<RtlSdrAudioOutput> audioOutput(m_rtlSdrAudioOutput);
+    QMetaObject::invokeMethod(m_rtlSdrAudioOutput, [audioOutput, reason]() {
+        if (audioOutput) {
+            audioOutput->stop(reason);
+        }
+    }, Qt::QueuedConnection);
+}
+
+void DecodiumBridge::onRtlSdrAudioSamplesReady(const QVector<short>& samples, int sampleRate)
+{
+    if (samples.isEmpty()
+        || sampleRate != RtlSdrDsp::kReceiverAudioSampleRate
+        || !m_monitoring
+        || !rtlSdrEnabled()
+        || !m_rtlSdrInput
+        || !m_rtlSdrInput->isRunning()
+        || m_transmitting
+        || m_tuning) {
+        return;
+    }
+    const RtlSdrInput::Config config = m_rtlSdrInput->activeConfig();
+    const bool audioEnabled = getSetting(QStringLiteral("RtlSdrAudioEnabled"),
+                                         config.demodulator != RtlSdrDsp::Demodulator::WeakSignal).toBool();
+    if (config.demodulator == RtlSdrDsp::Demodulator::WeakSignal || !audioEnabled) {
+        return;
+    }
+
+    startRtlSdrAudioPlayback(sampleRate);
+    if (!m_rtlSdrAudioPlaybackRequested || !m_rtlSdrAudioOutput) {
+        return;
+    }
+    QPointer<RtlSdrAudioOutput> audioOutput(m_rtlSdrAudioOutput);
+    QMetaObject::invokeMethod(m_rtlSdrAudioOutput,
+                              [audioOutput, samples, sampleRate]() {
+        if (audioOutput) {
+            audioOutput->enqueueSamples(samples, sampleRate);
+        }
+    }, Qt::QueuedConnection);
+}
+
+void DecodiumBridge::processRtlSdrSpectrum()
+{
+    if (!rtlSdrRfView() || m_rtlSdrIqCount < RtlSdrRfSpectrum::kFftSize * 2
+        || m_rtlSdrIqRing.size() != RTL_IQ_RING_SHORTS) {
+        return;
+    }
+    bool expectedIdle = false;
+    if (!m_rtlSdrSpectrumBusy.compare_exchange_strong(expectedIdle, true)) {
+        return;
+    }
+
+    QVector<short> iq(RtlSdrRfSpectrum::kFftSize * 2);
+    int source = (m_rtlSdrIqWritePos - iq.size() + RTL_IQ_RING_SHORTS) % RTL_IQ_RING_SHORTS;
+    for (int index = 0; index < iq.size(); ++index) {
+        iq[index] = m_rtlSdrIqRing[(source + index) % RTL_IQ_RING_SHORTS];
+    }
+    const int sampleRate = m_rtlSdrRfSampleRate;
+    const quint32 centreFrequency = m_rtlSdrRfCenterFrequencyHz;
+    const uint64_t serial = m_rtlSdrSpectrumSerial.fetch_add(1) + 1;
+    m_lastPanadapterFrameMs = QDateTime::currentMSecsSinceEpoch();
+
+    QPointer<DecodiumBridge> guard(this);
+    auto *task = QRunnable::create([guard, iq = std::move(iq), sampleRate,
+                                    centreFrequency, serial]() mutable {
+        RtlSdrRfSpectrum::Frame frame = RtlSdrRfSpectrum::compute(iq, sampleRate, centreFrequency);
+        if (!guard) {
+            return;
+        }
+        QMetaObject::invokeMethod(guard, [guard, frame = std::move(frame), serial]() mutable {
+            if (!guard) {
+                return;
+            }
+            guard->m_rtlSdrSpectrumBusy.store(false);
+            if (serial != guard->m_rtlSdrSpectrumSerial.load()
+                || !guard->rtlSdrRfView()
+                || frame.values.isEmpty()) {
+                return;
+            }
+            if (guard->m_lastPanadapterData.size() == frame.values.size()) {
+                for (int index = 0; index < frame.values.size(); ++index) {
+                    frame.values[index] = 0.85f * frame.values[index]
+                        + 0.15f * guard->m_lastPanadapterData[index];
+                }
+            }
+            guard->m_lastPanadapterData = frame.values;
+            guard->m_lastPanMinDb = frame.minDb;
+            guard->m_lastPanMaxDb = frame.maxDb;
+            guard->m_lastPanFreqMin = frame.frequencyMinHz;
+            guard->m_lastPanFreqMax = frame.frequencyMaxHz;
+            const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+            if (nowMs - guard->m_lastRtlSdrRfLogMs >= 5000) {
+                guard->m_lastRtlSdrRfLogMs = nowMs;
+                const auto peakIt = std::max_element(frame.values.cbegin(),
+                                                     frame.values.cend());
+                const int peakIndex = static_cast<int>(std::distance(frame.values.cbegin(),
+                                                                      peakIt));
+                const float peakDb = peakIt != frame.values.cend() ? *peakIt : -160.0f;
+                const double binWidth = frame.values.size() > 1
+                    ? (frame.frequencyMaxHz - frame.frequencyMinHz)
+                        / static_cast<double>(frame.values.size() - 1)
+                    : 0.0;
+                const double peakFrequency = frame.frequencyMinHz + peakIndex * binWidth;
+                const int selectedIndex = binWidth > 0.0
+                    ? qBound(0,
+                             qRound((guard->m_rtlSdrRfSelectedFrequencyHz
+                                     - frame.frequencyMinHz) / binWidth),
+                             frame.values.size() - 1)
+                    : 0;
+                const float selectedDb = frame.values.value(selectedIndex, -160.0f);
+                qInfo().noquote()
+                    << "[RTL-RF]"
+                    << "bins=" << frame.values.size()
+                    << "rate=" << guard->m_rtlSdrRfSampleRate
+                    << "span_hz=" << QString::number(frame.frequencyMinHz, 'f', 0)
+                                     + QStringLiteral("..")
+                                     + QString::number(frame.frequencyMaxHz, 'f', 0)
+                    << "selected_hz=" << guard->m_rtlSdrRfSelectedFrequencyHz
+                    << "selected_db=" << QString::number(selectedDb, 'f', 1)
+                    << "peak_hz=" << QString::number(peakFrequency, 'f', 0)
+                    << "peak_db=" << QString::number(peakDb, 'f', 1)
+                    << "display_db=" << QString::number(frame.minDb, 'f', 1)
+                                       + QStringLiteral("..")
+                                       + QString::number(frame.maxDb, 'f', 1);
+            }
+            guard->publishRemoteWaterfallFrame(frame.values, frame.minDb, frame.maxDb,
+                                                frame.frequencyMinHz, frame.frequencyMaxHz);
+            emit guard->panadapterDataReady(frame.values, frame.minDb, frame.maxDb,
+                                             frame.frequencyMinHz, frame.frequencyMaxHz);
+        }, Qt::QueuedConnection);
+    });
+    QThreadPool::globalInstance()->start(task, -1);
+}
+
 void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
 {
     MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
@@ -43842,6 +45100,11 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
                       .arg(qMax<qint64>(0, m_ft2LinkPostTxAckGuardUntilMs - captureRequestMs)));
         m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs,
                                             captureRequestMs + kFt2LinkPostTxAckGuardMs);
+        return;
+    }
+    if (rtlSdrEnabled()) {
+        bridgeLog(QStringLiteral("startAudioCapture: using RTL-SDR RX input"));
+        startRtlSdrCapture();
         return;
     }
     if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
@@ -44326,7 +45589,9 @@ void DecodiumBridge::handleAudioHealth(double rms,
                                        int clippedSamples,
                                        int samples)
 {
-    const bool captureActive = (m_soundInput != nullptr) || m_tciAudioCaptureActive;
+    const bool captureActive = (m_soundInput != nullptr)
+        || m_tciAudioCaptureActive
+        || (m_rtlSdrInput && m_rtlSdrInput->isRunning());
     if (!m_monitoring || !captureActive || samples <= 0) {
         m_audioUnhealthyStartMs = 0;
         m_audioOverdriveStartMs = 0;
@@ -44511,7 +45776,8 @@ void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMod
     }
 
     qint64 const now = QDateTime::currentMSecsSinceEpoch();
-    bool const keepExistingQtCapture = !m_tciAudioCaptureActive && m_soundInput;
+    bool const keepExistingQtCapture = (!m_tciAudioCaptureActive && m_soundInput)
+        || (m_rtlSdrInput && m_rtlSdrInput->isActive());
 
     if (keepExistingQtCapture) {
         bridgeLog(QStringLiteral("setMode: preserving active QAudioSource for mode change %1 -> %2")
@@ -44620,6 +45886,13 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         return;
     }
 
+    if (rtlSdrEnabled()) {
+        bridgeLog(QStringLiteral("RTL-SDR watchdog: restarting asynchronous receiver (%1)").arg(reason));
+        stopRtlSdrCapture();
+        startRtlSdrCapture();
+        return;
+    }
+
     if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         rearmLegacyPcmSpectrumFeed(QStringLiteral("watchdog %1").arg(reason));
         return;
@@ -44711,6 +45984,13 @@ void DecodiumBridge::stopAudioCapture()
     ++m_audioWatchdogRecoverySerial;
     m_lastAudioCaptureStartKey.clear();
     m_lastAudioCaptureStartMs = 0;
+    if (m_rtlSdrInput && m_rtlSdrInput->isActive()) {
+        stopRtlSdrCapture();
+        m_rxAudioSuspendedForTx = false;
+        m_audioUnhealthyStartMs = 0;
+        m_audioWatchdogIgnoreUntilMs = 0;
+        return;
+    }
     if (m_tciAudioCaptureActive) {
         stopTciAudioCapture();
         return;
@@ -44731,6 +46011,7 @@ void DecodiumBridge::teardownAudioCapture()
 {
     m_lastAudioCaptureStartKey.clear();
     m_lastAudioCaptureStartMs = 0;
+    stopRtlSdrCapture();
     if (m_soundInput) {
         bridgeLog(QStringLiteral("teardownAudioCapture: stopping and destroying SoundInput"));
         SoundInput *input = m_soundInput;
@@ -47497,7 +48778,7 @@ void DecodiumBridge::qsyTo(double freqHz, const QString& newMode)
 // B6 — cty.dat: scarica se mancante o vecchio di >30 giorni
 // ============================================================
 
-void DecodiumBridge::checkCtyDatUpdate()
+void DecodiumBridge::checkCtyDatUpdate(bool forceDownload)
 {
     if (offlineMode()) {
         emit statusMessage(QStringLiteral("Offline: cty.dat update disabled; local data remains available"));
@@ -47509,6 +48790,8 @@ void DecodiumBridge::checkCtyDatUpdate()
         return;
     }
 
+    m_ctyDatLastError.clear();
+    emit localDataStateChanged();
     bridgeLog("cty.dat update requested");
 
     // Cerca cty.dat nelle posizioni standard
@@ -47519,7 +48802,7 @@ void DecodiumBridge::checkCtyDatUpdate()
         if (QFile::exists(p)) { existing = p; break; }
     }
 
-    bool needsUpdate = existing.isEmpty();
+    bool needsUpdate = forceDownload || existing.isEmpty();
     if (!needsUpdate && !existing.isEmpty()) {
         QFileInfo fi(existing);
         needsUpdate = fi.lastModified().daysTo(QDateTime::currentDateTime()) > 30;
@@ -47533,6 +48816,7 @@ void DecodiumBridge::checkCtyDatUpdate()
 
     m_ctyDatUpdating = true;
     emit ctyDatUpdatingChanged();
+    emit localDataStateChanged();
     bridgeLog(existing.isEmpty()
               ? "cty.dat missing, starting download"
               : "cty.dat stale, starting download from " + existing);
@@ -47542,8 +48826,10 @@ void DecodiumBridge::checkCtyDatUpdate()
     if (dataDir.isEmpty())
         dataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     if (dataDir.isEmpty()) {
+        m_ctyDatLastError = QStringLiteral("cartella dati utente non disponibile");
         m_ctyDatUpdating = false;
         emit ctyDatUpdatingChanged();
+        emit localDataStateChanged();
         emit errorMessage(QStringLiteral("Download cty.dat fallito: cartella dati utente non disponibile."));
         return;
     }
@@ -47588,8 +48874,10 @@ void DecodiumBridge::checkCtyDatUpdate()
                 return;
 
             nam->deleteLater();
+            m_ctyDatLastError = failureReason;
             m_ctyDatUpdating = false;
             emit ctyDatUpdatingChanged();
+            emit localDataStateChanged();
             emit errorMessage("Download cty.dat fallito: " + failureReason);
             return;
         }
@@ -47608,22 +48896,33 @@ void DecodiumBridge::checkCtyDatUpdate()
                 bridgeLog(QStringLiteral("cty.dat downloaded from %1 (%2 bytes)")
                           .arg(sourceUrl.toString())
                           .arg(payload.size()));
-                QString loadedPath;
-                if (reloadDxccLookup(&loadedPath)) {
-                    refreshDecodeListDxcc();
-                    m_workedHistoryLoaded = false;
-                    loadWorkedBeforeHistoryAsync();
-                    bridgeLog("cty.dat updated and reloaded from " + loadedPath);
-                    emit statusMessage("cty.dat aggiornato e caricato: " + loadedPath);
-                } else {
-                    bridgeLog("cty.dat downloaded but DXCC reload failed");
-                    emit errorMessage("cty.dat scaricato ma il caricamento DXCC è fallito.");
-                }
+                reloadDxccLookupAsync([this, nam](bool loaded, const QString& loadedPath) {
+                    if (loaded) {
+                        m_ctyDatLastError.clear();
+                        m_workedHistoryLoaded = false;
+                        loadWorkedBeforeHistoryAsync();
+                        bridgeLog("cty.dat updated and reloaded from " + loadedPath);
+                        emit statusMessage("cty.dat aggiornato e caricato: " + loadedPath);
+                    } else {
+                        m_ctyDatLastError = QStringLiteral("caricamento DXCC fallito");
+                        bridgeLog("cty.dat downloaded but DXCC reload failed");
+                        emit errorMessage("cty.dat scaricato ma il caricamento DXCC è fallito.");
+                    }
+                    nam->deleteLater();
+                    m_ctyDatUpdating = false;
+                    emit ctyDatUpdatingChanged();
+                    emit localDataStateChanged();
+                });
+                return;
             } else {
                 bridgeLog(QStringLiteral("cty.dat save incomplete: wrote %1/%2 bytes, %3")
                           .arg(written)
                           .arg(payload.size())
                           .arg(writeError));
+                m_ctyDatLastError = QStringLiteral("scrittura incompleta (%1/%2 byte). %3")
+                                    .arg(written)
+                                    .arg(payload.size())
+                                    .arg(writeError);
                 emit errorMessage(QStringLiteral("Impossibile salvare cty.dat: scrittura incompleta (%1/%2 byte). %3")
                                   .arg(written)
                                   .arg(payload.size())
@@ -47631,17 +48930,21 @@ void DecodiumBridge::checkCtyDatUpdate()
             }
         } else {
             bridgeLog("cty.dat save failed: " + f.errorString());
+            m_ctyDatLastError = f.errorString();
             emit errorMessage("Impossibile salvare cty.dat: " + f.errorString());
         }
         nam->deleteLater();
         m_ctyDatUpdating = false;
         emit ctyDatUpdatingChanged();
+        emit localDataStateChanged();
     });
 
     if (!issueNextCtyDatRequest(nam)) {
         nam->deleteLater();
+        m_ctyDatLastError = QStringLiteral("nessun URL configurato");
         m_ctyDatUpdating = false;
         emit ctyDatUpdatingChanged();
+        emit localDataStateChanged();
         emit errorMessage(QStringLiteral("Download cty.dat fallito: nessun URL configurato."));
     }
 }
@@ -47663,6 +48966,7 @@ void DecodiumBridge::downloadCall3Txt()
         dataDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     }
     if (dataDir.isEmpty()) {
+        m_call3TxtLastError = QStringLiteral("cartella dati utente non disponibile");
         emit errorMessage(QStringLiteral("Download CALL3.TXT fallito: cartella dati utente non disponibile."));
         return;
     }
@@ -47670,12 +48974,15 @@ void DecodiumBridge::downloadCall3Txt()
     QString const path = QDir(dataDir).absoluteFilePath(QStringLiteral("CALL3.TXT"));
     QString parentError;
     if (!ensureParentDirectoryForFile(path, &parentError)) {
+        m_call3TxtLastError = parentError;
         emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT: %1").arg(parentError));
         return;
     }
 
+    m_call3TxtLastError.clear();
     m_call3TxtUpdating = true;
     emit call3TxtUpdatingChanged();
+    emit localDataStateChanged();
 
     bridgeLog("downloadCall3Txt: starting download to " + path);
     emit statusMessage("Download CALL3.TXT in corso...");
@@ -47699,6 +49006,7 @@ void DecodiumBridge::downloadCall3Txt()
             mgr->deleteLater();
             m_call3TxtUpdating = false;
             emit call3TxtUpdatingChanged();
+            emit localDataStateChanged();
         };
 
         if (reply->error() != QNetworkReply::NoError || (statusOk && statusCode >= 400)) {
@@ -47706,6 +49014,7 @@ void DecodiumBridge::downloadCall3Txt()
             if (statusOk && statusCode >= 400) {
                 reason = QStringLiteral("HTTP %1").arg(statusCode);
             }
+            m_call3TxtLastError = reason;
             bridgeLog("downloadCall3Txt failed: " + reason);
             emit errorMessage(QStringLiteral("Download CALL3.TXT fallito: %1").arg(reason));
             cleanup();
@@ -47715,6 +49024,7 @@ void DecodiumBridge::downloadCall3Txt()
         QByteArray const data = reply->readAll();
         QString validationError;
         if (!isProbablyCall3TxtPayload(data, &validationError)) {
+            m_call3TxtLastError = validationError;
             bridgeLog("downloadCall3Txt invalid payload: " + validationError);
             emit errorMessage(QStringLiteral("Download CALL3.TXT non valido: %1").arg(validationError));
             cleanup();
@@ -47723,6 +49033,7 @@ void DecodiumBridge::downloadCall3Txt()
 
         QSaveFile f(path);
         if (!f.open(QIODevice::WriteOnly)) {
+            m_call3TxtLastError = f.errorString();
             bridgeLog("downloadCall3Txt save failed: " + f.errorString());
             emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT in %1: %2")
                                   .arg(QDir::toNativeSeparators(path), f.errorString()));
@@ -47734,6 +49045,8 @@ void DecodiumBridge::downloadCall3Txt()
         if (written != data.size()) {
             QString const reason = f.errorString();
             f.cancelWriting();
+            m_call3TxtLastError = QStringLiteral("scrittura incompleta (%1/%2 byte). %3")
+                                  .arg(written).arg(data.size()).arg(reason);
             bridgeLog(QStringLiteral("downloadCall3Txt incomplete write: %1/%2 bytes")
                           .arg(written).arg(data.size()));
             emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT: scrittura incompleta (%1/%2 byte). %3")
@@ -47743,6 +49056,7 @@ void DecodiumBridge::downloadCall3Txt()
         }
 
         if (!f.commit()) {
+            m_call3TxtLastError = f.errorString();
             bridgeLog("downloadCall3Txt commit failed: " + f.errorString());
             emit errorMessage(QStringLiteral("Impossibile salvare CALL3.TXT: %1").arg(f.errorString()));
             cleanup();
@@ -47751,7 +49065,9 @@ void DecodiumBridge::downloadCall3Txt()
 
         m_worldMapCall3Loaded = false;
         m_worldMapCall3Loading = false;
+        m_worldMapCall3RecordCount = 0;
         loadWorldMapCall3Cache();
+        emit localDataStateChanged();
 
         bridgeLog(QStringLiteral("CALL3.TXT downloaded (%1 bytes) to %2")
                       .arg(data.size()).arg(path));
@@ -47792,29 +49108,115 @@ QStringList DecodiumBridge::ctyDatSearchPaths() const
     return uniquePaths;
 }
 
-bool DecodiumBridge::reloadDxccLookup(QString* loadedPath)
+QVariantMap DecodiumBridge::ctyDatState() const
 {
-    if (loadedPath)
-        loadedPath->clear();
-    if (!m_dxccLookup)
-        return false;
-
-    // Invalidate an older background startup read before applying an explicit
-    // user-triggered reload (for example after downloading a new cty.dat).
-    ++m_dxccLookupLoadSerial;
-    m_dxccLookupLoading = false;
-    m_dxccLookupLoadAttempted = true;
-
-    for (const QString& path : ctyDatSearchPaths()) {
-        if (!QFile::exists(path))
-            continue;
-        if (m_dxccLookup->loadCtyDat(path)) {
-            if (loadedPath)
-                *loadedPath = path;
-            return true;
+    QVariantMap state;
+    QString path;
+    for (const QString& candidate : ctyDatSearchPaths()) {
+        if (QFileInfo::exists(candidate)) {
+            path = candidate;
+            break;
         }
     }
-    return false;
+
+    const QFileInfo info(path);
+    const int entityCount = m_dxccLookup ? m_dxccLookup->entityCount() : 0;
+    const bool loading = m_dxccLookupLoading;
+    state.insert(QStringLiteral("id"), QStringLiteral("cty_dat"));
+    state.insert(QStringLiteral("label"), QStringLiteral("DXCC cty.dat"));
+    state.insert(QStringLiteral("updateable"), true);
+    state.insert(QStringLiteral("managedFile"), true);
+    state.insert(QStringLiteral("localPath"), path);
+    state.insert(QStringLiteral("rowCount"), loading && !path.isEmpty() ? -1 : entityCount);
+    state.insert(QStringLiteral("updatedAt"), info.exists() ? info.lastModified().toMSecsSinceEpoch() : 0);
+    state.insert(QStringLiteral("status"), m_ctyDatUpdating
+                 ? tr("Update in progress...")
+                 : (!m_ctyDatLastError.isEmpty()
+                    ? tr("Error")
+                    : (loading
+                       ? tr("Loading...")
+                       : (entityCount > 0 ? tr("Local")
+                                          : tr("File not loaded")))));
+    state.insert(QStringLiteral("error"), m_ctyDatLastError);
+    return state;
+}
+
+QVariantMap DecodiumBridge::call3TxtState() const
+{
+    QVariantMap state;
+    QString path;
+    for (const QString& candidate : worldMapCall3CandidatePaths()) {
+        if (QFileInfo::exists(candidate)) {
+            path = candidate;
+            break;
+        }
+    }
+
+    const QFileInfo info(path);
+    const bool loading = m_worldMapCall3Loading;
+    state.insert(QStringLiteral("id"), QStringLiteral("call3_txt"));
+    state.insert(QStringLiteral("label"), QStringLiteral("CALL3.TXT"));
+    state.insert(QStringLiteral("updateable"), true);
+    state.insert(QStringLiteral("managedFile"), true);
+    state.insert(QStringLiteral("localPath"), path);
+    state.insert(QStringLiteral("rowCount"), loading && !path.isEmpty() ? -1 : m_worldMapCall3RecordCount);
+    state.insert(QStringLiteral("updatedAt"), info.exists() ? info.lastModified().toMSecsSinceEpoch() : 0);
+    state.insert(QStringLiteral("status"), m_call3TxtUpdating
+                 ? tr("Update in progress...")
+                 : (!m_call3TxtLastError.isEmpty()
+                    ? tr("Error")
+                    : (loading
+                       ? tr("Loading...")
+                       : (m_worldMapCall3RecordCount > 0 ? tr("Local")
+                                                         : tr("File not loaded")))));
+    state.insert(QStringLiteral("error"), m_call3TxtLastError);
+    return state;
+}
+
+void DecodiumBridge::reloadDxccLookupAsync(const std::function<void(bool, const QString&)>& completion)
+{
+    if (!m_dxccLookup) {
+        if (completion)
+            completion(false, {});
+        return;
+    }
+
+    ++m_dxccLookupLoadSerial;
+    m_dxccLookupLoading = true;
+    m_dxccLookupLoadAttempted = true;
+    const quint64 serial = m_dxccLookupLoadSerial;
+    const QStringList candidates = ctyDatSearchPaths();
+    QPointer<DecodiumBridge> self(this);
+    auto* task = QRunnable::create([self, candidates, serial, completion]() {
+        auto lookup = std::make_shared<DxccLookup>();
+        QString loadedPath;
+        for (const QString& path : candidates) {
+            if (QFile::exists(path) && lookup->loadCtyDat(path)) {
+                loadedPath = path;
+                break;
+            }
+        }
+        if (!self)
+            return;
+
+        QMetaObject::invokeMethod(self, [self, serial, lookup = std::move(lookup), loadedPath, completion]() mutable {
+            if (!self || serial != self->m_dxccLookupLoadSerial)
+                return;
+
+            self->m_dxccLookupLoading = false;
+            const bool loaded = !loadedPath.isEmpty() && lookup->isLoaded();
+            if (loaded) {
+                *self->m_dxccLookup = std::move(*lookup);
+                if (self->m_callsignIntelligence)
+                    self->m_callsignIntelligence->notifyDxccDataChanged();
+                self->refreshDecodeListDxcc();
+            }
+            if (completion)
+                completion(loaded, loadedPath);
+        }, Qt::QueuedConnection);
+    });
+    task->setAutoDelete(true);
+    QThreadPool::globalInstance()->start(task, -1);
 }
 
 // ============================================================
@@ -49957,6 +51359,228 @@ void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
                   .arg(activePath));
 }
 
+static QVariantMap importConfirmedAdifDocumentInBackground(QString const& sourcePath,
+                                                           QString const& destinationPath,
+                                                           QString const& provider)
+{
+    QVariantMap result;
+    QFileInfo const destinationBefore(destinationPath);
+    const bool destinationExisted = destinationBefore.exists();
+    const qint64 destinationSize = destinationExisted ? destinationBefore.size() : -1;
+    const QDateTime destinationModified = destinationExisted ? destinationBefore.lastModified() : QDateTime();
+
+    ParsedAdifDocument source = loadAdifDocument(sourcePath);
+    if (!source.loaded) {
+        result.insert(QStringLiteral("error"), provider == QStringLiteral("qrz_confirmed")
+                     ? QStringLiteral("il file QRZ non contiene ADI valido")
+                     : QStringLiteral("il file eQSL InBox non contiene ADI valido"));
+        return result;
+    }
+    const int sourceCount = source.records.size();
+
+    QFileInfo const destinationInfo(destinationPath);
+    if (destinationInfo.exists() && destinationInfo.size() > kMaxAdifDocumentBytes) {
+        result.insert(QStringLiteral("error"), QStringLiteral("il logbook attivo supera il limite di importazione ADIF"));
+        return result;
+    }
+    ParsedAdifDocument destination = loadAdifDocument(destinationPath);
+    if (destinationInfo.exists() && !destination.loaded) {
+        result.insert(QStringLiteral("error"), QStringLiteral("impossibile leggere il logbook ADIF attivo"));
+        return result;
+    }
+
+    QHash<QString, int> existingIndexes;
+    for (int i = 0; i < destination.records.size(); ++i) {
+        const QString key = adifRecordDedupeKey(destination.records.at(i).fields);
+        if (!key.isEmpty() && !existingIndexes.contains(key)) {
+            existingIndexes.insert(key, i);
+        }
+    }
+
+    QVariantList newWorkedRecords;
+    int imported = 0;
+    int updated = 0;
+    bool changed = false;
+    for (ParsedAdifRecord incoming : source.records) {
+        incoming = normalizeImportedAdifRecord(incoming);
+        const QString call = incoming.fields.value(QStringLiteral("CALL")).trimmed().toUpper();
+        const QString key = adifRecordDedupeKey(incoming.fields);
+        if (call.isEmpty() || key.isEmpty()) {
+            continue;
+        }
+
+        QStringList confirmationFields;
+        if (provider == QStringLiteral("lotw_confirmed")) {
+            // LoTW returns matched records with QSL_RCVD=Y.  Keep the
+            // provider-specific fields as well, because award calculations
+            // may need the LoTW match timestamp and credit information.
+            incoming.fields.insert(QStringLiteral("QSL_RCVD"), QStringLiteral("Y"));
+            incoming.fields.insert(QStringLiteral("LOTW_QSL_RCVD"), QStringLiteral("Y"));
+            const QString rxQsl = incoming.fields.value(QStringLiteral("APP_LOTW_RXQSL")).trimmed();
+            if (incoming.fields.value(QStringLiteral("QSLRDATE")).trimmed().isEmpty() && rxQsl.size() >= 10) {
+                incoming.fields.insert(QStringLiteral("QSLRDATE"), rxQsl.left(10).remove(QLatin1Char('-')));
+            }
+            confirmationFields = {
+                QStringLiteral("QSL_RCVD"),
+                QStringLiteral("LOTW_QSL_RCVD"),
+                QStringLiteral("QSLRDATE"),
+                QStringLiteral("APP_LOTW_RXQSL"),
+                QStringLiteral("APP_LOTW_RXQSO"),
+                QStringLiteral("APP_LOTW_2xQSL"),
+                QStringLiteral("APP_LOTW_QSLMODE"),
+                QStringLiteral("CREDIT_GRANTED"),
+                QStringLiteral("APP_LOTW_CREDIT_GRANTED"),
+                QStringLiteral("CREDIT_SUBMITTED"),
+                QStringLiteral("APP_LOTW_CREDIT_SUBMITTED")
+            };
+        } else if (provider == QStringLiteral("qrz_confirmed")) {
+            // QRZ FETCH is filtered to confirmed contacts.  Keep the QRZ
+            // provenance fields and also set the standard ADIF confirmation
+            // flag consumed by awards and logbook filters.
+            incoming.fields.insert(QStringLiteral("QSL_RCVD"), QStringLiteral("Y"));
+            const QString qrzDate = incoming.fields.value(QStringLiteral("APP_QRZLOG_QSLDATE")).trimmed();
+            if (!qrzDate.isEmpty() && incoming.fields.value(QStringLiteral("QSLRDATE")).trimmed().isEmpty()) {
+                incoming.fields.insert(QStringLiteral("QSLRDATE"), qrzDate);
+            }
+            confirmationFields = {
+                QStringLiteral("QSL_RCVD"),
+                QStringLiteral("QSLRDATE"),
+                QStringLiteral("APP_QRZLOG_STATUS"),
+                QStringLiteral("APP_QRZLOG_QSLDATE")
+            };
+        } else {
+            // An eQSL InBox record is itself proof that an eQSL was received.
+            // Force the standard ADIF confirmation field even when an older
+            // eQSL export omitted it; awards consume this field from the active log.
+            incoming.fields.insert(QStringLiteral("EQSL_QSL_RCVD"), QStringLiteral("Y"));
+            confirmationFields = {
+                QStringLiteral("EQSL_QSL_RCVD"),
+                QStringLiteral("EQSL_QSLRDATE"),
+                QStringLiteral("APP_EQSL_AG")
+            };
+        }
+
+        const auto existing = existingIndexes.constFind(key);
+        if (existing == existingIndexes.constEnd()) {
+            destination.records.append(incoming);
+            existingIndexes.insert(key, destination.records.size() - 1);
+            ++imported;
+            changed = true;
+
+            QVariantMap worked;
+            worked.insert(QStringLiteral("call"), call);
+            worked.insert(QStringLiteral("grid"), incoming.fields.value(QStringLiteral("GRIDSQUARE")));
+            worked.insert(QStringLiteral("freq"), static_cast<qulonglong>(adifFrequencyHzFromFields(incoming.fields)));
+            worked.insert(QStringLiteral("mode"), normalizeAdifModeForDisplay(incoming.fields));
+            worked.insert(QStringLiteral("date"), incoming.fields.value(QStringLiteral("QSO_DATE")));
+            newWorkedRecords.append(worked);
+            continue;
+        }
+
+        ParsedAdifRecord& current = destination.records[existing.value()];
+        bool recordChanged = false;
+        for (const QString& field : confirmationFields) {
+            const QString incomingValue = incoming.fields.value(field).trimmed();
+            if (!incomingValue.isEmpty() && current.fields.value(field) != incomingValue) {
+                current.fields.insert(field, incomingValue);
+                recordChanged = true;
+            }
+        }
+        ++updated;
+        changed = changed || recordChanged;
+    }
+
+    // Do not overwrite a logbook that changed while the background merge was
+    // running (for example because a QSO was logged in the meantime).
+    QFileInfo const destinationAfter(destinationPath);
+    const bool changedDuringImport = destinationAfter.exists() != destinationExisted
+        || (destinationAfter.exists()
+            && (destinationAfter.size() != destinationSize
+                || destinationAfter.lastModified() != destinationModified));
+    if (changedDuringImport) {
+        result.insert(QStringLiteral("error"), QStringLiteral("il logbook è cambiato durante la sincronizzazione; riprovare"));
+        return result;
+    }
+
+    if (changed && !writeAdifDocument(destinationPath, destination)) {
+        result.insert(QStringLiteral("error"), QStringLiteral("impossibile salvare il logbook ADIF aggiornato"));
+        return result;
+    }
+
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("imported"), imported);
+    result.insert(QStringLiteral("updated"), updated);
+    result.insert(QStringLiteral("sourceCount"), sourceCount);
+    result.insert(QStringLiteral("total"), destination.records.size());
+    result.insert(QStringLiteral("newWorkedRecords"), newWorkedRecords);
+    return result;
+}
+
+void DecodiumBridge::importConfirmedAdifIntoLogbookAsync(const QString& provider, const QString& path)
+{
+    if (m_shuttingDown || !m_callsignIntelligence) {
+        return;
+    }
+    if (m_confirmedAdifImportWatcher) {
+        m_callsignIntelligence->completeConfirmedAdifImport(
+            provider, false, 0, 0, 0, QStringLiteral("un'altra sincronizzazione conferme è già in corso"));
+        return;
+    }
+
+    const QString sourcePath = path;
+    const QString destinationPath = ensureAdifLogPath();
+    m_confirmedAdifImportWatcher = new QFutureWatcher<QVariantMap>(this);
+    auto* watcher = m_confirmedAdifImportWatcher;
+    connect(watcher, &QFutureWatcher<QVariantMap>::finished, this, [this, watcher, provider]() {
+        const QVariantMap result = watcher->result();
+        if (m_confirmedAdifImportWatcher == watcher) {
+            m_confirmedAdifImportWatcher = nullptr;
+        }
+        watcher->deleteLater();
+
+        const bool ok = result.value(QStringLiteral("ok")).toBool();
+        if (ok) {
+            const QVariantList newWorkedRecords = result.value(QStringLiteral("newWorkedRecords")).toList();
+            for (const QVariant& value : newWorkedRecords) {
+                const QVariantMap record = value.toMap();
+                const QString call = record.value(QStringLiteral("call")).toString().trimmed().toUpper();
+                if (call.isEmpty()) {
+                    continue;
+                }
+                m_workedCalls.insert(call);
+                appendWorkedQso(call,
+                                record.value(QStringLiteral("grid")).toString(),
+                                record.value(QStringLiteral("freq")).toULongLong(),
+                                record.value(QStringLiteral("mode")).toString(),
+                                record.value(QStringLiteral("date")).toString());
+            }
+            m_qsoCountCache = result.value(QStringLiteral("total")).toInt();
+            invalidateQsoSearchCache();
+            warmLogCacheAsync();
+            emit qsoCountChanged();
+            emit workedCountChanged();
+            emit qsoLogCacheChanged();
+            if (m_mapIntelligenceService) {
+                m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
+            }
+            m_callsignIntelligence->completeConfirmedAdifImport(
+                provider,
+                true,
+                result.value(QStringLiteral("imported")).toInt(),
+                result.value(QStringLiteral("updated")).toInt(),
+                result.value(QStringLiteral("sourceCount")).toInt());
+        } else {
+            const QString error = result.value(QStringLiteral("error"),
+                                                QStringLiteral("sincronizzazione conferme non riuscita")).toString();
+            m_callsignIntelligence->completeConfirmedAdifImport(provider, false, 0, 0, 0, error);
+        }
+    });
+    emit statusMessage(QStringLiteral("Sincronizzazione %1 nel logbook in background...").arg(provider));
+    watcher->setFuture(QtConcurrent::run([sourcePath, destinationPath, provider]() {
+        return importConfirmedAdifDocumentInBackground(sourcePath, destinationPath, provider);
+    }));
+}
+
 int DecodiumBridge::importFromAdif(const QString& filename)
 {
     QElapsedTimer timer;
@@ -50187,6 +51811,9 @@ void DecodiumBridge::setQrzLogbookApiKey(const QString& v)
     m_qrzLogbookApiKey = v;
     if (m_qrzLogbook) {
         m_qrzLogbook->setApiKey(v);
+    }
+    if (m_callsignIntelligence) {
+        m_callsignIntelligence->setQrzApiKey(v);
     }
     emit qrzLogbookApiKeyChanged();
 }

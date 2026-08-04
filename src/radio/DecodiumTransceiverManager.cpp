@@ -2360,6 +2360,63 @@ void DecodiumTransceiverManager::setRigTxFrequency(double hz)
     sendState(d.get());
 }
 
+bool DecodiumTransceiverManager::prepareSatelliteHalfDuplex(double rxHz, double txHz)
+{
+    if (!m_connected || rxHz <= 0.0 || txHz <= 0.0 || qFuzzyCompare(rxHz + 1.0, txHz + 1.0)) {
+        return false;
+    }
+    if (m_splitMode.trimmed().compare(QStringLiteral("rig"), Qt::CaseInsensitive) != 0) {
+        return false;
+    }
+
+    bool const rxChanged = !sameCatFrequency(m_frequency, rxHz);
+    bool const txChanged = !sameCatFrequency(m_txFrequency, txHz);
+    bool const splitStateChanged = !m_split;
+    m_frequency = rxHz;
+    m_txFrequency = txHz;
+    m_split = true;
+    if (rxChanged) emit frequencyChanged();
+    if (txChanged) emit txFrequencyChanged();
+    if (splitStateChanged) emit splitChanged();
+
+    d->desired.frequency(static_cast<Transceiver::Frequency>(rxHz));
+    d->desired.split(true);
+    d->desired.tx_frequency(static_cast<Transceiver::Frequency>(txHz));
+    qInfo().noquote()
+        << "[FT2SAT] CAT prepare half-duplex"
+        << "rxHz=" << QString::number(rxHz, 'f', 0)
+        << "txHz=" << QString::number(txHz, 'f', 0)
+        << "settle=queued";
+    sendState(d.get());
+    return true;
+}
+
+bool DecodiumTransceiverManager::restoreSatelliteHalfDuplexRx(double rxHz)
+{
+    if (!m_connected || rxHz <= 0.0) {
+        return false;
+    }
+
+    bool const rxChanged = !sameCatFrequency(m_frequency, rxHz);
+    bool const txChanged = !sameCatFrequency(m_txFrequency, 0.0);
+    bool const splitStateChanged = m_split;
+    m_frequency = rxHz;
+    m_txFrequency = 0.0;
+    m_split = false;
+    if (rxChanged) emit frequencyChanged();
+    if (txChanged) emit txFrequencyChanged();
+    if (splitStateChanged) emit splitChanged();
+
+    d->desired.frequency(static_cast<Transceiver::Frequency>(rxHz));
+    d->desired.split(false);
+    d->desired.tx_frequency(0);
+    qInfo().noquote()
+        << "[FT2SAT] CAT restore RX"
+        << "rxHz=" << QString::number(rxHz, 'f', 0);
+    sendState(d.get());
+    return true;
+}
+
 void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
 {
     QElapsedTimer totalTimer;

@@ -2029,6 +2029,26 @@ DXLab@groups.ioに相談してください.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>更新中...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>エラー</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>読み込み中...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>ローカル</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>ファイル未読み込み</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX を開始しませんでした</translation>
@@ -13087,6 +13107,105 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>開発中の実験的機能</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>受信機のIF出力を使用:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>表示、ログ、デコードには無線機のダイヤル周波数を維持し、RTL-SDRは受信機の固定IF出力に同調します。</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>IF周波数 (Hz):</translation></message>
+    <message><source>IF sideband:</source><translation>IFサイドバンド:</translation></message>
+    <message><source>Automatic</source><translation>自動</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>自動ではLSB復調時のみLSBを使用し、FT8などの微弱信号モードではUSBを使用します。</translation></message>
+    <message><source>USB shift (Hz):</source><translation>USBシフト (Hz):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>LSBシフト (Hz):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>IFスペクトラムを反転:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>受信機のIFミキサーによってスペクトラムが反転し、信号がパナダプター上で逆方向に動く場合に有効にします。</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>IFモード: Decodiumは無線機の周波数を画面に表示し、RTL-SDRをIFと選択したUSB/LSBシフトの合計に同調します。</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>ローカルデータベース</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - ユーザーアクティビティ</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - 受信した確認</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - 受信した確認</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - 受信した確認</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>レコードなし</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>未更新</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>最終更新: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>ファイル: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>ファイルが見つかりません</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>任意のローカルファイルパス</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>コールサインデータベースをインポート</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>データベースとCSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>インポート</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>グローバル検索キャッシュを消去</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>すべてのプロバイダーについて、ローカルに保存されたコールサイン検索結果を削除します。FCC、LoTW、eQSL、Club Log のデータベースは削除されません。続行しますか？</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>低速PCモード:</translation>
@@ -21094,6 +21213,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>更新済み: 新規 %1 件、確認 %2 件を更新</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 を同期しました: 新規 %2 件、確認 %3 件を更新</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>更新済み</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>未更新</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>ローカル</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>エラー</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - ユーザーアクティビティ</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - 受信した確認</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - 受信した確認</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - 受信した確認</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 を更新しました</translation>

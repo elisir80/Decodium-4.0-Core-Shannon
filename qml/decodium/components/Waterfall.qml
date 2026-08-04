@@ -1019,11 +1019,21 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            startFreq:      waterfallPanel.minFreq
-            bandwidth:      waterfallPanel.maxFreq - waterfallPanel.minFreq
+            // Decoder audio uses the familiar 200..3200 Hz axis. When the
+            // RTL-SDR RF path is active the incoming bins are absolute RF,
+            // therefore the viewport must follow the tuner centre and its
+            // real sample-rate span instead of clipping them to the FT8 axis.
+            startFreq:      bridge.rtlSdrRfView
+                            ? Math.round(bridge.rtlSdrRfCenterFrequency
+                                         - bridge.rtlSdrRfSampleRate / 2)
+                            : waterfallPanel.minFreq
+            bandwidth:      bridge.rtlSdrRfView
+                            ? bridge.rtlSdrRfSampleRate
+                            : waterfallPanel.maxFreq - waterfallPanel.minFreq
             rxFreq:         bridge.rxFrequency
             txFreq:         bridge.txFrequency
             running:        bridge.monitoring
+            externalSpectrumActive: bridge.rtlSdrRfView
             showTxBrackets: true
             spectrumHeight: Math.max(waterfallPanel.spectrumMinHeight,
                                      Math.min(waterfallPanel.spectrumHeight,
@@ -1962,8 +1972,17 @@ Item {
             if (!bridge.monitoring) return
             waterfallDisplay.addSpectrumDataNorm(data)
         }
-        function onRxFrequencyChanged() { waterfallDisplay.rxFreq = bridge.rxFrequency }
-        function onTxFrequencyChanged() { waterfallDisplay.txFreq = bridge.txFrequency }
+        function syncRtlSdrRfMarkers() {
+            waterfallDisplay.rxFreq = bridge.rtlSdrRfView
+                    ? bridge.rtlSdrRfSelectedFrequency : bridge.rxFrequency
+            waterfallDisplay.txFreq = bridge.rtlSdrRfView
+                    ? bridge.rtlSdrRfSelectedFrequency : bridge.txFrequency
+        }
+        function onRxFrequencyChanged() { syncRtlSdrRfMarkers() }
+        function onTxFrequencyChanged() { syncRtlSdrRfMarkers() }
+        function onRtlSdrRfViewChanged() { syncRtlSdrRfMarkers() }
+        function onRtlSdrRfCenterFrequencyChanged() { syncRtlSdrRfMarkers() }
+        function onRtlSdrRfSelectedFrequencyChanged() { syncRtlSdrRfMarkers() }
         function onSettingValueChanged(key, value) {
             waterfallPanel.restoringSettings = true
             if (key === "uiPaletteIndex") {

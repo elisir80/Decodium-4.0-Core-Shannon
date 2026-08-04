@@ -422,6 +422,16 @@ set (wsjtx_CXXSRCS
   src/core/getfile.cpp
   Audio/soundout.cpp
   Audio/soundin.cpp
+  src/rtl/RtlSdrDsp.cpp
+  src/rtl/RtlSdrDsp.h
+  src/rtl/RtlSdrAudioOutput.cpp
+  src/rtl/RtlSdrAudioOutput.h
+  src/rtl/RtlSdrCapabilities.h
+  src/rtl/RtlSdrRfSpectrum.cpp
+  src/rtl/RtlSdrRfSpectrum.h
+  src/rtl/RtlSdrTuningPlan.h
+  src/rtl/RtlSdrInput.cpp
+  src/rtl/RtlSdrInput.h
   widgets/meterwidget.cpp
   widgets/signalmeter.cpp
   widgets/plotter.cpp
@@ -1007,6 +1017,26 @@ check_symbol_exists (rig_set_cache_timeout_ms "hamlib/rig.h" HAVE_HAMLIB_CACHING
 check_symbol_exists (rig_get_conf2 "hamlib/rig.h" HAVE_HAMLIB_GET_CONF2)
 
 find_package (Usb REQUIRED)
+
+# RTL-SDR is optional for developer builds, but release workflows enable and
+# package it.  Keeping the feature switch explicit lets contributors build the
+# traditional audio-only application without a USB SDR development package.
+option (DECODIUM_ENABLE_RTLSDR "Enable RTL-SDR RX input support" ON)
+option (DECODIUM_REQUIRE_RTLSDR "Fail configuration if RTL-SDR input support is unavailable" OFF)
+set (DECODIUM_HAS_RTLSDR OFF)
+if (DECODIUM_ENABLE_RTLSDR)
+  find_package (RtlSdr QUIET)
+  if (RtlSdr_FOUND)
+    set (DECODIUM_HAS_RTLSDR ON)
+    message (STATUS "RTL-SDR support enabled: ${RtlSdr_LIBRARY}")
+  else ()
+    if (DECODIUM_REQUIRE_RTLSDR)
+      message (FATAL_ERROR "RTL-SDR support is required but librtlsdr was not found")
+    else ()
+      message (WARNING "RTL-SDR support requested but librtlsdr was not found; building without RTL-SDR input")
+    endif ()
+  endif ()
+endif ()
 
 if (WSJT_FOX_OTP)
   add_definitions (-DFOX_OTP)
@@ -1713,6 +1743,12 @@ if (WIN32)
   target_link_libraries (wsjtx Pdh Qt6::AxContainer)
 endif ()
 target_compile_options (wsjtx PRIVATE -Wno-deprecated-declarations)
+if (DECODIUM_HAS_RTLSDR)
+  target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_RTLSDR=1)
+  target_link_libraries (wsjtx RtlSdr::RtlSdr)
+else ()
+  target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_RTLSDR=0)
+endif ()
 link_wsjtx_cycle_group (wsjtx wsjt_qt wsjt_cxx wsjt_fort)
 
 # -----------------------------------------------------------------------
@@ -1854,6 +1890,16 @@ add_executable (decodium_qml
   src/ui/WorldMapGpuItem.cpp
   src/ui/WorldMapGpuItem.hpp
   src/bridge/DecodiumAudioSink.h
+  src/rtl/RtlSdrDsp.h
+  src/rtl/RtlSdrDsp.cpp
+  src/rtl/RtlSdrAudioOutput.h
+  src/rtl/RtlSdrAudioOutput.cpp
+  src/rtl/RtlSdrCapabilities.h
+  src/rtl/RtlSdrRfSpectrum.h
+  src/rtl/RtlSdrRfSpectrum.cpp
+  src/rtl/RtlSdrTuningPlan.h
+  src/rtl/RtlSdrInput.h
+  src/rtl/RtlSdrInput.cpp
   Detector/FT8DecodeWorker.cpp
   Detector/FT2DecodeWorker.cpp
   Detector/FT4DecodeWorker.cpp
@@ -1922,6 +1968,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif ()
 # C17 — FoxVerifier senza Boost.Log (usa qDebug come shim)
 target_compile_definitions (decodium_qml PRIVATE DECODIUM_NO_BOOST_LOG FFTW3_SINGLE_FOUND DECODIUM_QML_PANADAPTER_DIRECT=1)
+if (DECODIUM_HAS_RTLSDR)
+  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_RTLSDR=1)
+else ()
+  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_RTLSDR=0)
+endif ()
 target_compile_definitions (decodium_qml PRIVATE
   DECODIUM_FT2LINK_ACCESS_SALT_B64="${DECODIUM_FT2LINK_ACCESS_SALT_B64}"
   DECODIUM_FT2LINK_ACCESS_HASH_B64="${DECODIUM_FT2LINK_ACCESS_HASH_B64}"
@@ -1953,6 +2004,9 @@ target_link_libraries (decodium_qml
   ${FFTW3_LIBRARIES}
   ${LIBM_LIBRARIES}
 )
+if (DECODIUM_HAS_RTLSDR)
+  target_link_libraries (decodium_qml RtlSdr::RtlSdr)
+endif ()
 if (OPENMP_FOUND)
   if (TARGET OpenMP::OpenMP_CXX)
     target_link_libraries (decodium_qml OpenMP::OpenMP_CXX)
@@ -2316,6 +2370,8 @@ install (FILES
   COPYING
   AUTHORS
   doc/project/THANKS
+  doc/RTL_SDR.md
+  doc/THIRD_PARTY_LICENSES_RTLSDR.md
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
   #COMPONENT runtime
   )

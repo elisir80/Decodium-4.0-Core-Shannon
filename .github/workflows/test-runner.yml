@@ -12,6 +12,9 @@ on:
       - 'Modulator/FtxMessageEncoder.*'
       - 'Modulator/FtxWaveformGenerator.*'
       - 'tests/test_jt4_roundtrip.cpp'
+      - 'src/rtl/**'
+      - 'tests/test_rtlsdr*'
+      - 'CMake/Modules/FindRtlSdr.cmake'
       - 'CMakeLists.txt'
       - 'CMake/templates/**'
       - 'packaging/**'
@@ -30,6 +33,9 @@ on:
       - 'Modulator/FtxMessageEncoder.*'
       - 'Modulator/FtxWaveformGenerator.*'
       - 'tests/test_jt4_roundtrip.cpp'
+      - 'src/rtl/**'
+      - 'tests/test_rtlsdr*'
+      - 'CMake/Modules/FindRtlSdr.cmake'
       - 'CMakeLists.txt'
       - 'CMake/templates/**'
       - 'packaging/**'
@@ -87,14 +93,14 @@ jobs:
         run: |
           set -euo pipefail
           cmake --build build-ft2link \
-            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip \
+            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip test_rtlsdr_dsp \
             --parallel "$(sysctl -n hw.ncpu)"
 
       - name: Run cross-platform modem tests
         run: |
           set -euo pipefail
           ctest --test-dir build-ft2link \
-            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip)$' \
+            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip|test_rtlsdr_dsp)$' \
             --output-on-failure
 
   ft2link-linux:
@@ -153,14 +159,14 @@ jobs:
         run: |
           set -euo pipefail
           cmake --build build-ft2link \
-            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip \
+            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip test_rtlsdr_dsp \
             --parallel "$(nproc)"
 
       - name: Run cross-platform modem tests
         run: |
           set -euo pipefail
           ctest --test-dir build-ft2link \
-            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip)$' \
+            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip|test_rtlsdr_dsp)$' \
             --output-on-failure
 
   ft2link-windows:
@@ -229,12 +235,12 @@ jobs:
         run: |
           set -euo pipefail
           cmake --build build-ft2link \
-            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip \
+            --target ft2link_core test_ft2link test_ft2link_qml_adapter test_jt4_roundtrip test_rtlsdr_dsp \
             --parallel "$(nproc)"
 
       - name: Run cross-platform modem tests
         run: |
           set -euo pipefail
           ctest --test-dir build-ft2link \
-            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip)$' \
+            -R '^(test_ft2link|test_ft2link_qml_adapter|test_jt4_roundtrip|test_rtlsdr_dsp)$' \
             --output-on-failure

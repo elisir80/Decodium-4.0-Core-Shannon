@@ -2040,6 +2040,26 @@ or contact DXLab support at DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Update in progress...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Loading...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Local</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>File not loaded</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX not started</translation>
@@ -13099,6 +13119,105 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</transl
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Experimental function under development</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>Use receiver IF output:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>IF frequency (Hz):</translation></message>
+    <message><source>IF sideband:</source><translation>IF sideband:</translation></message>
+    <message><source>Automatic</source><translation>Automatic</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</translation></message>
+    <message><source>USB shift (Hz):</source><translation>USB shift (Hz):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>LSB shift (Hz):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>Invert IF spectrum:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>LOCAL DATABASES</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - User activity</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - Confirmations received</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - Confirmations received</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - Confirmations received</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>No records</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Never updated</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Last update: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>File: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>File not found</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Optional local file path</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Import callsign database</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Databases and CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Import</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Clear global lookup cache</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</translation>
+    </message>
+    <message>
         <source>Management:</source>
         <translation>Management:</translation>
     </message>
@@ -21106,6 +21225,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>Updated: %1 new, %2 confirmations updated</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 synchronized: %2 new, %3 confirmations updated</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>Updated</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Never updated</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Local</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - User activity</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - Confirmations received</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - Confirmations received</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - Confirmations received</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 updated</translation>

@@ -47,6 +47,7 @@ class PanadapterItem : public QQuickItem
     Q_PROPERTY(int   paletteIndex READ paletteIndex WRITE setPaletteIndex NOTIFY paletteIndexChanged)
     Q_PROPERTY(QStringList paletteNames READ paletteNames CONSTANT)
     Q_PROPERTY(bool  running     READ running     WRITE setRunning     NOTIFY runningChanged)
+    Q_PROPERTY(bool  externalSpectrumActive READ externalSpectrumActive WRITE setExternalSpectrumActive NOTIFY externalSpectrumActiveChanged)
     Q_PROPERTY(bool  showTxBrackets READ showTxBrackets WRITE setShowTxBrackets NOTIFY showTxBracketsChanged)
     Q_PROPERTY(int   colorGain   READ colorGain   WRITE setColorGain   NOTIFY colorGainChanged)
     Q_PROPERTY(int   blackLevel  READ blackLevel  WRITE setBlackLevel  NOTIFY blackLevelChanged)
@@ -97,6 +98,7 @@ public:
     int   panHz()          const { return m_panHz; }
     int   paletteIndex()   const { return m_paletteIndex; }
     bool  running()        const { return m_running; }
+    bool  externalSpectrumActive() const { return m_externalSpectrumActive; }
     bool  showTxBrackets() const { return m_showTxBrackets; }
     float measuredFloor()  const { return m_measuredFloor; }
     float measuredPeak()   const { return m_measuredPeak; }
@@ -135,6 +137,7 @@ public:
     void setPanHz(int v)           { if (m_panHz!=v){m_panHz=v;emit panHzChanged();markAllDirty();} }
     void setPaletteIndex(int v);
     void setRunning(bool v)        { if (m_running!=v){m_running=v;emit runningChanged();} }
+    void setExternalSpectrumActive(bool active);
     void setShowTxBrackets(bool v) { if (m_showTxBrackets!=v){m_showTxBrackets=v;emit showTxBracketsChanged();markAllDirty();} }
     void setColorGain(int v)       { v=qBound(0,v,100); if(m_colorGain!=v){m_colorGain=v;m_waterfallRgbValid=false;emit colorGainChanged();markDirty();} }
     void setBlackLevel(int v)      { v=qBound(0,v,100); if(m_blackLevel!=v){m_blackLevel=v;m_waterfallRgbValid=false;emit blackLevelChanged();markDirty();} }
@@ -197,6 +200,7 @@ signals:
     void panHzChanged();
     void paletteIndexChanged();
     void runningChanged();
+    void externalSpectrumActiveChanged();
     void showTxBracketsChanged();
     void measuredFloorChanged();
     void measuredPeakChanged();
@@ -358,6 +362,7 @@ private:
     int   m_panHz        = 0;
     int   m_paletteIndex = 3;   // deskHPSDR default
     bool  m_running      = false;
+    bool  m_externalSpectrumActive = false;
     bool  m_showTxBrackets = true;
 
     int   m_colorGain    = 50;

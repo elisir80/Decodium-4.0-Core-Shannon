@@ -2034,6 +2034,26 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Frissítés folyamatban...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Hiba</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Betöltés...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Helyi</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>A fájl nincs betöltve</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX nem indult el</translation>
@@ -12957,6 +12977,105 @@ Tipp: zárja be az OmniRiget a Windows tálca ikonjából, majd nyomja meg újra
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Kísérleti funkció fejlesztés alatt</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>A vevő KF-kimenetének használata:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>Megtartja a rádió hangolási frekvenciáját a kijelzéshez, naplózáshoz és dekódoláshoz, miközben az RTL-SDR a vevő rögzített KF-kimenetére hangol.</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>KF-frekvencia (Hz):</translation></message>
+    <message><source>IF sideband:</source><translation>KF-oldalsáv:</translation></message>
+    <message><source>Automatic</source><translation>Automatikus</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>Az automatikus mód csak az LSB demodulátorral használ LSB-t; az FT8-hoz hasonló gyengejelű módok USB-t használnak.</translation></message>
+    <message><source>USB shift (Hz):</source><translation>USB-eltolás (Hz):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>LSB-eltolás (Hz):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>KF-spektrum megfordítása:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>Engedélyezze, ha a jelek ellenkező irányban mozognak a panorámakijelzőn, mert a vevő KF-keverője megfordítja a spektrumot.</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>KF mód: a Decodium a rádió frekvenciáját tartja a képernyőn, az RTL-SDR-t pedig a KF és a kiválasztott USB/LSB-eltolás összegére hangolja.</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>HELYI ADATBÁZISOK</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - felhasználói tevékenység</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - kapott megerősítések</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - kapott megerősítések</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - kapott megerősítések</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>Nincs rekord</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Még nem frissítve</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Utolsó frissítés: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>Fájl: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>A fájl nem található</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Opcionális helyi fájlútvonal</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Hívójel-adatbázis importálása</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Adatbázisok és CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Importálás</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Globális keresési gyorsítótár törlése</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>Minden szolgáltató helyben tárolt hívójel-keresési eredménye törlődik. Az FCC-, LoTW-, eQSL- és Club Log-adatbázisok nem törlődnek. Folytatja?</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>Lassú PC mód:</translation>
@@ -20960,6 +21079,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>Frissítve: %1 új, %2 megerősítés frissítve</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 szinkronizálva: %2 új, %3 megerősítés frissítve</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>Frissítve</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Még nem frissítve</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Helyi</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Hiba</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - felhasználói tevékenység</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - kapott megerősítések</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - kapott megerősítések</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - kapott megerősítések</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 frissítve</translation>

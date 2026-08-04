@@ -2031,6 +2031,26 @@ eller kontakt DXLab support på DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Opdatering i gang...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Fejl</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Indlæser...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Lokal</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>Fil ikke indlæst</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX ikke startet</translation>
@@ -13087,6 +13107,105 @@ Tip: luk OmniRig fra Windows-proceslinjeikonet, og tryk derefter på Forbind ige
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Eksperimentel funktion under udvikling</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>Brug modtagerens MF-udgang:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>Bevarer radioens indstillede frekvens til visning, logning og dekodning, mens RTL-SDR indstilles til modtagerens faste MF-udgang.</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>MF-frekvens (Hz):</translation></message>
+    <message><source>IF sideband:</source><translation>MF-sidebånd:</translation></message>
+    <message><source>Automatic</source><translation>Automatisk</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>Automatisk bruger kun LSB med LSB-demodulatoren; svagsignaltilstande som FT8 bruger USB.</translation></message>
+    <message><source>USB shift (Hz):</source><translation>USB-forskydning (Hz):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>LSB-forskydning (Hz):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>Invertér MF-spektrum:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>Aktivér dette, når signalerne bevæger sig modsat på panadapteren, fordi modtagerens MF-mixer vender spektret.</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>MF-tilstand: Decodium viser fortsat radiofrekvensen og indstiller RTL-SDR til MF plus den valgte USB/LSB-forskydning.</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>LOKALE DATABASER</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - brugeraktivitet</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - modtagne bekræftelser</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - modtagne bekræftelser</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - modtagne bekræftelser</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>Ingen poster</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Aldrig opdateret</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Senest opdateret: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>Fil: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>Fil ikke fundet</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Valgfri lokal filsti</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Importér callsign-database</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Databaser og CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Importér</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Ryd global lookup-cache</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>Alle lokalt gemte callsign-opslagsresultater for alle udbydere slettes. FCC-, LoTW-, eQSL- og Club Log-databaserne slettes ikke. Vil du fortsætte?</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>Langsom-PC-tilstand:</translation>
@@ -21095,6 +21214,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>Opdateret: %1 nye, %2 bekræftelser opdateret</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 synkroniseret: %2 nye, %3 bekræftelser opdateret</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>Opdateret</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Aldrig opdateret</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Lokal</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Fejl</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - brugeraktivitet</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - modtagne bekræftelser</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - modtagne bekræftelser</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - modtagne bekræftelser</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 opdateret</translation>

@@ -13,11 +13,24 @@ Dialog {
     // 1.0.412 — richiesta di schermo intero gestita da Main.qml (mainWindow non è in scope qui).
     signal fullScreenRequested()
     readonly property int popupViewportMargin: 16
-    readonly property int popupBaseWidth: (parent && parent.width > 0) ? Math.round(parent.width) : 1440
-    readonly property int popupBaseHeight: (parent && parent.height > 0) ? Math.round(parent.height) : 960
+    readonly property int popupParentWidth: (parent && parent.width > 0) ? Math.round(parent.width) : 1440
+    readonly property int popupParentHeight: (parent && parent.height > 0) ? Math.round(parent.height) : 960
+    readonly property var popupScreenGeometry: availableScreenGeometry()
+    readonly property int popupScreenWidth: Number(popupScreenGeometry.width) > 0
+                                             ? Math.round(Number(popupScreenGeometry.width))
+                                             : popupParentWidth
+    readonly property int popupScreenHeight: Number(popupScreenGeometry.height) > 0
+                                              ? Math.round(Number(popupScreenGeometry.height))
+                                              : popupParentHeight
+    readonly property int popupBaseWidth: Math.min(popupParentWidth, popupScreenWidth)
+    readonly property int popupBaseHeight: Math.min(popupParentHeight, popupScreenHeight)
     readonly property int popupMaxWidth: Math.max(1, popupBaseWidth - popupViewportMargin)
     readonly property int popupMaxHeight: Math.max(1, popupBaseHeight - popupViewportMargin)
-    readonly property bool compactSettingsLayout: width < 1180
+    // At 1280 px the dialog still has about 1,050 px for the page after the
+    // sidebar.  The old 1180 px threshold therefore selected the wide grid
+    // and pushed its fourth column beyond the screen.
+    readonly property bool compactSettingsLayout: width < 1420
+    readonly property bool narrowSettingsLayout: width < 1060
     title: qsTr("Settings")
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
@@ -31,19 +44,17 @@ Dialog {
         return isFinite(savedTab) ? Math.max(0, Math.min(13, Math.floor(savedTab))) : 0
     }
     property bool closeAlreadyPersisted: false
-    readonly property int labelWidth: compactSettingsLayout ? 132 : 172
-    readonly property int fieldMinWidth: compactSettingsLayout ? 240 : 380
-    readonly property int wideFieldMinWidth: compactSettingsLayout ? 340 : 620
-    readonly property int portFieldMinWidth: compactSettingsLayout ? 180 : 270
-    readonly property int numericFieldMinWidth: compactSettingsLayout ? 160 : 220
-    readonly property int comboFieldMinWidth: compactSettingsLayout ? 240 : 320
-    readonly property int frequencyPageMinWidth: compactSettingsLayout ? 900 : 1120
+    readonly property int labelWidth: narrowSettingsLayout ? 112 : (compactSettingsLayout ? 132 : 172)
+    readonly property int fieldMinWidth: narrowSettingsLayout ? 180 : (compactSettingsLayout ? 240 : 380)
+    readonly property int wideFieldMinWidth: narrowSettingsLayout ? 260 : (compactSettingsLayout ? 340 : 620)
+    readonly property int portFieldMinWidth: narrowSettingsLayout ? 140 : (compactSettingsLayout ? 180 : 270)
+    readonly property int numericFieldMinWidth: narrowSettingsLayout ? 120 : (compactSettingsLayout ? 160 : 220)
+    readonly property int comboFieldMinWidth: narrowSettingsLayout ? 180 : (compactSettingsLayout ? 240 : 320)
+    readonly property int frequencyPageMinWidth: narrowSettingsLayout ? 760 : (compactSettingsLayout ? 900 : 1120)
     readonly property int scrollLeftMargin: 10
     readonly property int scrollTopMargin: 10
     readonly property int scrollRightMargin: 12
     readonly property int scrollBottomMargin: 96
-    property string dataDownloadStatus: ""
-    property bool dataDownloadIsError: false
     property string uiFontLabel: bridge.fontSettingLabel("Font", "", 0)
     property string decodedFontLabel: bridge.fontSettingLabel("DecodedTextFont", "Courier", 10)
     property string fontPickerKey: ""
@@ -68,6 +79,99 @@ Dialog {
     property bool qrzLogbookTestIsError: false
     property bool qrzLogbookTestBusy: false
     readonly property var callsignService: bridge ? bridge.callsignIntelligence : null
+
+    function callsignDatabaseEntries() {
+        var entries = []
+        if (settingsDialog.callsignService) {
+            var providerEntries = settingsDialog.callsignService.databases
+            for (var i = 0; i < providerEntries.length; ++i)
+                entries.push(providerEntries[i])
+        }
+        if (bridge) {
+            entries.push(bridge.ctyDatState)
+            entries.push(bridge.call3TxtState)
+        }
+        return entries
+    }
+
+    function callsignDatabaseLabel(entry) {
+        var id = entry && entry.id ? String(entry.id) : ""
+        switch (id) {
+        case "fcc_uls":
+            return qsTr("FCC ULS")
+        case "lotw":
+            return qsTr("LoTW - User activity")
+        case "lotw_confirmed":
+            return qsTr("LoTW - Confirmations received")
+        case "eqsl":
+            return qsTr("eQSL AG")
+        case "eqsl_inbox":
+            return qsTr("eQSL InBox - Confirmations received")
+        case "qrz_confirmed":
+            return qsTr("QRZ.com - Confirmations received")
+        case "clublog_oqrs":
+            return qsTr("Club Log OQRS")
+        case "dxcc":
+        case "cty_dat":
+            return qsTr("DXCC cty.dat")
+        case "call3_txt":
+            return qsTr("CALL3.TXT")
+        default:
+            return entry && entry.label ? String(entry.label) : ""
+        }
+    }
+
+    function callsignDatabaseUpdating(provider) {
+        if (provider === "cty_dat")
+            return bridge && bridge.ctyDatUpdating
+        if (provider === "call3_txt")
+            return bridge && bridge.call3TxtUpdating
+        return settingsDialog.callsignService && settingsDialog.callsignService.databaseUpdatePending
+    }
+
+    function refreshCallsignDatabase(provider) {
+        if (provider === "cty_dat") {
+            bridge.checkCtyDatUpdate(true)
+        } else if (provider === "call3_txt") {
+            bridge.downloadCall3Txt()
+        } else if (settingsDialog.callsignService) {
+            settingsDialog.callsignService.refreshDatabase(provider)
+        }
+    }
+
+    Dialog {
+        id: clearCallsignCacheDialog
+        modal: true
+        title: qsTr("Clear global lookup cache")
+        standardButtons: Dialog.Cancel | Dialog.Ok
+        width: Math.min(520, Math.max(360, settingsDialog.width - 48))
+        anchors.centerIn: parent
+
+        contentItem: Text {
+            text: qsTr("All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?")
+            color: textPrimary
+            wrapMode: Text.WordWrap
+            horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            padding: 16
+        }
+
+        onAccepted: {
+            if (settingsDialog.callsignService)
+                settingsDialog.callsignService.clearCache()
+        }
+    }
+
+    function availableScreenGeometry() {
+        var geometry = null
+        try {
+            if (bridge && typeof bridge.primaryScreenAvailableGeometry === "function")
+                geometry = bridge.primaryScreenAvailableGeometry()
+        } catch (error) {
+            console.log("SettingsDialog: screen geometry unavailable: " + error)
+        }
+        return geometry || {}
+    }
 
     function refreshFontLabels() {
         uiFontLabel = bridge.fontSettingLabel("Font", "", 0)
@@ -556,23 +660,11 @@ Dialog {
         }
         function onStatusMessage(msg) {
             var text = String(msg || "")
-            var lower = text.toLowerCase()
-            if (settingsDialog.updateQrzLogbookTestStatus(text, false))
-                return
-            if (lower.indexOf("cty.dat") >= 0 || lower.indexOf("call3.txt") >= 0) {
-                dataDownloadStatus = text
-                dataDownloadIsError = false
-            }
+            settingsDialog.updateQrzLogbookTestStatus(text, false)
         }
         function onErrorMessage(msg) {
             var text = String(msg || "")
-            var lower = text.toLowerCase()
-            if (settingsDialog.updateQrzLogbookTestStatus(text, true))
-                return
-            if (lower.indexOf("cty.dat") >= 0 || lower.indexOf("call3.txt") >= 0) {
-                dataDownloadStatus = text
-                dataDownloadIsError = true
-            }
+            settingsDialog.updateQrzLogbookTestStatus(text, true)
         }
         function onActiveCatProfileChanged() {
             settingsDialog.refreshCatProfileDraft()
@@ -1588,8 +1680,8 @@ Dialog {
 
             // ── Sidebar ──────────────────────────────────────────────
             Rectangle {
-                Layout.preferredWidth: settingsDialog.compactSettingsLayout ? 180 : 210
-                Layout.minimumWidth: settingsDialog.compactSettingsLayout ? 160 : 210
+                Layout.preferredWidth: settingsDialog.narrowSettingsLayout ? 156 : (settingsDialog.compactSettingsLayout ? 180 : 210)
+                Layout.minimumWidth: settingsDialog.narrowSettingsLayout ? 148 : (settingsDialog.compactSettingsLayout ? 160 : 210)
                 Layout.fillHeight: true
                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
 
@@ -1627,7 +1719,7 @@ Dialog {
                 // ═══════════ TAB 0 — STAZIONE ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -1818,7 +1910,7 @@ Dialog {
                 // ═══════════ TAB 1 — RADIO ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -3097,7 +3189,7 @@ Dialog {
                 // ═══════════ TAB 2 — AUDIO ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -3213,6 +3305,488 @@ Dialog {
                             delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
                                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
                             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                        }
+
+                        // ── RTL-SDR ──
+                        Text { text: qsTr("RTL-SDR RECEIVER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 10 }
+                        Item { Layout.fillWidth: true }
+                        Rectangle {
+                            Layout.preferredWidth: 110
+                            Layout.preferredHeight: 28
+                            Layout.alignment: Qt.AlignRight
+                            radius: 6
+                            color: rtlRefreshMouse.containsMouse ? bgMedium : "transparent"
+                            border.color: glassBorder
+                            Text { anchors.centerIn: parent; text: qsTr("↻  Refresh"); color: secondaryCyan; font.pixelSize: 11; font.bold: true }
+                            MouseArea {
+                                id: rtlRefreshMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: bridge.refreshRtlSdrDevices()
+                            }
+                        }
+                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+                        Text { text: qsTr("Use RTL-SDR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            id: rtlEnabledCheck
+                            checked: bridge.getSetting("RtlSdrEnabled", false)
+                            enabled: bridge.rtlSdrSupported
+                            Layout.preferredHeight: controlHeight
+                            onClicked: {
+                                bridge.setSetting("RtlSdrEnabled", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.")
+                        }
+                        Text {
+                            text: bridge.rtlSdrSupported
+                                  ? qsTr("Experimental function under development")
+                                    + " — " + qsTr("No external audio cable is required. RX only.")
+                                  : qsTr("RTL-SDR support is not included in this build.")
+                            color: bridge.rtlSdrSupported ? "#ffb74d" : "#ff6b6b"
+                            font.pixelSize: 11
+                            font.bold: bridge.rtlSdrSupported
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                        }
+
+                        Text { text: qsTr("Receiver:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: rtlDeviceCombo
+                            model: bridge.rtlSdrDevices
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            Layout.minimumWidth: wideFieldMinWidth
+                            implicitHeight: controlHeight
+                            currentIndex: Math.max(0, Math.min(bridge.rtlSdrDevices.length - 1, bridge.getSetting("RtlSdrDeviceIndex", 0)))
+                            onActivated: {
+                                bridge.setSetting("RtlSdrDeviceIndex", currentIndex)
+                                Qt.callLater(rtlModeCombo.normalizeModeForReceiver)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: rtlDeviceCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup.width: Math.max(rtlDeviceCombo.width, 500)
+                            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                        }
+
+                        Text { text: qsTr("Input mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: rtlModeCombo
+                            property bool directSamplingAvailable: bridge.rtlSdrDirectSamplingAvailable(rtlDeviceCombo.currentIndex)
+                            function normalizeModeForReceiver() {
+                                if (!directSamplingAvailable
+                                        && bridge.getSetting("RtlSdrMode", "sdr") === "direct") {
+                                    bridge.setSetting("RtlSdrMode", "sdr")
+                                    currentIndex = 0
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
+                            }
+                            model: [qsTr("SDR Radio"), qsTr("Direct Sampling")]
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                                     && bridge.rtlSdrDevices.length > 0
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            currentIndex: bridge.getSetting("RtlSdrMode", "sdr") === "direct"
+                                          && directSamplingAvailable ? 1 : 0
+                            onActivated: {
+                                if (currentIndex === 1 && !directSamplingAvailable) {
+                                    currentIndex = 0
+                                    return
+                                }
+                                bridge.setSetting("RtlSdrMode", currentIndex === 1 ? "direct" : "sdr")
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            onDirectSamplingAvailableChanged: normalizeModeForReceiver()
+                            Component.onCompleted: normalizeModeForReceiver()
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: rtlModeCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            delegate: ItemDelegate {
+                                enabled: index === 0 || rtlModeCombo.directSamplingAvailable
+                                opacity: enabled ? 1.0 : 0.45
+                                contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                            ToolTip.visible: hovered
+                            ToolTip.text: !directSamplingAvailable
+                                          ? qsTr("Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.")
+                                          : currentIndex === 1
+                                          ? qsTr("Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.")
+                                          : qsTr("Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.")
+                        }
+                        Text {
+                            visible: bridge.rtlSdrDevices.length > 0
+                                     && !rtlModeCombo.directSamplingAvailable
+                            text: qsTr("Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.")
+                            color: secondaryCyan
+                            font.pixelSize: 11
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 4
+                        }
+                        Text { text: qsTr("Demodulator:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: rtlDemodCombo
+                            model: [qsTr("Weak signal / FT8 audio"), qsTr("Wide FM broadcast"),
+                                    qsTr("Narrow FM"), qsTr("AM"), qsTr("USB"),
+                                    qsTr("LSB"), qsTr("CW")]
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            property var demodKeys: ["weak", "wfm", "nfm", "am", "usb", "lsb", "cw"]
+                            currentIndex: Math.max(0, demodKeys.indexOf(bridge.getSetting("RtlSdrDemodulator", "weak")))
+                            onActivated: {
+                                bridge.setSetting("RtlSdrDemodulator", demodKeys[currentIndex])
+                                // Wide FM needs RF bandwidth beyond the old FT8
+                                // input rates; use a known 48 kHz audio divisor.
+                                var currentRate = bridge.getSetting("RtlSdrSampleRate", 240000)
+                                if (currentIndex === 1 && currentRate < 960000)
+                                    bridge.setSetting("RtlSdrSampleRate", 960000)
+                                else if (currentIndex !== 1 && currentRate > 288000)
+                                    bridge.setSetting("RtlSdrSampleRate", 240000)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: rtlDemodCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                            ToolTip.visible: hovered
+                            ToolTip.text: currentIndex === 0
+                                          ? qsTr("Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.")
+                                          : qsTr("Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.")
+                        }
+                        Text { text: qsTr("Listen to receiver audio:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            id: rtlReceiverAudioCheck
+                            checked: bridge.getSetting("RtlSdrAudioEnabled", rtlDemodCombo.currentIndex !== 0)
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.currentIndex !== 0
+                            Layout.preferredHeight: controlHeight
+                            onClicked: {
+                                bridge.setSetting("RtlSdrAudioEnabled", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.")
+                        }
+                        Text { text: qsTr("Follow dial frequency:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            id: rtlFollowDialCheck
+                            checked: bridge.getSetting("RtlSdrFollowDial", true)
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.preferredHeight: controlHeight
+                            onClicked: {
+                                bridge.setSetting("RtlSdrFollowDial", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+
+                        Text { text: qsTr("Use receiver IF output:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            id: rtlIfEnabledCheck
+                            checked: bridge.getSetting("RtlSdrIfEnabled", false)
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.preferredHeight: controlHeight
+                            Layout.columnSpan: 3
+                            onClicked: {
+                                bridge.setSetting("RtlSdrIfEnabled", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.")
+                        }
+
+                        Text { text: qsTr("IF frequency (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoTextField {
+                            id: rtlIfFrequencyField
+                            text: String(bridge.getSetting("RtlSdrIfFrequencyHz", 8830000))
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            implicitHeight: controlHeight
+                            validator: IntValidator { bottom: 100000; top: 1766000000 }
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                bridge.setSetting("RtlSdrIfFrequencyHz", Number(text))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+
+                        Text { text: qsTr("IF sideband:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: rtlIfSidebandCombo
+                            property var sidebandKeys: ["auto", "usb", "lsb"]
+                            model: [qsTr("Automatic"), qsTr("USB"), qsTr("LSB")]
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            implicitHeight: controlHeight
+                            currentIndex: Math.max(0, sidebandKeys.indexOf(bridge.getSetting("RtlSdrIfSideband", "auto")))
+                            onActivated: {
+                                bridge.setSetting("RtlSdrIfSideband", sidebandKeys[currentIndex])
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: rtlIfSidebandCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.")
+                        }
+
+                        Text { text: qsTr("USB shift (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoTextField {
+                            id: rtlIfUsbShiftField
+                            text: String(bridge.getSetting("RtlSdrIfUsbShiftHz", 1500))
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            validator: IntValidator { bottom: -500000; top: 500000 }
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                bridge.setSetting("RtlSdrIfUsbShiftHz", Number(text))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+                        Text { text: qsTr("LSB shift (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoTextField {
+                            id: rtlIfLsbShiftField
+                            text: String(bridge.getSetting("RtlSdrIfLsbShiftHz", -1500))
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            validator: IntValidator { bottom: -500000; top: 500000 }
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                bridge.setSetting("RtlSdrIfLsbShiftHz", Number(text))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+
+                        Text { text: qsTr("Invert IF spectrum:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            id: rtlIfSpectrumInvertedCheck
+                            checked: bridge.getSetting("RtlSdrIfSpectrumInverted", false)
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
+                            Layout.preferredHeight: controlHeight
+                            Layout.columnSpan: 3
+                            onClicked: {
+                                bridge.setSetting("RtlSdrIfSpectrumInverted", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.")
+                        }
+
+                        Text {
+                            visible: rtlIfEnabledCheck.checked
+                            text: qsTr("IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.")
+                            color: secondaryCyan
+                            font.pixelSize: 11
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 4
+                        }
+
+                        Text { text: qsTr("Receiver speaker output:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: rtlAudioOutputCombo
+                            model: {
+                                var outputs = [qsTr("System default")]
+                                for (var i = 0; i < bridge.audioOutputDevices.length; ++i)
+                                    outputs.push(bridge.audioOutputDevices[i])
+                                return outputs
+                            }
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                                     && rtlDemodCombo.currentIndex !== 0
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 3
+                            Layout.minimumWidth: wideFieldMinWidth
+                            implicitHeight: controlHeight
+                            currentIndex: {
+                                var wanted = bridge.getSetting("RtlSdrAudioOutputDevice", "")
+                                if (!wanted)
+                                    return 0
+                                for (var i = 0; i < bridge.audioOutputDevices.length; ++i) {
+                                    if (bridge.audioOutputDevices[i] === wanted)
+                                        return i + 1
+                                }
+                                return 0
+                            }
+                            onActivated: {
+                                bridge.setSetting("RtlSdrAudioOutputDevice",
+                                                  currentIndex === 0 ? "" : currentText)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: rtlAudioOutputCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup.width: Math.max(rtlAudioOutputCombo.width, 560)
+                            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("System default normally selects the computer speakers and is independent from Decodium's TX audio output.")
+                        }
+
+                        Text { text: qsTr("RF frequency (Hz):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoTextField {
+                            id: rtlFrequencyField
+                            text: String(bridge.getSetting("RtlSdrFrequencyHz", Math.round(bridge.frequency)))
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && !rtlFollowDialCheck.checked
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            Layout.columnSpan: 3
+                            validator: IntValidator {
+                                bottom: rtlModeCombo.currentIndex === 1 ? 500000 : 100000
+                                top: rtlModeCombo.currentIndex === 1 ? 24000000 : 1766000000
+                            }
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                bridge.setSetting("RtlSdrFrequencyHz", Number(text))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+
+                        Text { text: qsTr("Sample rate:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoComboBox {
+                            id: rtlSampleRateCombo
+                            model: rtlDemodCombo.currentIndex === 1 ? ["960000", "1200000"] : ["240000", "288000"]
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                                     && rtlModeCombo.currentIndex !== 1
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            currentIndex: {
+                                var wanted = bridge.getSetting("RtlSdrSampleRate", rtlDemodCombo.currentIndex === 1 ? 960000 : 240000)
+                                var index = model.indexOf(String(wanted))
+                                return index >= 0 ? index : 0
+                            }
+                            onActivated: {
+                                bridge.setSetting("RtlSdrSampleRate", Number(currentText))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+                            contentItem: Text { text: rtlSampleRateCombo.displayText + " sps"; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+                            delegate: ItemDelegate { contentItem: Text { text: modelData + " sps"; color: textPrimary; font.pixelSize: 12 }
+                                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+                            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+                        }
+
+                        Text {
+                            text: rtlDemodCombo.currentIndex === 1
+                                  ? qsTr("RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.")
+                                  : qsTr("RF spectrum is derived from complex IQ, independent from decoder audio.")
+                            color: textSecondary
+                            font.pixelSize: 11
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 4
+                        }
+                        Text { text: qsTr("PPM correction:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoTextField {
+                            id: rtlPpmField
+                            text: String(bridge.getSetting("RtlSdrPpmCorrection", 0))
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            validator: IntValidator { bottom: -500; top: 500 }
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                bridge.setSetting("RtlSdrPpmCorrection", Number(text))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+
+                        Text { text: qsTr("Tuner AGC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            id: rtlAgcCheck
+                            checked: bridge.getSetting("RtlSdrGainTenthsDb", -1) < 0
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.preferredHeight: controlHeight
+                            onClicked: {
+                                bridge.setSetting("RtlSdrGainTenthsDb", checked ? -1 : 200)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+                        Text { text: qsTr("Manual gain (dB):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        DecoTextField {
+                            id: rtlGainField
+                            text: (bridge.getSetting("RtlSdrGainTenthsDb", -1) < 0) ? "" : String(bridge.getSetting("RtlSdrGainTenthsDb", -1) / 10.0)
+                            placeholderText: qsTr("Automatic")
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                                     && rtlModeCombo.currentIndex !== 1 && !rtlAgcCheck.checked
+                            Layout.fillWidth: true
+                            implicitHeight: controlHeight
+                            validator: DoubleValidator { bottom: 0; top: 50; decimals: 1 }
+                            color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
+                            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                            onEditingFinished: {
+                                bridge.setSetting("RtlSdrGainTenthsDb", Math.round(Number(text) * 10))
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                        }
+
+                        Text { text: qsTr("Digital AGC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            checked: bridge.getSetting("RtlSdrDigitalAgc", false)
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.preferredHeight: controlHeight
+                            onClicked: {
+                                bridge.setSetting("RtlSdrDigitalAgc", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.")
+                        }
+                        Item { Layout.columnSpan: 2; Layout.fillWidth: true; implicitHeight: 1 }
+
+                        Text { text: qsTr("Bias tee:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        CheckBox {
+                            checked: bridge.getSetting("RtlSdrBiasTee", false)
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.preferredHeight: controlHeight
+                            onClicked: {
+                                bridge.setSetting("RtlSdrBiasTee", checked)
+                                settingsDialog.scheduleSettingsPersist()
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Supplies power to an external active antenna or LNA only when required by that equipment.")
+                        }
+                        Text { text: qsTr("Audio gain:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
+                        Slider {
+                            id: rtlAudioGainSlider
+                            from: 0.1; to: 4.0; stepSize: 0.1; live: true
+                            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
+                            Layout.fillWidth: true
+                            Binding on value { value: bridge.getSetting("RtlSdrAudioGain", 1.0); when: !rtlAudioGainSlider.pressed }
+                            onPressedChanged: {
+                                if (!pressed) {
+                                    bridge.setSetting("RtlSdrAudioGain", value)
+                                    settingsDialog.scheduleSettingsPersist()
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: bridge.rtlSdrStatus
+                            color: bridge.rtlSdrRunning ? secondaryCyan : textSecondary
+                            font.pixelSize: 11
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 4
+                            Layout.topMargin: 2
                         }
 
                         // ── Livelli ──
@@ -3357,7 +3931,7 @@ Dialog {
                 // ═══════════ TAB 3 — TX ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -4605,7 +5179,7 @@ Dialog {
                 ScrollView {
                     id: displaySettingsScroll
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
                     contentWidth: availableWidth
                     contentHeight: displaySettingsGrid.implicitHeight + 28
 
@@ -4858,7 +5432,11 @@ Dialog {
                         Text { text: qsTr("Process priority:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
                         DecoComboBox {
                             id: processPriorityCombo
-                            Layout.preferredWidth: 180
+                            // Keep the complete "Above normal" and
+                            // "High (recommended)" labels visible in the
+                            // compact four-column display layout.
+                            Layout.preferredWidth: narrowSettingsLayout ? 220 : 250
+                            Layout.minimumWidth: narrowSettingsLayout ? 210 : 230
                             Layout.columnSpan: 1
                             model: [qsTr("Normal"), qsTr("Above normal"), qsTr("High (recommended)"), qsTr("Realtime ⚠️")]
                             currentIndex: bridge ? bridge.processPriority : 1
@@ -5133,7 +5711,17 @@ Dialog {
                                 text: qsTr("Update")
                                 enabled: bridge.showUsState && !bridge.usStateDataUpdating
                                 implicitHeight: controlHeight
-                                Layout.preferredWidth: 90
+                                Layout.preferredWidth: narrowSettingsLayout ? 104 : 110
+                                Layout.minimumWidth: narrowSettingsLayout ? 100 : 104
+                                Layout.rightMargin: 8
+                                contentItem: Text {
+                                    text: parent.text
+                                    color: parent.enabled ? textPrimary : textSecondary
+                                    font.pixelSize: 11
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                    elide: Text.ElideNone
+                                }
                                 onClicked: bridge.updateUsStateData()
                             }
                         }
@@ -5268,7 +5856,7 @@ Dialog {
                 // ═══════════ TAB 5 — DECODIFICA ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -5623,7 +6211,7 @@ Dialog {
                 // ═══════════ TAB 6 — REPORTING ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -7111,7 +7699,7 @@ Dialog {
                 ScrollView {
                     id: colorsSettingsScroll
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
                     contentWidth: availableWidth
                     contentHeight: colorsSettingsGrid.implicitHeight + 34
 
@@ -7568,77 +8156,13 @@ Dialog {
                             onValueChanged: bridge.setSetting("uiWaterfallContrast", value)
                         }
 
-                        // ── Download Dati ──
-                        Text { text: qsTr("DATA DOWNLOAD"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-                        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
-
-                        Text { text: ""; Layout.preferredWidth: 100 }
-                        RowLayout {
-                            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 10
-                            Rectangle {
-                                width: 170; height: controlHeight; radius: 4
-                                opacity: bridge.ctyDatUpdating ? 0.65 : 1.0
-                                color: dlCtyMA.containsMouse && !bridge.ctyDatUpdating ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium
-                                border.color: primaryBlue
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: bridge.ctyDatUpdating ? "Download CTY.dat..." : "Download CTY.dat"
-                                    color: primaryBlue
-                                    font.pixelSize: 12
-                                }
-                                MouseArea {
-                                    id: dlCtyMA
-                                    anchors.fill: parent
-                                    enabled: !bridge.ctyDatUpdating
-                                    hoverEnabled: true
-                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                    onClicked: {
-                                        dataDownloadStatus = qsTr("Checking cty.dat...")
-                                        dataDownloadIsError = false
-                                        bridge.checkCtyDatUpdate()
-                                    }
-                                }
-                            }
-                            Rectangle {
-                                width: 190; height: controlHeight; radius: 4
-                                opacity: bridge.call3TxtUpdating ? 0.65 : 1.0
-                                color: dlCall3MA.containsMouse && !bridge.call3TxtUpdating ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium
-                                border.color: primaryBlue
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: bridge.call3TxtUpdating ? qsTr("Download CALL3.TXT...") : qsTr("Download CALL3.TXT")
-                                    color: primaryBlue
-                                    font.pixelSize: 12
-                                }
-                                MouseArea {
-                                    id: dlCall3MA
-                                    anchors.fill: parent
-                                    enabled: !bridge.call3TxtUpdating
-                                    hoverEnabled: true
-                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                    onClicked: {
-                                        dataDownloadStatus = qsTr("Downloading CALL3.TXT...")
-                                        dataDownloadIsError = false
-                                        bridge.downloadCall3Txt()
-                                    }
-                                }
-                            }
-                        }
-                        Text {
-                            text: dataDownloadStatus.length > 0 ? dataDownloadStatus : qsTr("After clicking, a message with the outcome or error appears here.")
-                            color: dataDownloadIsError ? "#ff5555" : (dataDownloadStatus.length > 0 ? secondaryCyan : textSecondary)
-                            font.pixelSize: 11
-                            wrapMode: Text.Wrap
-                            Layout.columnSpan: 4
-                        }
-                        Item { Layout.fillWidth: true; Layout.columnSpan: 4; Layout.preferredHeight: 24 }
                     }
                 }
 
                 // ═══════════ TAB 9 — AVANZATE ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -8299,7 +8823,7 @@ Dialog {
                 // ═══════════ TAB 10 — ALERTS ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -8455,7 +8979,7 @@ Dialog {
                 // ═══════════ TAB 11 — FILTRI ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         width: Math.max(0, parent.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -8753,7 +9277,7 @@ Dialog {
                 // ═══════════ TAB 12 — PULSANTI UI ═══════════
                 ScrollView {
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     GridLayout {
                         id: uiButtonsGrid
@@ -8888,7 +9412,7 @@ Dialog {
                 ScrollView {
                     id: callsignSettingsPage
                     clip: true
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                    ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
                     ColumnLayout {
                         width: Math.max(0, callsignSettingsPage.width - settingsDialog.scrollLeftMargin - settingsDialog.scrollRightMargin)
@@ -8901,7 +9425,7 @@ Dialog {
                         Text { text: qsTr("CALLSIGN INTELLIGENCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 4 }
                         Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
                         Text {
-                            text: qsTr("Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali Club Log sono salvate nel portachiavi tramite il canale secure settings.")
+                            text: qsTr("Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.")
                             color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
 
@@ -8940,6 +9464,55 @@ Dialog {
                             }
                         }
 
+                        Text { text: qsTr("eQSL INBOX — CONFERME RICEVUTE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
+                        Text {
+                            text: qsTr("Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.")
+                            color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        Text {
+                            text: qsTr("QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.")
+                            color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 14
+                            rowSpacing: 6
+                            Text { text: qsTr("Username/callsign eQSL"); color: textSecondary }
+                            TextField {
+                                Layout.fillWidth: true
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.eqslUsername : ""
+                                placeholderText: qsTr("Callsign eQSL o nickname account")
+                                onEditingFinished: if (settingsDialog.callsignService) settingsDialog.callsignService.eqslUsername = text.trim()
+                            }
+                            Text { text: qsTr("Password eQSL"); color: textSecondary }
+                            TextField {
+                                Layout.fillWidth: true
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.eqslPassword : ""
+                                echoMode: TextInput.Password
+                                onEditingFinished: if (settingsDialog.callsignService) settingsDialog.callsignService.eqslPassword = text.trim()
+                            }
+                        }
+
+                        Text { text: qsTr("LoTW — CONFERME RICEVUTE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
+                        Text {
+                            text: qsTr("Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.")
+                            color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: 2
+                            columnSpacing: 14
+                            rowSpacing: 6
+                            Text { text: qsTr("Username LoTW"); color: textSecondary }
+                            TextField {
+                                Layout.fillWidth: true
+                                text: settingsDialog.callsignService ? settingsDialog.callsignService.lotwUsername : ""
+                                placeholderText: qsTr("Callsign o username LoTW")
+                                onEditingFinished: if (settingsDialog.callsignService) settingsDialog.callsignService.lotwUsername = text.trim()
+                            }
+                        }
+
                         Text { text: qsTr("CLUB LOG OQRS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
                         GridLayout {
                             Layout.fillWidth: true
@@ -8971,14 +9544,9 @@ Dialog {
                         RowLayout {
                             Layout.fillWidth: true
                             Button {
-                                text: qsTr("Aggiorna OQRS")
+                                text: qsTr("Clear global lookup cache")
                                 enabled: settingsDialog.callsignService
-                                onClicked: settingsDialog.callsignService.refreshDatabase("clublog_oqrs")
-                            }
-                            Button {
-                                text: qsTr("Svuota cache")
-                                enabled: settingsDialog.callsignService
-                                onClicked: settingsDialog.callsignService.clearCache()
+                                onClicked: clearCallsignCacheDialog.open()
                             }
                             Item { Layout.fillWidth: true }
                             Text {
@@ -8987,18 +9555,33 @@ Dialog {
                             }
                         }
 
-                        Text { text: qsTr("DATABASE LOCALI"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
+                        Text { text: qsTr("LOCAL DATABASES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
                         Text {
                             text: settingsDialog.callsignService ? qsTr("SQLite: %1").arg(settingsDialog.callsignService.databasePath) : ""
-                            color: textSecondary; elide: Text.ElideMiddle; Layout.fillWidth: true
+                            color: textSecondary
+                            wrapMode: Text.WrapAnywhere
+                            maximumLineCount: 2
+                            elide: Text.ElideMiddle
+                            Layout.fillWidth: true
                         }
 
                         Repeater {
-                            model: settingsDialog.callsignService ? settingsDialog.callsignService.databases : []
+                            model: settingsDialog.callsignDatabaseEntries()
                             delegate: Rectangle {
                                 required property var modelData
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: modelData.updateable ? 74 : 54
+                                Layout.preferredHeight: modelData.managedFile
+                                                        ? (modelData.error ? 150 : 126)
+                                                        : modelData.updateable
+                                                        ? (modelData.error ? 172 : 152)
+                                                          + ((modelData.id === "clublog_oqrs" || modelData.id === "lotw_confirmed" || modelData.id === "qrz_confirmed") ? 22 : 0)
+                                                        : 68
+                                Layout.minimumHeight: modelData.managedFile
+                                                     ? (modelData.error ? 150 : 126)
+                                                     : modelData.updateable
+                                                     ? (modelData.error ? 172 : 152)
+                                                       + ((modelData.id === "clublog_oqrs" || modelData.id === "lotw_confirmed" || modelData.id === "qrz_confirmed") ? 22 : 0)
+                                                     : 68
                                 color: Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.55)
                                 border.color: glassBorder
                                 radius: 5
@@ -9006,46 +9589,147 @@ Dialog {
                                 ColumnLayout {
                                     anchors.fill: parent
                                     anchors.margins: 8
-                                    spacing: 3
+                                    spacing: 4
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Text { text: modelData.label; color: textPrimary; font.bold: true; Layout.fillWidth: true }
-                                        Text { text: modelData.rowCount > 0 ? qsTr("%1 record").arg(modelData.rowCount) : qsTr("nessun record"); color: textSecondary; font.pixelSize: 11 }
-                                        Text { text: modelData.status || qsTr("mai aggiornato"); color: modelData.error ? "#ff7676" : secondaryCyan; font.pixelSize: 11 }
+                                        Text {
+                                            text: settingsDialog.callsignDatabaseLabel(modelData)
+                                            color: textPrimary
+                                            font.bold: true
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                        }
                                         Button {
-                                            text: qsTr("Aggiorna")
+                                            text: qsTr("Update")
                                             visible: modelData.updateable
-                                            enabled: settingsDialog.callsignService && !settingsDialog.callsignService.lookupPending
-                                            onClicked: settingsDialog.callsignService.refreshDatabase(modelData.id)
+                                            enabled: settingsDialog.callsignService
+                                                     && !settingsDialog.callsignService.lookupPending
+                                                     && !settingsDialog.callsignDatabaseUpdating(modelData.id)
+                                            Layout.preferredWidth: 100
+                                            Layout.minimumWidth: 96
+                                            implicitHeight: settingsDialog.controlHeight
+                                            contentItem: Text {
+                                                text: parent.text
+                                                color: parent.enabled ? textPrimary : textSecondary
+                                                font.pixelSize: 11
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                                elide: Text.ElideNone
+                                            }
+                                            onClicked: settingsDialog.refreshCallsignDatabase(modelData.id)
                                         }
                                     }
                                     RowLayout {
-                                        visible: modelData.updateable
+                                        Layout.fillWidth: true
+                                        Text {
+                                            text: Number(modelData.rowCount || 0) < 0
+                                                  ? qsTr("Updating...")
+                                                  : modelData.rowCount > 0
+                                                  ? qsTr("%1 record").arg(modelData.rowCount)
+                                                  : qsTr("No records")
+                                            color: textSecondary
+                                            font.pixelSize: 11
+                                        }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 0
+                                            Text {
+                                                text: modelData.status || qsTr("Never updated")
+                                                color: modelData.error ? "#ff7676" : secondaryCyan
+                                                font.pixelSize: 11
+                                                elide: Text.ElideRight
+                                                horizontalAlignment: Text.AlignRight
+                                                Layout.fillWidth: true
+                                            }
+                                            Text {
+                                                visible: (modelData.id === "clublog_oqrs" || modelData.id === "lotw_confirmed" || modelData.id === "qrz_confirmed" || modelData.managedFile === true)
+                                                         && Number(modelData.updatedAt || 0) > 0
+                                                text: qsTr("Last update: %1").arg(
+                                                          Qt.formatDateTime(new Date(Number(modelData.updatedAt)), "yyyy-MM-dd HH:mm"))
+                                                color: textSecondary
+                                                font.pixelSize: 10
+                                                elide: Text.ElideRight
+                                                horizontalAlignment: Text.AlignRight
+                                                Layout.fillWidth: true
+                                            }
+                                        }
+                                    }
+                                    RowLayout {
+                                        visible: modelData.managedFile === true
+                                        Layout.fillWidth: true
+                                        Text {
+                                            text: modelData.localPath
+                                                  ? qsTr("File: %1").arg(modelData.localPath)
+                                                  : qsTr("File not found")
+                                            color: textSecondary
+                                            font.pixelSize: 10
+                                            wrapMode: Text.WrapAnywhere
+                                            maximumLineCount: 2
+                                            elide: Text.ElideMiddle
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+                                    RowLayout {
+                                        visible: modelData.updateable && modelData.managedFile !== true
                                         Layout.fillWidth: true
                                         TextField {
                                             id: localDatabasePathField
                                             Layout.fillWidth: true
-                                            placeholderText: qsTr("Percorso file locale opzionale")
+                                            Layout.minimumWidth: 0
+                                            Layout.preferredHeight: settingsDialog.controlHeight
+                                            implicitHeight: settingsDialog.controlHeight
+                                            placeholderText: qsTr("Optional local file path")
                                             text: modelData.localPath || ""
                                         }
+                                    }
+                                    RowLayout {
+                                        visible: modelData.updateable && modelData.managedFile !== true
+                                        Layout.fillWidth: true
+                                        Item { Layout.fillWidth: true }
                                         Button {
-                                            text: qsTr("Scegli")
+                                            text: qsTr("Choose")
+                                            Layout.preferredWidth: 92
+                                            Layout.minimumWidth: 88
+                                            implicitHeight: settingsDialog.controlHeight
+                                            contentItem: Text {
+                                                text: parent.text
+                                                color: parent.enabled ? textPrimary : textSecondary
+                                                font.pixelSize: 11
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                                elide: Text.ElideNone
+                                            }
                                             onClicked: {
-                                                var selected = bridge.openFileDialog(qsTr("Importa database callsign"), "", [qsTr("Database e CSV (*)")])
+                                                var selected = bridge.openFileDialog(qsTr("Import callsign database"), "", [qsTr("Databases and CSV (*)")])
                                                 if (selected && selected.length > 0)
                                                     localDatabasePathField.text = selected
                                             }
                                         }
                                         Button {
-                                            text: qsTr("Importa")
+                                            text: qsTr("Import")
                                             enabled: settingsDialog.callsignService && localDatabasePathField.text.trim().length > 0
+                                            Layout.preferredWidth: 92
+                                            Layout.minimumWidth: 88
+                                            implicitHeight: settingsDialog.controlHeight
+                                            contentItem: Text {
+                                                text: parent.text
+                                                color: parent.enabled ? textPrimary : textSecondary
+                                                font.pixelSize: 11
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                                elide: Text.ElideNone
+                                            }
                                             onClicked: settingsDialog.callsignService.importDatabase(modelData.id, localDatabasePathField.text.trim())
                                         }
                                     }
                                     Text {
                                         visible: !!modelData.error
                                         text: modelData.error || ""
-                                        color: "#ff7676"; font.pixelSize: 10; elide: Text.ElideRight; Layout.fillWidth: true
+                                        color: "#ff7676"
+                                        font.pixelSize: 10
+                                        wrapMode: Text.Wrap
+                                        maximumLineCount: 2
+                                        Layout.fillWidth: true
                                     }
                                 }
                             }

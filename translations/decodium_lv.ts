@@ -2044,6 +2044,26 @@ or contact DXLab support at DXLab@groups.io.</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Notiek atjaunināšana...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Kļūda</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Notiek ielāde...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Lokāls</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>Fails nav ielādēts</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX nav startēts</translation>
@@ -13102,6 +13122,105 @@ Padoms: aizveriet OmniRig no Windows sistēmas teknes ikonas, pēc tam vēlreiz 
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Eksperimentāla funkcija izstrādes stadijā</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>Izmantot uztvērēja SF izeju:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>Saglabā radio frekvenci attēlošanai, žurnālam un dekodēšanai, kamēr RTL-SDR ir noskaņots uz uztvērēja fiksēto SF izeju.</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>SF frekvence (Hz):</translation></message>
+    <message><source>IF sideband:</source><translation>SF sānu josla:</translation></message>
+    <message><source>Automatic</source><translation>Automātiski</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>Automātiskais režīms izmanto LSB tikai ar LSB demodulatoru; vāju signālu režīmi, piemēram, FT8, izmanto USB.</translation></message>
+    <message><source>USB shift (Hz):</source><translation>USB nobīde (Hz):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>LSB nobīde (Hz):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>Invertēt SF spektru:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>Iespējojiet, ja signāli panorāmas skatā pārvietojas pretējā virzienā, jo uztvērēja SF maisītājs apgriež spektru.</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>SF režīms: Decodium ekrānā saglabā radio frekvenci un noskaņo RTL-SDR uz SF plus izvēlēto USB/LSB nobīdi.</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>LOKĀLĀS DATUBĀZES</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW — lietotāju aktivitāte</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW — saņemtie apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox — saņemtie apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com — saņemtie apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>Nav ierakstu</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Nekad nav atjaunināts</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Pēdējā atjaunināšana: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>Fails: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>Fails nav atrasts</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Neobligāts lokālā faila ceļš</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Importēt izsaukuma signālu datubāzi</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Datubāzes un CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Importēt</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Notīrīt globālo meklēšanas kešatmiņu</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>Tiks dzēsti visi lokāli saglabātie izsaukuma signālu meklēšanas rezultāti visiem nodrošinātājiem. FCC, LoTW, eQSL un Club Log datubāzes netiks dzēstas. Vai turpināt?</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>Lēna datora režīms:</translation>
@@ -21109,6 +21228,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>Atjaunināts: %1 jauni, %2 apstiprinājumi atjaunināti</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 sinhronizēts: %2 jauni, %3 apstiprinājumi atjaunināti</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>Atjaunināts</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Nekad nav atjaunināts</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Lokāls</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Kļūda</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW — lietotāju aktivitāte</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW — saņemtie apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox — saņemtie apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com — saņemtie apstiprinājumi</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 atjaunināts</translation>

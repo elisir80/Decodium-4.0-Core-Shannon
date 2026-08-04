@@ -21,6 +21,7 @@ env:
   QT_SOURCE_URL: "https://download.qt.io/official_releases/qt/6.11/6.11.0/single/qt-everywhere-src-6.11.0.tar.xz"
   HAMLIB_TAG: "4.7.0"
   HAMLIB_VERSION: "4.7.0"
+  RTLSDR_VERSION: "2.0.2"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -204,6 +205,23 @@ jobs:
           echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig" >> "${GITHUB_ENV}"
           "${HAMLIB_PREFIX}/bin/rigctl" --version
 
+      - name: Build pinned RTL-SDR Blog driver
+        run: |
+          set -euo pipefail
+          RTLSDR_PREFIX="$(cygpath -u "$GITHUB_WORKSPACE")/.ci/librtlsdr-mingw64-${RTLSDR_VERSION}"
+          RTLSDR_VERSION="${RTLSDR_VERSION}" RTLSDR_PREFIX="${RTLSDR_PREFIX}" \
+            scripts/ci/build-librtlsdr.sh
+
+          RTLSDR_LIBRARY="$(find "${RTLSDR_PREFIX}/lib" -maxdepth 1 -name 'librtlsdr*.dll.a' | sort | head -n1)"
+          test -f "${RTLSDR_PREFIX}/include/rtl-sdr.h"
+          test -n "${RTLSDR_LIBRARY}"
+          test -f "${RTLSDR_PREFIX}/bin/librtlsdr.dll"
+
+          echo "RTLSDR_PREFIX=${RTLSDR_PREFIX}" >> "${GITHUB_ENV}"
+          echo "RtlSdr_INCLUDE_DIR=${RTLSDR_PREFIX}/include" >> "${GITHUB_ENV}"
+          echo "RtlSdr_LIBRARY=${RTLSDR_LIBRARY}" >> "${GITHUB_ENV}"
+          echo "$(cygpath -w "${RTLSDR_PREFIX}/bin")" >> "${GITHUB_PATH}"
+
       - name: Show toolchain versions
         run: |
           set -euo pipefail
@@ -220,9 +238,12 @@ jobs:
           cmake -S . -B build-windows -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DQt6_DIR="${QT6_DIR}" \
-            -DCMAKE_PREFIX_PATH="${QT_PREFIX};${HAMLIB_PREFIX}" \
+            -DCMAKE_PREFIX_PATH="${QT_PREFIX};${HAMLIB_PREFIX};${RTLSDR_PREFIX}" \
             -DHamlib_INCLUDE_DIR="${HAMLIB_INCLUDE_DIR}" \
             -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" \
+            -DRtlSdr_INCLUDE_DIR="${RtlSdr_INCLUDE_DIR}" \
+            -DRtlSdr_LIBRARY="${RtlSdr_LIBRARY}" \
+            -DDECODIUM_REQUIRE_RTLSDR=ON \
             -DRIGCTL_EXE="${RIGCTL_EXE}" \
             -DRIGCTLD_EXE="${RIGCTLD_EXE}" \
             -DRIGCTLCOM_EXE="${RIGCTLCOM_EXE}" \
@@ -261,6 +282,7 @@ jobs:
                "$(sha256sum "${DIST}/cty.dat" | awk '{print $1}')"
           cp -R sounds "${DIST}/sounds"
           cp -R Palettes "${DIST}/Palettes"
+          cp COPYING doc/THIRD_PARTY_LICENSES_RTLSDR.md "${DIST}/"
 
           WINDEPLOYQT="${WINDEPLOYQT}"
           QT_SHARE_BIN="${QT_PREFIX}/bin"
@@ -289,6 +311,7 @@ jobs:
             "${QT_PREFIX}/bin"
             "/mingw64/bin"
             "${HAMLIB_PREFIX}/bin"
+            "${RTLSDR_PREFIX}/bin"
           )
 
           is_system_dll() {
@@ -437,6 +460,7 @@ jobs:
           fi
 
           echo "Qt runtime ABI verified: $(tr '\n' ' ' <<< "${core_private_abis}")"
+          test -f "${DIST}/librtlsdr.dll"
 
           printf '%s\n' "Runtime DLLs bundled:" > "${DIST}/runtime-dll-report.txt"
           find "${DIST}" -maxdepth 1 -type f -iname '*.dll' -printf '%f\n' | sort -fu >> "${DIST}/runtime-dll-report.txt"

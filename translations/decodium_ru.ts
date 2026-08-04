@@ -2031,6 +2031,26 @@ or contact DXLab support at DXLab@groups.io.</source>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Идёт обновление...</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Ошибка</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Загрузка...</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Локальный</translation>
+    </message>
+    <message>
+        <source>File not loaded</source>
+        <translation>Файл не загружен</translation>
+    </message>
+    <message>
         <location filename="../DecodiumBridge.cpp" line="28717"/>
         <source>TX non avviata</source>
         <translation>TX не запущена</translation>
@@ -13101,6 +13121,105 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Экспериментальная функция в разработке</translation>
+    </message>
+    <message><source>Use receiver IF output:</source><translation>Использовать выход ПЧ приёмника:</translation></message>
+    <message><source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source><translation>Сохраняет частоту радиостанции для отображения, журнала и декодирования, пока RTL-SDR настроен на фиксированный выход ПЧ приёмника.</translation></message>
+    <message><source>IF frequency (Hz):</source><translation>Частота ПЧ (Гц):</translation></message>
+    <message><source>IF sideband:</source><translation>Боковая полоса ПЧ:</translation></message>
+    <message><source>Automatic</source><translation>Автоматически</translation></message>
+    <message><source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source><translation>Автоматический режим использует LSB только с демодулятором LSB; режимы слабых сигналов, такие как FT8, используют USB.</translation></message>
+    <message><source>USB shift (Hz):</source><translation>Сдвиг USB (Гц):</translation></message>
+    <message><source>LSB shift (Hz):</source><translation>Сдвиг LSB (Гц):</translation></message>
+    <message><source>Invert IF spectrum:</source><translation>Инвертировать спектр ПЧ:</translation></message>
+    <message><source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source><translation>Включите, если сигналы движутся в противоположном направлении на панораме из-за инверсии спектра смесителем ПЧ приёмника.</translation></message>
+    <message><source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source><translation>Режим ПЧ: Decodium сохраняет на экране частоту радиостанции и настраивает RTL-SDR на ПЧ с выбранным сдвигом USB/LSB.</translation></message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>ЛОКАЛЬНЫЕ БАЗЫ ДАННЫХ</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW — активность пользователей</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW — полученные подтверждения</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox — полученные подтверждения</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com — полученные подтверждения</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>Нет записей</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Никогда не обновлялось</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Последнее обновление: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>Файл: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>Файл не найден</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Необязательный путь к локальному файлу</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Импортировать базу позывных</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Базы данных и CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Импортировать</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Очистить глобальный кэш поиска</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>Будут удалены все локально сохранённые результаты поиска позывных для всех провайдеров. Базы данных FCC, LoTW, eQSL и Club Log удалены не будут. Продолжить?</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
         <source>Slow-PC mode:</source>
         <translation>Режим медленного ПК:</translation>
@@ -21128,6 +21247,62 @@ DXCC %4 · Grid %5 · WPX %6</translation>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Updated: %1 new, %2 confirmations updated</source>
+        <translation>Обновлено: новых — %1, обновлённых подтверждений — %2</translation>
+    </message>
+    <message>
+        <source>%1 synchronized: %2 new, %3 confirmations updated</source>
+        <translation>%1 синхронизирован: новых — %2, обновлённых подтверждений — %3</translation>
+    </message>
+    <message>
+        <source>Updated</source>
+        <translation>Обновлено</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Никогда не обновлялось</translation>
+    </message>
+    <message>
+        <source>Local</source>
+        <translation>Локальный</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Ошибка</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW — активность пользователей</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW — полученные подтверждения</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox — полученные подтверждения</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com — полученные подтверждения</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
     <message>
         <source>%1 aggiornato</source>
         <translation>%1 обновлён</translation>

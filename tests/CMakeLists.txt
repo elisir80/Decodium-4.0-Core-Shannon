@@ -190,6 +190,55 @@ add_executable (test_ft2link test_ft2link.cpp)
 target_link_libraries (test_ft2link ft2link_core Qt6::Test)
 add_test (NAME test_ft2link COMMAND $<TARGET_FILE:test_ft2link>)
 
+add_executable (test_ft2link_satellite_half_duplex
+  test_ft2link_satellite_half_duplex.cpp)
+target_link_libraries (test_ft2link_satellite_half_duplex Qt6::Test Qt6::Core)
+add_test (NAME test_ft2link_satellite_half_duplex
+  COMMAND $<TARGET_FILE:test_ft2link_satellite_half_duplex>)
+
+add_executable (test_linux_drm_gpu_usage test_linux_drm_gpu_usage.cpp)
+target_link_libraries (test_linux_drm_gpu_usage Qt6::Test Qt6::Core)
+add_test (NAME test_linux_drm_gpu_usage COMMAND $<TARGET_FILE:test_linux_drm_gpu_usage>)
+
+add_executable (test_rtlsdr_dsp
+  test_rtlsdr_dsp.cpp
+  ../src/rtl/RtlSdrDsp.cpp
+  ../src/rtl/RtlSdrDsp.h)
+target_link_libraries (test_rtlsdr_dsp Qt6::Test Qt6::Core)
+add_test (NAME test_rtlsdr_dsp COMMAND $<TARGET_FILE:test_rtlsdr_dsp>)
+
+add_executable (test_rtlsdr_rf_spectrum
+  test_rtlsdr_rf_spectrum.cpp
+  ../src/rtl/RtlSdrRfSpectrum.cpp
+  ../src/rtl/RtlSdrRfSpectrum.h)
+target_link_libraries (test_rtlsdr_rf_spectrum Qt6::Test Qt6::Core)
+add_test (NAME test_rtlsdr_rf_spectrum COMMAND $<TARGET_FILE:test_rtlsdr_rf_spectrum>)
+
+add_executable (test_rtlsdr_capabilities
+  test_rtlsdr_capabilities.cpp
+  ../src/rtl/RtlSdrCapabilities.h)
+target_link_libraries (test_rtlsdr_capabilities Qt6::Test Qt6::Core)
+add_test (NAME test_rtlsdr_capabilities COMMAND $<TARGET_FILE:test_rtlsdr_capabilities>)
+
+add_executable (test_rtlsdr_tuning_plan
+  test_rtlsdr_tuning_plan.cpp
+  ../src/rtl/RtlSdrTuningPlan.h)
+target_link_libraries (test_rtlsdr_tuning_plan Qt6::Test Qt6::Core)
+add_test (NAME test_rtlsdr_tuning_plan COMMAND $<TARGET_FILE:test_rtlsdr_tuning_plan>)
+
+# Intentionally not registered with CTest: it opens a real USB radio.  Run it
+# explicitly with DECODIUM_RTLSDR_HARDWARE_TEST=1 on a host with an RTL-SDR.
+if (DECODIUM_HAS_RTLSDR)
+  add_executable (test_rtlsdr_input
+    test_rtlsdr_input.cpp
+    ../src/rtl/RtlSdrInput.cpp
+    ../src/rtl/RtlSdrInput.h
+    ../src/rtl/RtlSdrDsp.cpp
+    ../src/rtl/RtlSdrDsp.h)
+  target_compile_definitions (test_rtlsdr_input PRIVATE DECODIUM_HAS_RTLSDR=1)
+  target_link_libraries (test_rtlsdr_input Qt6::Test Qt6::Core RtlSdr::RtlSdr)
+endif ()
+
 add_executable (test_ft2link_qml_adapter
   test_ft2link_qml_adapter.cpp
   ../controllers/FT2LinkQmlAdapter.cpp

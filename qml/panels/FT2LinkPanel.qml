@@ -158,6 +158,14 @@ Rectangle {
     property string checkInCity: settingString("uiFt2LinkCheckInCity", "")
     property string checkInRegion: settingString("uiFt2LinkCheckInRegion", "")
     property string checkInChannel: settingString("uiFt2LinkCheckInChannel", "HF")
+    // These are profile-scoped settings.  Editing them never retunes the rig;
+    // the dedicated C++ state machine reads them only for an FT2-Link RF TX.
+    property bool satelliteHalfDuplexEnabled: settingBool("Ft2LinkSatelliteHalfDuplexEnabled", false)
+    property double satelliteRxDialHz: settingNumber("Ft2LinkSatelliteRxDialHz", 0, 0, 30000000000)
+    property double satelliteTxDialHz: settingNumber("Ft2LinkSatelliteTxDialHz", 0, 0, 30000000000)
+    property int satelliteCatSettleMs: settingInt("Ft2LinkSatelliteCatSettleMs", 900, 250, 5000)
+    readonly property var satelliteHalfDuplexStatus: bridge
+                                                    ? bridge.ft2LinkSatelliteHalfDuplexStatus : ({})
     property double uiNowMs: Date.now()
     readonly property bool selectedSessionConnected: selectedSessionStateName === "Connected"
     readonly property var cqTypeOptions: ["CQ", "CHAT", "NET", "EMCOMM", "TEST", "QSY"]
@@ -235,6 +243,10 @@ Rectangle {
     onCheckInCityChanged: persistSetting("uiFt2LinkCheckInCity", checkInCity)
     onCheckInRegionChanged: persistSetting("uiFt2LinkCheckInRegion", checkInRegion)
     onCheckInChannelChanged: persistSetting("uiFt2LinkCheckInChannel", checkInChannel)
+    onSatelliteHalfDuplexEnabledChanged: persistSetting("Ft2LinkSatelliteHalfDuplexEnabled", satelliteHalfDuplexEnabled)
+    onSatelliteRxDialHzChanged: persistSetting("Ft2LinkSatelliteRxDialHz", Math.round(satelliteRxDialHz))
+    onSatelliteTxDialHzChanged: persistSetting("Ft2LinkSatelliteTxDialHz", Math.round(satelliteTxDialHz))
+    onSatelliteCatSettleMsChanged: persistSetting("Ft2LinkSatelliteCatSettleMs", satelliteCatSettleMs)
     onBbsGroupCsvChanged: persistSetting("uiFt2LinkBbsGroups", bbsGroupCsv)
     onBbsDefaultGroupChanged: persistSetting("uiFt2LinkBbsDefaultGroup", bbsDefaultGroup)
     onBbsGroupFilterChanged: {
@@ -278,6 +290,19 @@ Rectangle {
         if (!isFinite(value))
             value = fallback
         value = Math.round(value)
+        if (minValue !== undefined)
+            value = Math.max(minValue, value)
+        if (maxValue !== undefined)
+            value = Math.min(maxValue, value)
+        return value
+    }
+
+    function settingNumber(key, fallback, minValue, maxValue) {
+        var value = fallback
+        if (bridge && typeof bridge.getSetting === "function")
+            value = Number(bridge.getSetting(key, fallback))
+        if (!isFinite(value))
+            value = fallback
         if (minValue !== undefined)
             value = Math.max(minValue, value)
         if (maxValue !== undefined)
@@ -1025,6 +1050,7 @@ Rectangle {
         case 14: return 13 // PRE
         case 15: return 14 // FREQ
         case 16: return 15 // BLK
+        case 17: return 16 // SAT
         default: return 0
         }
     }
@@ -1076,6 +1102,9 @@ Rectangle {
             refreshBlockedCalls()
             if (ft2Link && typeof ft2Link.blockedCallsText === "function")
                 blockedCallsText.text = ft2Link.blockedCallsText()
+            break
+        case 17:
+            toolPageIndex = 17
             break
         default:
             toolPageIndex = target
@@ -11698,6 +11727,232 @@ Rectangle {
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                spacing: 7
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "SATELLITE HALF-DUPLEX"
+                                    font.family: root.mono
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: root.amber
+                                }
+
+                                CompactCheck {
+                                    text: "Enable independent RX/TX VFOs"
+                                    checked: root.satelliteHalfDuplexEnabled
+                                    accent: root.amber
+                                    tip: "For FT2-Link RF TX only. Editing this setting does not retune the radio."
+                                    onToggled: function(nextChecked) {
+                                        root.satelliteHalfDuplexEnabled = nextChecked
+                                    }
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 6
+
+                                    Text {
+                                        Layout.preferredWidth: 72
+                                        text: "RX MHz"
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.cyan
+                                    }
+
+                                    TextField {
+                                        id: satelliteRxDialField
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 28
+                                        text: root.satelliteRxDialHz > 0
+                                              ? (root.satelliteRxDialHz / 1000000).toFixed(6) : ""
+                                        placeholderText: "downlink dial MHz"
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        selectByMouse: true
+                                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                        onEditingFinished: {
+                                            var mhz = Number(text.replace(",", "."))
+                                            if (isFinite(mhz) && mhz > 0)
+                                                root.satelliteRxDialHz = Math.round(mhz * 1000000)
+                                        }
+                                    }
+
+                                    SmallButton {
+                                        text: "RIG"
+                                        implicitWidth: 44
+                                        accent: root.cyan
+                                        enabled: !!bridge && Number(bridge.frequency || 0) > 0
+                                        tip: "Copy the current receive dial frequency; does not retune the rig"
+                                        onClicked: root.satelliteRxDialHz = Math.round(Number(bridge.frequency))
+                                    }
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 6
+
+                                    Text {
+                                        Layout.preferredWidth: 72
+                                        text: "TX MHz"
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.red
+                                    }
+
+                                    TextField {
+                                        id: satelliteTxDialField
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 28
+                                        text: root.satelliteTxDialHz > 0
+                                              ? (root.satelliteTxDialHz / 1000000).toFixed(6) : ""
+                                        placeholderText: "uplink dial MHz"
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        selectByMouse: true
+                                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                        onEditingFinished: {
+                                            var mhz = Number(text.replace(",", "."))
+                                            if (isFinite(mhz) && mhz > 0)
+                                                root.satelliteTxDialHz = Math.round(mhz * 1000000)
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.preferredWidth: 76
+                                        text: "SETTLE ms"
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        color: root.textSecondary
+                                    }
+
+                                    TextField {
+                                        id: satelliteSettleField
+                                        Layout.preferredWidth: 62
+                                        Layout.preferredHeight: 28
+                                        text: String(root.satelliteCatSettleMs)
+                                        font.family: root.mono
+                                        font.pixelSize: 11
+                                        selectByMouse: true
+                                        inputMethodHints: Qt.ImhDigitsOnly
+                                        onEditingFinished: {
+                                            var value = Math.round(Number(text))
+                                            if (isFinite(value))
+                                                root.satelliteCatSettleMs = Math.max(250, Math.min(5000, value))
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: {
+                                        var state = root.satelliteHalfDuplexStatus || ({})
+                                        var detail = String(state.detail || "")
+                                        return "STATE: " + String(state.state || "Idle")
+                                               + (detail.length > 0 ? " — " + detail : "")
+                                    }
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                    color: root.satelliteHalfDuplexStatus.busy ? root.amber : root.textPrimary
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: {
+                                        var state = root.satelliteHalfDuplexStatus || ({})
+                                        var issue = String(state.configurationError || "")
+                                        if (issue.length > 0)
+                                            return issue
+                                        if (!state.supportedBackend)
+                                            return "Supported safely with a Hamlib CAT backend only."
+                                        if (!state.catConnected)
+                                            return "Connect the Hamlib CAT rig before transmitting."
+                                        if (String(state.rigSplitMode || "").toLowerCase() !== "rig")
+                                            return "Set Hamlib Split mode to 'rig' (not emulate or none)."
+                                        return "Ready: PTT will follow the CAT settle delay and RX is restored after TX."
+                                    }
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                    color: String(root.satelliteHalfDuplexStatus.configurationError || "").length > 0
+                                           ? root.red
+                                           : (root.satelliteHalfDuplexStatus.supportedBackend
+                                              && root.satelliteHalfDuplexStatus.catConnected
+                                              && String(root.satelliteHalfDuplexStatus.rigSplitMode || "").toLowerCase() === "rig"
+                                              ? root.green : root.amber)
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path."
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    wrapMode: Text.WordWrap
+                                    color: root.textSecondary
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: 1
+                                Layout.fillHeight: true
+                                color: root.borderSoft
+                            }
+
+                            ColumnLayout {
+                                Layout.preferredWidth: 260
+                                Layout.fillHeight: true
+                                spacing: 8
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "QO-100 / cross-band setup"
+                                    font.family: root.mono
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    color: root.cyan
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ."
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    wrapMode: Text.WordWrap
+                                    color: root.textSecondary
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view."
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    wrapMode: Text.WordWrap
+                                    color: root.textSecondary
+                                }
+
+                                Item { Layout.fillHeight: true }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use."
+                                    font.family: root.mono
+                                    font.pixelSize: 10
+                                    wrapMode: Text.WordWrap
+                                    color: root.amber
                                 }
                             }
                         }

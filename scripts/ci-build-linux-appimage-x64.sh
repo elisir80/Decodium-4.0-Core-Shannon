@@ -14,6 +14,8 @@ TOOLS_DIR="${TOOLS_DIR:-${ROOT_DIR}/.ci/tools}"
 APPIMAGE_ARCH="${APPIMAGE_ARCH:-x86_64}"
 APPIMAGE_OUTPUT_ARCH="${APPIMAGE_OUTPUT_ARCH:-${APPIMAGE_ARCH}}"
 LINUXDEPLOY_ARCH="${LINUXDEPLOY_ARCH:-${APPIMAGE_ARCH}}"
+RTLSDR_VERSION="${RTLSDR_VERSION:-2.0.2}"
+RTLSDR_PREFIX="${RTLSDR_PREFIX:-${ROOT_DIR}/.ci/cache/librtlsdr-linux-${APPIMAGE_ARCH}-${RTLSDR_VERSION}}"
 LINUXDEPLOY_URL="${LINUXDEPLOY_URL:-https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage}"
 LINUXDEPLOY_QT_PLUGIN_URL="${LINUXDEPLOY_QT_PLUGIN_URL:-https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 2)}"
@@ -146,6 +148,8 @@ echo "Root:           ${ROOT_DIR}"
 echo "Version:        ${VERSION}"
 echo "Hamlib:         ${HAMLIB_VERSION}"
 echo "Hamlib prefix:  ${HAMLIB_PREFIX}"
+echo "RTL-SDR:        ${RTLSDR_VERSION}"
+echo "RTL-SDR prefix: ${RTLSDR_PREFIX}"
 echo "Build dir:      ${BUILD_DIR}"
 echo "Output dir:     ${OUTPUT_DIR}"
 echo "Jobs:           ${JOBS}"
@@ -157,11 +161,11 @@ echo "Qt libs:        ${QT_LIB_DIR_FOR_BUILD}"
 export PATH="${HAMLIB_PREFIX}/bin:${PATH}"
 export PKG_CONFIG_PATH="${HAMLIB_PREFIX}/lib/pkgconfig:${HAMLIB_PREFIX}/lib64/pkgconfig:${PKG_CONFIG_PATH:-}"
 if [[ -n "${QT_LIB_DIR_FOR_BUILD}" && -d "${QT_LIB_DIR_FOR_BUILD}" ]]; then
-  export LD_LIBRARY_PATH="${QT_LIB_DIR_FOR_BUILD}:${HAMLIB_PREFIX}/lib:${HAMLIB_PREFIX}/lib64:${LD_LIBRARY_PATH:-}"
+  export LD_LIBRARY_PATH="${QT_LIB_DIR_FOR_BUILD}:${HAMLIB_PREFIX}/lib:${HAMLIB_PREFIX}/lib64:${RTLSDR_PREFIX}/lib:${LD_LIBRARY_PATH:-}"
 else
-  export LD_LIBRARY_PATH="${HAMLIB_PREFIX}/lib:${HAMLIB_PREFIX}/lib64:${LD_LIBRARY_PATH:-}"
+  export LD_LIBRARY_PATH="${HAMLIB_PREFIX}/lib:${HAMLIB_PREFIX}/lib64:${RTLSDR_PREFIX}/lib:${LD_LIBRARY_PATH:-}"
 fi
-export CMAKE_PREFIX_PATH="${HAMLIB_PREFIX}${CMAKE_PREFIX_PATH:+;${CMAKE_PREFIX_PATH}}"
+export CMAKE_PREFIX_PATH="${RTLSDR_PREFIX};${HAMLIB_PREFIX}${CMAKE_PREFIX_PATH:+;${CMAKE_PREFIX_PATH}}"
 
 hamlib_ready=false
 if [[ -x "${HAMLIB_PREFIX}/bin/rigctl" ]] \
@@ -212,6 +216,15 @@ if [[ -z "${HAMLIB_LIBRARY}" ]]; then
   exit 1
 fi
 
+log "Build pinned RTL-SDR Blog driver"
+RTLSDR_VERSION="${RTLSDR_VERSION}" RTLSDR_PREFIX="${RTLSDR_PREFIX}" \
+  "${ROOT_DIR}/scripts/ci/build-librtlsdr.sh"
+RTLSDR_LIBRARY="$(find "${RTLSDR_PREFIX}/lib" -maxdepth 1 -type f -name 'librtlsdr.so*' | sort | head -n1)"
+if [[ -z "${RTLSDR_LIBRARY}" || ! -f "${RTLSDR_PREFIX}/include/rtl-sdr.h" ]]; then
+  echo "error: unable to locate the installed librtlsdr runtime" >&2
+  exit 1
+fi
+
 log "Configure CMake"
 if [[ "${INCREMENTAL:-0}" == "1" && -d "${BUILD_DIR}" ]]; then
   log "Incremental build enabled: preserving ${BUILD_DIR}"
@@ -225,6 +238,9 @@ cmake -S "${ROOT_DIR}" -B "${BUILD_DIR}" -G "Unix Makefiles" \
   -DCMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}" \
   -DHamlib_INCLUDE_DIR="${HAMLIB_PREFIX}/include" \
   -DHamlib_LIBRARY="${HAMLIB_LIBRARY}" \
+  -DRtlSdr_INCLUDE_DIR="${RTLSDR_PREFIX}/include" \
+  -DRtlSdr_LIBRARY="${RTLSDR_LIBRARY}" \
+  -DDECODIUM_REQUIRE_RTLSDR=ON \
   -DRIGCTL_EXE="${HAMLIB_PREFIX}/bin/rigctl" \
   -DRIGCTLD_EXE="${HAMLIB_PREFIX}/bin/rigctld" \
   -DRIGCTLCOM_EXE="${HAMLIB_PREFIX}/bin/rigctlcom" \
@@ -255,6 +271,11 @@ log "Assemble AppDir"
 mkdir -p "${APPDIR}/usr/share/applications"
 mkdir -p "${APPDIR}/usr/share/icons/hicolor/256x256/apps"
 cmake --install "${BUILD_DIR}" --prefix "${APPDIR}/usr"
+mkdir -p "${APPDIR}/usr/lib"
+# Keep the SONAME aliases as real files inside AppDir: copying a symlink alone
+# would leave it pointing outside the AppImage after packaging.
+cp -aL "${RTLSDR_PREFIX}"/lib/librtlsdr.so* "${APPDIR}/usr/lib/"
+find "${APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit | grep -q .
 cp "${ROOT_DIR}/icons/Unix/decodium_icon.png" \
   "${APPDIR}/usr/share/icons/hicolor/256x256/apps/decodium.png"
 find "${APPDIR}" -name '._*' -o -name '.DS_Store' | xargs -r rm -f
@@ -631,6 +652,9 @@ test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/impl/libqtquickco
 verify_qml_plugin_dependencies "final AppImage" \
   "${EXTRACTED_APPDIR}/usr/bin/qml" \
   "${EXTRACTED_APPDIR}/usr/lib"
+find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit | grep -q .
+LD_LIBRARY_PATH="${EXTRACTED_APPDIR}/usr/lib:${EXTRACTED_APPDIR}/usr/bin" \
+  ldd "${EXTRACTED_APPDIR}/usr/bin/decodium" | grep -q 'librtlsdr.so'
 rm -rf "${verify_dir}"
 
 log "Done"

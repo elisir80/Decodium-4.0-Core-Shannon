@@ -19,6 +19,8 @@ permissions:
 env:
   HAMLIB_TAG: "4.7.0"
   HAMLIB_VERSION: "4.7.0"
+  RTLSDR_VERSION: "2.0.2"
+  DECODIUM_REQUIRE_RTLSDR: "ON"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -104,6 +106,23 @@ jobs:
           echo "RIGCTLCOM_EXE=${HAMLIB_PREFIX}/bin/rigctlcom" >> "$GITHUB_ENV"
 
           "${HAMLIB_PREFIX}/bin/rigctl" --version
+
+      - name: Build pinned RTL-SDR Blog driver
+        run: |
+          set -euo pipefail
+          RTLSDR_PREFIX="${RUNNER_TEMP}/librtlsdr-${RTLSDR_VERSION}"
+          RTLSDR_VERSION="${RTLSDR_VERSION}" RTLSDR_PREFIX="${RTLSDR_PREFIX}" \
+            scripts/ci/build-librtlsdr.sh
+
+          RTLSDR_LIBRARY="$(find "${RTLSDR_PREFIX}/lib" -maxdepth 1 -type f -name 'librtlsdr*.dylib' | sort | head -n1)"
+          test -f "${RTLSDR_PREFIX}/include/rtl-sdr.h"
+          test -n "${RTLSDR_LIBRARY}"
+
+          echo "RTLSDR_PREFIX=${RTLSDR_PREFIX}" >> "$GITHUB_ENV"
+          echo "RtlSdr_INCLUDE_DIR=${RTLSDR_PREFIX}/include" >> "$GITHUB_ENV"
+          echo "RtlSdr_LIBRARY=${RTLSDR_LIBRARY}" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${HAMLIB_PREFIX};${RTLSDR_PREFIX}" >> "$GITHUB_ENV"
+          echo "DYLD_FALLBACK_LIBRARY_PATH=${RTLSDR_PREFIX}/lib:${HAMLIB_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
 
       - name: Build release assets
         run: |
