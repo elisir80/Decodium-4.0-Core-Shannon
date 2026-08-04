@@ -5414,7 +5414,10 @@ private Q_SLOTS:
     QVERIFY (dir.isValid ());
 
     qputenv ("DECODIUM_FT2LINK_W2300_SEARCH_THREADS", "8");
-    qputenv ("DECODIUM_FT2LINK_W2300_MAX_DECODE_MS", "2500");
+    // The ultra-low-SNR search is intentionally bounded, but 2.5 seconds is
+    // below the repeatable completion time of the hosted macOS, Windows and
+    // Linux runners.  Keep the test finite while allowing the full search.
+    qputenv ("DECODIUM_FT2LINK_W2300_MAX_DECODE_MS", "6000");
 
     FT2LinkQmlAdapter adapter;
     QVariantMap options;
