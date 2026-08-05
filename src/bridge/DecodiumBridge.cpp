@@ -9644,7 +9644,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_cat4OmCat       = new DecodiumCat4OmManager(this);
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
-    applyStartupCatProfileSnapshot();
+    noteActiveCatProfileAtStartup();
     m_nativeCat->loadSettings();
     m_cat4OmCat->loadSettings();
     m_omniRigCat->loadSettings();
@@ -25717,7 +25717,23 @@ bool DecodiumBridge::applyCatProfileSnapshotToSettings(const QString& rawName, b
     return true;
 }
 
-void DecodiumBridge::applyStartupCatProfileSnapshot()
+// Il profilo CAT attivo NON viene piu' riversato nelle impostazioni a ogni
+// avvio. Le chiavi dello snapshot -- catBackend, CATMode, TXAudioSource, le
+// soglie SWR e i gruppi per-backend -- sono tutte impostazioni VIVE: le scrive
+// saveSettings() e le riscrive ogni manager con il proprio saveSettings(). Il
+// profilo ne e' una COPIA, presa nel momento in cui lo si salva.
+//
+// Riapplicarla all'avvio non poteva quindi aggiungere nulla: poteva solo
+// ANNULLARE in silenzio le modifiche fatte dopo. E' il difetto per cui, con un
+// profilo salvato mentre il backend era "hamlib", scegliere TCI non reggeva:
+// al riavvio lo snapshot rimetteva hamlib, l'audio TCI non si armava mai e
+// nessuna forzatura poteva funzionare, perche' il valore veniva riscritto da
+// dentro. Valeva per porta, velocita' e modo CAT allo stesso modo.
+//
+// Il profilo resta segnato come attivo e viene applicato quando lo si CARICA
+// (loadCatProfile), cioe' quando l'utente lo chiede davvero. Qui ci si limita
+// a segnalare nel log se il profilo e' divergente, invece di sovrascrivere.
+void DecodiumBridge::noteActiveCatProfileAtStartup()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     decodium::beginActiveSettingsProfile(settings);
@@ -25725,10 +25741,30 @@ void DecodiumBridge::applyStartupCatProfileSnapshot()
     if (name.isEmpty()) {
         return;
     }
-    if (applyCatProfileSnapshotToSettings(name, false)) {
-        bridgeLog(QStringLiteral("CAT profile startup snapshot applied: %1").arg(name));
+
+    QString const liveBackend = normalizedCatBackendForSettings(
+        settings.value(QStringLiteral("catBackend")).toString());
+
+    QString const key = findCatProfileStorageKey(settings, name);
+    if (key.isEmpty()) {
+        bridgeLog(QStringLiteral("CAT profile attivo ma senza snapshot: %1 (backend in uso: %2)")
+                      .arg(name, liveBackend));
+        return;
+    }
+
+    settings.beginGroup(kCatProfileRootGroup);
+    settings.beginGroup(key);
+    QString const profileBackend = normalizedCatBackendForSettings(
+        settings.value(QStringLiteral("catBackend")).toString());
+    settings.endGroup();
+    settings.endGroup();
+
+    if (profileBackend != liveBackend) {
+        bridgeLog(QStringLiteral("CAT profile %1: lo snapshot dice %2 ma vale il backend in uso %3"
+                                 " (il profilo si applica solo quando lo si carica)")
+                      .arg(name, profileBackend, liveBackend));
     } else {
-        bridgeLog(QStringLiteral("CAT profile startup snapshot missing: %1").arg(name));
+        bridgeLog(QStringLiteral("CAT profile attivo: %1 (backend %2)").arg(name, liveBackend));
     }
 }
 

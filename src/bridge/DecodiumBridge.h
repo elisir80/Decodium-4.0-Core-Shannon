@@ -3386,7 +3386,7 @@ private:
 
     QStringList ctyDatSearchPaths() const;
     bool applyCatProfileSnapshotToSettings(const QString& name, bool setActiveProfile);
-    void applyStartupCatProfileSnapshot();
+    void noteActiveCatProfileAtStartup();
     void reloadDxccLookupAsync(const std::function<void(bool, const QString&)>& completion);
     QString extractDecodedCallsign(const QString& msg, bool isCQ) const;
     QString extractDecodedGrid(const QString& msg) const;
