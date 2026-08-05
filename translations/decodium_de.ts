@@ -17157,6 +17157,4019 @@ Im Zweifel Hoch verwenden.</translation>
     </message>
 </context>
 <context>
+    <name>SettingsTab0</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="61"/>
+        <source>STATION DETAILS</source>
+        <translation>STATIONSDETAILS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="65"/>
+        <source>My Call:</source>
+        <translation>Mein Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="74"/>
+        <source>The active callsign transmitted by Decodium and written as STATION_CALLSIGN in ADIF.</source>
+        <translation>Das aktive Rufzeichen, das Decodium sendet und als STATION_CALLSIGN in ADIF schreibt.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="86"/>
+        <source>My Grid:</source>
+        <translation>Mein Locator:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="98"/>
+        <source>Auto Grid:</source>
+        <translation>Automatischer Locator:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="105"/>
+        <source>IARU Region:</source>
+        <translation>IARU Region:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="116"/>
+        <source>Type 2 Msg Gen:</source>
+        <translation>Typ-2-Msg-Gen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="118"/>
+        <source>Full</source>
+        <translation>Voll</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="118"/>
+        <source>Type 1 prefix</source>
+        <translation>Geben Sie das Präfix 1 ein</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="118"/>
+        <source>Type 2 prefix</source>
+        <translation>Präfix vom Typ 2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="127"/>
+        <source>Op Call:</source>
+        <translation>Operator-Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="136"/>
+        <source>Optional legacy operator-callsign setting. It never replaces My Call for transmission or STATION_CALLSIGN in ADIF.</source>
+        <translation>Optionale Alt-Einstellung für das Operator-Rufzeichen. Sie ersetzt niemals My Call beim Senden oder STATION_CALLSIGN in ADIF.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="142"/>
+        <source>Optional operator callsign</source>
+        <translation>Operator-Rufzeichen (optional)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="148"/>
+        <source>STATION INFO</source>
+        <translation>STATIONSINFO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="152"/>
+        <source>Station label:</source>
+        <translation>Stationsbezeichnung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="161"/>
+        <source>Optional descriptive label for this station or operating setup. It is not a callsign or a radio model.</source>
+        <translation>Optionale beschreibende Bezeichnung für diese Station oder diesen Aufbau. Sie ist kein Rufzeichen und kein Gerätemodell.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="167"/>
+        <source>Optional - e.g. Home station</source>
+        <translation>Optional - z. B. Heimstation</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="174"/>
+        <source>QTH:</source>
+        <translation>QTH:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="187"/>
+        <source>Rig / radio:</source>
+        <translation>Gerät / Funkgerät:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="196"/>
+        <source>Optional transceiver or radio description, for example Icom IC-7100. If left empty, Decodium uses the CAT rig name when available for PSK Reporter metadata.</source>
+        <translation>Optionale Beschreibung des Transceivers oder Funkgeräts, zum Beispiel Icom IC-7100. Bleibt das Feld leer, verwendet Decodium für die PSK-Reporter-Metadaten den CAT-Gerätenamen, sofern verfügbar.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="202"/>
+        <source>Optional - e.g. Icom IC-7100</source>
+        <translation>Optional - z. B. Icom IC-7100</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="209"/>
+        <source>Antenna:</source>
+        <translation>Antenne:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="221"/>
+        <source>Power (W):</source>
+        <translation>Leistung (W):</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab1</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="128"/>
+        <source>BACKEND CAT</source>
+        <translation>BACKEND CAT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="131"/>
+        <source>Backend:</source>
+        <translation>Backend:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="135"/>
+        <source>Native (15 radios)</source>
+        <translation>Native (15 Radios)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="135"/>
+        <source>Hamlib (300+ radios)</source>
+        <translation>Hamlib (über 300 Funkgeräte)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="156"/>
+        <source>Profile:</source>
+        <translation>Profil:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="180"/>
+        <source>No profile</source>
+        <translation>Kein Profil</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="200"/>
+        <source>Profile name</source>
+        <translation>Profilname</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="210"/>
+        <source>Load</source>
+        <translation>Laden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="221"/>
+        <source>Save</source>
+        <translation>Speichern</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="232"/>
+        <source>New</source>
+        <translation>Neu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="242"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="271"/>
+        <source>Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
+        <translation>Tipp: Schließen Sie OmniRig über das Windows-Taskleistensymbol und drücken Sie dann erneut auf „Verbinden“.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="277"/>
+        <source>Status:</source>
+        <translation>Status:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="281"/>
+        <source>Connected</source>
+        <translation>Verbunden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="281"/>
+        <source>Disconnected</source>
+        <translation>Nicht verbunden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="287"/>
+        <source>Disconnect</source>
+        <translation>Trennen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="287"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="304"/>
+        <source>CAT CONTROL</source>
+        <translation>CAT-STEUERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="310"/>
+        <source>Auto-detect:</source>
+        <translation>Automatische Erkennung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="317"/>
+        <source>Detect my radio</source>
+        <translation>Mein Funkgerät erkennen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="320"/>
+        <source>Reads what the system already knows: it opens no port and sends no command</source>
+        <translation>Liest nur, was das System bereits weiß: öffnet keinen Port und sendet keine Befehle</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="341"/>
+        <source>Rig:</source>
+        <translation>Anlage:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="442"/>
+        <source>Search radio, model or brand...</source>
+        <translation>Radio, Modell oder Marke suchen...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="495"/>
+        <source>Management:</source>
+        <translation>Verwaltung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="515"/>
+        <source>Control:</source>
+        <translation>Steuerung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="535"/>
+        <source>Radio group:</source>
+        <translation>Funkgerätegruppe:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="550"/>
+        <source>Automatic discovery</source>
+        <translation>Automatische Erkennung</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="561"/>
+        <source>Radio:</source>
+        <translation>Funkgerät:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="576"/>
+        <source>First available radio</source>
+        <translation>Erstes verfügbares Funkgerät</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="587"/>
+        <source>Ownership:</source>
+        <translation>Exklusive Kontrolle:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="595"/>
+        <source>Request control automatically</source>
+        <translation>Steuerung automatisch anfordern</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="612"/>
+        <source>Serial Port:</source>
+        <translation>Serieller Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="681"/>
+        <source>Refresh serial ports</source>
+        <translation>Serielle Schnittstellen aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="686"/>
+        <source>Baud Rate:</source>
+        <translation>Baudrate:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="720"/>
+        <source>CI-V Addr:</source>
+        <translation>CI-V Adresse:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="755"/>
+        <source>Host:Port:</source>
+        <translation>Host:Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="781"/>
+        <source>HRD Radio:</source>
+        <translation>HRD-Funkgerät:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="790"/>
+        <source>Strict match (abort if configured radio is not current in HRD)</source>
+        <translation>Strikte Übereinstimmung (abbrechen, wenn das konfigurierte Funkgerät in HRD nicht aktiv ist)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="810"/>
+        <source>TCI Host:Port:</source>
+        <translation>TCI-Host:Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="836"/>
+        <source>TCI Audio:</source>
+        <translation>TCI-Audio:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="844"/>
+        <source>RX/TX via TCI</source>
+        <translation>RX/TX über TCI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="860"/>
+        <source>PTT Method:</source>
+        <translation>PTT-Methode:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="907"/>
+        <source>PTT Port:</source>
+        <translation>PTT-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="938"/>
+        <source>Poll Interval (s):</source>
+        <translation>Umfrageintervall(e):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="954"/>
+        <source>CAT keep-alive:</source>
+        <translation>CAT-Keep-Alive:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="962"/>
+        <source>Light polling for interface activity LEDs</source>
+        <translation>Geringes Polling für Schnittstellen-Aktivitäts-LEDs</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="983"/>
+        <source>SERIAL PARAMETERS</source>
+        <translation>SERIELLE PARAMETER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="998"/>
+        <source>Data Bits:</source>
+        <translation>Datenbits:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1018"/>
+        <source>Stop Bits:</source>
+        <translation>Stoppbits:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1037"/>
+        <source>Handshake:</source>
+        <translation>Händedruck:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1062"/>
+        <source>Force DTR:</source>
+        <translation>Erzwinge DTR:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1084"/>
+        <source>Force RTS:</source>
+        <translation>Erzwinge RTS:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1106"/>
+        <source>SPLIT OPERATION</source>
+        <translation>SPLIT-BETRIEB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1109"/>
+        <source>Split:</source>
+        <translation>Aufteilung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1133"/>
+        <source>Mode:</source>
+        <translation>Modus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1146"/>
+        <source>TX Audio Src:</source>
+        <translation>TX Audioquelle:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1159"/>
+        <source>TX Audio:</source>
+        <translation>TX Audio:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1162"/>
+        <source>TCI Audio</source>
+        <translation>TCI Audio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1175"/>
+        <source>DIAGNOSTICS</source>
+        <translation>DIAGNOSE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1178"/>
+        <source>Check SWR:</source>
+        <translation>Überprüfen Sie SWR:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1190"/>
+        <source>PWR and SWR:</source>
+        <translation>PWR und SWR:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1201"/>
+        <source>SWR max:</source>
+        <translation>SWR max:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1220"/>
+        <source>Connecting...</source>
+        <translation>Verbinde...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1234"/>
+        <source>Hamlib:</source>
+        <translation>Hamlib:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1248"/>
+        <source>Open Hamlib update</source>
+        <translation>Öffnen Sie das Hamlib-Update</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1259"/>
+        <source>Windows: DLL updated from the Hamlib site. macOS/Linux: official documentation and releases.</source>
+        <translation>Windows: DLL von der Hamlib-Site aktualisiert. macOS/Linux: offizielle Dokumentation und Veröffentlichungen.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1268"/>
+        <source>ALC AUTO CALIBRATION</source>
+        <translation>ALC AUTO-KALIBRIERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1283"/>
+        <source>ALC target:</source>
+        <translation>ALC-Ziel:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1289"/>
+        <source>ALC scale 0-100. FT8/data: typically 15-25. Values &gt;60 risk overdriving the PA.</source>
+        <translation>ALC-Skala 0-100. FT8/Daten: typischerweise 15-25. Werte &gt;60 riskieren eine Übersteuerung der PA.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1339"/>
+        <source>Transmits a tune carrier and auto-adjusts the TX audio level until the radio's ALC reaches the target. One-shot. Requires Hamlib CAT connected.</source>
+        <translation>Sendet einen Tune-Träger und passt den TX-Audiopegel automatisch an, bis das ALC der Funkgeräts das Ziel erreicht. Einmalig. Erfordert verbundenes Hamlib-CAT.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1343"/>
+        <source>Cancel calibration</source>
+        <translation>Kalibrierung abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1344"/>
+        <source>Calibrate ALC (transmits a carrier)</source>
+        <translation>ALC kalibrieren (sendet einen Träger)</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab10</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="61"/>
+        <source>AUDIO ALERTS</source>
+        <translation>AUDIO ALERTS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="64"/>
+        <source>Alerts Enabled:</source>
+        <translation>Aktivierte Warnungen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="72"/>
+        <source>Test</source>
+        <translation>Test</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="94"/>
+        <source>CQ in Msg:</source>
+        <translation>CQ in Nachricht:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="101"/>
+        <source>My Call:</source>
+        <translation>Mein Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="109"/>
+        <source>New DXCC:</source>
+        <translation>Neues DXCC:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="116"/>
+        <source>New DXCC Band:</source>
+        <translation>Neues DXCC-Band:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="124"/>
+        <source>New Grid:</source>
+        <translation>Neuer Locator:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="131"/>
+        <source>New Grid Band:</source>
+        <translation>Neuer Locator pro Band:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="139"/>
+        <source>New Continent:</source>
+        <translation>Neuer Kontinent:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="146"/>
+        <source>New Cont Band:</source>
+        <translation>Neue Cont-Band:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="154"/>
+        <source>New CQ Zone:</source>
+        <translation>Neue CQ-Zone:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="161"/>
+        <source>CQ Zone Band:</source>
+        <translation>CQ Zonenband:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="169"/>
+        <source>New ITU Zone:</source>
+        <translation>Neue ITU-Zone:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="176"/>
+        <source>ITU Zone Band:</source>
+        <translation>ITU-Zonenband:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="184"/>
+        <source>DX Call/Grid:</source>
+        <translation>DX-Rufzeichen/Locator:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="191"/>
+        <source>QSY Message:</source>
+        <translation>QSY-Nachricht:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab11</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="61"/>
+        <source>BLACKLIST</source>
+        <translation>Schwarze Liste</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="64"/>
+        <source>Enabled:</source>
+        <translation>Aktiviert:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="74"/>
+        <source>Blacklist 1:</source>
+        <translation>Schwarze Liste 1:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="77"/>
+        <source>Blacklist 2:</source>
+        <translation>Schwarze Liste 2:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="81"/>
+        <source>Blacklist 3:</source>
+        <translation>Schwarze Liste 3:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="84"/>
+        <source>Blacklist 4:</source>
+        <translation>Schwarze Liste 4:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="88"/>
+        <source>Blacklist 5:</source>
+        <translation>Schwarze Liste 5:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="91"/>
+        <source>Blacklist 6:</source>
+        <translation>Schwarze Liste 6:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="95"/>
+        <source>Blacklist 7:</source>
+        <translation>Schwarze Liste 7:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="98"/>
+        <source>Blacklist 8:</source>
+        <translation>Schwarze Liste 8:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="102"/>
+        <source>Blacklist 9:</source>
+        <translation>Schwarze Liste 9:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="105"/>
+        <source>Blacklist 10:</source>
+        <translation>Schwarze Liste 10:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="109"/>
+        <source>Blacklist 11:</source>
+        <translation>Schwarze Liste 11:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="112"/>
+        <source>Blacklist 12:</source>
+        <translation>Schwarze Liste 12:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="117"/>
+        <source>WHITELIST</source>
+        <translation>WHITELIST</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="129"/>
+        <source>Whitelist 1:</source>
+        <translation>Whitelist 1:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="132"/>
+        <source>Whitelist 2:</source>
+        <translation>Whitelist 2:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="136"/>
+        <source>Whitelist 3:</source>
+        <translation>Whitelist 3:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="139"/>
+        <source>Whitelist 4:</source>
+        <translation>Whitelist 4:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="143"/>
+        <source>Whitelist 5:</source>
+        <translation>Whitelist 5:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="146"/>
+        <source>Whitelist 6:</source>
+        <translation>Whitelist 6:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="150"/>
+        <source>Whitelist 7:</source>
+        <translation>Whitelist 7:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="153"/>
+        <source>Whitelist 8:</source>
+        <translation>Whitelist 8:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="157"/>
+        <source>Whitelist 9:</source>
+        <translation>Whitelist 9:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="160"/>
+        <source>Whitelist 10:</source>
+        <translation>Whitelist 10:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="164"/>
+        <source>Whitelist 11:</source>
+        <translation>Whitelist 11:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="167"/>
+        <source>Whitelist 12:</source>
+        <translation>Whitelist 12:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="172"/>
+        <source>ALWAYS PASS</source>
+        <translation>IMMER PASSIEREN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="184"/>
+        <source>Always Pass 1:</source>
+        <translation>Immer Pass 1:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="187"/>
+        <source>Always Pass 2:</source>
+        <translation>Immer Pass 2:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="191"/>
+        <source>Always Pass 3:</source>
+        <translation>Immer bestehen 3:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="194"/>
+        <source>Always Pass 4:</source>
+        <translation>Immer bestehen 4:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="198"/>
+        <source>Always Pass 5:</source>
+        <translation>Immer bestanden 5:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="201"/>
+        <source>Always Pass 6:</source>
+        <translation>Immer bestehen 6:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="205"/>
+        <source>Always Pass 7:</source>
+        <translation>Immer bestehen 7:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="208"/>
+        <source>Always Pass 8:</source>
+        <translation>Immer bestehen 8:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="212"/>
+        <source>Always Pass 9:</source>
+        <translation>Bestehen Sie immer 9:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="215"/>
+        <source>Always Pass 10:</source>
+        <translation>Bestehen Sie immer 10:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="219"/>
+        <source>Always Pass 11:</source>
+        <translation>Bestehen Sie immer 11:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="222"/>
+        <source>Always Pass 12:</source>
+        <translation>Bestehen Sie immer 12:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="227"/>
+        <source>EXCLUDE TERRITORY</source>
+        <translation>GEBIET AUSSCHLIESSEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="230"/>
+        <source>Europe:</source>
+        <translation>Europa:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="238"/>
+        <source>Africa:</source>
+        <translation>Afrika:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="247"/>
+        <source>Oceania:</source>
+        <translation>Ozeanien:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="255"/>
+        <source>Asia:</source>
+        <translation>Asien:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="264"/>
+        <source>North America:</source>
+        <translation>Nordamerika:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="272"/>
+        <source>South America:</source>
+        <translation>Südamerika:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="282"/>
+        <source>FILTER OPTIONS</source>
+        <translation>FILTEROPTIONEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="285"/>
+        <source>Worked on Band:</source>
+        <translation>Auf Band gearbeitet:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="294"/>
+        <source>Hide stations already worked on the current band.</source>
+        <translation>Stationen ausblenden, die auf dem aktuellen Band bereits gearbeitet wurden.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="297"/>
+        <source>Worked Today:</source>
+        <translation>Heute gearbeitet:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="306"/>
+        <source>Hide stations already logged today in UTC.</source>
+        <translation>Stationen ausblenden, die heute in UTC bereits geloggt wurden.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="309"/>
+        <source>Wait &amp; Pounce:</source>
+        <translation>Warten und springen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="321"/>
+        <source>Wait &amp; Pounce listens for filtered CQ decodes, but it only starts a reply when TX/CQ is already armed by the operator.</source>
+        <translation>Wait &amp;amp; Pounce hört auf gefilterte CQ-Dekodierungen, startet eine Antwort aber nur, wenn TX/CQ bereits vom Operator scharfgeschaltet wurde.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="323"/>
+        <source>W&amp;P Filters Only:</source>
+        <translation>Nur W&amp;P-Filter:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="331"/>
+        <source>Calling Only:</source>
+        <translation>Nur rufende Stationen:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab12</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="62"/>
+        <source>Monitor (MON / STOP)</source>
+        <translation>Monitor (MON / STOP)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="63"/>
+        <source>Setup (⚙)</source>
+        <translation>Einrichtung (⚙)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="69"/>
+        <source>Layout (window reset)</source>
+        <translation>Layout (Fenster-Reset)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="70"/>
+        <source>History (decode history)</source>
+        <translation>Verlauf (Decodierungen)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="72"/>
+        <source>Async FT2 (A)</source>
+        <translation>Async FT2 (A)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="74"/>
+        <source>DX Cluster (toolbar)</source>
+        <translation>DX-Cluster (Werkzeugleiste)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="75"/>
+        <source>World Clock</source>
+        <translation>Weltuhr</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="79"/>
+        <source>Show or hide UI buttons as you prefer. Changes are immediate and saved automatically.</source>
+        <translation>UI-Schaltflächen nach Belieben ein- oder ausblenden. Änderungen sind sofort wirksam und werden automatisch gespeichert.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="85"/>
+        <source>TOP TOOLBAR</source>
+        <translation>OBERE SYMBOLLEISTE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="104"/>
+        <source>TOOLBAR BUTTON ORDER</source>
+        <translation>REIHENFOLGE DER TOOLBAR-SCHALTFLÄCHEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="108"/>
+        <source>Drag the top toolbar buttons (long-press) to reorder them. Use the button below to restore the default order.</source>
+        <translation>Ziehe die Schaltflächen der oberen Toolbar (langes Drücken), um sie neu anzuordnen. Verwende die Schaltfläche unten, um die Standardreihenfolge wiederherzustellen.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="126"/>
+        <source>Restore default button order</source>
+        <translation>Standard-Schaltflächenreihenfolge wiederherstellen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="159"/>
+        <source>Restore default TX panel order</source>
+        <translation>Standard-TX-Panel-Reihenfolge wiederherstellen</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab13</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="59"/>
+        <source>CALLSIGN INTELLIGENCE</source>
+        <translation>RUFZEICHEN-INTELLIGENZ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="62"/>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="72"/>
+        <source>Apertura automatica all'avvio QSO</source>
+        <translation>Automatisch öffnen, wenn ein QSO beginnt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="77"/>
+        <source>Apri il pannello lookup</source>
+        <translation>Abfragebereich öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="79"/>
+        <source>Chiusura automatica dopo logging</source>
+        <translation>Nach dem Eintragen automatisch schließen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="84"/>
+        <source>Chiudi il pannello dopo il QSO</source>
+        <translation>Bereich nach dem QSO schließen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="86"/>
+        <source>Arricchimento campi mancanti</source>
+        <translation>Fehlende Felder ergänzen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="91"/>
+        <source>Grid, nome e QTH nel prossimo log</source>
+        <translation>Gitter, Name und QTH im nächsten Logeintrag</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="93"/>
+        <source>Durata cache (minuti)</source>
+        <translation>Cache-Dauer (Minuten)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="101"/>
+        <source>eQSL INBOX — CONFERME RICEVUTE</source>
+        <translation>eQSL INBOX — CONFERME RICEVUTE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="103"/>
+        <source>Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</source>
+        <translation>Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="107"/>
+        <source>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</source>
+        <translation>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="115"/>
+        <source>Username/callsign eQSL</source>
+        <translation>Username/callsign eQSL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="119"/>
+        <source>Callsign eQSL o nickname account</source>
+        <translation>Callsign eQSL o nickname account</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="122"/>
+        <source>Password eQSL</source>
+        <translation>Password eQSL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="131"/>
+        <source>LoTW — CONFERME RICEVUTE</source>
+        <translation>LoTW — CONFERME RICEVUTE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="133"/>
+        <source>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</source>
+        <translation>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="141"/>
+        <source>Username LoTW</source>
+        <translation>Username LoTW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="145"/>
+        <source>Callsign o username LoTW</source>
+        <translation>Callsign o username LoTW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="150"/>
+        <source>CLUB LOG OQRS</source>
+        <translation>CLUB LOG OQRS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="156"/>
+        <source>API key</source>
+        <translation>API-Schlüssel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="163"/>
+        <source>Email</source>
+        <translation>E-Mail</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="169"/>
+        <source>Application password</source>
+        <translation>Anwendungspasswort</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="181"/>
+        <source>Clear global lookup cache</source>
+        <translation>Globalen Lookup-Cache leeren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="192"/>
+        <source>LOCAL DATABASES</source>
+        <translation>LOKALE DATENBANKEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="194"/>
+        <source>SQLite: %1</source>
+        <translation>SQLite: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="237"/>
+        <source>Update</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="260"/>
+        <source>Updating...</source>
+        <translation>Aktualisiere...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="262"/>
+        <source>%1 record</source>
+        <translation>%1 Datensätze</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="263"/>
+        <source>No records</source>
+        <translation>Keine Datensätze</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="271"/>
+        <source>Never updated</source>
+        <translation>Nie aktualisiert</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="281"/>
+        <source>Last update: %1</source>
+        <translation>Letzte Aktualisierung: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="296"/>
+        <source>File: %1</source>
+        <translation>Datei: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="297"/>
+        <source>File not found</source>
+        <translation>Datei nicht gefunden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="315"/>
+        <source>Optional local file path</source>
+        <translation>Optionaler lokaler Dateipfad</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="324"/>
+        <source>Choose</source>
+        <translation>Wählen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="337"/>
+        <source>Import callsign database</source>
+        <translation>Callsign-Datenbank importieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="337"/>
+        <source>Databases and CSV (*)</source>
+        <translation>Datenbanken und CSV (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="343"/>
+        <source>Import</source>
+        <translation>Importieren</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab2</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="61"/>
+        <source>AUDIO DEVICES</source>
+        <translation>AUDIOGERÄTE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="72"/>
+        <source>↻  Refresh</source>
+        <translation>↻  Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="87"/>
+        <source>Input Device:</source>
+        <translation>Eingabegerät:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="109"/>
+        <source>Linux: entries marked 'Pulse/PipeWire monitor' capture the audio playing on that PipeWire/PulseAudio sink, useful for WebSDR/KiwiSDR browser audio. Selecting a Pulse/PipeWire source requires pactl and changes the current user's default capture source.</source>
+        <translation>Linux: Einträge mit 'Pulse/PipeWire monitor' nehmen den Ton auf, der auf dieser PipeWire/PulseAudio-Senke läuft — nützlich für WebSDR/KiwiSDR-Ton im Browser. Die Auswahl einer Pulse/PipeWire-Quelle erfordert pactl und ändert die Standard-Aufnahmequelle des aktuellen Benutzers.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="111"/>
+        <source>Input Channel:</source>
+        <translation>Eingangskanal:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="114"/>
+        <source>Mono</source>
+        <translation>Mono</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="114"/>
+        <source>Left</source>
+        <translation>Links</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="114"/>
+        <source>Right</source>
+        <translation>Richtig</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="114"/>
+        <source>Both</source>
+        <translation>Beides</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="129"/>
+        <source>Output Device:</source>
+        <translation>Ausgabegerät:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="149"/>
+        <source>Output Channel:</source>
+        <translation>Ausgangskanal:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="167"/>
+        <source>RTL-SDR RECEIVER</source>
+        <translation>RTL-SDR RECEIVER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="187"/>
+        <source>Use RTL-SDR:</source>
+        <translation>Use RTL-SDR:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="198"/>
+        <source>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</source>
+        <translation>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="202"/>
+        <source>Experimental function under development</source>
+        <translation>Experimentelle Funktion in Entwicklung</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="203"/>
+        <source>No external audio cable is required. RX only.</source>
+        <translation>No external audio cable is required. RX only.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="204"/>
+        <source>RTL-SDR support is not included in this build.</source>
+        <translation>RTL-SDR support is not included in this build.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="213"/>
+        <source>Receiver:</source>
+        <translation>Receiver:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="236"/>
+        <source>Input mode:</source>
+        <translation>Input mode:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="248"/>
+        <source>SDR Radio</source>
+        <translation>SDR Radio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="248"/>
+        <source>Direct Sampling</source>
+        <translation>Direct Sampling</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="275"/>
+        <source>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</source>
+        <translation>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="277"/>
+        <source>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</source>
+        <translation>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="290"/>
+        <source>Demodulator:</source>
+        <translation>Demodulator:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="293"/>
+        <source>Weak signal / FT8 audio</source>
+        <translation>Weak signal / FT8 audio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="293"/>
+        <source>Wide FM broadcast</source>
+        <translation>Wide FM broadcast</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
+        <source>Narrow FM</source>
+        <translation>Narrow FM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
+        <source>AM</source>
+        <translation>AM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
+        <source>USB</source>
+        <translation>USB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="295"/>
+        <source>LSB</source>
+        <translation>LSB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="295"/>
+        <source>CW</source>
+        <translation>CW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="319"/>
+        <source>Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.</source>
+        <translation>Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="320"/>
+        <source>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</source>
+        <translation>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="322"/>
+        <source>Listen to receiver audio:</source>
+        <translation>Listen to receiver audio:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="333"/>
+        <source>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</source>
+        <translation>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="353"/>
+        <source>Follow dial frequency:</source>
+        <translation>Follow dial frequency:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="366"/>
+        <source>Use receiver IF output:</source>
+        <translation>ZF-Ausgang des Empfängers verwenden:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="378"/>
+        <source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source>
+        <translation>Behält die Funkgerätefrequenz für Anzeige, Protokollierung und Dekodierung bei, während der RTL-SDR auf den festen ZF-Ausgang des Empfängers abgestimmt wird.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="381"/>
+        <source>IF frequency (Hz):</source>
+        <translation>ZF-Frequenz (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="397"/>
+        <source>IF sideband:</source>
+        <translation>ZF-Seitenband:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="401"/>
+        <source>Automatic</source>
+        <translation>Automatisch</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="416"/>
+        <source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source>
+        <translation>Automatisch verwendet LSB nur mit dem LSB-Demodulator; Schwachsignalmodi wie FT8 verwenden USB.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="419"/>
+        <source>USB shift (Hz):</source>
+        <translation>USB-Verschiebung (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="435"/>
+        <source>LSB shift (Hz):</source>
+        <translation>LSB-Verschiebung (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="451"/>
+        <source>Invert IF spectrum:</source>
+        <translation>ZF-Spektrum invertieren:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="463"/>
+        <source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source>
+        <translation>Aktivieren, wenn sich Signale im Panadapter entgegengesetzt bewegen, weil der ZF-Mischer des Empfängers das Spektrum umkehrt.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="468"/>
+        <source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source>
+        <translation>ZF-Modus: Decodium zeigt weiterhin die Funkgerätefrequenz an und stimmt den RTL-SDR auf ZF plus gewählte USB/LSB-Verschiebung ab.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="478"/>
+        <source>Receiver speaker output:</source>
+        <translation>Receiver speaker output:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="482"/>
+        <source>System default</source>
+        <translation>System default</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="515"/>
+        <source>System default normally selects the computer speakers and is independent from Decodium's TX audio output.</source>
+        <translation>System default normally selects the computer speakers and is independent from Decodium's TX audio output.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="518"/>
+        <source>RF frequency (Hz):</source>
+        <translation>RF frequency (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="538"/>
+        <source>Sample rate:</source>
+        <translation>Sample rate:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="564"/>
+        <source>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</source>
+        <translation>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="565"/>
+        <source>RF spectrum is derived from complex IQ, independent from decoder audio.</source>
+        <translation>RF spectrum is derived from complex IQ, independent from decoder audio.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="572"/>
+        <source>PPM correction:</source>
+        <translation>PPM correction:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="588"/>
+        <source>Tuner AGC:</source>
+        <translation>Tuner AGC:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="599"/>
+        <source>Manual gain (dB):</source>
+        <translation>Manual gain (dB):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="617"/>
+        <source>Digital AGC:</source>
+        <translation>Digital AGC:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="627"/>
+        <source>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</source>
+        <translation>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="631"/>
+        <source>Bias tee:</source>
+        <translation>Bias tee:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="641"/>
+        <source>Supplies power to an external active antenna or LNA only when required by that equipment.</source>
+        <translation>Supplies power to an external active antenna or LNA only when required by that equipment.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="643"/>
+        <source>Audio gain:</source>
+        <translation>Audio gain:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="669"/>
+        <source>LEVELS</source>
+        <translation>EBENEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="672"/>
+        <source>RX Input Level:</source>
+        <translation>RX Eingangspegel:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="727"/>
+        <source>Auto RX level active</source>
+        <translation>Auto-RX-Pegel aktiv</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="728"/>
+        <source>Auto RX level disabled</source>
+        <translation>Auto-RX-Pegel deaktiviert</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="732"/>
+        <source>TX Output Level:</source>
+        <translation>TX Ausgangspegel:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="751"/>
+        <source>DIRECTORY</source>
+        <translation>VERZEICHNIS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="754"/>
+        <source>Save Directory:</source>
+        <translation>Verzeichnis speichern:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="770"/>
+        <source>AzEl Directory:</source>
+        <translation>AzEl-Verzeichnis:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="787"/>
+        <source>POWER MEMORY</source>
+        <translation>POWER-SPEICHER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="790"/>
+        <source>Band TX Memory:</source>
+        <translation>Band TX Speicher:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="797"/>
+        <source>Band Tune Mem:</source>
+        <translation>Band-Tune-Speicher:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab3</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="61"/>
+        <source>FREQUENCY AND TIMING</source>
+        <translation>FREQUENZ UND ZEITSTEUERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="64"/>
+        <source>TX Frequency:</source>
+        <translation>TX Häufigkeit:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="77"/>
+        <source>TX Slot:</source>
+        <translation>TX-Steckplatz:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="80"/>
+        <source>Second (:15/:45)</source>
+        <translation>Zweiter (:15/:45)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="80"/>
+        <source>First (:00/:30)</source>
+        <translation>Zuerst (:00/:30)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="94"/>
+        <source>TX Delay (s):</source>
+        <translation>TX Verzögerung(en):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="109"/>
+        <source>Allow TX QSY:</source>
+        <translation>Zulassen TX QSY:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="120"/>
+        <source>READY PROFILES</source>
+        <translation>BEREITPROFILE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="132"/>
+        <source>Balanced (daily QSO) - default</source>
+        <translation>Ausgewogen (tägliches QSO) - Standard</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="133"/>
+        <source>Conservative ON · full decode AutoCQ ON · close strong partners ON · adaptive decode ON · AP cache rescue ON · skip end-slot OFF · MAM OFF · partner memory ON · TX2 resend ON · smooth flow ON · caller retries 5.</source>
+        <translation>Konservativ ON · vollständiges Decode AutoCQ ON · starke Partner schließen ON · adaptives Decode ON · AP-Cache-Rettung ON · Slot-Ende überspringen OFF · MAM OFF · Partner-Speicher ON · TX2 erneut senden ON · ruhiger Ablauf ON · Anrufer-Versuche 5.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="134"/>
+        <source>Weak-signal / DX hunting</source>
+        <translation>Schwaches Signal / DX-Jagd</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="135"/>
+        <source>Like Balanced, but: caller retries 7 · adaptive decode OFF (maximum sensitivity) · AP cache rescue ON (accepts some false positives) · skip end-slot OFF (do not lose late decodes).</source>
+        <translation>Wie Ausgewogen, aber: Anrufer-Versuche 7 · adaptives Decode OFF (maximale Empfindlichkeit) · AP-Cache-Rettung ON (akzeptiert einige Fehlpositive) · Slot-Ende überspringen OFF (keine späten Decodes verlieren).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="136"/>
+        <source>Contest / high density</source>
+        <translation>Contest / hohe Dichte</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="137"/>
+        <source>close strong partners ON · skip end-slot ON (minimum latency) · MAM multi-stream ON (2 streams, experimental) · full decode AutoCQ ON · caller retries 3 · partner memory ON · conservative OFF.</source>
+        <translation>starke Partner schließen ON · Slot-Ende überspringen ON (minimale Latenz) · MAM Multi-Stream ON (2 Streams, experimentell) · vollständiges Decode AutoCQ ON · Anrufer-Versuche 3 · Partner-Speicher ON · konservativ OFF.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="138"/>
+        <source>CPU-limited (Decodium Console / mini PC)</source>
+        <translation>CPU-limitiert (Decodium Console / Mini-PC)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="139"/>
+        <source>adaptive decode ON · MAM OFF · full decode AutoCQ OFF · smooth flow ON · rest at defaults. Watchdogs unchanged.</source>
+        <translation>adaptives Decode ON · MAM OFF · vollständiges Decode AutoCQ OFF · ruhiger Ablauf ON · Rest auf Standardwerten. Watchdogs unverändert.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="162"/>
+        <source>● active</source>
+        <translation>● aktiv</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="178"/>
+        <source>AUTO SEQUENCE</source>
+        <translation>AUTOMATISCHE SEQUENZ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="197"/>
+        <source>Auto Sequence:</source>
+        <translation>Automatische Sequenz:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="218"/>
+        <source>Send RR73:</source>
+        <translation>Senden Sie RR73:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="239"/>
+        <source>Quick QSO:</source>
+        <translation>Schnell QSO:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="262"/>
+        <source>Resume QSO on partner reply:</source>
+        <translation>QSO fortsetzen wenn Partner antwortet:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="285"/>
+        <source>If you Halt during an active QSO and that same station sends a direct reply to your callsign within 2 minutes, Decodium can resume that QSO.
+
+Applies only to FT8/FT4/FT2 and only to the saved QSO state.
+
+Default: OFF (= Halt fully stops the sequence by default).</source>
+        <translation>Wenn du während eines aktiven QSO Halt drückst und dieselbe Station innerhalb von 2 Minuten eine direkte Antwort an dein Rufzeichen sendet, kann Decodium dieses QSO fortsetzen.
+
+Gilt nur für FT8/FT4/FT2 und nur für den gespeicherten QSO-Status.
+
+Standard: AUS (= Halt stoppt die Sequenz standardmäßig vollständig).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="288"/>
+        <source>Disable TX after 73:</source>
+        <translation>Deaktivieren Sie TX nach 73:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="306"/>
+        <source>MSK/Q65 TX until 73:</source>
+        <translation>MSK/Q65 TX bis 73:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="324"/>
+        <source>FT2 UTILITY</source>
+        <translation>FT2-WERKZEUGE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="329"/>
+        <source>FT2: signoff retries (73/RR73):</source>
+        <translation>FT2: Signoff-Wiederholungen (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="350"/>
+        <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner's ack before logging and closing.
+
+Default: 4 (~28s).
+
+Lower = closes earlier (less 'stuck' on the same station).
+Higher = more patient with weak/QSB partners.
+
+Doesn't affect FT8/FT4.</source>
+        <translation>Wie oft das abschließende 73/RR73 in FT2 wiederholt wird, während auf die Bestätigung des Partners gewartet wird, bevor geloggt und abgeschlossen wird.
+
+Standard: 4 (~28 s).
+
+Niedriger = schließt früher (bleibt weniger an derselben Station 'hängen').
+Höher = geduldiger bei schwachen/QSB-Partnern.
+
+Betrifft FT8/FT4 nicht.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="355"/>
+        <source>FT4: signoff retries (73/RR73):</source>
+        <translation>FT4: Signoff-Wiederholungen (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="376"/>
+        <source>How many times to repeat the final 73/RR73 in FT4.
+
+Default: 4 (~30s).
+
+Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
+
+Doesn't affect FT2/FT8.</source>
+        <translation>Wie oft das abschließende 73/RR73 in FT4 wiederholt wird.
+
+Standard: 4 (~30 s).
+
+Auf 6-8 erhöhen für schwache/QSB-Partner (ersetzt die früheren automatischen weak/conservative-Zusätze).
+
+Betrifft FT2/FT8 nicht.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="381"/>
+        <source>FT8: signoff retries (73/RR73):</source>
+        <translation>FT8: Signoff-Wiederholungen (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="402"/>
+        <source>How many times to repeat the final 73/RR73 in FT8.
+
+Default: 3 (~45s).
+
+Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
+
+Doesn't affect FT2/FT4.</source>
+        <translation>Wie oft das abschließende 73/RR73 in FT8 wiederholt wird.
+
+Standard: 3 (~45 s).
+
+Auf 6-8 erhöhen für schwache/QSB-Partner (ersetzt die früheren automatischen weak/conservative-Zusätze).
+
+Betrifft FT2/FT4 nicht.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="407"/>
+        <source>Weak-partner signoff boost (FT2/4/8):</source>
+        <translation>Signoff-Boost für schwache Partner (FT2/4/8):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="426"/>
+        <source>When ON, automatically grants extra final 73/RR73 retries when the active partner is weak (SNR at or below the threshold below), giving fragile QSOs more chances to close.
+
+Default OFF = unchanged behavior. Applies to FT2/FT4/FT8, always clamped to max 8 and still bounded by the TX watchdog.</source>
+        <translation>Wenn aktiv, werden automatisch zusätzliche abschließende 73/RR73-Wiederholungen gewährt, wenn der aktive Partner schwach ist (SNR auf oder unter der unten stehenden Schwelle), wodurch fragile QSOs mehr Chancen auf einen Abschluss erhalten.
+
+Standard AUS = unverändertes Verhalten. Gilt für FT2/FT4/FT8, immer auf max. 8 begrenzt und weiterhin durch den TX-Watchdog beschränkt.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="429"/>
+        <source>  weak SNR threshold (dB):</source>
+        <translation>  Schwelle für schwaches SNR (dB):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="452"/>
+        <source>A partner whose SNR is at or below this value is treated as 'weak' and receives the extra signoff retries.
+
+Default: -15 dB.</source>
+        <translation>Ein Partner, dessen SNR auf oder unter diesem Wert liegt, wird als 'schwach' behandelt und erhält die zusätzlichen Signoff-Wiederholungen.
+
+Standard: -15 dB.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="455"/>
+        <source>  extra signoff retries:</source>
+        <translation>  zusätzliche Signoff-Wiederholungen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="478"/>
+        <source>How many extra final 73/RR73 retries to add on top of the per-mode cap for weak partners.
+
+Default: +3 (capped so the total never exceeds 8).</source>
+        <translation>Wie viele zusätzliche abschließende 73/RR73-Wiederholungen über das Limit je Modus hinaus für schwache Partner hinzugefügt werden.
+
+Standard: +3 (so begrenzt, dass die Summe nie 8 überschreitet).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="483"/>
+        <source>Post-log RRR re-engage guard (FT2):</source>
+        <translation>Schutz gegen erneutes Anbinden nach Log (RRR, FT2):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="502"/>
+        <source>When ON, after a QSO is logged ('partner left') stop re-sending RR73 to a partner that keeps calling you with R+report because they did not copy your signoff (the 9H1SR too-many-calls case).
+
+A few courtesy repeats are still allowed (see max), then suppressed within the 30s cooldown. Default OFF. FT2 only.</source>
+        <translation>Wenn aktiv, wird nach dem Loggen eines QSO ('Partner hat verlassen') das erneute Senden von RR73 an einen Partner gestoppt, der dich weiterhin mit R+Rapport ruft, weil er deine Abmeldung nicht aufgenommen hat (der Fall 9H1SR mit zu vielen Anrufen).
+
+Einige Höflichkeits-Wiederholungen sind weiterhin erlaubt (siehe Max), danach innerhalb der 30s-Sperrzeit unterdrückt. Standard AUS. Nur FT2.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="505"/>
+        <source>  courtesy RRR max:</source>
+        <translation>  max. Höflichkeits-RRR:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="528"/>
+        <source>How many courtesy RR73 to still send to a just-logged partner before suppressing further re-engagements.
+
+0 = suppress immediately. Default: 1.</source>
+        <translation>Wie viele Höflichkeits-RR73 noch an einen gerade geloggten Partner gesendet werden, bevor weitere erneute Anbindungen unterdrückt werden.
+
+0 = sofort unterdrücken. Standard: 1.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="533"/>
+        <source>Immediate TX on click (1.0.283 style):</source>
+        <translation>Sofortiges TX beim Klick (Stil 1.0.283):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="555"/>
+        <source>Restores the 'TX starts IMMEDIATELY on double-click' behaviour of 1.0.283.
+
+• FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
+• FT8/FT4: raises the clickable window cap to d3CapMs (~11s on FT8, 5.6s on FT4) = real 1.0.283 behaviour
+
+Default: OFF (= safe upstream behaviour).
+
+Enable if it bothers you to wait 1 cycle after the click.</source>
+        <translation>Stellt das Verhalten 'TX startet SOFORT beim Doppelklick' von 1.0.283 wieder her.
+
+• FT2: lockert das Perioden-Gate (TX1 per Klick umgeht das Warten auf den nächsten Slot)
+• FT8/FT4: erhöht die Grenze des klickbaren Fensters auf d3CapMs (~11 s bei FT8, 5,6 s bei FT4) = echtes 1.0.283-Verhalten
+
+Standard: AUS (= sicheres Upstream-Verhalten).
+
+Aktivieren, falls es Sie stört, nach dem Klick 1 Zyklus zu warten.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="560"/>
+        <source>Log RR73 even if partner leaves (FT2):</source>
+        <translation>RR73 protokollieren, auch wenn Partner abbricht (FT2):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="582"/>
+        <source>FT2 + async AutoCQ: when WE close with RR73 (TX4) after the partner R+report and the partner then disappears, log the QSO anyway (at the signoff cap) instead of leaving it unlogged.
+
+Matches TX5/73 and sync mode behaviour.
+
+Default: OFF.</source>
+        <translation>FT2 + async AutoCQ: wenn WIR mit RR73 (TX4) abschließen, nachdem der Partner R+Rapport gesendet hat, und der Partner dann verschwindet, das QSO trotzdem protokollieren (am Signoff-Limit), anstatt es unprotokolliert zu lassen.
+
+Entspricht dem Verhalten von TX5/73 und dem Sync-Modus.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="587"/>
+        <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
+        <translation>FT8: schnelle Sequenzen (WSJT-X/JTDX-Stil):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="609"/>
+        <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
+
+Two changes:
+  (1) Boundary grace 1200ms → 400ms = TX starts ~800ms earlier after the slot boundary
+  (2) onFt8DecodeReady accepts late decodes within d3CapMs (~11s) instead of dropping the slot = no more '15s extra after the partner's reply'
+
+SAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety &gt; reactivity on loaded PCs).
+
+Default: OFF (= conservative upstream behaviour, max decode reliability).</source>
+        <translation>Reduziert die FT8-Sequenzwartezeiten für Nutzer, die WSJT-X/JTDX-artige Reaktivität bevorzugen.
+
+Zwei Änderungen:
+  (1) Boundary-Grace 1200 ms → 400 ms = TX startet ~800 ms früher nach der Slot-Grenze
+  (2) onFt8DecodeReady akzeptiert späte Decodes innerhalb von d3CapMs (~11 s), statt den Slot zu verwerfen = keine '15 s extra nach der Antwort des Partners' mehr
+
+SICHERHEIT: unter CPU-Last erzwingt die bestehende Begrenzung eine Grace ≥900 ms (Sicherheit &gt; Reaktivität auf ausgelasteten PCs).
+
+Standard: AUS (= konservatives Upstream-Verhalten, maximale Decode-Zuverlässigkeit).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="614"/>
+        <source>FT2: conservative TX window (no truncated frames):</source>
+        <translation>FT2: konservatives TX-Fenster (keine abgeschnittenen Frames):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="636"/>
+        <source>Controls how late in a slot the async FT2 TX may start.
+
+• ON (default): the TX starts only if the FULL payload (~2520ms) still fits — window ~18% of the slot. If it would arrive late, the TX is deferred to the next slot instead of sending a TRUNCATED frame the partner can't decode. Calm, Decodium-3.0-style stability.
+• OFF: FIX B (1.0.353) behaviour — window up to ~76% of the slot (only ~700ms of useful payload required). More reactive but can transmit truncated frames on a late reply.
+
+Enable OFF only if you want maximum reactivity and accept occasional non-decodable late TX.</source>
+        <translation>Steuert, wie spät in einem Slot der async-FT2-TX starten darf.
+
+• AN (Standard): Der TX startet nur, wenn die VOLLSTÄNDIGE Nutzlast (~2520 ms) noch hineinpasst — Fenster ~18% des Slots. Würde er zu spät ankommen, wird der TX auf den nächsten Slot verschoben, statt einen ABGESCHNITTENEN Frame zu senden, den der Partner nicht dekodieren kann. Ruhige Stabilität im Decodium-3.0-Stil.
+• AUS: FIX-B-Verhalten (1.0.353) — Fenster bis zu ~76% des Slots (nur ~700 ms nutzbare Nutzlast erforderlich). Reaktiver, kann aber bei einer späten Antwort abgeschnittene Frames senden.
+
+Aktiviere AUS nur, wenn du maximale Reaktivität willst und gelegentliche nicht dekodierbare späte TX akzeptierst.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="641"/>
+        <source>FT2: manual one-shot disarm (1.0.300+):</source>
+        <translation>FT2: manuelle One-Shot-Entschärfung (1.0.300+):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="663"/>
+        <source>When ON (upstream 1.0.300+ behaviour): after a manual TX1-TX3 in FT2 the TX is disarmed and re-armed ONLY when a partner decode arrives. Avoids TX1 looping forever on double-click, but on WEAK partners that don't decode in the first RX period the QSO is lost (= 'TX1 stops without completing').
+
+When OFF (default on this fork, pre-1.0.300): TX1 keeps repeating until 'Caller Retries' is reached — better for weak-signal QSOs (Pasquale's case).
+
+Enable only if you double-click stations that consistently reply on the first attempt.</source>
+        <translation>Wenn AN (Verhalten Upstream 1.0.300+): nach einem manuellen TX1-TX3 in FT2 wird der TX entschärft und NUR dann wieder scharfgeschaltet, wenn eine Partner-Dekodierung eintrifft. Vermeidet endloses TX1-Schleifen bei Doppelklick, aber bei SCHWACHEN Partnern, die in der ersten RX-Periode nicht dekodiert werden, geht das QSO verloren (= 'TX1 stoppt ohne Abschluss').
+
+Wenn AUS (Standard in diesem Fork, vor 1.0.300): TX1 wiederholt sich, bis 'Anrufer-Wiederholungen' erreicht ist — besser für Schwachsignal-QSOs (Pasquales Fall).
+
+Nur aktivieren, wenn du Stationen doppelklickst, die durchgängig beim ersten Versuch antworten.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="668"/>
+        <source>Caller retries (max TX repeats per step):</source>
+        <translation>Anrufer-Wiederholungen (max. TX-Wiederholungen pro Schritt):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="693"/>
+        <source>Maximum times the same TX step (TX1/TX2/TX3) repeats before halting if the partner doesn't reply.
+
+Default: 10.
+
+FT2 (slot 3.75s): 10 retries ≈ 38s of calling.
+FT8 (slot 15s): 10 retries ≈ 150s.
+
+Lower (4-6) = less time wasted on stations that don't reply.
+Higher (15-20) = patience for weak DX / marginal propagation.
+
+Note: with 'FT2 manual one-shot disarm' OFF (default) this is what stops TX1 from looping forever.</source>
+        <translation>Wie oft sich derselbe TX-Schritt (TX1/TX2/TX3) maximal wiederholt, bevor angehalten wird, falls der Partner nicht antwortet.
+
+Standard: 10.
+
+FT2 (Slot 3,75 s): 10 Wiederholungen ≈ 38 s Anruf.
+FT8 (Slot 15 s): 10 Wiederholungen ≈ 150 s.
+
+Niedriger (4-6) = weniger Zeit vergeudet bei Stationen, die nicht antworten.
+Höher (15-20) = Geduld für schwache DX / marginale Ausbreitung.
+
+Hinweis: mit 'FT2 manuelle One-Shot-Entschärfung' AUS (Standard) ist dies das, was TX1 vom endlosen Schleifen abhält.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="698"/>
+        <source>⚠ TX Watchdog is active and 'hard cap' below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ Der TX-Watchdog ist aktiv und das 'harte Limit' unten ist AUS: das obige Anrufer-Wiederholungen-Limit wird bis zum Watchdog-Timeout IGNORIERT.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="708"/>
+        <source>Caller retries hard cap (even with watchdog):</source>
+        <translation>Hartes Limit für Anrufer-Wiederholungen (auch mit Watchdog):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="730"/>
+        <source>When ON (default), the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Wenn AN (Standard), beendet das 'Anrufer-Wiederholungen'-Limit für TX1/TX2 den Anruf auch dann, wenn der TX-Watchdog aktiviert ist — die eingestellte Zahl ist ein echtes hartes Limit.
+
+Wenn AUS (Upstream-Verhalten 1.0.438): Der TX-Watchdog hat Vorrang und ignoriert das Anrufer-Wiederholungen-Limit bis zu seinem eigenen Timeout, sodass ein Anruf für die gesamte Watchdog-Dauer wiederholt werden kann (Standard 6 min).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="735"/>
+        <source>FT2 state transition census (log only):</source>
+        <translation>FT2-Zustandsübergangs-Erfassung (nur Protokoll):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="757"/>
+        <source>Diagnostic only (off by default): logs every FT2 QSO state transition (from/to/progress) to the diagnostic log, to empirically map the real sequencer state machine. No behaviour change at all - it only writes log lines. Used to design future deterministic-transition guards safely.</source>
+        <translation>Nur zur Diagnose (standardmäßig aus): protokolliert jeden FT2-QSO-Zustandsübergang (von/nach/Fortschritt) ins Diagnoseprotokoll, um die reale Sequencer-Zustandsmaschine empirisch abzubilden. Keinerlei Verhaltensänderung – es werden nur Protokollzeilen geschrieben. Dient dazu, künftige deterministische Übergangs-Sicherungen gefahrlos zu entwerfen.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="762"/>
+        <source>Adaptive async TX timing (experimental):</source>
+        <translation>Adaptives async TX-Timing (experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="784"/>
+        <source>Experimental, off by default. Makes the FT2 async-TX timing gates (RMS-quiet, decode-quiet, anti-collision jitter) adapt to channel occupancy: a bit more reactive when the channel is clear, more conservative when it is crowded. With this OFF the timing is byte-identical to the standard behaviour. It never transmits before hearing the partner.</source>
+        <translation>Experimentell, standardmäßig aus. Lässt die FT2-Async-TX-Timing-Gates (RMS-Stille, Decode-Stille, Anti-Kollisions-Jitter) sich an die Kanalauslastung anpassen: etwas reaktiver, wenn der Kanal frei ist, konservativer, wenn er belegt ist. Mit AUS ist das Timing byteidentisch zum Standardverhalten. Es sendet niemals, bevor der Partner gehört wurde.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="792"/>
+        <source>Conservative FT2 (weak-signal mode):</source>
+        <translation>Conservative FT2 (Schwachsignal-Modus):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="813"/>
+        <source>Anti-QSB tuning:
+  • Ghost filter -24 dB instead of -22
+  • Retry cap extended SNR-adaptive (+2..+4 extra)
+  • Same-step wait relaxed for weak partners
+
+Default: OFF — enable it if you have weak DX partners or marginal propagation.</source>
+        <translation>Anti-QSB-Abstimmung:
+  • Ghost-Filter -24 dB statt -22
+  • Retry-Grenze SNR-adaptiv erweitert (+2..+4 zusätzlich)
+  • Wartezeit im selben Schritt für schwache Partner gelockert
+
+Standard: AUS — aktivieren Sie es bei schwachen DX-Partnern oder marginaler Ausbreitung.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="818"/>
+        <source>FT2: full decode in AutoCQ:</source>
+        <translation>FT2: vollständige Dekodierung in AutoCQ:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="839"/>
+        <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
+
+Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
+
+Default: OFF.</source>
+        <translation>Hält während des CQ-Rufens (AutoCQ) die Decode-Tiefe auf voll (OSD + 4. Subtraktionsdurchlauf + Schwachsignal-Mittelung), statt sie auf 2 zu reduzieren.
+
+Hilft Ihnen, schwache Antwortende zu hören. Wird unter CPU-Last ohnehin automatisch reduziert.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="844"/>
+        <source>FT2: close strong partners earlier:</source>
+        <translation>FT2: starke Partner früher abschließen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="865"/>
+        <source>If a STRONG partner (SNR &gt; 0 dB) doesn't send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
+
+Weak partners keep the extra anti-QSB repetitions.
+
+Default: OFF.</source>
+        <translation>Wenn ein STARKER Partner (SNR &gt; 0 dB) das abschließende 73 nicht sendet, werden die RR73-Wiederholungen von 8 auf 4 reduziert (~15 s statt 30 s), bevor geloggt und zu CQ zurückgekehrt wird.
+
+Schwache Partner behalten die zusätzlichen Anti-QSB-Wiederholungen.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="870"/>
+        <source>FT2: adaptive decode (CPU saver):</source>
+        <translation>FT2: adaptive Dekodierung (CPU sparen):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="891"/>
+        <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn't re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
+
+When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
+
+Useful mainly on modest PCs.
+
+Default: OFF.</source>
+        <translation>Im NUR-HÖREN-Modus (kein CQ-Ruf und kein QSO) wird die Async-Neudekodierung von 100 ms auf ~350 ms ausgedünnt: 95 % überlappendes Audio wird nicht erneut dekodiert → spart CPU und reduziert die Spitzen, die die Decode-Tiefe senken können.
+
+Beim Warten auf eine Antwort (AutoCQ/QSO) bleibt die volle Taktung erhalten. Es gehen keine Decodes verloren.
+
+Hauptsächlich auf schwächeren PCs nützlich.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="896"/>
+        <source>FT2: narrow reply decode (experimental):</source>
+        <translation>FT2: schmale Antwort-Dekodierung (experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="917"/>
+        <source>When WAITING FOR A REPLY (AutoCQ or active QSO), decodes a narrow window around your RX frequency (±150 Hz) instead of the whole band, with a full-band pass every 4th cycle.
+
+The reply is decoded earlier in the slot (less CPU per attempt), so TX can react in the same slot instead of the next one. Band activity is still scanned 1 cycle out of 4.
+
+Default: OFF.</source>
+        <translation>Beim WARTEN AUF EINE ANTWORT (AutoCQ oder aktives QSO) wird ein schmales Fenster um deine RX-Frequenz (±150 Hz) dekodiert statt des gesamten Bandes, mit einem Vollband-Durchgang in jedem 4. Zyklus.
+
+Die Antwort wird früher im Slot dekodiert (weniger CPU pro Versuch), sodass der TX im selben Slot reagieren kann statt im nächsten. Die Bandaktivität wird weiterhin in 1 von 4 Zyklen gescannt.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="922"/>
+        <source>FT2: AP cache rescue (experimental):</source>
+        <translation>FT2: AP-Cache-Rettung (experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="943"/>
+        <source>Experimental FT2 AP cache: stores callsigns seen in-band as hashes (TTL 30 min) and may rescue borderline FT2 decodes when a decoded callsign is already in the cache.
+
+Safety gate: AP-cache-rescued rows are shown/audited, but they do not drive AutoSeq, AutoCQ, or automatic TX. They are also not used to seed the AP cache again.
+
+Default: OFF.</source>
+        <translation>Experimenteller FT2-AP-Cache: speichert im Band gesehene Rufzeichen als Hashes (TTL 30 Min.) und kann grenzwertige FT2-Dekodierungen retten, wenn ein dekodiertes Rufzeichen bereits im Cache ist.
+
+Sicherheits-Gate: per AP-Cache gerettete Zeilen werden angezeigt/geprüft, treiben aber weder AutoSeq, AutoCQ noch automatischen TX an. Sie werden auch nicht erneut zum Befüllen des AP-Cache verwendet.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="948"/>
+        <source>FT2: skip redundant end-slot decode (reduces lock-in latency):</source>
+        <translation>FT2: redundante End-Slot-Dekodierung überspringen (reduziert Lock-in-Latenz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="972"/>
+        <source>FT2 async only: when the asynchronous decode (incremental every 100 ms) has ALREADY decoded a slot, skip the end-of-slot synchronous decode pass for that slot.
+
+Benefit: removes contention (~1.8 s after TX) on the same worker, so the partner reply is picked up faster.
+
+Cost: for slots already covered by async you lose the full end-of-slot weak-averaging pass, which can recover weak/marginal stations. Slots where async returned EMPTY still keep the sync decode.
+
+Default: OFF.</source>
+        <translation>Nur FT2 async: wenn die asynchrone Dekodierung (inkrementell alle 100 ms) einen Slot BEREITS dekodiert hat, den synchronen Slot-Ende-Dekodier-Durchgang für diesen Slot überspringen.
+
+Vorteil: beseitigt die Konkurrenz (~1,8 s nach TX) auf demselben Worker, sodass die Partner-Antwort schneller aufgegriffen wird.
+
+Kosten: bei Slots, die bereits von async abgedeckt sind, verlierst du den vollständigen Slot-Ende-Durchgang mit Schwach-Mittelung, der schwache/marginale Stationen wiederherstellen kann. Slots, in denen async LEER zurückgab, behalten weiterhin die Sync-Dekodierung.
+
+Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="979"/>
+        <source>FT2/FT8 MAM multi-stream (MSHV, sperimentale):</source>
+        <translation>FT2/FT8 MAM Multi-Stream (MSHV, experimentell):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1003"/>
+        <source>MSHV multi-stream mode: in a single period it replies to MULTIPLE callers at the same time, each on ITS own audio frequency (like a DX-pedition station).
+
+This is an ADDITIONAL MAM option: MAM (Multi-Answer Mode) or AutoCQ must be active before it can run. With this OFF, MAM remains serial, one caller at a time, as before.
+
+EXPERIMENTAL. Default: OFF.</source>
+        <translation>MSHV-Multi-Stream-Modus: in einer einzigen Periode antwortet er MEHREREN Anrufern gleichzeitig, jeder auf SEINER eigenen Audiofrequenz (wie eine DX-Pedition-Station).
+
+Dies ist eine ZUSÄTZLICHE MAM-Option: MAM (Multi-Answer Mode) oder AutoCQ muss aktiv sein, bevor es laufen kann. Mit AUS bleibt MAM seriell, ein Anrufer nach dem anderen, wie zuvor.
+
+EXPERIMENTELL. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1008"/>
+        <source>MAM multi-stream: max stream simultanei:</source>
+        <translation>MAM Multi-Stream: max. gleichzeitige Streams:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1036"/>
+        <source>How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.
+
+Range 2-5. Default: 3.
+
+Higher values require more CPU to generate overlapping audio streams. Enabled only when MAM multi-stream is active.</source>
+        <translation>Wie viele parallele QSOs MAM Multi-Stream gleichzeitig ausführen kann, jedes auf seiner eigenen Frequenz.
+
+Bereich 2-5. Standard: 3.
+
+Höhere Werte erfordern mehr CPU, um überlappende Audiostreams zu erzeugen. Nur aktiviert, wenn MAM Multi-Stream aktiv ist.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1041"/>
+        <source>FT2 partner-memory (anti-QSB):</source>
+        <translation>FT2 partner-memory (Anti-QSB):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1063"/>
+        <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
+
+Requires Conservative FT2 active.
+
+Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.</source>
+        <translation>Speichert den Partnerstatus (Rufzeichen + TX-Nummer + qsoProgress + SNR) für 30 Sekunden: verschwindet der Partner durch QSB und taucht innerhalb von 30 s wieder auf, wird der qsoProgress wiederhergestellt, statt bei TX1 neu zu starten.
+
+Erfordert aktives Conservative FT2.
+
+Standard: AUS (opt-in nach dem 1.0.186-Revert — striktes Gate + [FT2WS-F]-Log). Automatisch deaktiviert, wenn Conservative AUS ist.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1068"/>
+        <source>FT2 TX2 re-send on stall:</source>
+        <translation>FT2 TX2 erneutes Senden bei Stillstand:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1090"/>
+        <source>If you're in TX3 (R+report) and the partner doesn't reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
+
+Helps with weak partners that didn't ack the first time. Capped to 1 re-send per QSO (no loops).
+
+Requires Conservative FT2 active. Default: ON under Conservative.</source>
+        <translation>Wenn Sie in TX3 (R+Rapport) sind und der Partner 2 Perioden lang (~7,5 s) nicht antwortet, wird TX2 (Signalrapport) einmal erneut gesendet, bevor das QSO verlassen wird.
+
+Hilft bei schwachen Partnern, die beim ersten Mal nicht bestätigt haben. Auf 1 erneutes Senden pro QSO begrenzt (keine Schleifen).
+
+Erfordert aktives Conservative FT2. Standard: EIN unter Conservative.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1098"/>
+        <source>Smooth decode flow:</source>
+        <translation>Flüssiger Decode-Fluss:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1119"/>
+        <source>Spreads FT8/FT4 decodes from the final end-of-period batch into continuous streaming with animated fade (~100 ms per row). FT2 async is unchanged because it already streams. Default: ON; auto-fallback if UI stalls are detected on modest PCs. Disable for legacy batch behavior.</source>
+        <translation>Verteilt FT8/FT4-Dekodierungen vom finalen Periodenend-Batch in kontinuierliches Streaming mit animiertem Fade (~100 ms pro Zeile). FT2 async ist unverändert, da es bereits streamt. Standard: AN; automatischer Fallback, falls UI-Stockungen auf bescheidenen PCs erkannt werden. Deaktivieren für klassisches Batch-Verhalten.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1125"/>
+        <source>WATCHDOG</source>
+        <translation>WACHHUND</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1128"/>
+        <source>TX Watchdog Mode:</source>
+        <translation>TX-Watchdog-Modus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
+        <source>Off</source>
+        <translation>Aus</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
+        <source>Time</source>
+        <translation>Zeit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
+        <source>Count</source>
+        <translation>Anzahl</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1151"/>
+        <source>TX Watchdog Time (min):</source>
+        <translation>TX-Watchdog-Zeit (Min.):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1169"/>
+        <source>TX Watchdog Count:</source>
+        <translation>TX-Watchdog-Anzahl:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1188"/>
+        <source>Log QSO at watchdog timeout:</source>
+        <translation>QSO bei Watchdog-Timeout loggen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1199"/>
+        <source>When ON, if the TX watchdog fires while a QSO has already completed the two-way report exchange (both reports exchanged, progress &gt;= ROGER_REPORT), the QSO is logged instead of abandoned.
+
+Default OFF = 1.0.445 behavior (only a deferred snapshot, recovered only if the partner re-sends 73; in a manual QSO it is lost).</source>
+        <translation>Wenn aktiv und der TX-Watchdog auslöst, während ein QSO den beidseitigen Rapportaustausch bereits abgeschlossen hat (beide Rapporte ausgetauscht, Fortschritt &gt;= ROGER_REPORT), wird das QSO geloggt statt verworfen.
+
+Standard AUS = Verhalten von 1.0.445 (nur ein aufgeschobener Schnappschuss, nur dann wiederhergestellt, wenn der Partner erneut 73 sendet; in einem manuellen QSO geht es verloren).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1201"/>
+        <source>Tune Watchdog (s):</source>
+        <translation>Watchdog(s) einstellen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1222"/>
+        <source>CW ID</source>
+        <translation>CW-ID</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1225"/>
+        <source>CW ID after 73:</source>
+        <translation>CW-ID nach 73:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1232"/>
+        <source>CW ID Interval (min):</source>
+        <translation>CW-ID-Intervall (min):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1243"/>
+        <source>TONE SPACING</source>
+        <translation>TONABSTAND</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1246"/>
+        <source>2x Tone Spacing:</source>
+        <translation>2x Tonabstand:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1260"/>
+        <source>4x Tone Spacing:</source>
+        <translation>4x Tonabstand:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1281"/>
+        <source>Alt F1-F6 Bind:</source>
+        <translation>Alt F1-F6 Bindung:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab4</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="65"/>
+        <source>ASPETTO / TEMA</source>
+        <translation>ERSCHEINUNGSBILD / DESIGN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="68"/>
+        <source>Theme:</source>
+        <translation>Theme:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="96"/>
+        <source>Accent:</source>
+        <translation>Akzent:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="133"/>
+        <source>Density:</source>
+        <translation>Dichte:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="174"/>
+        <source>DX-Pedition Workspace (3-column tactical layout)</source>
+        <translation>DX-Pedition-Arbeitsbereich (taktisches 3-Spalten-Layout)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="189"/>
+        <source>Alternative single-panel operator view optimized for DX pile-ups: a tactical 3-column dashboard (Cluster / Waterfall / TX) instead of the classic workspace. Opt-in, default OFF: the standard layout is unchanged when disabled.</source>
+        <translation>Alternative Einzelpanel-Operatoransicht, optimiert für DX-Pile-ups: ein taktisches 3-Spalten-Dashboard (Cluster / Waterfall / TX) statt des klassischen Arbeitsbereichs. Opt-in, Standard AUS: das Standardlayout bleibt unverändert, wenn deaktiviert.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="193"/>
+        <source>UI Scale:</source>
+        <translation>UI-Skalierung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="225"/>
+        <source>↻ restart to apply</source>
+        <translation>↻ Neustart zum Anwenden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="232"/>
+        <source>OPERATING BANDS</source>
+        <translation>BETRIEBSBÄNDER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="235"/>
+        <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
+        <translation>Klicken, um Bänder im Auswahlfeld ein-/auszublenden. Abgewählte Bänder verschwinden aus der HF- / V-U- / SHF-Leiste.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="264"/>
+        <source>visible (click to hide)</source>
+        <translation>sichtbar (Klick zum Ausblenden)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="264"/>
+        <source>hidden (click to show)</source>
+        <translation>ausgeblendet (Klick zum Anzeigen)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="273"/>
+        <source>UI — PERFORMANCE</source>
+        <translation>UI — LEISTUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="277"/>
+        <source>UI Quality preset:</source>
+        <translation>UI-Qualitätsvoreinstellung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="294"/>
+        <source>Low = no effects (modest PCs).
+Medium = light animations.
+High = all available animations.
+
+Default: Medium.</source>
+        <translation>Niedrig = keine Effekte (schwächere PCs).
+Mittel = leichte Animationen.
+Hoch = alle verfügbaren Animationen.
+
+Standard: Mittel.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="299"/>
+        <source>Process priority:</source>
+        <translation>Prozesspriorität:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="308"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="308"/>
+        <source>Above normal</source>
+        <translation>Über normal</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="308"/>
+        <source>High (recommended)</source>
+        <translation>Hoch (empfohlen)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="308"/>
+        <source>Realtime ⚠️</source>
+        <translation>Echtzeit ⚠️</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="317"/>
+        <source>CPU scheduling priority for the Decodium process (Windows).
+
+Normal / Above normal (default) = safe.
+High = smoother audio/decode with low risk (recommended if you notice stutters).
+Realtime ⚠️ = maximum scheduling priority, but it can make the PC unresponsive (mouse/keyboard) and requires administrator privileges. Without admin rights Windows downgrades it to High.
+
+If unsure, use High.</source>
+        <translation>CPU-Scheduling-Priorität für den Decodium-Prozess (Windows).
+
+Normal / Über normal (Standard) = sicher.
+Hoch = flüssigeres Audio/Dekodieren bei geringem Risiko (empfohlen bei Rucklern).
+Echtzeit ⚠️ = maximale Scheduling-Priorität, kann den PC aber unbedienbar machen (Maus/Tastatur) und erfordert Administratorrechte. Ohne Administratorrechte stuft Windows sie auf Hoch herab.
+
+Im Zweifel Hoch verwenden.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="322"/>
+        <source>UI Style (restart):</source>
+        <translation>UI-Stil (Neustart):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="345"/>
+        <source>QML Quick Controls style (requires restart):
+• Material (recommended) — Google Material 3, customizable, Decodium's historical default
+• FluentWinUI3 — native Windows 11 (Mica/acrylic). Automatic fallback for SplitView/StackView.
+• Universal — Microsoft Universal (WinPhone-style)
+• Fusion — neutral cross-platform desktop</source>
+        <translation>QML-Quick-Controls-Stil (erfordert Neustart):
+• Material (empfohlen) — Google Material 3, anpassbar, historischer Standard von Decodium
+• FluentWinUI3 — natives Windows 11 (Mica/Acryl). Automatischer Fallback für SplitView/StackView.
+• Universal — Microsoft Universal (WinPhone-Stil)
+• Fusion — neutral, plattformübergreifend, Desktop</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="356"/>
+        <source>Frameless pop-out:</source>
+        <translation>Rahmenloses Pop-out:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="369"/>
+        <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
+
+Windows 11 aesthetic.
+
+Default: OFF. Requires closing and reopening the window.</source>
+        <translation>Pop-out-Fenster (Wasserfall, Period1, DecoSync) werden rahmenlos und lassen sich über den Rand ziehen.
+
+Windows-11-Ästhetik.
+
+Standard: AUS. Erfordert Schließen und erneutes Öffnen des Fensters.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="374"/>
+        <source>Detach Full Spectrum:</source>
+        <translation>Vollspektrum abdocken:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="387"/>
+        <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
+
+Reduces stalls on modest PCs.
+
+Default: OFF. Requires restart.</source>
+        <translation>Öffnet beim Start das Vollspektrum (Bandaktivität) in einem separaten Fenster und isoliert so den Haupt-Render-Thread von ListView-Animationen.
+
+Reduziert Stalls auf schwächeren PCs.
+
+Standard: AUS. Erfordert Neustart.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="392"/>
+        <source>Full screen:</source>
+        <translation>Vollbild:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="396"/>
+        <source>Enable (F11)</source>
+        <translation>Aktivieren (F11)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="401"/>
+        <source>Switch Decodium to full screen. To exit: F11, Esc, or the top ✕ button. This is not saved: Decodium starts in normal window mode after restart.</source>
+        <translation>Decodium in den Vollbildmodus schalten. Zum Beenden: F11, Esc oder die ✕-Schaltfläche oben. Dies wird nicht gespeichert: Nach dem Neustart startet Decodium im normalen Fenstermodus.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="406"/>
+        <source>Spectrum FPS cap:</source>
+        <translation>Spektrum-FPS-Grenze:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="426"/>
+        <source>Maximum frame rate of the embedded waterfall/panadapter.
+
+  • 15 = modest PCs
+  • 20 = balanced default
+  • 30 = modern hardware
+
+When Full Spectrum is detached the separate render thread holds 30 fps without affecting the decoder.</source>
+        <translation>Maximale Bildrate des eingebetteten Wasserfalls/Panadapters.
+
+  • 15 = schwächere PCs
+  • 20 = ausgewogener Standard
+  • 30 = moderne Hardware
+
+Wenn das Vollspektrum abgedockt ist, hält der separate Render-Thread 30 fps, ohne den Decoder zu beeinträchtigen.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="432"/>
+        <source>CPU pressure:</source>
+        <translation>CPU-Auslastung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="446"/>
+        <source>events: total=%1 · severe=%2 (session)</source>
+        <translation>Ereignisse: gesamt=%1 · schwer=%2 (Sitzung)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="449"/>
+        <source>events: total=0 · severe=0</source>
+        <translation>Ereignisse: gesamt=0 · schwer=0</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="459"/>
+        <source>cpuPressure event counters for the current session.
+
+Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if you see ≥5 after an hour of use, lower UI Quality to Low or Spectrum FPS cap to 15.</source>
+        <translation>cpuPressure-Ereigniszähler für die aktuelle Sitzung.
+
+Schwere (≥1100 ms oder ein Stoß von 4+ kurzen Stalls) sind das stärkste Signal: Wenn Sie nach einer Stunde Nutzung ≥5 sehen, senken Sie die UI-Qualität auf Niedrig oder die Spektrum-FPS-Grenze auf 15.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="465"/>
+        <source>FONT</source>
+        <translation>SCHRIFTART</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="468"/>
+        <source>Font:</source>
+        <translation>Schriftart:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="493"/>
+        <source>Choose</source>
+        <translation>Wählen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="500"/>
+        <source>Reset</source>
+        <translation>Zurücksetzen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="504"/>
+        <source>Decoded Font:</source>
+        <translation>Entschlüsselte Schriftart:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="542"/>
+        <source>DECODES</source>
+        <translation>DEKODIERT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="545"/>
+        <source>Show DXCC:</source>
+        <translation>DXCC anzeigen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="553"/>
+        <source>US State:</source>
+        <translation>US-Bundesstaat:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="567"/>
+        <source>Updating...</source>
+        <translation>Aktualisiere...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="568"/>
+        <source>%1 calls</source>
+        <translation>%1 Rufzeichen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="569"/>
+        <source>Not loaded</source>
+        <translation>Nicht geladen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="578"/>
+        <source>Update</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="596"/>
+        <source>TX Msg to RX:</source>
+        <translation>TX Nachricht an RX:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="604"/>
+        <source>Waterfall Calls:</source>
+        <translation>Wasserfall-Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="612"/>
+        <source>FS Dist:</source>
+        <translation>FS Dist:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="620"/>
+        <source>FS Az:</source>
+        <translation>FS Az:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="628"/>
+        <source>RX Freq:</source>
+        <translation>RX-Freq:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="636"/>
+        <source>RX Dist:</source>
+        <translation>RX Dist:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="644"/>
+        <source>RX Az:</source>
+        <translation>RX Az:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="654"/>
+        <source>MAP AND DISTANCE</source>
+        <translation>KARTE UND ENTFERNUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="657"/>
+        <source>Miles:</source>
+        <translation>Meilen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="664"/>
+        <source>Greyline:</source>
+        <translation>Greyline:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="672"/>
+        <source>Map All Msgs:</source>
+        <translation>Alle Nachrichten zuordnen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="680"/>
+        <source>Click TX:</source>
+        <translation>Klicken Sie auf TX:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="689"/>
+        <source>ALIGNMENT</source>
+        <translation>AUSRICHTUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="692"/>
+        <source>Align:</source>
+        <translation>Ausrichten:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="699"/>
+        <source>Align Steps:</source>
+        <translation>Ausrichtungsschritte:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="709"/>
+        <source>Align Steps 2:</source>
+        <translation>Ausrichtungsschritte 2:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab5</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="61"/>
+        <source>REMOTE WEB SERVER (iPad / mobile PWA)</source>
+        <translation>REMOTE-WEBSERVER (iPad / mobile PWA)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="64"/>
+        <source>Enable Web Server:</source>
+        <translation>Webserver aktivieren:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="78"/>
+        <source>(not active)</source>
+        <translation>(nicht aktiv)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="84"/>
+        <source>Porta TCP:</source>
+        <translation>TCP-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="97"/>
+        <source>URL accesso:</source>
+        <translation>Zugriffs-URL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="108"/>
+        <source></source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="111"/>
+        <source>📱 Open Remote for iPad</source>
+        <translation>📱 Remote für iPad öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="135"/>
+        <source>DECODE LIST DISPLAY</source>
+        <translation>DECODE-LISTEN-ANZEIGE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="138"/>
+        <source>Colored period separator:</source>
+        <translation>Farbiger Periodentrenner:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="152"/>
+        <source>Newest first:</source>
+        <translation>Neueste zuerst:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="161"/>
+        <source>DECODE PARAMETERS</source>
+        <translation>PARAMETER DEKODIEREN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="164"/>
+        <source>Decode Depth:</source>
+        <translation>Dekodierungstiefe:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="167"/>
+        <source>Fast</source>
+        <translation>Schnell</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="167"/>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="167"/>
+        <source>Deep</source>
+        <translation>Tief</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="181"/>
+        <source>Low Freq (Hz):</source>
+        <translation>Niedrige Frequenz (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="193"/>
+        <source>High Freq (Hz):</source>
+        <translation>Hohe Frequenz (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="206"/>
+        <source>RX Bandwidth:</source>
+        <translation>RX Bandbreite:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="215"/>
+        <source>Decode at 52s:</source>
+        <translation>Dekodierung bei 52 Sekunden:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="223"/>
+        <source>Single Decode:</source>
+        <translation>Einzeldekodierung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="236"/>
+        <source>JT65 VHF/UHF</source>
+        <translation>JT65 VHF/UHF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="239"/>
+        <source>Erasure Patterns:</source>
+        <translation>Löschmuster:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="248"/>
+        <source>Aggressive:</source>
+        <translation>Aggressiv:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="258"/>
+        <source>Two-Pass:</source>
+        <translation>Zwei-Pass:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="268"/>
+        <source>SIDELOBE CONTROL</source>
+        <translation>SIDELOBE-STEUERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="271"/>
+        <source>Sidelobe Mode:</source>
+        <translation>Sidelobe-Modus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="274"/>
+        <source>Low Sidelobes</source>
+        <translation>Niedrige Nebenkeulen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="274"/>
+        <source>Max Sensitivity</source>
+        <translation>Maximale Empfindlichkeit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="283"/>
+        <source>Degrade S/N:</source>
+        <translation>Degradieren Sie S/N:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="294"/>
+        <source>DECODE FILTERS</source>
+        <translation>FILTER DEKODIEREN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="297"/>
+        <source>CQ Only:</source>
+        <translation>Nur CQ:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="308"/>
+        <source>CQ filter:</source>
+        <translation>CQ-Filter:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="328"/>
+        <source>My Call Only:</source>
+        <translation>Nur mein Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="339"/>
+        <source>Zap:</source>
+        <translation>Zap:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="349"/>
+        <source>Deep Search:</source>
+        <translation>Tiefensuche:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="360"/>
+        <source>AP Decode:</source>
+        <translation>AP-Dekodierung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="371"/>
+        <source>Avg Decode:</source>
+        <translation>Durchschnittliche Dekodierung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
+        <source>Deep decode in TX:</source>
+        <translation>Deep Decode bei TX:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>
+        <source>While operating/in QSO in FT8, ALSO launch the deep decode depth-4 (decode-list only) in addition to the fast depth-2 that drives TX.
+
+Recovers third-party stations that the fast pass would miss during operation, WITHOUT touching timing or QSO closure (it's pure decode-list, not auto-seq).
+
+Costs extra CPU during QSOs. Default: OFF.</source>
+        <translation>Startet während des Betriebs/im QSO in FT8 ZUSÄTZLICH zum schnellen Depth-2, das das TX steuert, auch das Deep Decode mit Depth-4 (nur Decode-Liste).
+
+Holt Drittstationen zurück, die der schnelle Durchlauf während des Betriebs verpassen würde, OHNE Timing oder QSO-Abschluss zu beeinflussen (reine Decode-Liste, kein Auto-Seq).
+
+Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab6</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="61"/>
+        <source>NETWORK SERVICES</source>
+        <translation>NETZWERKDIENSTLEISTUNGEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="64"/>
+        <source>PSK Reporter:</source>
+        <translation>PSK Reporter:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="74"/>
+        <source>TCP/IP:</source>
+        <translation>TCP/IP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="81"/>
+        <source>Query history:</source>
+        <translation>Abfrageverlauf:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="94"/>
+        <source>PSK Reporter look-back period for callsign search and heard-by results.</source>
+        <translation>Rückblickzeitraum von PSK Reporter für die Rufzeichensuche und die Gehört-von-Ergebnisse.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="98"/>
+        <source>DX CLUSTER</source>
+        <translation>DX-CLUSTER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="101"/>
+        <source>Server:</source>
+        <translation>Server:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="115"/>
+        <source>Port:</source>
+        <translation>Hafen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="132"/>
+        <source>Status:</source>
+        <translation>Status:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="139"/>
+        <source>Connected</source>
+        <translation>Verbunden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="139"/>
+        <source>Disconnected</source>
+        <translation>Nicht verbunden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="148"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="168"/>
+        <source>Disconnect</source>
+        <translation>Trennen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="179"/>
+        <source>Detail:</source>
+        <translation>Detail:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="181"/>
+        <source>No message</source>
+        <translation>Keine Nachricht</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="190"/>
+        <source>CLOUDLOG</source>
+        <translation>CLOUDLOG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="193"/>
+        <source>Enabled:</source>
+        <translation>Aktiviert:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="205"/>
+        <source>API URL:</source>
+        <translation>API URL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="216"/>
+        <source>API Key:</source>
+        <translation>API Schlüssel:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="227"/>
+        <source>Station ID:</source>
+        <translation>Stations-ID:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="239"/>
+        <source>QRZ LOGBOOK</source>
+        <translation>QRZ-LOGBUCH</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="253"/>
+        <source>Replace duplicates:</source>
+        <translation>Duplikate ersetzen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="286"/>
+        <source>Testing...</source>
+        <translation>Test läuft...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="286"/>
+        <source>Test</source>
+        <translation>Test</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="299"/>
+        <source>Testing QRZ API key...</source>
+        <translation>QRZ-API-Schlüssel wird getestet...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="317"/>
+        <source>LOTW</source>
+        <translation>LOTW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="320"/>
+        <source>LotW Enabled:</source>
+        <translation>LotW Aktiviert:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="330"/>
+        <source>Password:</source>
+        <translation>Passwort:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="338"/>
+        <source>Non-QSL'd:</source>
+        <translation>Non-QSL'd:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="345"/>
+        <source>Days Upload:</source>
+        <translation>Tage hochladen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="356"/>
+        <source>LOGGING</source>
+        <translation>PROTOKOLLIERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="359"/>
+        <source>Prompt to Log:</source>
+        <translation>Aufforderung zum Protokollieren:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="370"/>
+        <source>Auto Log:</source>
+        <translation>Automatisches Protokoll:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="383"/>
+        <source>Log as RTTY:</source>
+        <translation>Als RTTY anmelden:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="391"/>
+        <source>4-digit Grids:</source>
+        <translation>4-stellige Locator:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="398"/>
+        <source>Contest Only:</source>
+        <translation>Nur Wettbewerb:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="408"/>
+        <source>Spec Op Cmts:</source>
+        <translation>Spezifische Operationsbefehle:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="415"/>
+        <source>dB in Cmts:</source>
+        <translation>dB in Cmts:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="423"/>
+        <source>ZZ00:</source>
+        <translation>ZZ00:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="433"/>
+        <source>RECORDING</source>
+        <translation>AUFNAHME</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="436"/>
+        <source>Record RX:</source>
+        <translation>Datensatz RX:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="446"/>
+        <source>Record TX:</source>
+        <translation>Datensatz TX:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="457"/>
+        <source>WSPR Upload:</source>
+        <translation>WSPR Hochladen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="470"/>
+        <source>REMOTE WEB DASHBOARD (LAN)</source>
+        <translation>REMOTE-WEB-DASHBOARD (LAN)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="480"/>
+        <source>HTTP port:</source>
+        <translation>HTTP-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="490"/>
+        <source>WS socket port:</source>
+        <translation>WS-Socket-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="503"/>
+        <source>WS bind:</source>
+        <translation>WS-Bindung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="510"/>
+        <source>Username:</source>
+        <translation>Benutzername:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="518"/>
+        <source>Access token:</source>
+        <translation>Zugriffstoken:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="522"/>
+        <source>Required for LAN/WAN</source>
+        <translation>Erforderlich für LAN/WAN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="528"/>
+        <source>App restart required. For LAN/WAN, use a token of at least 12 characters.</source>
+        <translation>App-Neustart erforderlich. Verwenden Sie für LAN/WAN ein Token mit mindestens 12 Zeichen.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="536"/>
+        <source>UDP SERVER</source>
+        <translation>UDP-SERVER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="539"/>
+        <source>Client ID:</source>
+        <translation>Client-ID:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="561"/>
+        <source>Preset:</source>
+        <translation>Voreinstellung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="580"/>
+        <source>Server Name:</source>
+        <translation>Servername:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="587"/>
+        <source>Server Port:</source>
+        <translation>Server-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="597"/>
+        <source>Listen Port:</source>
+        <translation>Hörport:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="606"/>
+        <source>Multicast TTL:</source>
+        <translation>Multicast TTL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="616"/>
+        <source>Interface Used:</source>
+        <translation>Verwendete Schnittstelle:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="619"/>
+        <source>All interfaces</source>
+        <translation>Alle Schnittstellen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="634"/>
+        <source>Send ADIF:</source>
+        <translation>Senden Sie ADIF:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="643"/>
+        <source>Secondary UDP:</source>
+        <translation>Sekundär UDP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="651"/>
+        <source>Secondary Server:</source>
+        <translation>Sekundärer Server:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="659"/>
+        <source>Secondary Port:</source>
+        <translation>Sekundärer Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="668"/>
+        <source>Secondary TTL:</source>
+        <translation>Sekundäre TTL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="678"/>
+        <source>Secondary Interface:</source>
+        <translation>Sekundäre Schnittstelle:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="696"/>
+        <source>Secondary ADIF:</source>
+        <translation>Sekundär ADIF:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="705"/>
+        <source>Tertiary UDP:</source>
+        <translation>Tertiäres UDP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="713"/>
+        <source>Tertiary Server:</source>
+        <translation>Tertiärer Server:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="723"/>
+        <source>Tertiary Port:</source>
+        <translation>Tertiärer Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="734"/>
+        <source>Tertiary TTL:</source>
+        <translation>Tertiäres TTL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="746"/>
+        <source>Tertiary Interface:</source>
+        <translation>Tertiäre Schnittstelle:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="767"/>
+        <source>Tertiary ADIF:</source>
+        <translation>Tertiäres ADIF:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="780"/>
+        <source>N1MM / HRD LOGBOOK / EASYLOG</source>
+        <translation>N1MM / HRD LOGBOOK / EASYLOG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="784"/>
+        <source>Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.</source>
+        <translation>Diese ADIF-UDP-Ausgabe für N1MM Logger+ oder das QSO Forwarding von HRD Logbook verwenden. HRD lauscht üblicherweise auf 127.0.0.1:2333; das ist nicht der primäre WSJT-X-UDP-Server oben.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="795"/>
+        <source>Use HRD Logbook preset</source>
+        <translation>Voreinstellung für HRD Logbook verwenden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="827"/>
+        <source>Enables the N1MM-compatible ADIF UDP output and sets 127.0.0.1:2333. In HRD Logbook, enable UDP Receive / WSJT-X QSO Forwarding on port 2333.</source>
+        <translation>Aktiviert die N1MM-kompatible ADIF-UDP-Ausgabe und setzt 127.0.0.1:2333. Aktivieren Sie in HRD Logbook UDP Receive / WSJT-X QSO Forwarding auf Port 2333.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="830"/>
+        <source>Enable output:</source>
+        <translation>Ausgabe aktivieren:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="838"/>
+        <source>UDP Port:</source>
+        <translation>UDP-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="850"/>
+        <source>UDP Server:</source>
+        <translation>UDP-Server:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="862"/>
+        <source>Accept UDP:</source>
+        <translation>Akzeptieren Sie UDP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="872"/>
+        <source>Notify Request:</source>
+        <translation>Anfrage benachrichtigen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="880"/>
+        <source>Restore Win:</source>
+        <translation>Gewinn wiederherstellen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <source>ADIF TCP</source>
+        <translation>ADIF TCP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="893"/>
+        <source>Enable TCP ADIF:</source>
+        <translation>Aktivieren Sie TCP ADIF:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="901"/>
+        <source>TCP Port:</source>
+        <translation>TCP-Port:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="913"/>
+        <source>TCP Server:</source>
+        <translation>TCP-Server:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab7</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="63"/>
+        <source>FREQUENCY CALIBRATION</source>
+        <translation>FREQUENZKALIBRIERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="71"/>
+        <source>Refresh</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="97"/>
+        <source>Slope:</source>
+        <translation>Steigung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="115"/>
+        <source>ppm</source>
+        <translation>ppm</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="117"/>
+        <source>Intercept:</source>
+        <translation>Achsenabschnitt:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="135"/>
+        <source>Hz</source>
+        <translation>Hz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="139"/>
+        <source>Reset</source>
+        <translation>Zurücksetzen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="154"/>
+        <source>Reset calibration (slope=0, intercept=0). The frequency is written to the rig without correction (fast path).</source>
+        <translation>Kalibrierung zurücksetzen (slope=0, intercept=0). Die Frequenz wird ohne Korrektur an das Funkgerät geschrieben (schneller Pfad).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="166"/>
+        <source>Preview correzione:</source>
+        <translation>Korrekturvorschau:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="177"/>
+        <source>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</source>
+        <translation>14.074 MHz → %1 Hz · 28.074 MHz → %2 Hz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="192"/>
+        <source>WORKING FREQUENCIES</source>
+        <translation>ARBEITSFREQUENZEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="200"/>
+        <source>Load</source>
+        <translation>Laden</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="209"/>
+        <source>Merge</source>
+        <translation>Zusammenführen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="218"/>
+        <source>Save as</source>
+        <translation>Speichern unter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="227"/>
+        <source>Defaults</source>
+        <translation>Standardwerte</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="257"/>
+        <source>Region:</source>
+        <translation>Region:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="264"/>
+        <source>Mode:</source>
+        <translation>Modus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="272"/>
+        <source>Freq MHz:</source>
+        <translation>Freq MHz:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="294"/>
+        <source>Pref</source>
+        <translation>Präf</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="303"/>
+        <source>Description:</source>
+        <translation>Beschreibung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="317"/>
+        <source>Start:</source>
+        <translation>Start:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="328"/>
+        <source>End:</source>
+        <translation>Ende:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="347"/>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="357"/>
+        <source>Update</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="368"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="378"/>
+        <source>New</source>
+        <translation>Neu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="419"/>
+        <source>IARU Region</source>
+        <translation>IARU-Region</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="420"/>
+        <source>Mode</source>
+        <translation>Modus</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="421"/>
+        <source>Frequency</source>
+        <translation>Frequenz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="423"/>
+        <source>Description</source>
+        <translation>Beschreibung</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="424"/>
+        <source>Start Date/Time</source>
+        <translation>Startdatum/-uhrzeit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="425"/>
+        <source>End Date/Time</source>
+        <translation>Enddatum/-uhrzeit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="478"/>
+        <source>STATION INFORMATION</source>
+        <translation>STATIONSINFORMATIONEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="485"/>
+        <source>Band offset is the transverter/station frequency offset for that band; use 0.000000 when unused.</source>
+        <translation>Der Band-Offset ist der Transverter-/Stationsfrequenz-Offset für dieses Band; 0.000000 verwenden, wenn nicht genutzt.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="509"/>
+        <source>Band:</source>
+        <translation>Band:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="517"/>
+        <source>Offset MHz:</source>
+        <translation>Offset MHz:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="531"/>
+        <source>Antenna:</source>
+        <translation>Antenne:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="598"/>
+        <source>Band</source>
+        <translation>Band</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="599"/>
+        <source>Offset</source>
+        <translation>Offset</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="600"/>
+        <source>Antenna Description</source>
+        <translation>Antennenbeschreibung</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab8</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="65"/>
+        <source>DECODE COLORS</source>
+        <translation>FARBEN DEKODIEREN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="118"/>
+        <source>Use this specific decode color. When OFF, this category uses the shared default color.</source>
+        <translation>Diese spezifische Dekodierfarbe verwenden. Bei AUS verwendet diese Kategorie die gemeinsame Standardfarbe.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="194"/>
+        <source>Reset</source>
+        <translation>Zurücksetzen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="217"/>
+        <source>Bold</source>
+        <translation>Fett</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="233"/>
+        <source>BG:</source>
+        <translation>BG:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="247"/>
+        <source>Colors the row BACKGROUND (in addition to the text) for this category. OFF = no custom background.</source>
+        <translation>Färbt den ZEILENHINTERGRUND (zusätzlich zum Text) für diese Kategorie. AUS = kein benutzerdefinierter Hintergrund.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="322"/>
+        <source>B4 Strikethrough:</source>
+        <translation>B4 Durchgestrichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="335"/>
+        <source>Decode Boost:</source>
+        <translation>Decode-Boost:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="362"/>
+        <source>Visual contrast only; it does not change decoder sensitivity.</source>
+        <translation>Nur visueller Kontrast; ändert die Empfindlichkeit des Decoders nicht.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="370"/>
+        <source>HIGHLIGHTING</source>
+        <translation>Hervorheben</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="373"/>
+        <source>Highlight 73:</source>
+        <translation>Highlight 73:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="382"/>
+        <source>HL Orange:</source>
+        <translation>HL Orange:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="389"/>
+        <source>Orange Calls:</source>
+        <translation>Orange Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="397"/>
+        <source>HL Blue:</source>
+        <translation>HL Blau:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="404"/>
+        <source>Blue Calls:</source>
+        <translation>Blaue Rufzeichen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="413"/>
+        <source>COLORI INTERFACCIA (sfondo + testo)</source>
+        <translation>OBERFLÄCHENFARBEN (Hintergrund + Text)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="418"/>
+        <source>Usa colori personalizzati:</source>
+        <translation>Benutzerdefinierte Farben verwenden:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="425"/>
+        <source>(overrides theme background and text)</source>
+        <translation>(überschreibt Hintergrund und Text des Themes)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="432"/>
+        <source>Background:</source>
+        <translation>Hintergrund:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="452"/>
+        <source>Text:</source>
+        <translation>Text:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="469"/>
+        <source>SPECTRUM</source>
+        <translation>SPEKTRUM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="472"/>
+        <source>Palette:</source>
+        <translation>Palette:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="488"/>
+        <source>Black Level:</source>
+        <translation>Schwarzwert:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="494"/>
+        <source>Color Gain:</source>
+        <translation>Farbgewinn:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="500"/>
+        <source>Contrast:</source>
+        <translation>Kontrast:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab9</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="61"/>
+        <source>STARTUP</source>
+        <translation>START</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="78"/>
+        <source>Monitor OFF:</source>
+        <translation>Monitor AUS:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="87"/>
+        <source>Monitor Last:</source>
+        <translation>Zuletzt überwachen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="96"/>
+        <source>Auto Astro:</source>
+        <translation>Auto-Astro:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="104"/>
+        <source>kHz no k:</source>
+        <translation>kHz nein k:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="113"/>
+        <source>Progress Red:</source>
+        <translation>Fortschrittsrot:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="121"/>
+        <source>High DPI:</source>
+        <translation>Hohe DPI:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="130"/>
+        <source>Larger Tab:</source>
+        <translation>Größerer Tab:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="138"/>
+        <source>Direct Visual:</source>
+        <translation>Direkte Visualisierung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="144"/>
+        <source>Fast visual panadapter. In legacy mode it may open a second audio capture; in normal mode it only increases the visual refresh rate. Default: OFF.</source>
+        <translation>Schneller visueller Panadapter. Im klassischen Modus kann er eine zweite Audioaufnahme öffnen; im normalen Modus erhöht er nur die visuelle Aktualisierungsrate. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="150"/>
+        <source>Slow-PC mode:</source>
+        <translation>Modus für langsame PCs:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="159"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Ein Schalter für alte/langsame PCs. Aktiviert: OpenGL-Grafik (stabil auf alten GPUs, Neustart erforderlich), Modus geringe CPU-Last, max. 4 FT-Threads, normale Prozesspriorität, CPU-Dekodierungsprofil, und blendet Live-Karte / Full Spectrum standardmäßig aus. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="164"/>
+        <source>Low CPU:</source>
+        <translation>Niedrige CPU-Last:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="173"/>
+        <source>Profile for slow PCs: maximum 2 FT threads, slower waterfall, reduced early/deep decoding. Default: OFF.</source>
+        <translation>Profil für langsame PCs: maximal 2 FT-Threads, langsameres Waterfall, reduzierte frühe/tiefe Dekodierung. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="178"/>
+        <source>Reduces FT threads, waterfall refresh, and QML rendering during monitor/TX.</source>
+        <translation>Reduziert FT-Threads, Wasserfall-Aktualisierung und QML-Rendering während Monitor/TX.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="189"/>
+        <source>DATA UPDATES</source>
+        <translation>DATENAKTUALISIERUNGEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="192"/>
+        <source>LotW Users:</source>
+        <translation>LoTW-Benutzer:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="194"/>
+        <source>Updating...</source>
+        <translation>Aktualisiere...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="195"/>
+        <source>%1 users</source>
+        <translation>%1 Benutzer</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="196"/>
+        <source>Not loaded</source>
+        <translation>Nicht geladen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="206"/>
+        <source>Force Update</source>
+        <translation>Aktualisierung erzwingen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="215"/>
+        <source>US States:</source>
+        <translation>US States:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="218"/>
+        <source>%1 calls, %2 locators</source>
+        <translation>%1 Rufzeichen, %2 Locator</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="239"/>
+        <source>BEHAVIOR</source>
+        <translation>VERHALTEN</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="256"/>
+        <source>Quick Call:</source>
+        <translation>Schnellanruf:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="264"/>
+        <source>Force Call 1st:</source>
+        <translation>Rufzeichen zuerst erzwingen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="273"/>
+        <source>VHF/UHF:</source>
+        <translation>VHF/UHF:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="285"/>
+        <source>Wait Features:</source>
+        <translation>Wartefunktionen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="294"/>
+        <source>Erase Band Act:</source>
+        <translation>Bandakt löschen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="302"/>
+        <source>Clear DX Grid:</source>
+        <translation>DX-Locator löschen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="311"/>
+        <source>Clear DX Call:</source>
+        <translation>DX-Rufzeichen löschen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="319"/>
+        <source>RX&gt;TX after QSO:</source>
+        <translation>RX&gt;TX nach QSO:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="328"/>
+        <source>Alt Erase Btn:</source>
+        <translation>Alt Erase Btn:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="336"/>
+        <source>No Btn Color:</source>
+        <translation>Keine BTN-Farbe:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="348"/>
+        <source>OPERATING MODE</source>
+        <translation>BETRIEBSART</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="365"/>
+        <source>Fox Mode:</source>
+        <translation>Fox-Modus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="376"/>
+        <source>Hound Mode:</source>
+        <translation>Hound-Modus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="387"/>
+        <source>SuperFox:</source>
+        <translation>SuperFox:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="395"/>
+        <source>Show OTP:</source>
+        <translation>OTP anzeigen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="407"/>
+        <source>CONTEST</source>
+        <translation>WETTBEWERB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="410"/>
+        <source>Activity:</source>
+        <translation>Aktivität:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="413"/>
+        <source>None</source>
+        <translation>Keine</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="413"/>
+        <source>Field Day</source>
+        <translation>Feldtag</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="413"/>
+        <source>Fox</source>
+        <translation>Fox</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="413"/>
+        <source>Hound</source>
+        <translation>Hound</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="426"/>
+        <source>FD Exchange:</source>
+        <translation>FD Austausch:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="433"/>
+        <source>RTTY Exchange:</source>
+        <translation>RTTY Austausch:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="441"/>
+        <source>Contest Name:</source>
+        <translation>Name des Wettbewerbs:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="448"/>
+        <source>Indiv Name:</source>
+        <translation>Einzelname:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="456"/>
+        <source>NCCC Sprint:</source>
+        <translation>NCCC Sprint:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="466"/>
+        <source>NTP TIME SYNC</source>
+        <translation>NTP ZEITSYNC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="469"/>
+        <source>Enable NTP:</source>
+        <translation>Aktivieren Sie NTP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="486"/>
+        <source>Custom Server:</source>
+        <translation>Benutzerdefinierter Server:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="496"/>
+        <source>Empty = automatic public servers</source>
+        <translation>Leer = automatische öffentliche Server</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="511"/>
+        <source>Sync Now</source>
+        <translation>Jetzt synchronisieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="527"/>
+        <source>Leave the server empty to automatically use pool.ntp.org, Apple, Cloudflare, and Google.</source>
+        <translation>Lassen Sie den Server leer, um automatisch pool.ntp.org, Apple, Cloudflare und Google zu verwenden.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="533"/>
+        <source>RF self-calibration:</source>
+        <translation>HF-Selbstkalibrierung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="538"/>
+        <source>Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.</source>
+        <translation>Empfangene Dekodier-DT-Werte nur als sekundären Zeit-Sync-Hinweis verwenden, nachdem NTP/HTTPS bereits eingerastet ist. Standard: AUS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="543"/>
+        <source>Secondary hint only; it cannot create the first time lock.</source>
+        <translation>Nur sekundärer Hinweis; er kann nicht die erste Zeit-Einrastung erzeugen.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="551"/>
+        <source>ADV DECODING</source>
+        <translation>ERW. DECODIERUNG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="554"/>
+        <source>Auto Mode:</source>
+        <translation>Automatikmodus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="558"/>
+        <source>AUTO - enable the 3 technologies when needed</source>
+        <translation>AUTO – die 3 Technologien bei Bedarf aktivieren</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="571"/>
+        <source>When ON, the 3 features below are managed automatically. Trigger: Neural+Turbo when decodes &lt; 2/slot for 4 slots. Coherent when Q65 SNR &lt; -22 dB.</source>
+        <translation>Wenn EIN, werden die 3 Funktionen unten automatisch verwaltet. Auslöser: Neural+Turbo, wenn Decodes &lt; 2/Slot über 4 Slots. Coherent, wenn Q65-SNR &lt; -22 dB.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="579"/>
+        <source>Live state:</source>
+        <translation>Live-Status:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="581"/>
+        <source>Neural</source>
+        <translation>Neural</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="583"/>
+        <source>Turbo</source>
+        <translation>Turbo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="585"/>
+        <source>Coherent</source>
+        <translation>Coherent</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="589"/>
+        <source>Coherent Avg:</source>
+        <translation>Coherent-Mittelung:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="594"/>
+        <source>Coherent Average (Q65/JT65)</source>
+        <translation>Kohärente Mittelung (Q65/JT65)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="608"/>
+        <source>Accumulates multi-slot averaging for Q65/JT65 decodes (+1-3 dB)</source>
+        <translation>Sammelt Mehr-Slot-Mittelung für Q65/JT65-Decodes (+1-3 dB)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="615"/>
+        <source>Neural Sync:</source>
+        <translation>Neural Sync:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="620"/>
+        <source>Neural Sync (FT8 OSD decoder)</source>
+        <translation>Neural Sync (FT8-OSD-Decoder)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="634"/>
+        <source>Forces OSD-aware FT8 decoding (+2-3 dB on borderline signals)</source>
+        <translation>Erzwingt OSD-fähige FT8-Decodierung (+2-3 dB bei Grenzsignalen)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="641"/>
+        <source>Turbo Feedback:</source>
+        <translation>Turbo-Feedback:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="646"/>
+        <source>Turbo Feedback (extended LDPC iterations)</source>
+        <translation>Turbo-Feedback (erweiterte LDPC-Iterationen)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="660"/>
+        <source>Extended LDPC iterations for marginal decode recovery</source>
+        <translation>Erweiterte LDPC-Iterationen zur Wiederherstellung grenzwertiger Decodes</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="668"/>
+        <source>OTP</source>
+        <translation>OTP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="671"/>
+        <source>OTP Enabled:</source>
+        <translation>OTP Aktiviert:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="678"/>
+        <source>OTP Seed:</source>
+        <translation>OTP Samen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="686"/>
+        <source>OTP Interval:</source>
+        <translation>OTP Intervall:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="695"/>
+        <source>OTP URL:</source>
+        <translation>OTP URL:</translation>
+    </message>
+</context>
+<context>
     <name>SoundInput</name>
     <message>
         <location filename="../Audio/soundin.cpp" line="628"/>

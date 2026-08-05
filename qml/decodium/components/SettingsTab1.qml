@@ -1386,4 +1386,11 @@ ScrollView {
             Layout.preferredHeight: dialog.scrollBottomMargin
         }
     }
+
+    // Esito del rilevamento automatico della radio. Sta QUI, accanto al
+    // pulsante che lo apre: gli id non attraversano i confini fra componenti,
+    // quindi lasciarlo in SettingsDialog.qml dopo la suddivisione in schede
+    // avrebbe reso il pulsante muto. E' un Popup, non un Item: non entra nel
+    // layout della scheda e si ancora alla finestra.
+    RigDetectResults { id: detectRigResults }
 }

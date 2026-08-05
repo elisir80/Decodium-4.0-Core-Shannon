@@ -1893,7 +1893,4 @@ Dialog {
         } // RowLayout
     } // contentItem
 
-    // Esito del rilevamento automatico della radio. E' un Popup, non un Item:
-    // non entra nel layout delle impostazioni.
-    RigDetectResults { id: detectRigResults }
 }
