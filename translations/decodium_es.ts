@@ -18425,7 +18425,7 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="62"/>
         <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
-        <translation>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</translation>
+        <translation>Búsqueda local con respaldo DXCC, caché SQLite y proveedores actualizables. Las credenciales de eQSL y Club Log se guardan en el llavero mediante el canal de ajustes seguros.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="72"/>
@@ -18465,52 +18465,52 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="101"/>
         <source>eQSL INBOX — CONFERME RICEVUTE</source>
-        <translation>eQSL INBOX — CONFERME RICEVUTE</translation>
+        <translation>BANDEJA eQSL — CONFIRMACIONES RECIBIDAS</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="103"/>
         <source>Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</source>
-        <translation>Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</translation>
+        <translation>Descarga la bandeja/archivo de eQSL en ADIF y sincroniza las confirmaciones en el diario activo. El nombre de usuario predeterminado es el indicativo de la estación.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="107"/>
         <source>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</source>
-        <translation>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</translation>
+        <translation>QRZ.com usa la clave API ya configurada en la sección QRZ Logbook. El botón Actualizar descarga solo las confirmaciones; como alternativa puedes importar aquí un archivo ADI exportado de QRZ. La descarga, la paginación y la sincronización del diario se ejecutan en segundo plano y su estado sigue visible en esta pestaña.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="115"/>
         <source>Username/callsign eQSL</source>
-        <translation>Username/callsign eQSL</translation>
+        <translation>Usuario/indicativo eQSL</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="119"/>
         <source>Callsign eQSL o nickname account</source>
-        <translation>Callsign eQSL o nickname account</translation>
+        <translation>Indicativo eQSL o apodo de la cuenta</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="122"/>
         <source>Password eQSL</source>
-        <translation>Password eQSL</translation>
+        <translation>Contraseña eQSL</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="131"/>
         <source>LoTW — CONFERME RICEVUTE</source>
-        <translation>LoTW — CONFERME RICEVUTE</translation>
+        <translation>LoTW — CONFIRMACIONES RECIBIDAS</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="133"/>
         <source>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</source>
-        <translation>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</translation>
+        <translation>Descarga las QSL de LoTW recibidas y las sincroniza en el diario. La contraseña se reutiliza de la sección Reporting → LoTW; el usuario de LoTW puede ser distinto del indicativo con el que operas.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="141"/>
         <source>Username LoTW</source>
-        <translation>Username LoTW</translation>
+        <translation>Usuario LoTW</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="145"/>
         <source>Callsign o username LoTW</source>
-        <translation>Callsign o username LoTW</translation>
+        <translation>Indicativo o usuario LoTW</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="150"/>
@@ -18673,17 +18673,17 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="167"/>
         <source>RTL-SDR RECEIVER</source>
-        <translation>RTL-SDR RECEIVER</translation>
+        <translation>RECEPTOR RTL-SDR</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="187"/>
         <source>Use RTL-SDR:</source>
-        <translation>Use RTL-SDR:</translation>
+        <translation>Usar RTL-SDR:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="198"/>
         <source>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</source>
-        <translation>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</translation>
+        <translation>Recibe directamente de un RTL-SDR. Este modo es solo de recepción: Tune y TX están desactivados.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="202"/>
@@ -18693,62 +18693,62 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="203"/>
         <source>No external audio cable is required. RX only.</source>
-        <translation>No external audio cable is required. RX only.</translation>
+        <translation>No se necesita ningún cable de audio externo. Solo RX.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="204"/>
         <source>RTL-SDR support is not included in this build.</source>
-        <translation>RTL-SDR support is not included in this build.</translation>
+        <translation>El soporte RTL-SDR no está incluido en esta compilación.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="213"/>
         <source>Receiver:</source>
-        <translation>Receiver:</translation>
+        <translation>Receptor:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="236"/>
         <source>Input mode:</source>
-        <translation>Input mode:</translation>
+        <translation>Modo de entrada:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="248"/>
         <source>SDR Radio</source>
-        <translation>SDR Radio</translation>
+        <translation>Radio SDR</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="248"/>
         <source>Direct Sampling</source>
-        <translation>Direct Sampling</translation>
+        <translation>Muestreo directo</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="275"/>
         <source>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</source>
-        <translation>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</translation>
+        <translation>Usa la ruta del sintonizador. RTL-SDR Blog V4 gestiona por sí solo su convertidor de HF.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="277"/>
         <source>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</source>
-        <translation>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</translation>
+        <translation>Usa el ADC Q de muestreo directo del RTL2832 para la recepción en HF de 500 kHz a 24 MHz.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="290"/>
         <source>Demodulator:</source>
-        <translation>Demodulator:</translation>
+        <translation>Demodulador:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="293"/>
         <source>Weak signal / FT8 audio</source>
-        <translation>Weak signal / FT8 audio</translation>
+        <translation>Señales débiles / audio FT8</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="293"/>
         <source>Wide FM broadcast</source>
-        <translation>Wide FM broadcast</translation>
+        <translation>FM ancha (radiodifusión)</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
         <source>Narrow FM</source>
-        <translation>Narrow FM</translation>
+        <translation>FM estrecha</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
@@ -18773,27 +18773,27 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="319"/>
         <source>Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.</source>
-        <translation>Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.</translation>
+        <translation>Envía el PCM del decodificador solo a los modos de señal débil de Decodium; el panadapter de RF sigue basado en IQ.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="320"/>
         <source>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</source>
-        <translation>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</translation>
+        <translation>Demodula el audio de recepción por separado. Con RTL-SDR, TX y Tune siguen desactivados.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="322"/>
         <source>Listen to receiver audio:</source>
-        <translation>Listen to receiver audio:</translation>
+        <translation>Escuchar el audio del receptor:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="333"/>
         <source>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</source>
-        <translation>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</translation>
+        <translation>Reproduce el audio mono demodulado por la salida dedicada de abajo. Es asíncrono y nunca alimenta el decodificador FT8.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="353"/>
         <source>Follow dial frequency:</source>
-        <translation>Follow dial frequency:</translation>
+        <translation>Seguir la frecuencia del dial:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="366"/>
@@ -18853,62 +18853,62 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="478"/>
         <source>Receiver speaker output:</source>
-        <translation>Receiver speaker output:</translation>
+        <translation>Salida de altavoces del receptor:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="482"/>
         <source>System default</source>
-        <translation>System default</translation>
+        <translation>Predeterminado del sistema</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="515"/>
         <source>System default normally selects the computer speakers and is independent from Decodium's TX audio output.</source>
-        <translation>System default normally selects the computer speakers and is independent from Decodium's TX audio output.</translation>
+        <translation>El valor predeterminado del sistema suele elegir los altavoces del ordenador y es independiente de la salida de audio TX de Decodium.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="518"/>
         <source>RF frequency (Hz):</source>
-        <translation>RF frequency (Hz):</translation>
+        <translation>Frecuencia de RF (Hz):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="538"/>
         <source>Sample rate:</source>
-        <translation>Sample rate:</translation>
+        <translation>Frecuencia de muestreo:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="564"/>
         <source>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</source>
-        <translation>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</translation>
+        <translation>Espectro de RF: centro ±480 kHz o más; el audio del receptor es FM ancha a 48 kHz.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="565"/>
         <source>RF spectrum is derived from complex IQ, independent from decoder audio.</source>
-        <translation>RF spectrum is derived from complex IQ, independent from decoder audio.</translation>
+        <translation>El espectro de RF se obtiene del IQ complejo, con independencia del audio del decodificador.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="572"/>
         <source>PPM correction:</source>
-        <translation>PPM correction:</translation>
+        <translation>Corrección PPM:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="588"/>
         <source>Tuner AGC:</source>
-        <translation>Tuner AGC:</translation>
+        <translation>AGC del sintonizador:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="599"/>
         <source>Manual gain (dB):</source>
-        <translation>Manual gain (dB):</translation>
+        <translation>Ganancia manual (dB):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="617"/>
         <source>Digital AGC:</source>
-        <translation>Digital AGC:</translation>
+        <translation>AGC digital:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="627"/>
         <source>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</source>
-        <translation>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</translation>
+        <translation>Normalmente déjalo desactivado. En los receptores RTL-SDR Blog V4 puede subir el ruido de fondo.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="631"/>
@@ -18918,12 +18918,12 @@ En caso de duda, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="641"/>
         <source>Supplies power to an external active antenna or LNA only when required by that equipment.</source>
-        <translation>Supplies power to an external active antenna or LNA only when required by that equipment.</translation>
+        <translation>Alimenta una antena activa o un LNA externos solo cuando ese equipo lo requiera.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="643"/>
         <source>Audio gain:</source>
-        <translation>Audio gain:</translation>
+        <translation>Ganancia de audio:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="669"/>

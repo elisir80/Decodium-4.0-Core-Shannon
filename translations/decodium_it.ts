@@ -18361,17 +18361,17 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="167"/>
         <source>RTL-SDR RECEIVER</source>
-        <translation>RTL-SDR RECEIVER</translation>
+        <translation>RICEVITORE RTL-SDR</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="187"/>
         <source>Use RTL-SDR:</source>
-        <translation>Use RTL-SDR:</translation>
+        <translation>Usa RTL-SDR:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="198"/>
         <source>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</source>
-        <translation>Receives directly from an RTL-SDR. This mode is receive-only: Tune and TX are disabled.</translation>
+        <translation>Riceve direttamente da un RTL-SDR. Questa modalità è di sola ricezione: Tune e TX sono disattivati.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="202"/>
@@ -18381,62 +18381,62 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="203"/>
         <source>No external audio cable is required. RX only.</source>
-        <translation>No external audio cable is required. RX only.</translation>
+        <translation>Non serve alcun cavo audio esterno. Solo RX.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="204"/>
         <source>RTL-SDR support is not included in this build.</source>
-        <translation>RTL-SDR support is not included in this build.</translation>
+        <translation>Il supporto RTL-SDR non è incluso in questa build.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="213"/>
         <source>Receiver:</source>
-        <translation>Receiver:</translation>
+        <translation>Ricevitore:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="236"/>
         <source>Input mode:</source>
-        <translation>Input mode:</translation>
+        <translation>Modo d'ingresso:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="248"/>
         <source>SDR Radio</source>
-        <translation>SDR Radio</translation>
+        <translation>Radio SDR</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="248"/>
         <source>Direct Sampling</source>
-        <translation>Direct Sampling</translation>
+        <translation>Campionamento diretto</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="275"/>
         <source>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</source>
-        <translation>Uses the tuner path. RTL-SDR Blog V4 handles its HF upconverter automatically.</translation>
+        <translation>Usa il percorso del sintonizzatore. RTL-SDR Blog V4 gestisce da solo il proprio convertitore HF.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="277"/>
         <source>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</source>
-        <translation>Uses the RTL2832 direct-sampling Q ADC for HF reception from 500 kHz to 24 MHz.</translation>
+        <translation>Usa il convertitore Q a campionamento diretto dell'RTL2832 per la ricezione HF da 500 kHz a 24 MHz.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="290"/>
         <source>Demodulator:</source>
-        <translation>Demodulator:</translation>
+        <translation>Demodulatore:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="293"/>
         <source>Weak signal / FT8 audio</source>
-        <translation>Weak signal / FT8 audio</translation>
+        <translation>Segnali deboli / audio FT8</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="293"/>
         <source>Wide FM broadcast</source>
-        <translation>Wide FM broadcast</translation>
+        <translation>FM larga (radiodiffusione)</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
         <source>Narrow FM</source>
-        <translation>Narrow FM</translation>
+        <translation>FM stretta</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="294"/>
@@ -18461,27 +18461,27 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="319"/>
         <source>Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.</source>
-        <translation>Sends decoder PCM only to Decodium's weak-signal modes; the RF panadapter remains IQ-based.</translation>
+        <translation>Invia il PCM del decodificatore solo ai modi deboli di Decodium; il panadapter RF resta basato su IQ.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="320"/>
         <source>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</source>
-        <translation>Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.</translation>
+        <translation>Demodula l'audio di ricezione a parte. Con RTL-SDR, TX e Tune restano disattivati.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="322"/>
         <source>Listen to receiver audio:</source>
-        <translation>Listen to receiver audio:</translation>
+        <translation>Ascolta l'audio del ricevitore:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="333"/>
         <source>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</source>
-        <translation>Plays demodulated mono audio through the dedicated receiver output below. It is asynchronous and never feeds the FT8 decoder.</translation>
+        <translation>Riproduce l'audio mono demodulato sull'uscita dedicata qui sotto. È asincrono e non alimenta mai il decodificatore FT8.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="353"/>
         <source>Follow dial frequency:</source>
-        <translation>Follow dial frequency:</translation>
+        <translation>Segui la frequenza del VFO:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="366"/>
@@ -18541,62 +18541,62 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="478"/>
         <source>Receiver speaker output:</source>
-        <translation>Receiver speaker output:</translation>
+        <translation>Uscita altoparlanti del ricevitore:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="482"/>
         <source>System default</source>
-        <translation>System default</translation>
+        <translation>Predefinito di sistema</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="515"/>
         <source>System default normally selects the computer speakers and is independent from Decodium's TX audio output.</source>
-        <translation>System default normally selects the computer speakers and is independent from Decodium's TX audio output.</translation>
+        <translation>Il predefinito di sistema di solito sceglie gli altoparlanti del computer ed è indipendente dall'uscita audio TX di Decodium.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="518"/>
         <source>RF frequency (Hz):</source>
-        <translation>RF frequency (Hz):</translation>
+        <translation>Frequenza RF (Hz):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="538"/>
         <source>Sample rate:</source>
-        <translation>Sample rate:</translation>
+        <translation>Frequenza di campionamento:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="564"/>
         <source>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</source>
-        <translation>RF spectrum: centre ±480 kHz or more; receiver audio is Wide FM at 48 kHz.</translation>
+        <translation>Spettro RF: centro ±480 kHz o più; l'audio del ricevitore è FM larga a 48 kHz.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="565"/>
         <source>RF spectrum is derived from complex IQ, independent from decoder audio.</source>
-        <translation>RF spectrum is derived from complex IQ, independent from decoder audio.</translation>
+        <translation>Lo spettro RF è ricavato dall'IQ complesso, indipendente dall'audio del decodificatore.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="572"/>
         <source>PPM correction:</source>
-        <translation>PPM correction:</translation>
+        <translation>Correzione PPM:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="588"/>
         <source>Tuner AGC:</source>
-        <translation>Tuner AGC:</translation>
+        <translation>AGC del sintonizzatore:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="599"/>
         <source>Manual gain (dB):</source>
-        <translation>Manual gain (dB):</translation>
+        <translation>Guadagno manuale (dB):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="617"/>
         <source>Digital AGC:</source>
-        <translation>Digital AGC:</translation>
+        <translation>AGC digitale:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="627"/>
         <source>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</source>
-        <translation>Usually leave this disabled. It can raise the noise floor on RTL-SDR Blog V4 receivers.</translation>
+        <translation>Di norma lascialo disattivato. Sui ricevitori RTL-SDR Blog V4 può alzare il rumore di fondo.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="631"/>
@@ -18606,12 +18606,12 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="641"/>
         <source>Supplies power to an external active antenna or LNA only when required by that equipment.</source>
-        <translation>Supplies power to an external active antenna or LNA only when required by that equipment.</translation>
+        <translation>Alimenta un'antenna attiva o un LNA esterni solo se quell'apparato lo richiede.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="643"/>
         <source>Audio gain:</source>
-        <translation>Audio gain:</translation>
+        <translation>Guadagno audio:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="669"/>
