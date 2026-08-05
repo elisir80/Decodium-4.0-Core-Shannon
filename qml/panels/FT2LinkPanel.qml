@@ -164,6 +164,8 @@ Rectangle {
     property double satelliteRxDialHz: settingNumber("Ft2LinkSatelliteRxDialHz", 0, 0, 30000000000)
     property double satelliteTxDialHz: settingNumber("Ft2LinkSatelliteTxDialHz", 0, 0, 30000000000)
     property int satelliteCatSettleMs: settingInt("Ft2LinkSatelliteCatSettleMs", 900, 250, 5000)
+    property string satelliteRigImportStatus: ""
+    property bool satelliteRigAutoImported: false
     readonly property var satelliteHalfDuplexStatus: bridge
                                                     ? bridge.ft2LinkSatelliteHalfDuplexStatus : ({})
     property double uiNowMs: Date.now()
@@ -243,7 +245,11 @@ Rectangle {
     onCheckInCityChanged: persistSetting("uiFt2LinkCheckInCity", checkInCity)
     onCheckInRegionChanged: persistSetting("uiFt2LinkCheckInRegion", checkInRegion)
     onCheckInChannelChanged: persistSetting("uiFt2LinkCheckInChannel", checkInChannel)
-    onSatelliteHalfDuplexEnabledChanged: persistSetting("Ft2LinkSatelliteHalfDuplexEnabled", satelliteHalfDuplexEnabled)
+    onSatelliteHalfDuplexEnabledChanged: {
+        persistSetting("Ft2LinkSatelliteHalfDuplexEnabled", satelliteHalfDuplexEnabled)
+        if (satelliteHalfDuplexEnabled)
+            Qt.callLater(root.tryAutoImportSatelliteRigPair)
+    }
     onSatelliteRxDialHzChanged: persistSetting("Ft2LinkSatelliteRxDialHz", Math.round(satelliteRxDialHz))
     onSatelliteTxDialHzChanged: persistSetting("Ft2LinkSatelliteTxDialHz", Math.round(satelliteTxDialHz))
     onSatelliteCatSettleMsChanged: persistSetting("Ft2LinkSatelliteCatSettleMs", satelliteCatSettleMs)
@@ -319,6 +325,78 @@ Rectangle {
     function persistSetting(key, value) {
         if (bridge && typeof bridge.setSetting === "function")
             bridge.setSetting(key, value)
+    }
+
+    function satelliteRigPair() {
+        var result = { valid: false, detail: "", rxHz: 0, txHz: 0 }
+        if (!bridge) {
+            result.detail = "Decodium bridge is not available."
+            return result
+        }
+        if (String(bridge.catBackend || "").toLowerCase() !== "hamlib") {
+            result.detail = "Reading the satellite VFO pair is available with Hamlib CAT only."
+            return result
+        }
+        var rig = bridge.hamlibCat
+        if (!rig || !rig.connected) {
+            result.detail = "Connect the Hamlib CAT rig first."
+            return result
+        }
+        if (String(rig.splitMode || "").toLowerCase() !== "rig") {
+            result.detail = "Set Hamlib Split mode to 'rig' before reading the VFO pair."
+            return result
+        }
+        if (rig.split !== true) {
+            result.detail = "The rig is not currently reporting split as active."
+            return result
+        }
+
+        var rxHz = Math.round(Number(rig.frequency || 0))
+        var txHz = Math.round(Number(rig.txFrequency || 0))
+        if (!isFinite(rxHz) || rxHz < 1000000) {
+            result.detail = "The rig did not report a valid RX dial frequency."
+            return result
+        }
+        if (!isFinite(txHz) || txHz < 1000000) {
+            result.detail = "The rig did not report a valid TX dial frequency."
+            return result
+        }
+        if (rxHz === txHz) {
+            result.detail = "The rig reported identical RX and TX dial frequencies."
+            return result
+        }
+
+        result.valid = true
+        result.rxHz = rxHz
+        result.txHz = txHz
+        result.detail = "Rig reports RX " + (rxHz / 1000000).toFixed(6)
+                        + " MHz / TX " + (txHz / 1000000).toFixed(6) + " MHz."
+        return result
+    }
+
+    function importSatelliteRigPair(overwrite, showFailure) {
+        var pair = satelliteRigPair()
+        if (!pair.valid) {
+            if (showFailure)
+                satelliteRigImportStatus = pair.detail
+            return false
+        }
+        if (!overwrite && (satelliteRxDialHz > 0 || satelliteTxDialHz > 0))
+            return false
+
+        satelliteRxDialHz = pair.rxHz
+        satelliteTxDialHz = pair.txHz
+        satelliteRigAutoImported = true
+        satelliteRigImportStatus = (overwrite ? "Read from rig: " : "Imported from rig: ")
+                                  + pair.detail + " No CAT command was sent."
+        return true
+    }
+
+    function tryAutoImportSatelliteRigPair() {
+        if (!satelliteHalfDuplexEnabled || satelliteRigAutoImported
+                || satelliteRxDialHz > 0 || satelliteTxDialHz > 0)
+            return false
+        return importSatelliteRigPair(false, false)
     }
 
     function normalizeBbsGroup(text) {
@@ -4804,6 +4882,7 @@ Rectangle {
             if (root && typeof root.loadPresenceEditor === "function")
                 root.loadPresenceEditor()
         })
+        Qt.callLater(root.tryAutoImportSatelliteRigPair)
     }
 
     Timer {
@@ -4998,6 +5077,8 @@ Rectangle {
         ignoreUnknownSignals: true
         function onDeepSearchEnabledChanged() { root.applyCapabilities() }
         function onLowCpuModeEnabledChanged() { root.applyCapabilities() }
+        function onCatBackendChanged() { root.tryAutoImportSatelliteRigPair() }
+        function onCatConnectedChanged() { root.tryAutoImportSatelliteRigPair() }
         function onFt2LinkReceivedFileSaveFinished(requestId, result) {
             root.finishReceivedFileSave(requestId, result)
         }
@@ -5045,6 +5126,18 @@ Rectangle {
                 detail: cleanDetail
             })
         }
+    }
+
+    Connections {
+        // Reading these properties never changes the VFOs or PTT.  The signal
+        // handlers only auto-populate an entirely empty satellite profile.
+        target: bridge && bridge.hamlibCat ? bridge.hamlibCat : null
+        ignoreUnknownSignals: true
+        function onConnectedChanged() { root.tryAutoImportSatelliteRigPair() }
+        function onFrequencyChanged() { root.tryAutoImportSatelliteRigPair() }
+        function onTxFrequencyChanged() { root.tryAutoImportSatelliteRigPair() }
+        function onSplitChanged() { root.tryAutoImportSatelliteRigPair() }
+        function onSplitModeChanged() { root.tryAutoImportSatelliteRigPair() }
     }
 
     component SmallButton: Rectangle {
@@ -11853,6 +11946,32 @@ Rectangle {
                                             if (isFinite(value))
                                                 root.satelliteCatSettleMs = Math.max(250, Math.min(5000, value))
                                         }
+                                    }
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 6
+
+                                    SmallButton {
+                                        text: "READ RX/TX FROM RIG"
+                                        implicitWidth: 168
+                                        accent: root.cyan
+                                        enabled: !!bridge && !!bridge.hamlibCat
+                                        tip: "Copy the current Hamlib RX/TX split pair into this profile. It never retunes the rig."
+                                        onClicked: root.importSatelliteRigPair(true, true)
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.satelliteRigImportStatus.length > 0
+                                              ? root.satelliteRigImportStatus
+                                              : "Empty fields are imported automatically when Hamlib reports active split."
+                                        font.family: root.mono
+                                        font.pixelSize: 10
+                                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                        color: root.satelliteRigImportStatus.length > 0
+                                               ? root.green : root.textSecondary
                                     }
                                 }
 

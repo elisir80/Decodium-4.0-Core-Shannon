@@ -1920,7 +1920,8 @@ private:
     void maybeDispatchBridgeOwnedJtDecodeFallback();
     int minimumDecodeSamplesForMode(const QString& mode) const;
     void requestRigFrequencyFromBridge(double hz, const QString& reason);
-    void schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs = 900);
+    void schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs = 900,
+                                       int retryAttempt = 0);
     bool hamlibCatFrequencySettleActive(const QString& reason) const;
     bool ft2LinkSatelliteHalfDuplexRequested() const;
     bool ft2LinkSatelliteHalfDuplexOperationActive() const;
@@ -3536,6 +3537,7 @@ public:
     // 1.0.189 — Telemetria sessione
     Q_INVOKABLE int cpuPressureEventCount() const { return m_cpuPressureEventCount; }
     Q_INVOKABLE int cpuPressureSevereEventCount() const { return m_cpuPressureSevereEventCount; }
+    Q_INVOKABLE bool cpuPressureNow() const { return cpuPressureActive(); }
 
     // 1.0.167 — Remote viewer web server (PWA per iPad/mobile)
     Q_INVOKABLE bool    startWebServer(int port = 8080);

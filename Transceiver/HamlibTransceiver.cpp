@@ -1156,11 +1156,18 @@ void HamlibTransceiver::do_frequency (Frequency f, MODE m, bool no_ignore)
         {
           return;
         }
-      update_rx_frequency (f);
+
+      // A CI-V timeout/bus error may be returned after the request has been
+      // queued, but it is not confirmation that the radio accepted the QSY.
+      // Publishing f here used to clear the bridge's local-QSY guard; a late
+      // poll for the old band frequency could then overwrite the requested
+      // dial. Keep the last confirmed frequency until polling verifies it,
+      // allowing the bounded bridge retry to reissue the QSY if necessary.
       if (FrequencyWriteResult::AppliedWithTransientError == write_result)
         {
           return;
         }
+      update_rx_frequency (f);
 
       if (m_->mode_query_works_ && UNK != m)
         {

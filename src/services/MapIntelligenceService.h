@@ -450,6 +450,7 @@ signals:
 private slots:
     void scheduleQuery();
     void flushPendingLiveSpots();
+    void flushPendingSnapshot();
 
 private:
     struct QsoRecord {
@@ -687,6 +688,7 @@ private:
                        const QString& senderGrid,
                        bool replaceHeardBySnapshot);
     void applySnapshot(quint64 generation, Snapshot snapshot);
+    void applySnapshotNow(Snapshot snapshot);
     void applyGridDetails(quint64 generation, const QString& grid,
                           GridDetails details);
     void rebuildVisibleCoverage();
@@ -702,7 +704,11 @@ private:
     QThreadPool m_workerPool;
     QTimer* m_queryTimer {nullptr};
     QTimer* m_liveFlushTimer {nullptr};
+    QTimer* m_snapshotFlushTimer {nullptr};
     QList<PendingDecode> m_pendingDecodes;
+    Snapshot m_pendingSnapshot;
+    quint64 m_pendingSnapshotGeneration {0};
+    bool m_snapshotPending {false};
     QVariantList m_rawCoverage;
     QVariantList m_coverageCells;
     QVariantList m_roster;

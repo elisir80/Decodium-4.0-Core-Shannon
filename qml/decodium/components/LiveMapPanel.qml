@@ -55,6 +55,7 @@ Rectangle {
     property bool qsoViewportFocused: false
     property bool moonLocatePending: false
     property string activitySelectedBand: ""
+    property bool mapSnapshotSyncPending: false
     readonly property bool compactIntelligencePanel: width < 760
 
     function ensureActivityBand() {
@@ -103,6 +104,55 @@ Rectangle {
         }
         ToolTip.visible: layerMouse.containsMouse && helpText.length > 0
         ToolTip.text: helpText
+        ToolTip.delay: 450
+    }
+
+    // Do not use the platform Material Button here.  In the operational
+    // marker card, disabled Material buttons can render their label below the
+    // rounded background on some Qt/Windows style combinations, leaving four
+    // apparently blank controls.  This explicit content keeps the action and
+    // its unavailable state readable on every platform.
+    component OperationalActionButton: Rectangle {
+        required property string label
+        property bool actionEnabled: true
+        property string unavailableHint: ""
+        signal invoked()
+
+        radius: 14
+        color: actionEnabled
+            ? Qt.rgba(root.secondaryCyan.r, root.secondaryCyan.g, root.secondaryCyan.b, 0.16)
+            : Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.20)
+        border.width: 1
+        border.color: actionEnabled
+            ? Qt.rgba(root.secondaryCyan.r, root.secondaryCyan.g, root.secondaryCyan.b, 0.72)
+            : Qt.rgba(root.textSecondary.r, root.textSecondary.g, root.textSecondary.b, 0.52)
+        opacity: actionEnabled ? 1.0 : 0.82
+
+        Text {
+            anchors.centerIn: parent
+            text: parent.label
+            color: parent.actionEnabled ? root.textPrimary : root.textSecondary
+            font.pixelSize: 10
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+        }
+
+        MouseArea {
+            id: actionMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: parent.actionEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: {
+                if (parent.actionEnabled)
+                    parent.invoked()
+            }
+        }
+
+        ToolTip.visible: actionMouse.containsMouse && !actionEnabled
+                          && unavailableHint.length > 0
+        ToolTip.text: unavailableHint
         ToolTip.delay: 450
     }
 
@@ -475,6 +525,11 @@ Rectangle {
         worldMap.setCoverageCells(mapLayers ? mapLayers.coverageCells : [])
     }
 
+    function scheduleMapSnapshotSync() {
+        mapSnapshotSyncPending = true
+        mapSnapshotSyncTimer.restart()
+    }
+
     function syncSpotPaths() {
         if (!worldMap || !mapLayers || !mapLayers.pskLayerEnabled)
             return
@@ -687,6 +742,20 @@ Rectangle {
         running: root.visible && root.mapLayerEnabled("psk")
                  && !root.mapLayerEnabled("offline")
         onTriggered: root.requestPskData()
+    }
+
+    Timer {
+        id: mapSnapshotSyncTimer
+        interval: 180
+        repeat: false
+        onTriggered: {
+            root.mapSnapshotSyncPending = false
+            if (!root.visible || !root.worldMap)
+                return
+            root.ensureActivityBand()
+            root.syncCoverage()
+            activityChart.requestPaint()
+        }
     }
 
     Connections {
@@ -1398,30 +1467,59 @@ Rectangle {
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        Button {
-                            text: qsTr("CALL")
-                            enabled: String(root.operationalValue("call")).length > 0
-                            onClicked: root.engine.processMapRosterCall(
+                        spacing: 6
+                        OperationalActionButton {
+                            label: qsTr("CALL")
+                            Layout.minimumWidth: 50
+                            Layout.preferredWidth: 54
+                            Layout.maximumWidth: 58
+                            Layout.minimumHeight: 28
+                            Layout.preferredHeight: 28
+                            Layout.maximumHeight: 28
+                            actionEnabled: String(root.operationalValue("call")).length > 0
+                            unavailableHint: qsTr("This map marker has no callsign.")
+                            onInvoked: root.engine.processMapRosterCall(
                                 root.operationalValue("call"),
                                 root.operationalValue("grid"))
                         }
-                        Button {
-                            text: "QRZ"
-                            enabled: String(root.operationalValue("call")).length > 0
-                            onClicked: root.openCallLookup(
+                        OperationalActionButton {
+                            label: "QRZ"
+                            Layout.minimumWidth: 48
+                            Layout.preferredWidth: 52
+                            Layout.maximumWidth: 56
+                            Layout.minimumHeight: 28
+                            Layout.preferredHeight: 28
+                            Layout.maximumHeight: 28
+                            actionEnabled: String(root.operationalValue("call")).length > 0
+                            unavailableHint: qsTr("This map marker has no callsign.")
+                            onInvoked: root.openCallLookup(
                                 root.operationalValue("call"))
                         }
-                        Button {
-                            text: qsTr("ROTATE")
-                            enabled: root.mapOperations
-                                     && root.mapOperations.rotatorEnabled
-                            onClicked: root.aimSelectedMarker()
+                        OperationalActionButton {
+                            label: qsTr("ROTATE")
+                            Layout.minimumWidth: 66
+                            Layout.preferredWidth: 70
+                            Layout.maximumWidth: 74
+                            Layout.minimumHeight: 28
+                            Layout.preferredHeight: 28
+                            Layout.maximumHeight: 28
+                            actionEnabled: root.mapOperations
+                                           && root.mapOperations.rotatorEnabled
+                            unavailableHint: qsTr("Enable a rotator to aim the antenna.")
+                            onInvoked: root.aimSelectedMarker()
                         }
-                        Button {
-                            text: qsTr("TRACK")
-                            enabled: root.mapOperations
-                                     && root.mapOperations.rotatorEnabled
-                            onClicked: root.trackSelectedMarker()
+                        OperationalActionButton {
+                            label: qsTr("TRACK")
+                            Layout.minimumWidth: 60
+                            Layout.preferredWidth: 64
+                            Layout.maximumWidth: 68
+                            Layout.minimumHeight: 28
+                            Layout.preferredHeight: 28
+                            Layout.maximumHeight: 28
+                            actionEnabled: root.mapOperations
+                                           && root.mapOperations.rotatorEnabled
+                            unavailableHint: qsTr("Enable a rotator to track this satellite.")
+                            onInvoked: root.trackSelectedMarker()
                         }
                         Item { Layout.fillWidth: true }
                     }
@@ -5482,8 +5580,7 @@ Rectangle {
         ignoreUnknownSignals: true
 
         function onBandActivityChanged() {
-            root.ensureActivityBand()
-            activityChart.requestPaint()
+            root.scheduleMapSnapshotSync()
         }
 
         function onBandActivityWindowHoursChanged() {
@@ -5586,7 +5683,7 @@ Rectangle {
         ignoreUnknownSignals: true
 
         function onCoverageChanged() {
-            root.syncCoverage()
+            root.scheduleMapSnapshotSync()
         }
         // Snapshot refreshes also emit filtersChanged. Coverage and roster
         // have dedicated incremental signals, so a full contact replay here

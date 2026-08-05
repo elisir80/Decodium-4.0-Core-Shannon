@@ -10196,7 +10196,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         bool const monitorShouldStayActive = m_monitoring || m_monitorRequested;
         quint64 const monitorSessionId = m_periodTimerSessionId;
         double const previousFrequency = m_frequency;
-        setFrequency(freq);
+        // requestRigFrequencyFromBridge() records the current dial as the
+        // previous CAT value before it publishes the requested one.  Do not
+        // call setFrequency() first: doing so made previous==target, so a
+        // delayed CAT poll containing the old mode's dial was mistaken for a
+        // manual retune and could undo FT4 -> FT8 (or the reverse).
         requestRigFrequencyFromBridge(freq, QStringLiteral("band/mode"));
         if (m_monitoring) {
             {
@@ -15927,7 +15931,8 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
                        m_catBackend));
 }
 
-void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs)
+void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& reason, int delayMs,
+                                                    int retryAttempt)
 {
     if (hz <= 0.0
         || !isHamlibFamilyBackend(m_catBackend)
@@ -15940,7 +15945,7 @@ void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& rea
     m_catFrequencySettleUntilMs = std::max(m_catFrequencySettleUntilMs,
                                            nowMs + qMax(250, delayMs));
     quint64 const serial = ++m_catQsySettleSerial;
-    QTimer::singleShot(qMax(250, delayMs), this, [this, hz, reason, serial]() {
+    QTimer::singleShot(qMax(250, delayMs), this, [this, hz, reason, serial, retryAttempt]() {
         if (serial != m_catQsySettleSerial) {
             return;
         }
@@ -15951,6 +15956,27 @@ void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& rea
         }
         if (m_localCatFrequencyTargetHz > 0.0
             && std::abs(m_localCatFrequencyTargetHz - hz) > 1.0) {
+            return;
+        }
+
+        double const reportedHz = m_hamlibCat->frequency();
+        bool const qsyStillCurrent =
+            (m_localCatFrequencyTargetHz > 0.0
+             && std::abs(m_localCatFrequencyTargetHz - hz) <= 1.0)
+            || std::abs(m_frequency - hz) <= 1.0;
+        if (retryAttempt < 2
+            && qsyStillCurrent
+            && reportedHz > 0.0
+            && std::abs(reportedHz - hz) > 1.0) {
+            int const nextAttempt = retryAttempt + 1;
+            bridgeLog(QStringLiteral("CAT post-QSY retry %1/2: requested=%2 Hz rig=%3 Hz (%4)")
+                          .arg(nextAttempt)
+                          .arg(QString::number(hz, 'f', 0),
+                               QString::number(reportedHz, 'f', 0),
+                               reason));
+            activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend,
+                             applyFrequencyCalibration(hz), m_omniRigCat, m_legacyBackend);
+            schedulePostQsyCatSettledSync(hz, reason, 1000, nextAttempt);
             return;
         }
 
@@ -16258,13 +16284,6 @@ void DecodiumBridge::applyRemoteBandChange(const QString& band)
         return;
     }
 
-    double const targetFrequency = m_bandManager->dialFrequency();
-    if (targetFrequency > 0.0
-        && (!qFuzzyCompare(m_frequency + 1.0, targetFrequency + 1.0)
-            || std::abs(m_localCatFrequencyTargetHz - targetFrequency) > 1.0)) {
-        setFrequency(targetFrequency);
-        requestRigFrequencyFromBridge(targetFrequency, QStringLiteral("remote-band"));
-    }
     bridgeLog(QStringLiteral("Remote band change applied: %1 -> %2 Hz")
                   .arg(afterBand, QString::number(m_frequency, 'f', 0)));
 }
@@ -16855,14 +16874,10 @@ void DecodiumBridge::setMode(const QString& v) {
         if (m_preserveFrequencyOnModeChange) {
             m_bandManager->updateFromFrequency(m_frequency);
         } else {
+            // updateForMode emits bandFrequencyRequested(), whose sole bridge
+            // handler owns the QSY.  Reissuing it here produced a second CAT
+            // transaction with an already-overwritten previous frequency.
             m_bandManager->updateForMode(bandMode);
-            double const targetFrequency = m_bandManager->dialFrequency();
-            if (targetFrequency > 0.0
-                && (!qFuzzyCompare(m_frequency + 1.0, targetFrequency + 1.0)
-                    || std::abs(m_localCatFrequencyTargetHz - targetFrequency) > 1.0)) {
-                setFrequency(targetFrequency);
-                requestRigFrequencyFromBridge(targetFrequency, QStringLiteral("remote/mode"));
-            }
         }
         // Riavvia la cattura se attiva per adattare il periodo
         if (m_monitoring) {

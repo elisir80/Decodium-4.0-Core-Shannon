@@ -18,6 +18,7 @@
 #include <QSettings>
 #include <QMetaObject>
 #include <QMetaType>
+#include <QPointer>
 #include <QDebug>
 #include <QRegularExpression>
 #include <QTimer>
@@ -1097,13 +1098,19 @@ void DecodiumTransceiverManager::abortConnectingRigAfterTimeout(Transceiver* xcv
             xcv->stop();
         }, Qt::QueuedConnection);
     }
+    // Do not wait from the GUI thread.  Give the worker a grace period and
+    // terminate only from a later event-loop turn if Hamlib is still stuck.
     thread->quit();
-    if (!thread->wait(1500)) {
-        qWarning().noquote() << "[CATDBG] Connect watchdog: graceful stop timed out, terminating thread";
-        thread->terminate();
-        thread->wait(1000);
-    }
-    thread->deleteLater();
+    QPointer<QThread> watchedThread(thread);
+    QTimer::singleShot(1500, this, [watchedThread]() {
+        if (!watchedThread || !watchedThread->isRunning()) {
+            return;
+        }
+        qWarning().noquote()
+            << "[CATDBG] Connect watchdog: graceful stop timed out, terminating thread";
+        watchedThread->requestInterruption();
+        watchedThread->terminate();
+    });
 }
 
 bool DecodiumTransceiverManager::pttSharesCatPort() const
@@ -1128,8 +1135,17 @@ void DecodiumTransceiverManager::reconnectRigForParameterChange(const QString& r
     }
 
     emit statusUpdate(reason + QStringLiteral(": riconnessione CAT per applicare il PTT"));
+    bool const threadRunning = d->xcvThread && d->xcvThread->isRunning();
+    m_reconnectAfterDisconnect = true;
     disconnectRig();
-    connectRig();
+    if (!threadRunning) {
+        QTimer::singleShot(0, this, [this]() {
+            if (m_reconnectAfterDisconnect && !d->transceiver && !d->xcvThread) {
+                m_reconnectAfterDisconnect = false;
+                connectRig();
+            }
+        });
+    }
 }
 
 void DecodiumTransceiverManager::enforceForceLineAvailability()
@@ -1918,6 +1934,8 @@ void DecodiumTransceiverManager::connectRig()
     connect(thread, &QThread::finished, xcv, &QObject::deleteLater);
     connect(thread, &QThread::finished, this,
             [this, thread, xcv]() {
+                bool const reconnect = m_reconnectAfterDisconnect;
+                m_reconnectAfterDisconnect = false;
                 if (d->xcvThread == thread)
                     d->xcvThread = nullptr;
                 if (d->transceiver == xcv)
@@ -1930,6 +1948,13 @@ void DecodiumTransceiverManager::connectRig()
                     emit connectedChanged();
                 }
                 updateTelemetry(0.0, 0.0);
+                if (reconnect) {
+                    QTimer::singleShot(0, this, [this]() {
+                        if (!d->transceiver && !d->xcvThread) {
+                            connectRig();
+                        }
+                    });
+                }
             },
             Qt::QueuedConnection);
 
@@ -2093,18 +2118,16 @@ void DecodiumTransceiverManager::disconnectRig()
     if (!thread || !thread->isRunning() || xcv->thread() == QThread::currentThread()) {
         xcv->stop();
     } else {
-        QMetaObject::invokeMethod(xcv, [xcv]() {
+        QMetaObject::invokeMethod(xcv, [xcv, thread]() {
             xcv->stop();
-        }, Qt::BlockingQueuedConnection);
+            thread->quit();
+        }, Qt::QueuedConnection);
     }
 
-    if (thread && thread->isRunning()) {
-        thread->quit();
-        if (!thread->wait(4000)) {
-            thread->terminate();
-            thread->wait(1000);
+    if (!thread || !thread->isRunning()) {
+        if (thread) {
+            thread->deleteLater();
         }
-        thread->deleteLater();
     }
 
     if (m_connected) {
@@ -2249,41 +2272,17 @@ static void sendState(DecodiumTransceiverManagerPrivate* d)
     }, Qt::QueuedConnection);
 }
 
-static void sendLatestState(DecodiumTransceiverManagerPrivate* d, char const* context)
-{
-    if (!d->transceiver) return;
-    auto* xcv = d->transceiver;
-    auto st = d->desired;
-    auto* latestSeq = &d->seqNum;
-    unsigned seq = ++(d->seqNum);
-    QMetaObject::invokeMethod(xcv, [xcv, st, seq, latestSeq, context]() {
-        if (seq != latestSeq->load()) {
-            qInfo().noquote()
-                << "[CATDBG] Hamlib stale queued CAT state dropped"
-                << "context=" << context
-                << "seq=" << seq
-                << "latest=" << latestSeq->load();
-            return;
-        }
-        xcv->set(st, seq);
-    }, Qt::QueuedConnection);
-}
-
-static void sendStateSync(DecodiumTransceiverManagerPrivate* d)
+static void sendStateAsync(DecodiumTransceiverManagerPrivate* d, char const* context)
 {
     if (!d->transceiver) return;
     auto* xcv = d->transceiver;
     auto  st  = d->desired;
     unsigned seq = ++(d->seqNum);
-
-    if (xcv->thread() == QThread::currentThread()) {
-        xcv->set(st, seq);
-        return;
-    }
-
+    qInfo().noquote() << "[CAT-QUEUE] Hamlib state queued"
+                      << "context=" << context << "seq=" << seq;
     QMetaObject::invokeMethod(xcv, [xcv, st, seq]() {
         xcv->set(st, seq);
-    }, Qt::BlockingQueuedConnection);
+    }, Qt::QueuedConnection);
 }
 
 void DecodiumTransceiverManager::setRigFrequency(double hz)
@@ -2299,14 +2298,18 @@ void DecodiumTransceiverManager::setRigFrequency(double hz)
         return;
     }
 
-    if (!reportedMatches) {
-        m_frequency = hz;
-        emit frequencyChanged();
-    } else {
-        m_frequency = hz;
-    }
+    // m_frequency is the frequency confirmed by the rig.  Do not publish an
+    // optimistic value here: a deferred CI-V write would otherwise look as if
+    // the QSY had completed, suppressing both a later retry and the bridge's
+    // stale-poll guard.
     d->desired.frequency(static_cast<Transceiver::Frequency>(hz));
-    sendLatestState(d.get(), "setRigFrequency");
+
+    // A frequency change must reach the Hamlib worker even when a following
+    // mode, split or polling update is queued immediately afterwards. The
+    // worker serialises states and rejects genuinely older sequence numbers;
+    // sendLatestState(), on the other hand, can discard this QSY before the
+    // worker has had a chance to send it to a slow CI-V rig.
+    sendState(d.get());
 }
 
 void DecodiumTransceiverManager::setRigTxFrequency(double hz)
@@ -2452,12 +2455,9 @@ void DecodiumTransceiverManager::setRigTxFrequencyAndPtt(double hz, bool on)
         << "rxHz=" << QString::number(static_cast<double>(d->desired.frequency()), 'f', 0)
         << "txHz=" << QString::number(hz, 'f', 0);
     d->desired.ptt(on);
-    QElapsedTimer sendTimer;
-    sendTimer.start();
-    sendStateSync(d.get());
-    DIAG_INFO(QStringLiteral("[TX-TL] hamlib_set_tx_frequency_ptt total_ms=%1 send_state_ms=%2 splitMode=%3 on=%4 rxHz=%5 txHz=%6")
+    sendStateAsync(d.get(), "setRigTxFrequencyAndPtt");
+    DIAG_INFO(QStringLiteral("[TX-TL] hamlib_set_tx_frequency_ptt queued_ms=%1 splitMode=%2 on=%3 rxHz=%4 txHz=%5")
                   .arg(totalTimer.elapsed())
-                  .arg(sendTimer.elapsed())
                   .arg(m_splitMode)
                   .arg(on ? 1 : 0)
                   .arg(QString::number(static_cast<double>(d->desired.frequency()), 'f', 0),
@@ -2520,14 +2520,9 @@ void DecodiumTransceiverManager::setRigPtt(bool on)
         return;
     }
     d->desired.ptt(on);
-    // PTT OFF e' safety-critical: stopTx()/halt()/stopTune() dichiarano la TX
-    // terminata subito dopo questa chiamata, quindi devono aspettare che il
-    // worker abbia almeno eseguito il comando OFF verso il backend CAT.
-    if (on) {
-        sendState(d.get());
-    } else {
-        sendStateSync(d.get());
-    }
+    // PTT ON/OFF resta nella stessa coda serializzata. Il bridge aggiorna
+    // il proprio stato TX localmente e il worker completa il comando Hamlib.
+    sendStateAsync(d.get(), on ? "setRigPtt:on" : "setRigPtt:off");
 }
 
 void DecodiumTransceiverManager::setRigMode(const QString& mode)
@@ -2564,7 +2559,7 @@ void DecodiumTransceiverManager::setRigTune(bool on)
 {
     d->desired.online(true);
     d->desired.tune(on);
-    sendStateSync(d.get());
+    sendStateAsync(d.get(), on ? "setRigTune:on" : "setRigTune:off");
 }
 
 void DecodiumTransceiverManager::startRigTxAudio(const QString& mode, unsigned symbolsLength,
@@ -2583,7 +2578,7 @@ void DecodiumTransceiverManager::startRigTxAudio(const QString& mode, unsigned s
     d->desired.dbsnr(dbsnr);
     d->desired.trperiod(trPeriod);
     d->desired.tx_audio(true);
-    sendStateSync(d.get());
+    sendStateAsync(d.get(), "startRigTxAudio");
 }
 
 void DecodiumTransceiverManager::stopRigTxAudio(bool quick)

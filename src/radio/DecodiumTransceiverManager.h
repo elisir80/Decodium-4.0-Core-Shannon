@@ -272,6 +272,7 @@ private:
     bool    m_hrdStrictRadioMatch {true};
     int     m_transientCatRetryCount {0};
     bool    m_transientCatReconnectPending {false};
+    bool    m_reconnectAfterDisconnect {false};
     quint64 m_transientCatReconnectSerial {0};
     QElapsedTimer m_connectAttemptTimer;
 };

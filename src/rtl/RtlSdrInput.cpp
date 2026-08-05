@@ -23,10 +23,12 @@
 #endif
 
 namespace {
+#if DECODIUM_HAS_RTLSDR
 QString rtlError(const QString& operation, int result)
 {
     return QStringLiteral("RTL-SDR: %1 failed (%2)").arg(operation).arg(result);
 }
+#endif
 }
 
 class RtlSdrReader final : public QThread

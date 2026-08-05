@@ -1962,6 +1962,14 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     connect(m_liveFlushTimer, &QTimer::timeout,
             this, &MapIntelligenceService::flushPendingLiveSpots);
 
+    // Keep only the newest map result and publish it at a bounded cadence.
+    // A decode/PSK burst must not fan out into repeated heavy QML updates.
+    m_snapshotFlushTimer = new QTimer(this);
+    m_snapshotFlushTimer->setSingleShot(true);
+    m_snapshotFlushTimer->setInterval(280);
+    connect(m_snapshotFlushTimer, &QTimer::timeout,
+            this, &MapIntelligenceService::flushPendingSnapshot);
+
     scheduleQuery();
 }
 
@@ -3905,6 +3913,18 @@ void MapIntelligenceService::flushPendingLiveSpots()
             guard->scheduleQuery();
         }, Qt::QueuedConnection);
     }));
+}
+
+void MapIntelligenceService::flushPendingSnapshot()
+{
+    if (!m_snapshotPending) {
+        return;
+    }
+
+    m_snapshotPending = false;
+    Snapshot snapshot = std::move(m_pendingSnapshot);
+    m_pendingSnapshot = Snapshot {};
+    applySnapshotNow(std::move(snapshot));
 }
 
 QList<MapIntelligenceService::QsoRecord>
@@ -7224,6 +7244,21 @@ void MapIntelligenceService::applySnapshot(quint64 generation, Snapshot snapshot
     if (generation != m_queryGeneration.load()) {
         return;
     }
+
+    // The result is current when it reaches the GUI thread. Replace an older
+    // result and publish one coalesced batch later. Do not re-check the query
+    // generation in the timer callback: a newer query may be scheduled but
+    // not completed yet, and dropping this result would leave the map stale.
+    m_pendingSnapshotGeneration = generation;
+    m_pendingSnapshot = std::move(snapshot);
+    m_snapshotPending = true;
+    if (!m_snapshotFlushTimer->isActive()) {
+        m_snapshotFlushTimer->start();
+    }
+}
+
+void MapIntelligenceService::applySnapshotNow(Snapshot snapshot)
+{
     if (!snapshot.error.isEmpty()) {
         qWarning().noquote() << "[MAPINT] SQLite query failed:" << snapshot.error;
     }

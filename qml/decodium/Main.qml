@@ -39,6 +39,13 @@ ApplicationWindow {
     property bool startupWaterfallVisualReady: !startupVisualStagingEnabled
     property bool startupLiveMapVisualReady: !startupVisualStagingEnabled
     property bool startupSettingsSavePending: false
+    // Settings is a QML Dialog in this main window, whereas detached panels
+    // are native top-level Windows.  On Windows an always-on-top panel stays
+    // above the QML overlay and can make Settings visible but impossible to
+    // click.  Keep the exact visible set so it can be restored unchanged when
+    // the modal dialog closes.
+    property var settingsSuspendedTopmostPopouts: []
+    property bool settingsTopmostPopoutsSuspended: false
     property bool decodePanelLayoutSaved: false
     property int savedPeriod1PanelWidth: 400
     property int savedRxFreqPanelWidth: 400
@@ -538,11 +545,26 @@ ApplicationWindow {
             }
             if (bridge && bridge.warmLogCacheAsync)
                 bridge.warmLogCacheAsync()
-            // Do not instantiate the 600 KB SettingsDialog just to warm it up.
-            // If the user already opened it, warming its internal popups is cheap.
-            var settings = settingsDialogLoader.item
-            if (settings && settings.warmUpPopup)
-                settings.warmUpPopup()
+            // SettingsDialog contains all tabs in one StackLayout.  Loading it
+            // on the first click can pause the GUI while RX is active. Warm it
+            // once during a pressure-free window; low-end machines retry later
+            // instead of moving that cost into decoder delivery.
+            if (bridge && bridge.cpuPressureNow && bridge.cpuPressureNow()) {
+                interval = 10000
+                restart()
+                return
+            }
+            if (!settingsDialogLoader.item) {
+                settingsDialogLoader.pendingAction = function(item) {
+                    if (item && item.warmUpPopup)
+                        item.warmUpPopup()
+                }
+                settingsDialogLoader.active = true
+            } else {
+                var settings = settingsDialogLoader.item
+                if (settings && settings.warmUpPopup)
+                    settings.warmUpPopup()
+            }
         }
     }
     Timer {
@@ -2154,12 +2176,73 @@ ApplicationWindow {
             return
         }
         loader.pendingAction = action
-        loader.active = true
+        // Let the mouse/touch event return before starting a lazy dialog.  The
+        // loader is asynchronous, but activating it directly from a QML input
+        // handler still makes the first parse/layout part of that handler.
+        Qt.callLater(function() {
+            if (!loader.item && !loader.active)
+                loader.active = true
+        })
     }
 
     function closeLoaded(loader) {
         if (loader.item && loader.item.close)
             loader.item.close()
+    }
+
+    function suspendTopmostPopoutsForSettings() {
+        if (settingsTopmostPopoutsSuspended)
+            return
+
+        var candidates = [
+            waterfallWindow,
+            logFloatingWindow,
+            astroFloatingWindow,
+            satelliteFloatingWindow,
+            macroFloatingWindow,
+            rigFloatingWindow,
+            period1FloatingWindow,
+            period2FloatingWindow,
+            rxFreqFloatingWindow,
+            txPanelFloatingWindow
+        ]
+        var suspended = []
+        for (var i = 0; i < candidates.length; ++i) {
+            var floatingWindow = candidates[i]
+            if (!floatingWindow || !floatingWindow.visible)
+                continue
+            suspended.push(floatingWindow)
+            floatingWindow.hide()
+        }
+
+        settingsSuspendedTopmostPopouts = suspended
+        settingsTopmostPopoutsSuspended = true
+        if (suspended.length > 0)
+            console.log("SETUP temporarily hid " + suspended.length + " always-on-top pop-out(s)")
+    }
+
+    function restoreTopmostPopoutsAfterSettings() {
+        if (!settingsTopmostPopoutsSuspended)
+            return
+
+        var suspended = settingsSuspendedTopmostPopouts
+        settingsSuspendedTopmostPopouts = []
+        settingsTopmostPopoutsSuspended = false
+        if (applicationClosing || !suspended || suspended.length === 0)
+            return
+
+        // Re-show after the QML modal overlay has been removed.  Do not raise
+        // or activate the panels: closing Settings should leave focus where
+        // the user expects it, while preserving every panel's geometry/state.
+        Qt.callLater(function() {
+            if (applicationClosing)
+                return
+            for (var i = 0; i < suspended.length; ++i) {
+                var floatingWindow = suspended[i]
+                if (floatingWindow && !floatingWindow.visible)
+                    floatingWindow.show()
+            }
+        })
     }
 
     function openLogWindow() {
@@ -2176,10 +2259,25 @@ ApplicationWindow {
         satelliteFloatingWindow.showHostedWindow()
     }
     function openSettingsDialog() {
-        runWhenLoaded(settingsDialogLoader, function(item) { item.open() })
+        var requestedAt = Date.now()
+        console.log("SETUP requested loaded=" + !!settingsDialogLoader.item)
+        runWhenLoaded(settingsDialogLoader, function(item) {
+            Qt.callLater(function() {
+                var openStartedAt = Date.now()
+                console.log("SETUP open begin wait_ms=" + (openStartedAt - requestedAt))
+                suspendTopmostPopoutsForSettings()
+                item.open()
+                console.log("SETUP open returned elapsed_ms=" + (Date.now() - openStartedAt))
+            })
+        })
     }
     function openSettingsTab(tabIndex) {
-        runWhenLoaded(settingsDialogLoader, function(item) { item.openTab(tabIndex) })
+        runWhenLoaded(settingsDialogLoader, function(item) {
+            Qt.callLater(function() {
+                suspendTopmostPopoutsForSettings()
+                item.openTab(tabIndex)
+            })
+        })
     }
     function openMamWindow() {
         runWhenLoaded(mamWindowLoader, function(item) { item.open() })
@@ -6509,17 +6607,20 @@ ApplicationWindow {
 
                         Row {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            spacing: 4
+                            // 3 × 20 px + 2 × 2 px fits the 66 px inner width
+                            // of this 74 px header tile.  The previous 30 px
+                            // controls overflowed into the adjacent Reset area.
+                            spacing: 2
 
                             Rectangle {
-                                width: 30; height: 24; radius: 4
+                                width: 20; height: 20; radius: 3
                                 color: fontMinusMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.1)
                                 border.color: fontMinusMA.containsMouse ? secondaryCyan : glassBorder
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: "A-"
-                                    font.pixelSize: 11
+                                    font.pixelSize: 10
                                     font.bold: true
                                     color: textPrimary
                                 }
@@ -6534,14 +6635,14 @@ ApplicationWindow {
                             }
 
                             Rectangle {
-                                width: 30; height: 24; radius: 4
+                                width: 20; height: 20; radius: 3
                                 color: fontPlusMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b,0.1)
                                 border.color: fontPlusMA.containsMouse ? secondaryCyan : glassBorder
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: "A+"
-                                    font.pixelSize: 13
+                                    font.pixelSize: 10
                                     font.bold: true
                                     color: textPrimary
                                 }
@@ -6560,7 +6661,7 @@ ApplicationWindow {
                             // premendo la luna si passa allo scuro.
                             Rectangle {
                                 id: themeToggle
-                                width: 30; height: 24; radius: 4
+                                width: 20; height: 20; radius: 3
                                 property bool lightNow: !!(bridge.themeManager && bridge.themeManager.isLightTheme)
                                 // Ricorda quale scuro si stava usando, cosi' il
                                 // ritorno non butta via Darkcodium per Ocean Blue.
@@ -6571,7 +6672,7 @@ ApplicationWindow {
                                 Text {
                                     anchors.centerIn: parent
                                     text: themeToggle.lightNow ? "☾" : "☀"
-                                    font.pixelSize: 13
+                                    font.pixelSize: 11
                                     font.bold: true
                                     color: textPrimary
                                 }
@@ -10606,12 +10707,24 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         source: "components/SettingsDialog.qml"
         property var pendingAction: null
         onLoaded: {
-            console.log("Lazy component loaded: SettingsDialog")
+            console.log("Lazy component loaded: SettingsDialog tab=" + (item ? item.currentTab : -1))
             if (pendingAction) {
                 var action = pendingAction
                 pendingAction = null
                 action(item)
             }
+        }
+    }
+
+    Connections {
+        // The Settings dialog is lazily loaded, therefore connect through the
+        // Loader item rather than coupling the dialog component to Main.qml.
+        // Its Popup.closed signal also covers Escape, the header X and the
+        // footer buttons.
+        target: settingsDialogLoader.item
+        ignoreUnknownSignals: true
+        function onClosed() {
+            mainWindow.restoreTopmostPopoutsAfterSettings()
         }
     }
 
