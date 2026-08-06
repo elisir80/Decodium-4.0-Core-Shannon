@@ -1,7 +1,7 @@
 # Decodium 4.0 v1.0.533
 
 Version 1.0.533 consolidates the work delivered after v1.0.530: complete
-translation/catalogue repairs, the optional 3D waterfall spectrum, WSJT-Z-style
+translation/catalogue repairs, the optional 3D waterfall spectrum, automatic
 Auto Call, safer CAT4OM split/VFO sequencing, a higher-quality RTL-SDR SSB
 listening path, richer Live Map and Call Roster intelligence, and clearer LoTW
 and eQSL confirmation handling.
@@ -31,7 +31,7 @@ and eQSL confirmation handling.
 
 ### v1.0.533 — Auto Call and transmission safety
 
-- Added a WSJT-Z-style **Auto Call** mode for automatically answering eligible
+- Added an **Auto Call** mode for automatically answering eligible
   CQ/QRZ stations without manually selecting a target.
 - Added session limits, QSO counters, reset controls, persisted candidate
   priority and protection against conflicts with Direct Call, Auto CQ, active
@@ -102,7 +102,7 @@ and eQSL confirmation handling.
 
 La versione 1.0.533 consolida il lavoro successivo alla 1.0.530: correzioni
 complete alle traduzioni e ai cataloghi, spettro waterfall 3D opzionale, Auto
-Call analogo a WSJT-Z, gestione CAT4OM piu' sicura di split e VFO, ascolto SSB
+Call automatico, gestione CAT4OM piu' sicura di split e VFO, ascolto SSB
 RTL-SDR migliorato, Call Roster e Live Map piu' ricchi e gestione piu' chiara
 delle conferme LoTW ed eQSL.
 
@@ -130,7 +130,7 @@ delle conferme LoTW ed eQSL.
 
 ### 1.0.533 — Auto Call e sicurezza della trasmissione
 
-- Aggiunta la modalita' **Auto Call**, analoga a WSJT-Z, per rispondere
+- Aggiunta la modalita' **Auto Call** per rispondere
   automaticamente a stazioni CQ/QRZ idonee senza scegliere manualmente un
   target.
 - Aggiunti limite di sessione, contatore QSO, reset, priorita' persistente e
