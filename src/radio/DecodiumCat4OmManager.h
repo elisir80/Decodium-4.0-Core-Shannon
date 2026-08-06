@@ -274,6 +274,8 @@ private:
     QString selectSupportedMode(QString const& requested) const;
     bool commandAvailable(QString const& action) const;
     QString controlTargetVfo(bool transmit) const;
+    void queueFrequencyOnVfo(double hz, QString const& targetVfo);
+    void clearFrequencySequencePending();
 
     static QUrl endpointUrl(QString const& endpoint, int defaultPort);
     static QString normalizedEndpoint(QString const& endpoint, int defaultPort);
@@ -311,6 +313,10 @@ private:
     QString m_activeVfo;
     QString m_txVfo;
     QString m_radioConnectionStatus;
+    bool m_frequencySequencePending {false};
+    double m_frequencySequenceTargetHz {0.0};
+    QString m_frequencySequenceTargetVfo;
+    QString m_frequencySequenceRestoreVfo;
 
     bool m_connected {false};
     bool m_connecting {false};

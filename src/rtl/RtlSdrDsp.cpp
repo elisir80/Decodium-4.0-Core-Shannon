@@ -91,7 +91,10 @@ bool RtlSdrDsp::configure(int inputSampleRate, int outputSampleRate, double audi
 }
 
 bool RtlSdrDsp::configure(int inputSampleRate, Demodulator demodulator, double audioGain,
-                          int channelOffsetHz, bool spectrumInverted)
+                          int channelOffsetHz, bool spectrumInverted,
+                          double ssbVoiceBandwidthHz, SsbAgcMode ssbAgcMode,
+                          int ssbNotchFrequencyHz,
+                          SsbNoiseReductionMode ssbNoiseReduction)
 {
     if (!isSupportedSampleRateForDemodulator(inputSampleRate, demodulator)) {
         m_inputSampleRate = 0;
@@ -113,6 +116,10 @@ bool RtlSdrDsp::configure(int inputSampleRate, Demodulator demodulator, double a
     m_decoderDecimation = demodulator == Demodulator::WeakSignal ? m_outputDecimation : 0;
     m_spectrumInverted = spectrumInverted;
     m_audioGain = qBound(0.05, audioGain, 50.0);
+    m_ssbVoiceBandwidthHz = qBound(1800.0, ssbVoiceBandwidthHz, 4000.0);
+    m_ssbAgcMode = ssbAgcMode;
+    m_ssbNotchFrequencyHz = qBound(0, ssbNotchFrequencyHz, 4800);
+    m_ssbNoiseReduction = ssbNoiseReduction;
     m_channelNcoStep = -2.0 * kPi * static_cast<double>(channelOffsetHz)
         / static_cast<double>(inputSampleRate);
     m_channelNcoStepCos = std::cos(m_channelNcoStep);
@@ -147,9 +154,21 @@ void RtlSdrDsp::reset()
     m_audioState1 = 0.0;
     m_audioState2 = 0.0;
     m_outputDecimationAccumulator = 0.0;
+    m_ssbDc = 0.0;
+    m_ssbAgcEnvelope = 0.05;
+    m_ssbNotchZ1 = 0.0;
+    m_ssbNotchZ2 = 0.0;
+    m_ssbNoiseFloor = 0.01;
+    m_ssbNoiseEnvelope = 0.0;
     std::fill(m_channelDelayI.begin(), m_channelDelayI.end(), 0.0);
     std::fill(m_channelDelayQ.begin(), m_channelDelayQ.end(), 0.0);
+    std::fill(m_ssbAudioDelay.begin(), m_ssbAudioDelay.end(), 0.0);
     std::fill(m_decoderDelay.begin(), m_decoderDelay.end(), 0.0);
+}
+
+bool RtlSdrDsp::enhancedSsbAudioEnabled() const
+{
+    return m_demodulator == Demodulator::Usb || m_demodulator == Demodulator::Lsb;
 }
 
 std::vector<double> RtlSdrDsp::buildLowpass(int tapCount, double cutoffHz, int sampleRate)
@@ -185,6 +204,9 @@ void RtlSdrDsp::rebuildFilters()
     m_channelTaps.clear();
     m_channelDelayI.clear();
     m_channelDelayQ.clear();
+    m_ssbAudioTaps.clear();
+    m_ssbAudioDelay.clear();
+    m_ssbAudioDelayWrite = 0;
     m_channelAlpha = 1.0;
     m_audioAlpha = 1.0;
 
@@ -205,7 +227,10 @@ void RtlSdrDsp::rebuildFilters()
     case Demodulator::NarrowFm: cutoffHz = 5000.0; channelCutoffHz = 12500.0; break;
     case Demodulator::Am: cutoffHz = 9000.0; channelCutoffHz = 10000.0; break;
     case Demodulator::Usb:
-    case Demodulator::Lsb: cutoffHz = 3500.0; channelCutoffHz = 4000.0; break;
+    case Demodulator::Lsb:
+        cutoffHz = m_ssbVoiceBandwidthHz;
+        channelCutoffHz = qMin(5000.0, m_ssbVoiceBandwidthHz + 700.0);
+        break;
     case Demodulator::Cw: cutoffHz = 3500.0; channelCutoffHz = 1500.0; break;
     case Demodulator::WeakSignal: break;
     }
@@ -217,6 +242,30 @@ void RtlSdrDsp::rebuildFilters()
         m_channelTaps = buildLowpass(127, 90000.0, m_inputSampleRate);
         m_channelDelayI.assign(m_channelTaps.size(), 0.0);
         m_channelDelayQ.assign(m_channelTaps.size(), 0.0);
+    }
+    if (enhancedSsbAudioEnabled()) {
+        // This intentionally runs at the already-decimated 48 kHz audio rate,
+        // not at the 240/288 kS/s IQ rate.  It improves SSB intelligibility
+        // without changing the RF tuning reference or risking capture backlog.
+        m_ssbAudioTaps = buildLowpass(129, m_ssbVoiceBandwidthHz, m_outputSampleRate);
+        m_ssbAudioDelay.assign(m_ssbAudioTaps.size(), 0.0);
+
+        m_ssbNotchEnabled = m_ssbNotchFrequencyHz >= 80
+            && m_ssbNotchFrequencyHz < m_outputSampleRate / 2 - 100;
+        if (m_ssbNotchEnabled) {
+            constexpr double kNotchQ = 18.0;
+            const double omega = 2.0 * kPi * m_ssbNotchFrequencyHz
+                / static_cast<double>(m_outputSampleRate);
+            const double alpha = std::sin(omega) / (2.0 * kNotchQ);
+            const double a0 = 1.0 + alpha;
+            m_ssbNotchB0 = 1.0 / a0;
+            m_ssbNotchB1 = -2.0 * std::cos(omega) / a0;
+            m_ssbNotchB2 = 1.0 / a0;
+            m_ssbNotchA1 = -2.0 * std::cos(omega) / a0;
+            m_ssbNotchA2 = (1.0 - alpha) / a0;
+        }
+    } else {
+        m_ssbNotchEnabled = false;
     }
     // Two cascaded one-pole sections are intentionally used here instead of
     // convolving 127 FIR taps for both I and Q at up to 1.92 MS/s. The old
@@ -432,7 +481,74 @@ RtlSdrDsp::Result RtlSdrDsp::processFrame(const unsigned char *data, int bytes, 
             m_outputDecimationSamples = 0;
             m_audioState1 += m_audioAlpha * (decimated - m_audioState1);
             m_audioState2 += m_audioAlpha * (m_audioState1 - m_audioState2);
-            result.audioPcm.append(toPcm(m_audioState2));
+            double audio = m_audioState2;
+            if (enhancedSsbAudioEnabled()) {
+                // The RTL-SDR's DC spur and any residual BFO component are
+                // particularly noticeable on SSB speech.  Remove the slow
+                // component before the sharp voice-band filter.
+                constexpr double kDcCutoffHz = 90.0;
+                const double dcAlpha = 1.0 - std::exp(-2.0 * kPi * kDcCutoffHz
+                                                      / m_outputSampleRate);
+                m_ssbDc += dcAlpha * (audio - m_ssbDc);
+                audio = filterSample(audio - m_ssbDc, m_ssbAudioTaps,
+                                     m_ssbAudioDelay, m_ssbAudioDelayWrite);
+
+                if (m_ssbNotchEnabled) {
+                    const double notched = m_ssbNotchB0 * audio + m_ssbNotchZ1;
+                    m_ssbNotchZ1 = m_ssbNotchB1 * audio - m_ssbNotchA1 * notched
+                        + m_ssbNotchZ2;
+                    m_ssbNotchZ2 = m_ssbNotchB2 * audio - m_ssbNotchA2 * notched;
+                    audio = notched;
+                }
+
+                // Audio AGC is deliberately confined to RTL-SDR USB/LSB. It
+                // gives speech a stable listening level without tracking each
+                // syllable and never changes any FT8 decoder samples.
+                if (m_ssbAgcMode != SsbAgcMode::Off) {
+                    const double magnitude = std::abs(audio);
+                    const bool medium = m_ssbAgcMode == SsbAgcMode::Medium;
+                    const double envelopeAlpha = magnitude > m_ssbAgcEnvelope
+                        ? (medium ? 0.015 : 0.002)
+                        : (medium ? 0.0010 : 0.00008);
+                    m_ssbAgcEnvelope += envelopeAlpha * (magnitude - m_ssbAgcEnvelope);
+                    const double agcGain = qBound(
+                        0.25, 0.80 / qMax(0.015, m_ssbAgcEnvelope), 8.0);
+                    audio *= agcGain;
+                }
+
+                // Optional low-cost noise reduction: a speech-aware expander
+                // that learns the quiet noise floor and attenuates it between
+                // speech peaks. It is intentionally post-demodulation and
+                // restricted to RTL-SDR SSB listening.
+                if (m_ssbNoiseReduction != SsbNoiseReductionMode::Off) {
+                    const double magnitude = std::abs(audio);
+                    const double envelopeAlpha = magnitude > m_ssbNoiseEnvelope
+                        ? 0.035 : 0.0012;
+                    m_ssbNoiseEnvelope += envelopeAlpha
+                        * (magnitude - m_ssbNoiseEnvelope);
+                    const bool likelyNoise = magnitude
+                        < qMax(0.012, m_ssbNoiseEnvelope * 0.35);
+                    const double floorAlpha = likelyNoise ? 0.0025 : 0.00001;
+                    m_ssbNoiseFloor += floorAlpha * (magnitude - m_ssbNoiseFloor);
+                    m_ssbNoiseFloor = qBound(0.002, m_ssbNoiseFloor, 0.75);
+
+                    const bool medium = m_ssbNoiseReduction
+                        == SsbNoiseReductionMode::Medium;
+                    const double threshold = m_ssbNoiseFloor * (medium ? 2.8 : 1.8);
+                    const double fullLevel = threshold * (medium ? 2.6 : 2.0);
+                    const double minimumGain = medium ? 0.18 : 0.55;
+                    double reductionGain = minimumGain;
+                    if (m_ssbNoiseEnvelope >= fullLevel) {
+                        reductionGain = 1.0;
+                    } else if (m_ssbNoiseEnvelope > threshold) {
+                        const double mix = (m_ssbNoiseEnvelope - threshold)
+                            / qMax(0.001, fullLevel - threshold);
+                        reductionGain += (1.0 - minimumGain) * mix * mix * (3.0 - 2.0 * mix);
+                    }
+                    audio *= reductionGain;
+                }
+            }
+            result.audioPcm.append(toPcm(audio));
         }
     }
     return result;

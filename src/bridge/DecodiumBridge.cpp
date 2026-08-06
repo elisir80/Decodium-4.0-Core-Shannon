@@ -13563,6 +13563,53 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
         }
     };
 
+    // The embedded legacy backend publishes decoded CQ rows through the
+    // mirror path rather than through onFt8DecodeReady().  Auto Call must see
+    // the same rows on macOS/legacy TX as it does on the native decoder path;
+    // otherwise the CQ is visible in the UI but can never become TX1.
+    auto feedAutoCallFromEntries = [this](QVariantList const& entries) {
+        if (!m_autoCallEnabled || entries.isEmpty()) {
+            return false;
+        }
+
+        QStringList rows;
+        rows.reserve(entries.size());
+        for (QVariant const& value : entries) {
+            QVariantMap const entry = value.toMap();
+            if (entry.value(QStringLiteral("isTx")).toBool()) {
+                continue;
+            }
+            QString const message = entry.value(QStringLiteral("message"))
+                                        .toString().trimmed();
+            if (message.isEmpty()
+                || !entry.value(QStringLiteral("isCQ")).toBool()) {
+                continue;
+            }
+
+            QString time = normalizeUtcDisplayToken(
+                entry.value(QStringLiteral("time")).toString());
+            if (time.isEmpty()) {
+                time = QDateTime::currentDateTimeUtc().toString(QStringLiteral("hhmmss"));
+            }
+            bool freqOk = false;
+            int audioOffset = entry.value(QStringLiteral("freq"))
+                                  .toString().trimmed().toInt(&freqOk);
+            if (!freqOk) {
+                audioOffset = 0;
+            }
+            // parseFt8Row expects the raw decoder frequency, then subtracts
+            // m_nfa to return the audio offset used by setRxFrequency().
+            int const rawFrequency = qBound(0, m_nfa + audioOffset, 5000);
+            rows.append(QStringLiteral("%1 %2 %3 %4 ~  %5")
+                            .arg(time,
+                                 entry.value(QStringLiteral("db")).toString().trimmed(),
+                                 entry.value(QStringLiteral("dt")).toString().trimmed(),
+                                 QString::number(rawFrequency),
+                                 message));
+        }
+        return tryAutoCallFromRows(rows);
+    };
+
     QVariantList currentBandFallbackSnapshot;
     bool currentBandFallbackSnapshotReady = false;
     auto appendUniqueEntries = [](QVariantList& target, QVariantList const& entries) {
@@ -13634,6 +13681,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             feedMamQueueFromEntries(newBandDecodes);
             feedWaitPounceFromEntries(newBandDecodes, m_decodeList,
                                       QStringLiteral("legacy-band-delta"));
+            feedAutoCallFromEntries(newBandDecodes);
             feedAutoSequenceFromEntries(newBandDecodes);
             queueLegacyDecodeSecondaryWork(newBandDecodes,
                                            QStringLiteral("legacy-band-delta"));
@@ -13699,6 +13747,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             decodeEntriesNotInPrevious(mirroredDecodes, m_decodeList);
         feedMamQueueFromEntries(newBandDecodes);
         feedWaitPounceFromEntries(newBandDecodes, m_decodeList, QStringLiteral("legacy-band"));
+        feedAutoCallFromEntries(newBandDecodes);
         feedAutoSequenceFromEntries(newBandDecodes);
         queueLegacyDecodeSecondaryWork(newBandDecodes, QStringLiteral("legacy-band"));
         if (m_activeStations) {
@@ -13792,6 +13841,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             feedMamQueueFromEntries(newRxDecodes);
             feedWaitPounceFromEntries(newRxDecodes, m_rxDecodeList,
                                       QStringLiteral("legacy-rx-delta"));
+            feedAutoCallFromEntries(newRxDecodes);
             feedAutoSequenceFromEntries(newRxDecodes);
             queueLegacyDecodeSecondaryWork(newRxDecodes,
                                            QStringLiteral("legacy-rx-delta"));
@@ -13875,6 +13925,7 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
             decodeEntriesNotInPrevious(mergedRxDecodes, m_rxDecodeList);
         feedMamQueueFromEntries(newRxDecodes);
         feedWaitPounceFromEntries(newRxDecodes, m_rxDecodeList, QStringLiteral("legacy-rx"));
+        feedAutoCallFromEntries(newRxDecodes);
         feedAutoSequenceFromEntries(newRxDecodes);
         queueLegacyDecodeSecondaryWork(newRxDecodes, QStringLiteral("legacy-rx"));
 
@@ -16809,6 +16860,10 @@ void DecodiumBridge::setMode(const QString& v) {
         }
 
         m_mode = normalizedMode;
+        if (m_autoCallEnabled && !autoCallModeSupported()) {
+            bridgeLog(QStringLiteral("[AUTOCALL] disabled by mode change to %1").arg(m_mode));
+            setAutoCallEnabled(false);
+        }
         if ((m_mainQmlReady || m_startupServicesStarted) && !legacyBackendRequestedForRx()) {
             ensureDecodeWorkerForMode(m_mode);
         }
@@ -17213,6 +17268,27 @@ RtlSdrDsp::Demodulator rtlSdrDemodulatorFromSetting(const QVariant& value)
     if (name == QStringLiteral("cw")) return RtlSdrDsp::Demodulator::Cw;
     return RtlSdrDsp::Demodulator::WeakSignal;
 }
+
+RtlSdrDsp::SsbAgcMode rtlSdrSsbAgcModeFromSetting(const QVariant& value)
+{
+    const QString name = value.toString().trimmed().toLower();
+    if (name == QStringLiteral("off")) return RtlSdrDsp::SsbAgcMode::Off;
+    if (name == QStringLiteral("medium")) return RtlSdrDsp::SsbAgcMode::Medium;
+    return RtlSdrDsp::SsbAgcMode::Slow;
+}
+
+RtlSdrDsp::SsbNoiseReductionMode rtlSdrSsbNoiseReductionFromSetting(
+    const QVariant& value)
+{
+    const QString name = value.toString().trimmed().toLower();
+    if (name == QStringLiteral("light")) {
+        return RtlSdrDsp::SsbNoiseReductionMode::Light;
+    }
+    if (name == QStringLiteral("medium")) {
+        return RtlSdrDsp::SsbNoiseReductionMode::Medium;
+    }
+    return RtlSdrDsp::SsbNoiseReductionMode::Off;
+}
 }
 
 void DecodiumBridge::startRtlSdrCapture()
@@ -17245,6 +17321,15 @@ void DecodiumBridge::startRtlSdrCapture()
     config.digitalAgc = getSetting(QStringLiteral("RtlSdrDigitalAgc"), false).toBool();
     config.biasTee = getSetting(QStringLiteral("RtlSdrBiasTee"), false).toBool();
     config.audioGain = qBound(0.05, getSetting(QStringLiteral("RtlSdrAudioGain"), 1.0).toDouble(), 50.0);
+    config.ssbVoiceBandwidthHz = qBound(
+        1800.0, getSetting(QStringLiteral("RtlSdrSsbVoiceBandwidthHz"), 3500.0).toDouble(),
+        4000.0);
+    config.ssbAgcMode = rtlSdrSsbAgcModeFromSetting(
+        getSetting(QStringLiteral("RtlSdrSsbAgcMode"), QStringLiteral("slow")));
+    config.ssbNotchFrequencyHz = qBound(
+        0, getSetting(QStringLiteral("RtlSdrSsbNotchFrequencyHz"), 0).toInt(), 4800);
+    config.ssbNoiseReduction = rtlSdrSsbNoiseReductionFromSetting(
+        getSetting(QStringLiteral("RtlSdrSsbNoiseReduction"), QStringLiteral("off")));
     config.mode = getSetting(QStringLiteral("RtlSdrMode"), QStringLiteral("sdr"))
                           .toString().trimmed().compare(QStringLiteral("direct"), Qt::CaseInsensitive) == 0
         ? RtlSdrInput::Mode::DirectSampling
@@ -17334,6 +17419,14 @@ void DecodiumBridge::startRtlSdrCapture()
     }
 
     const RtlSdrInput::Config active = m_rtlSdrInput->activeConfig();
+    const bool ssbAudioControlsActive = config.demodulator == RtlSdrDsp::Demodulator::Usb
+        || config.demodulator == RtlSdrDsp::Demodulator::Lsb;
+    const bool sameSsbAudioControls = !ssbAudioControlsActive
+        || (qFuzzyCompare(active.ssbVoiceBandwidthHz + 1.0,
+                          config.ssbVoiceBandwidthHz + 1.0)
+            && active.ssbAgcMode == config.ssbAgcMode
+            && active.ssbNotchFrequencyHz == config.ssbNotchFrequencyHz
+            && active.ssbNoiseReduction == config.ssbNoiseReduction);
     const bool sameReceiverConfiguration = m_rtlSdrInput->isRunning()
         && active.deviceIndex == config.deviceIndex
         && active.sampleRate == config.sampleRate
@@ -17344,7 +17437,8 @@ void DecodiumBridge::startRtlSdrCapture()
         && active.demodulator == config.demodulator
         && active.spectrumInverted == config.spectrumInverted
         && active.biasTee == config.biasTee
-        && qFuzzyCompare(active.audioGain + 1.0, config.audioGain + 1.0);
+        && qFuzzyCompare(active.audioGain + 1.0, config.audioGain + 1.0)
+        && sameSsbAudioControls;
     const bool unchanged = sameReceiverConfiguration
         && active.centerFrequencyHz == config.centerFrequencyHz
         && active.channelOffsetHz == config.channelOffsetHz;
@@ -18328,6 +18422,9 @@ void DecodiumBridge::setTxDisabled(int n, bool disabled)
 
 void DecodiumBridge::setMultiAnswerMode(bool v)
 {
+    if (v && m_autoCallEnabled) {
+        setAutoCallEnabled(false);
+    }
     if (m_multiAnswerMode == v) {
         return;
     }
@@ -18348,6 +18445,9 @@ void DecodiumBridge::setMultiAnswerMode(bool v)
 
 void DecodiumBridge::setAutoCqRepeat(bool v)
 {
+    if (v && m_autoCallEnabled) {
+        setAutoCallEnabled(false);
+    }
     if (m_autoCqRepeat != v) {
         m_autoCqRepeat = v;
         if (m_autoCqRepeat) {
@@ -18404,6 +18504,137 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
             }
         }
     }
+}
+
+bool DecodiumBridge::autoCallModeSupported() const
+{
+    const QString mode = m_mode.trimmed().toUpper();
+    return mode == QStringLiteral("FT8")
+        || mode == QStringLiteral("FT4")
+        || mode == QStringLiteral("FT2");
+}
+
+void DecodiumBridge::setAutoCallEnabled(bool v)
+{
+    if (m_autoCallEnabled == v) {
+        return;
+    }
+
+    if (v) {
+        if (!autoCallModeSupported()) {
+            const QString message = QStringLiteral("Auto Call is available only in FT8, FT4 and FT2");
+            bridgeLog(QStringLiteral("[AUTOCALL] rejected: unsupported mode %1").arg(m_mode));
+            emit statusMessage(message);
+            return;
+        }
+        if (!checkSwrAllowsTransmission(QStringLiteral("autocall-arm"))) {
+            bridgeLog(QStringLiteral("[AUTOCALL] rejected: SWR protection is still active"));
+            return;
+        }
+        if (m_targetCallActive) {
+            const QString message = QStringLiteral("Stop Direct Call before enabling Auto Call");
+            bridgeLog(QStringLiteral("[AUTOCALL] rejected: target CALL is active"));
+            emit statusMessage(message);
+            return;
+        }
+        if (m_transmitting || m_tuning
+            || !m_dxCall.trimmed().isEmpty()
+            || (m_qsoProgress > 1 && m_qsoProgress < 6)) {
+            const QString message = QStringLiteral("Finish or stop the current QSO before enabling Auto Call");
+            bridgeLog(QStringLiteral("[AUTOCALL] rejected: active QSO or transmission"));
+            emit statusMessage(message);
+            return;
+        }
+
+        // Auto Call owns the automatic reply path. ACQ and multi-answer are
+        // stopped so that two independent schedulers cannot transmit together.
+        if (m_autoCqRepeat) {
+            setAutoCqRepeat(false);
+        }
+        if (m_multiAnswerMode) {
+            setMultiAnswerMode(false);
+        }
+        if (!m_autoSeq) {
+            m_autoSeq = true;
+            emit autoSeqChanged();
+        }
+        setTxEnabled(false);
+        m_autoCallQsoCount = 0;
+        emit autoCallQsoCountChanged();
+        m_autoCallCurrentCandidate.clear();
+        bridgeLog(QStringLiteral("[AUTOCALL] enabled: waiting for an eligible CQ"));
+    } else {
+        m_autoCallCurrentCandidate.clear();
+        if (!m_transmitting && !m_tuning) {
+            setTxEnabled(false);
+        }
+        bridgeLog(QStringLiteral("[AUTOCALL] disabled"));
+    }
+
+    m_autoCallEnabled = v;
+    emit autoCallEnabledChanged();
+}
+
+void DecodiumBridge::abortAutoCallAfterSwrStop(const QString& reason)
+{
+    if (!m_autoCallEnabled && m_autoCallCurrentCandidate.isEmpty()) {
+        return;
+    }
+
+    const QString interruptedCall = m_autoCallCurrentCandidate.trimmed().isEmpty()
+        ? m_dxCall.trimmed()
+        : m_autoCallCurrentCandidate.trimmed();
+    bridgeLog(QStringLiteral("[AUTOCALL] SWR safety stop: clearing interrupted QSO call=%1 reason=%2")
+                  .arg(interruptedCall.isEmpty() ? QStringLiteral("<none>") : interruptedCall,
+                       reason));
+
+    // Do not count an interrupted transmission as a completed QSO. Disarm
+    // first because resetQsoStateForNextSequence() intentionally increments
+    // the Auto Call session counter when Auto Call is still armed.
+    if (m_autoCallEnabled) {
+        setAutoCallEnabled(false);
+    }
+    m_autoCallStartingCandidate = false;
+    resetQsoStateForNextSequence(false);
+
+    emit statusMessage(QStringLiteral("Auto Call fermato dalla protezione SWR: correggi l'antenna e premi Start Auto Call"));
+}
+
+void DecodiumBridge::setAutoCallMaxQsos(int v)
+{
+    v = qBound(0, v, 999);
+    if (m_autoCallMaxQsos == v) {
+        return;
+    }
+    m_autoCallMaxQsos = v;
+    emit autoCallMaxQsosChanged();
+    QSettings(QSettings::IniFormat, QSettings::UserScope,
+              QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+        .setValue(QStringLiteral("CallFeature/AutoCallMaxQsos"), v);
+}
+
+void DecodiumBridge::setAutoCallPriority(int v)
+{
+    v = qBound(0, v, 2);
+    if (m_autoCallPriority == v) {
+        return;
+    }
+    m_autoCallPriority = v;
+    emit autoCallPriorityChanged();
+    QSettings(QSettings::IniFormat, QSettings::UserScope,
+              QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
+        .setValue(QStringLiteral("CallFeature/AutoCallPriority"), v);
+}
+
+void DecodiumBridge::resetAutoCallQsoCount()
+{
+    if (m_autoCallQsoCount == 0) {
+        return;
+    }
+    m_autoCallQsoCount = 0;
+    emit autoCallQsoCountChanged();
+    bridgeLog(QStringLiteral("[AUTOCALL] QSO counter reset"));
+    emit statusMessage(QStringLiteral("Auto Call QSO counter reset"));
 }
 
 void DecodiumBridge::setTxPeriod(int v)
@@ -18528,6 +18759,11 @@ void DecodiumBridge::startTargetCall()
 {
     if (m_targetCallSign.isEmpty()) {
         bridgeLog(QStringLiteral("startTargetCall: empty callsign, ignored"));
+        return;
+    }
+    if (m_autoCallEnabled) {
+        bridgeLog(QStringLiteral("startTargetCall: rejected while Auto Call is active"));
+        emit statusMessage(QStringLiteral("Stop Auto Call before starting Direct Call"));
         return;
     }
     if (m_targetCallActive) {
@@ -19185,6 +19421,15 @@ void DecodiumBridge::enforceSwrTransmissionLimit(const QString& reason)
     if (m_transmitting) {
         stopTx();
     }
+
+    // A stopped Auto Call leaves the selected callsign/QSO progress behind.
+    // That stale state used to make the next Start Auto Call fail with
+    // "active QSO or transmission", even after the SWR had returned to a
+    // safe value. Reset only this automatic path; manual QSOs retain their
+    // normal recovery behaviour.
+    abortAutoCallAfterSwrStop(QStringLiteral("%1 swr=%2")
+                                  .arg(reason)
+                                  .arg(m_rigSwr, 0, 'f', 2));
 
     emit errorMessage(QStringLiteral("SWR > %1 !!!\n\nTrasmissione interrotta\n\nControlla antenna")
                           .arg(kSWRStopThreshold, 0, 'f', 1));
@@ -30832,6 +31077,13 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
 {
     if (message.isEmpty()) return;
 
+    // A manual double-click is an explicit operator takeover. The automatic
+    // candidate path sets m_autoCallStartingCandidate while calling this same
+    // routine, so it remains armed for the next CQ only in that case.
+    if (m_autoCallEnabled && !m_autoCallStartingCandidate) {
+        setAutoCallEnabled(false);
+    }
+
     // Aggiorna il report che invieremo in TX2 basandoci sull'SNR del segnale decodificato
     if (!db.isEmpty()) {
         bool ok = false;
@@ -33485,11 +33737,227 @@ void DecodiumBridge::scheduleSmartFt2AsyncTx(const QString& reason)
     });
 }
 
+bool DecodiumBridge::tryAutoCallFromRows(const QStringList& rows)
+{
+    if (!m_autoCallEnabled
+        || !autoCallModeSupported()
+        || m_targetCallActive
+        || m_transmitting
+        || m_tuning
+        || !m_dxCall.trimmed().isEmpty()
+        || (m_qsoProgress > 1 && m_qsoProgress < 6)
+        || (m_autoCallMaxQsos > 0 && m_autoCallQsoCount >= m_autoCallMaxQsos)) {
+        return false;
+    }
+
+    struct Candidate {
+        QString message;
+        QString time;
+        QString snr;
+        QString call;
+        double distanceKm {-1.0};
+        int audioFreq {0};
+        int rowIndex {-1};
+    };
+
+    QList<Candidate> candidates;
+    candidates.reserve(qMin(rows.size(), 256));
+    const QString myBase = normalizedBaseCall(m_callsign.trimmed().toUpper());
+    const QString band = freqHzToBandToken(m_frequency);
+    const DecodeUserFilterConfig userFilters = readDecodeUserFilterConfig();
+    const int rowLimit = qMin(rows.size(), 256);
+
+    // Keep this scan bounded and synchronous like the existing auto-sequence
+    // prefilter. It only runs while Auto Call is armed and does not publish UI
+    // rows, touch the waterfall, or perform network I/O.
+    for (int i = 0; i < rowLimit; ++i) {
+        const QStringList fields = parseFt8Row(rows.at(i));
+        if (fields.size() < 5) {
+            continue;
+        }
+        const QString message = fields.at(4).trimmed();
+        const bool isCq = message.startsWith(QStringLiteral("CQ "), Qt::CaseInsensitive)
+            || message.compare(QStringLiteral("CQ"), Qt::CaseInsensitive) == 0
+            || message.startsWith(QStringLiteral("QRZ "), Qt::CaseInsensitive);
+        if (!isCq) {
+            continue;
+        }
+
+        QString semanticRejectReason;
+        if (!shouldAcceptDecodedMessage(message, &semanticRejectReason)) {
+            continue;
+        }
+
+        const QString call = normalizedUsableCallToken(extractDecodedCallsign(message, true));
+        const QString callBase = normalizedBaseCall(call);
+        if (call.isEmpty() || callBase.isEmpty() || callBase == myBase) {
+            continue;
+        }
+
+        const QString callBandKey = workedCallBandKey(band, call);
+        if (!callBandKey.isEmpty() && m_worked.callByBand.contains(callBandKey)) {
+            // WSJT-Z Auto Call forces "new call on band".
+            continue;
+        }
+        if (isRecentAutoCqWorkedOrLoggedDuplicate(call, m_frequency, m_mode)) {
+            continue;
+        }
+
+        QVariantMap entry;
+        entry[QStringLiteral("time")] = fields.value(0);
+        entry[QStringLiteral("db")] = fields.value(1);
+        entry[QStringLiteral("dt")] = fields.value(2);
+        entry[QStringLiteral("freq")] = fields.value(3);
+        entry[QStringLiteral("message")] = message;
+        entry[QStringLiteral("mode")] = m_mode;
+        entry[QStringLiteral("isTx")] = false;
+        entry[QStringLiteral("isCQ")] = true;
+        entry[QStringLiteral("fromCall")] = call;
+        entry[QStringLiteral("dxCallsign")] = call;
+        // Reuse the same in-memory DXCC/grid metadata used by the normal
+        // AutoCQ path, so the existing blacklist/whitelist/territory filters
+        // behave consistently with manual and AutoCQ operation.
+        enrichDecodeEntry(entry);
+        QString userFilterRejectReason;
+        if (!shouldAcceptDecodeEntryByUserFilters(entry, userFilters, true,
+                                                   &userFilterRejectReason)) {
+            bridgeLog(QStringLiteral("[AUTOCALL] filtered %1: %2")
+                          .arg(userFilterRejectReason, message));
+            continue;
+        }
+
+        const QString grid = extractDecodedGrid(message);
+        const double distanceKm = (!m_grid.trimmed().isEmpty() && !grid.isEmpty())
+            ? calcDistance(m_grid, grid)
+            : -1.0;
+        candidates.append(Candidate {
+            message,
+            fields.value(0),
+            fields.value(1),
+            call,
+            distanceKm,
+            fields.value(3).toInt(),
+            i
+        });
+    }
+
+    if (candidates.isEmpty()) {
+        return false;
+    }
+
+    Candidate selected = candidates.constLast();
+    if (m_autoCallPriority == 0) {
+        // A native decode batch normally contains one UTC slot, while the
+        // legacy mirror can contain entries from more than one timestamp.
+        // Prefer the newest decoded timestamp and use the source row order as
+        // a deterministic tie-breaker for same-slot/native rows.
+        for (const Candidate& candidate : candidates) {
+            const int candidateSeconds = secondsFromUtcDisplayToken(candidate.time);
+            const int selectedSeconds = secondsFromUtcDisplayToken(selected.time);
+            if (candidateSeconds < 0 || selectedSeconds < 0) {
+                if (candidate.rowIndex >= selected.rowIndex) {
+                    selected = candidate;
+                }
+                continue;
+            }
+            const int delta = signedUtcSecondDelta(selectedSeconds, candidateSeconds);
+            if (delta > 0 || (delta == 0 && candidate.rowIndex >= selected.rowIndex)) {
+                selected = candidate;
+            }
+        }
+    } else if (m_autoCallPriority == 1) {
+        for (const Candidate& candidate : candidates) {
+            bool candidateOk = false;
+            bool selectedOk = false;
+            const int candidateSnr = candidate.snr.toInt(&candidateOk);
+            const int selectedSnr = selected.snr.toInt(&selectedOk);
+            if ((candidateOk && !selectedOk)
+                || (candidateOk && selectedOk && candidateSnr >= selectedSnr)) {
+                selected = candidate;
+            }
+        }
+    } else if (m_autoCallPriority == 2) {
+        bool haveDistance = false;
+        for (const Candidate& candidate : candidates) {
+            if (!std::isfinite(candidate.distanceKm) || candidate.distanceKm < 0.0) {
+                continue;
+            }
+            if (!haveDistance || candidate.distanceKm >= selected.distanceKm) {
+                selected = candidate;
+                haveDistance = true;
+            }
+        }
+        if (!haveDistance) {
+            bridgeLog(QStringLiteral("[AUTOCALL] furthest-grid fallback: no valid station/DX locator; using newest candidate"));
+        }
+    }
+
+    m_autoCallStartingCandidate = true;
+    m_autoCallCurrentCandidate = selected.call;
+    bridgeLog(QStringLiteral("[AUTOCALL] selecting %1 priority=%2 time=%3 snr=%4 distanceKm=%5 message=%6")
+                  .arg(selected.call)
+                  .arg(m_autoCallPriority)
+                  .arg(selected.time)
+                  .arg(selected.snr)
+                  .arg(selected.distanceKm, 0, 'f', 1)
+                  .arg(selected.message));
+    processDecodeDoubleClick(selected.message, selected.time, selected.snr, selected.audioFreq);
+    m_autoCallStartingCandidate = false;
+
+    const bool started = normalizedBaseCall(m_dxCall) == normalizedBaseCall(selected.call)
+        && m_txEnabled;
+    if (!started) {
+        m_autoCallCurrentCandidate.clear();
+        bridgeLog(QStringLiteral("[AUTOCALL] candidate %1 was not armed").arg(selected.call));
+    } else {
+        // processDecodeDoubleClick() arms TX and performs an immediate guarded
+        // check. Keep one queued retry as well: decode callbacks can arrive at
+        // the slot boundary while the period/timing state is still being
+        // updated. The normal periodic guards remain authoritative, so this
+        // cannot start an out-of-slot transmission or touch the waterfall.
+        const QString candidateBase = normalizedBaseCall(selected.call);
+        QTimer::singleShot(0, this, [this, candidateBase]() {
+            if (m_shuttingDown || QCoreApplication::closingDown()
+                || !m_autoCallEnabled
+                || normalizedBaseCall(m_dxCall) != candidateBase
+                || !m_txEnabled
+                || m_transmitting
+                || m_tuning) {
+                return;
+            }
+            bridgeLog(QStringLiteral("[AUTOCALL] TX pending for %1; retrying guarded slot check")
+                          .arg(candidateBase));
+            checkAndStartPeriodicTx();
+        });
+    }
+    return started;
+}
+
+void DecodiumBridge::noteAutoCallQsoCompleted()
+{
+    if (!m_autoCallEnabled || m_autoCallCurrentCandidate.isEmpty()) {
+        return;
+    }
+    const QString completedCall = m_autoCallCurrentCandidate;
+    m_autoCallCurrentCandidate.clear();
+    ++m_autoCallQsoCount;
+    emit autoCallQsoCountChanged();
+    bridgeLog(QStringLiteral("[AUTOCALL] completed %1 (%2/%3)")
+                  .arg(completedCall)
+                  .arg(m_autoCallQsoCount)
+                  .arg(m_autoCallMaxQsos == 0 ? QStringLiteral("inf")
+                                               : QString::number(m_autoCallMaxQsos)));
+    if (m_autoCallMaxQsos > 0 && m_autoCallQsoCount >= m_autoCallMaxQsos) {
+        emit statusMessage(QStringLiteral("Auto Call limit reached; reset the counter to continue"));
+    }
+}
+
 // 1.0.446 - P2-8: reset stato QSO per la sequenza successiva. Estratto byte-identico dal
 // blocco duplicato nelle 2 lambda finishAutoSequenceQso (checkAndStartPeriodicTx +
 // autoSequenceStep). preserveAutoTx=false => spegne il TX. Reset SNR partner = P2-9.
 void DecodiumBridge::resetQsoStateForNextSequence(bool preserveAutoTx)
 {
+    noteAutoCallQsoCompleted();
     m_qsoLogged = false;  // reset per il prossimo QSO
     m_logAfterOwn73 = false;
     m_ft2DeferredLogPending = false;
@@ -35867,6 +36335,13 @@ void DecodiumBridge::loadSettings()
     m_targetCallPauseS        = qBound(0,  s.value(QStringLiteral("CallFeature/PauseS"),     0).toInt(),  300);
     m_armedWatchEnabled       = s.value(QStringLiteral("CallFeature/Armed"), false).toBool();
     m_armedReArm              = s.value(QStringLiteral("CallFeature/ReArm"), false).toBool();
+    // Persist configuration, but never restore the armed state or the session
+    // counter: a previous run must not make the radio transmit on startup.
+    m_autoCallEnabled         = false;
+    m_autoCallMaxQsos         = qBound(0, s.value(QStringLiteral("CallFeature/AutoCallMaxQsos"), 5).toInt(), 999);
+    m_autoCallPriority        = qBound(0, s.value(QStringLiteral("CallFeature/AutoCallPriority"), 0).toInt(), 2);
+    m_autoCallQsoCount        = 0;
+    m_autoCallCurrentCandidate.clear();
     bridgeLog(QStringLiteral("[FT2WS] Pack init Conservative=%1 PartnerMemory=%2 Tx2Resend=%3")
                   .arg(m_ft2Conservative ? "ON" : "OFF")
                   .arg(m_ft2PartnerMemoryEnabled ? "ON" : "OFF")
@@ -41686,6 +42161,10 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         && m_asyncTxEnabled
         && !m_callsign.isEmpty()
         && (m_autoSeq || m_autoCqRepeat);
+    bool autoCallStarted = false;
+    if (!ft8DeepInTxListOnly && !resumedQso && m_autoCallEnabled) {
+        autoCallStarted = tryAutoCallFromRows(rows);
+    }
     bool const autoSeqActive =
         !ft8DeepInTxListOnly
         && !resumedQso
@@ -41700,7 +42179,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                 mamIngestDecode(fields);
             }
         }
-    } else if (autoSeqActive || ft2SignoffRescueScan) {
+    } else if (!autoCallStarted && (autoSeqActive || ft2SignoffRescueScan)) {
         for (QString const& row : std::as_const(rows)) {
             QStringList const fields = parseFt8Row(row);
             if (fields.size() < 5) {
@@ -42649,7 +43128,13 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         && !m_callsign.isEmpty()
         && m_asyncTxEnabled
         && (m_autoSeq || m_autoCqRepeat);
-    if ((earlyAutoSeqActive || earlyFt2SignoffRescueScan) && !mamMultiStreamSequencerActive()) {
+    bool autoCallStarted = false;
+    if (!resumedQso && m_autoCallEnabled) {
+        autoCallStarted = tryAutoCallFromRows(rows);
+    }
+    if (!autoCallStarted
+        && (earlyAutoSeqActive || earlyFt2SignoffRescueScan)
+        && !mamMultiStreamSequencerActive()) {
         bool gotResponse = false;
         // FIX A: DT (secondi) del decode partner diretto, per ancorare lo slot.
         double partnerDtSec = 0.0;
@@ -43841,6 +44326,22 @@ void DecodiumBridge::onSpectrumTimer()
         m_remoteServer
         && m_remoteServer->isRunning()
         && m_remoteServer->waterfallEnabled();
+    bool spectrum3dNeedsCpuHistory = false;
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
+    m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+    for (const QPointer<PanadapterItem>& ref : m_panadapterItems) {
+        PanadapterItem* item = ref.data();
+        if (item && item->requiresCpuSpectrumHistory()) {
+            spectrum3dNeedsCpuHistory = true;
+            break;
+        }
+    }
+#endif
+    // The remote waterfall and the opt-in 3D spectrum both need dB rows that
+    // are visible to the CPU.  Do not turn off GPU FFT globally: this selects
+    // the existing asynchronous FFTW producer only while one is required.
+    bool const panadapterNeedsCpuSpectrumHistory =
+        remoteWaterfallNeedsCpu || spectrum3dNeedsCpuHistory;
     if (!m_spectrumVisible && !remoteWaterfallNeedsCpu) {
         if (m_spectrumTimer) {
             m_spectrumTimer->stop();
@@ -43930,6 +44431,7 @@ void DecodiumBridge::onSpectrumTimer()
             bool const acceleratedLegacyVisual =
                 !directVisualFastFeed
                 && m_legacyPcmSpectrumFeed
+                && !panadapterNeedsCpuSpectrumHistory
                 && !m_lowCpuModeEnabled
                 && !m_gpuPanadapterFftStallGuard.load()
                 && m_forceGpuPanadapterFft.load()
@@ -44014,7 +44516,7 @@ void DecodiumBridge::onSpectrumTimer()
                 && gpuPanadapterFftAllowed;
             if (!gpuPanadapterFftAvailable
                 && forceGpuPanadapterFft
-                && !remoteWaterfallNeedsCpu
+                && !panadapterNeedsCpuSpectrumHistory
                 && nowMs - m_lastGpuPanadapterProbeMs > 30000) {
                 m_lastGpuPanadapterProbeMs = nowMs;
                 gpuPanadapterFftAvailable = true;
@@ -44026,7 +44528,7 @@ void DecodiumBridge::onSpectrumTimer()
             }
             bool const gpuPanadapterFft =
                 gpuPanadapterFftAvailable
-                && !remoteWaterfallNeedsCpu;
+                && !panadapterNeedsCpuSpectrumHistory;
             if (gpuPanadapterFft) {
                 static std::atomic_bool loggedGpuPath {false};
                 bool expectedGpuLog = false;
@@ -44108,6 +44610,7 @@ void DecodiumBridge::onSpectrumTimer()
             }
 
             static std::atomic_bool loggedRemoteCpu {false};
+            static std::atomic_bool logged3dCpuHistory {false};
             bool expectedRemoteCpuLog = false;
             if (remoteWaterfallNeedsCpu
                 && loggedRemoteCpu.compare_exchange_strong(expectedRemoteCpuLog, true)) {
@@ -44115,6 +44618,14 @@ void DecodiumBridge::onSpectrumTimer()
                     << "[PANDBG] Panadapter visual FFT GPU path bypassed"
                     << "reason=remote_waterfall_needs_CPU_db_values"
                     << "fallback=FFTW_CPU";
+            }
+            bool expected3dCpuLog = false;
+            if (spectrum3dNeedsCpuHistory
+                && logged3dCpuHistory.compare_exchange_strong(expected3dCpuLog, true)) {
+                qInfo().noquote()
+                    << "[PANDBG] Panadapter GPU direct path bypassed"
+                    << "reason=stacked_3D_spectrum_needs_CPU_history"
+                    << "fallback=async_FFTW_CPU";
             }
 
             bool expectedIdle = false;
@@ -51422,9 +51933,13 @@ static QVariantMap importConfirmedAdifDocumentInBackground(QString const& source
 
     ParsedAdifDocument source = loadAdifDocument(sourcePath);
     if (!source.loaded) {
-        result.insert(QStringLiteral("error"), provider == QStringLiteral("qrz_confirmed")
-                     ? QStringLiteral("il file QRZ non contiene ADI valido")
-                     : QStringLiteral("il file eQSL InBox non contiene ADI valido"));
+        const QString providerLabel = provider == QStringLiteral("lotw_confirmed")
+            ? QStringLiteral("LoTW")
+            : provider == QStringLiteral("qrz_confirmed")
+              ? QStringLiteral("QRZ")
+              : QStringLiteral("eQSL InBox");
+        result.insert(QStringLiteral("error"),
+                      QStringLiteral("il file %1 non contiene ADI valido").arg(providerLabel));
         return result;
     }
     const int sourceCount = source.records.size();

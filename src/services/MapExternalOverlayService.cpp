@@ -1674,6 +1674,70 @@ QImage MapExternalOverlayService::renderTropoPayload(
         }
         ++rendered;
     }
+
+    // DXView can additionally publish observed 6 m Sporadic-E cloud
+    // perimeters.  They intentionally share the TROPO request and are drawn
+    // in a distinct colour: the response currently has no cloud timestamp,
+    // so replacing the complete image for every refresh avoids presenting a
+    // stale observation as live data.
+    QJsonArray const clouds =
+        document.object().value(QStringLiteral("cloud_list")).toArray();
+    for (QJsonValue const& value : clouds) {
+        QJsonObject const cloud = value.toObject();
+        QJsonArray const points = cloud.value(QStringLiteral("perim")).toArray();
+        if (points.size() < 3 || points.size() > 2048) {
+            continue;
+        }
+
+        QVector<QPointF> perimeter;
+        perimeter.reserve(points.size());
+        double previousLongitude = 0.0;
+        bool havePreviousLongitude = false;
+        for (QJsonValue const& pointValue : points) {
+            QJsonObject const point = pointValue.toObject();
+            QJsonValue const latitudeValue = point.value(QStringLiteral("lat"));
+            QJsonValue const longitudeValue = point.value(QStringLiteral("lon"));
+            if (!latitudeValue.isDouble() || !longitudeValue.isDouble()) {
+                perimeter.clear();
+                break;
+            }
+            double const latitude = qRadiansToDegrees(latitudeValue.toDouble());
+            double longitude = qRadiansToDegrees(longitudeValue.toDouble());
+            if (!std::isfinite(latitude) || !std::isfinite(longitude)
+                || latitude < -90.0 || latitude > 90.0) {
+                perimeter.clear();
+                break;
+            }
+            if (havePreviousLongitude) {
+                while (longitude - previousLongitude > 180.0) longitude -= 360.0;
+                while (longitude - previousLongitude < -180.0) longitude += 360.0;
+            }
+            previousLongitude = longitude;
+            havePreviousLongitude = true;
+            perimeter.append(QPointF(longitude, latitude));
+        }
+        if (perimeter.size() < 3) {
+            continue;
+        }
+
+        QColor const color(168, 92, 247, 142);
+        painter.setPen(QPen(QColor(198, 144, 255, 205), 1.0));
+        painter.setBrush(color);
+        for (int wrap = -1; wrap <= 1; ++wrap) {
+            QPainterPath path;
+            QPointF first = perimeter.first();
+            first.rx() += wrap * 360.0;
+            path.moveTo(mapPoint(first, outputSize));
+            for (qsizetype index = 1; index < perimeter.size(); ++index) {
+                QPointF point = perimeter.at(index);
+                point.rx() += wrap * 360.0;
+                path.lineTo(mapPoint(point, outputSize));
+            }
+            path.closeSubpath();
+            painter.drawPath(path);
+        }
+        ++rendered;
+    }
     painter.end();
 
     if (featureCount) {

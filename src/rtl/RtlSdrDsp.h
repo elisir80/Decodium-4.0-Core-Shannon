@@ -26,6 +26,21 @@ public:
         Cw
     };
 
+    // These controls belong strictly to the post-demodulated RTL-SDR SSB
+    // listening path. They are intentionally ignored for WeakSignal/FT8 and
+    // every non-SSB demodulator.
+    enum class SsbAgcMode {
+        Off,
+        Slow,
+        Medium
+    };
+
+    enum class SsbNoiseReductionMode {
+        Off,
+        Light,
+        Medium
+    };
+
     struct Result {
         // Signed, interleaved I/Q at the tuner sample rate.  This is the RF
         // path used by the panadapter and waterfall; it is never decoder PCM.
@@ -45,7 +60,11 @@ public:
     // General SDR receiver configuration. Non-weak demodulators output 48 kHz
     // mono PCM while preserving the full-rate IQ stream for RF display.
     bool configure(int inputSampleRate, Demodulator demodulator, double audioGain = 1.0,
-                   int channelOffsetHz = 0, bool spectrumInverted = false);
+                   int channelOffsetHz = 0, bool spectrumInverted = false,
+                   double ssbVoiceBandwidthHz = 3500.0,
+                   SsbAgcMode ssbAgcMode = SsbAgcMode::Slow,
+                   int ssbNotchFrequencyHz = 0,
+                   SsbNoiseReductionMode ssbNoiseReduction = SsbNoiseReductionMode::Off);
     void reset();
 
     bool isConfigured() const { return m_inputSampleRate > 0 && m_outputDecimation > 0; }
@@ -67,6 +86,7 @@ public:
     static QString demodulatorName(Demodulator demodulator);
 
 private:
+    bool enhancedSsbAudioEnabled() const;
     void rebuildFilters();
     static std::vector<double> buildLowpass(int tapCount, double cutoffHz, int sampleRate);
     static double filterSample(double value, const std::vector<double>& taps,
@@ -111,10 +131,35 @@ private:
     double m_audioState2 {0.0};
     double m_outputDecimationAccumulator {0.0};
 
+    // The general receiver must remain inexpensive at the RTL-SDR input rate.
+    // USB/LSB alone receive their quality pass after downsampling to 48 kHz:
+    // a voice-band FIR, DC rejection and slow audio AGC.  Weak-signal decoder
+    // PCM and the IQ stream for the panadapter never enter this path.
+    double m_ssbDc {0.0};
+    double m_ssbAgcEnvelope {0.05};
+    double m_ssbVoiceBandwidthHz {3500.0};
+    SsbAgcMode m_ssbAgcMode {SsbAgcMode::Slow};
+    int m_ssbNotchFrequencyHz {0};
+    SsbNoiseReductionMode m_ssbNoiseReduction {SsbNoiseReductionMode::Off};
+    bool m_ssbNotchEnabled {false};
+    double m_ssbNotchB0 {1.0};
+    double m_ssbNotchB1 {0.0};
+    double m_ssbNotchB2 {0.0};
+    double m_ssbNotchA1 {0.0};
+    double m_ssbNotchA2 {0.0};
+    double m_ssbNotchZ1 {0.0};
+    double m_ssbNotchZ2 {0.0};
+    double m_ssbNoiseFloor {0.01};
+    double m_ssbNoiseEnvelope {0.0};
+
     std::vector<double> m_channelTaps;
     std::vector<double> m_channelDelayI;
     std::vector<double> m_channelDelayQ;
     int m_channelDelayWrite {0};
+
+    std::vector<double> m_ssbAudioTaps;
+    std::vector<double> m_ssbAudioDelay;
+    int m_ssbAudioDelayWrite {0};
 
     std::vector<double> m_decoderTaps;
     std::vector<double> m_decoderDelay;

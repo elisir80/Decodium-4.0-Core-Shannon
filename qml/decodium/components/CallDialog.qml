@@ -217,7 +217,7 @@ Window {
                         radius: 6
                     }
                     onEditingFinished: if (bridge) bridge.targetCallSign = text
-                    enabled: !bridge || !bridge.targetCallActive
+                    enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                 }
             }
 
@@ -238,7 +238,7 @@ Window {
                         id: retriesSpin
                         from: 0; to: 999
                         value: bridge ? bridge.targetCallMaxRetries : 10
-                        enabled: !infiniteCheck.checked && (!bridge || !bridge.targetCallActive)
+                        enabled: !infiniteCheck.checked && (!bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled))
                         onValueModified: if (bridge) bridge.targetCallMaxRetries = value
                         Layout.preferredWidth: 100
                     }
@@ -246,7 +246,7 @@ Window {
                         id: infiniteCheck
                         text: qsTr("∞")
                         checked: bridge && bridge.targetCallMaxRetries === 0
-                        enabled: !bridge || !bridge.targetCallActive
+                        enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                         onToggled: {
                             if (!bridge) return
                             if (checked) bridge.targetCallMaxRetries = 0
@@ -282,7 +282,7 @@ Window {
                     id: timeoutSpin
                     from: 10; to: 600
                     value: bridge ? bridge.targetCallTimeoutS : 90
-                    enabled: !bridge || !bridge.targetCallActive
+                    enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                     Layout.preferredWidth: 120
                     onValueModified: if (bridge) bridge.targetCallTimeoutS = value
                 }
@@ -300,7 +300,7 @@ Window {
                         id: periodFirst
                         text: qsTr("1st (:00/:30)")
                         checked: bridge && bridge.targetCallPeriod === 0
-                        enabled: !bridge || !bridge.targetCallActive
+                        enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                         onToggled: if (checked && bridge) bridge.targetCallPeriod = 0
                         indicator: Rectangle {
                             implicitWidth: 20
@@ -330,7 +330,7 @@ Window {
                         id: periodSecond
                         text: qsTr("2nd (:15/:45)")
                         checked: bridge && bridge.targetCallPeriod === 1
-                        enabled: !bridge || !bridge.targetCallActive
+                        enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                         onToggled: if (checked && bridge) bridge.targetCallPeriod = 1
                         indicator: Rectangle {
                             implicitWidth: 20
@@ -360,7 +360,7 @@ Window {
                         id: periodAlt
                         text: qsTr("Alterna")
                         checked: bridge && bridge.targetCallPeriod === 2
-                        enabled: !bridge || !bridge.targetCallActive
+                        enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                         onToggled: if (checked && bridge) bridge.targetCallPeriod = 2
                         indicator: Rectangle {
                             implicitWidth: 20
@@ -403,7 +403,7 @@ Window {
                     id: pauseSpin
                     from: 0; to: 300
                     value: bridge ? bridge.targetCallPauseS : 0
-                    enabled: !bridge || !bridge.targetCallActive
+                    enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                     Layout.preferredWidth: 100
                     onValueModified: if (bridge) bridge.targetCallPauseS = value
                 }
@@ -419,7 +419,7 @@ Window {
                     Layout.fillWidth: true
                     text: qsTr("DX-watch armed — doesn't call immediately: waits for the target to be decoded")
                     checked: bridge && bridge.armedWatchEnabled
-                    enabled: !bridge || !bridge.targetCallActive
+                    enabled: !bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled)
                     onToggled: if (bridge) bridge.armedWatchEnabled = checked
                 }
                 DecoCheck {
@@ -428,7 +428,7 @@ Window {
                     Layout.leftMargin: 18
                     text: qsTr("Re-arm: if the target disappears, go back to listening (max 3 times, then manual Halt)")
                     checked: bridge && bridge.armedReArm
-                    enabled: armedCheck.checked && (!bridge || !bridge.targetCallActive)
+                    enabled: armedCheck.checked && (!bridge || (!bridge.targetCallActive && !bridge.autoCallEnabled))
                     opacity: enabled ? 1.0 : 0.5
                     onToggled: if (bridge) bridge.armedReArm = checked
                 }
@@ -469,6 +469,185 @@ Window {
             }
 
             Item { Layout.preferredHeight: 2 } // spacer
+
+            // ====== AUTO CALL ======
+            Rectangle { Layout.fillWidth: true; height: 1; color: callDialog.cBorder }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 5
+                Text {
+                    text: qsTr("Auto Call")
+                    color: callDialog.cText
+                    font.pixelSize: 16
+                    font.bold: true
+                }
+                DecoCheck {
+                    id: autoCallCheck
+                    Layout.fillWidth: true
+                    text: qsTr("Automatically call eligible CQ stations without selecting a target")
+                    checked: bridge && bridge.autoCallEnabled
+                    enabled: bridge && (!bridge.targetCallActive || bridge.autoCallEnabled)
+                    onToggled: if (bridge) bridge.autoCallEnabled = checked
+                }
+                Button {
+                    id: autoCallStartButton
+                    property bool running: bridge && bridge.autoCallEnabled
+                    Layout.fillWidth: true
+                    text: running
+                          ? qsTr("■ Stop Auto Call")
+                          : qsTr("▶ Start Auto Call")
+                    enabled: bridge && (!bridge.targetCallActive || bridge.autoCallEnabled)
+                    onClicked: if (bridge) bridge.autoCallEnabled = !bridge.autoCallEnabled
+                    background: Rectangle {
+                        radius: 6
+                        color: parent.running
+                               ? (parent.down ? Qt.darker(callDialog.cGreen, 1.12) : callDialog.cGreen)
+                               : (parent.enabled
+                                  ? (parent.down ? Qt.alpha(callDialog.cGreen, 0.38)
+                                                 : (parent.hovered ? Qt.alpha(callDialog.cGreen, 0.32)
+                                                                   : Qt.alpha(callDialog.cGreen, 0.24)))
+                                  : Qt.alpha(callDialog.cText, 0.06))
+                        border.color: parent.running || parent.enabled ? callDialog.cGreen : callDialog.cBorder
+                        border.width: parent.enabled ? 2 : 1
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: parent.running ? "#08131a" : (parent.enabled ? callDialog.cGreen : callDialog.cMuted)
+                        font.pixelSize: 13
+                        font.bold: parent.enabled
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Answers eligible CQ stations, skips calls already worked on this band, and stops at the session limit.")
+                    color: callDialog.cMuted
+                    font.pixelSize: 11
+                    wrapMode: Text.WordWrap
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: bridge && bridge.autoCallEnabled
+                          ? qsTr("Armed: waits for a valid CQ decode; TX starts on the next legal slot.")
+                          : qsTr("Idle: press Start Auto Call to arm automatic CQ replies.")
+                    color: bridge && bridge.autoCallEnabled ? callDialog.cGreen : callDialog.cMuted
+                    font.pixelSize: 11
+                    wrapMode: Text.WordWrap
+                }
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: 12
+                    rowSpacing: 6
+                    Text { text: qsTr("Max QSOs this session (0=∞)"); color: callDialog.cMuted; font.pixelSize: 12 }
+                    StyledSpinBox {
+                        from: 0; to: 999
+                        value: bridge ? bridge.autoCallMaxQsos : 5
+                        enabled: bridge && !bridge.autoCallEnabled
+                        Layout.preferredWidth: 110
+                        onValueModified: if (bridge) bridge.autoCallMaxQsos = value
+                    }
+                    Text { text: qsTr("Candidate priority"); color: callDialog.cMuted; font.pixelSize: 12 }
+                    ComboBox {
+                        id: autoCallPriorityCombo
+                        model: [qsTr("Last decoded"), qsTr("Strongest signal"), qsTr("Furthest grid")]
+                        currentIndex: bridge ? bridge.autoCallPriority : 0
+                        enabled: bridge && !bridge.autoCallEnabled
+                        Layout.fillWidth: true
+                        onActivated: if (bridge) bridge.autoCallPriority = currentIndex
+                        contentItem: Text {
+                            leftPadding: 14
+                            rightPadding: 34
+                            text: autoCallPriorityCombo.displayText
+                            color: autoCallPriorityCombo.enabled ? callDialog.cText : callDialog.cMuted
+                            font.pixelSize: 14
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+                        indicator: Text {
+                            x: autoCallPriorityCombo.width - width - 12
+                            y: (autoCallPriorityCombo.height - height) / 2
+                            text: "▾"
+                            color: autoCallPriorityCombo.enabled ? callDialog.cText : callDialog.cMuted
+                            font.pixelSize: 18
+                        }
+                        background: Rectangle {
+                            radius: 6
+                            color: autoCallPriorityCombo.enabled
+                                   ? (autoCallPriorityCombo.activeFocus
+                                      ? callDialog.cFieldBgFocus : callDialog.cFieldBg)
+                                   : Qt.alpha(callDialog.cText, 0.08)
+                            border.color: autoCallPriorityCombo.activeFocus
+                                          ? callDialog.cAccent : callDialog.cBorder
+                            border.width: autoCallPriorityCombo.activeFocus ? 2 : 1
+                        }
+                        delegate: ItemDelegate {
+                            width: autoCallPriorityCombo.width
+                            contentItem: Text {
+                                leftPadding: 12
+                                text: modelData
+                                color: parent.highlighted ? callDialog.cText : callDialog.cMuted
+                                font.pixelSize: 13
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: parent.highlighted ? callDialog.cAccent : callDialog.cFieldBg
+                            }
+                        }
+                        popup: Popup {
+                            y: autoCallPriorityCombo.height + 2
+                            width: autoCallPriorityCombo.width
+                            padding: 2
+                            contentItem: ListView {
+                                clip: true
+                                implicitHeight: contentHeight
+                                model: autoCallPriorityCombo.popup.visible ? autoCallPriorityCombo.delegateModel : null
+                            }
+                            background: Rectangle {
+                                color: callDialog.cFieldBg
+                                border.color: callDialog.cAccent
+                                border.width: 1
+                                radius: 6
+                            }
+                        }
+                    }
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        text: bridge ? qsTr("QSOs completed: %1 / %2").arg(bridge.autoCallQsoCount).arg(
+                                  bridge.autoCallMaxQsos === 0 ? qsTr("∞") : bridge.autoCallMaxQsos) : ""
+                        color: callDialog.cMuted
+                        font.pixelSize: 12
+                        Layout.fillWidth: true
+                    }
+                    Button {
+                        text: qsTr("Reset count")
+                        enabled: bridge && bridge.autoCallQsoCount > 0
+                        onClicked: if (bridge) bridge.resetAutoCallQsoCount()
+                        Layout.preferredWidth: 140
+                        Layout.preferredHeight: 36
+                        background: Rectangle {
+                            radius: 18
+                            color: parent.enabled
+                                   ? (parent.down ? Qt.alpha(callDialog.cText, 0.24)
+                                                  : Qt.alpha(callDialog.cText, 0.12))
+                                   : Qt.alpha(callDialog.cText, 0.06)
+                            border.color: parent.enabled ? callDialog.cBorder : Qt.alpha(callDialog.cBorder, 0.6)
+                            border.width: 1
+                        }
+                        contentItem: Text {
+                            text: parent.text
+                            color: parent.enabled ? callDialog.cText : callDialog.cMuted
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+                }
+            }
 
             // ====== SEZIONE AUTOCQ GENERICO (riusa esistente) ======
             Rectangle { Layout.fillWidth: true; height: 1; color: callDialog.cBorder }
@@ -556,6 +735,8 @@ Window {
                         if (!bridge) return
                         if (bridge.targetCallActive)
                             bridge.stopTargetCall()
+                        if (bridge.autoCallEnabled)
+                            bridge.autoCallEnabled = false
                         bridge.haltWithReason("call-dialog-stop")
                     }
                     background: Rectangle {
@@ -579,9 +760,9 @@ Window {
                 }
 
                 Button {
-                    text: qsTr("▶ Start")
-                    Layout.preferredWidth: 110
-                    enabled: bridge && !bridge.targetCallActive && targetField.text.trim().length > 2
+                    text: qsTr("▶ Direct Call")
+                    Layout.preferredWidth: 125
+                    enabled: bridge && !bridge.targetCallActive && !bridge.autoCallEnabled && targetField.text.trim().length > 2
                     onClicked: {
                         if (!bridge) return
                         bridge.targetCallSign = targetField.text

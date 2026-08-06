@@ -212,6 +212,11 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int  txDisabledMask   READ txDisabledMask   NOTIFY txDisabledMaskChanged)
     Q_PROPERTY(int  autoCqMaxCycles  READ autoCqMaxCycles  WRITE setAutoCqMaxCycles  NOTIFY autoCqMaxCyclesChanged)
     Q_PROPERTY(int  autoCqPauseSec   READ autoCqPauseSec   WRITE setAutoCqPauseSec   NOTIFY autoCqPauseSecChanged)
+    // WSJT-Z-style Auto Call: automatically answer eligible CQ callers.
+    Q_PROPERTY(bool autoCallEnabled READ autoCallEnabled WRITE setAutoCallEnabled NOTIFY autoCallEnabledChanged)
+    Q_PROPERTY(int autoCallMaxQsos READ autoCallMaxQsos WRITE setAutoCallMaxQsos NOTIFY autoCallMaxQsosChanged)
+    Q_PROPERTY(int autoCallQsoCount READ autoCallQsoCount NOTIFY autoCallQsoCountChanged)
+    Q_PROPERTY(int autoCallPriority READ autoCallPriority WRITE setAutoCallPriority NOTIFY autoCallPriorityChanged)
     Q_PROPERTY(bool avgDecodeEnabled READ avgDecodeEnabled WRITE setAvgDecodeEnabled NOTIFY avgDecodeEnabledChanged)
     Q_PROPERTY(bool ft8ApEnabled READ ft8ApEnabled WRITE setFt8ApEnabled NOTIFY ft8ApEnabledChanged)
     Q_PROPERTY(int  txPeriod         READ txPeriod         WRITE setTxPeriod         NOTIFY txPeriodChanged)
@@ -670,6 +675,14 @@ public:
     void setAutoCqMaxCycles(int v) { if (m_autoCqMaxCycles != v) { m_autoCqMaxCycles = qBound(0, v, 999); emit autoCqMaxCyclesChanged(); } }
     int  autoCqPauseSec()    const { return m_autoCqPauseSec; }
     void setAutoCqPauseSec(int v) { if (m_autoCqPauseSec != v) { m_autoCqPauseSec = qBound(0, v, 300); emit autoCqPauseSecChanged(); } }
+    bool autoCallEnabled() const { return m_autoCallEnabled; }
+    void setAutoCallEnabled(bool v);
+    int autoCallMaxQsos() const { return m_autoCallMaxQsos; }
+    void setAutoCallMaxQsos(int v);
+    int autoCallQsoCount() const { return m_autoCallQsoCount; }
+    int autoCallPriority() const { return m_autoCallPriority; }
+    void setAutoCallPriority(int v);
+    Q_INVOKABLE void resetAutoCallQsoCount();
     bool avgDecodeEnabled()  const { return m_avgDecodeEnabled; }
     void setAvgDecodeEnabled(bool v){ if (m_avgDecodeEnabled != v) { m_avgDecodeEnabled = v; emit avgDecodeEnabledChanged(); } }
     bool ft8ApEnabled() const { return m_ft8ApEnabled; }
@@ -1609,6 +1622,10 @@ signals:
     void processPriorityChanged();   // 1.0.388
     void autoCqMaxCyclesChanged();
     void autoCqPauseSecChanged();
+    void autoCallEnabledChanged();
+    void autoCallMaxQsosChanged();
+    void autoCallQsoCountChanged();
+    void autoCallPriorityChanged();
     void avgDecodeEnabledChanged();
     void ft8ApEnabledChanged();
     void txPeriodChanged();
@@ -1895,6 +1912,10 @@ private slots:
     void onTargetCallTransmittingChanged();  // 1.0.262 CALL feature edge detector
 
 private:
+    bool autoCallModeSupported() const;
+    bool tryAutoCallFromRows(const QStringList& rows);
+    void noteAutoCallQsoCompleted();
+    void abortAutoCallAfterSwrStop(const QString& reason);
     void tickTargetCallOnTx();   // CALL missed-target counter/timing enforcement on TX end
     // DX-watch armato (estensione CALL): ARMED->CALLING quando il target compare
     // come mittente in un decode; re-arm/stop a fine tentativo senza QSO.
@@ -3024,6 +3045,15 @@ private:
     int  m_autoCqMaxCycles  {0};   // 0 = infinito, >0 = max cicli CQ
     int  m_autoCqPauseSec   {0};   // pausa (s) tra cicli CQ (0 = nessuna pausa)
     int  m_autoCqCycleCount {0};   // contatore cicli CQ corrente
+
+    // WSJT-Z-style Auto Call session state. The feature is deliberately
+    // decode/control-only: it never touches the waterfall or panadapter path.
+    bool    m_autoCallEnabled   {false};
+    int     m_autoCallMaxQsos   {5};   // 0 = unlimited
+    int     m_autoCallQsoCount  {0};
+    int     m_autoCallPriority  {0};   // 0=last decoded, 1=strongest, 2=furthest
+    bool    m_autoCallStartingCandidate {false};
+    QString m_autoCallCurrentCandidate;
 
     // === TARGET CALL feature (fork-only 1.0.262) ===
     bool    m_targetCallActive       {false};

@@ -433,6 +433,7 @@ void DecodiumCat4OmManager::resetSessionState()
     m_controlReady = false;
     m_ownershipRequestPending = false;
     m_closeAfterPttOff = false;
+    clearFrequencySequencePending();
     m_safetyCloseTimer->stop();
     m_lastRadios = {};
     setConnected(false);
@@ -771,6 +772,11 @@ void DecodiumCat4OmManager::handleControlMessage(QString const& text)
             setOwnershipState(QStringLiteral("slave"));
             clearQueuedWrites(reason);
         }
+        if (action == QStringLiteral("setVfo")
+            || action == QStringLiteral("setFrequency")
+            || action == QStringLiteral("setSplit")) {
+            clearFrequencySequencePending();
+        }
         emit errorOccurred(tr("CAT4OM %1 failed: %2").arg(action, reason));
         if (m_closeAfterPttOff && action == QStringLiteral("setPtt")) {
             m_closeAfterPttOff = false;
@@ -888,6 +894,7 @@ void DecodiumCat4OmManager::applySelectedRadioState()
         m_radioConnectionStatus = selected.value(QStringLiteral("connectionState")).toString();
     }
     m_availableVfos = stringArray(selected.value(QStringLiteral("availableVfos")));
+    bool const split = selected.value(QStringLiteral("split")).toBool();
     m_activeVfo = selected.value(QStringLiteral("activeVfo")).toString();
     m_txVfo = selected.value(QStringLiteral("txVfo")).toString();
     QJsonObject const vfos = selected.value(QStringLiteral("vfos")).toObject();
@@ -898,10 +905,23 @@ void DecodiumCat4OmManager::applySelectedRadioState()
         m_txVfo = m_activeVfo;
     }
 
+    // Some CAT4OM radio handbooks (including the IC-7300 split model) report
+    // the selected VFO as txVfo even though split TX is carried by the other
+    // VFO.  When split is enabled and both values are equal, infer the other
+    // available VFO so Decodium does not repeatedly re-enter the A/B switch
+    // sequence on every state update.
+    if (split && m_txVfo.compare(m_activeVfo, Qt::CaseInsensitive) == 0) {
+        for (QString const& candidate : m_availableVfos) {
+            if (candidate.compare(m_activeVfo, Qt::CaseInsensitive) != 0) {
+                m_txVfo = candidate;
+                break;
+            }
+        }
+    }
+
     QJsonObject const activeState = vfos.value(m_activeVfo).toObject();
     double const frequency = activeState.value(QStringLiteral("frequency")).toDouble();
     QString const mode = activeState.value(QStringLiteral("mode")).toString();
-    bool const split = selected.value(QStringLiteral("split")).toBool();
     double const txFrequency = split
         ? vfos.value(m_txVfo).toObject().value(QStringLiteral("frequency")).toDouble()
         : 0.0;
@@ -925,6 +945,17 @@ void DecodiumCat4OmManager::applySelectedRadioState()
         m_alc = alc;
         m_alcValid = alcValid;
         emit alcChanged();
+    }
+
+    // A split-frequency update may temporarily select the TX VFO so CAT4OM
+    // can program it, then restore the original RX VFO.  Do not let the
+    // intermediate state trigger another sync in the opposite direction.
+    if (m_frequencySequencePending
+        && !fuzzyDifferent(m_frequencySequenceTargetHz, txFrequency)
+        && m_txVfo.compare(m_frequencySequenceTargetVfo, Qt::CaseInsensitive) == 0
+        && m_activeVfo.compare(m_frequencySequenceRestoreVfo, Qt::CaseInsensitive) == 0
+        && split) {
+        clearFrequencySequencePending();
     }
 
     QStringList const commands = stringArray(selected.value(QStringLiteral("availableCommands")));
@@ -1055,22 +1086,81 @@ QString DecodiumCat4OmManager::controlTargetVfo(bool transmit) const
     return vfo;
 }
 
+void DecodiumCat4OmManager::clearFrequencySequencePending()
+{
+    m_frequencySequencePending = false;
+    m_frequencySequenceTargetHz = 0.0;
+    m_frequencySequenceTargetVfo.clear();
+    m_frequencySequenceRestoreVfo.clear();
+}
+
+void DecodiumCat4OmManager::queueFrequencyOnVfo(double hz, QString const& targetVfo)
+{
+    if (hz <= 0.0) {
+        return;
+    }
+
+    QString const target = targetVfo.trimmed();
+    QString const active = m_activeVfo.trimmed();
+
+    // CAT4OM radios expose multiple logical VFOs, but many CAT drivers can
+    // change frequency only on the currently selected VFO.  In that case a
+    // direct setFrequency(vfo=VFOB) is rejected with INVALID_TARGET_VFO.
+    // Select the target first, apply the frequency, then restore the VFO that
+    // was active so RX and the user's radio state are not left on the TX VFO.
+    if (!target.isEmpty()
+        && !active.isEmpty()
+        && target.compare(active, Qt::CaseInsensitive) != 0
+        && commandAvailable(QStringLiteral("setVfo"))) {
+        queueOrSendWrite(QStringLiteral("setVfo"),
+                         QJsonObject{{QStringLiteral("vfo"), target}});
+    }
+
+    QJsonObject params{{QStringLiteral("frequency"), qRound64(hz)}};
+    // Omitting vfo is intentional for the active VFO.  CAT4OM then uses the
+    // currently selected VFO, which also covers radios that reject an
+    // explicit target even when it names the active VFO.
+    if (!target.isEmpty()
+        && (active.isEmpty()
+            || target.compare(active, Qt::CaseInsensitive) != 0)
+        && !commandAvailable(QStringLiteral("setVfo"))) {
+        params.insert(QStringLiteral("vfo"), target);
+    }
+    queueOrSendWrite(QStringLiteral("setFrequency"), params);
+
+    if (!target.isEmpty()
+        && !active.isEmpty()
+        && target.compare(active, Qt::CaseInsensitive) != 0
+        && commandAvailable(QStringLiteral("setVfo"))) {
+        queueOrSendWrite(QStringLiteral("setVfo"),
+                         QJsonObject{{QStringLiteral("vfo"), active}});
+    }
+}
+
 void DecodiumCat4OmManager::setRigFrequency(double hz)
 {
     if (hz <= 0.0) {
         return;
     }
-    QJsonObject params{{QStringLiteral("frequency"), qRound64(hz)}};
-    QString const vfo = controlTargetVfo(false);
-    if (!vfo.isEmpty()) {
-        params.insert(QStringLiteral("vfo"), vfo);
-    }
-    queueOrSendWrite(QStringLiteral("setFrequency"), params);
+    queueFrequencyOnVfo(hz, controlTargetVfo(false));
 }
 
 void DecodiumCat4OmManager::setRigTxFrequency(double hz)
 {
+    // "Fake It" is an audio-side split.  It must never change the physical
+    // IC-7300 split state; only the explicit "Rig" mode is allowed to send
+    // setSplit(true) and program the second VFO.
+    if (m_splitMode == QStringLiteral("emulate")) {
+        clearFrequencySequencePending();
+        if (m_split || m_txFrequency > 0.0) {
+            queueOrSendWrite(QStringLiteral("setSplit"),
+                             QJsonObject{{QStringLiteral("enabled"), false}});
+        }
+        return;
+    }
+
     if (m_splitMode == QStringLiteral("none") || hz <= 0.0) {
+        clearFrequencySequencePending();
         if (m_split || m_txFrequency > 0.0) {
             queueOrSendWrite(QStringLiteral("setSplit"),
                              QJsonObject{{QStringLiteral("enabled"), false}});
@@ -1091,11 +1181,33 @@ void DecodiumCat4OmManager::setRigTxFrequency(double hz)
         txVfo = m_activeVfo;
     }
 
-    QJsonObject frequencyParams{{QStringLiteral("frequency"), qRound64(hz)}};
-    if (!txVfo.isEmpty()) {
-        frequencyParams.insert(QStringLiteral("vfo"), txVfo);
+    // State updates emitted while the VFO programming sequence is in flight
+    // are informational only.  Re-entering here would alternate VFO A/B.
+    if (m_frequencySequencePending) {
+        return;
     }
-    queueOrSendWrite(QStringLiteral("setFrequency"), frequencyParams);
+
+    // The requested split state is already applied.  Avoid sending the same
+    // CAT4OM command again on every bridge synchronization tick.
+    if (m_split
+        && !fuzzyDifferent(m_txFrequency, hz)
+        && m_txVfo.compare(txVfo, Qt::CaseInsensitive) == 0) {
+        return;
+    }
+
+    QString const activeBeforeSequence = m_activeVfo;
+    if (m_controlReady && m_connected
+        && !txVfo.isEmpty()
+        && !activeBeforeSequence.isEmpty()
+        && txVfo.compare(activeBeforeSequence, Qt::CaseInsensitive) != 0
+        && commandAvailable(QStringLiteral("setVfo"))) {
+        m_frequencySequencePending = true;
+        m_frequencySequenceTargetHz = hz;
+        m_frequencySequenceTargetVfo = txVfo;
+        m_frequencySequenceRestoreVfo = activeBeforeSequence;
+    }
+
+    queueFrequencyOnVfo(hz, txVfo);
 
     QJsonObject splitParams{{QStringLiteral("enabled"), true}};
     if (!txVfo.isEmpty()) {

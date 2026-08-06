@@ -2131,6 +2131,39 @@ void PanadapterItem::setExternalSpectrumActive(bool active)
     update();
 }
 
+bool PanadapterItem::requiresCpuSpectrumHistory() const
+{
+    QMutexLocker lock(&m_mutex);
+    // Keep the regular GPU path whenever it can already provide dB rows.  The
+    // bridge only falls back when the zero-readback direct texture path is the
+    // active producer; that path intentionally has no CPU history to turn
+    // into stacked 3D traces.
+    return m_spectrum3d
+        && !m_externalSpectrumActive
+        && m_gpuDirectTextureReady
+        && !m_gpuFftFailed
+        && m_gpuFft
+        && m_gpuFft->directTexturePathActive;
+}
+
+void PanadapterItem::setSpectrum3d(bool enabled)
+{
+    {
+        QMutexLocker lock(&m_mutex);
+        if (m_spectrum3d == enabled)
+            return;
+        m_spectrum3d = enabled;
+        // The next scene-graph pass must replace the direct/2D nodes.  Do not
+        // tear down the direct textures: disabling 3D must resume that fast
+        // path immediately, without reallocating or touching the waterfall.
+        m_spectrumDirty = true;
+        m_spectrumOverlayDirty = true;
+    }
+
+    emit spectrum3dChanged();
+    update();
+}
+
 void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
                                       float minDb, float maxDb,
                                       float freqMinHz, float freqMaxHz)
@@ -5137,7 +5170,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         && m_gpuFft->directSpectrumTexture
         && m_gpuFft->directWaterfallTexture
         && m_gpuFft->directRowParamsTexture
-        && m_gpuFft->directPeakTexture;
+        && m_gpuFft->directPeakTexture
+        // The direct textures do not retain CPU-visible history.  While 3D is
+        // selected the bridge supplies asynchronous dB frames instead.
+        && !m_spectrum3d;
 #else
         false;
 #endif

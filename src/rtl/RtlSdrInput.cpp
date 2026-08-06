@@ -227,7 +227,9 @@ protected:
 
         RtlSdrDsp dsp;
         if (!dsp.configure(m_config.sampleRate, m_config.demodulator, m_config.audioGain,
-                           m_config.channelOffsetHz, m_config.spectrumInverted)) {
+                           m_config.channelOffsetHz, m_config.spectrumInverted,
+                           m_config.ssbVoiceBandwidthHz, m_config.ssbAgcMode,
+                           m_config.ssbNotchFrequencyHz, m_config.ssbNoiseReduction)) {
             emit readerError(QStringLiteral("RTL-SDR: could not configure the %1 DSP path.")
                                  .arg(RtlSdrDsp::demodulatorName(m_config.demodulator)));
             closeDevice();
@@ -279,7 +281,10 @@ protected:
                 }
                 if (!dsp.configure(m_config.sampleRate, m_config.demodulator,
                                    m_config.audioGain, requestedOffset,
-                                   m_config.spectrumInverted)) {
+                                   m_config.spectrumInverted,
+                                   m_config.ssbVoiceBandwidthHz, m_config.ssbAgcMode,
+                                   m_config.ssbNotchFrequencyHz,
+                                   m_config.ssbNoiseReduction)) {
                     emit readerError(QStringLiteral(
                         "RTL-SDR: could not reset the DSP path after retuning."));
                     break;

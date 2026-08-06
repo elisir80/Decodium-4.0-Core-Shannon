@@ -297,6 +297,7 @@ ScrollView {
             Layout.fillWidth: true
             implicitHeight: controlHeight
             property var demodKeys: ["weak", "wfm", "nfm", "am", "usb", "lsb", "cw"]
+            property bool ssbMode: currentIndex === 4 || currentIndex === 5
             currentIndex: Math.max(0, demodKeys.indexOf(bridge.getSetting("RtlSdrDemodulator", "weak")))
             onActivated: {
                 bridge.setSetting("RtlSdrDemodulator", demodKeys[currentIndex])
@@ -653,6 +654,146 @@ ScrollView {
                     dialog.scheduleSettingsPersist()
                 }
             }
+        }
+
+        Text {
+            visible: rtlDemodCombo.ssbMode
+            text: qsTr("SSB voice bandwidth:")
+            color: textSecondary
+            font.pixelSize: 12
+            Layout.preferredWidth: labelWidth
+            Layout.preferredHeight: controlHeight
+            verticalAlignment: Text.AlignVCenter
+        }
+        DecoComboBox {
+            id: rtlSsbBandwidthCombo
+            visible: rtlDemodCombo.ssbMode
+            property var bandwidthValues: [1800, 2400, 3000, 3500, 4000]
+            model: ["1.8 kHz", "2.4 kHz", "3.0 kHz", "3.5 kHz", "4.0 kHz"]
+            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            implicitHeight: controlHeight
+            currentIndex: Math.max(0, bandwidthValues.indexOf(
+                Number(bridge.getSetting("RtlSdrSsbVoiceBandwidthHz", 3500))))
+            onActivated: {
+                bridge.setSetting("RtlSdrSsbVoiceBandwidthHz", bandwidthValues[currentIndex])
+                dialog.scheduleSettingsPersist()
+            }
+            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+            contentItem: Text { text: rtlSsbBandwidthCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Post-demodulation audio filter only. It does not change the radio dial or RTL-SDR tuning.")
+        }
+
+        Text {
+            visible: rtlDemodCombo.ssbMode
+            text: qsTr("SSB audio AGC:")
+            color: textSecondary
+            font.pixelSize: 12
+            Layout.preferredWidth: labelWidth
+            Layout.preferredHeight: controlHeight
+            verticalAlignment: Text.AlignVCenter
+        }
+        DecoComboBox {
+            id: rtlSsbAgcCombo
+            visible: rtlDemodCombo.ssbMode
+            property var agcValues: ["off", "slow", "medium"]
+            model: [qsTr("Off"), qsTr("Slow"), qsTr("Medium")]
+            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            implicitHeight: controlHeight
+            currentIndex: Math.max(0, agcValues.indexOf(
+                String(bridge.getSetting("RtlSdrSsbAgcMode", "slow")).toLowerCase()))
+            onActivated: {
+                bridge.setSetting("RtlSdrSsbAgcMode", agcValues[currentIndex])
+                dialog.scheduleSettingsPersist()
+            }
+            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+            contentItem: Text { text: rtlSsbAgcCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Adjusts listening level after SSB demodulation. Off preserves the raw receiver level.")
+        }
+
+        Text {
+            visible: rtlDemodCombo.ssbMode
+            text: qsTr("SSB notch (Hz):")
+            color: textSecondary
+            font.pixelSize: 12
+            Layout.preferredWidth: labelWidth
+            Layout.preferredHeight: controlHeight
+            verticalAlignment: Text.AlignVCenter
+        }
+        DecoTextField {
+            id: rtlSsbNotchField
+            visible: rtlDemodCombo.ssbMode
+            text: String(bridge.getSetting("RtlSdrSsbNotchFrequencyHz", 0))
+            placeholderText: qsTr("0 = Off")
+            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            implicitHeight: controlHeight
+            validator: IntValidator { bottom: 0; top: 4800 }
+            color: textPrimary
+            font.pixelSize: controlFontSize
+            leftPadding: 8
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onEditingFinished: {
+                bridge.setSetting("RtlSdrSsbNotchFrequencyHz", Number(text))
+                dialog.scheduleSettingsPersist()
+            }
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Set the audible whistle frequency to remove a persistent carrier. Use 0 to disable.")
+        }
+
+        Text {
+            visible: rtlDemodCombo.ssbMode
+            text: qsTr("SSB noise reduction:")
+            color: textSecondary
+            font.pixelSize: 12
+            Layout.preferredWidth: labelWidth
+            Layout.preferredHeight: controlHeight
+            verticalAlignment: Text.AlignVCenter
+        }
+        DecoComboBox {
+            id: rtlSsbNoiseReductionCombo
+            visible: rtlDemodCombo.ssbMode
+            property var reductionValues: ["off", "light", "medium"]
+            model: [qsTr("Off"), qsTr("Light"), qsTr("Medium")]
+            enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            implicitHeight: controlHeight
+            currentIndex: Math.max(0, reductionValues.indexOf(
+                String(bridge.getSetting("RtlSdrSsbNoiseReduction", "off")).toLowerCase()))
+            onActivated: {
+                bridge.setSetting("RtlSdrSsbNoiseReduction", reductionValues[currentIndex])
+                dialog.scheduleSettingsPersist()
+            }
+            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+            contentItem: Text { text: rtlSsbNoiseReductionCombo.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter }
+            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12 }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+            ToolTip.visible: hovered
+            ToolTip.text: qsTr("Adaptive speech gate for background noise in pauses. It never affects digital-mode decoder audio.")
+        }
+
+        Text {
+            visible: rtlDemodCombo.ssbMode
+            text: qsTr("These controls apply only to RTL-SDR USB/LSB listening after demodulation; they never alter FT8 or the radio tuning reference.")
+            color: textSecondary
+            font.pixelSize: 11
+            wrapMode: Text.WordWrap
+            Layout.fillWidth: true
+            Layout.columnSpan: 4
         }
 
         Text {

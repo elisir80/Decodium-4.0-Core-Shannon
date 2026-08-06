@@ -41,6 +41,11 @@ public:
         bool spectrumInverted {false};
         bool biasTee {false};
         double audioGain {1.0};
+        double ssbVoiceBandwidthHz {3500.0};
+        RtlSdrDsp::SsbAgcMode ssbAgcMode {RtlSdrDsp::SsbAgcMode::Slow};
+        int ssbNotchFrequencyHz {0};
+        RtlSdrDsp::SsbNoiseReductionMode ssbNoiseReduction {
+            RtlSdrDsp::SsbNoiseReductionMode::Off};
     };
 
     explicit RtlSdrInput(QObject *parent = nullptr);

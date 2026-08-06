@@ -788,6 +788,157 @@ private slots:
                     != QStringLiteral("NA"));
     }
 
+    void classifiesRosterGridOriginAndFineSpotAge()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+        MapIntelligenceService service(
+            nullptr, tempDir.filePath(QStringLiteral("grid-origin.sqlite")));
+
+        QStringList const spotAges = service.availableSpotAgeFilters();
+        QCOMPARE(spotAges.first(), QStringLiteral("5 min"));
+        QCOMPARE(spotAges.at(1), QStringLiteral("10 min"));
+        QCOMPARE(spotAges.at(11), QStringLiteral("60 min"));
+        QVERIFY(spotAges.contains(QStringLiteral("35 min")));
+        QVERIFY(spotAges.contains(QStringLiteral("All retained")));
+        service.setSpotAgeFilter(QStringLiteral("35 min"));
+        QCOMPARE(service.spotAgeFilter(), QStringLiteral("35 min"));
+        service.setSpotAgeFilter(QStringLiteral("1 hour"));
+        QCOMPARE(service.spotAgeFilter(), QStringLiteral("60 min"));
+        QVERIFY(service.availableRosterColumns().contains(QStringLiteral("Grid source")));
+
+        auto ingest = [&service](const QString& call,
+                                 const QString& grid,
+                                 const QString& source,
+                                 const QString& gridOrigin) {
+            QVariantMap entry;
+            entry.insert(QStringLiteral("time"), QStringLiteral("120000"));
+            entry.insert(QStringLiteral("timestamp"), QDateTime::currentMSecsSinceEpoch());
+            entry.insert(QStringLiteral("message"),
+                         source == QStringLiteral("decoder")
+                             ? QStringLiteral("CQ %1 %2").arg(call, grid)
+                             : QStringLiteral("Grid information for %1").arg(call));
+            entry.insert(QStringLiteral("fromCall"), call);
+            entry.insert(QStringLiteral("dxGrid"), grid);
+            entry.insert(QStringLiteral("source"), source);
+            entry.insert(QStringLiteral("gridOrigin"), gridOrigin);
+            entry.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+            entry.insert(QStringLiteral("db"), QStringLiteral("-14"));
+            entry.insert(QStringLiteral("freq"), 1500);
+            service.ingestDecodeEntry(entry, 14074000, QStringLiteral("20m"));
+        };
+
+        ingest(QStringLiteral("DECODED1"), QStringLiteral("JN70"),
+               QStringLiteral("decoder"), QStringLiteral("Decoded on-air"));
+        ingest(QStringLiteral("LOOKUP1"), QStringLiteral("IO91"),
+               QStringLiteral("lookup"), QStringLiteral("Lookup"));
+        ingest(QStringLiteral("OAMS1"), QStringLiteral("KN12"),
+               QStringLiteral("oams"), QStringLiteral("OAMS"));
+
+        auto rosterRow = [&service](const QString& call) {
+            for (QVariant const& value : service.roster()) {
+                QVariantMap const row = value.toMap();
+                if (row.value(QStringLiteral("call")).toString() == call) return row;
+            }
+            return QVariantMap {};
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("OAMS1")).isEmpty(), 5000);
+
+        QVariantMap const decoded = rosterRow(QStringLiteral("DECODED1"));
+        QCOMPARE(decoded.value(QStringLiteral("gridOrigin")).toString(),
+                 QStringLiteral("Decoded on-air"));
+        QCOMPARE(decoded.value(QStringLiteral("gridReliability")).toString(),
+                 QStringLiteral("Verified"));
+        QCOMPARE(decoded.value(QStringLiteral("gridMarker")).toString(),
+                 QStringLiteral("✓"));
+
+        QVariantMap const lookup = rosterRow(QStringLiteral("LOOKUP1"));
+        QCOMPARE(lookup.value(QStringLiteral("gridOrigin")).toString(),
+                 QStringLiteral("Lookup estimate"));
+        QCOMPARE(lookup.value(QStringLiteral("gridReliability")).toString(),
+                 QStringLiteral("Estimated"));
+        QCOMPARE(lookup.value(QStringLiteral("gridMarker")).toString(),
+                 QStringLiteral("?"));
+
+        QVariantMap const oams = rosterRow(QStringLiteral("OAMS1"));
+        QCOMPARE(oams.value(QStringLiteral("gridOrigin")).toString(),
+                 QStringLiteral("OAMS"));
+        QCOMPARE(oams.value(QStringLiteral("gridReliability")).toString(),
+                 QStringLiteral("Corroborated"));
+        QCOMPARE(oams.value(QStringLiteral("gridMarker")).toString(),
+                 QStringLiteral("◇"));
+
+        QVariantMap psk;
+        psk.insert(QStringLiteral("call"), QStringLiteral("PSK1"));
+        psk.insert(QStringLiteral("grid"), QStringLiteral("JO21"));
+        psk.insert(QStringLiteral("mode"), QStringLiteral("FT8"));
+        psk.insert(QStringLiteral("freq"), 14076000);
+        service.setRosterStationCall(QStringLiteral("HOME"));
+        service.setRosterSpottedMeOnly(true);
+        service.ingestPskSpots({psk}, QStringLiteral("HOME"), QStringLiteral("JN70"));
+        QTRY_VERIFY_WITH_TIMEOUT(!rosterRow(QStringLiteral("PSK1")).isEmpty(), 5000);
+        QVariantMap const pskRow = rosterRow(QStringLiteral("PSK1"));
+        QCOMPARE(pskRow.value(QStringLiteral("gridOrigin")).toString(),
+                 QStringLiteral("PSK Reporter"));
+        QCOMPARE(pskRow.value(QStringLiteral("gridReliability")).toString(),
+                 QStringLiteral("Corroborated"));
+        QCOMPARE(pskRow.value(QStringLiteral("gridMarker")).toString(),
+                 QStringLiteral("◇"));
+    }
+
+    void migratesLegacySpotGridOrigin()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+        QString const databasePath = tempDir.filePath(QStringLiteral("legacy-grid.sqlite"));
+        QString const connectionName = QStringLiteral("legacy_grid_%1")
+            .arg(QUuid::createUuid().toString(QUuid::WithoutBraces));
+        {
+            QSqlDatabase database =
+                QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connectionName);
+            database.setDatabaseName(databasePath);
+            QVERIFY(database.open());
+            QSqlQuery query(database);
+            QVERIFY(query.exec(QStringLiteral(
+                "CREATE TABLE map_spot("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, unique_key TEXT NOT NULL UNIQUE,"
+                "call TEXT NOT NULL, grid TEXT, grid4 TEXT, band TEXT, mode TEXT,"
+                "message TEXT, observed_utc TEXT NOT NULL, observed_ms INTEGER NOT NULL,"
+                "frequency_hz INTEGER, snr INTEGER, source TEXT,"
+                "hits INTEGER NOT NULL DEFAULT 1)")));
+            query.prepare(QStringLiteral(
+                "INSERT INTO map_spot(unique_key,call,grid,grid4,band,mode,message,"
+                "observed_utc,observed_ms,frequency_hz,snr,source)"
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?,?)"));
+            query.addBindValue(QStringLiteral("legacy-grid-1"));
+            query.addBindValue(QStringLiteral("LEGACY1"));
+            query.addBindValue(QStringLiteral("JN70"));
+            query.addBindValue(QStringLiteral("JN70"));
+            query.addBindValue(QStringLiteral("20m"));
+            query.addBindValue(QStringLiteral("FT8"));
+            query.addBindValue(QStringLiteral("CQ LEGACY1 JN70"));
+            query.addBindValue(QStringLiteral("2026-08-06T12:00:00Z"));
+            query.addBindValue(QDateTime::currentMSecsSinceEpoch());
+            query.addBindValue(14075500);
+            query.addBindValue(-15);
+            query.addBindValue(QStringLiteral("decoder"));
+            QVERIFY(query.exec());
+            database.close();
+        }
+        QSqlDatabase::removeDatabase(connectionName);
+
+        MapIntelligenceService service(nullptr, databasePath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.roster().size(), 1, 5000);
+        QVariantMap const row = service.roster().first().toMap();
+        QCOMPARE(row.value(QStringLiteral("call")).toString(), QStringLiteral("LEGACY1"));
+        QCOMPARE(row.value(QStringLiteral("gridOrigin")).toString(),
+                 QStringLiteral("Decoded on-air"));
+        QCOMPARE(row.value(QStringLiteral("gridReliability")).toString(),
+                 QStringLiteral("Verified"));
+    }
+
     void repairsPersistedDirectedDecodeAttribution()
     {
         QTemporaryDir tempDir;
@@ -1959,11 +2110,19 @@ private slots:
                 "lat": 0.785398,
                 "lon": 0.174533,
                 "ts": 4102444800,
-                "spokes": [
-                    0.0, 0.04,
-                    1.570796, 0.06,
-                    3.141593, 0.05,
-                    4.712389, 0.04
+            "spokes": [
+                0.0, 0.04,
+                1.570796, 0.06,
+                3.141593, 0.05,
+                4.712389, 0.04
+            ]
+            }],
+            "cloud_list": [{
+                "id": "es-test",
+                "perim": [
+                    {"lat": 0.0, "lon": 0.0},
+                    {"lat": 0.0, "lon": 0.25},
+                    {"lat": 0.20, "lon": 0.125}
                 ]
             }]
         })json";
@@ -1972,7 +2131,7 @@ private slots:
         QImage const tropoImage =
             MapExternalOverlayService::renderTropoPayload(
                 tropo, &featureCount, &error, QSize(128, 64));
-        QCOMPARE(featureCount, 1);
+        QCOMPARE(featureCount, 2);
         QVERIFY2(error.isEmpty(), qPrintable(error));
         QVERIFY(!tropoImage.isNull());
 
@@ -1988,6 +2147,10 @@ private slots:
             }
         }
         QVERIFY(hasVisiblePixel);
+        QColor const esPixel = tropoImage.pixelColor(66, 30);
+        QVERIFY(esPixel.alpha() > 0);
+        QVERIFY(esPixel.blue() > esPixel.red());
+        QVERIFY(esPixel.red() > esPixel.green());
 
         QImage const moonImage =
             MapExternalOverlayService::renderMoonOverlay(

@@ -145,7 +145,8 @@ private:
     void finishLookup(const QVariantMap& value, bool fromCache, const QString& status);
     void lookupRemoteClubLog(const QString& callsign);
     void handleRemoteLookupFinished(QNetworkReply* reply, const QString& callsign);
-    void handleDatabaseReply(QNetworkReply* reply, const QString& provider);
+    void handleDatabaseReply(QNetworkReply* reply, const QString& provider,
+                             bool eqslInboxAdif = false);
     void startDatabaseImport(const QString& provider, const QByteArray& data);
     void startConfirmedAdifSave(const QString& provider, const QByteArray& data);
     void startConfirmedAdifFileImport(const QString& provider, const QString& path);

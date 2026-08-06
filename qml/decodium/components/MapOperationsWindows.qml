@@ -41,6 +41,11 @@ Item {
         if (state === "error") return "#e35d6a"
         return root.mutedColor
     }
+    function rosterGridLabel(row) {
+        if (!row || !row.grid)
+            return ""
+        return String(row.grid) + (row.gridMarker ? " " + row.gridMarker : "")
+    }
 
     Window {
         id: rosterWindow
@@ -100,10 +105,12 @@ Item {
                             elide: Text.ElideRight
                         }
                         Text {
-                            Layout.preferredWidth: 70
-                            text: modelData.grid || ""
+                            Layout.preferredWidth: 142
+                            text: root.rosterGridLabel(modelData)
+                                  + (modelData.gridOrigin ? " · " + modelData.gridOrigin : "")
                             color: root.mutedColor
                             font.pixelSize: 9
+                            elide: Text.ElideRight
                         }
                         Text {
                             Layout.fillWidth: true

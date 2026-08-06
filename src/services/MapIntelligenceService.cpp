@@ -861,17 +861,121 @@ QString externalAwardSpotEntity(const ExternalAwardDefinition& definition,
     return {};
 }
 
+QString normalizedSpotAgeFilter(const QString& value)
+{
+    QString const normalized = value.trimmed().toLower();
+    if (normalized == QStringLiteral("all retained")) {
+        return QStringLiteral("All retained");
+    }
+    if (normalized == QStringLiteral("1 hour")) {
+        // Keep the persisted value used by earlier releases meaningful after
+        // moving to the finer 5-minute selector.
+        return QStringLiteral("60 min");
+    }
+    if (normalized == QStringLiteral("6 hours")) return QStringLiteral("6 hours");
+    if (normalized == QStringLiteral("24 hours")) return QStringLiteral("24 hours");
+    if (normalized == QStringLiteral("7 days")) return QStringLiteral("7 days");
+
+    QRegularExpression const minutesExpression(
+        QStringLiteral("^([0-9]{1,3})\\s*min(?:ute)?s?$"));
+    QRegularExpressionMatch const match = minutesExpression.match(normalized);
+    if (match.hasMatch()) {
+        bool ok = false;
+        int const minutes = match.captured(1).toInt(&ok);
+        if (ok && minutes >= 5 && minutes <= 60 && minutes % 5 == 0) {
+            return QStringLiteral("%1 min").arg(minutes);
+        }
+    }
+    return {};
+}
+
 qint64 spotAgeCutoff(const QString& filter, qint64 nowMs)
 {
-    QString const normalized = filter.trimmed().toLower();
+    QString const normalized = normalizedSpotAgeFilter(filter);
     qint64 minutes = 0;
-    if (normalized == QStringLiteral("5 min")) minutes = 5;
-    else if (normalized == QStringLiteral("15 min")) minutes = 15;
-    else if (normalized == QStringLiteral("1 hour")) minutes = 60;
-    else if (normalized == QStringLiteral("6 hours")) minutes = 360;
-    else if (normalized == QStringLiteral("24 hours")) minutes = 1440;
-    else if (normalized == QStringLiteral("7 days")) minutes = 10080;
+    QRegularExpression const minutesExpression(QStringLiteral("^([0-9]+) min$"));
+    QRegularExpressionMatch const match = minutesExpression.match(normalized);
+    if (match.hasMatch()) {
+        minutes = match.captured(1).toLongLong();
+    } else if (normalized == QStringLiteral("6 hours")) {
+        minutes = 360;
+    } else if (normalized == QStringLiteral("24 hours")) {
+        minutes = 1440;
+    } else if (normalized == QStringLiteral("7 days")) {
+        minutes = 10080;
+    }
     return minutes > 0 ? nowMs - minutes * 60LL * 1000LL : 0;
+}
+
+QString normalizedGridOrigin(const QString& value)
+{
+    QString const normalized = value.trimmed().toLower();
+    if (normalized.isEmpty()) return QStringLiteral("UNKNOWN");
+    if (normalized.contains(QStringLiteral("decode"))
+        || normalized.contains(QStringLiteral("on-air"))
+        || normalized.contains(QStringLiteral("over the air"))) {
+        return QStringLiteral("DECODED");
+    }
+    if (normalized.contains(QStringLiteral("psk"))) return QStringLiteral("PSK");
+    if (normalized.contains(QStringLiteral("oams"))) return QStringLiteral("OAMS");
+    if (normalized.contains(QStringLiteral("rtsn"))) return QStringLiteral("RTSN");
+    if (normalized.contains(QStringLiteral("lookup"))
+        || normalized.contains(QStringLiteral("qrz"))
+        || normalized.contains(QStringLiteral("hamqth"))
+        || normalized.contains(QStringLiteral("callbook"))) {
+        return QStringLiteral("LOOKUP");
+    }
+    return QStringLiteral("UNKNOWN");
+}
+
+QString gridOriginForSource(const QString& source, const QString& provider = {})
+{
+    QString const explicitOrigin = normalizedGridOrigin(provider);
+    if (explicitOrigin != QStringLiteral("UNKNOWN")) return explicitOrigin;
+    QString const normalizedSource = source.trimmed().toLower();
+    if (normalizedSource == QStringLiteral("decoder")) return QStringLiteral("DECODED");
+    if (normalizedSource == QStringLiteral("psk")) return QStringLiteral("PSK");
+    if (normalizedSource == QStringLiteral("oams")) return QStringLiteral("OAMS");
+    if (normalizedSource == QStringLiteral("rtsn")) return QStringLiteral("RTSN");
+    if (normalizedSource == QStringLiteral("lookup")) return QStringLiteral("LOOKUP");
+    return QStringLiteral("UNKNOWN");
+}
+
+QString gridOriginLabel(const QString& origin)
+{
+    QString const normalized = normalizedGridOrigin(origin);
+    if (normalized == QStringLiteral("DECODED")) return QStringLiteral("Decoded on-air");
+    if (normalized == QStringLiteral("PSK")) return QStringLiteral("PSK Reporter");
+    if (normalized == QStringLiteral("OAMS")) return QStringLiteral("OAMS");
+    if (normalized == QStringLiteral("RTSN")) return QStringLiteral("RTSN");
+    if (normalized == QStringLiteral("LOOKUP")) return QStringLiteral("Lookup estimate");
+    return QStringLiteral("Unspecified");
+}
+
+QString gridReliabilityLabel(const QString& origin)
+{
+    QString const normalized = normalizedGridOrigin(origin);
+    if (normalized == QStringLiteral("DECODED")) return QStringLiteral("Verified");
+    if (normalized == QStringLiteral("PSK")
+        || normalized == QStringLiteral("OAMS")
+        || normalized == QStringLiteral("RTSN")) {
+        return QStringLiteral("Corroborated");
+    }
+    if (normalized == QStringLiteral("LOOKUP")) return QStringLiteral("Estimated");
+    return QStringLiteral("Unspecified");
+}
+
+QString gridReliabilityMarker(const QString& origin)
+{
+    QString const normalized = normalizedGridOrigin(origin);
+    if (normalized == QStringLiteral("DECODED")) return QStringLiteral("✓");
+    if (normalized == QStringLiteral("PSK")
+        || normalized == QStringLiteral("OAMS")
+        || normalized == QStringLiteral("RTSN")) {
+        return QStringLiteral("◇");
+    }
+    if (normalized == QStringLiteral("LOOKUP")) return QStringLiteral("?");
+    return QStringLiteral("·");
 }
 
 QString activityTypeForMessage(const QString& message,
@@ -1068,6 +1172,7 @@ bool openMapDatabase(const QString& path,
             " call TEXT NOT NULL,"
             " grid TEXT,"
             " grid4 TEXT,"
+            " grid_origin TEXT NOT NULL DEFAULT 'UNKNOWN',"
             " band TEXT,"
             " mode TEXT,"
             " message TEXT,"
@@ -1167,6 +1272,7 @@ bool openMapDatabase(const QString& path,
         {"map_spot", "target_call", "TEXT"},
         {"map_spot", "distance_km", "REAL NOT NULL DEFAULT -1"},
         {"map_spot", "grid6", "TEXT"},
+        {"map_spot", "grid_origin", "TEXT NOT NULL DEFAULT 'UNKNOWN'"},
         {"map_spot", "dt", "REAL NOT NULL DEFAULT 0"},
         {"map_spot", "county", "TEXT"},
         {"map_spot", "pota_ref", "TEXT"},
@@ -1192,6 +1298,18 @@ bool openMapDatabase(const QString& path,
                           error)) {
             return false;
         }
+    }
+    // Existing databases predate grid provenance.  Infer only the origin of
+    // their already stored locator; a decoded value is still never replaced by
+    // data of lower confidence.
+    if (!execSql(db, QStringLiteral(
+            "UPDATE map_spot SET grid_origin=CASE"
+            " WHEN lower(source)='decoder' AND grid<>'' THEN 'DECODED'"
+            " WHEN lower(source)='psk' AND grid<>'' THEN 'PSK'"
+            " WHEN lower(source)='oams' AND grid<>'' THEN 'OAMS'"
+            " ELSE 'UNKNOWN' END"
+            " WHERE COALESCE(grid_origin, 'UNKNOWN')='UNKNOWN'"), error)) {
+        return false;
     }
     static const QStringList extendedIndexes {
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_period ON map_qso(qso_epoch DESC)"),
@@ -1749,9 +1867,10 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     }
     m_pskOpacityPercent =
         qBound(20, settings.value(QStringLiteral("PskOpacityPercent"), 65).toInt(), 100);
-    m_spotAgeFilter = settings.value(QStringLiteral("SpotAgeFilter"),
-                                     QStringLiteral("15 min")).toString();
-    if (!availableSpotAgeFilters().contains(m_spotAgeFilter, Qt::CaseInsensitive)) {
+    m_spotAgeFilter = normalizedSpotAgeFilter(
+        settings.value(QStringLiteral("SpotAgeFilter"),
+                       QStringLiteral("15 min")).toString());
+    if (m_spotAgeFilter.isEmpty()) {
         m_spotAgeFilter = QStringLiteral("15 min");
     }
     m_spotCorrelationFilter = settings.value(QStringLiteral("SpotCorrelationFilter"),
@@ -2144,10 +2263,13 @@ QStringList MapIntelligenceService::availablePskDisplayModes() const
 
 QStringList MapIntelligenceService::availableSpotAgeFilters() const
 {
-    return {QStringLiteral("5 min"), QStringLiteral("15 min"),
-            QStringLiteral("1 hour"), QStringLiteral("6 hours"),
-            QStringLiteral("24 hours"), QStringLiteral("7 days"),
-            QStringLiteral("All retained")};
+    QStringList values;
+    for (int minutes = 5; minutes <= 60; minutes += 5) {
+        values.append(QStringLiteral("%1 min").arg(minutes));
+    }
+    values.append({QStringLiteral("6 hours"), QStringLiteral("24 hours"),
+                   QStringLiteral("7 days"), QStringLiteral("All retained")});
+    return values;
 }
 
 QStringList MapIntelligenceService::availableCorrelationFilters() const
@@ -2159,7 +2281,8 @@ QStringList MapIntelligenceService::availableCorrelationFilters() const
 
 QStringList MapIntelligenceService::availableRosterColumns() const
 {
-    return {QStringLiteral("Grid"), QStringLiteral("Band"),
+    return {QStringLiteral("Grid"), QStringLiteral("Grid source"),
+            QStringLiteral("Band"),
             QStringLiteral("Mode"), QStringLiteral("SNR"), QStringLiteral("DT"),
             QStringLiteral("DXCC"), QStringLiteral("Continent"),
             QStringLiteral("CQ zone"), QStringLiteral("ITU zone"),
@@ -2755,10 +2878,9 @@ void MapIntelligenceService::setPskOpacityPercent(int percent)
 
 void MapIntelligenceService::setSpotAgeFilter(const QString& value)
 {
-    int const index = availableSpotAgeFilters().indexOf(value.trimmed(), 0,
-                                                         Qt::CaseInsensitive);
-    QString const normalized = index >= 0 ? availableSpotAgeFilters().at(index)
-                                          : QStringLiteral("15 min");
+    QString const requested = normalizedSpotAgeFilter(value);
+    QString const normalized = requested.isEmpty()
+        ? QStringLiteral("15 min") : requested;
     if (m_spotAgeFilter.compare(normalized, Qt::CaseInsensitive) == 0) return;
     m_spotAgeFilter = normalized;
     saveSetting(QStringLiteral("SpotAgeFilter"), normalized);
@@ -3801,6 +3923,14 @@ void MapIntelligenceService::queuePskSpots(const QVariantList& rows,
                 row.value(QStringLiteral("receiverGrid"), senderGrid).toString());
             spot.provider = row.value(QStringLiteral("provider"),
                                       QStringLiteral("PSK Reporter")).toString().trimmed();
+            if (!spot.grid.isEmpty()) {
+                QString const explicitGridOrigin = normalizedGridOrigin(
+                    row.value(QStringLiteral("gridOrigin"),
+                              row.value(QStringLiteral("gridSource"))).toString());
+                spot.gridOrigin = explicitGridOrigin != QStringLiteral("UNKNOWN")
+                    ? explicitGridOrigin
+                    : gridOriginForSource(spot.source, spot.provider);
+            }
             spot.direction = row.value(QStringLiteral("direction"),
                                        QStringLiteral("TX")).toString()
                                  .trimmed().toUpper();
@@ -4199,6 +4329,9 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
     }
 
     QString const transmittedGrid = gridFromMessage(spot.message);
+    QString const explicitGridOrigin = normalizedGridOrigin(
+        entry.value(QStringLiteral("gridOrigin"),
+                    entry.value(QStringLiteral("gridSource"))).toString());
     if (!transmittedGrid.isEmpty()
         && ((!decodedTransmitter.isEmpty())
             || messageAssociatesGridWithCall(spot.message, spot.call))) {
@@ -4206,11 +4339,24 @@ MapIntelligenceService::liveSpotFromEntry(const QVariantMap& entry,
         // in the decoded payload.  This is the only decoder-side location we
         // use for map coverage and grid detail popups.
         spot.grid = transmittedGrid;
+        spot.gridOrigin = QStringLiteral("DECODED");
     } else if (spot.source == QStringLiteral("psk")
                || spot.source == QStringLiteral("oams")) {
         // External spot feeds provide a station location independently of a
         // decoded over-the-air payload, so their explicit grid remains valid.
         spot.grid = normalizedGrid(entry.value(QStringLiteral("dxGrid")).toString());
+        if (!spot.grid.isEmpty()) {
+            spot.gridOrigin = explicitGridOrigin != QStringLiteral("UNKNOWN")
+                ? explicitGridOrigin : gridOriginForSource(spot.source);
+        }
+    } else if (explicitGridOrigin != QStringLiteral("UNKNOWN")) {
+        // A future callbook/RTSN adapter may supply a locator even if the
+        // received text did not contain one.  Keep it visible, but distinctly
+        // marked as lower-confidence rather than pretending it was decoded.
+        spot.grid = normalizedGrid(entry.value(QStringLiteral("dxGrid")).toString());
+        if (!spot.grid.isEmpty()) {
+            spot.gridOrigin = explicitGridOrigin;
+        }
     }
     spot.grid4 = spot.grid.left(4);
     spot.grid6 = spot.grid.size() >= 6 ? spot.grid.left(6) : QString();
@@ -4781,7 +4927,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             " EXISTS(SELECT 1 FROM map_qso q"
             "   WHERE s.wpx<>'' AND upper(q.wpx)=upper(s.wpx)"
             "     AND q.confirmed=1") + historyScope
-            + QStringLiteral(" LIMIT 1), s.dxcc_number, s.propagation_mode")
+            + QStringLiteral(" LIMIT 1), s.dxcc_number, s.propagation_mode,"
+                             " COALESCE(s.grid_origin, 'UNKNOWN') AS grid_origin")
             + QStringLiteral(
             " FROM map_spot s"
             " LEFT JOIN map_roster_preference p ON upper(p.call)=upper(s.call)"
@@ -4858,6 +5005,7 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         query.bindValue(QStringLiteral(":limit"), kRosterCandidateLimit);
         if (query.exec()) {
             int const rosterDxccNumberIndex = query.record().indexOf(QStringLiteral("dxcc_number"));
+            int const rosterGridOriginIndex = query.record().indexOf(QStringLiteral("grid_origin"));
             QSqlQuery profileQuery(db);
             profileQuery.prepare(QStringLiteral(
                 "SELECT COALESCE(MAX(county), ''), COALESCE(MAX(pota_ref), ''),"
@@ -5211,6 +5359,14 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 QVariantMap row;
                 row.insert(QStringLiteral("call"), query.value(0).toString());
                 row.insert(QStringLiteral("grid"), query.value(1).toString());
+                QString const gridOrigin = rosterGridOriginIndex >= 0
+                    ? query.value(rosterGridOriginIndex).toString()
+                    : QStringLiteral("UNKNOWN");
+                row.insert(QStringLiteral("gridOrigin"), gridOriginLabel(gridOrigin));
+                row.insert(QStringLiteral("gridReliability"),
+                           gridReliabilityLabel(gridOrigin));
+                row.insert(QStringLiteral("gridMarker"),
+                           gridReliabilityMarker(gridOrigin));
                 row.insert(QStringLiteral("band"), query.value(2).toString());
                 row.insert(QStringLiteral("mode"), query.value(3).toString());
                 row.insert(QStringLiteral("propagation"), query.value(45).toString());
@@ -6706,12 +6862,12 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
     QSqlQuery insert(db);
     if (!insert.prepare(QStringLiteral(
             "INSERT INTO map_spot"
-            " (unique_key, call, grid, grid4, grid6, band, mode, propagation_mode, message, observed_utc,"
+            " (unique_key, call, grid, grid4, grid6, grid_origin, band, mode, propagation_mode, message, observed_utc,"
             " observed_ms, frequency_hz, snr, dt, source, dxcc, continent, cq_zone,"
             " itu_zone, state, county, pota_ref, iota, wpx, dxcc_number, is_cq, target_call, distance_km, activity_type,"
             " receiver_call, receiver_grid, provider, first_observed_ms, last_observed_ms,"
             " correlation_count, direction)"
-            " VALUES (:key, :call, :grid, :grid4, :grid6, :band, :mode, :propagation_mode, :message, :utc,"
+            " VALUES (:key, :call, :grid, :grid4, :grid6, :grid_origin, :band, :mode, :propagation_mode, :message, :utc,"
             " :ms, :freq, :snr, :dt, :source, :dxcc, :continent, :cq_zone,"
             " :itu_zone, :state, :county, :pota_ref, :iota, :wpx, :dxcc_number, :is_cq, :target_call, :distance_km, :activity_type,"
             " :receiver_call, :receiver_grid, :provider, :first_observed_ms, :last_observed_ms,"
@@ -6720,6 +6876,8 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
             " observed_utc=excluded.observed_utc,"
             " observed_ms=excluded.observed_ms,"
             " last_observed_ms=excluded.last_observed_ms,"
+            " grid_origin=CASE WHEN excluded.grid_origin<>'UNKNOWN'"
+            " THEN excluded.grid_origin ELSE map_spot.grid_origin END,"
             " snr=excluded.snr,"
             " dt=excluded.dt,"
             " county=CASE WHEN excluded.county<>'' THEN excluded.county ELSE map_spot.county END,"
@@ -6781,6 +6939,7 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
             insert.bindValue(QStringLiteral(":grid"), spot.grid);
             insert.bindValue(QStringLiteral(":grid4"), spot.grid4);
             insert.bindValue(QStringLiteral(":grid6"), spot.grid6);
+            insert.bindValue(QStringLiteral(":grid_origin"), spot.gridOrigin);
             insert.bindValue(QStringLiteral(":band"), spot.band);
             insert.bindValue(QStringLiteral(":mode"), spot.mode);
             insert.bindValue(QStringLiteral(":propagation_mode"), propagationMode);

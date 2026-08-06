@@ -202,19 +202,23 @@ ScrollView {
         Repeater {
             model: dialog.callsignDatabaseEntries()
             delegate: Rectangle {
+                id: dbDelegate
                 required property var modelData
+                property bool confirmedProvider: modelData.id === "lotw_confirmed"
+                                                || modelData.id === "qrz_confirmed"
+                property bool confirmationSource: confirmedProvider || modelData.managedFile === true
                 Layout.fillWidth: true
                 Layout.preferredHeight: modelData.managedFile
                                         ? (modelData.error ? 150 : 126)
                                         : modelData.updateable
-                                        ? (modelData.error ? 172 : 152)
-                                          + ((modelData.id === "clublog_oqrs" || modelData.id === "lotw_confirmed" || modelData.id === "qrz_confirmed") ? 22 : 0)
+                                        ? (modelData.error ? 196 : 176)
+                                          + ((modelData.id === "clublog_oqrs" || confirmedProvider) ? 22 : 0)
                                         : 68
                 Layout.minimumHeight: modelData.managedFile
                                      ? (modelData.error ? 150 : 126)
                                      : modelData.updateable
-                                     ? (modelData.error ? 172 : 152)
-                                       + ((modelData.id === "clublog_oqrs" || modelData.id === "lotw_confirmed" || modelData.id === "qrz_confirmed") ? 22 : 0)
+                                     ? (modelData.error ? 196 : 176)
+                                       + ((modelData.id === "clublog_oqrs" || confirmedProvider) ? 22 : 0)
                                      : 68
                 color: Qt.rgba(bgMedium.r, bgMedium.g, bgMedium.b, 0.55)
                 border.color: glassBorder
@@ -258,6 +262,10 @@ ScrollView {
                         Text {
                             text: Number(modelData.rowCount || 0) < 0
                                   ? qsTr("Updating...")
+                                  : dbDelegate.confirmationSource && modelData.rowCount > 0
+                                  ? qsTr("%1 confirmations in last sync").arg(modelData.rowCount)
+                                  : dbDelegate.confirmationSource
+                                  ? qsTr("No confirmations")
                                   : modelData.rowCount > 0
                                   ? qsTr("%1 record").arg(modelData.rowCount)
                                   : qsTr("No records")
@@ -312,7 +320,9 @@ ScrollView {
                             Layout.minimumWidth: 0
                             Layout.preferredHeight: dialog.controlHeight
                             implicitHeight: dialog.controlHeight
-                            placeholderText: qsTr("Optional local file path")
+                            placeholderText: dbDelegate.confirmedProvider
+                                             ? qsTr("Optional ADI file to merge into the logbook")
+                                             : qsTr("Optional local file path")
                             text: modelData.localPath || ""
                         }
                     }
@@ -334,13 +344,19 @@ ScrollView {
                                 elide: Text.ElideNone
                             }
                             onClicked: {
-                                var selected = bridge.openFileDialog(qsTr("Import callsign database"), "", [qsTr("Databases and CSV (*)")])
+                                var selected = bridge.openFileDialog(
+                                    dbDelegate.confirmedProvider ? qsTr("Import confirmations ADI")
+                                                                  : qsTr("Import callsign database"),
+                                    "",
+                                    dbDelegate.confirmedProvider
+                                        ? [qsTr("ADIF files (*.adi *.adif)"), qsTr("All files (*)")]
+                                        : [qsTr("Databases and CSV (*)")])
                                 if (selected && selected.length > 0)
                                     localDatabasePathField.text = selected
                             }
                         }
                         Button {
-                            text: qsTr("Import")
+                            text: dbDelegate.confirmedProvider ? qsTr("Import ADI") : qsTr("Import")
                             enabled: dialog.callsignService && localDatabasePathField.text.trim().length > 0
                             Layout.preferredWidth: 92
                             Layout.minimumWidth: 88
@@ -355,6 +371,14 @@ ScrollView {
                             }
                             onClicked: dialog.callsignService.importDatabase(modelData.id, localDatabasePathField.text.trim())
                         }
+                    }
+                    Text {
+                        visible: dbDelegate.confirmedProvider
+                        text: qsTr("Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.")
+                        color: textSecondary
+                        font.pixelSize: 10
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                     }
                     Text {
                         visible: !!modelData.error

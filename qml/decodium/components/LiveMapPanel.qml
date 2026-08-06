@@ -550,7 +550,14 @@ Rectangle {
     function rosterColumnValue(row, column) {
         if (!row)
             return ""
-        if (column === "Grid") return row.grid || ""
+        if (column === "Grid") return rosterGridLabel(row)
+        if (column === "Grid source") {
+            if (!row.grid)
+                return ""
+            var origin = row.gridOrigin || qsTr("Unspecified")
+            var reliability = row.gridReliability || ""
+            return reliability.length > 0 ? origin + " · " + reliability : origin
+        }
         if (column === "Band") return row.band || ""
         if (column === "Mode") return row.mode || ""
         if (column === "SNR") return row.snr !== undefined ? String(row.snr) + " dB" : ""
@@ -570,6 +577,12 @@ Rectangle {
         if (column === "Age") return row.ageMinutes >= 0 ? row.ageMinutes + "m" : ""
         if (column === "Source") return row.source || ""
         return ""
+    }
+
+    function rosterGridLabel(row) {
+        if (!row || !row.grid)
+            return ""
+        return String(row.grid) + (row.gridMarker ? " " + row.gridMarker : "")
     }
 
     function rosterColumnSummary(row) {
@@ -4435,7 +4448,11 @@ Rectangle {
                                             Text {
                                                 Layout.fillWidth: true
                                                 text: (modelData.call || qsTr("Unknown"))
-                                                      + (modelData.grid ? "  " + modelData.grid : "")
+                                                      + (modelData.grid
+                                                         ? "  " + root.rosterGridLabel(modelData)
+                                                               + (modelData.gridOrigin
+                                                                  ? " · " + modelData.gridOrigin : "")
+                                                         : "")
                                                 color: root.rosterStatusColor(modelData.status)
                                                 font.pixelSize: 11
                                                 font.bold: true

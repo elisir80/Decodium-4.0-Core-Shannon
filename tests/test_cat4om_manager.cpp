@@ -22,7 +22,11 @@ private:
     QWebSocket* m_controlClient {nullptr};
     QStringList m_actions;
     qint64 m_frequency {14074000};
+    qint64 m_frequencyB {14076000};
     QString m_mode {QStringLiteral("USB")};
+    QString m_activeVfo {QStringLiteral("VFOA")};
+    QString m_txVfo {QStringLiteral("VFOA")};
+    bool m_split {false};
     bool m_ptt {false};
 
     QJsonObject radioState() const
@@ -32,20 +36,21 @@ private:
             {QStringLiteral("radioName"), QStringLiteral("Icom IC-7300")},
             {QStringLiteral("connectionStatus"), QStringLiteral("connected")},
             {QStringLiteral("availableVfos"), QJsonArray{QStringLiteral("VFOA"), QStringLiteral("VFOB")}},
-            {QStringLiteral("activeVfo"), QStringLiteral("VFOA")},
-            {QStringLiteral("txVfo"), QStringLiteral("VFOA")},
+            {QStringLiteral("activeVfo"), m_activeVfo},
+            {QStringLiteral("txVfo"), m_txVfo},
             {QStringLiteral("vfos"), QJsonObject{
                  {QStringLiteral("VFOA"), QJsonObject{
                       {QStringLiteral("frequency"), m_frequency},
                       {QStringLiteral("mode"), m_mode}}},
                  {QStringLiteral("VFOB"), QJsonObject{
-                      {QStringLiteral("frequency"), 14076000},
+                      {QStringLiteral("frequency"), m_frequencyB},
                       {QStringLiteral("mode"), m_mode}}}}},
-            {QStringLiteral("split"), false},
+            {QStringLiteral("split"), m_split},
             {QStringLiteral("ptt"), m_ptt},
             {QStringLiteral("availableCommands"), QJsonArray{
                  QStringLiteral("SetFrequency"), QStringLiteral("SetMode"),
-                 QStringLiteral("SetPtt"), QStringLiteral("SetSplit")}},
+                 QStringLiteral("SetPtt"), QStringLiteral("SetVfo"),
+                 QStringLiteral("SetSplit")}},
             {QStringLiteral("supportedModes"), QJsonArray{
                  QStringLiteral("USB"), QStringLiteral("DATA-U")}},
             {QStringLiteral("metering"), QJsonObject{
@@ -129,23 +134,46 @@ private slots:
                 QString const action = message.value(QStringLiteral("action")).toString();
                 m_actions.append(action);
                 QJsonObject result;
+                bool success = true;
+                QJsonObject error;
                 if (action == QStringLiteral("getOwnership")) {
                     result.insert(QStringLiteral("role"), QStringLiteral("master"));
                 } else {
                     QJsonObject const params = message.value(QStringLiteral("params")).toObject();
-                    if (action == QStringLiteral("setFrequency"))
-                        m_frequency = params.value(QStringLiteral("frequency")).toInteger();
-                    else if (action == QStringLiteral("setMode"))
+                    if (action == QStringLiteral("setFrequency")) {
+                        QString const requestedVfo = params.value(QStringLiteral("vfo")).toString();
+                        if (!requestedVfo.isEmpty()
+                            && requestedVfo.compare(m_activeVfo, Qt::CaseInsensitive) != 0) {
+                            success = false;
+                            error = QJsonObject{
+                                {QStringLiteral("code"), QStringLiteral("INVALID_TARGET_VFO")},
+                                {QStringLiteral("message"), QStringLiteral("select the target VFO first")}};
+                        } else if (m_activeVfo.compare(QStringLiteral("VFOB"), Qt::CaseInsensitive) == 0) {
+                            m_frequencyB = params.value(QStringLiteral("frequency")).toInteger();
+                        } else {
+                            m_frequency = params.value(QStringLiteral("frequency")).toInteger();
+                        }
+                    } else if (action == QStringLiteral("setVfo")) {
+                        m_activeVfo = params.value(QStringLiteral("vfo")).toString();
+                    } else if (action == QStringLiteral("setMode"))
                         m_mode = params.value(QStringLiteral("mode")).toString();
                     else if (action == QStringLiteral("setPtt"))
                         m_ptt = params.value(QStringLiteral("enabled")).toBool();
+                    else if (action == QStringLiteral("setSplit")) {
+                        m_split = params.value(QStringLiteral("enabled")).toBool();
+                        // Mirror the IC-7300 CAT4OM handbook: in split mode
+                        // the state may still report the selected VFO (A)
+                        // rather than the effective TX VFO (B).
+                        if (!m_split) m_txVfo = m_activeVfo;
+                    }
                 }
                 send(m_controlClient, QJsonObject{
                      {QStringLiteral("type"), QStringLiteral("response")},
                      {QStringLiteral("id"), message.value(QStringLiteral("id"))},
-                     {QStringLiteral("success"), true},
+                     {QStringLiteral("success"), success},
+                     {QStringLiteral("error"), error},
                      {QStringLiteral("result"), result}});
-                if (action != QStringLiteral("getOwnership")) sendState();
+                if (success && action != QStringLiteral("getOwnership")) sendState();
             });
         });
     }
@@ -177,6 +205,41 @@ private slots:
         QVERIFY(m_actions.contains(QStringLiteral("setFrequency")));
         QVERIFY(m_actions.contains(QStringLiteral("setMode")));
         QVERIFY(m_actions.contains(QStringLiteral("setPtt")));
+
+        // CAT4OM requires the target VFO to be selected before changing its
+        // frequency.  Verify that split TX frequency programming follows the
+        // setVfo -> setFrequency -> restore-active-VFO sequence instead of
+        // sending a rejected direct VFOB target.
+        manager.setSplitMode(QStringLiteral("rig"));
+        m_actions.clear();
+        QSignalSpy errorSpy(&manager, &DecodiumCat4OmManager::errorOccurred);
+        connect(&manager, &DecodiumCat4OmManager::frequencyChanged,
+                &manager, [&manager]() { manager.setRigTxFrequency(7075000); });
+        manager.setRigTxFrequency(7075000);
+        QTRY_COMPARE_WITH_TIMEOUT(manager.txFrequency(), 7075000.0, 3000);
+        QTRY_COMPARE_WITH_TIMEOUT(m_activeVfo, QStringLiteral("VFOA"), 3000);
+        QVERIFY(errorSpy.isEmpty());
+        QCOMPARE(m_actions, QStringList({QStringLiteral("setVfo"),
+                                         QStringLiteral("setFrequency"),
+                                         QStringLiteral("setVfo"),
+                                         QStringLiteral("setSplit")}));
+
+        QStringList const completedActions = m_actions;
+        manager.setRigTxFrequency(7075000);
+        QCOMPARE(m_actions, completedActions);
+
+        // Fake It is audio-side only: changing the TX/audio frequency must
+        // not select VFO B or enable the physical IC-7300 split.
+        manager.setSplitMode(QStringLiteral("emulate"));
+        m_actions.clear();
+        manager.setRigTxFrequency(7076000);
+        QTRY_VERIFY_WITH_TIMEOUT(!manager.split(), 3000);
+        QCOMPARE(m_actions, QStringList({QStringLiteral("setSplit")}));
+
+        m_actions.clear();
+        manager.setRigFrequency(7080000);
+        QTRY_COMPARE_WITH_TIMEOUT(manager.frequency(), 7080000.0, 3000);
+        QCOMPARE(m_actions, QStringList({QStringLiteral("setFrequency")}));
 
         manager.setRigPtt(false);
         QTRY_VERIFY_WITH_TIMEOUT(!manager.pttActive(), 3000);

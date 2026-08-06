@@ -95,6 +95,10 @@ public:
     bool  autoRange()      const { return m_autoRange; }
     bool  peakHold()       const { return m_peakHold; }
     bool  spectrum3d()           const { return m_spectrum3d; }
+    // The GPU-direct FFT keeps its history exclusively in RHI textures.  A
+    // stacked 3D spectrum needs CPU-visible dB rows instead, so the bridge
+    // uses this only to select its existing asynchronous FFT fallback.
+    bool  requiresCpuSpectrumHistory() const;
     int   spectrum3dTraces()     const { return m_spectrum3dTraces; }
     float spectrum3dFloorDepth() const { return m_spectrum3dFloorDepth; }
     float peakDecay()      const { return m_peakDecay; }
@@ -136,7 +140,7 @@ public:
     void setMaxDb(float v)         { if (m_maxDb!=v){m_maxDb=v;emit maxDbChanged();markAllDirty();} }
     void setAutoRange(bool v)      { if (m_autoRange!=v){m_autoRange=v;emit autoRangeChanged();markAllDirty();} }
     void setPeakHold(bool v)       { if (m_peakHold!=v){m_peakHold=v;if(!v)m_peakBins.clear();emit peakHoldChanged();} }
-    void setSpectrum3d(bool v)     { if (m_spectrum3d!=v){m_spectrum3d=v;emit spectrum3dChanged();update();} }
+    void setSpectrum3d(bool v);
     void setSpectrum3dTraces(int v) {
         int const clamped = qBound(8, v, 128);
         if (m_spectrum3dTraces!=clamped){m_spectrum3dTraces=clamped;emit spectrum3dTracesChanged();update();}
@@ -552,7 +556,7 @@ private:
     qint64 m_decodeLabelMetricLastLogMs = 0;
     struct GpuFftState;
     GpuFftState* m_gpuFft = nullptr;
-    QMutex m_mutex;
+    mutable QMutex m_mutex;
 
     // Throttle: quando attivo, addSpectrumData chiama update() al massimo
     // ogni kThrottleIntervalMs (10 fps invece dei normali ~50 fps).

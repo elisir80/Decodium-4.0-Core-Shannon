@@ -11,6 +11,7 @@ private slots:
     void bothHardwareModesProducePcm();
     void inPlaceRetuneKeepsUsbReaderOpen();
     void wideFmProducesIqAndReceiverAudio();
+    void ssbModesProduceEnhancedReceiverAudio();
 };
 
 void TestRtlSdrInput::bothHardwareModesProducePcm()
@@ -137,6 +138,58 @@ void TestRtlSdrInput::wideFmProducesIqAndReceiverAudio()
     QCOMPARE(errorSpy.count(), 0);
     input.stop();
     QTRY_VERIFY_WITH_TIMEOUT(stoppedSpy.count() == 1, 5000);
+}
+
+void TestRtlSdrInput::ssbModesProduceEnhancedReceiverAudio()
+{
+    if (!qEnvironmentVariableIsSet("DECODIUM_RTLSDR_HARDWARE_TEST")) {
+        QSKIP("Set DECODIUM_RTLSDR_HARDWARE_TEST=1 with an RTL-SDR connected to run this opt-in hardware smoke test.");
+    }
+    if (!RtlSdrInput::compiledIn()) {
+        QSKIP("This build does not include librtlsdr.");
+    }
+
+    const QList<RtlSdrDsp::Demodulator> modes {
+        RtlSdrDsp::Demodulator::Usb,
+        RtlSdrDsp::Demodulator::Lsb
+    };
+    for (const RtlSdrDsp::Demodulator mode : modes) {
+        RtlSdrInput input;
+        QSignalSpy startedSpy(&input, &RtlSdrInput::started);
+        QSignalSpy iqSpy(&input, &RtlSdrInput::iqSamplesReady);
+        QSignalSpy audioSpy(&input, &RtlSdrInput::audioSamplesReady);
+        QSignalSpy stoppedSpy(&input, &RtlSdrInput::stopped);
+        QSignalSpy errorSpy(&input, &RtlSdrInput::error);
+
+        RtlSdrInput::Config config;
+        config.deviceIndex = 0;
+        config.mode = RtlSdrInput::Mode::SdrRadio;
+        config.demodulator = mode;
+        config.centerFrequencyHz = 14200000U;
+        config.sampleRate = 240000;
+        config.ssbVoiceBandwidthHz = mode == RtlSdrDsp::Demodulator::Usb ? 2400.0 : 4000.0;
+        config.ssbAgcMode = mode == RtlSdrDsp::Demodulator::Usb
+            ? RtlSdrDsp::SsbAgcMode::Off : RtlSdrDsp::SsbAgcMode::Medium;
+        config.ssbNotchFrequencyHz = mode == RtlSdrDsp::Demodulator::Usb ? 1000 : 0;
+        config.ssbNoiseReduction = mode == RtlSdrDsp::Demodulator::Usb
+            ? RtlSdrDsp::SsbNoiseReductionMode::Light
+            : RtlSdrDsp::SsbNoiseReductionMode::Medium;
+        input.start(config);
+
+        QTRY_VERIFY_WITH_TIMEOUT(startedSpy.count() == 1 || errorSpy.count() > 0, 5000);
+        if (errorSpy.count() > 0) {
+            QFAIL(qPrintable(errorSpy.first().value(0).toString()));
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(iqSpy.count() > 0, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(audioSpy.count() > 2, 5000);
+        QCOMPARE(errorSpy.count(), 0);
+        QCOMPARE(input.activeConfig().ssbVoiceBandwidthHz, config.ssbVoiceBandwidthHz);
+        QVERIFY(input.activeConfig().ssbAgcMode == config.ssbAgcMode);
+        QCOMPARE(input.activeConfig().ssbNotchFrequencyHz, config.ssbNotchFrequencyHz);
+        QVERIFY(input.activeConfig().ssbNoiseReduction == config.ssbNoiseReduction);
+        input.stop();
+        QTRY_VERIFY_WITH_TIMEOUT(stoppedSpy.count() == 1, 5000);
+    }
 }
 
 QTEST_MAIN(TestRtlSdrInput)

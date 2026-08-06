@@ -493,6 +493,10 @@ private:
         QString grid;
         QString grid4;
         QString grid6;
+        // Provenance is deliberately independent from the spot source: a
+        // decoded messages can be correlated with PSK data without making
+        // their over-the-air locator any less authoritative.
+        QString gridOrigin {QStringLiteral("UNKNOWN")};
         QString band;
         QString mode;
         QString propagationMode;
@@ -800,7 +804,8 @@ private:
     QString m_spotCorrelationFilter {QStringLiteral("All")};
     int m_bandActivityWindowHours {6};
     QStringList m_rosterVisibleColumns {
-        QStringLiteral("Grid"), QStringLiteral("Band"), QStringLiteral("Mode"),
+        QStringLiteral("Grid"), QStringLiteral("Grid source"),
+        QStringLiteral("Band"), QStringLiteral("Mode"),
         QStringLiteral("SNR"), QStringLiteral("DXCC"), QStringLiteral("Age")};
     QString m_callLookupProvider {QStringLiteral("QRZ")};
     bool m_alertNewGridEnabled {true};

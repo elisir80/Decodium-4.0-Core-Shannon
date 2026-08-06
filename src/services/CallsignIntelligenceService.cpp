@@ -2,6 +2,8 @@
 
 #include "DxccLookup.h"
 #include "DecodiumProfileSettings.h"
+#include "EqslInboxDownload.h"
+#include "LotwReportResponse.h"
 #include "SecureSettings.hpp"
 
 #include <QDateTime>
@@ -458,13 +460,15 @@ void CallsignIntelligenceService::loadSettings()
     m_enrichMissingFields = settings.value(QStringLiteral("EnrichMissingFields"), false).toBool();
     m_cacheTtlMinutes = qBound(5, settings.value(QStringLiteral("CacheTtlMinutes"), 1440).toInt(), 10080);
     m_eqslUsername = settings.value(QStringLiteral("EqslUsername")).toString().trimmed().toUpper();
-    m_lotwUsername = settings.value(QStringLiteral("LotwUsername")).toString().trimmed().toUpper();
+    // LoTW documents this as a username, not necessarily a callsign.  Do not
+    // alter its case while loading a saved account name.
+    m_lotwUsername = settings.value(QStringLiteral("LotwUsername")).toString().trimmed();
     m_lotwLastQsl = settings.value(QStringLiteral("LotwLastQsl")).toString().trimmed();
     m_clubLogEmail = settings.value(QStringLiteral("ClubLogEmail")).toString();
     const QString secureService = secure_settings::service(QStringLiteral("CALLSIGN_INTELLIGENCE"));
     m_eqslPassword = secure_settings::load_or_import(&settings, secureService,
                                                       QStringLiteral("EqslPassword"),
-                                                      settings.value(QStringLiteral("EqslPassword")).toString()).trimmed();
+                                                      settings.value(QStringLiteral("EqslPassword")).toString());
     m_clubLogApiKey = secure_settings::load_or_import(&settings, secureService,
                                                        QStringLiteral("ClubLogApiKey"),
                                                        settings.value(QStringLiteral("ClubLogApiKey")).toString()).trimmed();
@@ -543,16 +547,15 @@ void CallsignIntelligenceService::setEqslUsername(const QString& value)
 
 void CallsignIntelligenceService::setEqslPassword(const QString& value)
 {
-    const QString clean = value.trimmed();
-    if (m_eqslPassword == clean) return;
-    m_eqslPassword = clean;
-    saveSetting(QStringLiteral("EqslPassword"), clean);
+    if (m_eqslPassword == value) return;
+    m_eqslPassword = value;
+    saveSetting(QStringLiteral("EqslPassword"), value);
     emit settingsChanged();
 }
 
 void CallsignIntelligenceService::setLotwUsername(const QString& value)
 {
-    const QString clean = value.trimmed().toUpper();
+    const QString clean = value.trimmed();
     if (m_lotwUsername == clean) return;
     m_lotwUsername = clean;
     saveSetting(QStringLiteral("LotwUsername"), clean);
@@ -561,7 +564,9 @@ void CallsignIntelligenceService::setLotwUsername(const QString& value)
 
 void CallsignIntelligenceService::setLotwPassword(const QString& value)
 {
-    m_lotwPassword = value.trimmed();
+    // Passwords are opaque values: trimming would make a valid password with
+    // a leading or trailing space impossible to use.
+    m_lotwPassword = value;
 }
 
 void CallsignIntelligenceService::setQrzApiKey(const QString& value)
@@ -1095,14 +1100,15 @@ bool CallsignIntelligenceService::importDatabase(const QString& provider, const 
     if (!m_specs.contains(cleanProvider) || cleanProvider == QStringLiteral("dxcc")) return false;
     QString localPath = path;
     if (localPath.startsWith(QStringLiteral("file://"))) localPath = QUrl(localPath).toLocalFile();
-    if (cleanProvider == QStringLiteral("qrz_confirmed")) {
+    if (cleanProvider == QStringLiteral("lotw_confirmed")
+        || cleanProvider == QStringLiteral("qrz_confirmed")) {
         if (m_databaseUpdatePending || m_databaseImportWatcher) {
             setStatus(tr("Aggiornamento già in corso"));
             return false;
         }
         setDatabaseUpdatePending(true);
         m_updateProvider = cleanProvider;
-        setStatus(tr("Lettura ADI QRZ in background..."));
+        setStatus(tr("Lettura ADI %1 in background...").arg(providerLabel(cleanProvider)));
         startConfirmedAdifFileImport(cleanProvider, QFileInfo(localPath).absoluteFilePath());
         return true;
     }
@@ -1252,10 +1258,13 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
     setStatus(tr("Aggiornamento %1 in corso...").arg(providerLabel(cleanProvider)));
 }
 
-void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply, const QString& provider)
+void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
+                                                      const QString& provider,
+                                                      bool eqslInboxAdif)
 {
     if (!reply) return;
     const QByteArray payload = reply->readAll();
+    const QUrl responseUrl = reply->url();
     const auto error = reply->error();
     const QString errorText = reply->errorString();
     reply->deleteLater();
@@ -1273,11 +1282,11 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply, cons
         return;
     }
     if (provider == QStringLiteral("lotw_confirmed")) {
-        const QByteArray lower = payload.toLower();
-        if (!lower.contains("<eoh>")) {
-            const QString detail = lower.contains("<html")
-                ? tr("LoTW ha restituito una pagina di errore: verificare login e password")
-                : tr("la risposta LoTW non contiene un ADIF valido");
+        const decodium::lotw::ReportResponse response = decodium::lotw::parseReportResponse(payload);
+        if (response.kind != decodium::lotw::ReportResponseKind::Adif) {
+            const QString detail = response.error.isEmpty()
+                ? tr("la risposta LoTW non contiene un ADIF valido")
+                : response.error;
             refreshDatabaseState(provider, 0, 0, tr("Error"), detail);
             m_updateProvider.clear();
             setDatabaseUpdatePending(false);
@@ -1353,6 +1362,40 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply, cons
         return;
     }
     if (provider == QStringLiteral("eqsl_inbox")) {
+        if (!eqslInboxAdif) {
+            const decodium::eqsl::InboxPageResult page = decodium::eqsl::parseInboxPage(payload, responseUrl);
+            if (page.kind == decodium::eqsl::InboxPageKind::DownloadReady) {
+                QNetworkRequest request(page.adifUrl);
+                request.setHeader(QNetworkRequest::UserAgentHeader,
+                                  QStringLiteral("Decodium/4.0 eQSL InBox"));
+                request.setTransferTimeout(120000);
+                m_activeReply = m_network->get(request);
+                connect(m_activeReply, &QNetworkReply::finished, this,
+                        [this, reply = m_activeReply, provider]() {
+                    handleDatabaseReply(reply, provider, true);
+                });
+                setStatus(tr("eQSL InBox: download del file ADI in corso..."));
+                return;
+            }
+            if (page.kind == decodium::eqsl::InboxPageKind::NoRecords) {
+                // eQSL can legitimately answer without a generated download
+                // when the Inbox is empty.  Store an empty ADIF rather than
+                // presenting this as a credentials failure.
+                startConfirmedAdifSave(provider, {});
+                return;
+            }
+            if (page.kind != decodium::eqsl::InboxPageKind::DirectAdif) {
+                const QString detail = page.error.isEmpty()
+                    ? tr("risposta eQSL non valida")
+                    : page.error;
+                refreshDatabaseState(provider, 0, 0, tr("Error"), detail);
+                m_updateProvider.clear();
+                setDatabaseUpdatePending(false);
+                setStatus(tr("eQSL InBox fallito: %1").arg(detail));
+                emit databasesChanged();
+                return;
+            }
+        }
         startConfirmedAdifSave(provider, payload);
         return;
     }
@@ -1433,10 +1476,13 @@ void CallsignIntelligenceService::startConfirmedAdifSave(const QString& provider
         QVariantMap result;
         const QByteArray lower = data.left(8192).toLower();
         const QByteArray lowerAll = data.toLower();
-        const bool lotwHeader = provider == QStringLiteral("lotw_confirmed") && lowerAll.contains("<eoh>");
+        const bool confirmedAdifHeader = (provider == QStringLiteral("lotw_confirmed")
+                                          || provider == QStringLiteral("eqsl_inbox"))
+            && lowerAll.contains("<eoh>");
         const bool hasRecords = lowerAll.contains("<call:");
         const bool hasRecordEnd = lowerAll.contains("<eor");
-        if (!data.trimmed().isEmpty() && ((!hasRecords && !lotwHeader) || (!hasRecordEnd && !lotwHeader))) {
+        if (!data.trimmed().isEmpty()
+            && ((!hasRecords && !confirmedAdifHeader) || (!hasRecordEnd && !confirmedAdifHeader))) {
             result.insert(QStringLiteral("error"),
                           lower.contains("<html") || lower.contains("error")
                               ? QStringLiteral("il provider ha restituito una pagina di errore: verificare le credenziali")
@@ -1505,9 +1551,12 @@ void CallsignIntelligenceService::startConfirmedAdifFileImport(const QString& pr
             return;
         }
 
+        // A manually chosen LoTW export is a recovery/import operation. It
+        // must not move the incremental online cursor backwards when an older
+        // archive is selected. Only a successful online LoTW query advances
+        // APP_LoTW_LASTQSL in completeConfirmedAdifImport().
         if (provider == QStringLiteral("lotw_confirmed")) {
-            m_pendingLotwLastQsl = adifHeaderValue(result.value(QStringLiteral("payload")).toByteArray(),
-                                                   QStringLiteral("APP_LoTW_LASTQSL"));
+            m_pendingLotwLastQsl.clear();
         }
         setStatus(tr("File ADI %1 letto; importazione in background...").arg(providerLabel(provider)));
         startConfirmedAdifSave(provider, result.value(QStringLiteral("payload")).toByteArray());
@@ -1583,7 +1632,10 @@ void CallsignIntelligenceService::refreshDatabaseState(const QString& provider, 
         countQuery.addBindValue(provider);
         if (countQuery.exec() && countQuery.next())
             effectiveRowCount = countQuery.value(0).toInt();
-    } else {
+    } else if (updatedAt <= 0) {
+        // Preserve the last successful count when reporting an error. For
+        // confirmed providers a successful sync uses rowCount directly: its
+        // source records live in the active logbook, not callsign_records.
         countQuery.prepare(QStringLiteral("SELECT row_count FROM callsign_provider_state WHERE provider=?"));
         countQuery.addBindValue(provider);
         if (countQuery.exec() && countQuery.next())
