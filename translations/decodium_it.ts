@@ -22098,6 +22098,36 @@ Clicca MONITOR per iniziare</translation>
         <source>Show waterfall controls</source>
         <translation>Mostra controlli waterfall</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Tracce:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Fondo:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>Spettro 3D a tracce impilate: mostra la storia della banda che si allontana. Costa di più da disegnare, quindi sulle macchine modeste conviene lasciarlo spento.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>Spettro 3D a tracce impilate: acceso. Premi per tornare alla traccia 2D.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Quante tracce di storia vengono disegnate. Poche tracce separano le creste, molte mostrano una storia più lunga.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>Quanto sopra il minimo partono le creste. Alzalo per appiattire il rumore e lasciare in piedi solo i segnali.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

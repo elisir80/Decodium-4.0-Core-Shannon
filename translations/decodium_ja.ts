@@ -22070,6 +22070,36 @@ MONITOR をクリックして開始</translation>
         <source>Show waterfall controls</source>
         <translation>waterfall コントロールを表示</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>トレース:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>下限:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>重ね描き3Dスペクトラム: バンドの履歴が奥へ遠ざかる様子を表示します。描画の負荷が高いので、非力なパソコンでは切ったままにしてください。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>重ね描き3Dスペクトラム: オン。クリックすると2D表示に戻ります。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>描画する履歴トレースの本数。少ないと尾根が分かれ、多いとより長い履歴が見えます。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>尾根が始まる高さを最小値からどれだけ上に取るか。上げると雑音が平らになり、信号だけが立ち上がります。</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

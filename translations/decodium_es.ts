@@ -22412,6 +22412,36 @@ Haga clic en MONITOR para empezar</translation>
         <source>Show waterfall controls</source>
         <translation>Mostrar controles de waterfall</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Trazas:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Suelo:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>Espectro 3D de trazas apiladas: muestra la historia de la banda alejándose. Cuesta más de dibujar, así que en equipos modestos conviene dejarlo apagado.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>Espectro 3D de trazas apiladas: activado. Pulsa para volver a la traza 2D.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Cuántas trazas de historia se dibujan. Pocas trazas separan las crestas; muchas muestran una historia más larga.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>Cuánto por encima del mínimo empiezan las crestas. Súbelo para aplanar el ruido y dejar en pie solo las señales.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

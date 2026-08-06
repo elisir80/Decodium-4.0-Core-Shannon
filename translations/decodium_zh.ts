@@ -22069,6 +22069,36 @@ Click MONITOR to start</source>
         <source>Show waterfall controls</source>
         <translation>显示 waterfall 控件</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>迹线：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>基准：</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>堆叠迹线三维频谱：显示频段历史向远处退去。绘制开销较大，配置一般的机器建议保持关闭。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>堆叠迹线三维频谱：已开启。点击可返回二维迹线。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>绘制多少条历史迹线。迹线少则山脊分明，多则显示更长的历史。</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>山脊从最小值以上多高开始。调高可压平噪声，只让信号立起来。</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

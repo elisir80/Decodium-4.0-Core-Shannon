@@ -22071,6 +22071,36 @@ Cliquez sur MONITOR pour démarrer</translation>
         <source>Show waterfall controls</source>
         <translation>Afficher les commandes de la cascade</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Traces :</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Plancher :</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>Spectre 3D à traces empilées : montre l'historique de la bande s'éloignant vers le fond. Il coûte plus cher à dessiner, mieux vaut le laisser désactivé sur les machines modestes.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>Spectre 3D à traces empilées : activé. Cliquez pour revenir à la trace 2D.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Combien de traces d'historique sont dessinées. Peu de traces séparent les crêtes ; beaucoup montrent un historique plus long.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>À quelle hauteur au-dessus du minimum commencent les crêtes. Augmentez-la pour aplatir le bruit et ne laisser que les signaux.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

@@ -22083,6 +22083,36 @@ Click MONITOR to start</source>
         <source>Show waterfall controls</source>
         <translation>Показать элементы управления waterfall</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Трассы:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Порог:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>Трёхмерный спектр из наложенных трасс: показывает историю диапазона, уходящую вдаль. Рисовать его дороже, поэтому на слабых машинах лучше оставить выключенным.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>Трёхмерный спектр из наложенных трасс: включён. Нажмите, чтобы вернуться к двумерной трассе.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Сколько трасс истории рисуется. Меньше трасс — гребни разделены чётче, больше — длиннее история.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>Насколько выше минимума начинаются гребни. Поднимите, чтобы сгладить шум и оставить только сигналы.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

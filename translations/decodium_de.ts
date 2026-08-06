@@ -22071,6 +22071,36 @@ MONITOR klicken zum Starten</translation>
         <source>Show waterfall controls</source>
         <translation>Wasserfall-Steuerung anzeigen</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Spuren:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Basis:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>3D-Spektrum mit gestapelten Spuren: zeigt die Bandhistorie in die Tiefe laufend. Es kostet mehr Rechenzeit, auf schwächeren Rechnern besser ausgeschaltet lassen.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>3D-Spektrum mit gestapelten Spuren: ein. Klicken, um zur 2D-Spur zurückzukehren.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Wie viele Verlaufsspuren gezeichnet werden. Wenige Spuren trennen die Kämme, viele zeigen eine längere Historie.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>Wie weit über dem Minimum die Kämme beginnen. Höher stellen, um das Rauschen zu glätten und nur die Signale stehen zu lassen.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

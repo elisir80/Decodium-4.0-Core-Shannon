@@ -29,6 +29,13 @@ class PanadapterItem : public QQuickItem
 
     // ── Spectrum features ───────────────────────────────────────────────────
     Q_PROPERTY(bool  peakHold    READ peakHold    WRITE setPeakHold    NOTIFY peakHoldChanged)
+
+    // ── Spettro 3D a tracce impilate (opt-in, default spento) ───────────────
+    // La storia grezza in dB e' gia' conservata per la cascata: qui viene solo
+    // ridisegnata in prospettiva, senza raccogliere altri dati.
+    Q_PROPERTY(bool  spectrum3d           READ spectrum3d           WRITE setSpectrum3d           NOTIFY spectrum3dChanged)
+    Q_PROPERTY(int   spectrum3dTraces     READ spectrum3dTraces     WRITE setSpectrum3dTraces     NOTIFY spectrum3dTracesChanged)
+    Q_PROPERTY(float spectrum3dFloorDepth READ spectrum3dFloorDepth WRITE setSpectrum3dFloorDepth NOTIFY spectrum3dFloorDepthChanged)
     Q_PROPERTY(float peakDecay   READ peakDecay   WRITE setPeakDecay   NOTIFY peakDecayChanged)
     Q_PROPERTY(int   avgFrames   READ avgFrames   WRITE setAvgFrames   NOTIFY avgFramesChanged)
     Q_PROPERTY(int   spectrumHeight READ spectrumHeight WRITE setSpectrumHeight NOTIFY spectrumHeightChanged)
@@ -87,6 +94,9 @@ public:
     float maxDb()          const { return m_maxDb; }
     bool  autoRange()      const { return m_autoRange; }
     bool  peakHold()       const { return m_peakHold; }
+    bool  spectrum3d()           const { return m_spectrum3d; }
+    int   spectrum3dTraces()     const { return m_spectrum3dTraces; }
+    float spectrum3dFloorDepth() const { return m_spectrum3dFloorDepth; }
     float peakDecay()      const { return m_peakDecay; }
     int   avgFrames()      const { return m_avgFrames; }
     int   spectrumHeight() const { return m_spectrumH; }
@@ -126,6 +136,15 @@ public:
     void setMaxDb(float v)         { if (m_maxDb!=v){m_maxDb=v;emit maxDbChanged();markAllDirty();} }
     void setAutoRange(bool v)      { if (m_autoRange!=v){m_autoRange=v;emit autoRangeChanged();markAllDirty();} }
     void setPeakHold(bool v)       { if (m_peakHold!=v){m_peakHold=v;if(!v)m_peakBins.clear();emit peakHoldChanged();} }
+    void setSpectrum3d(bool v)     { if (m_spectrum3d!=v){m_spectrum3d=v;emit spectrum3dChanged();update();} }
+    void setSpectrum3dTraces(int v) {
+        int const clamped = qBound(8, v, 128);
+        if (m_spectrum3dTraces!=clamped){m_spectrum3dTraces=clamped;emit spectrum3dTracesChanged();update();}
+    }
+    void setSpectrum3dFloorDepth(float v) {
+        float const clamped = qBound(0.0f, v, 40.0f);
+        if (!qFuzzyCompare(m_spectrum3dFloorDepth, clamped)){m_spectrum3dFloorDepth=clamped;emit spectrum3dFloorDepthChanged();update();}
+    }
     void setPeakDecay(float v)     { if (m_peakDecay!=v){m_peakDecay=v;emit peakDecayChanged();} }
     void setAvgFrames(int v)       { if (m_avgFrames!=v){m_avgFrames=qBound(1,v,32);emit avgFramesChanged();} }
     void setSpectrumHeight(int v)  { if (m_spectrumH!=v){m_spectrumH=v;emit spectrumHeightChanged();markGeomDirty();} }
@@ -189,6 +208,9 @@ signals:
     void maxDbChanged();
     void autoRangeChanged();
     void peakHoldChanged();
+    void spectrum3dChanged();
+    void spectrum3dTracesChanged();
+    void spectrum3dFloorDepthChanged();
     void peakDecayChanged();
     void avgFramesChanged();
     void spectrumHeightChanged();
@@ -254,6 +276,7 @@ private:
     bool spectrumGraphSupported() const;
     void updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int h);
     void removeSpectrumGraphNodes(QSGNode* spectrumRoot);
+    void updateSpectrum3dNodes(QSGNode* spectrumRoot, int w, int h);
     void rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectReady);
     void updateSpectrumOverlayNode(QSGNode* spectrumRoot, int w, int h, bool gpuDirectReady, bool gpuSpectrumGraph);
     bool gpuFftSupported(QString* reason = nullptr) const;
@@ -351,6 +374,9 @@ private:
     float m_maxDb        = -40.f;
     bool  m_autoRange    = true;
     bool  m_peakHold     = true;
+    bool  m_spectrum3d   = false;   // opt-in: costa vertici, non si accende da sola
+    int   m_spectrum3dTraces = 28;  // tracce di storia disegnate
+    float m_spectrum3dFloorDepth = 6.0f; // dB sopra il minimo sotto cui la traccia e' piatta
     float m_peakDecay    = 0.97f;
     int   m_avgFrames    = 1;
     int   m_spectrumH    = 150;

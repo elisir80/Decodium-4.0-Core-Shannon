@@ -172,6 +172,14 @@ Item {
         waterfallPanel.setShowDecodeCallsigns(boolSetting("uiWaterfallShowCallsigns", true), false)
         dxClusterCheck.checked = boolSetting("uiWaterfallShowDxCluster", false)
         waterfallDisplay.showDxClusterSpots = dxClusterCheck.checked
+        // Spento per impostazione predefinita: costa vertici e su macchine
+        // modeste si deve poter accendere solo di proposito.
+        spectrum3dToggle.checked = boolSetting("uiSpectrum3d", false)
+        waterfallDisplay.spectrum3d = spectrum3dToggle.checked
+        traces3dSlider.value = bridge.getSetting("uiSpectrum3dTraces", 28)
+        floor3dSlider.value = bridge.getSetting("uiSpectrum3dFloorDepth", 6)
+        waterfallDisplay.spectrum3dTraces = traces3dSlider.value
+        waterfallDisplay.spectrum3dFloorDepth = floor3dSlider.value
 
         // In light theme la palette è forzata a 11 (mockup pastello). Non sovrascrivere col valore Settings.
         waterfallDisplay.autoRange = autoRangeCheck.checked
@@ -745,6 +753,106 @@ Item {
                     }
                 }
                 Text { text: "Auto"; color: autoRangeCheck.checked ? accentGreen : textSec; font.pixelSize: 10 }
+
+                // Spettro 3D a tracce impilate. La cascata sotto resta invariata:
+                // cambia solo come viene disegnato lo spettro sopra di essa.
+                //
+                // UN SOLO bersaglio, non casella + etichetta separate: l'etichetta
+                // non era cliccabile e il quadratino finiva a ridosso di quello di
+                // "Auto", quindi si mancava il bersaglio o si premeva l'altro.
+                // Qui tutto il rettangolo e' cliccabile e lo stato si legge a colpo
+                // d'occhio: pieno = acceso, vuoto = spento.
+                Rectangle {
+                    id: spectrum3dToggle
+                    property bool checked: false
+                    implicitWidth: 42
+                    implicitHeight: 18
+                    radius: 3
+                    color: checked ? accentCyan : (spectrum3dMA.containsMouse ? Qt.rgba(1,1,1,0.10) : wfToolbarBg)
+                    border.color: accentCyan
+                    border.width: 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "3D"
+                        color: spectrum3dToggle.checked ? "black" : accentCyan
+                        font.pixelSize: 10
+                        font.bold: true
+                    }
+
+                    ToolTip.text: spectrum3dToggle.checked
+                                  ? qsTr("Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.")
+                                  : qsTr("Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.")
+                    ToolTip.visible: spectrum3dMA.containsMouse
+                    ToolTip.delay: 400
+
+                    MouseArea {
+                        id: spectrum3dMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            spectrum3dToggle.checked = !spectrum3dToggle.checked
+                            waterfallDisplay.spectrum3d = spectrum3dToggle.checked
+                            if (!waterfallPanel.restoringSettings) {
+                                waterfallPanel.persistGraphSetting("uiSpectrum3d", spectrum3dToggle.checked)
+                            }
+                        }
+                    }
+                }
+
+                // Regolazioni del 3D: compaiono solo quando serve, per non
+                // affollare la barra a chi il 3D non lo usa.
+                Text {
+                    text: qsTr("Traces:"); color: accentCyan; font.pixelSize: 10
+                    visible: spectrum3dToggle.checked
+                }
+                Slider {
+                    id: traces3dSlider
+                    visible: spectrum3dToggle.checked
+                    Layout.preferredWidth: 70
+                    from: 8; to: 96; value: 28; stepSize: 1
+                    onValueChanged: {
+                        waterfallDisplay.spectrum3dTraces = value
+                        if (!waterfallPanel.restoringSettings) {
+                            waterfallPanel.persistGraphSetting("uiSpectrum3dTraces", value)
+                        }
+                    }
+                    ToolTip.text: qsTr("How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.")
+                    ToolTip.visible: traces3dSlider.hovered
+                    ToolTip.delay: 400
+                    background: Rectangle { x:traces3dSlider.leftPadding;y:traces3dSlider.topPadding+traces3dSlider.availableHeight/2-2;width:traces3dSlider.availableWidth;height:4;radius:2;color:wfTrack }
+                    handle: Rectangle { x:traces3dSlider.leftPadding+traces3dSlider.visualPosition*(traces3dSlider.availableWidth-width);y:traces3dSlider.topPadding+traces3dSlider.availableHeight/2-height/2;width:10;height:10;radius:5;color:accentCyan }
+                }
+                Text {
+                    text: traces3dSlider.value.toFixed(0); color: accentCyan; font.pixelSize: 10; width: 18
+                    visible: spectrum3dToggle.checked
+                }
+                Text {
+                    text: qsTr("Floor:"); color: accentCyan; font.pixelSize: 10
+                    visible: spectrum3dToggle.checked
+                }
+                Slider {
+                    id: floor3dSlider
+                    visible: spectrum3dToggle.checked
+                    Layout.preferredWidth: 70
+                    from: 0; to: 30; value: 6; stepSize: 1
+                    onValueChanged: {
+                        waterfallDisplay.spectrum3dFloorDepth = value
+                        if (!waterfallPanel.restoringSettings) {
+                            waterfallPanel.persistGraphSetting("uiSpectrum3dFloorDepth", value)
+                        }
+                    }
+                    ToolTip.text: qsTr("How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.")
+                    ToolTip.visible: floor3dSlider.hovered
+                    ToolTip.delay: 400
+                    background: Rectangle { x:floor3dSlider.leftPadding;y:floor3dSlider.topPadding+floor3dSlider.availableHeight/2-2;width:floor3dSlider.availableWidth;height:4;radius:2;color:wfTrack }
+                    handle: Rectangle { x:floor3dSlider.leftPadding+floor3dSlider.visualPosition*(floor3dSlider.availableWidth-width);y:floor3dSlider.topPadding+floor3dSlider.availableHeight/2-height/2;width:10;height:10;radius:5;color:accentCyan }
+                }
+                Text {
+                    text: floor3dSlider.value.toFixed(0) + " dB"; color: accentCyan; font.pixelSize: 10; width: 32
+                    visible: spectrum3dToggle.checked
+                }
 
                 // TX brackets toggle
                 Text { text: "[ ]"; color: txBracketsCheck.checked ? accentGreen : textSec; font.pixelSize: 10; font.bold: true }

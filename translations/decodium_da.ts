@@ -22070,6 +22070,36 @@ Klik på MONITOR for at starte</translation>
         <source>Show waterfall controls</source>
         <translation>Vis waterfall-kontroller</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Spor:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Bund:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>3D-spektrum med stablede spor: viser båndets historie, der forsvinder i dybden. Det koster mere at tegne, så lad det være slået fra på beskedne maskiner.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>3D-spektrum med stablede spor: til. Klik for at vende tilbage til 2D-sporet.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Hvor mange historikspor der tegnes. Få spor adskiller kammene, mange viser en længere historik.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>Hvor langt over minimum kammene begynder. Hæv den for at udjævne støjen og kun lade signalerne stå tilbage.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

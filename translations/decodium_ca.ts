@@ -22072,6 +22072,36 @@ Feu clic a MONITOR per començar</translation>
         <source>Show waterfall controls</source>
         <translation>Mostra els controls del waterfall</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="807"/>
+        <source>Traces:</source>
+        <translation>Traces:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="832"/>
+        <source>Floor:</source>
+        <translation>Base:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="785"/>
+        <source>Stacked-trace 3D spectrum: shows the history of the band receding into the distance. It costs more to draw, so leave it off on modest machines.</source>
+        <translation>Espectre 3D de traces apilades: mostra la història de la banda allunyant-se. Costa més de dibuixar, així que en màquines modestes val més deixar-lo apagat.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="784"/>
+        <source>Stacked-trace 3D spectrum: on. Click to go back to the 2D trace.</source>
+        <translation>Espectre 3D de traces apilades: activat. Prem per tornar a la traça 2D.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="821"/>
+        <source>How many history traces are drawn. Fewer traces separate the ridges; more of them show a longer history.</source>
+        <translation>Quantes traces d'història es dibuixen. Poques traces separen les crestes; moltes mostren una història més llarga.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
+        <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
+        <translation>Quant per sobre del mínim comencen les crestes. Apuja-ho per aplanar el soroll i deixar dempeus només els senyals.</translation>
+    </message>
 </context>
 <context>
     <name>WideGraph</name>

@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QSGFlatColorMaterial>
+#include <QSGVertexColorMaterial>
 #include <QSGGeometryNode>
 #include <QSGMaterial>
 #include <QSGMaterialShader>
@@ -400,6 +401,50 @@ QSGGeometryNode* ensureFlatColorNode(QSGNode* parent,
 
     if (material)
         material->setColor(color);
+    node->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
+    return node;
+}
+
+// Come ensureFlatColorNode, ma con il colore per VERTICE: serve allo spettro 3D,
+// dove la cresta cambia tinta con l'ampiezza lungo la stessa traccia.
+// Se al posto indicato c'e' un nodo di tipo diverso (per esempio quello piatto
+// del 2D) viene rimosso insieme ai successivi: e' cosi' che il passaggio
+// 2D<->3D si ripulisce da solo senza codice di transizione.
+QSGGeometryNode* ensureVertexColorNode(QSGNode* parent,
+                                       int index,
+                                       int vertexCount,
+                                       QSGGeometry::DrawingMode drawingMode)
+{
+    if (!parent || vertexCount <= 0)
+        return nullptr;
+
+    QSGNode* child = sceneGraphChildAt(parent, index);
+    auto* node = dynamic_cast<QSGGeometryNode*>(child);
+    auto* material = node ? dynamic_cast<QSGVertexColorMaterial*>(node->material()) : nullptr;
+    if (child && (!node || !material)) {
+        removeSceneGraphChildrenFrom(parent, child);
+        child = nullptr;
+        node = nullptr;
+    }
+
+    if (!node) {
+        node = new QSGGeometryNode();
+        auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_ColoredPoint2D(), vertexCount);
+        geometry->setDrawingMode(drawingMode);
+        geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
+        node->setGeometry(geometry);
+        node->setFlag(QSGNode::OwnsGeometry);
+        node->setMaterial(new QSGVertexColorMaterial());
+        node->setFlag(QSGNode::OwnsMaterial);
+        parent->appendChildNode(node);
+    } else {
+        QSGGeometry* geometry = node->geometry();
+        if (geometry && geometry->vertexCount() != vertexCount)
+            geometry->allocate(vertexCount);
+        if (geometry)
+            geometry->setDrawingMode(drawingMode);
+    }
+
     node->markDirty(QSGNode::DirtyGeometry | QSGNode::DirtyMaterial);
     return node;
 }
@@ -2951,6 +2996,208 @@ void PanadapterItem::renderSpectrum()
     }
 }
 
+// Spettro 3D a tracce impilate: la storia gia' conservata per la cascata
+// (m_waterfallDbRows, buffer circolare di dB grezzi) viene ridisegnata in
+// prospettiva, dalla traccia piu' lontana alla piu' vicina. Nessun dato nuovo
+// viene raccolto e nessuno shader viene aggiunto: sono polilinee nello stesso
+// meccanismo a nodi del 2D.
+//
+// Il costo e' tracce x punti, ed e' proprio quello che strozza i PC modesti,
+// quindi i punti per traccia sono decimati a un tetto fisso e la funzione e'
+// raggiungibile solo con l'opzione accesa a mano.
+void PanadapterItem::updateSpectrum3dNodes(QSGNode* spectrumRoot, int w, int h)
+{
+    if (!spectrumRoot || w <= 1 || h <= 1) {
+        removeSpectrumGraphNodes(spectrumRoot);
+        return;
+    }
+
+    int const histBins = m_waterfallRawBinsWidth;
+    int const histRows = histBins > 0 ? m_waterfallDbRows.size() / histBins : 0;
+    if (histBins <= 1 || histRows < 2) {
+        // Storia non ancora disponibile (avvio, cambio banda): meglio niente che
+        // una superficie fatta di valori sentinella.
+        removeSpectrumGraphNodes(spectrumRoot);
+        return;
+    }
+
+    PanadapterFreqView const freqView = makePanadapterFreqView(
+        static_cast<float>(m_startFreq),
+        static_cast<float>(m_bandwidth),
+        m_dataFreqMin,
+        m_dataFreqMax,
+        m_zoomFactor,
+        static_cast<float>(m_panHz));
+    if (freqView.clipsData) {
+        removeSpectrumGraphNodes(spectrumRoot);
+        return;
+    }
+
+    int const traces = qBound(2, qMin(m_spectrum3dTraces, histRows), 128);
+
+    // Decimazione orizzontale: un punto ogni 'step' pixel, con un tetto di punti
+    // per traccia. Su 1300 pixel e 48 tracce si passa da ~62k vertici a ~15k.
+    int const maxPointsPerTrace = 320;
+    int const step = qMax(1, (w + maxPointsPerTrace - 1) / maxPointsPerTrace);
+    int const points = w / step + 1;
+    if (points < 2) {
+        removeSpectrumGraphNodes(spectrumRoot);
+        return;
+    }
+
+    // L'altezza della cresta si misura sopra il fondo scelto dall'utente, non
+    // sopra il minimo assoluto: cosi' il rumore resta piatto e spiccano i segnali.
+    float const floorDb = m_minDb + m_spectrum3dFloorDepth;
+    float floorRange = m_maxDb - floorDb;
+    if (floorRange < 1.f)
+        floorRange = 1.f;
+
+    float const nearY = static_cast<float>(h) - 1.0f;
+    float const farY = static_cast<float>(h) * 0.28f;
+    float const bandH = nearY - farY;
+    float const shrinkMax = 0.32f;          // restringimento della traccia lontana
+    float const ridgeMax = bandH * 0.55f;   // cresta massima della traccia vicina
+    // Spaziatura NON lineare: le tracce vicine si distanziano, quelle lontane si
+    // addensano verso l'orizzonte. Con una spaziatura lineare il risultato legge
+    // come una rete di linee invece che come una superficie che si allontana.
+    float const perspectiveExponent = 2.0f;
+
+    int childIndex = 1;
+
+    // Reticolo di frequenza in prospettiva: linee che convergono verso il punto
+    // di fuga. E' il segnale visivo che distingue uno spazio tridimensionale da
+    // una pila di curve. Va disegnato PRIMA delle tracce: sotto viene coperto
+    // dai riempimenti, e resta visibile solo nel cielo sopra i profili, che e'
+    // esattamente dove serve.
+    {
+        int const gridLines = 9;
+        float const farScale = 1.0f - shrinkMax;
+        float const farOffset = static_cast<float>(w) * shrinkMax * 0.5f;
+        if (auto* gridNode = ensureVertexColorNode(spectrumRoot, childIndex,
+                                                   gridLines * 2,
+                                                   QSGGeometry::DrawLines)) {
+            auto* gv = gridNode->geometry()->vertexDataAsColoredPoint2D();
+            for (int g = 0; g < gridLines; ++g) {
+                float const fx = static_cast<float>(g) / static_cast<float>(gridLines - 1);
+                float const nx = fx * static_cast<float>(w);
+                float const fxFar = farOffset + fx * static_cast<float>(w) * farScale;
+                // Sfumatura: piu' marcato vicino, quasi spento all'orizzonte.
+                gv[g * 2].set(nx, nearY, 46, 60, 74, 170);
+                gv[g * 2 + 1].set(fxFar, farY, 14, 19, 24, 58);
+            }
+            ++childIndex;
+        }
+    }
+
+    for (int t = traces - 1; t >= 0; --t) {
+        float const depth = traces > 1 ? static_cast<float>(t) / static_cast<float>(traces - 1) : 0.f;
+        int row = (m_wfWriteRow - 1 - t) % histRows;
+        if (row < 0)
+            row += histRows;
+        float const* src = m_waterfallDbRows.constData() + static_cast<qsizetype>(row) * histBins;
+        // Reiezione degli impulsi: la mediana temporale su tre righe toglie i
+        // picchi isolati di un solo fotogramma, che altrimenti costellano la
+        // superficie di spuntoni e la fanno sembrare sporca.
+        int rowPrev = (row - 1) % histRows;
+        if (rowPrev < 0) rowPrev += histRows;
+        int const rowNext = (row + 1) % histRows;
+        float const* srcPrev = m_waterfallDbRows.constData() + static_cast<qsizetype>(rowPrev) * histBins;
+        float const* srcNext = m_waterfallDbRows.constData() + static_cast<qsizetype>(rowNext) * histBins;
+
+        // Due nodi per traccia: prima il RIEMPIMENTO, poi la cresta luminosa.
+        // Il riempimento e' cio' che mancava perche' il disegno leggesse come una
+        // superficie invece che come una rete di linee: essendo disegnato dopo, il
+        // riempimento della traccia vicina COPRE quelle dietro, e delle lontane
+        // resta visibile solo cio' che sporge sopra il profilo davanti. E' la
+        // rimozione delle superfici nascoste, ottenuta con l'ordine di disegno.
+        auto* fillNode = ensureVertexColorNode(spectrumRoot, childIndex, points * 2,
+                                               QSGGeometry::DrawTriangleStrip);
+        if (!fillNode)
+            break;
+        ++childIndex;
+        auto* fillVertices = fillNode->geometry()->vertexDataAsColoredPoint2D();
+
+        auto* node = ensureVertexColorNode(spectrumRoot, childIndex, points,
+                                           QSGGeometry::DrawLineStrip);
+        if (!node)
+            break;
+        ++childIndex;
+
+        // La traccia piu' recente e' quella che l'operatore sta guardando: piu'
+        // spessa, cosi' si stacca dalla storia che le sta dietro.
+        node->geometry()->setLineWidth(t == 0 ? 2.0f : 1.0f);
+
+        auto* vertices = node->geometry()->vertexDataAsColoredPoint2D();
+        float const persp = 1.0f - std::pow(1.0f - depth, perspectiveExponent);
+        float const scaleX = 1.0f - shrinkMax * persp;
+        float const offsetX = static_cast<float>(w) * shrinkMax * persp * 0.5f;
+        float const baseY = nearY - persp * bandH;
+        float const ridge = ridgeMax * (1.0f - 0.55f * persp);
+        // Le tracce lontane sbiadiscono: da' profondita' e toglie confusione
+        // dove le creste si sovrappongono.
+        int const alpha = static_cast<int>(255.0f * (1.0f - 0.72f * persp));
+
+        for (int i = 0; i < points; ++i) {
+            int const x = qMin(i * step, w - 1);
+            float const pixFreq = freqView.viewStart
+                + static_cast<float>(x) * freqView.viewRange / static_cast<float>(w);
+            float const clampedFreq = qBound(m_dataFreqMin, pixFreq, m_dataFreqMax);
+            int bin = static_cast<int>((clampedFreq - m_dataFreqMin) / freqView.dataRange
+                                       * static_cast<float>(histBins));
+            bin = qBound(0, bin, histBins - 1);
+
+            float const a0 = src[bin];
+            float const a1 = srcPrev[bin];
+            float const a2 = srcNext[bin];
+            float const db = qMax(qMin(a0, a1), qMin(qMax(a0, a1), a2)); // mediana
+            float raw = qBound(0.f, (db - floorDb) / floorRange, 1.f);
+            // Leggera curva: appiattisce il rumore e lascia svettare i segnali,
+            // invece di una superficie uniformemente mossa.
+            float const norm = raw * raw * (3.0f - 2.0f * raw);
+            QRgb const rgb = wfColor(norm);
+            // QSGVertexColorMaterial vuole il colore gia' premoltiplicato per alfa.
+            auto const pm = [alpha](int c) {
+                return static_cast<uchar>(c * alpha / 255);
+            };
+            float const px = offsetX + static_cast<float>(x) * scaleX;
+            float const py = baseY - norm * ridge;
+            vertices[i].set(px, py,
+                            pm(qRed(rgb)), pm(qGreen(rgb)), pm(qBlue(rgb)),
+                            static_cast<uchar>(alpha));
+
+            // Il riempimento scende fino al fondo del pannello ed e' OPACO:
+            // solo cosi' nasconde davvero le tracce dietro. Sotto la cresta
+            // sfuma verso il nero, che da' rilievo al profilo luminoso sopra.
+            auto const shade = [](int c, float k) {
+                return static_cast<uchar>(qBound(0.f, static_cast<float>(c) * k, 255.f));
+            };
+            float const topShade = 0.30f * (1.0f - 0.45f * persp);
+            fillVertices[i * 2].set(px, py,
+                                    shade(qRed(rgb), topShade),
+                                    shade(qGreen(rgb), topShade),
+                                    shade(qBlue(rgb), topShade), 255);
+            fillVertices[i * 2 + 1].set(px, static_cast<float>(h),
+                                        shade(qRed(rgb), 0.06f),
+                                        shade(qGreen(rgb), 0.06f),
+                                        shade(qBlue(rgb), 0.06f), 255);
+        }
+    }
+
+    // Rimuove SOLO le tracce in eccesso quando il loro numero cala, MAI il nodo
+    // dell'overlay: quello porta griglia, etichette e contrassegni RX/TX, e viene
+    // rimesso in coda a ogni fotogramma per restare sopra la superficie.
+    // Cancellandolo qui insieme al resto spariva dallo schermo.
+    QSGNode* extra = sceneGraphChildAt(spectrumRoot, childIndex);
+    while (extra) {
+        QSGNode* const next = extra->nextSibling();
+        if (!dynamic_cast<PanadapterSpectrumOverlayNode*>(extra)) {
+            spectrumRoot->removeChildNode(extra);
+            delete extra;
+        }
+        extra = next;
+    }
+}
+
 void PanadapterItem::removeSpectrumGraphNodes(QSGNode* spectrumRoot)
 {
     if (!spectrumRoot)
@@ -3042,7 +3289,12 @@ void PanadapterItem::rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectRea
         if (x < 0 || x >= w)
             continue;
         p.setPen(QPen(QColor(40, 40, 40), 1));
-        p.drawLine(x, 0, x, qMax(0, h - 16));
+        // Con il 3D attivo la griglia dritta a tutta altezza attraversa il
+        // paesaggio in prospettiva e rovina l'illusione: al suo posto c'e' il
+        // reticolo che converge al punto di fuga. Le etichette sotto restano,
+        // e restano anche i contrassegni RX/TX, che servono a operare.
+        if (!m_spectrum3d)
+            p.drawLine(x, 0, x, qMax(0, h - 16));
         QString label;
         if (qAbs(f) >= 1000000) {
             label = QString::number(static_cast<double>(f) / 1000000.0, 'f',
@@ -3406,6 +3658,13 @@ void PanadapterItem::updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int 
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
     if (!spectrumRoot || w <= 1 || h <= 1 || m_bins.isEmpty()) {
         removeSpectrumGraphNodes(spectrumRoot);
+        return;
+    }
+
+    // Vista 3D: sostituisce la traccia 2D (riempimento, alone, picco) ma lascia
+    // intatta la cascata sotto e tutte le sovrapposizioni, che vivono altrove.
+    if (m_spectrum3d) {
+        updateSpectrum3dNodes(spectrumRoot, w, h);
         return;
     }
 
