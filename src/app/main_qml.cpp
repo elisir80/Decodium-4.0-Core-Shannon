@@ -61,6 +61,14 @@
 #define NOMINMAX
 #endif
 #include <windows.h>
+
+// Hybrid-GPU laptops inspect these exports before Qt creates its Direct3D
+// device. They request the discrete adapter while preserving an explicit
+// per-app choice made in Windows Graphics settings.
+extern "C" {
+__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
+}
 #endif
 
 #include "DecodiumBridge.h"
@@ -1234,6 +1242,9 @@ int main(int argc, char* argv[])
     DecodiumApplication app(argc, argv);
     DecodiumLogging::installCrashHandler();
     L("QApplication OK");
+#ifdef Q_OS_WIN
+    L("Windows dGPU preference requested via NVIDIA Optimus / AMD PowerXpress exports");
+#endif
 
     // Set the real app identity before any QStandardPaths lookup. In AppImage
     // builds argv[0] is the launcher wrapper, and using it for CacheLocation

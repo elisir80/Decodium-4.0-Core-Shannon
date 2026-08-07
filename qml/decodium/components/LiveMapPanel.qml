@@ -527,6 +527,11 @@ Rectangle {
 
     function scheduleMapSnapshotSync() {
         mapSnapshotSyncPending = true
+        // A live snapshot is visual information, not decode-critical work.
+        // Keep normal systems responsive while avoiding repeated map rebuilds
+        // during a short UI-pressure window.
+        mapSnapshotSyncTimer.interval = root.engine && root.engine.cpuPressureNow
+                && root.engine.cpuPressureNow() ? 750 : 450
         mapSnapshotSyncTimer.restart()
     }
 
@@ -759,7 +764,7 @@ Rectangle {
 
     Timer {
         id: mapSnapshotSyncTimer
-        interval: 180
+        interval: 450
         repeat: false
         onTriggered: {
             root.mapSnapshotSyncPending = false
@@ -767,7 +772,8 @@ Rectangle {
                 return
             root.ensureActivityBand()
             root.syncCoverage()
-            activityChart.requestPaint()
+            if (activityChart.visible && activityChart.width > 1 && activityChart.height > 1)
+                activityChart.requestPaint()
         }
     }
 

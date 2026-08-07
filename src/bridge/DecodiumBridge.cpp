@@ -7061,7 +7061,7 @@ void DecodiumBridge::setHideGhostDecodes(bool v)
     if (m_hideGhostDecodes == v) return;
     m_hideGhostDecodes = v;
     bridgeLog(QStringLiteral("setHideGhostDecodes: %1").arg(v ? "ON" : "OFF"));
-    saveSettings();
+    saveSettingsAsync();
     invalidateDecodeUiPredicateCaches();
     invalidateLegacyDecodeModelDeltaFastPath();
     // Rigenera i model con la nuova policy di filter.
@@ -8437,7 +8437,7 @@ void DecodiumBridge::setDecodeShowPeriodSeparator(bool v)
     m_decodeShowPeriodSeparator = v;
     bridgeLog(QStringLiteral("setDecodeShowPeriodSeparator: %1")
         .arg(v ? "ON" : "OFF"));
-    saveSettings();
+    saveSettingsAsync();
     invalidateLegacyDecodeModelDeltaFastPath();
     rebuildBandActivityModel();
     rebuildRxDecodeModel();
@@ -18417,7 +18417,7 @@ void DecodiumBridge::setTxDisabled(int n, bool disabled)
                   .arg(disabled ? QStringLiteral("disabled") : QStringLiteral("enabled"))
                   .arg(m_txDisabledMask, 0, 16));
     emit txDisabledMaskChanged();
-    saveSettings();
+    saveSettingsAsync();
 }
 
 void DecodiumBridge::setMultiAnswerMode(bool v)
@@ -30434,7 +30434,7 @@ void DecodiumBridge::shutdown()
     // close path waits for the final queued snapshot before saveSettings()
     // writes the rest of the application state.
     settingsWriteThreadPool().waitForDone(5000);
-    saveSettings();
+    saveSettingsAsync();
 }
 
 void DecodiumBridge::copyToClipboard(const QString &text)

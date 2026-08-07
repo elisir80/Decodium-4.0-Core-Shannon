@@ -2085,7 +2085,10 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     // A decode/PSK burst must not fan out into repeated heavy QML updates.
     m_snapshotFlushTimer = new QTimer(this);
     m_snapshotFlushTimer->setSingleShot(true);
-    m_snapshotFlushTimer->setInterval(280);
+    // SQLite results may update multiple map domains at once. A half-second
+    // coalescing window keeps the Live Map current without repeatedly waking
+    // the QML scene graph during an RX burst.
+    m_snapshotFlushTimer->setInterval(500);
     connect(m_snapshotFlushTimer, &QTimer::timeout,
             this, &MapIntelligenceService::flushPendingSnapshot);
 

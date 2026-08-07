@@ -515,7 +515,7 @@ Dialog {
 
         bridge[prop] = normalized
         bridge.setSetting(prop, normalized)
-        bridge.saveSettings()
+        bridge.saveSettingsAsync()
         return true
     }
 
@@ -1091,9 +1091,6 @@ Dialog {
     function scheduleCatPersist() {
         if (initializationInProgress)
             return
-        var controller = activeCatController()
-        if (controller && controller.saveSettings)
-            controller.saveSettings()
         catPersistTimer.restart()
     }
 
@@ -1103,7 +1100,7 @@ Dialog {
         var controller = activeCatController()
         if (controller && controller.saveSettings)
             controller.saveSettings()
-        bridge.saveSettings()
+        bridge.saveSettingsAsync()
     }
 
     function closeAfterPersist() {
@@ -1199,7 +1196,7 @@ Dialog {
         interval: 300
         repeat: false
         onTriggered: if (!settingsDialog.initializationInProgress)
-                         bridge.saveSettings()
+                         settingsDialog.persistSettingsNow()
     }
 
     Timer {

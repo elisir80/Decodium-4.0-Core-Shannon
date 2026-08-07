@@ -207,10 +207,10 @@ Dialog {
         onAccepted: {
             if (colorPickerInput.text.match(/^#[0-9A-Fa-f]{6}$/) && targetProp !== "") {
                 bridge[targetProp] = colorPickerInput.text
-                bridge.saveSettings()
+                bridge.saveSettingsAsync()
             }
         }
     }
 
-    onAccepted: bridge.saveSettings()
+    onAccepted: bridge.saveSettingsAsync()
 }

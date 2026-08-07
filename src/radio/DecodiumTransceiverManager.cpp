@@ -1067,50 +1067,14 @@ void DecodiumTransceiverManager::abortConnectingRigAfterTimeout(Transceiver* xcv
         << "elapsedMs=" << (m_connectAttemptTimer.isValid() ? m_connectAttemptTimer.elapsed() : -1)
         << "shownReason=" << shownReason;
 
-    d->transceiver = nullptr;
-    if (d->xcvThread == thread) {
-        d->xcvThread = nullptr;
-    }
-    d->desired = Transceiver::TransceiverState {};
-    setConnecting(false);
-    if (m_connected) {
-        m_connected = false;
-        emit connectedChanged();
-    }
-    updateTelemetry(0.0, 0.0);
     emit errorOccurred(QStringLiteral("CAT failure: ") + shownReason);
 
-    if (!thread) {
-        return;
-    }
-
-    thread->requestInterruption();
-    // Tenta lo stop graceful PRIMA del terminate: se il worker ha raggiunto il
-    // suo event loop (es. start() lento ma completato dopo lo scadere del
-    // watchdog), lo stop accodato chiude socket/sessione (HRD, rete) e il
-    // retry di connessione successivo non trova la porta occupata. NON usare
-    // BlockingQueuedConnection qui: se il worker e' davvero appeso dentro
-    // start() il main thread resterebbe bloccato indefinitamente. Se lo stop
-    // accodato non viene mai processato, si termina come prima (con grace
-    // estesa 250->1500ms per dare tempo allo stop di girare).
-    if (xcv) {
-        QMetaObject::invokeMethod(xcv, [xcv]() {
-            xcv->stop();
-        }, Qt::QueuedConnection);
-    }
-    // Do not wait from the GUI thread.  Give the worker a grace period and
-    // terminate only from a later event-loop turn if Hamlib is still stuck.
-    thread->quit();
-    QPointer<QThread> watchedThread(thread);
-    QTimer::singleShot(1500, this, [watchedThread]() {
-        if (!watchedThread || !watchedThread->isRunning()) {
-            return;
-        }
-        qWarning().noquote()
-            << "[CATDBG] Connect watchdog: graceful stop timed out, terminating thread";
-        watchedThread->requestInterruption();
-        watchedThread->terminate();
-    });
+    // Keep the rig and thread owned by the manager until their normal
+    // finished() path has run.  This prevents startup retries from reopening
+    // a serial port while the watchdog shutdown is still executing.
+    Q_UNUSED(thread);
+    Q_UNUSED(xcv);
+    disconnectRigInternal(false);
 }
 
 bool DecodiumTransceiverManager::pttSharesCatPort() const
@@ -1130,22 +1094,12 @@ bool DecodiumTransceiverManager::forceRtsAvailable() const
 
 void DecodiumTransceiverManager::reconnectRigForParameterChange(const QString& reason)
 {
-    if (!m_connected || !d->transceiver) {
+    if (!m_connected || (!d->transceiver && !d->xcvThread)) {
         return;
     }
 
     emit statusUpdate(reason + QStringLiteral(": riconnessione CAT per applicare il PTT"));
-    bool const threadRunning = d->xcvThread && d->xcvThread->isRunning();
-    m_reconnectAfterDisconnect = true;
-    disconnectRig();
-    if (!threadRunning) {
-        QTimer::singleShot(0, this, [this]() {
-            if (m_reconnectAfterDisconnect && !d->transceiver && !d->xcvThread) {
-                m_reconnectAfterDisconnect = false;
-                connectRig();
-            }
-        });
-    }
+    disconnectRigInternal(true);
 }
 
 void DecodiumTransceiverManager::enforceForceLineAvailability()
@@ -1300,8 +1254,7 @@ void DecodiumTransceiverManager::setCivAddress(int v)
         && 0 == m_portType.compare(QStringLiteral("serial"), Qt::CaseInsensitive)) {
         QString const civText = QString::number(m_civAddress, 16).rightJustified(2, QLatin1Char('0')).toUpper();
         emit statusUpdate(QStringLiteral("CI-V Address: riconnessione CAT per applicare 0x%1").arg(civText));
-        disconnectRig();
-        connectRig();
+        disconnectRigInternal(true);
     }
 }
 
@@ -1319,8 +1272,7 @@ void DecodiumTransceiverManager::setTciAudioEnabled(bool v)
     if (reconnect) {
         emit statusUpdate(QStringLiteral("Audio TCI: riconnessione CAT per applicare %1")
                               .arg(v ? QStringLiteral("ON") : QStringLiteral("OFF")));
-        disconnectRig();
-        connectRig();
+        disconnectRigInternal(true);
     }
 }
 
@@ -1346,8 +1298,7 @@ void DecodiumTransceiverManager::setSplitMode(const QString& v)
                                        : normalized == QStringLiteral("rig")
                                            ? QStringLiteral("Rig")
                                            : QStringLiteral("None")));
-        disconnectRig();
-        connectRig();
+        disconnectRigInternal(true);
     }
 }
 
@@ -1760,35 +1711,43 @@ void DecodiumTransceiverManager::connectRig()
         return;
     }
 
-    if (d->transceiver) {
-        if (m_connecting && !m_connected) {
+    // A rig/thread still present owns the serial handle until its worker has
+    // emitted finished() and its QThread has emitted finished().  Never open
+    // the same port from this call while that shutdown is still in progress;
+    // queue the new connection for the thread-finished callback instead.
+    if (m_disconnectInProgress) {
+        m_reconnectAfterDisconnect = true;
+        qInfo().noquote()
+            << "[CATDBG] Connect queued: waiting for rig thread to finish"
+            << "rig=" << m_rigName
+            << "serial=" << m_serialPort;
+        return;
+    }
+
+    if (d->transceiver || d->xcvThread) {
+        if (m_connecting && !m_connected && d->transceiver) {
             qint64 const elapsedMs = m_connectAttemptTimer.isValid()
                 ? m_connectAttemptTimer.elapsed()
                 : -1;
             int const staleConnectThresholdMs = isHamRadioDeluxeRig(m_rigName)
                 ? kHrdStartupWatchdogMs
                 : 20000;
-            if (elapsedMs >= staleConnectThresholdMs || elapsedMs < 0) {
-                qWarning().noquote()
-                    << "[CATDBG] Stale connect attempt reset"
-                    << "rig=" << m_rigName
-                    << "portType=" << m_portType
-                    << "network=" << m_networkPort
-                    << "elapsedMs=" << elapsedMs
-                    << "thresholdMs=" << staleConnectThresholdMs;
-                emit statusUpdate(QStringLiteral("Connessione a %1 scaduta, riavvio tentativo...")
-                                  .arg(m_rigName));
-                disconnectRig();
-            } else {
+            if (elapsedMs < staleConnectThresholdMs && elapsedMs >= 0) {
                 emit statusUpdate(QStringLiteral("Connessione a %1 gia' in corso...").arg(m_rigName));
                 return;
             }
-        } else {
-            disconnectRig();
+            qWarning().noquote()
+                << "[CATDBG] Stale connect attempt reset"
+                << "rig=" << m_rigName
+                << "portType=" << m_portType
+                << "network=" << m_networkPort
+                << "elapsedMs=" << elapsedMs
+                << "thresholdMs=" << staleConnectThresholdMs;
+            emit statusUpdate(QStringLiteral("Connessione a %1 scaduta, riavvio tentativo...")
+                              .arg(m_rigName));
         }
-        // Piccola attesa per assicurarsi che il vecchio thread sia fermato
-        if (d->xcvThread && d->xcvThread->isRunning())
-            d->xcvThread->wait(2000);
+        disconnectRigInternal(true);
+        return;
     }
 
     // Valida che il rig sia effettivamente nel registry (evita rig_init(0) → crash Hamlib 4.7)
@@ -1941,6 +1900,7 @@ void DecodiumTransceiverManager::connectRig()
                 if (d->transceiver == xcv)
                     d->transceiver = nullptr;
                 d->desired = Transceiver::TransceiverState {};
+                m_disconnectInProgress = false;
                 setConnecting(false);
                 thread->deleteLater();
                 if (m_connected) {
@@ -2100,34 +2060,90 @@ void DecodiumTransceiverManager::connectRig()
 // ── disconnectRig ─────────────────────────────────────────────────────────
 void DecodiumTransceiverManager::disconnectRig()
 {
+    disconnectRigInternal(false);
+}
+
+void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDisconnect)
+{
     ++m_transientCatReconnectSerial;
     m_transientCatReconnectPending = false;
+    m_reconnectAfterDisconnect = reconnectAfterDisconnect;
+
+    // A public disconnect cancels a queued reconnect.  An internal reconnect
+    // request leaves it armed so the thread-finished callback can start the
+    // next session only after the old serial handle has really been closed.
+    if (m_disconnectInProgress) {
+        return;
+    }
+
     setConnecting(false);
-    if (!d->transceiver) return;
+    if (!d->transceiver && !d->xcvThread) {
+        m_disconnectInProgress = false;
+        if (m_reconnectAfterDisconnect) {
+            m_reconnectAfterDisconnect = false;
+            QTimer::singleShot(0, this, [this]() { connectRig(); });
+        }
+        return;
+    }
 
     auto* xcv    = d->transceiver;
     auto* thread = d->xcvThread;
+    m_disconnectInProgress = true;
 
-    // Invalida subito i puntatori nel PIMPL per evitare double-call
-    d->transceiver = nullptr;
-    d->xcvThread   = nullptr;
+    // Keep both pointers valid until QThread::finished().  They are the
+    // ownership/serialisation guard: clearing them here used to let a second
+    // connectRig() call Hamlib rig_open while the old rig_close was still
+    // running on the worker thread.
     d->desired = Transceiver::TransceiverState {};
 
-    // Richiedi stop in modo sincrono sul thread del rig così il cleanup
-    // (PTT off, split reset, rig_close) avviene prima del quit del thread.
-    if (!thread || !thread->isRunning() || xcv->thread() == QThread::currentThread()) {
-        xcv->stop();
-    } else {
-        QMetaObject::invokeMethod(xcv, [xcv, thread]() {
-            xcv->stop();
-            thread->quit();
-        }, Qt::QueuedConnection);
-    }
-
+    // Richiedi lo stop sul thread del rig: xcv->stop() deve completare il
+    // cleanup Hamlib (PTT off, split reset, rig_close) prima che il thread
+    // termini e che la riconnessione venga accodata.
     if (!thread || !thread->isRunning()) {
+        if (xcv) {
+            xcv->stop();
+            xcv->deleteLater();
+        }
+        d->transceiver = nullptr;
+        d->xcvThread = nullptr;
         if (thread) {
             thread->deleteLater();
         }
+        m_disconnectInProgress = false;
+        bool const reconnect = m_reconnectAfterDisconnect;
+        m_reconnectAfterDisconnect = false;
+        if (reconnect) {
+            QTimer::singleShot(0, this, [this]() { connectRig(); });
+        }
+    } else {
+        if (xcv) {
+            QMetaObject::invokeMethod(xcv, [xcv, thread]() {
+                xcv->stop();
+                thread->quit();
+            }, Qt::QueuedConnection);
+        } else {
+            thread->quit();
+        }
+
+        // Do not block the GUI thread waiting for Hamlib.  If a backend is
+        // stuck in I/O, terminate only after the graceful close window; the
+        // QThread::finished callback still gates the subsequent connect.
+        QPointer<QThread> watchedThread(thread);
+        QTimer::singleShot(2500, this, [this, watchedThread]() {
+            if (!watchedThread || !watchedThread->isRunning()
+                || d->xcvThread != watchedThread) {
+                return;
+            }
+            qWarning().noquote()
+                << "[CATDBG] Rig disconnect: graceful stop timed out, terminating thread";
+            watchedThread->requestInterruption();
+            watchedThread->quit();
+            QTimer::singleShot(500, this, [watchedThread]() {
+                if (watchedThread && watchedThread->isRunning()) {
+                    watchedThread->terminate();
+                }
+            });
+        });
     }
 
     if (m_connected) {
@@ -2145,72 +2161,7 @@ void DecodiumTransceiverManager::restartTransientCatConnectionNonBlocking()
     }
 
     m_transientCatReconnectPending = false;
-    quint64 const reconnectSerial = ++m_transientCatReconnectSerial;
-    auto* xcv = d->transceiver;
-    auto* thread = d->xcvThread;
-
-    d->transceiver = nullptr;
-    d->xcvThread = nullptr;
-    d->desired = Transceiver::TransceiverState {};
-    setConnecting(false);
-    if (m_connected) {
-        m_connected = false;
-        emit connectedChanged();
-    }
-    updateTelemetry(0.0, 0.0);
-    emit statusUpdate(QStringLiteral("Disconnesso dal transceiver"));
-
-    auto reconnectDone = std::make_shared<bool>(false);
-    auto reconnectOnce = [this, reconnectSerial, reconnectDone]() {
-        if (*reconnectDone) {
-            return;
-        }
-        *reconnectDone = true;
-        if (reconnectSerial != m_transientCatReconnectSerial) {
-            return;
-        }
-        QTimer::singleShot(0, this, [this, reconnectSerial]() {
-            if (reconnectSerial == m_transientCatReconnectSerial && !d->transceiver) {
-                connectRig();
-            }
-        });
-    };
-
-    if (!thread || !thread->isRunning()) {
-        if (xcv) {
-            xcv->deleteLater();
-        }
-        if (thread) {
-            thread->deleteLater();
-        }
-        reconnectOnce();
-        return;
-    }
-
-    connect(thread, &QThread::finished, this, reconnectOnce, Qt::SingleShotConnection);
-
-    if (xcv) {
-        QMetaObject::invokeMethod(xcv, [xcv]() {
-            xcv->stop();
-        }, Qt::QueuedConnection);
-    } else {
-        thread->quit();
-    }
-
-    QTimer::singleShot(2000, this, [this, thread, reconnectDone]() {
-        if (*reconnectDone || !thread->isRunning()) {
-            return;
-        }
-        qWarning().noquote()
-            << "[CATDBG] Transient reconnect: graceful stop timed out, terminating thread";
-        thread->requestInterruption();
-        thread->quit();
-        QTimer::singleShot(500, this, [thread, reconnectDone]() {
-            if (!*reconnectDone && thread->isRunning()) {
-                thread->terminate();
-            }
-        });
-    });
+    disconnectRigInternal(true);
 }
 
 void DecodiumTransceiverManager::scheduleTransientReconnect(const QString& reason)
