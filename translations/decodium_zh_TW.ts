@@ -740,6 +740,81 @@ Searched paths:
         <source>▶ Start</source>
         <translation>▶ 開始</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="479"/>
+        <source>Auto Call</source>
+        <translation>自動呼叫</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="487"/>
+        <source>Automatically call eligible CQ stations without selecting a target</source>
+        <translation>自動呼叫符合條件的 CQ 電台，不需選定目標</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="497"/>
+        <source>■ Stop Auto Call</source>
+        <translation>■ 停止自動呼叫</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="498"/>
+        <source>▶ Start Auto Call</source>
+        <translation>▶ 開始自動呼叫</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="524"/>
+        <source>Answers eligible CQ stations, skips calls already worked on this band, and stops at the session limit.</source>
+        <translation>應答符合條件的 CQ 電台，跳過本波段已通聯過的呼號，並在工作階段上限處停止。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="532"/>
+        <source>Armed: waits for a valid CQ decode; TX starts on the next legal slot.</source>
+        <translation>已就緒：等待有效的 CQ 解碼；發射將在下一個合法時槽開始。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="533"/>
+        <source>Idle: press Start Auto Call to arm automatic CQ replies.</source>
+        <translation>閒置：按「開始自動呼叫」以就緒自動應答 CQ。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="543"/>
+        <source>Max QSOs this session (0=∞)</source>
+        <translation>本次工作階段最多 QSO 數 (0=∞)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="551"/>
+        <source>Candidate priority</source>
+        <translation>候選優先順序</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="554"/>
+        <source>Last decoded</source>
+        <translation>最近解碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="554"/>
+        <source>Strongest signal</source>
+        <translation>最強訊號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="554"/>
+        <source>Furthest grid</source>
+        <translation>最遠網格</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="620"/>
+        <source>QSOs completed: %1 / %2</source>
+        <translation>已完成 QSO：%1 / %2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="627"/>
+        <source>Reset count</source>
+        <translation>重設計數</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="763"/>
+        <source>▶ Direct Call</source>
+        <translation>▶ 直接呼叫</translation>
+    </message>
 </context>
 <context>
     <name>CallsignDialog</name>
@@ -2082,6 +2157,21 @@ or contact DXLab support at DXLab@groups.io.</source>
         <location filename="../DecodiumBridge.cpp" line="46183"/>
         <source>Update checks are disabled in this build.</source>
         <translation>此組建已停用更新檢查。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41382"/>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>地圖 CALL 無法為 %1 選擇 TX1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41442"/>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>與 %1 的 QSO 已就緒 - 下一個完整時槽發送 TX%2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41502"/>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>與 %1 的 QSO 已就緒 - TX%2</translation>
     </message>
 </context>
 <context>
@@ -5311,6 +5401,106 @@ Error: %2</source>
     <message>
         <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
         <translation>過去 %1 分鐘內 PSK Reporter 對你呼號的接收報告。無需啟用 Decodium 的 PSK 上傳。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="557"/>
+        <source>Unspecified</source>
+        <translation>未指定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1493"/>
+        <source>This map marker has no callsign.</source>
+        <translation>此地圖標記沒有呼號。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1521"/>
+        <source>Enable a rotator to aim the antenna.</source>
+        <translation>啟用旋轉器以指向天線。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1534"/>
+        <source>Enable a rotator to track this satellite.</source>
+        <translation>啟用旋轉器以追蹤該衛星。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2429"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2478"/>
+        <source>Refresh</source>
+        <translation>重新整理</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2516"/>
+        <source>Band</source>
+        <translation>波段</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2528"/>
+        <source>Mode</source>
+        <translation>模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2556"/>
+        <source>Source</source>
+        <translation>來源</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2589"/>
+        <source>Continent</source>
+        <translation>大洲</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2607"/>
+        <source>CQ only</source>
+        <translation>只顯示CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2753"/>
+        <source>Connected</source>
+        <translation>已連接</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2753"/>
+        <source>Connect</source>
+        <translation>連接</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3587"/>
+        <source>Source: %1</source>
+        <translation>來源：%1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3628"/>
+        <source>New DXCC</source>
+        <translation>新DXCC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3783"/>
+        <source>LoTW</source>
+        <translation>洛特</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3791"/>
+        <source>eQSL</source>
+        <translation>品質等級</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3913"/>
+        <source>CQ</source>
+        <translation>重慶</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="4215"/>
+        <source>Hide</source>
+        <translation>隱藏</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="4245"/>
+        <source>Add</source>
+        <translation>新增</translation>
     </message>
 </context>
 <context>
@@ -11581,6 +11771,29 @@ UDP 伺服器 %2:%3</translation>
     </message>
 </context>
 <context>
+    <name>MapExternalOverlayService</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="486"/>
+        <source>current</source>
+        <translation>目前</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="488"/>
+        <source>stale</source>
+        <translation>過期</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="490"/>
+        <source>offline cache</source>
+        <translation>離線快取</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="492"/>
+        <source>loading</source>
+        <translation>載入中</translation>
+    </message>
+</context>
+<context>
     <name>MessageAveraging</name>
     <message>
         <location filename="../widgets/messageaveraging.ui" line="14"/>
@@ -12235,6 +12448,11 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../DecodiumTransceiverManager.cpp" line="205"/>
         <source>CAT disabilitato da variabile d&apos;ambiente DECODIUM_DISABLE_CAT.</source>
         <translation>已透過環境變數 DECODIUM_DISABLE_CAT 停用 CAT。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
+        <source>unknown protocol error</source>
+        <translation>未知的協定錯誤</translation>
     </message>
 </context>
 <context>
@@ -18271,6 +18489,46 @@ If unsure, use High.</source>
         <source>Import</source>
         <translation>匯入</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="266"/>
+        <source>%1 confirmations in last sync</source>
+        <translation>上次同步收到 %1 筆確認</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="268"/>
+        <source>No confirmations</source>
+        <translation>沒有確認</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="324"/>
+        <source>Optional ADI file to merge into the logbook</source>
+        <translation>選用的 ADI 檔，用於合併到日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="348"/>
+        <source>Import confirmations ADI</source>
+        <translation>從 ADI 匯入確認</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
+        <source>ADIF files (*.adi *.adif)</source>
+        <translation>ADIF 檔案 (*.adi *.adif)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
+        <source>All files (*)</source>
+        <translation>所有檔案 (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="359"/>
+        <source>Import ADI</source>
+        <translation>匯入 ADI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="377"/>
+        <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
+        <translation>僅用於手動復原：匯入 ADI 會把其中的確認合併到目前日誌，與「重新整理」相同。它不會推進 LoTW 線上下載的游標。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -18638,6 +18896,76 @@ If unsure, use High.</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="797"/>
         <source>Band Tune Mem:</source>
         <translation>樂團調音記憶：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="661"/>
+        <source>SSB voice bandwidth:</source>
+        <translation>SSB 話音頻寬：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="689"/>
+        <source>Post-demodulation audio filter only. It does not change the radio dial or RTL-SDR tuning.</source>
+        <translation>僅為解調後的音訊濾波。它不會改變電台或 RTL-SDR 的調諧。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="694"/>
+        <source>SSB audio AGC:</source>
+        <translation>SSB 音訊 AGC：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Off</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Slow</source>
+        <translation>慢</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Medium</source>
+        <translation>中等</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="722"/>
+        <source>Adjusts listening level after SSB demodulation. Off preserves the raw receiver level.</source>
+        <translation>調整 SSB 解調後的聆聽電平。關閉則保留接收機的原始電平。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="727"/>
+        <source>SSB notch (Hz):</source>
+        <translation>SSB 陷波 (Hz)：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="738"/>
+        <source>0 = Off</source>
+        <translation>0 = 關閉</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="753"/>
+        <source>Set the audible whistle frequency to remove a persistent carrier. Use 0 to disable.</source>
+        <translation>設定可聽見的哨聲頻率以消除持續載波。填 0 表示關閉。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="758"/>
+        <source>SSB noise reduction:</source>
+        <translation>SSB 降噪：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="769"/>
+        <source>Light</source>
+        <translation>輕</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="786"/>
+        <source>Adaptive speech gate for background noise in pauses. It never affects digital-mode decoder audio.</source>
+        <translation>針對停頓中背景雜訊的自適應語音閘。它絕不影響數位模式解碼器的音訊。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="791"/>
+        <source>These controls apply only to RTL-SDR USB/LSB listening after demodulation; they never alter FT8 or the radio tuning reference.</source>
+        <translation>這些控制項僅作用於解調後的 RTL-SDR USB/LSB 聆聽；它們絕不改變 FT8 或電台的調諧基準。</translation>
     </message>
 </context>
 <context>
@@ -24992,6 +25320,21 @@ Right click for insert and delete options.</source>
         <source>PROPAGATION FORECAST · age / validity / decay</source>
         <translation>傳播預報 · 時長 / 有效期 / 衰減</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MapOperationsWindows.qml" line="127"/>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MapOperationsWindows.qml" line="185"/>
+        <source>Refresh</source>
+        <translation>重新整理</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MapOperationsWindows.qml" line="210"/>
+        <source>Moon data unavailable</source>
+        <translation>月球資料不可用</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -25414,6 +25757,161 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Online: provider remoto callsign abilitati</source>
         <translation>線上: 已啟用呼號的遠端服務方</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1111"/>
+        <source>Lettura ADI %1 in background...</source>
+        <translation>正在背景讀取 ADI %1...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1150"/>
+        <source>Username e password LoTW richiesti; la password è nella sezione Reporting → LoTW</source>
+        <translation>需要 LoTW 使用者名稱和密碼；密碼在 Reporting → LoTW 區</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1151"/>
+        <source>LoTW conferme: username e password richiesti</source>
+        <translation>LoTW 確認：需要使用者名稱和密碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1174"/>
+        <source>LoTW: download iniziale delle conferme in corso...</source>
+        <translation>LoTW：正在進行確認的首次下載...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1175"/>
+        <source>LoTW: cerco nuove conferme dal %1...</source>
+        <translation>LoTW：正在尋找自 %1 起的新確認...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1184"/>
+        <source>Chiave API QRZ mancante: configurarla nella sezione QRZ Logbook</source>
+        <translation>缺少 QRZ API 金鑰：請在 QRZ Logbook 區設定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1185"/>
+        <source>QRZ.com: chiave API mancante</source>
+        <translation>QRZ.com：缺少 API 金鑰</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1194"/>
+        <source>QRZ.com: pagina 1 delle conferme in download...</source>
+        <translation>QRZ.com：正在下載確認的第 1 頁...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1201"/>
+        <source>Username e password eQSL richiesti</source>
+        <translation>需要 eQSL 使用者名稱和密碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1202"/>
+        <source>eQSL InBox: username e password eQSL richiesti</source>
+        <translation>eQSL 收件匣：需要 eQSL 使用者名稱和密碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1221"/>
+        <source>Download eQSL InBox in corso...</source>
+        <translation>正在下載 eQSL 收件匣...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1288"/>
+        <source>la risposta LoTW non contiene un ADIF valido</source>
+        <translation>LoTW 的回應不包含有效的 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1293"/>
+        <source>LoTW fallito: %1</source>
+        <translation>LoTW 失敗：%1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1306"/>
+        <source>risposta API non valida</source>
+        <translation>無效的 API 回應</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1310"/>
+        <source>QRZ.com fallito: %1</source>
+        <translation>QRZ.com 失敗：%1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1345"/>
+        <source>QRZ.com: pagina %1 ricevuta (%2 conferme), continuo...</source>
+        <translation>QRZ.com：已收到第 %1 頁（%2 筆確認），繼續...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1359"/>
+        <source>QRZ.com: %1 conferme scaricate; preparazione import...</source>
+        <translation>QRZ.com：已下載 %1 筆確認；正在準備匯入...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1377"/>
+        <source>eQSL InBox: download del file ADI in corso...</source>
+        <translation>eQSL 收件匣：正在下載 ADI 檔...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1389"/>
+        <source>risposta eQSL non valida</source>
+        <translation>無效的 eQSL 回應</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1394"/>
+        <source>eQSL InBox fallito: %1</source>
+        <translation>eQSL 收件匣失敗：%1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1439"/>
+        <source>Salvataggio conferme %1 in background...</source>
+        <translation>正在背景儲存 %1 的確認...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1450"/>
+        <source>File ADI non valido</source>
+        <translation>無效的 ADI 檔</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1457"/>
+        <source>%1 fallito: %2</source>
+        <translation>%1 失敗：%2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1465"/>
+        <source>Scaricato; sincronizzazione logbook...</source>
+        <translation>已下載；正在同步日誌...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1471"/>
+        <source>%1 scaricato: sincronizzazione logbook in corso...</source>
+        <translation>%1 已下載：正在同步日誌...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1542"/>
+        <source>impossibile leggere il file ADI</source>
+        <translation>無法讀取 ADI 檔</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1549"/>
+        <source>Importazione %1 fallita: %2</source>
+        <translation>%1 匯入失敗：%2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1561"/>
+        <source>File ADI %1 letto; importazione in background...</source>
+        <translation>已讀取 ADI 檔 %1；正在背景匯入...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1589"/>
+        <source>Importazione %1 in background...</source>
+        <translation>正在背景匯入 %1...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1700"/>
+        <source>File not loaded</source>
+        <translation>檔案未載入</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
+        <source>Sincronizzazione %1 fallita: %2</source>
+        <translation>%1 同步失敗：%2</translation>
     </message>
 </context>
 <context>
@@ -26102,6 +26600,11 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>state unknown</source>
         <translation>狀態未知</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
+        <source>Disconnected</source>
+        <translation>已斷線</translation>
     </message>
 </context>
 </TS>

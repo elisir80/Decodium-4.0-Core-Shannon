@@ -746,6 +746,81 @@ Chemins recherchés&#xa0;:
         <source>▶ Start</source>
         <translation>▶ Démarrer</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="479"/>
+        <source>Auto Call</source>
+        <translation>Appel automatique</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="487"/>
+        <source>Automatically call eligible CQ stations without selecting a target</source>
+        <translation>Appelle automatiquement les stations en CQ éligibles, sans choisir de cible</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="497"/>
+        <source>■ Stop Auto Call</source>
+        <translation>■ Arrêter l'appel automatique</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="498"/>
+        <source>▶ Start Auto Call</source>
+        <translation>▶ Démarrer l'appel automatique</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="524"/>
+        <source>Answers eligible CQ stations, skips calls already worked on this band, and stops at the session limit.</source>
+        <translation>Répond aux stations en CQ éligibles, passe les indicatifs déjà contactés sur cette bande et s'arrête à la limite de la session.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="532"/>
+        <source>Armed: waits for a valid CQ decode; TX starts on the next legal slot.</source>
+        <translation>Armé : attend un décodage CQ valide ; l'émission démarre au prochain créneau autorisé.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="533"/>
+        <source>Idle: press Start Auto Call to arm automatic CQ replies.</source>
+        <translation>Inactif : appuyez sur Démarrer l'appel automatique pour armer les réponses automatiques aux CQ.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="543"/>
+        <source>Max QSOs this session (0=∞)</source>
+        <translation>QSO maximum pour cette session (0=∞)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="551"/>
+        <source>Candidate priority</source>
+        <translation>Priorité des candidats</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="554"/>
+        <source>Last decoded</source>
+        <translation>Dernière décodée</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="554"/>
+        <source>Strongest signal</source>
+        <translation>Signal le plus fort</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="554"/>
+        <source>Furthest grid</source>
+        <translation>Locator le plus éloigné</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="620"/>
+        <source>QSOs completed: %1 / %2</source>
+        <translation>QSO terminés : %1 / %2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="627"/>
+        <source>Reset count</source>
+        <translation>Remettre le compteur à zéro</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="763"/>
+        <source>▶ Direct Call</source>
+        <translation>▶ Appel direct</translation>
+    </message>
 </context>
 <context>
     <name>CallsignDialog</name>
@@ -2089,6 +2164,21 @@ ou contactez le support DXLab à DXLab@groups.io.</translation>
         <location filename="../DecodiumBridge.cpp" line="46183"/>
         <source>Update checks are disabled in this build.</source>
         <translation>La vérification des mises à jour est désactivée dans cette version.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41382"/>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>Le CALL de la carte n'a pas pu sélectionner TX1 pour %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41442"/>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO avec %1 armé - TX%2 au prochain créneau complet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41502"/>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO avec %1 armé - TX%2</translation>
     </message>
 </context>
 <context>
@@ -5315,6 +5405,106 @@ Erreur&#xa0;: %2</translation>
     <message>
         <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
         <translation>Rapports de réception PSK Reporter pour votre indicatif durant les %1 dernières minutes. L&apos;envoi PSK de Decodium n&apos;a pas besoin d&apos;être activé.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="557"/>
+        <source>Unspecified</source>
+        <translation>Non précisé</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1493"/>
+        <source>This map marker has no callsign.</source>
+        <translation>Ce repère de carte n'a pas d'indicatif.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1521"/>
+        <source>Enable a rotator to aim the antenna.</source>
+        <translation>Activez un rotor pour orienter l'antenne.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1534"/>
+        <source>Enable a rotator to track this satellite.</source>
+        <translation>Activez un rotor pour suivre ce satellite.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2429"/>
+        <source>Clear</source>
+        <translation>Effacer</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2478"/>
+        <source>Refresh</source>
+        <translation>Actualiser</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2516"/>
+        <source>Band</source>
+        <translation>Bande</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2528"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2556"/>
+        <source>Source</source>
+        <translation>Source</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2589"/>
+        <source>Continent</source>
+        <translation>Continent</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2607"/>
+        <source>CQ only</source>
+        <translation>CQ uniquement</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2753"/>
+        <source>Connected</source>
+        <translation>Connecté</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2753"/>
+        <source>Connect</source>
+        <translation>Se connecter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3587"/>
+        <source>Source: %1</source>
+        <translation>Source : %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3628"/>
+        <source>New DXCC</source>
+        <translation>Nouveau DXCC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3783"/>
+        <source>LoTW</source>
+        <translation>LoTW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3791"/>
+        <source>eQSL</source>
+        <translation>eQSL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3913"/>
+        <source>CQ</source>
+        <translation>CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="4215"/>
+        <source>Hide</source>
+        <translation>Masquer</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="4245"/>
+        <source>Add</source>
+        <translation>Ajouter</translation>
     </message>
 </context>
 <context>
@@ -11583,6 +11773,29 @@ Serveur UDP %2:%3</translation>
     </message>
 </context>
 <context>
+    <name>MapExternalOverlayService</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="486"/>
+        <source>current</source>
+        <translation>actuel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="488"/>
+        <source>stale</source>
+        <translation>obsolète</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="490"/>
+        <source>offline cache</source>
+        <translation>cache hors ligne</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="492"/>
+        <source>loading</source>
+        <translation>chargement</translation>
+    </message>
+</context>
+<context>
     <name>MessageAveraging</name>
     <message>
         <location filename="../widgets/messageaveraging.ui" line="14"/>
@@ -12237,6 +12450,11 @@ Le fichier téléchargé dépasse la limite de MiB %1&#xa0;:
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="187"/>
         <source>%1: network error: %2.%3</source>
         <translation>%1 : erreur réseau : %2.%3</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
+        <source>unknown protocol error</source>
+        <translation>erreur de protocole inconnue</translation>
     </message>
 </context>
 <context>
@@ -18273,6 +18491,46 @@ En cas de doute, utilisez Élevée.</translation>
         <source>Import</source>
         <translation>Importer</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="266"/>
+        <source>%1 confirmations in last sync</source>
+        <translation>%1 confirmations lors de la dernière synchronisation</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="268"/>
+        <source>No confirmations</source>
+        <translation>Aucune confirmation</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="324"/>
+        <source>Optional ADI file to merge into the logbook</source>
+        <translation>Fichier ADI facultatif à fusionner dans le journal</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="348"/>
+        <source>Import confirmations ADI</source>
+        <translation>Importer les confirmations depuis un ADI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
+        <source>ADIF files (*.adi *.adif)</source>
+        <translation>Fichiers ADIF (*.adi *.adif)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
+        <source>All files (*)</source>
+        <translation>Tous les fichiers (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="359"/>
+        <source>Import ADI</source>
+        <translation>Importer un ADI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="377"/>
+        <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
+        <translation>Récupération manuelle seulement : importer un ADI fusionne ses confirmations dans le journal actif, comme le fait Actualiser. Cela n'avance pas le repère de téléchargement LoTW en ligne.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -18640,6 +18898,76 @@ En cas de doute, utilisez Élevée.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="797"/>
         <source>Band Tune Mem:</source>
         <translation>Mémorisation du groupe :</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="661"/>
+        <source>SSB voice bandwidth:</source>
+        <translation>Largeur de bande SSB :</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="689"/>
+        <source>Post-demodulation audio filter only. It does not change the radio dial or RTL-SDR tuning.</source>
+        <translation>Filtre audio après démodulation seulement. Il ne modifie ni l'accord de la radio ni celui du RTL-SDR.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="694"/>
+        <source>SSB audio AGC:</source>
+        <translation>CAG audio SSB :</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Off</source>
+        <translation>Désactivé</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Slow</source>
+        <translation>Lent</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Medium</source>
+        <translation>Moyen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="722"/>
+        <source>Adjusts listening level after SSB demodulation. Off preserves the raw receiver level.</source>
+        <translation>Règle le niveau d'écoute après démodulation SSB. Désactivé conserve le niveau brut du récepteur.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="727"/>
+        <source>SSB notch (Hz):</source>
+        <translation>Notch SSB (Hz) :</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="738"/>
+        <source>0 = Off</source>
+        <translation>0 = désactivé</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="753"/>
+        <source>Set the audible whistle frequency to remove a persistent carrier. Use 0 to disable.</source>
+        <translation>Réglez la fréquence du sifflement audible pour supprimer une porteuse persistante. Mettez 0 pour désactiver.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="758"/>
+        <source>SSB noise reduction:</source>
+        <translation>Réduction de bruit SSB :</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="769"/>
+        <source>Light</source>
+        <translation>Légère</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="786"/>
+        <source>Adaptive speech gate for background noise in pauses. It never affects digital-mode decoder audio.</source>
+        <translation>Porte de parole adaptative pour le bruit de fond dans les pauses. Elle n'affecte jamais l'audio du décodeur des modes numériques.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="791"/>
+        <source>These controls apply only to RTL-SDR USB/LSB listening after demodulation; they never alter FT8 or the radio tuning reference.</source>
+        <translation>Ces réglages ne concernent que l'écoute USB/LSB du RTL-SDR après démodulation ; ils n'altèrent jamais le FT8 ni la référence d'accord de la radio.</translation>
     </message>
 </context>
 <context>
@@ -24994,6 +25322,21 @@ Cliquez avec le bouton droit pour les options d&apos;insertion et de suppression
         <source>PROPAGATION FORECAST · age / validity / decay</source>
         <translation>PRÉVISION DE PROPAGATION · ancienneté / validité / estompement</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MapOperationsWindows.qml" line="127"/>
+        <source>CALL</source>
+        <translation>CALL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MapOperationsWindows.qml" line="185"/>
+        <source>Refresh</source>
+        <translation>Actualiser</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MapOperationsWindows.qml" line="210"/>
+        <source>Moon data unavailable</source>
+        <translation>Données de la Lune indisponibles</translation>
+    </message>
 </context>
 <context>
     <name>MapStatisticsPanel</name>
@@ -25416,6 +25759,161 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Online: provider remoto callsign abilitati</source>
         <translation>En ligne : fournisseurs distants d&apos;indicatifs activés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1111"/>
+        <source>Lettura ADI %1 in background...</source>
+        <translation>Lecture de l'ADI %1 en arrière-plan...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1150"/>
+        <source>Username e password LoTW richiesti; la password è nella sezione Reporting → LoTW</source>
+        <translation>Nom d'utilisateur et mot de passe LoTW requis ; le mot de passe se trouve dans la section Reporting → LoTW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1151"/>
+        <source>LoTW conferme: username e password richiesti</source>
+        <translation>Confirmations LoTW : nom d'utilisateur et mot de passe requis</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1174"/>
+        <source>LoTW: download iniziale delle conferme in corso...</source>
+        <translation>LoTW : téléchargement initial des confirmations en cours...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1175"/>
+        <source>LoTW: cerco nuove conferme dal %1...</source>
+        <translation>LoTW : recherche de nouvelles confirmations depuis le %1...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1184"/>
+        <source>Chiave API QRZ mancante: configurarla nella sezione QRZ Logbook</source>
+        <translation>Clé API QRZ manquante : renseignez-la dans la section QRZ Logbook</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1185"/>
+        <source>QRZ.com: chiave API mancante</source>
+        <translation>QRZ.com : clé API manquante</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1194"/>
+        <source>QRZ.com: pagina 1 delle conferme in download...</source>
+        <translation>QRZ.com : téléchargement de la page 1 des confirmations...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1201"/>
+        <source>Username e password eQSL richiesti</source>
+        <translation>Nom d'utilisateur et mot de passe eQSL requis</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1202"/>
+        <source>eQSL InBox: username e password eQSL richiesti</source>
+        <translation>Boîte de réception eQSL : nom d'utilisateur et mot de passe eQSL requis</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1221"/>
+        <source>Download eQSL InBox in corso...</source>
+        <translation>Téléchargement de la boîte de réception eQSL...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1288"/>
+        <source>la risposta LoTW non contiene un ADIF valido</source>
+        <translation>la réponse LoTW ne contient pas d'ADIF valide</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1293"/>
+        <source>LoTW fallito: %1</source>
+        <translation>Échec LoTW : %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1306"/>
+        <source>risposta API non valida</source>
+        <translation>réponse d'API non valide</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1310"/>
+        <source>QRZ.com fallito: %1</source>
+        <translation>Échec QRZ.com : %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1345"/>
+        <source>QRZ.com: pagina %1 ricevuta (%2 conferme), continuo...</source>
+        <translation>QRZ.com : page %1 reçue (%2 confirmations), suite...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1359"/>
+        <source>QRZ.com: %1 conferme scaricate; preparazione import...</source>
+        <translation>QRZ.com : %1 confirmations téléchargées ; préparation de l'import...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1377"/>
+        <source>eQSL InBox: download del file ADI in corso...</source>
+        <translation>Boîte de réception eQSL : téléchargement du fichier ADI...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1389"/>
+        <source>risposta eQSL non valida</source>
+        <translation>réponse eQSL non valide</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1394"/>
+        <source>eQSL InBox fallito: %1</source>
+        <translation>Échec de la boîte de réception eQSL : %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1439"/>
+        <source>Salvataggio conferme %1 in background...</source>
+        <translation>Enregistrement des confirmations %1 en arrière-plan...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1450"/>
+        <source>File ADI non valido</source>
+        <translation>Fichier ADI non valide</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1457"/>
+        <source>%1 fallito: %2</source>
+        <translation>Échec de %1 : %2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1465"/>
+        <source>Scaricato; sincronizzazione logbook...</source>
+        <translation>Téléchargé ; synchronisation du journal...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1471"/>
+        <source>%1 scaricato: sincronizzazione logbook in corso...</source>
+        <translation>%1 téléchargé : synchronisation du journal...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1542"/>
+        <source>impossibile leggere il file ADI</source>
+        <translation>impossible de lire le fichier ADI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1549"/>
+        <source>Importazione %1 fallita: %2</source>
+        <translation>Échec de l'import de %1 : %2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1561"/>
+        <source>File ADI %1 letto; importazione in background...</source>
+        <translation>Fichier ADI %1 lu ; import en arrière-plan...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1589"/>
+        <source>Importazione %1 in background...</source>
+        <translation>Import de %1 en arrière-plan...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1700"/>
+        <source>File not loaded</source>
+        <translation>Fichier non chargé</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
+        <source>Sincronizzazione %1 fallita: %2</source>
+        <translation>Échec de la synchronisation de %1 : %2</translation>
     </message>
 </context>
 <context>
@@ -26104,6 +26602,11 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>state unknown</source>
         <translation>état inconnu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
+        <source>Disconnected</source>
+        <translation>Déconnecté</translation>
     </message>
 </context>
 </TS>
