@@ -10,7 +10,7 @@ import QtQuick.Layouts
 
 Dialog {
     id: macroDialog
-    title: "Macro Settings"
+    title: qsTr("Macro Settings")
     modal: false
     dim: false
     width: 700
@@ -128,7 +128,7 @@ Dialog {
                 }
 
                 ToolTip.visible: macroMinMA.containsMouse
-                ToolTip.text: "Minimize"
+                ToolTip.text: qsTr("Minimize")
                 ToolTip.delay: 500
             }
 
@@ -181,7 +181,7 @@ Dialog {
                 spacing: 10
 
                 Text {
-                    text: "Contest Mode"
+                    text: qsTr("Contest Mode")
                     font.pixelSize: 14
                     font.bold: true
                     color: primaryBlue
@@ -191,7 +191,7 @@ Dialog {
                     spacing: 12
 
                     Text {
-                        text: "Contest:"
+                        text: qsTr("Contest:")
                         font.pixelSize: 12
                         color: textSecondary
                         Layout.preferredWidth: 80
@@ -231,7 +231,7 @@ Dialog {
                     visible: appEngine.macroManager && appEngine.macroManager.contestMode
 
                     Text {
-                        text: "Serial #:"
+                        text: qsTr("Serial #:")
                         font.pixelSize: 12
                         color: textSecondary
                         Layout.preferredWidth: 80
@@ -269,7 +269,7 @@ Dialog {
                     }
 
                     Text {
-                        text: "Exchange:"
+                        text: qsTr("Exchange:")
                         font.pixelSize: 12
                         color: textSecondary
                         Layout.leftMargin: 20
@@ -313,7 +313,7 @@ Dialog {
 
                 RowLayout {
                     Text {
-                        text: "TX Macro Templates"
+                        text: qsTr("TX Macro Templates")
                         font.pixelSize: 14
                         font.bold: true
                         color: textPrimary
@@ -322,7 +322,7 @@ Dialog {
                     Item { Layout.fillWidth: true }
 
                     Button {
-                        text: "Reset to Default"
+                        text: qsTr("Reset to Default")
                         implicitHeight: 28
                         background: Rectangle {
                             color: parent.hovered ? Qt.rgba(244/255, 67/255, 54/255, 0.3) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -346,7 +346,7 @@ Dialog {
 
                 // Help text
                 Text {
-                    text: "Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange"
+                    text: qsTr("Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange")
                     font.pixelSize: 10
                     color: textSecondary
                     wrapMode: Text.WordWrap
@@ -416,7 +416,7 @@ Dialog {
                                 Button {
                                     implicitWidth: 60
                                     implicitHeight: 32
-                                    text: "Preview"
+                                    text: qsTr("Preview")
 
                                     background: Rectangle {
                                         color: parent.hovered ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
@@ -461,7 +461,7 @@ Dialog {
                     Text {
                         id: previewText
                         anchors.centerIn: parent
-                        text: "Click 'Preview' to see expanded macro"
+                        text: qsTr("Click 'Preview' to see expanded macro")
                         font.family: decodiumMonoFontFamily
                         font.pixelSize: 12
                         color: accentGreen

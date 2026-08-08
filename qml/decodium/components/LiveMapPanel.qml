@@ -844,7 +844,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: "Live Map"
+                    text: qsTr("Live Map")
                     font.pixelSize: 14
                     font.bold: true
                     color: secondaryCyan
@@ -2226,7 +2226,7 @@ Rectangle {
                                         text: root.mapLayers && root.mapLayers.layerModel
                                             ? root.mapLayers.layerModel.layerColor(
                                                   layerStyleSelector.currentValue) : "#ffffff"
-                                        placeholderText: "#RRGGBB"
+                                        placeholderText: qsTr("#RRGGBB")
                                         font.pixelSize: 9
                                         onEditingFinished: {
                                             if (root.mapLayers && root.mapLayers.layerModel)
@@ -3238,7 +3238,7 @@ Rectangle {
                                             spacing: 5
                                             Text {
                                                 Layout.preferredWidth: 34
-                                                text: "foF2"
+                                                text: qsTr("foF2")
                                                 color: "#66d9ff"
                                                 font.pixelSize: 8
                                                 font.bold: true
@@ -3283,7 +3283,7 @@ Rectangle {
                                             spacing: 5
                                             Text {
                                                 Layout.preferredWidth: 34
-                                                text: "Es"
+                                                text: qsTr("Es")
                                                 color: "#ff9f43"
                                                 font.pixelSize: 8
                                                 font.bold: true

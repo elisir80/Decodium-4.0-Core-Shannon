@@ -141,7 +141,7 @@ Dialog {
                     { id: "qrz", label: "QRZ" },
                     { id: "fcc_uls", label: "FCC" },
                     { id: "eqsl", label: "eQSL" },
-                    { id: "clublog", label: "Club Log" }
+                    { id: "clublog", label: qsTr("Club Log") }
                 ]
                 delegate: Button {
                     text: modelData.label

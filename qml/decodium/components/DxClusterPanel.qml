@@ -73,7 +73,7 @@ Rectangle {
                 color: bridge.dxCluster && bridge.dxCluster.connected ? "#00e676" : "#ef5350"
             }
             Text {
-                text: "DX Cluster"
+                text: qsTr("DX Cluster")
                 color: secondaryCyan; font.bold: true; font.pixelSize: 12
             }
             Text {
@@ -137,13 +137,13 @@ Rectangle {
         Row {
             anchors { fill: parent; leftMargin: 6 }
             spacing: 0
-            Text { width: 46;  text: "Time";     color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { width: 76;  text: "DX Call";  color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { width: 70;  text: "Freq";     color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { width: 44;  text: "Band";     color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { width: 48;  text: "Mode";     color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { width: 70;  text: "Spotter";  color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { Layout.fillWidth: true; text: "Info"; color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { width: 46;  text: qsTr("Time");     color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { width: 76;  text: qsTr("DX Call");  color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { width: 70;  text: qsTr("Freq");     color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { width: 44;  text: qsTr("Band");     color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { width: 48;  text: qsTr("Mode");     color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { width: 70;  text: qsTr("Spotter");  color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { Layout.fillWidth: true; text: qsTr("Info"); color: textSecondary; font.pixelSize: 10; font.bold: true }
         }
     }
 
@@ -306,7 +306,7 @@ Rectangle {
             anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
             spacing: 8
 
-            Text { text: "Filter:"; color: textSecondary; font.pixelSize: 10 }
+            Text { text: qsTr("Filter:"); color: textSecondary; font.pixelSize: 10 }
 
             Repeater {
                 model: ["All", "FT8", "FT4", "FT2", "CW", "SSB"]
@@ -337,7 +337,7 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: if (bridge.dxCluster) bridge.dxCluster.clearSpots()
                 }
-                Text { anchors.centerIn: parent; text: "Clear"; color: textSecondary; font.pixelSize: 10 }
+                Text { anchors.centerIn: parent; text: qsTr("Clear"); color: textSecondary; font.pixelSize: 10 }
             }
         }
     }

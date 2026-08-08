@@ -11,7 +11,7 @@ import "../../panels"
 
 Dialog {
     id: astroWindow
-    title: "Astronomical Data"
+    title: qsTr("Astronomical Data")
     modal: false
     width: nativeHostWindow && parent
            ? Math.max(480, parent.width - 24)
@@ -238,7 +238,7 @@ Dialog {
                 }
 
                 ToolTip.visible: astroMinMA.containsMouse
-                ToolTip.text: "Minimize"
+                ToolTip.text: qsTr("Minimize")
                 ToolTip.delay: 500
             }
 
@@ -269,7 +269,7 @@ Dialog {
                 }
 
                 ToolTip.visible: astroCloseMA.containsMouse
-                ToolTip.text: "Close"
+                ToolTip.text: qsTr("Close")
                 ToolTip.delay: 500
             }
         }
@@ -324,7 +324,7 @@ Dialog {
                         spacing: 12
 
                         Text {
-                            text: "Location:"
+                            text: qsTr("Location:")
                             font.pixelSize: 12
                             color: textSecondary
                         }
@@ -416,7 +416,7 @@ Dialog {
 
                     RowLayout {
                         Text {
-                            text: "Moon"
+                            text: qsTr("Moon")
                             font.pixelSize: 14
                             font.bold: true
                             color: moonColor
@@ -458,7 +458,7 @@ Dialog {
                             color: astroManager && astroManager.moonElevation > 0 ? accentGreen : "#f44336"
                         }
 
-                        Text { text: "Distance:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Distance:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? (astroManager.moonDistance / 1000).toFixed(0) + " Mm" : "---"
                             font.family: decodiumMonoFontFamily
@@ -474,7 +474,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Rise:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Rise:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? astroManager.moonRise + " UTC" : "---"
                             font.family: decodiumMonoFontFamily
@@ -482,7 +482,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Set:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Set:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? astroManager.moonSet + " UTC" : "---"
                             font.family: decodiumMonoFontFamily
@@ -507,7 +507,7 @@ Dialog {
                     spacing: 8
 
                     Text {
-                        text: "Sun"
+                        text: qsTr("Sun")
                         font.pixelSize: 14
                         font.bold: true
                         color: sunColor
@@ -534,7 +534,7 @@ Dialog {
                             color: astroManager && astroManager.sunElevation > 0 ? sunColor : textSecondary
                         }
 
-                        Text { text: "Sunrise:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Sunrise:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? astroManager.sunrise + " UTC" : "---"
                             font.family: decodiumMonoFontFamily
@@ -542,7 +542,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Sunset:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Sunset:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? astroManager.sunset + " UTC" : "---"
                             font.family: decodiumMonoFontFamily
@@ -568,7 +568,7 @@ Dialog {
 
                     RowLayout {
                         Text {
-                            text: "EME (Earth-Moon-Earth)"
+                            text: qsTr("EME (Earth-Moon-Earth)")
                             font.pixelSize: 14
                             font.bold: true
                             color: accentGreen
@@ -604,7 +604,7 @@ Dialog {
                         columnSpacing: 20
                         rowSpacing: 6
 
-                        Text { text: "Status:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Status:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager && astroManager.emePossible ? "POSSIBLE" : "NOT POSSIBLE"
                             font.pixelSize: 12
@@ -612,7 +612,7 @@ Dialog {
                             color: astroManager && astroManager.emePossible ? accentGreen : "#f44336"
                         }
 
-                        Text { text: "Path Loss:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Path Loss:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? astroManager.emePathLoss.toFixed(1) + " dB" : "---"
                             font.family: decodiumMonoFontFamily
@@ -630,7 +630,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Frequency:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Frequency:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager ? astroManager.frequency.toFixed(3) + " MHz" : "---"
                             font.family: decodiumMonoFontFamily
@@ -638,7 +638,7 @@ Dialog {
                             color: secondaryCyan
                         }
 
-                        Text { text: "Window:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Window:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: astroManager
                                   ? astroManager.emeWindowStart + " - " + astroManager.emeWindowEnd + " UTC"
@@ -667,7 +667,7 @@ Dialog {
 
                     RowLayout {
                         Text {
-                            text: "Propagation (HamQSL)"
+                            text: qsTr("Propagation (HamQSL)")
                             font.pixelSize: 14
                             font.bold: true
                             color: secondaryCyan
@@ -692,7 +692,7 @@ Dialog {
                         columnSpacing: 20
                         rowSpacing: 6
 
-                        Text { text: "Solar Flux:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Solar Flux:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.solarFlux) : "---"
                             font.family: decodiumMonoFontFamily
@@ -700,7 +700,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "A-Index:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("A-Index:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.aIndex) : "---"
                             font.family: decodiumMonoFontFamily
@@ -708,7 +708,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "K-Index:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("K-Index:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.kIndex) : "---"
                             font.family: decodiumMonoFontFamily
@@ -716,7 +716,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "X-Ray:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("X-Ray:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.xRay) : "---"
                             font.family: decodiumMonoFontFamily
@@ -724,7 +724,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Sunspots:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Sunspots:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.sunspots) : "---"
                             font.family: decodiumMonoFontFamily
@@ -732,7 +732,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Solar Wind:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Solar Wind:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.solarWind) : "---"
                             font.family: decodiumMonoFontFamily
@@ -748,7 +748,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Geomagnetic:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Geomagnetic:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.geomagneticField) : "---"
                             font.family: decodiumMonoFontFamily
@@ -756,7 +756,7 @@ Dialog {
                             color: textPrimary
                         }
 
-                        Text { text: "Signal Noise:"; color: textSecondary; font.pixelSize: 11 }
+                        Text { text: qsTr("Signal Noise:"); color: textSecondary; font.pixelSize: 11 }
                         Text {
                             text: propagationManager ? astroWindow.displayPropagationValue(propagationManager.signalNoise) : "---"
                             font.family: decodiumMonoFontFamily
@@ -802,7 +802,7 @@ Dialog {
                     spacing: 8
 
                     Text {
-                        text: "HF Band Conditions"
+                        text: qsTr("HF Band Conditions")
                         font.pixelSize: 14
                         font.bold: true
                         color: accentGreen
@@ -813,21 +813,21 @@ Dialog {
 
                         Text {
                             Layout.preferredWidth: 90
-                            text: "Band"
+                            text: qsTr("Band")
                             font.pixelSize: 11
                             font.bold: true
                             color: textSecondary
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: "Day"
+                            text: qsTr("Day")
                             font.pixelSize: 11
                             font.bold: true
                             color: textSecondary
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: "Night"
+                            text: qsTr("Night")
                             font.pixelSize: 11
                             font.bold: true
                             color: textSecondary
@@ -885,7 +885,7 @@ Dialog {
 
                     Text {
                         visible: propagationManager && propagationManager.hfConditions.length === 0
-                        text: "No HF condition data available yet."
+                        text: qsTr("No HF condition data available yet.")
                         font.pixelSize: 11
                         color: textSecondary
                     }
@@ -908,7 +908,7 @@ Dialog {
                     spacing: 8
 
                     Text {
-                        text: "VHF Conditions"
+                        text: qsTr("VHF Conditions")
                         font.pixelSize: 14
                         font.bold: true
                         color: moonColor
@@ -940,7 +940,7 @@ Dialog {
 
                     Text {
                         visible: propagationManager && propagationManager.vhfConditions.length === 0
-                        text: "No VHF condition data available yet."
+                        text: qsTr("No VHF condition data available yet.")
                         font.pixelSize: 11
                         color: textSecondary
                     }
@@ -967,7 +967,7 @@ Dialog {
 
                 Button {
                     id: refreshButton
-                    text: "Refresh"
+                    text: qsTr("Refresh")
                     implicitWidth: 132
                     implicitHeight: 34
                     scale: down ? 0.97 : 1.0

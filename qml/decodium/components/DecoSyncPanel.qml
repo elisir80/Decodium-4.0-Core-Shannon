@@ -66,7 +66,7 @@ Rectangle {
         spacing: 8
 
         Text {
-            text: "DecoSyncTime Monitor"
+            text: qsTr("DecoSyncTime Monitor")
             color: accentBlue
             font.pixelSize: 14
             font.bold: true
@@ -157,13 +157,13 @@ Rectangle {
             rowSpacing: 4
             columnSpacing: 12
 
-            Text { text: "Source"; color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { text: "Stato"; color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { text: "Offset"; color: textSecondary; font.pixelSize: 10; font.bold: true }
-            Text { text: "Servers"; color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { text: qsTr("Source"); color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { text: qsTr("Stato"); color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { text: qsTr("Offset"); color: textSecondary; font.pixelSize: 10; font.bold: true }
+            Text { text: qsTr("Servers"); color: textSecondary; font.pixelSize: 10; font.bold: true }
 
             // NTP — via legacyNtpClient signals propagated as decoSyncTime
-            Text { text: "NTP UDP"; color: textPrimary; font.pixelSize: 11 }
+            Text { text: qsTr("NTP UDP"); color: textPrimary; font.pixelSize: 11 }
             Text {
                 text: bridge.ntpSynced ? "SYNC" : "—"
                 color: bridge.ntpSynced ? accentGreen : textSecondary
@@ -173,10 +173,10 @@ Rectangle {
                 text: bridge.ntpSynced ? bridge.ntpOffsetMs.toFixed(1) + " ms" : "—"
                 color: textPrimary; font.pixelSize: 11
             }
-            Text { text: "8 pool"; color: textSecondary; font.pixelSize: 11 }
+            Text { text: qsTr("8 pool"); color: textSecondary; font.pixelSize: 11 }
 
             // HTTPS
-            Text { text: "HTTPS Date"; color: textPrimary; font.pixelSize: 11 }
+            Text { text: qsTr("HTTPS Date"); color: textPrimary; font.pixelSize: 11 }
             Text {
                 text: (bridge.decoSyncTime && bridge.decoSyncTime.httpsSynced()) ? "SYNC" : "—"
                 color: (bridge.decoSyncTime && bridge.decoSyncTime.httpsSynced()) ? accentGreen : textSecondary
@@ -194,7 +194,7 @@ Rectangle {
             }
 
             // SelfCal
-            Text { text: "SelfCal FT"; color: textPrimary; font.pixelSize: 11 }
+            Text { text: qsTr("SelfCal FT"); color: textPrimary; font.pixelSize: 11 }
             Text {
                 text: (bridge.decoSyncTime && bridge.decoSyncTime.selfCalPendingCount() > 0)
                       ? "buffering" : "idle"

@@ -98,7 +98,7 @@ Rectangle {
             }
 
             // Row 1 — Radio model
-            Text { text: "Radio"; color: textSecondary; font.pixelSize: 12 }
+            Text { text: qsTr("Radio"); color: textSecondary; font.pixelSize: 12 }
             DecoComboBox {
                 id: rigCombo
                 Layout.fillWidth: true
@@ -221,7 +221,7 @@ Rectangle {
             // Row 2 — network endpoint for HRD/DXLab-style rigs
             Text {
                 visible: networkRig
-                text: "Network host"
+                text: qsTr("Network host")
                 color: textSecondary
                 font.pixelSize: 12
             }
@@ -244,7 +244,7 @@ Rectangle {
             }
 
             // Row 3 — COM port
-            Text { visible: serialRig; text: "Serial port"; color: textSecondary; font.pixelSize: 12 }
+            Text { visible: serialRig; text: qsTr("Serial port"); color: textSecondary; font.pixelSize: 12 }
             RowLayout {
                 visible: serialRig
                 Layout.fillWidth: true
@@ -270,12 +270,12 @@ Rectangle {
                     background: Rectangle { color: Qt.rgba(1,1,1,0.07); border.color: glassBorder; radius: 4 }
                     contentItem: Text { text: parent.text; color: secondaryCyan; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: if (cat) { cat.refreshPorts(); var idx = portCombo.find(cat.serialPort); if (idx >= 0) portCombo.currentIndex = idx }
-                    ToolTip.visible: hovered; ToolTip.text: "Refresh ports"; ToolTip.delay: 500
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Refresh ports"); ToolTip.delay: 500
                 }
             }
 
             // Row 4 — Baud rate
-            Text { visible: serialRig; text: "Baud rate"; color: textSecondary; font.pixelSize: 12 }
+            Text { visible: serialRig; text: qsTr("Baud rate"); color: textSecondary; font.pixelSize: 12 }
             DecoComboBox {
                 id: baudCombo
                 visible: serialRig
@@ -299,7 +299,7 @@ Rectangle {
             }
 
             // Row 5 — PTT method
-            Text { text: "PTT method"; color: textSecondary; font.pixelSize: 12 }
+            Text { text: qsTr("PTT method"); color: textSecondary; font.pixelSize: 12 }
             DecoComboBox {
                 id: pttCombo
                 Layout.fillWidth: true
@@ -322,7 +322,7 @@ Rectangle {
             spacing: 20
 
             CheckBox {
-                text: "Auto-connect on startup"
+                text: qsTr("Auto-connect on startup")
                 font.pixelSize: 11
                 checked: cat ? cat.catAutoConnect : false
                 onCheckedChanged: if (cat) cat.catAutoConnect = checked
@@ -337,7 +337,7 @@ Rectangle {
             }
 
             CheckBox {
-                text: "Auto-start audio"
+                text: qsTr("Auto-start audio")
                 font.pixelSize: 11
                 checked: cat ? cat.audioAutoStart : false
                 onCheckedChanged: if (cat) cat.audioAutoStart = checked
@@ -361,7 +361,7 @@ Rectangle {
             border.color: Qt.rgba(1,0.8,0,0.3)
             Text {
                 anchors.centerIn: parent
-                text: "TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)"
+                text: qsTr("TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)")
                 font.pixelSize: 10; font.italic: true
                 color: Qt.rgba(1,0.85,0.2,0.8)
             }
@@ -377,7 +377,7 @@ Rectangle {
             Button {
                 Layout.fillWidth: true
                 implicitHeight: 42
-                text: "Save"
+                text: qsTr("Save")
                 background: Rectangle { radius: 6; color: Qt.rgba(1,1,1,0.07); border.color: glassBorder }
                 contentItem: Text { text: parent.text; font.pixelSize: 13; font.bold: true; color: textSecondary; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                 onClicked: if (cat) cat.saveSettings()
@@ -387,7 +387,7 @@ Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 42
                 enabled: cat && !cat.connected
-                text: "Connect"
+                text: qsTr("Connect")
                 background: Rectangle {
                     radius: 6
                     gradient: Gradient {
@@ -403,7 +403,7 @@ Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: 42
                 enabled: cat && cat.connected
-                text: "Disconnect"
+                text: qsTr("Disconnect")
                 background: Rectangle {
                     radius: 6
                     color: parent.enabled ? Qt.rgba(errorRed.r, errorRed.g, errorRed.b, 0.25) : Qt.rgba(0.3,0.3,0.3,0.3)

@@ -5418,7 +5418,7 @@ Rectangle {
                     spacing: 8
 
                     Text {
-                        text: "FT2-LINK"
+                        text: qsTr("FT2-LINK")
                         font.family: root.mono
                         font.pixelSize: 14
                         font.bold: true
@@ -5609,7 +5609,7 @@ Rectangle {
                         CompactCheck {
                             id: cqOnlyCheck
                             visible: !root.stationHistoryMode
-                            text: "CQ only"
+                            text: qsTr("CQ only")
                             checked: root.cqOnly
                             accent: root.green
                             tip: "Show CQ-capable stations only"
@@ -5648,7 +5648,7 @@ Rectangle {
 
                         CompactCheck {
                             id: autoBeaconCheck
-                            text: "AUTO CQ"
+                            text: qsTr("AUTO CQ")
                             checked: ft2Link ? ft2Link.autoBeaconEnabled : false
                             accent: root.green
                             tip: "Enable periodic CQ"
@@ -6002,7 +6002,7 @@ Rectangle {
                     }
                     Item { Layout.fillWidth: true }
                     SmallButton {
-                        text: "LOOP ACK"
+                        text: qsTr("LOOP ACK")
                         implicitWidth: 72
                         accent: root.amber
                         visible: root.lastHelloBytes && root.selectedRemoteCall.length > 0
@@ -6091,7 +6091,7 @@ Rectangle {
                     Text {
                         anchors.centerIn: parent
                         visible: sessionList.count === 0
-                        text: "No sessions"
+                        text: qsTr("No sessions")
                         font.family: root.mono
                         font.pixelSize: 11
                         color: root.textSecondary
@@ -6191,7 +6191,7 @@ Rectangle {
 
                     CompactCheck {
                         id: dropDataCheck
-                        text: "DROP DATA"
+                        text: qsTr("DROP DATA")
                         accent: root.red
                         onToggled: function(nextChecked) {
                             dropDataCheck.checked = nextChecked
@@ -6200,7 +6200,7 @@ Rectangle {
 
                     CompactCheck {
                         id: dropAckCheck
-                        text: "DROP ACK"
+                        text: qsTr("DROP ACK")
                         accent: root.red
                         onToggled: function(nextChecked) {
                             dropAckCheck.checked = nextChecked
@@ -6794,7 +6794,7 @@ Rectangle {
 
                                 Text {
                                     visible: cannedList.count === 0
-                                    text: "No tags"
+                                    text: qsTr("No tags")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -6844,7 +6844,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "SET CF"
+                                    text: qsTr("SET CF")
                                     implicitWidth: 58
                                     accent: root.cyan
                                     enabled: root.currentDialFrequencyHz() > 0
@@ -6853,7 +6853,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "CF TAG"
+                                    text: qsTr("CF TAG")
                                     implicitWidth: 58
                                     accent: root.cyan
                                     enabled: root.selectedSessionId > 0 && root.qsyCallingFrequencyHz > 0
@@ -6891,7 +6891,7 @@ Rectangle {
                                     id: composeText
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 34
-                                    placeholderText: "Message"
+                                    placeholderText: qsTr("Message")
                                     enabled: true
                                     font.family: root.mono
                                     font.pixelSize: 11
@@ -7012,7 +7012,7 @@ Rectangle {
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: 0
                                         Layout.preferredHeight: 28
-                                        placeholderText: "key=value; key=value"
+                                        placeholderText: qsTr("key=value; key=value")
                                         enabled: root.selectedSessionConnected
                                         font.family: root.mono
                                         font.pixelSize: 11
@@ -7229,7 +7229,7 @@ Rectangle {
                                         maximumLength: 16
                                         selectByMouse: true
                                         ToolTip.visible: hovered
-                                        ToolTip.text: "BBS group. Empty means ALL."
+                                        ToolTip.text: qsTr("BBS group. Empty means ALL.")
                                         ToolTip.delay: 450
                                         background: Rectangle {
                                             radius: 4
@@ -7266,14 +7266,14 @@ Rectangle {
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: 0
                                         Layout.preferredHeight: 28
-                                        placeholderText: "Bulletin title"
+                                        placeholderText: qsTr("Bulletin title")
                                         enabled: root.selectedSessionConnected
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         maximumLength: 64
                                         selectByMouse: true
                                         ToolTip.visible: hovered
-                                        ToolTip.text: "Short BBS subject/title."
+                                        ToolTip.text: qsTr("Short BBS subject/title.")
                                         ToolTip.delay: 450
                                         background: Rectangle {
                                             radius: 4
@@ -7308,7 +7308,7 @@ Rectangle {
                                         Layout.fillWidth: true
                                         Layout.minimumWidth: 0
                                         Layout.preferredHeight: 28
-                                        placeholderText: "BBS message body"
+                                        placeholderText: qsTr("BBS message body")
                                         enabled: root.selectedSessionConnected
                                         font.family: root.mono
                                         font.pixelSize: 11
@@ -7316,7 +7316,7 @@ Rectangle {
                                         selectByMouse: true
                                         onAccepted: root.armOrTransmitBulletin()
                                         ToolTip.visible: hovered
-                                        ToolTip.text: "Text to store and send as the BBS bulletin body."
+                                        ToolTip.text: qsTr("Text to store and send as the BBS bulletin body.")
                                         ToolTip.delay: 450
                                         background: Rectangle {
                                             radius: 4
@@ -7365,7 +7365,7 @@ Rectangle {
                                     Layout.preferredWidth: 150
                                     Layout.minimumWidth: 90
                                     Layout.preferredHeight: 26
-                                    placeholderText: "server-file.txt"
+                                    placeholderText: qsTr("server-file.txt")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     selectByMouse: true
@@ -7384,7 +7384,7 @@ Rectangle {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 120
                                     Layout.preferredHeight: 26
-                                    placeholderText: "BBS server file body"
+                                    placeholderText: qsTr("BBS server file body")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     selectByMouse: true
@@ -7453,7 +7453,7 @@ Rectangle {
                                     Layout.preferredWidth: 180
                                     Layout.minimumWidth: 100
                                     Layout.preferredHeight: 26
-                                    placeholderText: "remote-file.txt"
+                                    placeholderText: qsTr("remote-file.txt")
                                     enabled: root.selectedSessionConnected
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -7592,7 +7592,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: bbsSharedFileList.count === 0
-                                    text: "No BBS server files"
+                                    text: qsTr("No BBS server files")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -7637,7 +7637,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "SAVE GROUP"
+                                    text: qsTr("SAVE GROUP")
                                     implicitWidth: 86
                                     implicitHeight: 22
                                     labelSize: 9
@@ -7665,7 +7665,7 @@ Rectangle {
                                 spacing: 6
 
                                 Text {
-                                    text: "BBS BULLETINS"
+                                    text: qsTr("BBS BULLETINS")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     font.bold: true
@@ -7702,7 +7702,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "MARK ALL READ"
+                                    text: qsTr("MARK ALL READ")
                                     implicitWidth: 104
                                     accent: root.amber
                                     enabled: root.bulletinUnreadCount > 0
@@ -7883,7 +7883,7 @@ Rectangle {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
                                     Layout.preferredHeight: 32
-                                    placeholderText: "Broadcast message"
+                                    placeholderText: qsTr("Broadcast message")
                                     enabled: !root.broadcastTxPending()
                                     font.family: root.mono
                                     font.pixelSize: 12
@@ -7925,7 +7925,7 @@ Rectangle {
                                     id: alertTagsText
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 28
-                                    placeholderText: "Alert tags: WX, POTA, NET"
+                                    placeholderText: qsTr("Alert tags: WX, POTA, NET")
                                     enabled: true
                                     font.family: root.mono
                                     font.pixelSize: 11
@@ -7977,7 +7977,7 @@ Rectangle {
                                     id: pathTargetText
                                     Layout.preferredWidth: 116
                                     Layout.preferredHeight: 26
-                                    placeholderText: "PATH CALL"
+                                    placeholderText: qsTr("PATH CALL")
                                     enabled: true
                                     font.family: root.mono
                                     font.pixelSize: 11
@@ -8105,7 +8105,7 @@ Rectangle {
                                     id: digipeaterMessageText
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 26
-                                    placeholderText: "Digipeater payload"
+                                    placeholderText: qsTr("Digipeater payload")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     maximumLength: 96
@@ -8146,7 +8146,7 @@ Rectangle {
                                 spacing: 8
 
                                 Text {
-                                    text: "DIGIPEATER"
+                                    text: qsTr("DIGIPEATER")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     font.bold: true
@@ -8174,7 +8174,7 @@ Rectangle {
                                 spacing: 6
 
                                 Text {
-                                    text: "ALERT CENTER"
+                                    text: qsTr("ALERT CENTER")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     font.bold: true
@@ -8203,7 +8203,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "CLEAR ARCH"
+                                    text: qsTr("CLEAR ARCH")
                                     implicitWidth: 86
                                     implicitHeight: 22
                                     labelSize: 9
@@ -8367,7 +8367,7 @@ Rectangle {
                                 TextField {
                                     id: mailSubjectText
                                     Layout.preferredWidth: 150
-                                    placeholderText: "Subject"
+                                    placeholderText: qsTr("Subject")
                                     enabled: true
                                     font.family: root.mono
                                     font.pixelSize: 11
@@ -8378,7 +8378,7 @@ Rectangle {
                                 TextField {
                                     id: mailBodyText
                                     Layout.fillWidth: true
-                                    placeholderText: "Mail body"
+                                    placeholderText: qsTr("Mail body")
                                     enabled: true
                                     font.family: root.mono
                                     font.pixelSize: 11
@@ -8544,7 +8544,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "USE PATH"
+                                    text: qsTr("USE PATH")
                                     implicitWidth: 72
                                     labelSize: 9
                                     accent: root.cyan
@@ -8554,7 +8554,7 @@ Rectangle {
                                 }
 
                                 SmallButton {
-                                    text: "CALL RLY"
+                                    text: qsTr("CALL RLY")
                                     implicitWidth: 72
                                     labelSize: 9
                                     accent: root.amber
@@ -8591,7 +8591,7 @@ Rectangle {
                                     Layout.preferredWidth: 150
                                     Layout.preferredHeight: 22
                                     text: root.emailGatewayHost
-                                    placeholderText: "smtp.host"
+                                    placeholderText: qsTr("smtp.host")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     selectByMouse: true
@@ -8634,7 +8634,7 @@ Rectangle {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 22
                                     text: root.emailGatewayUsername
-                                    placeholderText: "SMTP user"
+                                    placeholderText: qsTr("SMTP user")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     selectByMouse: true
@@ -8652,7 +8652,7 @@ Rectangle {
                                     Layout.preferredWidth: 185
                                     Layout.preferredHeight: 22
                                     text: root.emailGatewayFrom
-                                    placeholderText: "From email"
+                                    placeholderText: qsTr("From email")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     selectByMouse: true
@@ -8664,7 +8664,7 @@ Rectangle {
                                     id: emailGatewayPasswordText
                                     Layout.preferredWidth: 150
                                     Layout.preferredHeight: 22
-                                    placeholderText: "SMTP password"
+                                    placeholderText: qsTr("SMTP password")
                                     echoMode: TextInput.Password
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -8901,7 +8901,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: mailboxList.count === 0
-                                    text: "No mail"
+                                    text: qsTr("No mail")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -9069,7 +9069,7 @@ Rectangle {
                                     id: awayMessageText
                                     Layout.preferredWidth: 176
                                     Layout.preferredHeight: 26
-                                    placeholderText: "Away message"
+                                    placeholderText: qsTr("Away message")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     maximumLength: 240
@@ -9090,7 +9090,7 @@ Rectangle {
                                     id: welcomeMessageText
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 26
-                                    placeholderText: "Welcome message"
+                                    placeholderText: qsTr("Welcome message")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     maximumLength: 240
@@ -9101,7 +9101,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: autoReplyCheck
-                                    text: "AUTO REPLY"
+                                    text: qsTr("AUTO REPLY")
                                     enabled: !!ft2Link
                                     accent: root.green
                                     onToggled: function(nextChecked) { autoReplyCheck.checked = nextChecked }
@@ -9124,7 +9124,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: autoAwayCheck
-                                    text: "AUTO AWAY"
+                                    text: qsTr("AUTO AWAY")
                                     enabled: !!ft2Link
                                     accent: root.amber
                                     onToggled: function(nextChecked) { autoAwayCheck.checked = nextChecked }
@@ -9167,7 +9167,7 @@ Rectangle {
                                 spacing: 6
 
                                 Text {
-                                    text: "CALL ID"
+                                    text: qsTr("CALL ID")
                                     color: root.textSecondary
                                     font.family: root.mono
                                     font.pixelSize: 9
@@ -9192,7 +9192,7 @@ Rectangle {
                                 }
 
                                 Text {
-                                    text: "AUTO DISC"
+                                    text: qsTr("AUTO DISC")
                                     color: root.textSecondary
                                     font.family: root.mono
                                     font.pixelSize: 9
@@ -9218,7 +9218,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: incomingPingCheck
-                                    text: "PING RX"
+                                    text: qsTr("PING RX")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9296,7 +9296,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: lastHeardPeekingCheck
-                                    text: "LH PEEK"
+                                    text: qsTr("LH PEEK")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9305,7 +9305,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: snrReportCheck
-                                    text: "SNR TX"
+                                    text: qsTr("SNR TX")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9314,7 +9314,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: verboseSnrAcceptCheck
-                                    text: "VSNR OK"
+                                    text: qsTr("VSNR OK")
                                     checked: false
                                     enabled: !!ft2Link
                                     accent: root.cyan
@@ -9323,7 +9323,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: lastConnectionsPeekingCheck
-                                    text: "LC PEEK"
+                                    text: qsTr("LC PEEK")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9332,7 +9332,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: parkedVmailPeekingCheck
-                                    text: "VM PEEK"
+                                    text: qsTr("VM PEEK")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9341,7 +9341,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: vmailParkingCheck
-                                    text: "VM PARK"
+                                    text: qsTr("VM PARK")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9350,7 +9350,7 @@ Rectangle {
 
                                 CompactCheck {
                                     id: infoInquireCheck
-                                    text: "INFO REQ"
+                                    text: qsTr("INFO REQ")
                                     checked: true
                                     enabled: !!ft2Link
                                     accent: root.green
@@ -9582,7 +9582,7 @@ Rectangle {
 	                                TextField {
 	                                    id: contactCommentText
 	                                    Layout.fillWidth: true
-	                                    placeholderText: "Comment"
+	                                    placeholderText: qsTr("Comment")
 	                                    font.family: root.mono
 	                                    font.pixelSize: 10
 	                                    maximumLength: 240
@@ -9714,7 +9714,7 @@ Rectangle {
 		                                    Text {
 		                                        anchors.centerIn: parent
 		                                        visible: contactList.count === 0
-		                                        text: "No contacts"
+		                                        text: qsTr("No contacts")
 		                                        font.family: root.mono
 		                                        font.pixelSize: 10
 		                                        color: root.textSecondary
@@ -9874,7 +9874,7 @@ Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 24
                                         text: root.clusterSharePath
-                                        placeholderText: "Shared cluster JSON path"
+                                        placeholderText: qsTr("Shared cluster JSON path")
                                         font.family: root.mono
                                         font.pixelSize: 10
                                         selectByMouse: true
@@ -10016,7 +10016,7 @@ Rectangle {
                                         height: Math.max(clusterJsonScroll.availableHeight, implicitHeight)
                                         selectByMouse: true
                                         wrapMode: TextEdit.NoWrap
-                                        placeholderText: "Paste cluster JSON here, or press EXPORT"
+                                        placeholderText: qsTr("Paste cluster JSON here, or press EXPORT")
                                         font.family: root.mono
                                         font.pixelSize: 10
                                         color: root.textPrimary
@@ -10142,7 +10142,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: clusterLastHeardList.count === 0
-                                    text: "No cluster last-heard records"
+                                    text: qsTr("No cluster last-heard records")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -10286,7 +10286,7 @@ Rectangle {
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        text: "not tracked"
+                                        text: qsTr("not tracked")
                                         elide: Text.ElideRight
                                         font.family: root.mono
                                         font.pixelSize: 10
@@ -10403,7 +10403,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: pathReportList.count === 0
-                                    text: "No path reports"
+                                    text: qsTr("No path reports")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -10569,7 +10569,7 @@ Rectangle {
                                     selectByMouse: true
                                     wrapMode: TextEdit.NoWrap
                                     text: root.logExportText
-                                    placeholderText: "Select an export"
+                                    placeholderText: qsTr("Select an export")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textPrimary
@@ -10709,7 +10709,7 @@ Rectangle {
                                     text: root.databaseActionText.length > 0
                                           ? root.databaseActionText
                                           : root.prettyJson(root.storeAudit)
-                                    placeholderText: "Run audit"
+                                    placeholderText: qsTr("Run audit")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textPrimary
@@ -11154,7 +11154,7 @@ Rectangle {
                                         id: presetTipText
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 26
-                                        placeholderText: "description"
+                                        placeholderText: qsTr("description")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         maximumLength: 96
@@ -11166,7 +11166,7 @@ Rectangle {
                                     id: presetTemplateText
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 28
-                                    placeholderText: "template text with <MYCALL>, <CALL>, <QTH>..."
+                                    placeholderText: qsTr("template text with <MYCALL>, <CALL>, <QTH>...")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     maximumLength: 512
@@ -11273,7 +11273,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: customPresetList.count === 0
-                                    text: "No custom presets"
+                                    text: qsTr("No custom presets")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -11305,7 +11305,7 @@ Rectangle {
                                         Layout.preferredWidth: 120
                                         Layout.preferredHeight: 26
                                         text: root.checkInRegion
-                                        placeholderText: "county/state"
+                                        placeholderText: qsTr("county/state")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11332,7 +11332,7 @@ Rectangle {
                                         id: checkInWeatherText
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 28
-                                        placeholderText: "weather line optional"
+                                        placeholderText: qsTr("weather line optional")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11360,7 +11360,7 @@ Rectangle {
                                 Text {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    text: "Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body."
+                                    text: qsTr("Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.")
                                     wrapMode: Text.WordWrap
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -11392,7 +11392,7 @@ Rectangle {
                                         text: ft2Link && typeof ft2Link.frequencyPresetsText === "function"
                                               ? ft2Link.frequencyPresetsText()
                                               : ""
-                                        placeholderText: "14105000|20m|Main, 7105000|40m|Main"
+                                        placeholderText: qsTr("14105000|20m|Main, 7105000|40m|Main")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11430,7 +11430,7 @@ Rectangle {
                                         text: ft2Link && typeof ft2Link.frequencyScheduleText === "function"
                                               ? ft2Link.frequencyScheduleText()
                                               : ""
-                                        placeholderText: "0000-2359|CALLING|14105000|20m main|CQ"
+                                        placeholderText: qsTr("0000-2359|CALLING|14105000|20m main|CQ")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11518,7 +11518,7 @@ Rectangle {
                                         text: ft2Link && typeof ft2Link.allowedQsyRangesText === "function"
                                               ? ft2Link.allowedQsyRangesText()
                                               : ""
-                                        placeholderText: "14101250-14108750|20m, 7101250-7108750|40m"
+                                        placeholderText: qsTr("14101250-14108750|20m, 7101250-7108750|40m")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11547,7 +11547,7 @@ Rectangle {
                                 Text {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    text: "FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed."
+                                    text: qsTr("FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.")
                                     wrapMode: Text.WordWrap
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -11691,7 +11691,7 @@ Rectangle {
                                         text: ft2Link && typeof ft2Link.blockedCallsText === "function"
                                               ? ft2Link.blockedCallsText()
                                               : ""
-                                        placeholderText: "CALL1, CALL2, Z6/TEST"
+                                        placeholderText: qsTr("CALL1, CALL2, Z6/TEST")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11726,7 +11726,7 @@ Rectangle {
                                         id: blockedCallText
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 28
-                                        placeholderText: "Add callsign"
+                                        placeholderText: qsTr("Add callsign")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         maximumLength: 24
@@ -11747,7 +11747,7 @@ Rectangle {
                                 Text {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    text: "Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally."
+                                    text: qsTr("Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.")
                                     wrapMode: Text.WordWrap
                                     font.family: root.mono
                                     font.pixelSize: 10
@@ -11816,7 +11816,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     visible: blockedCallListView.count === 0
-                                    text: "No blocked calls"
+                                    text: qsTr("No blocked calls")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     color: root.textSecondary
@@ -11837,7 +11837,7 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "SATELLITE HALF-DUPLEX"
+                                    text: qsTr("SATELLITE HALF-DUPLEX")
                                     font.family: root.mono
                                     font.pixelSize: 12
                                     font.bold: true
@@ -11845,7 +11845,7 @@ Rectangle {
                                 }
 
                                 CompactCheck {
-                                    text: "Enable independent RX/TX VFOs"
+                                    text: qsTr("Enable independent RX/TX VFOs")
                                     checked: root.satelliteHalfDuplexEnabled
                                     accent: root.amber
                                     tip: "For FT2-Link RF TX only. Editing this setting does not retune the radio."
@@ -11860,7 +11860,7 @@ Rectangle {
 
                                     Text {
                                         Layout.preferredWidth: 72
-                                        text: "RX MHz"
+                                        text: qsTr("RX MHz")
                                         font.family: root.mono
                                         font.pixelSize: 10
                                         color: root.cyan
@@ -11872,7 +11872,7 @@ Rectangle {
                                         Layout.preferredHeight: 28
                                         text: root.satelliteRxDialHz > 0
                                               ? (root.satelliteRxDialHz / 1000000).toFixed(6) : ""
-                                        placeholderText: "downlink dial MHz"
+                                        placeholderText: qsTr("downlink dial MHz")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11900,7 +11900,7 @@ Rectangle {
 
                                     Text {
                                         Layout.preferredWidth: 72
-                                        text: "TX MHz"
+                                        text: qsTr("TX MHz")
                                         font.family: root.mono
                                         font.pixelSize: 10
                                         color: root.red
@@ -11912,7 +11912,7 @@ Rectangle {
                                         Layout.preferredHeight: 28
                                         text: root.satelliteTxDialHz > 0
                                               ? (root.satelliteTxDialHz / 1000000).toFixed(6) : ""
-                                        placeholderText: "uplink dial MHz"
+                                        placeholderText: qsTr("uplink dial MHz")
                                         font.family: root.mono
                                         font.pixelSize: 11
                                         selectByMouse: true
@@ -11926,7 +11926,7 @@ Rectangle {
 
                                     Text {
                                         Layout.preferredWidth: 76
-                                        text: "SETTLE ms"
+                                        text: qsTr("SETTLE ms")
                                         font.family: root.mono
                                         font.pixelSize: 10
                                         color: root.textSecondary
@@ -11954,7 +11954,7 @@ Rectangle {
                                     spacing: 6
 
                                     SmallButton {
-                                        text: "READ RX/TX FROM RIG"
+                                        text: qsTr("READ RX/TX FROM RIG")
                                         implicitWidth: 168
                                         accent: root.cyan
                                         enabled: !!bridge && !!bridge.hamlibCat
@@ -12017,7 +12017,7 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path."
+                                    text: qsTr("Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     wrapMode: Text.WordWrap
@@ -12038,7 +12038,7 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "QO-100 / cross-band setup"
+                                    text: qsTr("QO-100 / cross-band setup")
                                     font.family: root.mono
                                     font.pixelSize: 11
                                     font.bold: true
@@ -12047,7 +12047,7 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ."
+                                    text: qsTr("Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     wrapMode: Text.WordWrap
@@ -12056,7 +12056,7 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view."
+                                    text: qsTr("The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     wrapMode: Text.WordWrap
@@ -12067,7 +12067,7 @@ Rectangle {
 
                                 Text {
                                     Layout.fillWidth: true
-                                    text: "CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use."
+                                    text: qsTr("CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.")
                                     font.family: root.mono
                                     font.pixelSize: 10
                                     wrapMode: Text.WordWrap

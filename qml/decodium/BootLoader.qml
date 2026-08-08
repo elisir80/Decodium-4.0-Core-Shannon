@@ -149,14 +149,14 @@ ApplicationWindow {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "DECODIUM 4.0"
+            text: qsTr("DECODIUM 4.0")
             color: "#ff7814"
             font.pixelSize: 42
             font.bold: true
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "Core Gallager"
+            text: qsTr("Core Gallager")
             color: "#aaaacc"
             font.pixelSize: 18
         }

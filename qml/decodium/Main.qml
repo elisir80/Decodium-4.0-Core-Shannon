@@ -1108,7 +1108,7 @@ ApplicationWindow {
             anchors.centerIn: parent
             spacing: 10
             Text { text: qsTr("Full screen"); color: "#ffffff"; font.pixelSize: 12; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
-            Text { text: "F11 / Esc"; color: textSecondary; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: qsTr("F11 / Esc"); color: textSecondary; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
             Rectangle {
                 width: 24; height: 24; radius: 12
                 anchors.verticalCenter: parent.verticalCenter
@@ -3316,7 +3316,7 @@ ApplicationWindow {
 
             Text {
                 Layout.fillWidth: true
-                text: "FT2-Link access"
+                text: qsTr("FT2-Link access")
                 color: secondaryCyan
                 font.pixelSize: 18
                 font.bold: true
@@ -3324,7 +3324,7 @@ ApplicationWindow {
 
             Text {
                 Layout.fillWidth: true
-                text: "Enter password to unlock this mode."
+                text: qsTr("Enter password to unlock this mode.")
                 color: textSecondary
                 font.pixelSize: 12
                 wrapMode: Text.WordWrap
@@ -3333,7 +3333,7 @@ ApplicationWindow {
             TextField {
                 id: ft2LinkPasswordField
                 Layout.fillWidth: true
-                placeholderText: "Password"
+                placeholderText: qsTr("Password")
                 echoMode: TextInput.Password
                 selectByMouse: true
                 color: textPrimary
@@ -3369,7 +3369,7 @@ ApplicationWindow {
                 }
 
                 Button {
-                    text: "Unlock"
+                    text: qsTr("Unlock")
                     highlighted: true
                     onClicked: mainWindow.acceptFt2LinkAccess()
                 }
@@ -3475,14 +3475,14 @@ ApplicationWindow {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "Based on WSJT-X by K1JT et al."
+                text: qsTr("Based on WSJT-X by K1JT et al.")
                 font.pixelSize: 14
                 color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.5)
             }
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "QML Interface by IU8LMC"
+                text: qsTr("QML Interface by IU8LMC")
                 font.pixelSize: 13
                 color: accentGreen
             }
@@ -3674,7 +3674,7 @@ ApplicationWindow {
             // Not found message
             Text {
                 Layout.fillWidth: true
-                text: "No recent activity found\n(last 15 minutes)"
+                text: qsTr("No recent activity found\n(last 15 minutes)")
                 font.pixelSize: 12
                 color: textSecondary
                 horizontalAlignment: Text.AlignHCenter
@@ -3911,7 +3911,7 @@ ApplicationWindow {
                     Behavior on border.width { NumberAnimation { duration: 150 } }
 
                     ToolTip.visible: menuButtonMA.containsMouse
-                    ToolTip.text: "Menu"
+                    ToolTip.text: qsTr("Menu")
                     ToolTip.delay: 500
                 }
 
@@ -4872,7 +4872,7 @@ ApplicationWindow {
                                 anchors.centerIn: parent
                                 spacing: 2
                                 Text { text: "⚙"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                                Text { text: "Setup"; font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                                Text { text: qsTr("Setup"); font.pixelSize: 9; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                             }
                         }
                     }
@@ -5033,7 +5033,7 @@ ApplicationWindow {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
-                                    text: "Layout"
+                                    text: qsTr("Layout")
                                     font.pixelSize: 9
                                     font.bold: true
                                     color: Qt.rgba(255/255, 175/255, 88/255, 1.0)
@@ -5067,7 +5067,7 @@ ApplicationWindow {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
-                                    text: "History"
+                                    text: qsTr("History")
                                     font.pixelSize: 9
                                     font.bold: true
                                     color: Qt.rgba(88/255, 175/255, 255/255, 1.0)
@@ -6063,7 +6063,7 @@ ApplicationWindow {
                             }
 
                             Text {
-                                text: "Auto Spot"
+                                text: qsTr("Auto Spot")
                                 width: Math.max(0, autoSpotContent.width - autoSpotBox.width - autoSpotContent.spacing)
                                 color: bridge.autoSpotEnabled ? accentGreen : textSecondary
                                 font.pixelSize: 8
@@ -6140,14 +6140,14 @@ ApplicationWindow {
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: "Bypass"
+                            text: qsTr("Bypass")
                             font.pixelSize: 9
                             font.bold: true
                             color: bridge.filtersBypassed ? parent.parent.bypassRed : textSecondary
                         }
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: "Filters"
+                            text: qsTr("Filters")
                             font.pixelSize: 9
                             font.bold: true
                             color: bridge.filtersBypassed ? parent.parent.bypassRed : textSecondary
@@ -6499,7 +6499,7 @@ ApplicationWindow {
                         spacing: 4
 
                         Text {
-                            text: "PSK Reporter"
+                            text: qsTr("PSK Reporter")
                             font.pixelSize: 10
                             font.bold: true
                             color: secondaryCyan
@@ -6710,7 +6710,7 @@ ApplicationWindow {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "Reset"
+                                text: qsTr("Reset")
                                 font.pixelSize: 8
                                 color: textSecondary
                             }
@@ -7166,7 +7166,7 @@ ApplicationWindow {
                                 }
 
                                 ToolTip.visible: waterfallPopMA.containsMouse
-                                ToolTip.text: "Detach Waterfall"
+                                ToolTip.text: qsTr("Detach Waterfall")
                                 ToolTip.delay: 500
                             }
                         }
@@ -7980,7 +7980,7 @@ ApplicationWindow {
 
                                         Text {
                                             anchors.verticalCenter: parent.verticalCenter
-                                            text: "FT2-Link popped out"
+                                            text: qsTr("FT2-Link popped out")
                                             font.pixelSize: 13
                                             font.bold: true
                                             color: textSecondary
@@ -8870,7 +8870,7 @@ NumberAnimation {
 
                                         Text {
                                             anchors.centerIn: parent
-                                            text: "No decodes"
+                                            text: qsTr("No decodes")
                                             font.pixelSize: 12
                                             color: textSecondary
                                             horizontalAlignment: Text.AlignHCenter
@@ -10432,7 +10432,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             alignment: Qt.AlignRight
 
             Button {
-                text: "Configure radio"
+                text: qsTr("Configure radio")
                 DialogButtonBox.buttonRole: DialogButtonBox.ActionRole
                 onClicked: {
                     rigErrorDialog.close()
@@ -10441,7 +10441,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             }
 
             Button {
-                text: "Retry"
+                text: qsTr("Retry")
                 DialogButtonBox.buttonRole: DialogButtonBox.ActionRole
                 onClicked: {
                     rigErrorDialog.close()
@@ -11067,7 +11067,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         // altrimenti il title è già descrittivo (es. "DX Cluster") e il
                         // sottotitolo statico aggiunge solo rumore.
                         visible: warningDialogTitle === "" || warningDialogTitle === "Error" || warningDialogTitle === "Errore"
-                        text: "Decodium reported a non-blocking problem."
+                        text: qsTr("Decodium reported a non-blocking problem.")
                         font.pixelSize: 11
                         color: textSecondary
                         elide: Text.ElideRight
@@ -12044,7 +12044,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     // ===== B11 CABRILLO EXPORT DIALOG =====
     Dialog {
         id: cabrilloDlg
-        title: "Export Cabrillo"
+        title: qsTr("Export Cabrillo")
         anchors.centerIn: parent
         width: 400
         modal: true
@@ -12056,7 +12056,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         contentItem: Column {
             spacing: 12; padding: 16
-            Text { text: "Output file path:"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Output file path:"); font.pixelSize: 12; color: textPrimary }
             DecoTextField {
                 id: cabrilloPath
                 width: 360
@@ -12073,7 +12073,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         footer: DialogButtonBox {
             Button {
-                text: "Export"
+                text: qsTr("Export")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
                 onClicked: {
                     if (bridge.exportCabrillo(cabrilloPath.text))
@@ -12108,7 +12108,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             padding: 20
 
             Text {
-                text: "Watchdog Mode"
+                text: qsTr("Watchdog Mode")
                 font.pixelSize: 14
                 font.bold: true
                 color: textPrimary
@@ -12118,19 +12118,19 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 spacing: 10
                 RadioButton {
                     id: wdOff
-                    text: "Off"
+                    text: qsTr("Off")
                     checked: bridge.txWatchdogMode === 0
                     onClicked: bridge.txWatchdogMode = 0
                 }
                 RadioButton {
                     id: wdTime
-                    text: "Time"
+                    text: qsTr("Time")
                     checked: bridge.txWatchdogMode === 1
                     onClicked: bridge.txWatchdogMode = 1
                 }
                 RadioButton {
                     id: wdCount
-                    text: "Count"
+                    text: qsTr("Count")
                     checked: bridge.txWatchdogMode === 2
                     onClicked: bridge.txWatchdogMode = 2
                 }
@@ -12139,7 +12139,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             Row {
                 spacing: 10
                 visible: bridge.txWatchdogMode === 1
-                Text { text: "Time (min):"; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: qsTr("Time (min):"); color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
                     from: 1; to: 999
                     value: bridge.txWatchdogTime
@@ -12150,7 +12150,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             Row {
                 spacing: 10
                 visible: bridge.txWatchdogMode === 2
-                Text { text: "Max TX:"; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: qsTr("Max TX:"); color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
                     from: 1; to: 50
                     value: bridge.txWatchdogCount
@@ -12185,7 +12185,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             padding: 20
 
             Text {
-                text: "Contest Type"
+                text: qsTr("Contest Type")
                 font.pixelSize: 14
                 font.bold: true
                 color: textPrimary
@@ -12210,7 +12210,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             }
 
             Text {
-                text: "Exchange"
+                text: qsTr("Exchange")
                 font.pixelSize: 14
                 font.bold: true
                 color: textPrimary
@@ -12221,14 +12221,14 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 width: 300
                 text: bridge.contestExchange
                 onTextChanged: bridge.contestExchange = text
-                placeholderText: "Example: 599 001"
+                placeholderText: qsTr("Example: 599 001")
                 visible: bridge.contestType > 0
             }
 
             Row {
                 spacing: 10
                 visible: bridge.contestType > 0
-                Text { text: "Serial Number:"; color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: qsTr("Serial Number:"); color: textPrimary; anchors.verticalCenter: parent.verticalCenter }
                 SpinBox {
                     from: 1; to: 9999
                     value: bridge.contestNumber
@@ -12263,31 +12263,31 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             padding: 20
 
             Text {
-                text: "TRANSMISSION"
+                text: qsTr("TRANSMISSION")
                 font.pixelSize: 14
                 font.bold: true
                 color: accentOrange
             }
-            Text { text: "F1 - F7: Select TX1 - TX7"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("F1 - F7: Select TX1 - TX7"); font.pixelSize: 12; color: textPrimary }
             Text { text: qsTr("F9: toggle RX-only 1st/2nd"); font.pixelSize: 12; color: textPrimary }
             Text { text: qsTr("Escape: Halt (immediate TX stop)"); font.pixelSize: 12; color: textPrimary }
 
             Rectangle { height: 1; width: parent.width - 40; color: glassBorder }
 
             Text {
-                text: "CONTROLS (Ctrl+)"
+                text: qsTr("CONTROLS (Ctrl+)")
                 font.pixelSize: 14
                 font.bold: true
                 color: secondaryCyan
             }
             Text { text: qsTr("Ctrl+A: toggle Auto Sequence"); font.pixelSize: 12; color: textPrimary }
-            Text { text: "Ctrl+G: Generate all TX messages"; font.pixelSize: 12; color: textPrimary }
+            Text { text: qsTr("Ctrl+G: Generate all TX messages"); font.pixelSize: 12; color: textPrimary }
             Text { text: qsTr("Ctrl+Z: toggle ZAP mode"); font.pixelSize: 12; color: textPrimary }
 
             Rectangle { height: 1; width: parent.width - 40; color: glassBorder }
 
             Text {
-                text: "ACTIONS (Alt+)"
+                text: qsTr("ACTIONS (Alt+)")
                 font.pixelSize: 14
                 font.bold: true
                 color: successGreen
@@ -12317,7 +12317,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         flags: (bridge && bridge.uiFramelessPopouts)
                ? (Qt.Window | Qt.FramelessWindowHint)
                : (Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        title: "Waterfall - Decodium"
+        title: qsTr("Waterfall - Decodium")
         color: "transparent"
 
         // 1.0.286 — RIMOSSO il DragHandler root: era figlio del Window (non
@@ -12495,7 +12495,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                             spacing: 8
 
                             Text {
-                                text: "Zoom:"
+                                text: qsTr("Zoom:")
                                 color: textSecondary
                                 font.pixelSize: 11
                             }
@@ -12622,7 +12622,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                             }
 
                             ToolTip.visible: minimizeMA.containsMouse
-	                            ToolTip.text: "Minimize"
+	                            ToolTip.text: qsTr("Minimize")
                             ToolTip.delay: 500
                         }
 
@@ -12719,7 +12719,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         minimumWidth: 600
         minimumHeight: 400
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-        title: "QSO Log - Decodium"
+        title: qsTr("QSO Log - Decodium")
         color: "transparent"
 
         x: mainWindow.x + mainWindow.width + 20
@@ -12776,7 +12776,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         spacing: 12
 
                         Text { text: "⋮⋮"; font.pixelSize: 14; color: textSecondary }
-                        Text { text: "📋 QSO Log"; font.pixelSize: 16; font.bold: true; color: secondaryCyan }
+                        Text { text: qsTr("📋 QSO Log"); font.pixelSize: 16; font.bold: true; color: secondaryCyan }
                         Item { Layout.fillWidth: true }
 
                         // Minimize button
@@ -13013,7 +13013,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         minimumHeight: 400
         visible: false
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-        title: "Macro - Decodium"
+        title: qsTr("Macro - Decodium")
         color: "transparent"
 
         x: mainWindow.x + mainWindow.width + 20
@@ -13144,7 +13144,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         minimumHeight: 400
         visible: false
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-        title: "Rig Control - Decodium"
+        title: qsTr("Rig Control - Decodium")
         color: "transparent"
 
         x: mainWindow.x + mainWindow.width + 20
@@ -13198,7 +13198,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         spacing: 12
 
                         Text { text: "⋮⋮"; font.pixelSize: 14; color: textSecondary }
-                        Text { text: "📻 Rig Control (CAT)"; font.pixelSize: 16; font.bold: true; color: secondaryCyan }
+                        Text { text: qsTr("📻 Rig Control (CAT)"); font.pixelSize: 16; font.bold: true; color: secondaryCyan }
                         Item { Layout.fillWidth: true }
 
                         Rectangle {
@@ -13249,7 +13249,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         visible: false
         flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
              | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
-        title: "Live Map - Decodium"
+        title: qsTr("Live Map - Decodium")
         color: bgDeep
 
         x: mainWindow.x + 80
@@ -13327,7 +13327,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 	        flags: (bridge && bridge.uiFramelessPopouts)
 	               ? (Qt.Window | Qt.FramelessWindowHint)
 	               : (Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-		        title: "Full Spectrum - Decodium"
+		        title: qsTr("Full Spectrum - Decodium")
 	        color: "transparent"
 
 	        // 1.0.286 — RIMOSSO il DragHandler root (stesso fix della Waterfall): era
@@ -14054,7 +14054,7 @@ NumberAnimation {
         minimumHeight: 250
         visible: false
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-        title: "Period 2 - Decodium"
+        title: qsTr("Period 2 - Decodium")
         color: "transparent"
         x: mainWindow.x + 180
         y: mainWindow.y + 180
@@ -14089,7 +14089,7 @@ NumberAnimation {
         minimumHeight: 200
         visible: false
 	        flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-	        title: "Signal RX - Decodium"
+	        title: qsTr("Signal RX - Decodium")
 	        color: "transparent"
 	        readonly property bool compactColumns: width < 520
 	        readonly property int utcColumnWidth: compactColumns ? 66 : 84
@@ -14569,7 +14569,7 @@ NumberAnimation {
         minimumHeight: 200
         visible: false
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-        title: "TX Panel - Decodium"
+        title: qsTr("TX Panel - Decodium")
         color: "transparent"
 
         x: mainWindow.x + 150
@@ -14896,7 +14896,7 @@ NumberAnimation {
 	        minimumWidth: 760
 	        minimumHeight: 360
 	        visible: mainWindow.ft2LinkModeActive && mainWindow.ft2LinkPanelDetached
-	        title: "FT2-Link - Decodium"
+	        title: qsTr("FT2-Link - Decodium")
 	        color: bgDeep
 
 	        x: mainWindow.x + 80
@@ -15299,7 +15299,7 @@ NumberAnimation {
     // standard WindowState/dxClusterFloatingWindow.
     Window {
         id: dxClusterFloatingWindow
-        title: "DX Cluster - Decodium"
+        title: qsTr("DX Cluster - Decodium")
         width: Math.max(500, Number(bridge.getSetting("uiDxClusterPanelWidth", 560)))
         height: Math.max(300, Number(bridge.getSetting("uiDxClusterPanelHeight", 360)))
         minimumWidth: 500

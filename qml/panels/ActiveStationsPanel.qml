@@ -24,7 +24,7 @@ Rectangle {
             spacing: 6
 
             Text {
-                text: "ACTIVE STATIONS"
+                text: qsTr("ACTIVE STATIONS")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 font.bold: true
@@ -82,7 +82,7 @@ Rectangle {
                     border.width: 1; radius: 3
                 }
                 contentItem: Text {
-                    text: "CQ Only"; font.family: decodiumMonoFontFamily; font.pixelSize: 9
+                    text: qsTr("CQ Only"); font.family: decodiumMonoFontFamily; font.pixelSize: 9
                     color: parent.active ? "#00BCD4" : "#78909C"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -99,7 +99,7 @@ Rectangle {
                     border.width: 1; radius: 3
                 }
                 contentItem: Text {
-                    text: "Wanted"; font.family: decodiumMonoFontFamily; font.pixelSize: 9
+                    text: qsTr("Wanted"); font.family: decodiumMonoFontFamily; font.pixelSize: 9
                     color: parent.active ? "#00BCD4" : "#78909C"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -112,7 +112,7 @@ Rectangle {
                 implicitWidth: 36; implicitHeight: 18
                 onClicked: { if (bridge.activeStations) bridge.activeStations.clear() }
                 contentItem: Text {
-                    text: "Clear"; font.family: decodiumMonoFontFamily; font.pixelSize: 9
+                    text: qsTr("Clear"); font.family: decodiumMonoFontFamily; font.pixelSize: 9
                     color: "#f44336"
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
@@ -125,10 +125,10 @@ Rectangle {
         RowLayout {
             width: parent.width
             spacing: 4
-            Text { text: "Call";  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 78 }
-            Text { text: "Freq";  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
+            Text { text: qsTr("Call");  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 78 }
+            Text { text: qsTr("Freq");  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
             Text { text: "SNR";   font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 33 }
-            Text { text: "Grid";  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
+            Text { text: qsTr("Grid");  font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.preferredWidth: 48 }
             Text { text: "UTC";   font.family: decodiumMonoFontFamily; font.pixelSize: 9; color: "#546E7A"; Layout.fillWidth: true }
         }
 
@@ -219,7 +219,7 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 visible: !bridge.activeStations || bridge.activeStations.count === 0
-                text: "No active stations"
+                text: qsTr("No active stations")
                 font.family: decodiumMonoFontFamily; font.pixelSize: 10
                 color: "#546E7A"
             }

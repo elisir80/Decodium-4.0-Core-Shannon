@@ -131,6 +131,49 @@
     </message>
 </context>
 <context>
+    <name>ActiveStationsPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="27"/>
+        <source>ACTIVE STATIONS</source>
+        <translation>AKTÍV ÁLLOMÁSOK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="85"/>
+        <source>CQ Only</source>
+        <translation>Csak CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="102"/>
+        <source>Wanted</source>
+        <translation>Keresett</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="115"/>
+        <source>Clear</source>
+        <translation>Torles</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="128"/>
+        <source>Call</source>
+        <translation>Hívjon</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="129"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="131"/>
+        <source>Grid</source>
+        <translation>QRA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="222"/>
+        <source>No active stations</source>
+        <translation>Nincs aktív állomás</translation>
+    </message>
+</context>
+<context>
     <name>Astro</name>
     <message>
         <location filename="../widgets/astro.ui" line="34"/>
@@ -313,6 +356,44 @@ Keresett útvonalak:%1</translation>
     </message>
 </context>
 <context>
+    <name>AstroPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="156"/>
+        <source>ASTRO / EME</source>
+        <translation>ASZTRO / EME</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="205"/>
+        <source>Az</source>
+        <translation>Az</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="207"/>
+        <source>El</source>
+        <translation>El</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="215"/>
+        <source>Doppler</source>
+        <translation>Doppler</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="217"/>
+        <source>Sun El</source>
+        <translation>Nap magassága</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="225"/>
+        <source>Phase</source>
+        <translation>Fázis</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="227"/>
+        <source>Illum</source>
+        <translation>Megvil.</translation>
+    </message>
+</context>
+<context>
     <name>AstroWindow</name>
     <message>
         <location filename="../qml/decodium/components/AstroWindow.qml" line="121"/>
@@ -322,6 +403,171 @@ Keresett útvonalak:%1</translation>
     <message>
         <source>Satellite tracking</source>
         <translation>Műholdkövetés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="14"/>
+        <source>Astronomical Data</source>
+        <translation>Csillagászati adatok</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="241"/>
+        <source>Minimize</source>
+        <translation>Kis méret</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="272"/>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="327"/>
+        <source>Location:</source>
+        <translation>Hely:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="419"/>
+        <source>Moon</source>
+        <translation>Hold</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="461"/>
+        <source>Distance:</source>
+        <translation>Távolság:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="477"/>
+        <source>Rise:</source>
+        <translation>Kelés:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="485"/>
+        <source>Set:</source>
+        <translation>Nyugvás:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="510"/>
+        <source>Sun</source>
+        <translation>Nap</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="537"/>
+        <source>Sunrise:</source>
+        <translation>Napkelte:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="545"/>
+        <source>Sunset:</source>
+        <translation>Napnyugta:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="571"/>
+        <source>EME (Earth-Moon-Earth)</source>
+        <translation>EME (Föld-Hold-Föld)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="607"/>
+        <source>Status:</source>
+        <translation>Állapot:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="615"/>
+        <source>Path Loss:</source>
+        <translation>Útvonalcsillapítás:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="633"/>
+        <source>Frequency:</source>
+        <translation>Frekvencia:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="641"/>
+        <source>Window:</source>
+        <translation>Ablak:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="670"/>
+        <source>Propagation (HamQSL)</source>
+        <translation>Terjedés (HamQSL)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="695"/>
+        <source>Solar Flux:</source>
+        <translation>Napfluxus:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="703"/>
+        <source>A-Index:</source>
+        <translation>A-index:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="711"/>
+        <source>K-Index:</source>
+        <translation>K-index:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="719"/>
+        <source>X-Ray:</source>
+        <translation>Röntgen:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="727"/>
+        <source>Sunspots:</source>
+        <translation>Napfoltok:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="735"/>
+        <source>Solar Wind:</source>
+        <translation>Napszél:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="751"/>
+        <source>Geomagnetic:</source>
+        <translation>Geomágneses:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="759"/>
+        <source>Signal Noise:</source>
+        <translation>Zaj:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="805"/>
+        <source>HF Band Conditions</source>
+        <translation>HF sávok állapota</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="816"/>
+        <source>Band</source>
+        <translation>Sáv</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="823"/>
+        <source>Day</source>
+        <translation>Nappal</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="830"/>
+        <source>Night</source>
+        <translation>Éjszaka</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="888"/>
+        <source>No HF condition data available yet.</source>
+        <translation>Még nincs adat a HF sávok állapotáról.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="911"/>
+        <source>VHF Conditions</source>
+        <translation>VHF állapot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="943"/>
+        <source>No VHF condition data available yet.</source>
+        <translation>Még nincs adat a VHF állapotáról.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="970"/>
+        <source>Refresh</source>
+        <translation>Frissítés</translation>
     </message>
 </context>
 <context>
@@ -381,6 +627,16 @@ Keresett útvonalak:%1</translation>
         <location filename="../qml/decodium/BootLoader.qml" line="21"/>
         <source>Decodium 4.0 — Loading...</source>
         <translation>Decodium 4.0 — Betöltés...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="152"/>
+        <source>DECODIUM 4.0</source>
+        <translation>DECODIUM 4.0</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="159"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
     </message>
 </context>
 <context>
@@ -815,6 +1071,24 @@ Keresett útvonalak:%1</translation>
         <source>▶ Direct Call</source>
         <translation>▶ Közvetlen hívás</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="206"/>
+        <source>es. F4CQS</source>
+        <translation>pl. F4CQS</translation>
+    </message>
+</context>
+<context>
+    <name>CallerQueuePanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/CallerQueuePanel.qml" line="30"/>
+        <source>FOX CALLER QUEUE</source>
+        <translation>FOX HÍVÓSOR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/CallerQueuePanel.qml" line="123"/>
+        <source>No callers in queue</source>
+        <translation>Nincs hívó a sorban</translation>
+    </message>
 </context>
 <context>
     <name>CallsignDialog</name>
@@ -1004,6 +1278,39 @@ Kérjük, ellenőrizze a naplóját.</translation>
         <location filename="../widgets/colorhighlighting.ui" line="330"/>
         <source>New ITU Zone on Band</source>
         <translation>Új ITU Zóna a Sávban</translation>
+    </message>
+</context>
+<context>
+    <name>ColorHighlightingDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="9"/>
+        <source>Color Highlighting</source>
+        <translation>Színes kiemelés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="112"/>
+        <source>B4 Strikethrough:</source>
+        <translation>B4 Áthúzás:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="131"/>
+        <source>Alert Sounds:</source>
+        <translation>Riasztóhangok:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="149"/>
+        <source>Choose Color</source>
+        <translation>Szín választása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="170"/>
+        <source>Hex color (#RRGGBB):</source>
+        <translation>Hexa szín (#RRGGBB):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="180"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
     </message>
 </context>
 <context>
@@ -1856,11 +2163,64 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
     </message>
 </context>
 <context>
+    <name>DecoComboBox</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoComboBox.qml" line="114"/>
+        <source>▾</source>
+        <translation>▾</translation>
+    </message>
+</context>
+<context>
     <name>DecoSyncPanel</name>
     <message>
         <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="54"/>
         <source>DecoSyncTime not available</source>
         <translation>A DecoSyncTime nem érhető el</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="69"/>
+        <source>DecoSyncTime Monitor</source>
+        <translation>DecoSyncTime Monitor</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="160"/>
+        <source>Source</source>
+        <translation>Forrás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="161"/>
+        <source>Stato</source>
+        <translation>Állapot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="162"/>
+        <source>Offset</source>
+        <translation>Eltolás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="163"/>
+        <source>Servers</source>
+        <translation>Kiszolgálók</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="166"/>
+        <source>NTP UDP</source>
+        <translation>NTP UDP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="176"/>
+        <source>8 pool</source>
+        <translation>8 pool</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="179"/>
+        <source>HTTPS Date</source>
+        <translation>HTTPS Date</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="197"/>
+        <source>SelfCal FT</source>
+        <translation>SelfCal FT</translation>
     </message>
 </context>
 <context>
@@ -2096,6 +2456,21 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
         <source>Close</source>
         <translation>Bezárás</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="456"/>
+        <source>Grid</source>
+        <translation>QRA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="458"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="459"/>
+        <source>Message</source>
+        <translation>Üzenet</translation>
+    </message>
 </context>
 <context>
     <name>DecodeWindow</name>
@@ -2104,6 +2479,38 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
         <location filename="../qml/decodium/components/DecodeWindow.qml" line="1878"/>
         <source>── PERIOD ──</source>
         <translation>── PERIÓDUS ──</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="968"/>
+        <source>Full Spectrum</source>
+        <translation>Teljes spektrum</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1047"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1061"/>
+        <source>Drift</source>
+        <translation>Elhangolás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1100"/>
+        <source>Az</source>
+        <translation>Az</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1541"/>
+        <source>No decoded messages
+Click Monitor to start</source>
+        <translation>Nincs dekódolt üzenet
+A kezdéshez kattintson a Monitor gombra</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1575"/>
+        <source>Signal RX</source>
+        <translation>RX jel</translation>
     </message>
 </context>
 <context>
@@ -2697,6 +3104,54 @@ vagy lépjen kapcsolatba a DXLab ügyfélszolgálatával a DXLab@groups.io címe
     </message>
 </context>
 <context>
+    <name>DevOverlay</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="140"/>
+        <source>Decodium DevOverlay</source>
+        <translation>Decodium DevOverlay</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="197"/>
+        <source>Frame (ms):</source>
+        <translation>Képkocka (ms):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="215"/>
+        <source>Decode Hz:</source>
+        <translation>Dekódolás/másodperc:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="226"/>
+        <source>Delegates:</source>
+        <translation>Delegáltak:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="244"/>
+        <source>Uptime:</source>
+        <translation>Üzemidő:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="264"/>
+        <source>Frame time 5s</source>
+        <translation>Képkockaidő 5 s</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="330"/>
+        <source>Copy diagnostics</source>
+        <translation>Diagnosztika másolása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="347"/>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="359"/>
+        <source>Copied to clipboard</source>
+        <translation>Vágólapra másolva</translation>
+    </message>
+</context>
+<context>
     <name>Dialog</name>
     <message>
         <location filename="../WSPR/WSPRBandHopping.cpp" line="116"/>
@@ -2814,6 +3269,59 @@ Hiba: %2 - %3</translation>
     </message>
 </context>
 <context>
+    <name>DxClusterPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="76"/>
+        <source>DX Cluster</source>
+        <translation>DX Cluster</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="140"/>
+        <source>Time</source>
+        <translation>Idő</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="141"/>
+        <source>DX Call</source>
+        <translation>DX hívás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="142"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="143"/>
+        <source>Band</source>
+        <translation>Sáv</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="144"/>
+        <source>Mode</source>
+        <translation>mód</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="145"/>
+        <source>Spotter</source>
+        <translation>Titkosrendőr</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="146"/>
+        <source>Info</source>
+        <translation>Infó</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="309"/>
+        <source>Filter:</source>
+        <translation>Szűrő:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="340"/>
+        <source>Clear</source>
+        <translation>Torles</translation>
+    </message>
+</context>
+<context>
     <name>DxPeditionWorkspace</name>
     <message>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="255"/>
@@ -2834,6 +3342,31 @@ Hiba: %2 - %3</translation>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="657"/>
         <source>Log · QSO Entry</source>
         <translation>Log · QSO bejegyzés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="182"/>
+        <source>DECODIUM 4</source>
+        <translation>DECODIUM 4</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="187"/>
+        <source>DX-PEDITION MODE</source>
+        <translation>DX-PEDITION MÓD</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="537"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="568"/>
+        <source>Waterfall</source>
+        <translation>Vízesés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="635"/>
+        <source>TX Macros</source>
+        <translation>TX makrók</translation>
     </message>
 </context>
 <context>
@@ -3502,6 +4035,14 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
     </message>
 </context>
 <context>
+    <name>FullSpectrumPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="460"/>
+        <source>No decodes</source>
+        <translation>Nincs dekódolás</translation>
+    </message>
+</context>
+<context>
     <name>HRDTransceiver</name>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="396"/>
@@ -3879,6 +4420,123 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <location filename="../qml/decodium/components/InfoDialog.qml" line="718"/>
         <source>Compact Full Spectrum</source>
         <translation>Kompakt Full Spectrum</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="83"/>
+        <source>DECODIUM INFO</source>
+        <translation>DECODIUM INFÓ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="218"/>
+        <source>4.0 Core Gallager</source>
+        <translation>4.0 Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="227"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</source>
+        <translation>Fejlett dekóder amatőrrádiós digitális módokhoz
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="260"/>
+        <source>Decodium by IU8LMC</source>
+        <translation>Decodium by IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="267"/>
+        <source>Qt6 Modern UI Port by IU8LMC</source>
+        <translation>Modern Qt6 felület: IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="274"/>
+        <source>Developed by Salvatore Raccampo 9H1SR</source>
+        <translation>Fejlesztette Salvatore Raccampo 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="281"/>
+        <source>WSJT-X Algorithms by K1JT (Joe Taylor)</source>
+        <translation>WSJT-X algoritmusok: K1JT (Joe Taylor)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="290"/>
+        <source>Copyright 2024-2026 - Open Source GPL</source>
+        <translation>Copyright 2024-2026 - Nyílt forráskód, GPL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="314"/>
+        <source>DECODIUM HISTORY</source>
+        <translation>A DECODIUM TÖRTÉNETE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="410"/>
+        <source>CONTACTS &amp; FEEDBACK</source>
+        <translation>KAPCSOLAT ÉS VISSZAJELZÉS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="432"/>
+        <source>Developer: IU8LMC</source>
+        <translation>Developer: IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="447"/>
+        <source>iu8lmc@gmail.com</source>
+        <translation>iu8lmc@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="465"/>
+        <source>Developer: 9H1SR</source>
+        <translation>Developer: 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="480"/>
+        <source>9h1sr@gmail.com</source>
+        <translation>9h1sr@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="517"/>
+        <source>SEND FEEDBACK</source>
+        <translation>VISSZAJELZÉS KÜLDÉSE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="528"/>
+        <source>Subject</source>
+        <translation>Tárgy</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="555"/>
+        <source>Message, suggestion, or bug report</source>
+        <translation>Üzenet, javaslat vagy hibajelentés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="581"/>
+        <source>Send Feedback</source>
+        <translation>Küldés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="628"/>
+        <source>QUICK GUIDE</source>
+        <translation>GYORS ÚTMUTATÓ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="652"/>
+        <source>QUICK START</source>
+        <translation>GYORS INDÍTÁS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="695"/>
+        <source>KEYBOARD SHORTCUTS</source>
+        <translation>BILLENTYŰPARANCSOK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="770"/>
+        <source>OPERATING TIPS</source>
+        <translation>ÜZEMELTETÉSI TIPPEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="811"/>
+        <source>USEFUL LINKS</source>
+        <translation>HASZNOS HIVATKOZÁSOK</translation>
     </message>
 </context>
 <context>
@@ -5503,6 +6161,26 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>Add</source>
         <translation>Hozzáadás</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="847"/>
+        <source>Live Map</source>
+        <translation>Élő térkép</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2229"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3241"/>
+        <source>foF2</source>
+        <translation>foF2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3286"/>
+        <source>Es</source>
+        <translation>Es</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5857,6 +6535,14 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
     </message>
 </context>
 <context>
+    <name>LogQsoPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogQsoPanel.qml" line="133"/>
+        <source>NEXT TX</source>
+        <translation>KÖVETKEZŐ ADÁS</translation>
+    </message>
+</context>
+<context>
     <name>LogWindow</name>
     <message>
         <location filename="../qml/decodium/components/LogWindow.qml" line="181"/>
@@ -5951,6 +6637,151 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>Copy Callsign</source>
         <translation>Hívójel másolása</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="308"/>
+        <source>Nuovo logbook</source>
+        <translation>Új napló</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="317"/>
+        <source>Nome operatore / callsign</source>
+        <translation>Kezelő neve / hívójel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="330"/>
+        <source>Backup log attuale</source>
+        <translation>Aktuális napló mentése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="481"/>
+        <source>QSO Log</source>
+        <translation>QSO-napló</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="517"/>
+        <source>−</source>
+        <translation>−</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="527"/>
+        <source>Minimize</source>
+        <translation>Kis méret</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="538"/>
+        <source>✕</source>
+        <translation>✕</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="548"/>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="592"/>
+        <source>New</source>
+        <translation>Új</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="594"/>
+        <source>Create a separate logbook</source>
+        <translation>Külön napló létrehozása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="601"/>
+        <source>Load</source>
+        <translation>Betöltés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="603"/>
+        <source>Load/use an existing ADIF as a logbook</source>
+        <translation>Meglévő ADIF betöltése és használata naplóként</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="610"/>
+        <source>Bkp</source>
+        <translation>Bkp</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="612"/>
+        <source>Back up the active logbook</source>
+        <translation>Az aktív napló mentése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="620"/>
+        <source>Del</source>
+        <translation>Törl</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="629"/>
+        <source>Delete selected logbook</source>
+        <translation>A kijelölt napló törlése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="642"/>
+        <source>🔍</source>
+        <translation>🔍</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="689"/>
+        <source>Clear</source>
+        <translation>Torles</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="704"/>
+        <source>Remove search, band, and mode filters</source>
+        <translation>Keresési, sáv- és módszűrők eltávolítása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="717"/>
+        <source>Importa ADIF</source>
+        <translation>ADIF importálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="722"/>
+        <source>Import ADIF file</source>
+        <translation>ADIF fájl importálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="732"/>
+        <source>Esporta ADIF</source>
+        <translation>ADIF exportálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="737"/>
+        <source>Export ADIF</source>
+        <translation>ADIF exportálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="746"/>
+        <source>↻</source>
+        <translation>↻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="751"/>
+        <source>Refresh</source>
+        <translation>Frissítés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="770"/>
+        <source>Date/Time</source>
+        <translation>Dátum/idő</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="777"/>
+        <source>Dist</source>
+        <translation>Dist</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="911"/>
+        <source>No QSOs found</source>
+        <translation>Nem található QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="1190"/>
+        <source>MAX DIST</source>
+        <translation>MAX TÁV</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -6043,6 +6874,131 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <source>Cancel</source>
         <translation>Mégse</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="226"/>
+        <source>Nuovo logbook</source>
+        <translation>Új napló</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="235"/>
+        <source>Nome operatore / callsign</source>
+        <translation>Kezelő neve / hívójel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="248"/>
+        <source>Backup log attuale</source>
+        <translation>Aktuális napló mentése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="395"/>
+        <source>New</source>
+        <translation>Új</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="397"/>
+        <source>Create a separate logbook</source>
+        <translation>Külön napló létrehozása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="404"/>
+        <source>Load</source>
+        <translation>Betöltés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="406"/>
+        <source>Load/use an existing ADIF</source>
+        <translation>Meglévő ADIF betöltése és használata</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="413"/>
+        <source>Bkp</source>
+        <translation>Bkp</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="415"/>
+        <source>Back up the active logbook</source>
+        <translation>Az aktív napló mentése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="423"/>
+        <source>Del</source>
+        <translation>Törl</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="432"/>
+        <source>Delete selected logbook</source>
+        <translation>A kijelölt napló törlése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="444"/>
+        <source>🔍</source>
+        <translation>🔍</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="486"/>
+        <source>×</source>
+        <translation>×</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="501"/>
+        <source>Remove filters</source>
+        <translation>Szűrők eltávolítása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="512"/>
+        <source>⬇</source>
+        <translation>⬇</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="514"/>
+        <source>Import ADIF</source>
+        <translation>ADIF importálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="522"/>
+        <source>⬆</source>
+        <translation>⬆</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="524"/>
+        <source>Export ADIF</source>
+        <translation>ADIF exportálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="532"/>
+        <source>↻</source>
+        <translation>↻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="534"/>
+        <source>Refresh</source>
+        <translation>Frissítés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="547"/>
+        <source>Date/Time</source>
+        <translation>Dátum/idő</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="552"/>
+        <source>Rpt</source>
+        <translation>Rip</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="617"/>
+        <source>Copy Callsign</source>
+        <translation>Hívójel másolása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="753"/>
+        <source>Sent</source>
+        <translation>Elküldve</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
+        <source>Rcvd</source>
+        <translation>Rcvd</translation>
+    </message>
 </context>
 <context>
     <name>MacroDialog</name>
@@ -6050,6 +7006,104 @@ A fájl nem nyitható meg:%1Hiba:%2</translation>
         <location filename="../qml/decodium/components/MacroDialog.qml" line="95"/>
         <source>⌨️ TX Macro Configuration</source>
         <translation>⌨️ TX makró konfiguráció</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="13"/>
+        <source>Macro Settings</source>
+        <translation>Makróbeállítások</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="131"/>
+        <source>Minimize</source>
+        <translation>Kis méret</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="184"/>
+        <source>Contest Mode</source>
+        <translation>Verseny mód</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="194"/>
+        <source>Contest:</source>
+        <translation>Verseny:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="234"/>
+        <source>Serial #:</source>
+        <translation>Sorszám:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="272"/>
+        <source>Exchange:</source>
+        <translation>Csere:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="316"/>
+        <source>TX Macro Templates</source>
+        <translation>TX makrósablonok</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="325"/>
+        <source>Reset to Default</source>
+        <translation>Alapértelmezés visszaállítása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="349"/>
+        <source>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</source>
+        <translation>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="419"/>
+        <source>Preview</source>
+        <translation>Előnézet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="464"/>
+        <source>Click 'Preview' to see expanded macro</source>
+        <translation>Kattintson az „Előnézet” gombra a kibontott makróhoz</translation>
+    </message>
+</context>
+<context>
+    <name>MacroDialogContent</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="35"/>
+        <source>Contest Mode</source>
+        <translation>Verseny mód</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="41"/>
+        <source>Enable Contest Mode</source>
+        <translation>Versenymód bekapcsolása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="45"/>
+        <source>Exchange:</source>
+        <translation>Csere:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="49"/>
+        <source>e.g., 599 001</source>
+        <translation>pl. 599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="74"/>
+        <source>TX Macros</source>
+        <translation>TX makrók</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="122"/>
+        <source>Available Variables:</source>
+        <translation>Elérhető változók:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="124"/>
+        <source>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</source>
+        <translation>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="128"/>
+        <source>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</source>
+        <translation>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
     </message>
 </context>
 <context>
@@ -6770,6 +7824,288 @@ Jobb kattintás: lecsatlakozás</translation>
         <location filename="../qml/decodium/Main.qml" line="15320"/>
         <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
         <translation>A Decodium talált egy ehhez a számítógéphez csatlakoztatott rádiót. A javaslat alkalmazása beállítja a CAT-portot, a típust és a hangeszközöket, így a megfelelő COM-port keresése nélkül kezdhet.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="1111"/>
+        <source>F11 / Esc</source>
+        <translation>F11 / Esc</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3319"/>
+        <source>FT2-Link access</source>
+        <translation>FT2-Link hozzáférés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3327"/>
+        <source>Enter password to unlock this mode.</source>
+        <translation>Adja meg a jelszót a mód feloldásához.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3336"/>
+        <source>Password</source>
+        <translation>Jelszó</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3372"/>
+        <source>Unlock</source>
+        <translation>Feloldás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3478"/>
+        <source>Based on WSJT-X by K1JT et al.</source>
+        <translation>A K1JT és társai WSJT-X programja alapján.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3485"/>
+        <source>QML Interface by IU8LMC</source>
+        <translation>QML felület: IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3677"/>
+        <source>No recent activity found
+(last 15 minutes)</source>
+        <translation>Nincs friss tevékenység
+(utolsó 15 perc)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3914"/>
+        <source>Menu</source>
+        <translation>Menü</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="4875"/>
+        <source>Setup</source>
+        <translation>Beállítások</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5036"/>
+        <source>Layout</source>
+        <translation>Elrendezés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5070"/>
+        <source>History</source>
+        <translation>Előzmények</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6066"/>
+        <source>Auto Spot</source>
+        <translation>Automatikus spot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6143"/>
+        <source>Bypass</source>
+        <translation>Kihagyás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6150"/>
+        <source>Filters</source>
+        <translation>Szűrők</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6502"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6713"/>
+        <source>Reset</source>
+        <translation>Reset</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7169"/>
+        <source>Detach Waterfall</source>
+        <translation>Vízesés leválasztása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7983"/>
+        <source>FT2-Link popped out</source>
+        <translation>FT2-Link leválasztva</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="8873"/>
+        <source>No decodes</source>
+        <translation>Nincs dekódolás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10435"/>
+        <source>Configure radio</source>
+        <translation>Rádió beállítása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10444"/>
+        <source>Retry</source>
+        <translation>Újra</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="11070"/>
+        <source>Decodium reported a non-blocking problem.</source>
+        <translation>A Decodium nem blokkoló hibát jelzett.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12047"/>
+        <source>Export Cabrillo</source>
+        <translation>Cabrillo exportálása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12059"/>
+        <source>Output file path:</source>
+        <translation>Kimeneti fájl útvonala:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12076"/>
+        <source>Export</source>
+        <translation>Exportálás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12111"/>
+        <source>Watchdog Mode</source>
+        <translation>Őrkutya mód</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12121"/>
+        <source>Off</source>
+        <translation>Le</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12127"/>
+        <source>Time</source>
+        <translation>Idő</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12133"/>
+        <source>Count</source>
+        <translation>Darab</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12142"/>
+        <source>Time (min):</source>
+        <translation>Idő (perc):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12153"/>
+        <source>Max TX:</source>
+        <translation>Max. adás:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12188"/>
+        <source>Contest Type</source>
+        <translation>Verseny típusa</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12213"/>
+        <source>Exchange</source>
+        <translation>Csere</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12224"/>
+        <source>Example: 599 001</source>
+        <translation>Példa: 599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12231"/>
+        <source>Serial Number:</source>
+        <translation>Sorszám:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12266"/>
+        <source>TRANSMISSION</source>
+        <translation>ADÁS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12271"/>
+        <source>F1 - F7: Select TX1 - TX7</source>
+        <translation>F1 - F7: TX1 - TX7 kiválasztása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12278"/>
+        <source>CONTROLS (Ctrl+)</source>
+        <translation>VEZÉRLŐK (Ctrl+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12284"/>
+        <source>Ctrl+G: Generate all TX messages</source>
+        <translation>Ctrl+G: az összes TX üzenet létrehozása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12290"/>
+        <source>ACTIONS (Alt+)</source>
+        <translation>MŰVELETEK (Alt+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12320"/>
+        <source>Waterfall - Decodium</source>
+        <translation>Vízesés - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12498"/>
+        <source>Zoom:</source>
+        <translation>Nagyítás:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12625"/>
+        <source>Minimize</source>
+        <translation>Kis méret</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12722"/>
+        <source>QSO Log - Decodium</source>
+        <translation>QSO-napló - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12779"/>
+        <source>📋 QSO Log</source>
+        <translation>📋 QSO-napló</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13016"/>
+        <source>Macro - Decodium</source>
+        <translation>Makrók - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13147"/>
+        <source>Rig Control - Decodium</source>
+        <translation>Rádióvezérlés - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13201"/>
+        <source>📻 Rig Control (CAT)</source>
+        <translation>📻 Rádióvezérlés (CAT)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13252"/>
+        <source>Live Map - Decodium</source>
+        <translation>Élő térkép - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13330"/>
+        <source>Full Spectrum - Decodium</source>
+        <translation>Teljes spektrum - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14057"/>
+        <source>Period 2 - Decodium</source>
+        <translation>2. periódus - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14092"/>
+        <source>Signal RX - Decodium</source>
+        <translation>RX jel - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14572"/>
+        <source>TX Panel - Decodium</source>
+        <translation>TX panel - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14899"/>
+        <source>FT2-Link - Decodium</source>
+        <translation>FT2-Link - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
+        <source>DX Cluster - Decodium</source>
+        <translation>DX Cluster - Decodium</translation>
     </message>
 </context>
 <context>
@@ -11628,6 +12964,11 @@ UDP szerver %2:%3</translation>
         <source>No active stream</source>
         <translation>Nincs aktív adatfolyam</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamPanel.qml" line="366"/>
+        <source>No active caller</source>
+        <translation>Nincs aktív hívó</translation>
+    </message>
 </context>
 <context>
     <name>MamWindow</name>
@@ -11640,6 +12981,16 @@ UDP szerver %2:%3</translation>
         <location filename="../qml/decodium/components/MamWindow.qml" line="532"/>
         <source>No active stream</source>
         <translation>Nincs aktív adatfolyam</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="11"/>
+        <source>Multi-Answer Mode</source>
+        <translation>Többválaszos mód</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="452"/>
+        <source>No active caller</source>
+        <translation>Nincs aktív hívó</translation>
     </message>
 </context>
 <context>
@@ -11677,6 +13028,39 @@ UDP szerver %2:%3</translation>
         <location filename="../widgets/messageaveraging.ui" line="29"/>
         <source>   UTC  Sync    DT  Freq   </source>
         <translation>   UTC Sync DT Frek   </translation>
+    </message>
+</context>
+<context>
+    <name>MessageAvgPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="43"/>
+        <source>MESSAGE AVERAGING</source>
+        <translation>ÜZENETÁTLAGOLÁS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="64"/>
+        <source>Clear</source>
+        <translation>Torles</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="85"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="86"/>
+        <source>Avg</source>
+        <translation>Avg</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="87"/>
+        <source>Message</source>
+        <translation>Üzenet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="163"/>
+        <source>No averaged results yet</source>
+        <translation>Még nincs átlagolt eredmény</translation>
     </message>
 </context>
 <context>
@@ -12326,6 +13710,19 @@ A letöltött fájl meghaladja a%1MiB korlátot:%2</translation>
     </message>
 </context>
 <context>
+    <name>QSYDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="78"/>
+        <source>SUGGESTED FREQUENCIES</source>
+        <translation>JAVASOLT FREKVENCIÁK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="168"/>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+</context>
+<context>
     <name>QSYMessage</name>
     <message>
         <location filename="../widgets/QSYMessage.ui" line="26"/>
@@ -12802,6 +14199,53 @@ nem jelennek meg!</translation>
     </message>
 </context>
 <context>
+    <name>QueuePanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="182"/>
+        <source>Grid</source>
+        <translation>QRA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="183"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="275"/>
+        <source>Queue empty
+Double-click decode to add</source>
+        <translation>A sor üres
+A hozzáadáshoz kattintson duplán egy dekódolásra</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="287"/>
+        <source>Clear Queue</source>
+        <translation>Sor ürítése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="327"/>
+        <source>Status</source>
+        <translation>Állapot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="418"/>
+        <source>No active QSOs
+Add from queue</source>
+        <translation>Nincs aktív QSO
+Adjon hozzá a sorból</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="432"/>
+        <source>Max:</source>
+        <translation>Max:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="452"/>
+        <source>Clear</source>
+        <translation>Torles</translation>
+    </message>
+</context>
+<context>
     <name>RTTYTerminalWidget</name>
     <message>
         <location filename="../widgets/RTTYTerminalWidget.cpp" line="34"/>
@@ -13078,6 +14522,66 @@ Tipp: zárja be az OmniRiget a Windows tálca ikonjából, majd nyomja meg újra
         <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
         <translation>Csak azt olvassa, amit a rendszer már tud: nem nyit portot és nem küld parancsot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="101"/>
+        <source>Radio</source>
+        <translation>Rádió</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="224"/>
+        <source>Network host</source>
+        <translation>Hálózati gép</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="247"/>
+        <source>Serial port</source>
+        <translation>Soros port</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="273"/>
+        <source>Refresh ports</source>
+        <translation>Portok frissítése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="278"/>
+        <source>Baud rate</source>
+        <translation>Átviteli sebesség</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="302"/>
+        <source>PTT method</source>
+        <translation>PTT módszer</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="325"/>
+        <source>Auto-connect on startup</source>
+        <translation>Csatlakozás induláskor</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="340"/>
+        <source>Auto-start audio</source>
+        <translation>Hang automatikus indítása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="364"/>
+        <source>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</source>
+        <translation>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="380"/>
+        <source>Save</source>
+        <translation>Mentés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="390"/>
+        <source>Connect</source>
+        <translation>Csatlakozás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="406"/>
+        <source>Disconnect</source>
+        <translation>Leválasztás</translation>
     </message>
 </context>
 <context>
@@ -17241,6 +18745,21 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
         <translation>Csak azt olvassa, amit a rendszer már tud: nem nyit portot és nem küld parancsot</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1599"/>
+        <source>Callsign</source>
+        <translation>Hívójel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1416"/>
+        <source>173045  -21  0.1  1045  CQ LB9ZG JP20</source>
+        <translation>173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1498"/>
+        <source>✕</source>
+        <translation>✕</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab0</name>
@@ -17721,6 +19240,11 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1344"/>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>ALC kalibrálása (vivőt sugároz)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="825"/>
+        <source>localhost:50001</source>
+        <translation>localhost:50001</translation>
     </message>
 </context>
 <context>
@@ -20625,6 +22149,11 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <source>TCP Server:</source>
         <translation>TCP szerver:</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="111"/>
+        <source>dx.iz7auh.net</source>
+        <translation>dx.iz7auh.net</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab7</name>
@@ -21366,6 +22895,19 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
     </message>
 </context>
 <context>
+    <name>SignalRxPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SignalRxPanel.qml" line="265"/>
+        <source>QSO LOCK</source>
+        <translation>QSO ZÁR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SignalRxPanel.qml" line="474"/>
+        <source>No RX-frequency decodes</source>
+        <translation>Nincs dekódolás az RX frekvencián</translation>
+    </message>
+</context>
+<context>
     <name>SoundInput</name>
     <message>
         <location filename="../Audio/soundin.cpp" line="628"/>
@@ -21575,6 +23117,16 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
         <translation>© 2024-2026 IU8LMC  ·  GPL nyílt forráskód  ·  A K1JT és mtsai. WSJT-X alapján &amp; WSJT-X by K1JT</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="131"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="142"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio</source>
+        <translation>Fejlett dekóder amatőrrádiós digitális módokhoz</translation>
+    </message>
 </context>
 <context>
     <name>StationDialog</name>
@@ -21645,6 +23197,16 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <location filename="../qml/decodium/components/StatusBar.qml" line="478"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
         <translation>Az ALC-t a Hamlib nem jelenti ehhez a rig/backendhez</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="364"/>
+        <source>FT Decoder Threads: </source>
+        <translation>FT dekóder szálak: </translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="654"/>
+        <source>Decodium 4.0</source>
+        <translation>Decodium 4.0</translation>
     </message>
 </context>
 <context>
@@ -21952,6 +23514,36 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <source>Clear History</source>
         <translation>Törölje az előzményeket</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="75"/>
+        <source>TIME SYNC</source>
+        <translation>IDŐSZINKRON</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="192"/>
+        <source>NTP Offset:</source>
+        <translation>NTP eltérés:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="217"/>
+        <source>SC Drift:</source>
+        <translation>SC elhangolás:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="267"/>
+        <source>Decode Latency:</source>
+        <translation>Dekódolási késleltetés:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="292"/>
+        <source>Settings:</source>
+        <translation>Beállítások:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="308"/>
+        <source>Open</source>
+        <translation>Megnyit</translation>
+    </message>
 </context>
 <context>
     <name>TransceiverBase</name>
@@ -22194,6 +23786,36 @@ Hosszú nyomás: üzenet szerkesztése</translation>
         <source>Skip</source>
         <translation>Kihagyás</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2166"/>
+        <source>Call:</source>
+        <translation>Hívójel:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2192"/>
+        <source>Report:</source>
+        <translation>Riport:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2195"/>
+        <source>Mode:</source>
+        <translation>Mód:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2198"/>
+        <source>Freq:</source>
+        <translation>Frekv.:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2241"/>
+        <source>Comment:</source>
+        <translation>Megjegyzés:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2259"/>
+        <source>Satellite:</source>
+        <translation>Műhold:</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -22296,6 +23918,111 @@ Kattintson a MONITOR gombra a kezdéshez</translation>
         <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
         <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
         <translation>Mennyivel a minimum felett kezdődnek a gerincek. Emelje meg, hogy a zaj ellaposodjon és csak a jelek maradjanak állva.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="454"/>
+        <source>Calls:</source>
+        <translation>Hívójelek:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="472"/>
+        <source>Show decoded callsigns on the waterfall</source>
+        <translation>Dekódolt hívójelek megjelenítése a vízesésen</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="486"/>
+        <source>Font</source>
+        <translation>Betűtípus</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="507"/>
+        <source>Gap</source>
+        <translation>Térköz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="544"/>
+        <source>Bold</source>
+        <translation>Félkövér</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="548"/>
+        <source>Color</source>
+        <translation>Szín</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="660"/>
+        <source>Palette:</source>
+        <translation>Paletta:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="745"/>
+        <source>Automatic noise threshold (IIR)</source>
+        <translation>Automatikus zajküszöb (IIR)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="889"/>
+        <source>Show DX Cluster spots on the waterfall (click to call)</source>
+        <translation>DX Cluster spotok megjelenítése a vízesésen (kattintás a híváshoz)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="899"/>
+        <source>Cluster</source>
+        <translation>Klaszter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="925"/>
+        <source>▴</source>
+        <translation>▴</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="955"/>
+        <source>Peak Hold: keeps spectrum peaks visible</source>
+        <translation>Csúcstartás: láthatóan tartja a spektrum csúcsait</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="965"/>
+        <source>Peak</source>
+        <translation>Peak</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="968"/>
+        <source>Zoom</source>
+        <translation>Zoom</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1000"/>
+        <source>Measured noise threshold</source>
+        <translation>Mért zajküszöb</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1014"/>
+        <source>Black:</source>
+        <translation>Fekete:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1027"/>
+        <source>Gain:</source>
+        <translation>Erősítés:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1042"/>
+        <source>Contrasto:</source>
+        <translation>Kontraszt:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1058"/>
+        <source>Vel:</source>
+        <translation>Seb.:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1997"/>
+        <source>☰</source>
+        <translation>☰</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
+        <source>⠿</source>
+        <translation>⠿</translation>
     </message>
 </context>
 <context>
@@ -25462,6 +27189,26 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <source>non disponibile</source>
         <translation>nem érhető el</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="51"/>
+        <source>Callsign</source>
+        <translation>Hívójel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="68"/>
+        <source>Refresh</source>
+        <translation>Frissítés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="115"/>
+        <source>Grid</source>
+        <translation>QRA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="144"/>
+        <source>Club Log</source>
+        <translation>Club Log</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -26288,6 +28035,456 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message numerus="yes">
         <source>Marked read %n received file</source>
         <translation><numerusform>%n fogadott fájl olvasottként megjelölve</numerusform><numerusform>%n fogadott fájl olvasottként megjelölve</numerusform></translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5421"/>
+        <source>FT2-LINK</source>
+        <translation>FT2-LINK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5612"/>
+        <source>CQ only</source>
+        <translation>Csak CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5651"/>
+        <source>AUTO CQ</source>
+        <translation>AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6005"/>
+        <source>LOOP ACK</source>
+        <translation>LOOP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6094"/>
+        <source>No sessions</source>
+        <translation>Nincs munkamenet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6194"/>
+        <source>DROP DATA</source>
+        <translation>DROP DATA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6203"/>
+        <source>DROP ACK</source>
+        <translation>DROP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6797"/>
+        <source>No tags</source>
+        <translation>Nincs címke</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6847"/>
+        <source>SET CF</source>
+        <translation>SET CF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6856"/>
+        <source>CF TAG</source>
+        <translation>CF TAG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6894"/>
+        <source>Message</source>
+        <translation>Üzenet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7015"/>
+        <source>key=value; key=value</source>
+        <translation>key=value; key=value</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7232"/>
+        <source>BBS group. Empty means ALL.</source>
+        <translation>BBS csoport. Üresen: MINDENKI.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7269"/>
+        <source>Bulletin title</source>
+        <translation>Hírlevél címe</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7276"/>
+        <source>Short BBS subject/title.</source>
+        <translation>Rövid BBS tárgy vagy cím.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7311"/>
+        <source>BBS message body</source>
+        <translation>BBS üzenet törzse</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7319"/>
+        <source>Text to store and send as the BBS bulletin body.</source>
+        <translation>A BBS hírlevél törzseként mentendő és küldendő szöveg.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7368"/>
+        <source>server-file.txt</source>
+        <translation>server-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7387"/>
+        <source>BBS server file body</source>
+        <translation>A BBS-kiszolgálón lévő fájl tartalma</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7456"/>
+        <source>remote-file.txt</source>
+        <translation>remote-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7595"/>
+        <source>No BBS server files</source>
+        <translation>Nincs fájl a BBS-kiszolgálón</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7640"/>
+        <source>SAVE GROUP</source>
+        <translation>CSOPORT MENTÉSE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7668"/>
+        <source>BBS BULLETINS</source>
+        <translation>BBS HÍRLEVELEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7705"/>
+        <source>MARK ALL READ</source>
+        <translation>MIND OLVASOTT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7886"/>
+        <source>Broadcast message</source>
+        <translation>Körüzenet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7928"/>
+        <source>Alert tags: WX, POTA, NET</source>
+        <translation>Riasztási címkék: WX, POTA, NET</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7980"/>
+        <source>PATH CALL</source>
+        <translation>PATH CALL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8108"/>
+        <source>Digipeater payload</source>
+        <translation>Digipeater tartalom</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8149"/>
+        <source>DIGIPEATER</source>
+        <translation>DIGIPEATER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8177"/>
+        <source>ALERT CENTER</source>
+        <translation>RIASZTÁSI KÖZPONT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8206"/>
+        <source>CLEAR ARCH</source>
+        <translation>ARCHÍVUM ÜRÍTÉSE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8370"/>
+        <source>Subject</source>
+        <translation>Tárgy</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8381"/>
+        <source>Mail body</source>
+        <translation>Levél törzse</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8547"/>
+        <source>USE PATH</source>
+        <translation>USE PATH</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8557"/>
+        <source>CALL RLY</source>
+        <translation>CALL RLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8594"/>
+        <source>smtp.host</source>
+        <translation>smtp.host</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8637"/>
+        <source>SMTP user</source>
+        <translation>SMTP felhasználó</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8655"/>
+        <source>From email</source>
+        <translation>Feladó címe</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8667"/>
+        <source>SMTP password</source>
+        <translation>SMTP jelszó</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8904"/>
+        <source>No mail</source>
+        <translation>Nincs levél</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9072"/>
+        <source>Away message</source>
+        <translation>Távollét üzenet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9093"/>
+        <source>Welcome message</source>
+        <translation>Üdvözlő üzenet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9104"/>
+        <source>AUTO REPLY</source>
+        <translation>AUTO REPLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9127"/>
+        <source>AUTO AWAY</source>
+        <translation>AUTO AWAY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9170"/>
+        <source>CALL ID</source>
+        <translation>CALL ID</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9195"/>
+        <source>AUTO DISC</source>
+        <translation>AUTO DISC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9221"/>
+        <source>PING RX</source>
+        <translation>PING RX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9299"/>
+        <source>LH PEEK</source>
+        <translation>LH PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9308"/>
+        <source>SNR TX</source>
+        <translation>SNR TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9317"/>
+        <source>VSNR OK</source>
+        <translation>VSNR OK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9326"/>
+        <source>LC PEEK</source>
+        <translation>LC PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9335"/>
+        <source>VM PEEK</source>
+        <translation>VM PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9344"/>
+        <source>VM PARK</source>
+        <translation>VM PARK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9353"/>
+        <source>INFO REQ</source>
+        <translation>INFO REQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9585"/>
+        <source>Comment</source>
+        <translation>Megjegyzés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9717"/>
+        <source>No contacts</source>
+        <translation>Nincs névjegy</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9877"/>
+        <source>Shared cluster JSON path</source>
+        <translation>A klaszter megosztott JSON útvonala</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10019"/>
+        <source>Paste cluster JSON here, or press EXPORT</source>
+        <translation>Illessze be ide a klaszter JSON-t, vagy nyomja meg az EXPORT gombot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10145"/>
+        <source>No cluster last-heard records</source>
+        <translation>Nincs klaszter utoljára-hallott bejegyzés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10289"/>
+        <source>not tracked</source>
+        <translation>nincs követve</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10406"/>
+        <source>No path reports</source>
+        <translation>Nincs útvonaljelentés</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10572"/>
+        <source>Select an export</source>
+        <translation>Válasszon egy exportot</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10712"/>
+        <source>Run audit</source>
+        <translation>Ellenőrzés futtatása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11157"/>
+        <source>description</source>
+        <translation>leírás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11169"/>
+        <source>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</source>
+        <translation>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11276"/>
+        <source>No custom presets</source>
+        <translation>Nincs saját előbeállítás</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11308"/>
+        <source>county/state</source>
+        <translation>megye/állam</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11335"/>
+        <source>weather line optional</source>
+        <translation>időjárás sor nem kötelező</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11363"/>
+        <source>Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.</source>
+        <translation>Szerdai bejelentkezés: a MAIL beállítja a címet, tárgyat és törzset; a CHAT csak a törzset illeszti be.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11395"/>
+        <source>14105000|20m|Main, 7105000|40m|Main</source>
+        <translation>14105000|20m|Main, 7105000|40m|Main</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11433"/>
+        <source>0000-2359|CALLING|14105000|20m main|CQ</source>
+        <translation>0000-2359|CALLING|14105000|20m main|CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11521"/>
+        <source>14101250-14108750|20m, 7101250-7108750|40m</source>
+        <translation>14101250-14108750|20m, 7101250-7108750|40m</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11550"/>
+        <source>FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.</source>
+        <translation>A FREQ tárolja a hívófrekvencia-előbeállításokat, az UTC időablakokat és az engedélyezett QSY tartományokat. A CALLING/CQ/BEACON/EMCOMM/QUIET műveletek védik az aktív frekvenciát; a DATA adatablakot jelöl. CAT-on keresztüli automatikus QSY nem történik.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11694"/>
+        <source>CALL1, CALL2, Z6/TEST</source>
+        <translation>CALL1, CALL2, Z6/TEST</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11729"/>
+        <source>Add callsign</source>
+        <translation>Hívójel hozzáadása</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11750"/>
+        <source>Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.</source>
+        <translation>A letiltott hívójelek nem indíthatnak munkamenetet, nem jelennek meg az utoljára hallottak között, és a jeladó-, CQ-, ping- és körüzenet-forgalmuk helyben figyelmen kívül marad.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11819"/>
+        <source>No blocked calls</source>
+        <translation>Nincs letiltott hívójel</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11840"/>
+        <source>SATELLITE HALF-DUPLEX</source>
+        <translation>MŰHOLD FÉL-DUPLEX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11848"/>
+        <source>Enable independent RX/TX VFOs</source>
+        <translation>Független RX/TX VFO-k engedélyezése</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11863"/>
+        <source>RX MHz</source>
+        <translation>RX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11875"/>
+        <source>downlink dial MHz</source>
+        <translation>letöltő frekvencia MHz-ben</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11903"/>
+        <source>TX MHz</source>
+        <translation>TX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11915"/>
+        <source>uplink dial MHz</source>
+        <translation>feltöltő frekvencia MHz-ben</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11929"/>
+        <source>SETTLE ms</source>
+        <translation>SETTLE ms</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11957"/>
+        <source>READ RX/TX FROM RIG</source>
+        <translation>RX/TX BEOLVASÁSA A RÁDIÓBÓL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12020"/>
+        <source>Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.</source>
+        <translation>Minden adáshoz használja az FT2-Link szokásos ARM vezérlőjét. Ez a mód fél-duplex: a vett hang adáskor szünetel, a PTT az RX VFO visszaállítása előtt elenged, és a kézi leállítás is ugyanazt a biztonságos visszatérési utat követi.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12041"/>
+        <source>QO-100 / cross-band setup</source>
+        <translation>QO-100 / cross-band setup</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12050"/>
+        <source>Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.</source>
+        <translation>Adja meg az állomása vagy transzvertere által ténylegesen használt CAT frekvenciákat. Nem alkalmazunk rögzített QO-100 értékeket: a KF-tervek és a transzverter-eltolások eltérnek.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12059"/>
+        <source>The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.</source>
+        <translation>Ebben a módban a szokásos FT hangeltolás-alapú split szándékosan kimarad, így egy sávok közötti adás nem használja újra és nem mozgatja az FT2-Link csevegés/munkamenet nézetét.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12070"/>
+        <source>CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.</source>
+        <translation>A CAT diagnosztika az [FT2SAT] címkével kerül naplózásra. Kezdje kis teljesítménnyel, és adásba menetel előtt ellenőrizze a rádió VFO-it.</translation>
     </message>
 </context>
 <context>

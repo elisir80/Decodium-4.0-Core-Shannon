@@ -1413,7 +1413,7 @@ Dialog {
                 Text {
                     anchors.fill: parent
                     anchors.margins: 10
-                    text: "173045  -21  0.1  1045  CQ LB9ZG JP20"
+                    text: qsTr("173045  -21  0.1  1045  CQ LB9ZG JP20")
                     color: textPrimary
                     font.family: settingsDialog.fontPickerFamily
                     font.pointSize: settingsDialog.fontPickerPointSize
@@ -1495,7 +1495,7 @@ Dialog {
                 width: 34; height: 34; radius: 6
                 color: closeMA.containsMouse ? Qt.rgba(0.95,0.26,0.21,0.3) : Qt.rgba(1,1,1,0.1)
                 border.color: closeMA.containsMouse ? "#f44336" : glassBorder
-                Text { anchors.centerIn: parent; text: "\u2715"; color: closeMA.containsMouse ? "#f44336" : textPrimary; font.pixelSize: 14 }
+                Text { anchors.centerIn: parent; text: qsTr("\u2715"); color: closeMA.containsMouse ? "#f44336" : textPrimary; font.pixelSize: 14 }
                 MouseArea { id: closeMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: settingsDialog.close() }
             }
         }

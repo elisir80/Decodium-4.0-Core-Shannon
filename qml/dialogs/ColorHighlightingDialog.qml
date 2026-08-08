@@ -6,7 +6,7 @@ import "../decodium/components"
 // ColorHighlightingDialog — palette WSJT-X (B7)
 Dialog {
     id: colorDialog
-    title: "Color Highlighting"
+    title: qsTr("Color Highlighting")
     modal: true
     standardButtons: Dialog.Ok | Dialog.Cancel
     width: 460
@@ -109,7 +109,7 @@ Dialog {
                 width: contentColumn.width - 32
 
                 Text {
-                    text: "B4 Strikethrough:"
+                    text: qsTr("B4 Strikethrough:")
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 12
                     color: "#ECEFF1"
@@ -128,7 +128,7 @@ Dialog {
                 width: contentColumn.width - 32
 
                 Text {
-                    text: "Alert Sounds:"
+                    text: qsTr("Alert Sounds:")
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 12
                     color: "#ECEFF1"
@@ -146,7 +146,7 @@ Dialog {
     // Color picker sub-dialog
     Dialog {
         id: colorPickerDialog
-        title: "Choose Color"
+        title: qsTr("Choose Color")
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
         width: 280
@@ -167,7 +167,7 @@ Dialog {
             padding: 12
 
             Text {
-                text: "Hex color (#RRGGBB):"
+                text: qsTr("Hex color (#RRGGBB):")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 11
                 color: "#B0BEC5"
@@ -177,7 +177,7 @@ Dialog {
                 id: colorPickerInput
                 width: 240
                 text: colorPickerDialog.currentHex
-                placeholderText: "#RRGGBB"
+                placeholderText: qsTr("#RRGGBB")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 13
                 background: Rectangle {

@@ -822,7 +822,7 @@ ScrollView {
             leftPadding: 8
             color: textPrimary
             font.pixelSize: controlFontSize
-            placeholderText: "localhost:50001"
+            placeholderText: qsTr("localhost:50001")
             selectByMouse: true
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: {

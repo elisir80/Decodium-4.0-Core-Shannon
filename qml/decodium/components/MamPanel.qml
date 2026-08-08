@@ -363,7 +363,7 @@ Item {
 
                 Text {
                     visible: !mamPanel.mamHasActiveCaller && !(mamPanel.engine && mamPanel.engine.mamMultiStream)
-                    text: "No active caller"
+                    text: qsTr("No active caller")
                     font.pixelSize: 12
                     color: mamPanel.textSecondary
                 }

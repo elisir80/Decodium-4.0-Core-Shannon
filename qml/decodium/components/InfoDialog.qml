@@ -80,7 +80,7 @@ Dialog {
             anchors.margins: 16
 
             Text {
-                text: "DECODIUM INFO"
+                text: qsTr("DECODIUM INFO")
                 font.pixelSize: 18
                 font.bold: true
                 color: secondaryCyan
@@ -215,7 +215,7 @@ Dialog {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "4.0 Core Gallager"
+                        text: qsTr("4.0 Core Gallager")
                         font.pixelSize: 16
                         color: secondaryCyan
                     }
@@ -224,7 +224,7 @@ Dialog {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         Layout.preferredWidth: 500
-                        text: "Advanced Digital Mode Decoder for Amateur Radio\nFT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441"
+                        text: qsTr("Advanced Digital Mode Decoder for Amateur Radio\nFT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441")
                         font.pixelSize: 13
                         color: textSecondary
                         horizontalAlignment: Text.AlignHCenter
@@ -257,28 +257,28 @@ Dialog {
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Decodium by IU8LMC"
+                                text: qsTr("Decodium by IU8LMC")
                                 font.pixelSize: 12
                                 color: textPrimary
                             }
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Qt6 Modern UI Port by IU8LMC"
+                                text: qsTr("Qt6 Modern UI Port by IU8LMC")
                                 font.pixelSize: 12
                                 color: textPrimary
                             }
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Developed by Salvatore Raccampo 9H1SR"
+                                text: qsTr("Developed by Salvatore Raccampo 9H1SR")
                                 font.pixelSize: 12
                                 color: textPrimary
                             }
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "WSJT-X Algorithms by K1JT (Joe Taylor)"
+                                text: qsTr("WSJT-X Algorithms by K1JT (Joe Taylor)")
                                 font.pixelSize: 12
                                 color: textPrimary
                             }
@@ -287,7 +287,7 @@ Dialog {
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Copyright 2024-2026 - Open Source GPL"
+                                text: qsTr("Copyright 2024-2026 - Open Source GPL")
                                 font.pixelSize: 11
                                 color: textSecondary
                             }
@@ -311,7 +311,7 @@ Dialog {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "DECODIUM HISTORY"
+                        text: qsTr("DECODIUM HISTORY")
                         font.pixelSize: 16
                         font.bold: true
                         color: secondaryCyan
@@ -407,7 +407,7 @@ Dialog {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "CONTACTS & FEEDBACK"
+                        text: qsTr("CONTACTS & FEEDBACK")
                         font.pixelSize: 16
                         font.bold: true
                         color: secondaryCyan
@@ -429,7 +429,7 @@ Dialog {
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Developer: IU8LMC"
+                                text: qsTr("Developer: IU8LMC")
                                 font.pixelSize: 14
                                 color: textPrimary
                             }
@@ -444,7 +444,7 @@ Dialog {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "iu8lmc@gmail.com"
+                                    text: qsTr("iu8lmc@gmail.com")
                                     font.pixelSize: 14
                                     color: secondaryCyan
                                 }
@@ -462,7 +462,7 @@ Dialog {
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Developer: 9H1SR"
+                                text: qsTr("Developer: 9H1SR")
                                 font.pixelSize: 14
                                 color: textPrimary
                             }
@@ -477,7 +477,7 @@ Dialog {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "9h1sr@gmail.com"
+                                    text: qsTr("9h1sr@gmail.com")
                                     font.pixelSize: 14
                                     color: accentGreen
                                 }
@@ -514,7 +514,7 @@ Dialog {
 
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "SEND FEEDBACK"
+                                text: qsTr("SEND FEEDBACK")
                                 font.pixelSize: 14
                                 font.bold: true
                                 color: accentOrange
@@ -525,7 +525,7 @@ Dialog {
                                 spacing: 5
 
                                 Text {
-                                    text: "Subject"
+                                    text: qsTr("Subject")
                                     color: textSecondary
                                     font.pixelSize: 11
                                 }
@@ -552,7 +552,7 @@ Dialog {
                                 spacing: 5
 
                                 Text {
-                                    text: "Message, suggestion, or bug report"
+                                    text: qsTr("Message, suggestion, or bug report")
                                     color: textSecondary
                                     font.pixelSize: 11
                                 }
@@ -578,7 +578,7 @@ Dialog {
 
                             Button {
                                 Layout.alignment: Qt.AlignHCenter
-                                text: "Send Feedback"
+                                text: qsTr("Send Feedback")
                                 font.pixelSize: 12
 
                                 background: Rectangle {
@@ -625,7 +625,7 @@ Dialog {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "QUICK GUIDE"
+                        text: qsTr("QUICK GUIDE")
                         font.pixelSize: 16
                         font.bold: true
                         color: secondaryCyan
@@ -649,7 +649,7 @@ Dialog {
                             spacing: 10
 
                             Text {
-                                text: "QUICK START"
+                                text: qsTr("QUICK START")
                                 font.pixelSize: 13
                                 font.bold: true
                                 color: accentGreen
@@ -692,7 +692,7 @@ Dialog {
                             spacing: 8
 
                             Text {
-                                text: "KEYBOARD SHORTCUTS"
+                                text: qsTr("KEYBOARD SHORTCUTS")
                                 font.pixelSize: 13
                                 font.bold: true
                                 color: accentOrange
@@ -767,7 +767,7 @@ Dialog {
                             spacing: 10
 
                             Text {
-                                text: "OPERATING TIPS"
+                                text: qsTr("OPERATING TIPS")
                                 font.pixelSize: 13
                                 font.bold: true
                                 color: primaryBlue
@@ -808,7 +808,7 @@ Dialog {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "USEFUL LINKS"
+                        text: qsTr("USEFUL LINKS")
                         font.pixelSize: 16
                         font.bold: true
                         color: secondaryCyan

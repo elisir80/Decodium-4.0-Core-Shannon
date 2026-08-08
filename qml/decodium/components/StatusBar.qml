@@ -361,7 +361,7 @@ Rectangle {
                     ToolTip {
                         visible: parent.containsMouse
                         delay: 500
-                        text: "FT Decoder Threads: "
+                        text: qsTr("FT Decoder Threads: ")
                               + ftThreadsLed.tooltipValue
                               + "\nClick: cycle 1-8 - Right-click: AUTO"
                     }
@@ -651,7 +651,7 @@ Rectangle {
         // Version info
         Text {
             visible: showFooterVersion
-            text: "Decodium 4.0"
+            text: qsTr("Decodium 4.0")
             font.pixelSize: 10
             color: textSecondary
         }

@@ -2163,7 +2163,7 @@ Item {
                 columnSpacing: 12
                 rowSpacing: 8
 
-                Text { text: "Call:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Call:"); color: textSecondary; font.pixelSize: 13 }
                 Text { text: logPreviewCall || "-"; color: textPrimary; font.pixelSize: 14; font.bold: true }
 
                 Text { text: "Grid:"; color: textSecondary; font.pixelSize: 13 }
@@ -2189,13 +2189,13 @@ Item {
                     }
                 }
 
-                Text { text: "Report:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Report:"); color: textSecondary; font.pixelSize: 13 }
                 Text { text: (logPreviewSent || "-") + " / " + (logPreviewRcvd || "-"); color: textPrimary; font.pixelSize: 14 }
 
-                Text { text: "Mode:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Mode:"); color: textSecondary; font.pixelSize: 13 }
                 Text { text: logPreviewMode || "-"; color: textPrimary; font.pixelSize: 14 }
 
-                Text { text: "Freq:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Freq:"); color: textSecondary; font.pixelSize: 13 }
                 Text { text: logPreviewFreq && logPreviewFreq !== "0" ? logPreviewFreq + " Hz" : "-"; color: textPrimary; font.pixelSize: 14 }
 
                 Text { text: qsTr("Start UTC:"); color: textSecondary; font.pixelSize: 13 }
@@ -2238,7 +2238,7 @@ Item {
                     }
                 }
 
-                Text { text: "Comment:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Comment:"); color: textSecondary; font.pixelSize: 13 }
                 DecoTextField {
                     id: logCommentField
                     Layout.fillWidth: true
@@ -2256,7 +2256,7 @@ Item {
                     }
                 }
 
-                Text { text: "Satellite:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Satellite:"); color: textSecondary; font.pixelSize: 13 }
                 StyledComboBox {
                     id: satelliteCombo
                     model: txPanel.logSatelliteChoices

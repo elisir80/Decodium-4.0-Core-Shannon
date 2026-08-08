@@ -111,7 +111,7 @@ ComboBox {
     indicator: Text {
         x: control.width - width - 12
         y: Math.round((control.height - height) / 2)
-        text: "\u25BE"
+        text: qsTr("\u25BE")
         color: control.enabled ? control.decoTextColor : control.decoMutedTextColor
         font.family: control._stableFontFamily
         font.pixelSize: Math.max(12, control._stablePixelSize)

@@ -457,7 +457,7 @@ Item {
         Text {
             anchors.centerIn: parent
             visible: list.count === 0
-            text: "No decodes"
+            text: qsTr("No decodes")
             color: root.cTextDim
             font.pixelSize: 12; font.italic: true
         }

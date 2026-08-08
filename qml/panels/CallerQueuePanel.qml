@@ -27,7 +27,7 @@ Rectangle {
             spacing: 6
 
             Text {
-                text: "FOX CALLER QUEUE"
+                text: qsTr("FOX CALLER QUEUE")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 font.bold: true
@@ -120,7 +120,7 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 visible: queueList.count === 0
-                text: "No callers in queue"
+                text: qsTr("No callers in queue")
                 font.family: decodiumMonoFontFamily; font.pixelSize: 10
                 color: "#546E7A"
             }

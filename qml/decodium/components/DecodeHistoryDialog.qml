@@ -453,10 +453,10 @@ Window {
                     Text { text: "Mode";   color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 50 }
                     Text { text: "DX";     color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 90 }
                     Text { text: "DE";     color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 90 }
-                    Text { text: "Grid";   color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 55 }
+                    Text { text: qsTr("Grid");   color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 55 }
                     Text { text: "SNR";    color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 36; horizontalAlignment: Text.AlignRight }
-                    Text { text: "Freq";   color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 70; horizontalAlignment: Text.AlignRight }
-                    Text { text: "Message"; color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.fillWidth: true }
+                    Text { text: qsTr("Freq");   color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 70; horizontalAlignment: Text.AlignRight }
+                    Text { text: qsTr("Message"); color: historyDialog.cAccent; font.bold: true; font.pixelSize: 11; Layout.fillWidth: true }
                 }
             }
 

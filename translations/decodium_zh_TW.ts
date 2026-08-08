@@ -131,6 +131,49 @@
     </message>
 </context>
 <context>
+    <name>ActiveStationsPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="27"/>
+        <source>ACTIVE STATIONS</source>
+        <translation>作用中電台</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="85"/>
+        <source>CQ Only</source>
+        <translation>僅 CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="102"/>
+        <source>Wanted</source>
+        <translation>需要</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="115"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="128"/>
+        <source>Call</source>
+        <translation>呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="129"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="131"/>
+        <source>Grid</source>
+        <translation>網格</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="222"/>
+        <source>No active stations</source>
+        <translation>沒有作用中的電台</translation>
+    </message>
+</context>
+<context>
     <name>Astro</name>
     <message>
         <location filename="../widgets/astro.ui" line="34"/>
@@ -313,6 +356,44 @@ Searched paths:
     </message>
 </context>
 <context>
+    <name>AstroPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="156"/>
+        <source>ASTRO / EME</source>
+        <translation>天文 / EME</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="205"/>
+        <source>Az</source>
+        <translation>Az</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="207"/>
+        <source>El</source>
+        <translation>El</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="215"/>
+        <source>Doppler</source>
+        <translation>Doppler</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="217"/>
+        <source>Sun El</source>
+        <translation>太陽仰角</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="225"/>
+        <source>Phase</source>
+        <translation>相位</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="227"/>
+        <source>Illum</source>
+        <translation>照度</translation>
+    </message>
+</context>
+<context>
     <name>AstroWindow</name>
     <message>
         <location filename="../qml/decodium/components/AstroWindow.qml" line="121"/>
@@ -322,6 +403,171 @@ Searched paths:
     <message>
         <source>Satellite tracking</source>
         <translation>衛星追蹤</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="14"/>
+        <source>Astronomical Data</source>
+        <translation>天文資料</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="241"/>
+        <source>Minimize</source>
+        <translation>最小化</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="272"/>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="327"/>
+        <source>Location:</source>
+        <translation>位置:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="419"/>
+        <source>Moon</source>
+        <translation>月亮</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="461"/>
+        <source>Distance:</source>
+        <translation>距離：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="477"/>
+        <source>Rise:</source>
+        <translation>升起：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="485"/>
+        <source>Set:</source>
+        <translation>落下：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="510"/>
+        <source>Sun</source>
+        <translation>太陽</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="537"/>
+        <source>Sunrise:</source>
+        <translation>日出：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="545"/>
+        <source>Sunset:</source>
+        <translation>日落：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="571"/>
+        <source>EME (Earth-Moon-Earth)</source>
+        <translation>EME（地月地）</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="607"/>
+        <source>Status:</source>
+        <translation>狀態：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="615"/>
+        <source>Path Loss:</source>
+        <translation>路徑損耗：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="633"/>
+        <source>Frequency:</source>
+        <translation>頻率：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="641"/>
+        <source>Window:</source>
+        <translation>視窗：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="670"/>
+        <source>Propagation (HamQSL)</source>
+        <translation>傳播 (HamQSL)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="695"/>
+        <source>Solar Flux:</source>
+        <translation>太陽流量：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="703"/>
+        <source>A-Index:</source>
+        <translation>A 指數：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="711"/>
+        <source>K-Index:</source>
+        <translation>K 指數：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="719"/>
+        <source>X-Ray:</source>
+        <translation>X 射線：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="727"/>
+        <source>Sunspots:</source>
+        <translation>太陽黑子：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="735"/>
+        <source>Solar Wind:</source>
+        <translation>太陽風：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="751"/>
+        <source>Geomagnetic:</source>
+        <translation>地磁：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="759"/>
+        <source>Signal Noise:</source>
+        <translation>雜訊：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="805"/>
+        <source>HF Band Conditions</source>
+        <translation>短波波段狀況</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="816"/>
+        <source>Band</source>
+        <translation>波段</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="823"/>
+        <source>Day</source>
+        <translation>白天</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="830"/>
+        <source>Night</source>
+        <translation>夜間</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="888"/>
+        <source>No HF condition data available yet.</source>
+        <translation>尚無短波狀況資料。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="911"/>
+        <source>VHF Conditions</source>
+        <translation>特高頻狀況</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="943"/>
+        <source>No VHF condition data available yet.</source>
+        <translation>尚無特高頻狀況資料。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="970"/>
+        <source>Refresh</source>
+        <translation>重新整理</translation>
     </message>
 </context>
 <context>
@@ -381,6 +627,16 @@ Searched paths:
         <location filename="../qml/decodium/BootLoader.qml" line="21"/>
         <source>Decodium 4.0 — Loading...</source>
         <translation>Decodium 4.0 — 載入中...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="152"/>
+        <source>DECODIUM 4.0</source>
+        <translation>DECODIUM 4.0</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="159"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
     </message>
 </context>
 <context>
@@ -815,6 +1071,24 @@ Searched paths:
         <source>▶ Direct Call</source>
         <translation>▶ 直接呼叫</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="206"/>
+        <source>es. F4CQS</source>
+        <translation>例：F4CQS</translation>
+    </message>
+</context>
+<context>
+    <name>CallerQueuePanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/CallerQueuePanel.qml" line="30"/>
+        <source>FOX CALLER QUEUE</source>
+        <translation>FOX 呼叫佇列</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/CallerQueuePanel.qml" line="123"/>
+        <source>No callers in queue</source>
+        <translation>佇列中沒有呼叫方</translation>
+    </message>
 </context>
 <context>
     <name>CallsignDialog</name>
@@ -1003,6 +1277,39 @@ Please check your log.</source>
         <location filename="../widgets/colorhighlighting.ui" line="330"/>
         <source>New ITU Zone on Band</source>
         <translation>新ITU區 波段</translation>
+    </message>
+</context>
+<context>
+    <name>ColorHighlightingDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="9"/>
+        <source>Color Highlighting</source>
+        <translation>顏色標示</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="112"/>
+        <source>B4 Strikethrough:</source>
+        <translation>B4 刪除線：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="131"/>
+        <source>Alert Sounds:</source>
+        <translation>提示音：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="149"/>
+        <source>Choose Color</source>
+        <translation>選擇顏色</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="170"/>
+        <source>Hex color (#RRGGBB):</source>
+        <translation>十六進位顏色 (#RRGGBB)：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="180"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
     </message>
 </context>
 <context>
@@ -1851,11 +2158,64 @@ or contact DXLab support at DXLab@groups.io.</source>
     </message>
 </context>
 <context>
+    <name>DecoComboBox</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoComboBox.qml" line="114"/>
+        <source>▾</source>
+        <translation>▾</translation>
+    </message>
+</context>
+<context>
     <name>DecoSyncPanel</name>
     <message>
         <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="54"/>
         <source>DecoSyncTime not available</source>
         <translation>DecoSyncTime 無法使用</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="69"/>
+        <source>DecoSyncTime Monitor</source>
+        <translation>DecoSyncTime Monitor</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="160"/>
+        <source>Source</source>
+        <translation>來源</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="161"/>
+        <source>Stato</source>
+        <translation>狀態</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="162"/>
+        <source>Offset</source>
+        <translation>Offset</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="163"/>
+        <source>Servers</source>
+        <translation>伺服器</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="166"/>
+        <source>NTP UDP</source>
+        <translation>NTP UDP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="176"/>
+        <source>8 pool</source>
+        <translation>8 pool</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="179"/>
+        <source>HTTPS Date</source>
+        <translation>HTTPS Date</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="197"/>
+        <source>SelfCal FT</source>
+        <translation>SelfCal FT</translation>
     </message>
 </context>
 <context>
@@ -2091,6 +2451,21 @@ or contact DXLab support at DXLab@groups.io.</source>
         <source>Close</source>
         <translation>關閉</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="456"/>
+        <source>Grid</source>
+        <translation>網格</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="458"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="459"/>
+        <source>Message</source>
+        <translation>訊息</translation>
+    </message>
 </context>
 <context>
     <name>DecodeWindow</name>
@@ -2099,6 +2474,38 @@ or contact DXLab support at DXLab@groups.io.</source>
         <location filename="../qml/decodium/components/DecodeWindow.qml" line="1878"/>
         <source>── PERIOD ──</source>
         <translation>── 週期 ──</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="968"/>
+        <source>Full Spectrum</source>
+        <translation>全頻譜</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1047"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1061"/>
+        <source>Drift</source>
+        <translation>漂移</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1100"/>
+        <source>Az</source>
+        <translation>Az</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1541"/>
+        <source>No decoded messages
+Click Monitor to start</source>
+        <translation>沒有解碼的訊息
+點擊 Monitor 開始</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1575"/>
+        <source>Signal RX</source>
+        <translation>接收訊號</translation>
     </message>
 </context>
 <context>
@@ -2692,6 +3099,54 @@ or contact DXLab support at DXLab@groups.io.</source>
     </message>
 </context>
 <context>
+    <name>DevOverlay</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="140"/>
+        <source>Decodium DevOverlay</source>
+        <translation>Decodium DevOverlay</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="197"/>
+        <source>Frame (ms):</source>
+        <translation>影格 (ms)：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="215"/>
+        <source>Decode Hz:</source>
+        <translation>解碼次數/秒：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="226"/>
+        <source>Delegates:</source>
+        <translation>委派項：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="244"/>
+        <source>Uptime:</source>
+        <translation>運行時間：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="264"/>
+        <source>Frame time 5s</source>
+        <translation>影格時間 5 秒</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="330"/>
+        <source>Copy diagnostics</source>
+        <translation>複製診斷資訊</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="347"/>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="359"/>
+        <source>Copied to clipboard</source>
+        <translation>已複製到剪貼簿</translation>
+    </message>
+</context>
+<context>
     <name>Dialog</name>
     <message>
         <location filename="../WSPR/WSPRBandHopping.cpp" line="116"/>
@@ -2809,6 +3264,59 @@ Error: %2 - %3</source>
     </message>
 </context>
 <context>
+    <name>DxClusterPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="76"/>
+        <source>DX Cluster</source>
+        <translation>DX叢集</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="140"/>
+        <source>Time</source>
+        <translation>時間</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="141"/>
+        <source>DX Call</source>
+        <translation>DX 呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="142"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="143"/>
+        <source>Band</source>
+        <translation>波段</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="144"/>
+        <source>Mode</source>
+        <translation>模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="145"/>
+        <source>Spotter</source>
+        <translation>點位回報者</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="146"/>
+        <source>Info</source>
+        <translation>資訊</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="309"/>
+        <source>Filter:</source>
+        <translation>篩選：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="340"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+</context>
+<context>
     <name>DxPeditionWorkspace</name>
     <message>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="255"/>
@@ -2829,6 +3337,31 @@ Error: %2 - %3</source>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="657"/>
         <source>Log · QSO Entry</source>
         <translation>Log · QSO 記錄</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="182"/>
+        <source>DECODIUM 4</source>
+        <translation>DECODIUM 4</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="187"/>
+        <source>DX-PEDITION MODE</source>
+        <translation>DX-Pedition 模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="537"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="568"/>
+        <source>Waterfall</source>
+        <translation>頻譜瀑布圖</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="635"/>
+        <source>TX Macros</source>
+        <translation>TX 巨集</translation>
     </message>
 </context>
 <context>
@@ -3501,6 +4034,14 @@ Error: %2</source>
     </message>
 </context>
 <context>
+    <name>FullSpectrumPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="460"/>
+        <source>No decodes</source>
+        <translation>無解碼</translation>
+    </message>
+</context>
+<context>
     <name>HRDTransceiver</name>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="396"/>
@@ -3878,6 +4419,123 @@ Error: %2</source>
         <location filename="../qml/decodium/components/InfoDialog.qml" line="718"/>
         <source>Compact Full Spectrum</source>
         <translation>精簡 Full Spectrum</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="83"/>
+        <source>DECODIUM INFO</source>
+        <translation>DECODIUM 資訊</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="218"/>
+        <source>4.0 Core Gallager</source>
+        <translation>4.0 Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="227"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</source>
+        <translation>面向業餘無線電的進階數位模式解碼器
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="260"/>
+        <source>Decodium by IU8LMC</source>
+        <translation>Decodium by IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="267"/>
+        <source>Qt6 Modern UI Port by IU8LMC</source>
+        <translation>Qt6 現代介面移植：IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="274"/>
+        <source>Developed by Salvatore Raccampo 9H1SR</source>
+        <translation>由 Salvatore Raccampo 9H1SR 開發</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="281"/>
+        <source>WSJT-X Algorithms by K1JT (Joe Taylor)</source>
+        <translation>WSJT-X 演算法：K1JT (Joe Taylor)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="290"/>
+        <source>Copyright 2024-2026 - Open Source GPL</source>
+        <translation>Copyright 2024-2026 - 開源 GPL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="314"/>
+        <source>DECODIUM HISTORY</source>
+        <translation>DECODIUM 歷程</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="410"/>
+        <source>CONTACTS &amp; FEEDBACK</source>
+        <translation>聯絡與意見</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="432"/>
+        <source>Developer: IU8LMC</source>
+        <translation>Developer: IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="447"/>
+        <source>iu8lmc@gmail.com</source>
+        <translation>iu8lmc@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="465"/>
+        <source>Developer: 9H1SR</source>
+        <translation>Developer: 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="480"/>
+        <source>9h1sr@gmail.com</source>
+        <translation>9h1sr@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="517"/>
+        <source>SEND FEEDBACK</source>
+        <translation>傳送意見</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="528"/>
+        <source>Subject</source>
+        <translation>主旨</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="555"/>
+        <source>Message, suggestion, or bug report</source>
+        <translation>留言、建議或缺陷回報</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="581"/>
+        <source>Send Feedback</source>
+        <translation>傳送</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="628"/>
+        <source>QUICK GUIDE</source>
+        <translation>快速指南</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="652"/>
+        <source>QUICK START</source>
+        <translation>快速上手</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="695"/>
+        <source>KEYBOARD SHORTCUTS</source>
+        <translation>鍵盤快速鍵</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="770"/>
+        <source>OPERATING TIPS</source>
+        <translation>操作提示</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="811"/>
+        <source>USEFUL LINKS</source>
+        <translation>實用連結</translation>
     </message>
 </context>
 <context>
@@ -5502,6 +6160,26 @@ Error: %2</source>
         <source>Add</source>
         <translation>新增</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="847"/>
+        <source>Live Map</source>
+        <translation>即時地圖</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2229"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3241"/>
+        <source>foF2</source>
+        <translation>foF2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3286"/>
+        <source>Es</source>
+        <translation>Es</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5856,6 +6534,14 @@ Error: %2</source>
     </message>
 </context>
 <context>
+    <name>LogQsoPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogQsoPanel.qml" line="133"/>
+        <source>NEXT TX</source>
+        <translation>下一次發射</translation>
+    </message>
+</context>
+<context>
     <name>LogWindow</name>
     <message>
         <location filename="../qml/decodium/components/LogWindow.qml" line="181"/>
@@ -5950,6 +6636,151 @@ Error: %2</source>
         <source>Copy Callsign</source>
         <translation>複製呼號</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="308"/>
+        <source>Nuovo logbook</source>
+        <translation>新增日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="317"/>
+        <source>Nome operatore / callsign</source>
+        <translation>操作員姓名／呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="330"/>
+        <source>Backup log attuale</source>
+        <translation>備份目前日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="481"/>
+        <source>QSO Log</source>
+        <translation>QSO 日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="517"/>
+        <source>−</source>
+        <translation>−</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="527"/>
+        <source>Minimize</source>
+        <translation>最小化</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="538"/>
+        <source>✕</source>
+        <translation>✕</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="548"/>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="592"/>
+        <source>New</source>
+        <translation>新建</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="594"/>
+        <source>Create a separate logbook</source>
+        <translation>建立獨立日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="601"/>
+        <source>Load</source>
+        <translation>載入</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="603"/>
+        <source>Load/use an existing ADIF as a logbook</source>
+        <translation>載入並使用現有 ADIF 作為日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="610"/>
+        <source>Bkp</source>
+        <translation>Bkp</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="612"/>
+        <source>Back up the active logbook</source>
+        <translation>備份目前使用的日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="620"/>
+        <source>Del</source>
+        <translation>刪除</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="629"/>
+        <source>Delete selected logbook</source>
+        <translation>刪除選取的日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="642"/>
+        <source>🔍</source>
+        <translation>🔍</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="689"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="704"/>
+        <source>Remove search, band, and mode filters</source>
+        <translation>清除搜尋、波段與模式篩選</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="717"/>
+        <source>Importa ADIF</source>
+        <translation>匯入 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="722"/>
+        <source>Import ADIF file</source>
+        <translation>匯入 ADIF 檔</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="732"/>
+        <source>Esporta ADIF</source>
+        <translation>匯出 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="737"/>
+        <source>Export ADIF</source>
+        <translation>匯出 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="746"/>
+        <source>↻</source>
+        <translation>↻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="751"/>
+        <source>Refresh</source>
+        <translation>重新整理</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="770"/>
+        <source>Date/Time</source>
+        <translation>日期/時間</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="777"/>
+        <source>Dist</source>
+        <translation>Dist</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="911"/>
+        <source>No QSOs found</source>
+        <translation>找不到 QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="1190"/>
+        <source>MAX DIST</source>
+        <translation>最遠距離</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -6042,6 +6873,131 @@ Error: %2</source>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="226"/>
+        <source>Nuovo logbook</source>
+        <translation>新增日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="235"/>
+        <source>Nome operatore / callsign</source>
+        <translation>操作員姓名／呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="248"/>
+        <source>Backup log attuale</source>
+        <translation>備份目前日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="395"/>
+        <source>New</source>
+        <translation>新建</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="397"/>
+        <source>Create a separate logbook</source>
+        <translation>建立獨立日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="404"/>
+        <source>Load</source>
+        <translation>載入</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="406"/>
+        <source>Load/use an existing ADIF</source>
+        <translation>載入並使用現有 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="413"/>
+        <source>Bkp</source>
+        <translation>Bkp</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="415"/>
+        <source>Back up the active logbook</source>
+        <translation>備份目前使用的日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="423"/>
+        <source>Del</source>
+        <translation>刪除</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="432"/>
+        <source>Delete selected logbook</source>
+        <translation>刪除選取的日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="444"/>
+        <source>🔍</source>
+        <translation>🔍</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="486"/>
+        <source>×</source>
+        <translation>×</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="501"/>
+        <source>Remove filters</source>
+        <translation>清除篩選</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="512"/>
+        <source>⬇</source>
+        <translation>⬇</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="514"/>
+        <source>Import ADIF</source>
+        <translation>匯入 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="522"/>
+        <source>⬆</source>
+        <translation>⬆</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="524"/>
+        <source>Export ADIF</source>
+        <translation>匯出 ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="532"/>
+        <source>↻</source>
+        <translation>↻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="534"/>
+        <source>Refresh</source>
+        <translation>重新整理</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="547"/>
+        <source>Date/Time</source>
+        <translation>日期/時間</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="552"/>
+        <source>Rpt</source>
+        <translation>報告</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="617"/>
+        <source>Copy Callsign</source>
+        <translation>複製呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="753"/>
+        <source>Sent</source>
+        <translation>發出</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
+        <source>Rcvd</source>
+        <translation>接收</translation>
+    </message>
 </context>
 <context>
     <name>MacroDialog</name>
@@ -6049,6 +7005,104 @@ Error: %2</source>
         <location filename="../qml/decodium/components/MacroDialog.qml" line="95"/>
         <source>⌨️ TX Macro Configuration</source>
         <translation>⌨️ TX 巨集設定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="13"/>
+        <source>Macro Settings</source>
+        <translation>巨集設定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="131"/>
+        <source>Minimize</source>
+        <translation>最小化</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="184"/>
+        <source>Contest Mode</source>
+        <translation>競賽模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="194"/>
+        <source>Contest:</source>
+        <translation>競賽:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="234"/>
+        <source>Serial #:</source>
+        <translation>序號：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="272"/>
+        <source>Exchange:</source>
+        <translation>交換資訊：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="316"/>
+        <source>TX Macro Templates</source>
+        <translation>TX 巨集範本</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="325"/>
+        <source>Reset to Default</source>
+        <translation>還原預設</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="349"/>
+        <source>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</source>
+        <translation>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="419"/>
+        <source>Preview</source>
+        <translation>預覽</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="464"/>
+        <source>Click 'Preview' to see expanded macro</source>
+        <translation>點擊「預覽」查看展開後的巨集</translation>
+    </message>
+</context>
+<context>
+    <name>MacroDialogContent</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="35"/>
+        <source>Contest Mode</source>
+        <translation>競賽模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="41"/>
+        <source>Enable Contest Mode</source>
+        <translation>啟用競賽模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="45"/>
+        <source>Exchange:</source>
+        <translation>交換資訊：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="49"/>
+        <source>e.g., 599 001</source>
+        <translation>例：599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="74"/>
+        <source>TX Macros</source>
+        <translation>TX 巨集</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="122"/>
+        <source>Available Variables:</source>
+        <translation>可用變數：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="124"/>
+        <source>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</source>
+        <translation>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="128"/>
+        <source>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</source>
+        <translation>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
     </message>
 </context>
 <context>
@@ -6769,6 +7823,288 @@ Right-click: disconnect</source>
         <location filename="../qml/decodium/Main.qml" line="15320"/>
         <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
         <translation>Decodium 偵測到連接到本機的電台。套用該建議會設定 CAT 連接埠、機型和音訊裝置，不必再尋找正確的 COM 連接埠。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="1111"/>
+        <source>F11 / Esc</source>
+        <translation>F11 / Esc</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3319"/>
+        <source>FT2-Link access</source>
+        <translation>FT2-Link 存取</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3327"/>
+        <source>Enter password to unlock this mode.</source>
+        <translation>輸入密碼以解鎖此模式。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3336"/>
+        <source>Password</source>
+        <translation>密碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3372"/>
+        <source>Unlock</source>
+        <translation>解鎖</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3478"/>
+        <source>Based on WSJT-X by K1JT et al.</source>
+        <translation>基於 K1JT 等人的 WSJT-X。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3485"/>
+        <source>QML Interface by IU8LMC</source>
+        <translation>QML 介面：IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3677"/>
+        <source>No recent activity found
+(last 15 minutes)</source>
+        <translation>最近沒有活動
+（最近 15 分鐘）</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3914"/>
+        <source>Menu</source>
+        <translation>選單</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="4875"/>
+        <source>Setup</source>
+        <translation>設定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5036"/>
+        <source>Layout</source>
+        <translation>版面</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5070"/>
+        <source>History</source>
+        <translation>歷史</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6066"/>
+        <source>Auto Spot</source>
+        <translation>自動上報</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6143"/>
+        <source>Bypass</source>
+        <translation>旁路</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6150"/>
+        <source>Filters</source>
+        <translation>過濾</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6502"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6713"/>
+        <source>Reset</source>
+        <translation>重置</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7169"/>
+        <source>Detach Waterfall</source>
+        <translation>分離瀑布圖</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7983"/>
+        <source>FT2-Link popped out</source>
+        <translation>FT2-Link 已分離</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="8873"/>
+        <source>No decodes</source>
+        <translation>無解碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10435"/>
+        <source>Configure radio</source>
+        <translation>設定電台</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10444"/>
+        <source>Retry</source>
+        <translation>重試</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="11070"/>
+        <source>Decodium reported a non-blocking problem.</source>
+        <translation>Decodium 回報了一個不影響運作的問題。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12047"/>
+        <source>Export Cabrillo</source>
+        <translation>匯出 Cabrillo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12059"/>
+        <source>Output file path:</source>
+        <translation>輸出檔案路徑：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12076"/>
+        <source>Export</source>
+        <translation>匯出</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12111"/>
+        <source>Watchdog Mode</source>
+        <translation>看門狗模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12121"/>
+        <source>Off</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12127"/>
+        <source>Time</source>
+        <translation>時間</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12133"/>
+        <source>Count</source>
+        <translation>次數</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12142"/>
+        <source>Time (min):</source>
+        <translation>時間（分）：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12153"/>
+        <source>Max TX:</source>
+        <translation>最大發射次數：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12188"/>
+        <source>Contest Type</source>
+        <translation>競賽類型</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12213"/>
+        <source>Exchange</source>
+        <translation>交換資訊</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12224"/>
+        <source>Example: 599 001</source>
+        <translation>例：599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12231"/>
+        <source>Serial Number:</source>
+        <translation>序號：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12266"/>
+        <source>TRANSMISSION</source>
+        <translation>發射</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12271"/>
+        <source>F1 - F7: Select TX1 - TX7</source>
+        <translation>F1 - F7：選擇 TX1 - TX7</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12278"/>
+        <source>CONTROLS (Ctrl+)</source>
+        <translation>控制 (Ctrl+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12284"/>
+        <source>Ctrl+G: Generate all TX messages</source>
+        <translation>Ctrl+G：產生所有發射訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12290"/>
+        <source>ACTIONS (Alt+)</source>
+        <translation>動作 (Alt+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12320"/>
+        <source>Waterfall - Decodium</source>
+        <translation>瀑布圖 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12498"/>
+        <source>Zoom:</source>
+        <translation>縮放：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12625"/>
+        <source>Minimize</source>
+        <translation>最小化</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12722"/>
+        <source>QSO Log - Decodium</source>
+        <translation>QSO 日誌 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12779"/>
+        <source>📋 QSO Log</source>
+        <translation>📋 QSO 日誌</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13016"/>
+        <source>Macro - Decodium</source>
+        <translation>巨集 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13147"/>
+        <source>Rig Control - Decodium</source>
+        <translation>電台控制 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13201"/>
+        <source>📻 Rig Control (CAT)</source>
+        <translation>📻 電台控制 (CAT)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13252"/>
+        <source>Live Map - Decodium</source>
+        <translation>即時地圖 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13330"/>
+        <source>Full Spectrum - Decodium</source>
+        <translation>全頻譜 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14057"/>
+        <source>Period 2 - Decodium</source>
+        <translation>週期 2 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14092"/>
+        <source>Signal RX - Decodium</source>
+        <translation>接收訊號 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14572"/>
+        <source>TX Panel - Decodium</source>
+        <translation>發射面板 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14899"/>
+        <source>FT2-Link - Decodium</source>
+        <translation>FT2-Link - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
+        <source>DX Cluster - Decodium</source>
+        <translation>DX Cluster - Decodium</translation>
     </message>
 </context>
 <context>
@@ -11756,6 +13092,11 @@ UDP 伺服器 %2:%3</translation>
         <source>No active stream</source>
         <translation>沒有作用中的串流</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamPanel.qml" line="366"/>
+        <source>No active caller</source>
+        <translation>沒有作用中的呼叫方</translation>
+    </message>
 </context>
 <context>
     <name>MamWindow</name>
@@ -11768,6 +13109,16 @@ UDP 伺服器 %2:%3</translation>
         <location filename="../qml/decodium/components/MamWindow.qml" line="532"/>
         <source>No active stream</source>
         <translation>沒有作用中的串流</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="11"/>
+        <source>Multi-Answer Mode</source>
+        <translation>多重回覆模式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="452"/>
+        <source>No active caller</source>
+        <translation>沒有作用中的呼叫方</translation>
     </message>
 </context>
 <context>
@@ -11805,6 +13156,39 @@ UDP 伺服器 %2:%3</translation>
         <location filename="../widgets/messageaveraging.ui" line="29"/>
         <source>   UTC  Sync    DT  Freq   </source>
         <translation>   UTC 同步 DT 頻率</translation>
+    </message>
+</context>
+<context>
+    <name>MessageAvgPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="43"/>
+        <source>MESSAGE AVERAGING</source>
+        <translation>訊息平均</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="64"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="85"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="86"/>
+        <source>Avg</source>
+        <translation>Avg</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="87"/>
+        <source>Message</source>
+        <translation>訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="163"/>
+        <source>No averaged results yet</source>
+        <translation>尚無平均結果</translation>
     </message>
 </context>
 <context>
@@ -12456,6 +13840,19 @@ Downloaded file exceeds limit of %1 MiB:
     </message>
 </context>
 <context>
+    <name>QSYDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="78"/>
+        <source>SUGGESTED FREQUENCIES</source>
+        <translation>建議頻率</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="168"/>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+</context>
+<context>
     <name>QSYMessage</name>
     <message>
         <location filename="../widgets/QSYMessage.ui" line="26"/>
@@ -12932,6 +14329,53 @@ will not be shown!</source>
     </message>
 </context>
 <context>
+    <name>QueuePanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="182"/>
+        <source>Grid</source>
+        <translation>網格</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="183"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="275"/>
+        <source>Queue empty
+Double-click decode to add</source>
+        <translation>佇列為空
+連按兩下解碼即可加入</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="287"/>
+        <source>Clear Queue</source>
+        <translation>清空佇列</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="327"/>
+        <source>Status</source>
+        <translation>狀態</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="418"/>
+        <source>No active QSOs
+Add from queue</source>
+        <translation>沒有進行中的 QSO
+可從佇列加入</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="432"/>
+        <source>Max:</source>
+        <translation>最大：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="452"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+</context>
+<context>
     <name>RTTYTerminalWidget</name>
     <message>
         <location filename="../widgets/RTTYTerminalWidget.cpp" line="34"/>
@@ -13208,6 +14652,66 @@ Tip: close OmniRig from the Windows tray icon, then press Connect again.</source
         <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
         <translation>只讀取系統已知的資訊：不開啟任何連接埠，也不傳送任何指令</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="101"/>
+        <source>Radio</source>
+        <translation>電台</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="224"/>
+        <source>Network host</source>
+        <translation>網路主機</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="247"/>
+        <source>Serial port</source>
+        <translation>序列埠</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="273"/>
+        <source>Refresh ports</source>
+        <translation>重新整理埠</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="278"/>
+        <source>Baud rate</source>
+        <translation>鮑率</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="302"/>
+        <source>PTT method</source>
+        <translation>PTT 方式</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="325"/>
+        <source>Auto-connect on startup</source>
+        <translation>啟動時自動連線</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="340"/>
+        <source>Auto-start audio</source>
+        <translation>自動啟動音訊</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="364"/>
+        <source>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</source>
+        <translation>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="380"/>
+        <source>Save</source>
+        <translation>儲存</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="390"/>
+        <source>Connect</source>
+        <translation>連接</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="406"/>
+        <source>Disconnect</source>
+        <translation>中斷連線</translation>
     </message>
 </context>
 <context>
@@ -17371,6 +18875,21 @@ If unsure, use High.</source>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
         <translation>只讀取系統已知的資訊：不開啟任何連接埠，也不傳送任何指令</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1599"/>
+        <source>Callsign</source>
+        <translation>呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1416"/>
+        <source>173045  -21  0.1  1045  CQ LB9ZG JP20</source>
+        <translation>173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1498"/>
+        <source>✕</source>
+        <translation>✕</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab0</name>
@@ -17851,6 +19370,11 @@ If unsure, use High.</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1344"/>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>校準 ALC（傳送載波）</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="825"/>
+        <source>localhost:50001</source>
+        <translation>localhost:50001</translation>
     </message>
 </context>
 <context>
@@ -20755,6 +22279,11 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <source>TCP Server:</source>
         <translation>TCP 伺服器：</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="111"/>
+        <source>dx.iz7auh.net</source>
+        <translation>dx.iz7auh.net</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab7</name>
@@ -21496,6 +23025,19 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
     </message>
 </context>
 <context>
+    <name>SignalRxPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SignalRxPanel.qml" line="265"/>
+        <source>QSO LOCK</source>
+        <translation>QSO 鎖定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SignalRxPanel.qml" line="474"/>
+        <source>No RX-frequency decodes</source>
+        <translation>接收頻率上沒有解碼</translation>
+    </message>
+</context>
+<context>
     <name>SoundInput</name>
     <message>
         <location filename="../Audio/soundin.cpp" line="628"/>
@@ -21705,6 +23247,16 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
         <translation>© 2024-2026 IU8LMC  ·  GPL 開源  ·  基於 K1JT 等人的 WSJT-X &amp; WSJT-X by K1JT</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="131"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="142"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio</source>
+        <translation>面向業餘無線電的進階數位模式解碼器</translation>
+    </message>
 </context>
 <context>
     <name>StationDialog</name>
@@ -21775,6 +23327,16 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <location filename="../qml/decodium/components/StatusBar.qml" line="478"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
         <translation>此 rig/後端的 Hamlib 未回報 ALC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="364"/>
+        <source>FT Decoder Threads: </source>
+        <translation>FT 解碼器執行緒數：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="654"/>
+        <source>Decodium 4.0</source>
+        <translation>Decodium 4.0</translation>
     </message>
 </context>
 <context>
@@ -22082,6 +23644,36 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <source>Clear History</source>
         <translation>清除歷史記錄</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="75"/>
+        <source>TIME SYNC</source>
+        <translation>時間同步</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="192"/>
+        <source>NTP Offset:</source>
+        <translation>NTP 偏移：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="217"/>
+        <source>SC Drift:</source>
+        <translation>SC 漂移：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="267"/>
+        <source>Decode Latency:</source>
+        <translation>解碼延遲：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="292"/>
+        <source>Settings:</source>
+        <translation>設定：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="308"/>
+        <source>Open</source>
+        <translation>開啟檔案</translation>
+    </message>
 </context>
 <context>
     <name>TransceiverBase</name>
@@ -22324,6 +23916,36 @@ Long-press: edit message</source>
         <source>Skip</source>
         <translation>跳過</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2166"/>
+        <source>Call:</source>
+        <translation>呼號：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2192"/>
+        <source>Report:</source>
+        <translation>報告：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2195"/>
+        <source>Mode:</source>
+        <translation>模式：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2198"/>
+        <source>Freq:</source>
+        <translation>頻率：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2241"/>
+        <source>Comment:</source>
+        <translation>備註：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2259"/>
+        <source>Satellite:</source>
+        <translation>衛星：</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -22426,6 +24048,111 @@ Click MONITOR to start</source>
         <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
         <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
         <translation>山脊從最小值以上多高開始。調高可壓平雜訊，只讓訊號立起來。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="454"/>
+        <source>Calls:</source>
+        <translation>呼號：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="472"/>
+        <source>Show decoded callsigns on the waterfall</source>
+        <translation>在瀑布圖上顯示已解碼的呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="486"/>
+        <source>Font</source>
+        <translation>字型</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="507"/>
+        <source>Gap</source>
+        <translation>間距</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="544"/>
+        <source>Bold</source>
+        <translation>大膽</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="548"/>
+        <source>Color</source>
+        <translation>顏色</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="660"/>
+        <source>Palette:</source>
+        <translation>調色盤：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="745"/>
+        <source>Automatic noise threshold (IIR)</source>
+        <translation>自動雜訊門檻 (IIR)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="889"/>
+        <source>Show DX Cluster spots on the waterfall (click to call)</source>
+        <translation>在瀑布圖上顯示 DX 叢集點位（點擊即可呼叫）</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="899"/>
+        <source>Cluster</source>
+        <translation>叢集</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="925"/>
+        <source>▴</source>
+        <translation>▴</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="955"/>
+        <source>Peak Hold: keeps spectrum peaks visible</source>
+        <translation>峰值保持：讓頻譜峰值持續可見</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="965"/>
+        <source>Peak</source>
+        <translation>Peak</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="968"/>
+        <source>Zoom</source>
+        <translation>Zoom</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1000"/>
+        <source>Measured noise threshold</source>
+        <translation>實測雜訊門檻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1014"/>
+        <source>Black:</source>
+        <translation>黑：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1027"/>
+        <source>Gain:</source>
+        <translation>增益：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1042"/>
+        <source>Contrasto:</source>
+        <translation>對比：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1058"/>
+        <source>Vel:</source>
+        <translation>速度：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1997"/>
+        <source>☰</source>
+        <translation>☰</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
+        <source>⠿</source>
+        <translation>⠿</translation>
     </message>
 </context>
 <context>
@@ -25595,6 +27322,26 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <source>non disponibile</source>
         <translation>不可用</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="51"/>
+        <source>Callsign</source>
+        <translation>呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="68"/>
+        <source>Refresh</source>
+        <translation>重新整理</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="115"/>
+        <source>Grid</source>
+        <translation>網格</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="144"/>
+        <source>Club Log</source>
+        <translation>Club Log</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -26421,6 +28168,456 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message numerus="yes">
         <source>Marked read %n received file</source>
         <translation><numerusform>已將 %n 個接收檔案標為已讀</numerusform></translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5421"/>
+        <source>FT2-LINK</source>
+        <translation>FT2-LINK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5612"/>
+        <source>CQ only</source>
+        <translation>只顯示CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5651"/>
+        <source>AUTO CQ</source>
+        <translation>AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6005"/>
+        <source>LOOP ACK</source>
+        <translation>LOOP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6094"/>
+        <source>No sessions</source>
+        <translation>沒有工作階段</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6194"/>
+        <source>DROP DATA</source>
+        <translation>DROP DATA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6203"/>
+        <source>DROP ACK</source>
+        <translation>DROP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6797"/>
+        <source>No tags</source>
+        <translation>沒有標籤</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6847"/>
+        <source>SET CF</source>
+        <translation>SET CF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6856"/>
+        <source>CF TAG</source>
+        <translation>CF TAG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6894"/>
+        <source>Message</source>
+        <translation>訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7015"/>
+        <source>key=value; key=value</source>
+        <translation>key=value; key=value</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7232"/>
+        <source>BBS group. Empty means ALL.</source>
+        <translation>BBS 群組。留空表示全部。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7269"/>
+        <source>Bulletin title</source>
+        <translation>公告標題</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7276"/>
+        <source>Short BBS subject/title.</source>
+        <translation>BBS 的簡短主旨或標題。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7311"/>
+        <source>BBS message body</source>
+        <translation>BBS 訊息內文</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7319"/>
+        <source>Text to store and send as the BBS bulletin body.</source>
+        <translation>作為 BBS 公告內文儲存並傳送的文字。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7368"/>
+        <source>server-file.txt</source>
+        <translation>server-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7387"/>
+        <source>BBS server file body</source>
+        <translation>BBS 伺服器檔案內容</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7456"/>
+        <source>remote-file.txt</source>
+        <translation>remote-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7595"/>
+        <source>No BBS server files</source>
+        <translation>BBS 伺服器上沒有檔案</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7640"/>
+        <source>SAVE GROUP</source>
+        <translation>儲存群組</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7668"/>
+        <source>BBS BULLETINS</source>
+        <translation>BBS 公告</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7705"/>
+        <source>MARK ALL READ</source>
+        <translation>全部標為已讀</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7886"/>
+        <source>Broadcast message</source>
+        <translation>廣播訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7928"/>
+        <source>Alert tags: WX, POTA, NET</source>
+        <translation>提醒標籤：WX、POTA、NET</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7980"/>
+        <source>PATH CALL</source>
+        <translation>PATH CALL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8108"/>
+        <source>Digipeater payload</source>
+        <translation>數位中繼酬載</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8149"/>
+        <source>DIGIPEATER</source>
+        <translation>數位中繼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8177"/>
+        <source>ALERT CENTER</source>
+        <translation>提醒中心</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8206"/>
+        <source>CLEAR ARCH</source>
+        <translation>清空封存</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8370"/>
+        <source>Subject</source>
+        <translation>主旨</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8381"/>
+        <source>Mail body</source>
+        <translation>郵件內文</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8547"/>
+        <source>USE PATH</source>
+        <translation>USE PATH</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8557"/>
+        <source>CALL RLY</source>
+        <translation>CALL RLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8594"/>
+        <source>smtp.host</source>
+        <translation>smtp.host</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8637"/>
+        <source>SMTP user</source>
+        <translation>SMTP 使用者</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8655"/>
+        <source>From email</source>
+        <translation>寄件者地址</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8667"/>
+        <source>SMTP password</source>
+        <translation>SMTP 密碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8904"/>
+        <source>No mail</source>
+        <translation>沒有郵件</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9072"/>
+        <source>Away message</source>
+        <translation>離開留言</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9093"/>
+        <source>Welcome message</source>
+        <translation>歡迎訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9104"/>
+        <source>AUTO REPLY</source>
+        <translation>AUTO REPLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9127"/>
+        <source>AUTO AWAY</source>
+        <translation>AUTO AWAY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9170"/>
+        <source>CALL ID</source>
+        <translation>CALL ID</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9195"/>
+        <source>AUTO DISC</source>
+        <translation>AUTO DISC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9221"/>
+        <source>PING RX</source>
+        <translation>PING RX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9299"/>
+        <source>LH PEEK</source>
+        <translation>LH PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9308"/>
+        <source>SNR TX</source>
+        <translation>SNR TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9317"/>
+        <source>VSNR OK</source>
+        <translation>VSNR OK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9326"/>
+        <source>LC PEEK</source>
+        <translation>LC PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9335"/>
+        <source>VM PEEK</source>
+        <translation>VM PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9344"/>
+        <source>VM PARK</source>
+        <translation>VM PARK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9353"/>
+        <source>INFO REQ</source>
+        <translation>INFO REQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9585"/>
+        <source>Comment</source>
+        <translation>註解</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9717"/>
+        <source>No contacts</source>
+        <translation>沒有聯絡人</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9877"/>
+        <source>Shared cluster JSON path</source>
+        <translation>共用叢集 JSON 路徑</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10019"/>
+        <source>Paste cluster JSON here, or press EXPORT</source>
+        <translation>在此貼上叢集 JSON，或按 EXPORT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10145"/>
+        <source>No cluster last-heard records</source>
+        <translation>沒有叢集的最近收聽記錄</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10289"/>
+        <source>not tracked</source>
+        <translation>未追蹤</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10406"/>
+        <source>No path reports</source>
+        <translation>沒有路徑報告</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10572"/>
+        <source>Select an export</source>
+        <translation>選擇一個匯出</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10712"/>
+        <source>Run audit</source>
+        <translation>執行稽核</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11157"/>
+        <source>description</source>
+        <translation>描述</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11169"/>
+        <source>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</source>
+        <translation>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11276"/>
+        <source>No custom presets</source>
+        <translation>沒有自訂預設</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11308"/>
+        <source>county/state</source>
+        <translation>縣/州</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11335"/>
+        <source>weather line optional</source>
+        <translation>天氣行為選填</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11363"/>
+        <source>Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.</source>
+        <translation>週三簽到：MAIL 會設定地址、主旨與內文；CHAT 只插入內文。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11395"/>
+        <source>14105000|20m|Main, 7105000|40m|Main</source>
+        <translation>14105000|20m|Main, 7105000|40m|Main</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11433"/>
+        <source>0000-2359|CALLING|14105000|20m main|CQ</source>
+        <translation>0000-2359|CALLING|14105000|20m main|CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11521"/>
+        <source>14101250-14108750|20m, 7101250-7108750|40m</source>
+        <translation>14101250-14108750|20m, 7101250-7108750|40m</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11550"/>
+        <source>FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.</source>
+        <translation>FREQ 保存呼叫頻率預設、UTC 時段視窗與允許的 QSY 範圍。CALLING/CQ/BEACON/EMCOMM/QUIET 動作保護目前頻率；DATA 標記資料視窗。不執行經 CAT 的自動 QSY。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11694"/>
+        <source>CALL1, CALL2, Z6/TEST</source>
+        <translation>CALL1, CALL2, Z6/TEST</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11729"/>
+        <source>Add callsign</source>
+        <translation>新增呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11750"/>
+        <source>Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.</source>
+        <translation>被封鎖的呼號無法發起工作階段，不出現在最近收聽清單中，其信標、CQ、ping 與廣播流量在本地被忽略。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11819"/>
+        <source>No blocked calls</source>
+        <translation>沒有被封鎖的呼號</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11840"/>
+        <source>SATELLITE HALF-DUPLEX</source>
+        <translation>衛星半雙工</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11848"/>
+        <source>Enable independent RX/TX VFOs</source>
+        <translation>啟用獨立的收發 VFO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11863"/>
+        <source>RX MHz</source>
+        <translation>RX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11875"/>
+        <source>downlink dial MHz</source>
+        <translation>下行頻率 (MHz)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11903"/>
+        <source>TX MHz</source>
+        <translation>TX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11915"/>
+        <source>uplink dial MHz</source>
+        <translation>上行頻率 (MHz)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11929"/>
+        <source>SETTLE ms</source>
+        <translation>SETTLE ms</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11957"/>
+        <source>READ RX/TX FROM RIG</source>
+        <translation>從電台讀取 RX/TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12020"/>
+        <source>Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.</source>
+        <translation>每次射頻發射都使用 FT2-Link 常規的 ARM 控制。此模式為半雙工：發射時接收音訊暫停，在恢復接收 VFO 之前釋放 PTT，手動停止也遵循同樣的安全返回路徑。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12041"/>
+        <source>QO-100 / cross-band setup</source>
+        <translation>QO-100 / cross-band setup</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12050"/>
+        <source>Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.</source>
+        <translation>請輸入你的電台或變頻器實際使用的 CAT 頻率。不會套用固定的 QO-100 預設值：中頻方案與變頻器偏移各不相同。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12059"/>
+        <source>The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.</source>
+        <translation>此模式會刻意繞過 FT 常規的音訊偏移分頻，因此跨波段發射無法重用或移動 FT2-Link 的聊天／工作階段檢視。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12070"/>
+        <source>CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.</source>
+        <translation>CAT 診斷以 [FT2SAT] 標記記錄。請先用小功率，並在上線前核對電台的 VFO。</translation>
     </message>
 </context>
 <context>

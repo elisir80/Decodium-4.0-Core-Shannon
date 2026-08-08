@@ -179,8 +179,8 @@ Rectangle {
 
                         Text { text: "Call"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 70 }
                         Text { text: "SNR"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 35 }
-                        Text { text: "Grid"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 45 }
-                        Text { text: "Freq"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 45 }
+                        Text { text: qsTr("Grid"); font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 45 }
+                        Text { text: qsTr("Freq"); font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 45 }
                         Item { Layout.fillWidth: true }
                     }
 
@@ -272,7 +272,7 @@ Rectangle {
                         // Empty state
                         Text {
                             anchors.centerIn: parent
-                            text: "Queue empty\nDouble-click decode to add"
+                            text: qsTr("Queue empty\nDouble-click decode to add")
                             font.pixelSize: 10
                             color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
                             horizontalAlignment: Text.AlignHCenter
@@ -284,7 +284,7 @@ Rectangle {
                     Button {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 22
-                        text: "Clear Queue"
+                        text: qsTr("Clear Queue")
                         font.pixelSize: 9
                         enabled: queueListModel.count > 0
                         onClicked: clearQueue()
@@ -324,7 +324,7 @@ Rectangle {
                         spacing: 4
 
                         Text { text: "Call"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 70 }
-                        Text { text: "Status"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 40 }
+                        Text { text: qsTr("Status"); font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 40 }
                         Text { text: "SNR"; font.pixelSize: 9; font.bold: true; color: textSecondary; Layout.preferredWidth: 35 }
                         Item { Layout.fillWidth: true }
                     }
@@ -415,7 +415,7 @@ Rectangle {
                         // Empty state
                         Text {
                             anchors.centerIn: parent
-                            text: "No active QSOs\nAdd from queue"
+                            text: qsTr("No active QSOs\nAdd from queue")
                             font.pixelSize: 10
                             color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
                             horizontalAlignment: Text.AlignHCenter
@@ -429,7 +429,7 @@ Rectangle {
                         spacing: 4
 
                         Text {
-                            text: "Max:"
+                            text: qsTr("Max:")
                             font.pixelSize: 9
                             color: textSecondary
                         }
@@ -449,7 +449,7 @@ Rectangle {
 
                         Button {
                             Layout.preferredHeight: 22
-                            text: "Clear"
+                            text: qsTr("Clear")
                             font.pixelSize: 9
                             enabled: activeSlotModel.count > 0
                             onClicked: clearSlots()

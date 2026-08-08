@@ -153,7 +153,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Text {
-                text: "ASTRO / EME"
+                text: qsTr("ASTRO / EME")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 font.letterSpacing: 2
@@ -202,9 +202,9 @@ Rectangle {
             columnSpacing: 8
             rowSpacing: 4
 
-            Text { text: "Az";      font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
+            Text { text: qsTr("Az");      font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
             Text { text: moonAzimuth.toFixed(1) + "\u00B0"; font.family: decodiumMonoFontFamily; font.pixelSize: 12; color: "#ECEFF1" }
-            Text { text: "El";      font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
+            Text { text: qsTr("El");      font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
             Text {
                 text: moonElevation.toFixed(1) + "\u00B0"
                 font.family: decodiumMonoFontFamily
@@ -212,9 +212,9 @@ Rectangle {
                 color: moonElevation > 0 ? "#69F0AE" : "#f44336"
             }
 
-            Text { text: "Doppler"; font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
+            Text { text: qsTr("Doppler"); font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
             Text { text: (moonDopplerHz >= 0 ? "+" : "") + moonDopplerHz.toFixed(0) + " Hz"; font.family: decodiumMonoFontFamily; font.pixelSize: 12; color: "#00BCD4" }
-            Text { text: "Sun El";  font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
+            Text { text: qsTr("Sun El");  font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
             Text {
                 text: sunElevation.toFixed(1) + "\u00B0"
                 font.family: decodiumMonoFontFamily
@@ -222,9 +222,9 @@ Rectangle {
                 color: sunElevation > 0 ? "#FFC107" : "#90A4AE"
             }
 
-            Text { text: "Phase";   font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
+            Text { text: qsTr("Phase");   font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
             Text { text: (moonPhase * 100).toFixed(0) + "%"; font.family: decodiumMonoFontFamily; font.pixelSize: 12; color: "#ECEFF1" }
-            Text { text: "Illum";   font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
+            Text { text: qsTr("Illum");   font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: "#90A4AE" }
             Text {
                 text: {
                     var illum = (1 - Math.cos(moonPhase * 2 * Math.PI)) / 2;

@@ -132,6 +132,49 @@
     </message>
 </context>
 <context>
+    <name>ActiveStationsPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="27"/>
+        <source>ACTIVE STATIONS</source>
+        <translation>STAZIONI ATTIVE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="85"/>
+        <source>CQ Only</source>
+        <translation>Solo CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="102"/>
+        <source>Wanted</source>
+        <translation>Cercata</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="115"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="128"/>
+        <source>Call</source>
+        <translation>Nominativo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="129"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="131"/>
+        <source>Grid</source>
+        <translation>Griglia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/ActiveStationsPanel.qml" line="222"/>
+        <source>No active stations</source>
+        <translation>Nessuna stazione attiva</translation>
+    </message>
+</context>
+<context>
     <name>Astro</name>
     <message>
         <location filename="../widgets/astro.ui" line="34"/>
@@ -314,6 +357,44 @@ Searched paths:
     </message>
 </context>
 <context>
+    <name>AstroPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="156"/>
+        <source>ASTRO / EME</source>
+        <translation>ASTRO / EME</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="205"/>
+        <source>Az</source>
+        <translation>Az</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="207"/>
+        <source>El</source>
+        <translation>El</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="215"/>
+        <source>Doppler</source>
+        <translation>Doppler</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="217"/>
+        <source>Sun El</source>
+        <translation>Elev. sole</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="225"/>
+        <source>Phase</source>
+        <translation>Fase</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/AstroPanel.qml" line="227"/>
+        <source>Illum</source>
+        <translation>Illum.</translation>
+    </message>
+</context>
+<context>
     <name>AstroWindow</name>
     <message>
         <location filename="../qml/decodium/components/AstroWindow.qml" line="121"/>
@@ -323,6 +404,171 @@ Searched paths:
     <message>
         <source>Satellite tracking</source>
         <translation>Inseguimento satelliti</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="14"/>
+        <source>Astronomical Data</source>
+        <translation>Dati Astronomici</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="241"/>
+        <source>Minimize</source>
+        <translation>Riduci a icona</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="272"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="327"/>
+        <source>Location:</source>
+        <translation>Posizione:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="419"/>
+        <source>Moon</source>
+        <translation>Luna</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="461"/>
+        <source>Distance:</source>
+        <translation>Distanza:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="477"/>
+        <source>Rise:</source>
+        <translation>Sorgere:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="485"/>
+        <source>Set:</source>
+        <translation>Tramonto:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="510"/>
+        <source>Sun</source>
+        <translation>Sole</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="537"/>
+        <source>Sunrise:</source>
+        <translation>Alba:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="545"/>
+        <source>Sunset:</source>
+        <translation>Tramonto:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="571"/>
+        <source>EME (Earth-Moon-Earth)</source>
+        <translation>EME (Terra-Luna-Terra)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="607"/>
+        <source>Status:</source>
+        <translation>Stato:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="615"/>
+        <source>Path Loss:</source>
+        <translation>Attenuazione:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="633"/>
+        <source>Frequency:</source>
+        <translation>Frequenza:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="641"/>
+        <source>Window:</source>
+        <translation>Finestra:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="670"/>
+        <source>Propagation (HamQSL)</source>
+        <translation>Propagazione (HamQSL)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="695"/>
+        <source>Solar Flux:</source>
+        <translation>Flusso solare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="703"/>
+        <source>A-Index:</source>
+        <translation>Indice A:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="711"/>
+        <source>K-Index:</source>
+        <translation>Indice K:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="719"/>
+        <source>X-Ray:</source>
+        <translation>Raggi X:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="727"/>
+        <source>Sunspots:</source>
+        <translation>Macchie solari:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="735"/>
+        <source>Solar Wind:</source>
+        <translation>Vento solare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="751"/>
+        <source>Geomagnetic:</source>
+        <translation>Geomagnetismo:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="759"/>
+        <source>Signal Noise:</source>
+        <translation>Rumore:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="805"/>
+        <source>HF Band Conditions</source>
+        <translation>Condizioni delle bande HF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="816"/>
+        <source>Band</source>
+        <translation>Banda</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="823"/>
+        <source>Day</source>
+        <translation>Giorno</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="830"/>
+        <source>Night</source>
+        <translation>Notte</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="888"/>
+        <source>No HF condition data available yet.</source>
+        <translation>Nessun dato sulle condizioni HF disponibile.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="911"/>
+        <source>VHF Conditions</source>
+        <translation>Condizioni VHF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="943"/>
+        <source>No VHF condition data available yet.</source>
+        <translation>Nessun dato sulle condizioni VHF disponibile.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/AstroWindow.qml" line="970"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
     </message>
 </context>
 <context>
@@ -382,6 +628,16 @@ Searched paths:
         <location filename="../qml/decodium/BootLoader.qml" line="21"/>
         <source>Decodium 4.0 — Loading...</source>
         <translation>Decodium 4.0 — Caricamento...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="152"/>
+        <source>DECODIUM 4.0</source>
+        <translation>DECODIUM 4.0</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="159"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
     </message>
 </context>
 <context>
@@ -817,6 +1073,24 @@ Searched paths:
         <source>▶ Direct Call</source>
         <translation>▶ Chiamata diretta</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallDialog.qml" line="206"/>
+        <source>es. F4CQS</source>
+        <translation>es. F4CQS</translation>
+    </message>
+</context>
+<context>
+    <name>CallerQueuePanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/CallerQueuePanel.qml" line="30"/>
+        <source>FOX CALLER QUEUE</source>
+        <translation>CODA CHIAMANTI FOX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/CallerQueuePanel.qml" line="123"/>
+        <source>No callers in queue</source>
+        <translation>Nessun chiamante in coda</translation>
+    </message>
 </context>
 <context>
     <name>CallsignDialog</name>
@@ -1005,6 +1279,39 @@ Please check your log.</source>
         <location filename="../widgets/colorhighlighting.ui" line="330"/>
         <source>New ITU Zone on Band</source>
         <translation>Nuovo Zona ITU sulla Banda</translation>
+    </message>
+</context>
+<context>
+    <name>ColorHighlightingDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="9"/>
+        <source>Color Highlighting</source>
+        <translation>Evidenziazione a colori</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="112"/>
+        <source>B4 Strikethrough:</source>
+        <translation>B4 Barrato:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="131"/>
+        <source>Alert Sounds:</source>
+        <translation>Suoni di avviso:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="149"/>
+        <source>Choose Color</source>
+        <translation>Scegli il colore</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="170"/>
+        <source>Hex color (#RRGGBB):</source>
+        <translation>Colore esadecimale (#RRGGBB):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="180"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
     </message>
 </context>
 <context>
@@ -1854,11 +2161,64 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
     </message>
 </context>
 <context>
+    <name>DecoComboBox</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoComboBox.qml" line="114"/>
+        <source>▾</source>
+        <translation>▾</translation>
+    </message>
+</context>
+<context>
     <name>DecoSyncPanel</name>
     <message>
         <location filename="../qml/decodium/components/DecoSyncPanel.qml" line="54"/>
         <source>DecoSyncTime not available</source>
         <translation>DecoSyncTime non disponibile</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="69"/>
+        <source>DecoSyncTime Monitor</source>
+        <translation>Monitor DecoSyncTime</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="160"/>
+        <source>Source</source>
+        <translation>Fonte</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="161"/>
+        <source>Stato</source>
+        <translation>Stato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="162"/>
+        <source>Offset</source>
+        <translation>Offset</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="163"/>
+        <source>Servers</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="166"/>
+        <source>NTP UDP</source>
+        <translation>NTP UDP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="176"/>
+        <source>8 pool</source>
+        <translation>8 pool</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="179"/>
+        <source>HTTPS Date</source>
+        <translation>HTTPS Date</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoSyncPanel.qml" line="197"/>
+        <source>SelfCal FT</source>
+        <translation>SelfCal FT</translation>
     </message>
 </context>
 <context>
@@ -2095,6 +2455,21 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
         <source>Close</source>
         <translation>Chiudi</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="456"/>
+        <source>Grid</source>
+        <translation>Griglia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="458"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeHistoryDialog.qml" line="459"/>
+        <source>Message</source>
+        <translation>Messaggio</translation>
+    </message>
 </context>
 <context>
     <name>DecodeWindow</name>
@@ -2103,6 +2478,38 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
         <location filename="../qml/decodium/components/DecodeWindow.qml" line="1878"/>
         <source>── PERIOD ──</source>
         <translation>── PERIODO ──</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="968"/>
+        <source>Full Spectrum</source>
+        <translation>Spettro completo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1047"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1061"/>
+        <source>Drift</source>
+        <translation>Deriva</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1100"/>
+        <source>Az</source>
+        <translation>Az</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1541"/>
+        <source>No decoded messages
+Click Monitor to start</source>
+        <translation>Nessun messaggio decodificato
+Premi Monitor per iniziare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="1575"/>
+        <source>Signal RX</source>
+        <translation>Segnale RX</translation>
     </message>
 </context>
 <context>
@@ -2696,6 +3103,54 @@ o contattare l&apos;assistenza DXLab all&apos;indirizzo DXLab@groups.io.</transl
     </message>
 </context>
 <context>
+    <name>DevOverlay</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="140"/>
+        <source>Decodium DevOverlay</source>
+        <translation>Decodium DevOverlay</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="197"/>
+        <source>Frame (ms):</source>
+        <translation>Fotogramma (ms):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="215"/>
+        <source>Decode Hz:</source>
+        <translation>Decodifiche al secondo:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="226"/>
+        <source>Delegates:</source>
+        <translation>Delegati:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="244"/>
+        <source>Uptime:</source>
+        <translation>Tempo di attività:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="264"/>
+        <source>Frame time 5s</source>
+        <translation>Tempo di fotogramma 5 s</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="330"/>
+        <source>Copy diagnostics</source>
+        <translation>Copia la diagnostica</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="347"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="359"/>
+        <source>Copied to clipboard</source>
+        <translation>Copiato negli appunti</translation>
+    </message>
+</context>
+<context>
     <name>Dialog</name>
     <message>
         <location filename="../WSPR/WSPRBandHopping.cpp" line="116"/>
@@ -2814,6 +3269,59 @@ Errore: %2 - %3</translation>
     </message>
 </context>
 <context>
+    <name>DxClusterPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="76"/>
+        <source>DX Cluster</source>
+        <translation>Cluster DX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="140"/>
+        <source>Time</source>
+        <translation>Tempo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="141"/>
+        <source>DX Call</source>
+        <translation>Nominativo DX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="142"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="143"/>
+        <source>Band</source>
+        <translation>Banda</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="144"/>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="145"/>
+        <source>Spotter</source>
+        <translation>Osservatore</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="146"/>
+        <source>Info</source>
+        <translation>Info</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="309"/>
+        <source>Filter:</source>
+        <translation>Filtro:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="340"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+</context>
+<context>
     <name>DxPeditionWorkspace</name>
     <message>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="255"/>
@@ -2834,6 +3342,31 @@ Errore: %2 - %3</translation>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="657"/>
         <source>Log · QSO Entry</source>
         <translation>Log · Inserimento QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="182"/>
+        <source>DECODIUM 4</source>
+        <translation>DECODIUM 4</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="187"/>
+        <source>DX-PEDITION MODE</source>
+        <translation>MODO DX-PEDITION</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="537"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="568"/>
+        <source>Waterfall</source>
+        <translation>Display a cascata</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="635"/>
+        <source>TX Macros</source>
+        <translation>Macro TX</translation>
     </message>
 </context>
 <context>
@@ -3508,6 +4041,14 @@ Errore: %2</translation>
     </message>
 </context>
 <context>
+    <name>FullSpectrumPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="460"/>
+        <source>No decodes</source>
+        <translation>Nessuna decodifica</translation>
+    </message>
+</context>
+<context>
     <name>HRDTransceiver</name>
     <message>
         <location filename="../Transceiver/HRDTransceiver.cpp" line="396"/>
@@ -3885,6 +4426,123 @@ Errore: %2</translation>
         <location filename="../qml/decodium/components/InfoDialog.qml" line="718"/>
         <source>Compact Full Spectrum</source>
         <translation>Full Spectrum compatto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="83"/>
+        <source>DECODIUM INFO</source>
+        <translation>INFORMAZIONI SU DECODIUM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="218"/>
+        <source>4.0 Core Gallager</source>
+        <translation>4.0 Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="227"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</source>
+        <translation>Decodificatore avanzato per i modi digitali radioamatoriali
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="260"/>
+        <source>Decodium by IU8LMC</source>
+        <translation>Decodium by IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="267"/>
+        <source>Qt6 Modern UI Port by IU8LMC</source>
+        <translation>Interfaccia moderna in Qt6 di IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="274"/>
+        <source>Developed by Salvatore Raccampo 9H1SR</source>
+        <translation>Sviluppato da Salvatore Raccampo 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="281"/>
+        <source>WSJT-X Algorithms by K1JT (Joe Taylor)</source>
+        <translation>Algoritmi WSJT-X di K1JT (Joe Taylor)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="290"/>
+        <source>Copyright 2024-2026 - Open Source GPL</source>
+        <translation>Copyright 2024-2026 - Open source GPL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="314"/>
+        <source>DECODIUM HISTORY</source>
+        <translation>STORIA DI DECODIUM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="410"/>
+        <source>CONTACTS &amp; FEEDBACK</source>
+        <translation>CONTATTI E SEGNALAZIONI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="432"/>
+        <source>Developer: IU8LMC</source>
+        <translation>Developer: IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="447"/>
+        <source>iu8lmc@gmail.com</source>
+        <translation>iu8lmc@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="465"/>
+        <source>Developer: 9H1SR</source>
+        <translation>Developer: 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="480"/>
+        <source>9h1sr@gmail.com</source>
+        <translation>9h1sr@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="517"/>
+        <source>SEND FEEDBACK</source>
+        <translation>INVIA UNA SEGNALAZIONE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="528"/>
+        <source>Subject</source>
+        <translation>Oggetto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="555"/>
+        <source>Message, suggestion, or bug report</source>
+        <translation>Messaggio, suggerimento o segnalazione di un difetto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="581"/>
+        <source>Send Feedback</source>
+        <translation>Invia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="628"/>
+        <source>QUICK GUIDE</source>
+        <translation>GUIDA RAPIDA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="652"/>
+        <source>QUICK START</source>
+        <translation>AVVIO RAPIDO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="695"/>
+        <source>KEYBOARD SHORTCUTS</source>
+        <translation>SCORCIATOIE DA TASTIERA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="770"/>
+        <source>OPERATING TIPS</source>
+        <translation>CONSIGLI OPERATIVI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="811"/>
+        <source>USEFUL LINKS</source>
+        <translation>COLLEGAMENTI UTILI</translation>
     </message>
 </context>
 <context>
@@ -5509,6 +6167,26 @@ Errore: %2</translation>
         <source>Add</source>
         <translation>Aggoingere</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="847"/>
+        <source>Live Map</source>
+        <translation>Mappa live</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2229"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3241"/>
+        <source>foF2</source>
+        <translation>foF2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3286"/>
+        <source>Es</source>
+        <translation>Es</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -5875,6 +6553,14 @@ Errore: %2</translation>
     </message>
 </context>
 <context>
+    <name>LogQsoPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogQsoPanel.qml" line="133"/>
+        <source>NEXT TX</source>
+        <translation>PROSSIMA TX</translation>
+    </message>
+</context>
+<context>
     <name>LogWindow</name>
     <message>
         <location filename="../qml/decodium/components/LogWindow.qml" line="181"/>
@@ -5969,6 +6655,151 @@ Errore: %2</translation>
         <source>Copy Callsign</source>
         <translation>Copia il nominativo</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="308"/>
+        <source>Nuovo logbook</source>
+        <translation>Nuovo logbook</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="317"/>
+        <source>Nome operatore / callsign</source>
+        <translation>Nome operatore / callsign</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="330"/>
+        <source>Backup log attuale</source>
+        <translation>Backup log attuale</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="481"/>
+        <source>QSO Log</source>
+        <translation>Registro QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="517"/>
+        <source>−</source>
+        <translation>−</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="527"/>
+        <source>Minimize</source>
+        <translation>Riduci a icona</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="538"/>
+        <source>✕</source>
+        <translation>✕</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="548"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="592"/>
+        <source>New</source>
+        <translation>Nuovo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="594"/>
+        <source>Create a separate logbook</source>
+        <translation>Crea un logbook separato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="601"/>
+        <source>Load</source>
+        <translation>Carica</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="603"/>
+        <source>Load/use an existing ADIF as a logbook</source>
+        <translation>Carica e usa un ADIF esistente come logbook</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="610"/>
+        <source>Bkp</source>
+        <translation>Bkp</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="612"/>
+        <source>Back up the active logbook</source>
+        <translation>Fai una copia del logbook attivo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="620"/>
+        <source>Del</source>
+        <translation>Elim</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="629"/>
+        <source>Delete selected logbook</source>
+        <translation>Elimina il logbook selezionato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="642"/>
+        <source>🔍</source>
+        <translation>🔍</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="689"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="704"/>
+        <source>Remove search, band, and mode filters</source>
+        <translation>Togli i filtri di ricerca, banda e modo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="717"/>
+        <source>Importa ADIF</source>
+        <translation>Importa ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="722"/>
+        <source>Import ADIF file</source>
+        <translation>Importa un file ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="732"/>
+        <source>Esporta ADIF</source>
+        <translation>Esporta ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="737"/>
+        <source>Export ADIF</source>
+        <translation>Esporta ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="746"/>
+        <source>↻</source>
+        <translation>↻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="751"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="770"/>
+        <source>Date/Time</source>
+        <translation>Data/ora</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="777"/>
+        <source>Dist</source>
+        <translation>Dist</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="911"/>
+        <source>No QSOs found</source>
+        <translation>Nessun QSO trovato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindow.qml" line="1190"/>
+        <source>MAX DIST</source>
+        <translation>DIST MAX</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -6061,6 +6892,131 @@ Errore: %2</translation>
         <source>Cancel</source>
         <translation>Annulla</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="226"/>
+        <source>Nuovo logbook</source>
+        <translation>Nuovo logbook</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="235"/>
+        <source>Nome operatore / callsign</source>
+        <translation>Nome operatore / callsign</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="248"/>
+        <source>Backup log attuale</source>
+        <translation>Backup log attuale</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="395"/>
+        <source>New</source>
+        <translation>Nuovo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="397"/>
+        <source>Create a separate logbook</source>
+        <translation>Crea un logbook separato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="404"/>
+        <source>Load</source>
+        <translation>Carica</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="406"/>
+        <source>Load/use an existing ADIF</source>
+        <translation>Carica e usa un ADIF esistente</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="413"/>
+        <source>Bkp</source>
+        <translation>Bkp</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="415"/>
+        <source>Back up the active logbook</source>
+        <translation>Fai una copia del logbook attivo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="423"/>
+        <source>Del</source>
+        <translation>Elim</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="432"/>
+        <source>Delete selected logbook</source>
+        <translation>Elimina il logbook selezionato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="444"/>
+        <source>🔍</source>
+        <translation>🔍</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="486"/>
+        <source>×</source>
+        <translation>×</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="501"/>
+        <source>Remove filters</source>
+        <translation>Togli i filtri</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="512"/>
+        <source>⬇</source>
+        <translation>⬇</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="514"/>
+        <source>Import ADIF</source>
+        <translation>Importa ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="522"/>
+        <source>⬆</source>
+        <translation>⬆</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="524"/>
+        <source>Export ADIF</source>
+        <translation>Esporta ADIF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="532"/>
+        <source>↻</source>
+        <translation>↻</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="534"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="547"/>
+        <source>Date/Time</source>
+        <translation>Data/ora</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="552"/>
+        <source>Rpt</source>
+        <translation>Rap</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="617"/>
+        <source>Copy Callsign</source>
+        <translation>Copia il nominativo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="753"/>
+        <source>Sent</source>
+        <translation>Inviato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
+        <source>Rcvd</source>
+        <translation>Ricevuto</translation>
+    </message>
 </context>
 <context>
     <name>MacroDialog</name>
@@ -6068,6 +7024,104 @@ Errore: %2</translation>
         <location filename="../qml/decodium/components/MacroDialog.qml" line="95"/>
         <source>⌨️ TX Macro Configuration</source>
         <translation>⌨️ Configurazione macro TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="13"/>
+        <source>Macro Settings</source>
+        <translation>Impostazioni delle macro</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="131"/>
+        <source>Minimize</source>
+        <translation>Riduci a icona</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="184"/>
+        <source>Contest Mode</source>
+        <translation>Modalità Contest</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="194"/>
+        <source>Contest:</source>
+        <translation>Concorso:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="234"/>
+        <source>Serial #:</source>
+        <translation>Progressivo:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="272"/>
+        <source>Exchange:</source>
+        <translation>Rapporto:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="316"/>
+        <source>TX Macro Templates</source>
+        <translation>Modelli di macro TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="325"/>
+        <source>Reset to Default</source>
+        <translation>Ripristina i valori iniziali</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="349"/>
+        <source>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</source>
+        <translation>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="419"/>
+        <source>Preview</source>
+        <translation>Anteprima</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="464"/>
+        <source>Click 'Preview' to see expanded macro</source>
+        <translation>Premi «Anteprima» per vedere la macro espansa</translation>
+    </message>
+</context>
+<context>
+    <name>MacroDialogContent</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="35"/>
+        <source>Contest Mode</source>
+        <translation>Modalità Contest</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="41"/>
+        <source>Enable Contest Mode</source>
+        <translation>Attiva il modo contest</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="45"/>
+        <source>Exchange:</source>
+        <translation>Rapporto:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="49"/>
+        <source>e.g., 599 001</source>
+        <translation>es. 599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="74"/>
+        <source>TX Macros</source>
+        <translation>Macro TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="122"/>
+        <source>Available Variables:</source>
+        <translation>Variabili disponibili:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="124"/>
+        <source>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</source>
+        <translation>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="128"/>
+        <source>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</source>
+        <translation>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</translation>
     </message>
 </context>
 <context>
@@ -6788,6 +7842,288 @@ Clic destro: disconnetti</translation>
         <location filename="../qml/decodium/Main.qml" line="15320"/>
         <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
         <translation>Decodium ha trovato una radio collegata a questo computer. Applicando la proposta imposta la porta CAT, il modello e le schede audio, così puoi iniziare senza cercare la porta COM giusta.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="1111"/>
+        <source>F11 / Esc</source>
+        <translation>F11 / Esc</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3319"/>
+        <source>FT2-Link access</source>
+        <translation>Accesso FT2-Link</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3327"/>
+        <source>Enter password to unlock this mode.</source>
+        <translation>Inserisci la password per sbloccare questo modo.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3336"/>
+        <source>Password</source>
+        <translation>Password</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3372"/>
+        <source>Unlock</source>
+        <translation>Sblocca</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3478"/>
+        <source>Based on WSJT-X by K1JT et al.</source>
+        <translation>Basato su WSJT-X di K1JT e altri.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3485"/>
+        <source>QML Interface by IU8LMC</source>
+        <translation>Interfaccia QML di IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3677"/>
+        <source>No recent activity found
+(last 15 minutes)</source>
+        <translation>Nessuna attività recente
+(ultimi 15 minuti)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3914"/>
+        <source>Menu</source>
+        <translation>Menu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="4875"/>
+        <source>Setup</source>
+        <translation>Impostazioni</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5036"/>
+        <source>Layout</source>
+        <translation>Disposizione</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5070"/>
+        <source>History</source>
+        <translation>Cronologia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6066"/>
+        <source>Auto Spot</source>
+        <translation>Spot automatico</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6143"/>
+        <source>Bypass</source>
+        <translation>Escludi</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6150"/>
+        <source>Filters</source>
+        <translation>Filtri</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6502"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6713"/>
+        <source>Reset</source>
+        <translation>Ripristina</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7169"/>
+        <source>Detach Waterfall</source>
+        <translation>Stacca la cascata</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7983"/>
+        <source>FT2-Link popped out</source>
+        <translation>FT2-Link staccato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="8873"/>
+        <source>No decodes</source>
+        <translation>Nessuna decodifica</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10435"/>
+        <source>Configure radio</source>
+        <translation>Configura la radio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10444"/>
+        <source>Retry</source>
+        <translation>Riprova</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="11070"/>
+        <source>Decodium reported a non-blocking problem.</source>
+        <translation>Decodium ha segnalato un problema non bloccante.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12047"/>
+        <source>Export Cabrillo</source>
+        <translation>Esporta Cabrillo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12059"/>
+        <source>Output file path:</source>
+        <translation>Percorso del file:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12076"/>
+        <source>Export</source>
+        <translation>Esporta</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12111"/>
+        <source>Watchdog Mode</source>
+        <translation>Modo watchdog</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12121"/>
+        <source>Off</source>
+        <translation>Spento</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12127"/>
+        <source>Time</source>
+        <translation>Tempo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12133"/>
+        <source>Count</source>
+        <translation>Conteggio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12142"/>
+        <source>Time (min):</source>
+        <translation>Tempo (min):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12153"/>
+        <source>Max TX:</source>
+        <translation>TX massime:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12188"/>
+        <source>Contest Type</source>
+        <translation>Tipo di contest</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12213"/>
+        <source>Exchange</source>
+        <translation>Rapporto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12224"/>
+        <source>Example: 599 001</source>
+        <translation>Esempio: 599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12231"/>
+        <source>Serial Number:</source>
+        <translation>Numero progressivo:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12266"/>
+        <source>TRANSMISSION</source>
+        <translation>TRASMISSIONE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12271"/>
+        <source>F1 - F7: Select TX1 - TX7</source>
+        <translation>F1 - F7: seleziona TX1 - TX7</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12278"/>
+        <source>CONTROLS (Ctrl+)</source>
+        <translation>COMANDI (Ctrl+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12284"/>
+        <source>Ctrl+G: Generate all TX messages</source>
+        <translation>Ctrl+G: genera tutti i messaggi TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12290"/>
+        <source>ACTIONS (Alt+)</source>
+        <translation>AZIONI (Alt+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12320"/>
+        <source>Waterfall - Decodium</source>
+        <translation>Cascata - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12498"/>
+        <source>Zoom:</source>
+        <translation>Ingrandimento:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12625"/>
+        <source>Minimize</source>
+        <translation>Riduci a icona</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12722"/>
+        <source>QSO Log - Decodium</source>
+        <translation>Registro QSO - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12779"/>
+        <source>📋 QSO Log</source>
+        <translation>📋 Registro QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13016"/>
+        <source>Macro - Decodium</source>
+        <translation>Macro - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13147"/>
+        <source>Rig Control - Decodium</source>
+        <translation>Controllo radio - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13201"/>
+        <source>📻 Rig Control (CAT)</source>
+        <translation>📻 Controllo radio (CAT)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13252"/>
+        <source>Live Map - Decodium</source>
+        <translation>Mappa live - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13330"/>
+        <source>Full Spectrum - Decodium</source>
+        <translation>Spettro completo - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14057"/>
+        <source>Period 2 - Decodium</source>
+        <translation>Periodo 2 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14092"/>
+        <source>Signal RX - Decodium</source>
+        <translation>Segnale RX - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14572"/>
+        <source>TX Panel - Decodium</source>
+        <translation>Pannello TX - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14899"/>
+        <source>FT2-Link - Decodium</source>
+        <translation>FT2-Link - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
+        <source>DX Cluster - Decodium</source>
+        <translation>DX Cluster - Decodium</translation>
     </message>
 </context>
 <context>
@@ -11785,6 +13121,11 @@ Server UDP%2:%3</translation>
         <source>No active stream</source>
         <translation>Nessuno stream attivo</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamPanel.qml" line="366"/>
+        <source>No active caller</source>
+        <translation>Nessun chiamante attivo</translation>
+    </message>
 </context>
 <context>
     <name>MamWindow</name>
@@ -11797,6 +13138,16 @@ Server UDP%2:%3</translation>
         <location filename="../qml/decodium/components/MamWindow.qml" line="532"/>
         <source>No active stream</source>
         <translation>Nessuno stream attivo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="11"/>
+        <source>Multi-Answer Mode</source>
+        <translation>Modalità Multi-Risposta</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="452"/>
+        <source>No active caller</source>
+        <translation>Nessun chiamante attivo</translation>
     </message>
 </context>
 <context>
@@ -11834,6 +13185,39 @@ Server UDP%2:%3</translation>
         <location filename="../widgets/messageaveraging.ui" line="29"/>
         <source>   UTC  Sync    DT  Freq   </source>
         <translation>   UTC Sincronizzazione DT Freq   </translation>
+    </message>
+</context>
+<context>
+    <name>MessageAvgPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="43"/>
+        <source>MESSAGE AVERAGING</source>
+        <translation>MEDIA DEI MESSAGGI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="64"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="85"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="86"/>
+        <source>Avg</source>
+        <translation>Avg</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="87"/>
+        <source>Message</source>
+        <translation>Messaggio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="163"/>
+        <source>No averaged results yet</source>
+        <translation>Ancora nessun risultato mediato</translation>
     </message>
 </context>
 <context>
@@ -12485,6 +13869,19 @@ Il file scaricato supera il limite di %1 MiB:
     </message>
 </context>
 <context>
+    <name>QSYDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="78"/>
+        <source>SUGGESTED FREQUENCIES</source>
+        <translation>FREQUENZE SUGGERITE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="168"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+</context>
+<context>
     <name>QSYMessage</name>
     <message>
         <location filename="../widgets/QSYMessage.ui" line="26"/>
@@ -12961,6 +14358,53 @@ non verranno mostrate!</translation>
     </message>
 </context>
 <context>
+    <name>QueuePanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="182"/>
+        <source>Grid</source>
+        <translation>Griglia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="183"/>
+        <source>Freq</source>
+        <translation>Freq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="275"/>
+        <source>Queue empty
+Double-click decode to add</source>
+        <translation>Coda vuota
+Doppio clic su una decodifica per aggiungerla</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="287"/>
+        <source>Clear Queue</source>
+        <translation>Svuota la coda</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="327"/>
+        <source>Status</source>
+        <translation>Stato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="418"/>
+        <source>No active QSOs
+Add from queue</source>
+        <translation>Nessun QSO attivo
+Aggiungi dalla coda</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="432"/>
+        <source>Max:</source>
+        <translation>Max:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/QueuePanel.qml" line="452"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+</context>
+<context>
     <name>RTTYTerminalWidget</name>
     <message>
         <location filename="../widgets/RTTYTerminalWidget.cpp" line="34"/>
@@ -13237,6 +14681,66 @@ Suggerimento: chiudi OmniRig dall'icona nella tray di Windows, poi premi di nuov
         <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="82"/>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
         <translation>Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="101"/>
+        <source>Radio</source>
+        <translation>Radio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="224"/>
+        <source>Network host</source>
+        <translation>Host di rete</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="247"/>
+        <source>Serial port</source>
+        <translation>Porta seriale</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="273"/>
+        <source>Refresh ports</source>
+        <translation>Aggiorna porte</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="278"/>
+        <source>Baud rate</source>
+        <translation>Velocità</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="302"/>
+        <source>PTT method</source>
+        <translation>Metodo PTT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="325"/>
+        <source>Auto-connect on startup</source>
+        <translation>Collega all'avvio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="340"/>
+        <source>Auto-start audio</source>
+        <translation>Avvia l'audio da solo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="364"/>
+        <source>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</source>
+        <translation>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="380"/>
+        <source>Save</source>
+        <translation>Salva</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="390"/>
+        <source>Connect</source>
+        <translation>Connetti</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="406"/>
+        <source>Disconnect</source>
+        <translation>Disconnetti</translation>
     </message>
 </context>
 <context>
@@ -17400,6 +18904,21 @@ Nel dubbio, usa Alta.</translation>
         <source>Reads what the system already knows: it opens no port and sends no command</source>
         <translation>Legge solo ciò che il sistema già sa: non apre porte e non invia comandi</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1599"/>
+        <source>Callsign</source>
+        <translation>Nominativo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1416"/>
+        <source>173045  -21  0.1  1045  CQ LB9ZG JP20</source>
+        <translation>173045  -21  0.1  1045  CQ LB9ZG JP20</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsDialog.qml" line="1498"/>
+        <source>✕</source>
+        <translation>✕</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab0</name>
@@ -17880,6 +19399,11 @@ Nel dubbio, usa Alta.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1344"/>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>Calibra ALC (trasmette una portante)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="825"/>
+        <source>localhost:50001</source>
+        <translation>localhost:50001</translation>
     </message>
 </context>
 <context>
@@ -20784,6 +22308,11 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <source>TCP Server:</source>
         <translation>Server TCP:</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="111"/>
+        <source>dx.iz7auh.net</source>
+        <translation>dx.iz7auh.net</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab7</name>
@@ -21525,6 +23054,19 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
     </message>
 </context>
 <context>
+    <name>SignalRxPanel</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SignalRxPanel.qml" line="265"/>
+        <source>QSO LOCK</source>
+        <translation>BLOCCO QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SignalRxPanel.qml" line="474"/>
+        <source>No RX-frequency decodes</source>
+        <translation>Nessuna decodifica sulla frequenza RX</translation>
+    </message>
+</context>
+<context>
     <name>SoundInput</name>
     <message>
         <location filename="../Audio/soundin.cpp" line="628"/>
@@ -21734,6 +23276,16 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
         <translation>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Basato su WSJT-X di K1JT et al. &amp; WSJT-X by K1JT</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="131"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="142"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio</source>
+        <translation>Decodificatore avanzato per i modi digitali radioamatoriali</translation>
+    </message>
 </context>
 <context>
     <name>StationDialog</name>
@@ -21804,6 +23356,16 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <location filename="../qml/decodium/components/StatusBar.qml" line="478"/>
         <source>ALC is not reported by Hamlib for this rig/backend</source>
         <translation>L&apos;ALC non viene riportato da Hamlib per questa radio/backend</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="364"/>
+        <source>FT Decoder Threads: </source>
+        <translation>Thread del decodificatore FT: </translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="654"/>
+        <source>Decodium 4.0</source>
+        <translation>Decodium 4.0</translation>
     </message>
 </context>
 <context>
@@ -22111,6 +23673,36 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
         <source>Clear History</source>
         <translation>Cancella cronologia</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="75"/>
+        <source>TIME SYNC</source>
+        <translation>SINCRONISMO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="192"/>
+        <source>NTP Offset:</source>
+        <translation>Scarto NTP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="217"/>
+        <source>SC Drift:</source>
+        <translation>Deriva SC:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="267"/>
+        <source>Decode Latency:</source>
+        <translation>Ritardo di decodifica:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="292"/>
+        <source>Settings:</source>
+        <translation>Impostazioni:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="308"/>
+        <source>Open</source>
+        <translation>Apri</translation>
+    </message>
 </context>
 <context>
     <name>TransceiverBase</name>
@@ -22353,6 +23945,36 @@ Pressione prolungata: modifica messaggio</translation>
         <source>Skip</source>
         <translation>Salta</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2166"/>
+        <source>Call:</source>
+        <translation>Nominativo:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2192"/>
+        <source>Report:</source>
+        <translation>Rapporto:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2195"/>
+        <source>Mode:</source>
+        <translation>Modalità:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2198"/>
+        <source>Freq:</source>
+        <translation>Freq:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2241"/>
+        <source>Comment:</source>
+        <translation>Commento:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2259"/>
+        <source>Satellite:</source>
+        <translation>Satellite:</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -22455,6 +24077,111 @@ Clicca MONITOR per iniziare</translation>
         <location filename="../qml/decodium/components/Waterfall.qml" line="846"/>
         <source>How far above the minimum the ridges start. Raise it to flatten the noise and leave only the signals standing.</source>
         <translation>Quanto sopra il minimo partono le creste. Alzalo per appiattire il rumore e lasciare in piedi solo i segnali.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="454"/>
+        <source>Calls:</source>
+        <translation>Nominativi:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="472"/>
+        <source>Show decoded callsigns on the waterfall</source>
+        <translation>Mostra i nominativi decodificati sulla cascata</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="486"/>
+        <source>Font</source>
+        <translation>Carattere</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="507"/>
+        <source>Gap</source>
+        <translation>Spaziatura</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="544"/>
+        <source>Bold</source>
+        <translation>Grassetto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="548"/>
+        <source>Color</source>
+        <translation>Colore</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="660"/>
+        <source>Palette:</source>
+        <translation>Tavolozza:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="745"/>
+        <source>Automatic noise threshold (IIR)</source>
+        <translation>Soglia di rumore automatica (IIR)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="889"/>
+        <source>Show DX Cluster spots on the waterfall (click to call)</source>
+        <translation>Mostra gli spot del DX Cluster sulla cascata (clic per chiamare)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="899"/>
+        <source>Cluster</source>
+        <translation>Cluster</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="925"/>
+        <source>▴</source>
+        <translation>▴</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="955"/>
+        <source>Peak Hold: keeps spectrum peaks visible</source>
+        <translation>Tieni i picchi: mantiene visibili i picchi dello spettro</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="965"/>
+        <source>Peak</source>
+        <translation>Peak</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="968"/>
+        <source>Zoom</source>
+        <translation>Zoom</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1000"/>
+        <source>Measured noise threshold</source>
+        <translation>Soglia di rumore misurata</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1014"/>
+        <source>Black:</source>
+        <translation>Nero:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1027"/>
+        <source>Gain:</source>
+        <translation>Guadagno:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1042"/>
+        <source>Contrasto:</source>
+        <translation>Contrasto:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1058"/>
+        <source>Vel:</source>
+        <translation>Vel:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="1997"/>
+        <source>☰</source>
+        <translation>☰</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
+        <source>⠿</source>
+        <translation>⠿</translation>
     </message>
 </context>
 <context>
@@ -25630,6 +27357,26 @@ DXCC %4 · Grid %5 · WPX %6</translation>
         <source>non disponibile</source>
         <translation>non disponibile</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="51"/>
+        <source>Callsign</source>
+        <translation>Nominativo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="68"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="115"/>
+        <source>Grid</source>
+        <translation>Griglia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="144"/>
+        <source>Club Log</source>
+        <translation>Club Log</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -26256,6 +28003,456 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message><source>Received binary file has no data</source><translation>Il file binario ricevuto non contiene dati</translation></message>
     <message><source>Received binary file has invalid Base64 data</source><translation>Il file binario ricevuto contiene dati Base64 non validi</translation></message>
     <message><source>The system file manager could not open the receive directory</source><translation>Il gestore file di sistema non ha potuto aprire la cartella di ricezione</translation></message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5421"/>
+        <source>FT2-LINK</source>
+        <translation>FT2-LINK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5612"/>
+        <source>CQ only</source>
+        <translation>Solo CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5651"/>
+        <source>AUTO CQ</source>
+        <translation>AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6005"/>
+        <source>LOOP ACK</source>
+        <translation>LOOP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6094"/>
+        <source>No sessions</source>
+        <translation>Nessuna sessione</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6194"/>
+        <source>DROP DATA</source>
+        <translation>DROP DATA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6203"/>
+        <source>DROP ACK</source>
+        <translation>DROP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6797"/>
+        <source>No tags</source>
+        <translation>Nessuna etichetta</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6847"/>
+        <source>SET CF</source>
+        <translation>SET CF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6856"/>
+        <source>CF TAG</source>
+        <translation>CF TAG</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6894"/>
+        <source>Message</source>
+        <translation>Messaggio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7015"/>
+        <source>key=value; key=value</source>
+        <translation>key=value; key=value</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7232"/>
+        <source>BBS group. Empty means ALL.</source>
+        <translation>Gruppo BBS. Vuoto significa TUTTI.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7269"/>
+        <source>Bulletin title</source>
+        <translation>Titolo del bollettino</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7276"/>
+        <source>Short BBS subject/title.</source>
+        <translation>Oggetto o titolo breve per la BBS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7311"/>
+        <source>BBS message body</source>
+        <translation>Corpo del messaggio BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7319"/>
+        <source>Text to store and send as the BBS bulletin body.</source>
+        <translation>Testo da salvare e inviare come corpo del bollettino BBS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7368"/>
+        <source>server-file.txt</source>
+        <translation>server-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7387"/>
+        <source>BBS server file body</source>
+        <translation>Contenuto del file sul server BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7456"/>
+        <source>remote-file.txt</source>
+        <translation>remote-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7595"/>
+        <source>No BBS server files</source>
+        <translation>Nessun file sul server BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7640"/>
+        <source>SAVE GROUP</source>
+        <translation>SALVA GRUPPO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7668"/>
+        <source>BBS BULLETINS</source>
+        <translation>BOLLETTINI BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7705"/>
+        <source>MARK ALL READ</source>
+        <translation>SEGNA TUTTI COME LETTI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7886"/>
+        <source>Broadcast message</source>
+        <translation>Messaggio di diffusione</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7928"/>
+        <source>Alert tags: WX, POTA, NET</source>
+        <translation>Etichette di avviso: WX, POTA, NET</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7980"/>
+        <source>PATH CALL</source>
+        <translation>PATH CALL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8108"/>
+        <source>Digipeater payload</source>
+        <translation>Contenuto del digipeater</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8149"/>
+        <source>DIGIPEATER</source>
+        <translation>DIGIPEATER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8177"/>
+        <source>ALERT CENTER</source>
+        <translation>CENTRO AVVISI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8206"/>
+        <source>CLEAR ARCH</source>
+        <translation>SVUOTA ARCHIVIO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8370"/>
+        <source>Subject</source>
+        <translation>Oggetto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8381"/>
+        <source>Mail body</source>
+        <translation>Corpo del messaggio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8547"/>
+        <source>USE PATH</source>
+        <translation>USE PATH</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8557"/>
+        <source>CALL RLY</source>
+        <translation>CALL RLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8594"/>
+        <source>smtp.host</source>
+        <translation>smtp.host</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8637"/>
+        <source>SMTP user</source>
+        <translation>Utente SMTP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8655"/>
+        <source>From email</source>
+        <translation>Indirizzo mittente</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8667"/>
+        <source>SMTP password</source>
+        <translation>Password SMTP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8904"/>
+        <source>No mail</source>
+        <translation>Nessun messaggio</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9072"/>
+        <source>Away message</source>
+        <translation>Messaggio di assenza</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9093"/>
+        <source>Welcome message</source>
+        <translation>Messaggio di benvenuto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9104"/>
+        <source>AUTO REPLY</source>
+        <translation>AUTO REPLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9127"/>
+        <source>AUTO AWAY</source>
+        <translation>AUTO AWAY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9170"/>
+        <source>CALL ID</source>
+        <translation>CALL ID</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9195"/>
+        <source>AUTO DISC</source>
+        <translation>AUTO DISC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9221"/>
+        <source>PING RX</source>
+        <translation>PING RX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9299"/>
+        <source>LH PEEK</source>
+        <translation>LH PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9308"/>
+        <source>SNR TX</source>
+        <translation>SNR TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9317"/>
+        <source>VSNR OK</source>
+        <translation>VSNR OK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9326"/>
+        <source>LC PEEK</source>
+        <translation>LC PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9335"/>
+        <source>VM PEEK</source>
+        <translation>VM PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9344"/>
+        <source>VM PARK</source>
+        <translation>VM PARK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9353"/>
+        <source>INFO REQ</source>
+        <translation>INFO REQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9585"/>
+        <source>Comment</source>
+        <translation>Commento</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9717"/>
+        <source>No contacts</source>
+        <translation>Nessun contatto</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9877"/>
+        <source>Shared cluster JSON path</source>
+        <translation>Percorso del JSON condiviso del cluster</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10019"/>
+        <source>Paste cluster JSON here, or press EXPORT</source>
+        <translation>Incolla qui il JSON del cluster, oppure premi EXPORT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10145"/>
+        <source>No cluster last-heard records</source>
+        <translation>Nessun ascolto registrato dal cluster</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10289"/>
+        <source>not tracked</source>
+        <translation>non tracciato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10406"/>
+        <source>No path reports</source>
+        <translation>Nessun rapporto di percorso</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10572"/>
+        <source>Select an export</source>
+        <translation>Scegli un'esportazione</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10712"/>
+        <source>Run audit</source>
+        <translation>Esegui la verifica</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11157"/>
+        <source>description</source>
+        <translation>descrizione</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11169"/>
+        <source>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</source>
+        <translation>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11276"/>
+        <source>No custom presets</source>
+        <translation>Nessun preimpostato personale</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11308"/>
+        <source>county/state</source>
+        <translation>provincia/regione</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11335"/>
+        <source>weather line optional</source>
+        <translation>riga meteo facoltativa</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11363"/>
+        <source>Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.</source>
+        <translation>Check-in del mercoledì: MAIL imposta indirizzo, oggetto e corpo; CHAT inserisce solo il corpo.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11395"/>
+        <source>14105000|20m|Main, 7105000|40m|Main</source>
+        <translation>14105000|20m|Main, 7105000|40m|Main</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11433"/>
+        <source>0000-2359|CALLING|14105000|20m main|CQ</source>
+        <translation>0000-2359|CALLING|14105000|20m main|CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11521"/>
+        <source>14101250-14108750|20m, 7101250-7108750|40m</source>
+        <translation>14101250-14108750|20m, 7101250-7108750|40m</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11550"/>
+        <source>FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.</source>
+        <translation>FREQ conserva le frequenze di chiamata preimpostate, le finestre orarie in UTC e gli intervalli di QSY consentiti. Le azioni CALLING/CQ/BEACON/EMCOMM/QUIET proteggono la frequenza attiva; DATA segna una finestra dati. Il QSY automatico via CAT non viene eseguito.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11694"/>
+        <source>CALL1, CALL2, Z6/TEST</source>
+        <translation>CALL1, CALL2, Z6/TEST</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11729"/>
+        <source>Add callsign</source>
+        <translation>Aggiungi nominativo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11750"/>
+        <source>Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.</source>
+        <translation>I nominativi bloccati non possono aprire una sessione, non compaiono fra gli ultimi ascoltati, e il loro traffico di faro, CQ, ping e diffusione viene ignorato in locale.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11819"/>
+        <source>No blocked calls</source>
+        <translation>Nessun nominativo bloccato</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11840"/>
+        <source>SATELLITE HALF-DUPLEX</source>
+        <translation>SATELLITE HALF-DUPLEX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11848"/>
+        <source>Enable independent RX/TX VFOs</source>
+        <translation>Attiva VFO indipendenti per RX e TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11863"/>
+        <source>RX MHz</source>
+        <translation>RX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11875"/>
+        <source>downlink dial MHz</source>
+        <translation>frequenza di discesa in MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11903"/>
+        <source>TX MHz</source>
+        <translation>TX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11915"/>
+        <source>uplink dial MHz</source>
+        <translation>frequenza di salita in MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11929"/>
+        <source>SETTLE ms</source>
+        <translation>SETTLE ms</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11957"/>
+        <source>READ RX/TX FROM RIG</source>
+        <translation>LEGGI RX/TX DALLA RADIO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12020"/>
+        <source>Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.</source>
+        <translation>Usa il normale comando ARM di FT2-Link per ogni trasmissione. Questo modo è half-duplex: l'audio di ricezione si ferma in trasmissione, il PTT viene rilasciato prima di ripristinare il VFO di ricezione, e anche l'arresto manuale segue lo stesso percorso di rientro sicuro.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12041"/>
+        <source>QO-100 / cross-band setup</source>
+        <translation>QO-100 / cross-band setup</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12050"/>
+        <source>Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.</source>
+        <translation>Inserisci le frequenze CAT reali usate dalla tua stazione o dal transverter. Non viene applicato alcun valore fisso per QO-100: i piani di media frequenza e gli scostamenti dei transverter cambiano da caso a caso.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12059"/>
+        <source>The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.</source>
+        <translation>In questo modo lo split per scostamento audio dell'FT viene deliberatamente saltato, così una trasmissione cross-band non può riusare né spostare la vista chat/sessione di FT2-Link.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12070"/>
+        <source>CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.</source>
+        <translation>La diagnostica CAT viene registrata con l'etichetta [FT2SAT]. Parti con potenza bassa e verifica i VFO della radio prima di andare in aria.</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCat4OmManager</name>

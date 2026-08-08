@@ -965,7 +965,7 @@ Window {
                             spacing: 12
 
                             Text {
-                                text: "Full Spectrum"
+                                text: qsTr("Full Spectrum")
                                 font.pixelSize: 13
                                 font.bold: true
                                 color: secondaryCyan
@@ -1044,7 +1044,7 @@ Window {
                             }
                             Item { Layout.preferredWidth: decodeWindow.bandDtFreqGapWidth }
                             Text {
-                                text: "Freq"
+                                text: qsTr("Freq")
                                 font.family: decodiumMonoFontFamily
                                 font.pixelSize: 10
                                 font.bold: true
@@ -1058,7 +1058,7 @@ Window {
                                 Layout.fillHeight: true
                                 Text {
                                     anchors.fill: parent
-                                    text: "Drift"
+                                    text: qsTr("Drift")
                                     font.family: decodiumMonoFontFamily
                                     font.pixelSize: 10
                                     font.bold: true
@@ -1097,7 +1097,7 @@ Window {
                                 Layout.fillHeight: true
                                 Text {
                                     anchors.fill: parent
-                                    text: "Az"
+                                    text: qsTr("Az")
                                     font.family: decodiumMonoFontFamily
                                     font.pixelSize: 10
                                     font.bold: true
@@ -1538,7 +1538,7 @@ Component.onCompleted: {
                         // Empty state
                         Text {
                             anchors.centerIn: parent
-                            text: "No decoded messages\nClick Monitor to start"
+                            text: qsTr("No decoded messages\nClick Monitor to start")
                             font.pixelSize: 12
                             color: textSecondary
                             horizontalAlignment: Text.AlignHCenter
@@ -1572,7 +1572,7 @@ Component.onCompleted: {
                             spacing: 8
 
                             Text {
-                                text: "Signal RX"
+                                text: qsTr("Signal RX")
                                 font.pixelSize: decodeWindow.compactRxHeader ? 12 : 13
                                 font.bold: true
                                 color: primaryBlue

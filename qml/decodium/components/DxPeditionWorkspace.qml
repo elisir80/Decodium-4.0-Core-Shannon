@@ -179,12 +179,12 @@ Item {
                     ColumnLayout {
                         spacing: 0
                         Text {
-                            text: "DECODIUM 4"
+                            text: qsTr("DECODIUM 4")
                             color: workspace.cText
                             font.pixelSize: 14; font.bold: true; font.letterSpacing: 1.4
                         }
                         Text {
-                            text: "DX-PEDITION MODE"
+                            text: qsTr("DX-PEDITION MODE")
                             color: workspace.cTextDim
                             font.pixelSize: 9; font.letterSpacing: 1.6
                         }
@@ -534,7 +534,7 @@ Item {
                 DxPanel {
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 100
-                    title: "PSK Reporter"
+                    title: qsTr("PSK Reporter")
                     meta: "heard-by"
                     live: true
                     Loader {
@@ -565,7 +565,7 @@ Item {
                 DxPanel {
                     SplitView.preferredHeight: 340
                     SplitView.minimumHeight: 160
-                    title: "Waterfall"
+                    title: qsTr("Waterfall")
                     meta: "panadapter"
                     Loader {
                         anchors.fill: parent
@@ -632,7 +632,7 @@ Item {
                 DxPanel {
                     SplitView.preferredHeight: 250
                     SplitView.minimumHeight: 150
-                    title: "TX Macros"
+                    title: qsTr("TX Macros")
                     meta: "live"
                     Loader {
                         anchors.fill: parent

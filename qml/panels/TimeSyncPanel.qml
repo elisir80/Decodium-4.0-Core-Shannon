@@ -72,7 +72,7 @@ Rectangle {
             }
 
             Text {
-                text: "TIME SYNC"
+                text: qsTr("TIME SYNC")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 font.bold: true
@@ -189,7 +189,7 @@ Rectangle {
 
             // NTP Offset
             Text {
-                text: "NTP Offset:"
+                text: qsTr("NTP Offset:")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: "#78909C"
@@ -214,7 +214,7 @@ Rectangle {
 
             // Soundcard Drift
             Text {
-                text: "SC Drift:"
+                text: qsTr("SC Drift:")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: "#78909C"
@@ -234,7 +234,7 @@ Rectangle {
 
             // Average DT
             Text {
-                text: "Avg DT:"
+                text: qsTr("Avg DT:")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: "#78909C"
@@ -264,7 +264,7 @@ Rectangle {
 
             // Decode Latency
             Text {
-                text: "Decode Latency:"
+                text: qsTr("Decode Latency:")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: "#78909C"
@@ -289,7 +289,7 @@ Rectangle {
             }
 
             Text {
-                text: "Settings:"
+                text: qsTr("Settings:")
                 font.family: decodiumMonoFontFamily
                 font.pixelSize: 10
                 color: "#78909C"
@@ -305,7 +305,7 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "Open"
+                    text: qsTr("Open")
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     color: "#B2EBF2"

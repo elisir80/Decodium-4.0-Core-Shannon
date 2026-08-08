@@ -128,7 +128,7 @@ Rectangle {
             }
 
             Text {
-                text: "Core Gallager"
+                text: qsTr("Core Gallager")
                 font.pixelSize: 16; font.italic: true
                 color: secondaryCyan
             }
@@ -139,7 +139,7 @@ Rectangle {
         // Tagline
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Advanced Digital Mode Decoder for Amateur Radio"
+            text: qsTr("Advanced Digital Mode Decoder for Amateur Radio")
             font.pixelSize: 13
             color: textSecondary
         }

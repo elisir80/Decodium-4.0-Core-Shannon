@@ -130,7 +130,7 @@ Item {
                 anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
                 spacing: 8
                 Text {
-                    text: "NEXT TX"
+                    text: qsTr("NEXT TX")
                     color: root.cTextDim
                     font.pixelSize: 9; font.bold: true; font.letterSpacing: 1.4
                 }

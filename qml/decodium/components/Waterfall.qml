@@ -451,7 +451,7 @@ Item {
                 spacing: 6
 
                 Text {
-                    text: "Calls:"
+                    text: qsTr("Calls:")
                     color: accentCyan
                     font.pixelSize: 10
                     font.bold: true
@@ -469,7 +469,7 @@ Item {
                     bottomPadding: 0
                     checked: waterfallPanel.showDecodeCallsigns
                     onClicked: waterfallPanel.setShowDecodeCallsigns(checked)
-                    ToolTip.text: "Show decoded callsigns on the waterfall"
+                    ToolTip.text: qsTr("Show decoded callsigns on the waterfall")
                     ToolTip.visible: showCallsCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -483,7 +483,7 @@ Item {
                     contentItem: Item { implicitWidth: 0; implicitHeight: 0 }
                 }
 
-                Text { text: "Font"; color: wfText; font.pixelSize: 10 }
+                Text { text: qsTr("Font"); color: wfText; font.pixelSize: 10 }
                 Slider {
                     id: labelFontSlider
                     Layout.preferredWidth: 70
@@ -504,7 +504,7 @@ Item {
 
                 Rectangle { width:1; height:14; color:"#333" }
 
-                Text { text: "Gap"; color: wfText; font.pixelSize: 10 }
+                Text { text: qsTr("Gap"); color: wfText; font.pixelSize: 10 }
                 Slider {
                     id: labelSpacingSlider
                     Layout.preferredWidth: 60
@@ -541,11 +541,11 @@ Item {
                         Text { anchors.centerIn: parent; text: "B"; color: "black"; font.pixelSize: 9; font.bold: true; visible: labelBoldCheck.checked }
                     }
                 }
-                Text { text: "Bold"; color: labelBoldCheck.checked ? "#FFFFFF" : textSec; font.pixelSize: 10 }
+                Text { text: qsTr("Bold"); color: labelBoldCheck.checked ? "#FFFFFF" : textSec; font.pixelSize: 10 }
 
                 Rectangle { width:1; height:14; color:"#333" }
 
-                Text { text: "Color"; color: wfText; font.pixelSize: 10 }
+                Text { text: qsTr("Color"); color: wfText; font.pixelSize: 10 }
                 DecoComboBox {
                     id: labelColorCombo
                     Layout.preferredWidth: 122
@@ -657,7 +657,7 @@ Item {
 
                 // ── Palette / Auto / [] / Peak / Zoom / dBm ──
                 // Unita alla barra Calls per avere un'unica riga superiore (feedback IK8OLM)
-                Text { text: "Palette:"; color: wfText; font.pixelSize: 10 }
+                Text { text: qsTr("Palette:"); color: wfText; font.pixelSize: 10 }
                 DecoComboBox {
                     id: paletteCombo
                     Layout.preferredWidth: 142
@@ -742,7 +742,7 @@ Item {
                             waterfallPanel.persistGraphSetting("uiWaterfallAutoRange", checked)
                         }
                     }
-                    ToolTip.text: "Automatic noise threshold (IIR)"
+                    ToolTip.text: qsTr("Automatic noise threshold (IIR)")
                     ToolTip.visible: autoRangeCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -886,7 +886,7 @@ Item {
                             waterfallPanel.scheduleDxClusterRefresh(0)
                         }
                     }
-                    ToolTip.text: "Show DX Cluster spots on the waterfall (click to call)"
+                    ToolTip.text: qsTr("Show DX Cluster spots on the waterfall (click to call)")
                     ToolTip.visible: dxClusterCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -896,7 +896,7 @@ Item {
                         Text { anchors.centerIn: parent; text: "DX"; color: "black"; font.pixelSize: 7; font.bold: true; visible: dxClusterCheck.checked }
                     }
                 }
-                Text { text: "Cluster"; color: dxClusterCheck.checked ? "#FFC800" : textSec; font.pixelSize: 10 }
+                Text { text: qsTr("Cluster"); color: dxClusterCheck.checked ? "#FFC800" : textSec; font.pixelSize: 10 }
 
                 Item { Layout.fillWidth: true }
 
@@ -922,7 +922,7 @@ Item {
                             font.bold: true
                         }
                         Text {
-                            text: "\u25B4"
+                            text: qsTr("\u25B4")
                             color: accentGreen
                             font.pixelSize: 13
                             font.bold: true
@@ -952,7 +952,7 @@ Item {
                             waterfallPanel.persistGraphSetting("uiWaterfallPeakHold", checked)
                         }
                     }
-                    ToolTip.text: "Peak Hold: keeps spectrum peaks visible"
+                    ToolTip.text: qsTr("Peak Hold: keeps spectrum peaks visible")
                     ToolTip.visible: peakHoldCheck.hovered
                     ToolTip.delay: 400
                     indicator: Rectangle {
@@ -962,10 +962,10 @@ Item {
                         Text { anchors.centerIn: parent; text: "P"; color: "#262626"; font.pixelSize: 9; font.bold: true; visible: peakHoldCheck.checked }
                     }
                 }
-                Text { text: "Peak"; color: peakHoldCheck.checked ? wfYellow : textSec; font.pixelSize: 10 }
+                Text { text: qsTr("Peak"); color: peakHoldCheck.checked ? wfYellow : textSec; font.pixelSize: 10 }
 
                 // Zoom
-                Text { text: "Zoom"; color: wfText; font.pixelSize: 10 }
+                Text { text: qsTr("Zoom"); color: wfText; font.pixelSize: 10 }
                 Slider {
                     id: zoomSlider
                     Layout.preferredWidth: 70
@@ -997,7 +997,7 @@ Item {
                     text: waterfallDisplay.measuredFloor.toFixed(0) + "dBm"
                     color: accentGreen
                     font.pixelSize: 10
-                    ToolTip.text: "Measured noise threshold"
+                    ToolTip.text: qsTr("Measured noise threshold")
                     ToolTip.visible: nfLabel.containsMouse
                     ToolTip.delay: 400
                     MouseArea { id: nfLabel; anchors.fill: parent; hoverEnabled: true }
@@ -1011,7 +1011,7 @@ Item {
             color: wfToolbarBg; visible: waterfallPanel.controlsVisible
             RowLayout {
                 anchors.fill: parent; anchors.leftMargin: 6; anchors.rightMargin: 6; spacing: 6
-                Text { text: "Black:"; color: wfSlate; font.pixelSize: 10 }
+                Text { text: qsTr("Black:"); color: wfSlate; font.pixelSize: 10 }
                 Slider { id: blackSlider; Layout.preferredWidth: 80; from: 0; to: 100; value: 15; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.blackLevel = value
@@ -1024,7 +1024,7 @@ Item {
                 }
                 Text { text: blackSlider.value.toFixed(0); color: wfSlate; font.pixelSize: 10; width: 20 }
                 Rectangle { width:1;height:14;color:"#333" }
-                Text { text: "Gain:"; color: wfBlue; font.pixelSize: 10 }
+                Text { text: qsTr("Gain:"); color: wfBlue; font.pixelSize: 10 }
                 Slider { id: gainSlider; Layout.preferredWidth: 80; from: 0; to: 100; value: 50; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.colorGain = value
@@ -1039,7 +1039,7 @@ Item {
 
                 Rectangle { width:1;height:14;color:"#333" }
 
-                Text { text: "Contrasto:"; color: wfPurple; font.pixelSize: 10 }
+                Text { text: qsTr("Contrasto:"); color: wfPurple; font.pixelSize: 10 }
                 Slider { id: contrastSlider; Layout.preferredWidth: 70; from: 10; to: 150; value: 80; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.contrastLevel = value
@@ -1055,7 +1055,7 @@ Item {
 
                 Rectangle { width:1;height:14;color:"#333" }
 
-                Text { text: "Vel:"; color: "#DD8866"; font.pixelSize: 10 }
+                Text { text: qsTr("Vel:"); color: "#DD8866"; font.pixelSize: 10 }
                 Slider { id: speedSlider; Layout.preferredWidth: 60; from: 10; to: 500; value: 20; stepSize: 5
                     onValueChanged: if (!waterfallPanel.restoringSettings) waterfallPanel.persistGraphSetting("spectrumInterval", value)
                     background: Rectangle { x:speedSlider.leftPadding;y:speedSlider.topPadding+speedSlider.availableHeight/2-2;width:speedSlider.availableWidth;height:4;radius:2;color:wfTrack }
@@ -1994,7 +1994,7 @@ Item {
             anchors.horizontalCenterOffset: 9
             spacing: 7
             Text {
-                text: "\u2630"
+                text: qsTr("\u2630")
                 color: accentCyan
                 font.pixelSize: 14
                 font.bold: true
@@ -2030,7 +2030,7 @@ Item {
                    : "transparent"
             Text {
                 anchors.centerIn: parent
-                text: "\u283f"
+                text: qsTr("\u283f")
                 color: accentCyan
                 font.pixelSize: 12
             }

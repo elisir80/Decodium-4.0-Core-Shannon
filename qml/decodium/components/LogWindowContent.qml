@@ -223,7 +223,7 @@ Rectangle {
 
     Dialog {
         id: createLogbookDialog
-        title: "Nuovo logbook"
+        title: qsTr("Nuovo logbook")
         anchors.centerIn: parent
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
@@ -232,7 +232,7 @@ Rectangle {
             width: 300
             spacing: 8
             Label {
-                text: "Nome operatore / callsign"
+                text: qsTr("Nome operatore / callsign")
                 color: textPrimary
             }
             DecoTextField {
@@ -245,7 +245,7 @@ Rectangle {
             CheckBox {
                 id: newLogbookBackupCheck
                 checked: true
-                text: "Backup log attuale"
+                text: qsTr("Backup log attuale")
             }
         }
 
@@ -392,27 +392,27 @@ Rectangle {
                     width: 32; height: 24; radius: 3
                     color: newLogbookMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.28) : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.10)
                     border.color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.55)
-                    Text { anchors.centerIn: parent; text: "New"; font.pixelSize: 9; font.bold: true; color: accentGreen }
+                    Text { anchors.centerIn: parent; text: qsTr("New"); font.pixelSize: 9; font.bold: true; color: accentGreen }
                     MouseArea { id: newLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: createLogbookDialog.open() }
-                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: "Create a separate logbook"; ToolTip.delay: 500
+                    ToolTip.visible: newLogbookMA.containsMouse; ToolTip.text: qsTr("Create a separate logbook"); ToolTip.delay: 500
                 }
 
                 Rectangle {
                     width: 34; height: 24; radius: 3
                     color: loadLogbookMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.28) : Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.10)
                     border.color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.55)
-                    Text { anchors.centerIn: parent; text: "Load"; font.pixelSize: 9; font.bold: true; color: secondaryCyan }
+                    Text { anchors.centerIn: parent; text: qsTr("Load"); font.pixelSize: 9; font.bold: true; color: secondaryCyan }
                     MouseArea { id: loadLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openAddLogbookDialog() }
-                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: "Load/use an existing ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: loadLogbookMA.containsMouse; ToolTip.text: qsTr("Load/use an existing ADIF"); ToolTip.delay: 500
                 }
 
                 Rectangle {
                     width: 32; height: 24; radius: 3
                     color: backupLogbookMA.containsMouse ? Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.25) : Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.08)
                     border.color: Qt.rgba(accentOrange.r, accentOrange.g, accentOrange.b, 0.5)
-                    Text { anchors.centerIn: parent; text: "Bkp"; font.pixelSize: 9; font.bold: true; color: accentOrange }
+                    Text { anchors.centerIn: parent; text: qsTr("Bkp"); font.pixelSize: 9; font.bold: true; color: accentOrange }
                     MouseArea { id: backupLogbookMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (appEngine && appEngine.logManager) appEngine.logManager.backupActiveLogbook() }
-                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: "Back up the active logbook"; ToolTip.delay: 500
+                    ToolTip.visible: backupLogbookMA.containsMouse; ToolTip.text: qsTr("Back up the active logbook"); ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -420,7 +420,7 @@ Rectangle {
                     color: deleteLogbookMA.containsMouse ? Qt.rgba(255, 70, 90, 0.28) : Qt.rgba(255, 70, 90, 0.08)
                     border.color: Qt.rgba(255, 70, 90, 0.55)
                     opacity: logbookProfiles.length > 0 ? 1.0 : 0.45
-                    Text { anchors.centerIn: parent; text: "Del"; font.pixelSize: 9; font.bold: true; color: "#ff465a" }
+                    Text { anchors.centerIn: parent; text: qsTr("Del"); font.pixelSize: 9; font.bold: true; color: "#ff465a" }
                     MouseArea {
                         id: deleteLogbookMA
                         anchors.fill: parent
@@ -429,7 +429,7 @@ Rectangle {
                         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                         onClicked: logContent.openDeleteLogbookDialog()
                     }
-                    ToolTip.visible: deleteLogbookMA.containsMouse; ToolTip.text: "Delete selected logbook"; ToolTip.delay: 500
+                    ToolTip.visible: deleteLogbookMA.containsMouse; ToolTip.text: qsTr("Delete selected logbook"); ToolTip.delay: 500
                 }
 
                 Rectangle {
@@ -441,7 +441,7 @@ Rectangle {
 
                     RowLayout {
                         anchors.fill: parent; anchors.margins: 3; spacing: 3
-                        Text { text: "\uD83D\uDD0D"; font.pixelSize: 10; color: textSecondary }
+                        Text { text: qsTr("\uD83D\uDD0D"); font.pixelSize: 10; color: textSecondary }
                         DecoTextField {
                             id: searchField; Layout.fillWidth: true
                             placeholderText: qsTr("Search...")
@@ -483,7 +483,7 @@ Rectangle {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "\u00D7"
+                        text: qsTr("\u00D7")
                         font.pixelSize: 13
                         font.bold: true
                         color: accentOrange
@@ -498,7 +498,7 @@ Rectangle {
                     }
 
                     ToolTip.visible: clearFiltersMA.containsMouse
-                    ToolTip.text: "Remove filters"
+                    ToolTip.text: qsTr("Remove filters")
                     ToolTip.delay: 500
                 }
 
@@ -509,9 +509,9 @@ Rectangle {
                     width: 22; height: 22; radius: 3
                     color: importFloatMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.3) : "transparent"
                     Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: "\u2B07"; font.pixelSize: 11; color: importFloatMA.containsMouse ? accentGreen : textSecondary }
+                    Text { anchors.centerIn: parent; text: qsTr("\u2B07"); font.pixelSize: 11; color: importFloatMA.containsMouse ? accentGreen : textSecondary }
                     MouseArea { id: importFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openImportAdifDialog() }
-                    ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: "Import ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: qsTr("Import ADIF"); ToolTip.delay: 500
                 }
 
                 // Export ADIF
@@ -519,9 +519,9 @@ Rectangle {
                     width: 22; height: 22; radius: 3
                     color: exportFloatMA.containsMouse ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3) : "transparent"
                     Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: "\u2B06"; font.pixelSize: 11; color: exportFloatMA.containsMouse ? secondaryCyan : textSecondary }
+                    Text { anchors.centerIn: parent; text: qsTr("\u2B06"); font.pixelSize: 11; color: exportFloatMA.containsMouse ? secondaryCyan : textSecondary }
                     MouseArea { id: exportFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openExportAdifDialog() }
-                    ToolTip.visible: exportFloatMA.containsMouse; ToolTip.text: "Export ADIF"; ToolTip.delay: 500
+                    ToolTip.visible: exportFloatMA.containsMouse; ToolTip.text: qsTr("Export ADIF"); ToolTip.delay: 500
                 }
 
                 // Refresh
@@ -529,9 +529,9 @@ Rectangle {
                     width: 22; height: 22; radius: 3
                     color: refreshFloatMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : "transparent"
                     Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: "\u21BB"; font.pixelSize: 12; font.bold: true; color: refreshFloatMA.containsMouse ? accentGreen : textSecondary }
+                    Text { anchors.centerIn: parent; text: qsTr("\u21BB"); font.pixelSize: 12; font.bold: true; color: refreshFloatMA.containsMouse ? accentGreen : textSecondary }
                     MouseArea { id: refreshFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: refreshLog() }
-                    ToolTip.visible: refreshFloatMA.containsMouse; ToolTip.text: "Refresh"; ToolTip.delay: 500
+                    ToolTip.visible: refreshFloatMA.containsMouse; ToolTip.text: qsTr("Refresh"); ToolTip.delay: 500
                 }
             }
         }
@@ -544,12 +544,12 @@ Rectangle {
 
             RowLayout {
                 anchors.fill: parent; anchors.leftMargin: 8; anchors.rightMargin: 8; spacing: 0
-                Text { text: "Date/Time"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 128 }
+                Text { text: qsTr("Date/Time"); font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 128 }
                 Text { text: "Call"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 85 }
                 Text { text: "Grid"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 50 }
                 Text { text: "Band"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 50 }
                 Text { text: "Mode"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 50 }
-                Text { text: "Rpt"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 60 }
+                Text { text: qsTr("Rpt"); font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.preferredWidth: 60 }
                 Text { text: "Comment"; font.pixelSize: 9; font.bold: true; color: secondaryCyan; Layout.fillWidth: true }
             }
         }
@@ -750,7 +750,7 @@ Rectangle {
 
                     ColumnLayout {
                         spacing: 1
-                        Text { text: "Sent"; font.pixelSize: 9; font.bold: true; color: secondaryCyan }
+                        Text { text: qsTr("Sent"); font.pixelSize: 9; font.bold: true; color: secondaryCyan }
                         Rectangle {
                             width: 52; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
@@ -767,7 +767,7 @@ Rectangle {
 
                     ColumnLayout {
                         spacing: 1
-                        Text { text: "Rcvd"; font.pixelSize: 9; font.bold: true; color: secondaryCyan }
+                        Text { text: qsTr("Rcvd"); font.pixelSize: 9; font.bold: true; color: secondaryCyan }
                         Rectangle {
                             width: 52; height: 30; radius: 3
                             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)

@@ -262,7 +262,7 @@ Item {
             ColumnLayout {
                 spacing: 0
                 Text {
-                    text: "QSO LOCK"
+                    text: qsTr("QSO LOCK")
                     color: root.cTextDim
                     font.pixelSize: 9; font.bold: true; font.letterSpacing: 1.6
                 }
@@ -471,7 +471,7 @@ Item {
         Text {
             anchors.centerIn: parent
             visible: list.count === 0
-            text: "No RX-frequency decodes"
+            text: qsTr("No RX-frequency decodes")
             color: root.cTextDim
             font.pixelSize: 12; font.italic: true
         }

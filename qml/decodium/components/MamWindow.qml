@@ -8,7 +8,7 @@ import QtQuick.Layouts
 
 Dialog {
     id: mamWindow
-    title: "Multi-Answer Mode"
+    title: qsTr("Multi-Answer Mode")
     width: 700
     height: 450
     modal: false
@@ -449,7 +449,7 @@ Dialog {
 
                     Text {
                         visible: !mamWindow.mamHasActiveCaller && !(mamWindow.engine && mamWindow.engine.mamMultiStream)
-                        text: "No active caller"
+                        text: qsTr("No active caller")
                         font.pixelSize: 12
                         color: textSecondary
                     }

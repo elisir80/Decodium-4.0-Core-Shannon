@@ -108,7 +108,7 @@ ScrollView {
             leftPadding: 8
             color: textPrimary
             font.pixelSize: controlFontSize
-            placeholderText: "dx.iz7auh.net"
+            placeholderText: qsTr("dx.iz7auh.net")
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onEditingFinished: if (bridge.dxCluster) bridge.dxCluster.host = text.trim()
         }

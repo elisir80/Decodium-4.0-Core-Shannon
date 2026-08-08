@@ -137,7 +137,7 @@ Item {
                     anchors.rightMargin: 4
                     spacing: 4
                     Text {
-                        text: "Decodium DevOverlay"
+                        text: qsTr("Decodium DevOverlay")
                         color: "#5DD9C1"
                         font.pixelSize: 11
                         font.bold: true
@@ -194,7 +194,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                Text { text: "Frame (ms):"; color: "#9AB8C4"; font.pixelSize: 10 }
+                Text { text: qsTr("Frame (ms):"); color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
                     // 1.0.252: Qt 6.11 RHI on-demand stoppa frame signals dopo
                     // ~4s startup. Frame timing inaffidabile su Decodium pipeline.
@@ -212,7 +212,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                Text { text: "Decode Hz:"; color: "#9AB8C4"; font.pixelSize: 10 }
+                Text { text: qsTr("Decode Hz:"); color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
                     text: warmingUp
                           ? "warming up..."
@@ -223,7 +223,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                Text { text: "Delegates:"; color: "#9AB8C4"; font.pixelSize: 10 }
+                Text { text: qsTr("Delegates:"); color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
                     // Force binding re-eval ad ogni perfMetricsChanged (250ms tick).
                     property real _tick: target ? target.lastFrameTimeMs : 0
@@ -241,7 +241,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                Text { text: "Uptime:"; color: "#9AB8C4"; font.pixelSize: 10 }
+                Text { text: qsTr("Uptime:"); color: "#9AB8C4"; font.pixelSize: 10 }
                 Text {
                     // 1.0.244 fix: binding rilegge ad ogni Timer 1s tick.
                     text: fmt(uptimeSec, 0) + " s"
@@ -261,7 +261,7 @@ Item {
                 radius: 4
 
                 Text {
-                    text: "Frame time 5s"
+                    text: qsTr("Frame time 5s")
                     color: "#7088A0"
                     font.pixelSize: 9
                     anchors.left: parent.left
@@ -327,7 +327,7 @@ Item {
                 spacing: 6
 
                 Button {
-                    text: "Copy diagnostics"
+                    text: qsTr("Copy diagnostics")
                     Layout.fillWidth: true
                     font.pixelSize: 10
                     onClicked: {
@@ -344,7 +344,7 @@ Item {
                 }
 
                 Button {
-                    text: "Close"
+                    text: qsTr("Close")
                     Layout.preferredWidth: 64
                     font.pixelSize: 10
                     onClicked: {
@@ -356,7 +356,7 @@ Item {
 
             Text {
                 id: copyFeedback
-                text: "Copied to clipboard"
+                text: qsTr("Copied to clipboard")
                 color: "#5DD9C1"
                 font.pixelSize: 9
                 opacity: 0

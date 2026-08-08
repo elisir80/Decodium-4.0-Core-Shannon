@@ -203,7 +203,7 @@ Window {
                     id: targetField
                     Layout.fillWidth: true
                     text: bridge ? bridge.targetCallSign : ""
-                    placeholderText: "es. F4CQS"
+                    placeholderText: qsTr("es. F4CQS")
                     placeholderTextColor: "#7d89a5"
                     color: callDialog.cText
                     font.pixelSize: 18

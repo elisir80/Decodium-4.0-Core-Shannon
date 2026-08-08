@@ -75,7 +75,7 @@ Dialog {
 
         Text {
             Layout.leftMargin: 12
-            text: "SUGGESTED FREQUENCIES"
+            text: qsTr("SUGGESTED FREQUENCIES")
             font.family: decodiumMonoFontFamily
             font.pixelSize: 10
             font.letterSpacing: 2
@@ -165,7 +165,7 @@ Dialog {
         Button {
             Layout.alignment: Qt.AlignHCenter
             Layout.bottomMargin: 8
-            text: "Close"
+            text: qsTr("Close")
             onClicked: qsyDialog.close()
             background: Rectangle {
                 color: parent.hovered ? Qt.rgba(0, 0.74, 0.84, 0.2) : Qt.rgba(1,1,1,0.05)
