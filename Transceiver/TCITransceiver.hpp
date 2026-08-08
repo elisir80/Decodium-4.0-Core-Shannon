@@ -135,8 +135,12 @@ Cmd_Lock
 };
 Q_ENUM (Tci_Cmd);
 
-qreal rxAtten;
-qreal txAtten;
+// 1.0.537 iu8lmc - rxAtten veniva letto in writeAudioData senza essere
+// mai inizializzato: il guadagno dell'audio RX via TCI dipendeva da
+// memoria indeterminata. 0 dB = guadagno unitario.
+QString device_name_;      // nome riportato dal server TCI (es. ColibriNANO)
+qreal rxAtten = 0.0;
+qreal txAtten = 45.0;
 
 public slots:
 //  void close();

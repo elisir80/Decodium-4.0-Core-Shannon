@@ -2495,11 +2495,28 @@ void DecodiumTransceiverManager::setRigMode(const QString& mode)
     sendState(d.get());
 }
 
+void DecodiumTransceiverManager::setTciRxGainDb(double db)
+{
+    double const bounded = qBound(-60.0, db, 20.0);
+    if (qFuzzyCompare(m_tciRxGainDb, bounded)) {
+        return;
+    }
+    m_tciRxGainDb = bounded;
+    emit tciRxGainDbChanged();
+    // do_volume() viene invocato a ogni set(): basta aggiornare lo stato
+    // desiderato perche' il nuovo guadagno valga dal frame successivo.
+    d->desired.volume(m_tciRxGainDb);
+    if (m_connected && d->transceiver) {
+        sendState(d.get());
+    }
+}
+
 void DecodiumTransceiverManager::setRigAudio(bool on, double periodSeconds, int blockSize)
 {
     d->desired.online(true);
     d->desired.period(qBound(0.1, periodSeconds, 1800.0));
     d->desired.blocksize(qBound(256, blockSize, 48000));
+    d->desired.volume(m_tciRxGainDb);
     d->desired.audio(on);
     // 1.0.204 — Audio off non richiede attesa sincrona; il main puo'
     // proseguire senza bloccarsi sul worker thread CAT.
@@ -2591,6 +2608,7 @@ void DecodiumTransceiverManager::saveSettings()
     s.setValue("catAutoConnect", m_catAutoConnect);
     s.setValue("audioAutoStart", m_audioAutoStart);
     s.setValue("tciAudioEnabled", m_tciAudioEnabled);
+    s.setValue("tciRxGainDb", m_tciRxGainDb);
     s.setValue("hrdStrictRadioMatch", m_hrdStrictRadioMatch);
     s.endGroup();
 }
@@ -2627,6 +2645,7 @@ void DecodiumTransceiverManager::loadSettings()
     m_hrdStrictRadioMatch = get("hrdStrictRadioMatch", m_hrdStrictRadioMatch).toBool();
     bool const legacyTciAudioFlag = (rawPollInterval & tci__audio) == tci__audio;
     m_tciAudioEnabled = get("tciAudioEnabled", m_tciAudioEnabled || legacyTciAudioFlag).toBool();
+    m_tciRxGainDb = qBound(-60.0, get("tciRxGainDb", m_tciRxGainDb).toDouble(), 20.0);
     // setRigName DOPO gli altri per aggiornare portType correttamente
     QString rig = get("rigName", m_rigName).toString();
     s.endGroup();

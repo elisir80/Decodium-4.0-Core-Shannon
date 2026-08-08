@@ -72,6 +72,7 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(bool catAutoConnect READ catAutoConnect WRITE setCatAutoConnect NOTIFY catAutoConnectChanged)
     Q_PROPERTY(bool audioAutoStart READ audioAutoStart WRITE setAudioAutoStart NOTIFY audioAutoStartChanged)
     Q_PROPERTY(bool tciAudioEnabled READ tciAudioEnabled WRITE setTciAudioEnabled NOTIFY tciAudioEnabledChanged)
+    Q_PROPERTY(double tciRxGainDb READ tciRxGainDb WRITE setTciRxGainDb NOTIFY tciRxGainDbChanged)
     Q_PROPERTY(bool hrdStrictRadioMatch READ hrdStrictRadioMatch WRITE setHrdStrictRadioMatch NOTIFY hrdStrictRadioMatchChanged)
 
 public:
@@ -120,6 +121,7 @@ public:
     bool catAutoConnect() const { return m_catAutoConnect; }
     bool audioAutoStart() const { return m_audioAutoStart; }
     bool tciAudioEnabled() const { return m_tciAudioEnabled; }
+    double tciRxGainDb() const { return m_tciRxGainDb; }
     bool hrdStrictRadioMatch() const { return m_hrdStrictRadioMatch; }
 
     // ── Scrittura proprietà ───────────────────────────────────────────────
@@ -144,6 +146,7 @@ public:
     void setCatAutoConnect(bool v)        { if (m_catAutoConnect != v){ m_catAutoConnect = v; emit catAutoConnectChanged(); } }
     void setAudioAutoStart(bool v)        { if (m_audioAutoStart != v){ m_audioAutoStart = v; emit audioAutoStartChanged(); } }
     void setTciAudioEnabled(bool v);
+    void setTciRxGainDb(double db);
     void setHrdStrictRadioMatch(bool v)   { if (m_hrdStrictRadioMatch != v){ m_hrdStrictRadioMatch = v; emit hrdStrictRadioMatchChanged(); } }
 
     // ── Comandi QML-invokable ─────────────────────────────────────────────
@@ -212,6 +215,7 @@ signals:
     void catAutoConnectChanged();
     void audioAutoStartChanged();
     void tciAudioEnabledChanged();
+    void tciRxGainDbChanged();
     void hrdStrictRadioMatchChanged();
     void errorOccurred(const QString& msg);
     void statusUpdate(const QString& msg);
@@ -270,6 +274,12 @@ private:
     bool    m_catAutoConnect {false};
     bool    m_audioAutoStart {false};
     bool    m_tciAudioEnabled {true};
+    // 1.0.537 iu8lmc - guadagno applicato all'audio RX che arriva via TCI.
+    // I server TCI consegnano il flusso a fondo scala: misurato su AetherSDR
+    // picco 0,999 e rms 0,45 (circa -7 dBFS), mentre il decodificatore lavora
+    // bene intorno a -27 dBFS. -20 dB riporta il livello nell'intervallo utile
+    // senza toccare il volume del software SDR.
+    double  m_tciRxGainDb {-20.0};
     bool    m_hrdStrictRadioMatch {true};
     int     m_transientCatRetryCount {0};
     bool    m_transientCatReconnectPending {false};

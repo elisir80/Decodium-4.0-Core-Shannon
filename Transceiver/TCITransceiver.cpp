@@ -897,6 +897,7 @@ int TCITransceiver::do_start ()
   requested_drive_ = "";
   drive_ = "";
   level_ = -54;
+  rxAtten = 0;   // 0 dB: nessuna attenuazione sull'audio RX via TCI
   txAtten = 45;
   power_ = 0;
   swr_ = 0;
@@ -1260,6 +1261,11 @@ void TCITransceiver::onMessageReceived(const QString &str)
       case Cmd_Device:
         TCI_VERBOSE_PRINTF("%s CmdDevice : %s\n",QDateTime::QDateTime::currentDateTimeUtc().toString("hh:mm:ss.zzz").toStdString().c_str(),args.join("|").toStdString().c_str());
         if((arg (0) == "SunSDR2DX" || arg (0) == "SunSDR2PRO") && !ESDR3) tx_top_ = false;
+        // 1.0.537 iu8lmc - il nome del dispositivo finisce nel registro
+        // diagnostico: serve a distinguere ColibriNANO e le altre
+        // chiavette Expert Electronics dai transceiver veri e propri.
+        device_name_ = arg (0);
+        qInfo () << "[TCI] device:" << device_name_;
         TCI_VERBOSE_PRINTF("tx_top_:%d\n",tx_top_);
         break;
       case Cmd_Ready:
@@ -1609,7 +1615,10 @@ void TCITransceiver::rig_power (bool on)
 void TCITransceiver::stream_audio (bool on)
 {
   TRACE_CAT ("TCITransceiver", on << state ());
-  if (on != stream_audio_ && tci_Ready) {
+  // 1.0.537 iu8lmc - si confronta anche con l'intento gia' inviato: un
+  // audio_start subito dopo un audio_stop non va scartato solo perche'
+  // l'eco del server non e' ancora tornata.
+  if ((on != stream_audio_ || on != requested_stream_audio_) && tci_Ready) {
     requested_stream_audio_ = on;
     if (on) {
       audioStreamChannels_ = 2;

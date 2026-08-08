@@ -857,6 +857,44 @@ ScrollView {
             }
         }
 
+        // I server TCI consegnano l'audio a fondo scala: senza attenuazione il
+        // flusso arriva saturo, la cascata diventa una macchia uniforme e solo
+        // i segnali forti si decodificano. Il decodificatore lavora bene
+        // intorno a -27 dBFS.
+        Text {
+            visible: dialog.usesTciControls()
+            text: qsTr("TCI RX gain:")
+            color: textSecondary
+            font.pixelSize: 12
+            Layout.preferredWidth: 100
+        }
+        RowLayout {
+            visible: dialog.usesTciControls()
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            spacing: 8
+            Slider {
+                id: tciRxGainSlider
+                Layout.fillWidth: true
+                from: -40
+                to: 6
+                stepSize: 1
+                value: bridge.catManager ? bridge.catManager.tciRxGainDb : -20
+                onMoved: {
+                    if (bridge.catManager) bridge.catManager.setTciRxGainDb(value)
+                    dialog.scheduleCatPersist()
+                }
+            }
+            Text {
+                text: Math.round(tciRxGainSlider.value) + " dB"
+                color: textPrimary
+                font.pixelSize: 12
+                font.family: decodiumMonoFontFamily
+                Layout.preferredWidth: 48
+                horizontalAlignment: Text.AlignRight
+            }
+        }
+
         Text { text: qsTr("PTT Method:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoComboBox {
             id: pttCombo

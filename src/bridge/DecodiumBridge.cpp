@@ -45139,9 +45139,18 @@ QStringList DecodiumBridge::parseJt65Row(const QString& row) const
 
 bool DecodiumBridge::usingTciAudioInput() const
 {
+    // 1.0.537 iu8lmc - conta il trasporto realmente in uso, non solo
+    // l'etichetta del backend scelta nelle impostazioni. Un rig "TCI Client
+    // RX1" si collega con portType=tci anche quando il selettore dice
+    // "hamlib": prima di questa correzione l'audio TCI restava spento in
+    // silenzio pur essendo il collegamento gia' su TCI e l'opzione attiva.
+    // Il flag tci__audio nel gestore CAT usa gia' portType: le due
+    // condizioni erano incoerenti fra loro.
+    if (!m_hamlibCat || !m_hamlibCat->tciAudioEnabled()) {
+        return false;
+    }
     return m_catBackend == QStringLiteral("tci")
-        && m_hamlibCat
-        && m_hamlibCat->tciAudioEnabled();
+        || 0 == m_hamlibCat->portType().compare(QStringLiteral("tci"), Qt::CaseInsensitive);
 }
 
 bool DecodiumBridge::startTciTxAudioStream(QVector<float> const& wave, QString const& mode,
@@ -45665,9 +45674,20 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
         return;
     }
     if (rtlSdrEnabled()) {
-        bridgeLog(QStringLiteral("startAudioCapture: using RTL-SDR RX input"));
-        startRtlSdrCapture();
-        return;
+        // 1.0.537 iu8lmc - la modalita' RTL-SDR vale per le chiavette basate
+        // su RTL2832U. Una ColibriNANO o un altro SDR pilotato da software
+        // esterno non si apre di li' ("opening device 0 failed") e, poiche'
+        // questo ramo usciva comunque, restava senza alcuna sorgente audio.
+        // Se la ricerca USB e' finita senza trovare nulla e l'audio TCI e'
+        // configurato, si prosegue invece di lasciare il ricevitore muto.
+        if (!m_rtlSdrDiscoveryPending && m_rtlSdrDevices.isEmpty() && usingTciAudioInput()) {
+            bridgeLog(QStringLiteral(
+                "startAudioCapture: nessuna chiavetta RTL-SDR presente, si usa l'audio TCI"));
+        } else {
+            bridgeLog(QStringLiteral("startAudioCapture: using RTL-SDR RX input"));
+            startRtlSdrCapture();
+            return;
+        }
     }
     if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
@@ -46446,6 +46466,30 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs,
                                             now + kFt2LinkPostTxAckGuardMs);
         return;
+    }
+
+    // 1.0.537 iu8lmc - l'audio TCI non e' una scheda audio: chiudere e riaprire
+    // lo stream a pochi millisecondi di distanza non lo recupera, lo spegne.
+    // Il registro mostrava audio_stop e audio_start a 4 ms, poi dodici secondi
+    // di silenzio, poi di nuovo, all'infinito. Qui si limita la frequenza dei
+    // riavvii senza disabilitare il recupero: si salta solo se i campioni sono
+    // arrivati da poco o se si e' gia' riavviato da poco.
+    if (m_tciAudioCaptureActive) {
+        constexpr qint64 kTciAudioAliveMs = 12000;
+        constexpr qint64 kTciRestartSettleMs = 15000;
+        qint64 const sinceSamples = m_lastAudioHealthMs > 0 ? now - m_lastAudioHealthMs : -1;
+        qint64 const sinceRestart = m_lastAudioWatchdogRestartMs > 0
+            ? now - m_lastAudioWatchdogRestartMs : -1;
+        bool const streamAlive = sinceSamples >= 0 && sinceSamples < kTciAudioAliveMs;
+        bool const restartTooSoon = sinceRestart >= 0 && sinceRestart < kTciRestartSettleMs;
+        if (streamAlive || restartTooSoon) {
+            bridgeLog(QStringLiteral(
+                "Audio watchdog: riavvio TCI saltato (%1) sinceSamples=%2ms sinceRestart=%3ms")
+                          .arg(reason).arg(sinceSamples).arg(sinceRestart));
+            m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs, now + 5000);
+            m_audioUnhealthyStartMs = 0;
+            return;
+        }
     }
 
     if (rtlSdrEnabled()) {

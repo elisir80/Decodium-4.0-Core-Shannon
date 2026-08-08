@@ -19471,6 +19471,11 @@ Noklusējums: IZSL.</translation>
         <source>localhost:50001</source>
         <translation>localhost:50001</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="866"/>
+        <source>TCI RX gain:</source>
+        <translation>TCI RX pastiprinājums:</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>
