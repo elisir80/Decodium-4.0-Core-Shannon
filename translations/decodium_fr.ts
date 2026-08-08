@@ -2514,6 +2514,11 @@ Cliquez sur Monitor pour démarrer</translation>
         <source>Signal RX</source>
         <translation>Signal RX</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="977"/>
+        <source>decodes</source>
+        <translation>décodages</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumBridge</name>
@@ -4046,6 +4051,36 @@ Erreur&#xa0;: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="460"/>
         <source>No decodes</source>
         <translation>Aucun décodage</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="284"/>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="285"/>
+        <source>dB</source>
+        <translation>dB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="287"/>
+        <source>DT</source>
+        <translation>DT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="289"/>
+        <source>FREQ</source>
+        <translation>FRÉQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="291"/>
+        <source>MESSAGE</source>
+        <translation>MESSAGE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="292"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
     </message>
 </context>
 <context>
@@ -8109,6 +8144,51 @@ Clic droit : se déconnecter</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
         <source>DX Cluster - Decodium</source>
         <translation>DX Cluster - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3001"/>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3002"/>
+        <source>dB</source>
+        <translation>dB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3003"/>
+        <source>DT</source>
+        <translation>DT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3004"/>
+        <source>Freq</source>
+        <translation>Fréq</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3005"/>
+        <source>Drift</source>
+        <translation>Dérive</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3006"/>
+        <source>Message</source>
+        <translation>Message</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3007"/>
+        <source>Dist</source>
+        <translation>Dist</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3008"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
+        <source>Az</source>
+        <translation>Az</translation>
     </message>
 </context>
 <context>
@@ -23675,6 +23755,31 @@ Coûte du CPU supplémentaire pendant les QSO. Par défaut : OFF.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="308"/>
         <source>Open</source>
         <translation>Ouvert</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="246"/>
+        <source>No qualifying decodes</source>
+        <translation>Aucun décodage exploitable</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="246"/>
+        <source>Waiting cycle</source>
+        <translation>En attente du cycle</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="249"/>
+        <source>LOCKED</source>
+        <translation>VERROUILLÉ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
+        <source>Converging</source>
+        <translation>Convergence</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
+        <source>Adjusting</source>
+        <translation>Ajustement</translation>
     </message>
 </context>
 <context>

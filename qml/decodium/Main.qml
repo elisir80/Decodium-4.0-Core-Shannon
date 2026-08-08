@@ -2998,15 +2998,15 @@ ApplicationWindow {
     // Metadati statici per colonna (label, allineamento, flessibile, nascondibile, min px).
     function fsColMeta(id) {
         switch (id) {
-        case "utc":  return { label: "UTC",     align: "left",  fill: false, canHide: true,  minW: 44 }
-        case "db":   return { label: "dB",      align: "right", fill: false, canHide: true,  minW: 24 }
-        case "dt":   return { label: "DT",      align: "right", fill: false, canHide: true,  minW: 28 }
-        case "freq": return { label: "Freq",    align: "right", fill: false, canHide: true,  minW: 30 }
-        case "drift": return { label: "Drift",  align: "right", fill: false, canHide: true,  minW: 34 }
-        case "msg":  return { label: "Message", align: "left",  fill: true,  canHide: false, minW: 72 }
-        case "dist": return { label: "Dist",    align: "right", fill: false, canHide: true,  minW: 36 }
-        case "dxcc": return { label: "DXCC",    align: "right", fill: false, canHide: true,  minW: 90 }
-        case "az":   return { label: "Az",      align: "right", fill: false, canHide: true,  minW: 34 }
+        case "utc":  return { label: qsTr("UTC"),     align: "left",  fill: false, canHide: true,  minW: 44 }
+        case "db":   return { label: qsTr("dB"),      align: "right", fill: false, canHide: true,  minW: 24 }
+        case "dt":   return { label: qsTr("DT"),      align: "right", fill: false, canHide: true,  minW: 28 }
+        case "freq": return { label: qsTr("Freq"),    align: "right", fill: false, canHide: true,  minW: 30 }
+        case "drift": return { label: qsTr("Drift"),  align: "right", fill: false, canHide: true,  minW: 34 }
+        case "msg":  return { label: qsTr("Message"), align: "left",  fill: true,  canHide: false, minW: 72 }
+        case "dist": return { label: qsTr("Dist"),    align: "right", fill: false, canHide: true,  minW: 36 }
+        case "dxcc": return { label: qsTr("DXCC"),    align: "right", fill: false, canHide: true,  minW: 90 }
+        case "az":   return { label: qsTr("Az"),      align: "right", fill: false, canHide: true,  minW: 34 }
         }
         return { label: id, align: "left", fill: false, canHide: true, minW: 30 }
     }
@@ -8268,7 +8268,7 @@ ApplicationWindow {
                                         Item { Layout.fillWidth: true }
 
                                         Text {
-                                            text: decodePanel.displayedDecodeCount() +" decodes"
+                                            text: decodePanel.displayedDecodeCount() + " " + qsTr("decodes")
                                             font.pixelSize: 10
                                             color: textSecondary
                                         }
@@ -8393,14 +8393,14 @@ ApplicationWindow {
                                         MenuItem { text: qsTr("Move right  ▶"); enabled: mainWindow.fsCanMove(fsHeaderMenuEmbedded.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuEmbedded.targetId, 1) }
                                         MenuItem { text: qsTr("Hide this column"); enabled: mainWindow.fsColMeta(fsHeaderMenuEmbedded.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuEmbedded.targetId, false) }
                                         MenuSeparator {}
-                                        MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + "UTC";     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
-                                        MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + "dB";      onTriggered: mainWindow.fsToggleColumnVisible("db") }
-                                        MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + "DT";      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
-                                        MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + "Freq";    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
+                                        MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + qsTr("UTC");     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
+                                        MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + qsTr("dB");      onTriggered: mainWindow.fsToggleColumnVisible("db") }
+                                        MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + qsTr("DT");      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
+                                        MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + qsTr("Freq");    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
                                         MenuItem { text: qsTr("✓  Message"); enabled: false }
-                                        MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + "Dist";    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
-                                        MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + "DXCC";    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
-                                        MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + "Az";      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
+                                        MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + qsTr("Dist");    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
+                                        MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + qsTr("DXCC");    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
+                                        MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + qsTr("Az");      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
                                         MenuSeparator {}
                                         MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + qsTr("Newest on top"); onTriggered: mainWindow.fsToggleNewestFirst() }
                                         MenuSeparator {}
@@ -9193,11 +9193,11 @@ NumberAnimation {
                                         Item { Layout.preferredWidth: rxFreqPanel.dbDtGapWidth }
                                         Text { text: "DT"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.dtColumnWidth }
                                         Item { visible: rxFreqPanel.freqColumnWidth > 0; Layout.preferredWidth: rxFreqPanel.dtFreqGapWidth }
-                                        Text { visible: rxFreqPanel.freqColumnWidth > 0; text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
+                                        Text { visible: rxFreqPanel.freqColumnWidth > 0; text: qsTr("Freq"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.freqColumnWidth }
                                         Item { Layout.preferredWidth: rxFreqPanel.gapColumnWidth }
-                                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
-                                        Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
-                                        Text { visible: rxFreqPanel.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
+                                        Text { text: qsTr("Message"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
+                                        Text { visible: rxFreqPanel.distanceColumnWidth > 0; text: qsTr("Dist"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.distanceColumnWidth }
+                                        Text { visible: rxFreqPanel.azColumnWidth > 0; text: qsTr("Az"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqPanel.azColumnWidth }
                                     }
                                 }
 
@@ -13607,14 +13607,14 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         MenuItem { text: qsTr("Move right  ▶"); enabled: mainWindow.fsCanMove(fsHeaderMenuFloating.targetId, 1); onTriggered: mainWindow.fsMoveColumn(fsHeaderMenuFloating.targetId, 1) }
                         MenuItem { text: qsTr("Hide this column"); enabled: mainWindow.fsColMeta(fsHeaderMenuFloating.targetId).canHide; onTriggered: mainWindow.fsSetColumnVisible(fsHeaderMenuFloating.targetId, false) }
                         MenuSeparator {}
-                        MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + "UTC";     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
-                        MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + "dB";      onTriggered: mainWindow.fsToggleColumnVisible("db") }
-                        MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + "DT";      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
-                        MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + "Freq";    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
+                        MenuItem { text: (mainWindow.fsColVisible("utc")  ? "✓  " : "      ") + qsTr("UTC");     onTriggered: mainWindow.fsToggleColumnVisible("utc") }
+                        MenuItem { text: (mainWindow.fsColVisible("db")   ? "✓  " : "      ") + qsTr("dB");      onTriggered: mainWindow.fsToggleColumnVisible("db") }
+                        MenuItem { text: (mainWindow.fsColVisible("dt")   ? "✓  " : "      ") + qsTr("DT");      onTriggered: mainWindow.fsToggleColumnVisible("dt") }
+                        MenuItem { text: (mainWindow.fsColVisible("freq") ? "✓  " : "      ") + qsTr("Freq");    onTriggered: mainWindow.fsToggleColumnVisible("freq") }
                         MenuItem { text: qsTr("✓  Message"); enabled: false }
-                        MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + "Dist";    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
-                        MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + "DXCC";    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
-                        MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + "Az";      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
+                        MenuItem { text: (mainWindow.fsColVisible("dist") ? "✓  " : "      ") + qsTr("Dist");    onTriggered: mainWindow.fsToggleColumnVisible("dist") }
+                        MenuItem { text: (mainWindow.fsColVisible("dxcc") ? "✓  " : "      ") + qsTr("DXCC");    enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("dxcc") }
+                        MenuItem { text: (mainWindow.fsColVisible("az")   ? "✓  " : "      ") + qsTr("Az");      enabled: mainWindow.showDxccInfo; onTriggered: mainWindow.fsToggleColumnVisible("az") }
                         MenuSeparator {}
                         MenuItem { text: (mainWindow.fsNewestFirst ? "✓  " : "      ") + qsTr("Newest on top"); onTriggered: mainWindow.fsToggleNewestFirst() }
                         MenuSeparator {}
@@ -14345,11 +14345,11 @@ NumberAnimation {
 	                        Item { Layout.preferredWidth: rxFreqFloatingWindow.dbDtGapWidth }
 	                        Text { text: "DT"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.dtColumnWidth }
 	                        Item { visible: rxFreqFloatingWindow.freqColumnWidth > 0; Layout.preferredWidth: rxFreqFloatingWindow.dtFreqGapWidth }
-	                        Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: "Freq"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
+	                        Text { visible: rxFreqFloatingWindow.freqColumnWidth > 0; text: qsTr("Freq"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.freqColumnWidth }
 	                        Item { Layout.preferredWidth: rxFreqFloatingWindow.gapColumnWidth }
-	                        Text { text: "Message"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
-	                        Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: "Dist"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
-	                        Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: "Az"; font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
+	                        Text { text: qsTr("Message"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight }
+	                        Text { visible: rxFreqFloatingWindow.distanceColumnWidth > 0; text: qsTr("Dist"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.distanceColumnWidth }
+	                        Text { visible: rxFreqFloatingWindow.azColumnWidth > 0; text: qsTr("Az"); font.family: mainWindow.decodedTextFontFamily; font.pixelSize: Math.round(mainWindow.decodedTextHeaderPixelSize * fs); font.bold: true; color: primaryBlue; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: rxFreqFloatingWindow.azColumnWidth }
 	                    }
 	                }
 

@@ -2507,6 +2507,11 @@ Click Monitor to start</source>
         <source>Signal RX</source>
         <translation>接收訊號</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="977"/>
+        <source>decodes</source>
+        <translation>筆解碼</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumBridge</name>
@@ -4039,6 +4044,36 @@ Error: %2</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="460"/>
         <source>No decodes</source>
         <translation>無解碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="284"/>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="285"/>
+        <source>dB</source>
+        <translation>dB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="287"/>
+        <source>DT</source>
+        <translation>DT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="289"/>
+        <source>FREQ</source>
+        <translation>頻率</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="291"/>
+        <source>MESSAGE</source>
+        <translation>訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="292"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
     </message>
 </context>
 <context>
@@ -8105,6 +8140,51 @@ Right-click: disconnect</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
         <source>DX Cluster - Decodium</source>
         <translation>DX Cluster - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3001"/>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3002"/>
+        <source>dB</source>
+        <translation>dB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3003"/>
+        <source>DT</source>
+        <translation>DT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3004"/>
+        <source>Freq</source>
+        <translation>頻率</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3005"/>
+        <source>Drift</source>
+        <translation>漂移</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3006"/>
+        <source>Message</source>
+        <translation>訊息</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3007"/>
+        <source>Dist</source>
+        <translation>距離</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3008"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
+        <source>Az</source>
+        <translation>Az</translation>
     </message>
 </context>
 <context>
@@ -23673,6 +23753,31 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="308"/>
         <source>Open</source>
         <translation>開啟檔案</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="246"/>
+        <source>No qualifying decodes</source>
+        <translation>沒有可用的解碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="246"/>
+        <source>Waiting cycle</source>
+        <translation>等待週期</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="249"/>
+        <source>LOCKED</source>
+        <translation>已鎖定</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
+        <source>Converging</source>
+        <translation>收斂中</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
+        <source>Adjusting</source>
+        <translation>調整中</translation>
     </message>
 </context>
 <context>

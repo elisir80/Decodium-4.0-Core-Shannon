@@ -2522,6 +2522,11 @@ Noklikšķiniet uz Monitor, lai sāktu</translation>
         <source>Signal RX</source>
         <translation>RX signāls</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecodeWindow.qml" line="977"/>
+        <source>decodes</source>
+        <translation>dekodējumi</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumBridge</name>
@@ -4054,6 +4059,36 @@ Error: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="460"/>
         <source>No decodes</source>
         <translation>Nav dekodējumu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="284"/>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="285"/>
+        <source>dB</source>
+        <translation>dB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="287"/>
+        <source>DT</source>
+        <translation>DT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="289"/>
+        <source>FREQ</source>
+        <translation>FREKV</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="291"/>
+        <source>MESSAGE</source>
+        <translation>ZIŅOJUMS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="292"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
     </message>
 </context>
 <context>
@@ -8120,6 +8155,51 @@ Labais klikšķis: atvienot</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
         <source>DX Cluster - Decodium</source>
         <translation>DX Cluster - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3001"/>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3002"/>
+        <source>dB</source>
+        <translation>dB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3003"/>
+        <source>DT</source>
+        <translation>DT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3004"/>
+        <source>Freq</source>
+        <translation>Frekv</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3005"/>
+        <source>Drift</source>
+        <translation>Novirze</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3006"/>
+        <source>Message</source>
+        <translation>Ziņojums</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3007"/>
+        <source>Dist</source>
+        <translation>Att</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3008"/>
+        <source>DXCC</source>
+        <translation>DXCC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
+        <source>Az</source>
+        <translation>Az</translation>
     </message>
 </context>
 <context>
@@ -23688,6 +23768,31 @@ QSO laikā tērē papildu CPU. Noklusējums: IZSL.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="308"/>
         <source>Open</source>
         <translation>Open</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="246"/>
+        <source>No qualifying decodes</source>
+        <translation>Nav derīgu dekodējumu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="246"/>
+        <source>Waiting cycle</source>
+        <translation>Gaida ciklu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="249"/>
+        <source>LOCKED</source>
+        <translation>FIKSĒTS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
+        <source>Converging</source>
+        <translation>Konverģē</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
+        <source>Adjusting</source>
+        <translation>Pielāgojas</translation>
     </message>
 </context>
 <context>

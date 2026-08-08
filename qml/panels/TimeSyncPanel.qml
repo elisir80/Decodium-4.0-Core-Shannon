@@ -243,11 +243,11 @@ Rectangle {
                 text: {
                     if (!timeSyncPanel.dtMetricsActive) return "N/A"
                     if (bridge.timeSyncSampleCount <= 0) {
-                        return bridge.decodeLatencyMs > 0 ? "No qualifying decodes" : "Waiting cycle"
+                        return bridge.decodeLatencyMs > 0 ? qsTr("No qualifying decodes") : qsTr("Waiting cycle")
                     }
                     var dt = bridge.avgDt
-                    var status = Math.abs(dt) < 0.1 ? "LOCKED" :
-                                 Math.abs(dt) < 0.3 ? "Converging" : "Adjusting"
+                    var status = Math.abs(dt) < 0.1 ? qsTr("LOCKED") :
+                                 Math.abs(dt) < 0.3 ? qsTr("Converging") : qsTr("Adjusting")
                     return dt.toFixed(3) + " s (" + status + ")"
                 }
                 font.family: decodiumMonoFontFamily
@@ -273,7 +273,7 @@ Rectangle {
                 text: {
                     if (!timeSyncPanel.dtMetricsActive) return "N/A"
                     if (bridge.decodeLatencyMs < 0) return "TIMEOUT"
-                    if (bridge.decodeLatencyMs === 0) return "Waiting cycle"
+                    if (bridge.decodeLatencyMs === 0) return qsTr("Waiting cycle")
                     return bridge.decodeLatencyMs.toFixed(0) + " ms"
                 }
                 font.family: decodiumMonoFontFamily

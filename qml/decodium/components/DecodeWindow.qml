@@ -974,7 +974,7 @@ Window {
                             Item { Layout.fillWidth: true }
 
                             Text {
-                                text: decodeWindow.bandActivityCount() + " decodes"
+                                text: decodeWindow.bandActivityCount() + " " + qsTr("decodes")
                                 font.pixelSize: 11
                                 color: textSecondary
                             }

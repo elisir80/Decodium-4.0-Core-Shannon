@@ -281,15 +281,15 @@ Item {
         RowLayout {
             anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
             spacing: 0
-            Text { text: "UTC"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.preferredWidth: root.wUtc }
-            Text { text: "dB"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDb }
+            Text { text: qsTr("UTC"); color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.preferredWidth: root.wUtc }
+            Text { text: qsTr("dB"); color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDb }
             Item { Layout.preferredWidth: root.gap }
-            Text { text: "DT"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDt }
+            Text { text: qsTr("DT"); color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDt }
             Item { Layout.preferredWidth: root.gap }
-            Text { text: "FREQ"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wFreq }
+            Text { text: qsTr("FREQ"); color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wFreq }
             Item { Layout.preferredWidth: root.gap }
-            Text { text: "MESSAGE"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.fillWidth: true }
-            Text { visible: root.wDxcc > 0; text: "DXCC"; color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDxcc }
+            Text { text: qsTr("MESSAGE"); color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; Layout.fillWidth: true }
+            Text { visible: root.wDxcc > 0; text: qsTr("DXCC"); color: root.cGrid; font.pixelSize: 10; font.bold: true; font.family: decodiumMonoFontFamily; horizontalAlignment: Text.AlignRight; Layout.preferredWidth: root.wDxcc }
         }
     }
 
