@@ -26,6 +26,13 @@ private slots:
   {
     QCOMPARE(decodium::network::normalizedUdpClientId(QString {}),
              QStringLiteral("Decodium"));
+    // 1.0.538: ogni destinazione sceglie il proprio ripiego, cosi' la porta
+    // primaria puo' restare "WSJTX" per i programmi locali che lo pretendono.
+    QCOMPARE(decodium::network::normalizedUdpClientId(QString {}, QStringLiteral("WSJTX")),
+             QStringLiteral("WSJTX"));
+    QCOMPARE(decodium::network::normalizedUdpClientId(QStringLiteral("  Decodium  "),
+                                                      QStringLiteral("WSJTX")),
+             QStringLiteral("Decodium"));
     QCOMPARE(decodium::network::normalizedUdpClientId(QStringLiteral("  Deco   Client  ")),
              QStringLiteral("Deco Client"));
     QCOMPARE(decodium::network::normalizedUdpClientId(QString(80, QLatin1Char('A'))).size(), 64);

@@ -27000,6 +27000,8 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         QStringLiteral("UDPServerPort"),
         QStringLiteral("UDPListenPort"),
         QStringLiteral("UDPClientId"),
+        QStringLiteral("UDPSecondaryClientId"),
+        QStringLiteral("UDPTertiaryClientId"),
         QStringLiteral("UDPTTL"),
         QStringLiteral("AcceptUDPRequests"),
         QStringLiteral("UDPSecondaryEnabled"),
@@ -29087,23 +29089,20 @@ void DecodiumBridge::initUdpMessageClient()
     bool const n1mmEnabled = getSetting(QStringLiteral("BroadcastToN1MM"), false).toBool();
     QString const n1mmServer = getSetting(QStringLiteral("N1MMServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
     quint16 const n1mmPort = udpPortFromSettingValue(getSetting(QStringLiteral("N1MMServerPort"), 2333), 2333);
-    // 1.0.538 iu8lmc - migrazione una tantum. Chi aveva gia' aperto il
-    // pannello UDP si ritrovava "WSJTX" salvato nelle impostazioni, e i
-    // collettori scartavano ogni pacchetto leggendo la nostra 1.0.x come se
-    // fosse la versione di WSJT-X. Si sposta a "Decodium" una sola volta:
-    // chi preferisce il vecchio identificativo puo' rimetterlo dal menu a
-    // tendina e la scelta non viene piu' toccata.
-    if (!getSetting(QStringLiteral("UDPClientIdMigratedToDecodium"), false).toBool()) {
-        QString const savedId = getSetting(QStringLiteral("UDPClientId"), QString()).toString().trimmed();
-        if (0 == savedId.compare(QStringLiteral("WSJTX"), Qt::CaseInsensitive)
-            || 0 == savedId.compare(QStringLiteral("WSJT-X"), Qt::CaseInsensitive)) {
-            setSetting(QStringLiteral("UDPClientId"), QStringLiteral("Decodium"));
-            bridgeLog(QStringLiteral("UDP client id migrato da %1 a Decodium").arg(savedId));
-        }
-        setSetting(QStringLiteral("UDPClientIdMigratedToDecodium"), true);
-    }
+    // 1.0.538 iu8lmc - un identificativo per destinazione. I programmi
+    // locali (JTAlert, GridTracker) filtrano su "WSJTX" e devono continuare
+    // a trovarlo sulla porta primaria; i collettori remoti leggevano invece
+    // quel nome insieme alla nostra versione 1.0.x, la confrontavano con il
+    // WSJT-X 2.7.x e scartavano tutto con "OLD software version". Con un
+    // campo per destinazione si servono entrambi senza raddoppiare i
+    // pacchetti.
     QString const clientId = decodium::network::normalizedUdpClientId(
-        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("Decodium")).toString());
+        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("WSJTX")).toString(),
+        QStringLiteral("WSJTX"));
+    QString const secondaryClientId = decodium::network::normalizedUdpClientId(
+        getSetting(QStringLiteral("UDPSecondaryClientId"), QStringLiteral("Decodium")).toString());
+    QString const tertiaryClientId = decodium::network::normalizedUdpClientId(
+        getSetting(QStringLiteral("UDPTertiaryClientId"), QStringLiteral("Decodium")).toString());
 
     bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 loggedADIF=%8")
                   .arg(serverName.trimmed(), QString::number(serverPort), QString::number(listenPort),
@@ -29111,11 +29110,11 @@ void DecodiumBridge::initUdpMessageClient()
                        boolText(acceptUdpRequests), boolText(primaryAdifEnabled)));
     bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
                   .arg(boolText(secondaryEnabled), secondaryServerName, QString::number(secondaryPort),
-                       clientId, interfaceText(secondaryInterfaces), QString::number(secondaryTtl),
+                       secondaryClientId, interfaceText(secondaryInterfaces), QString::number(secondaryTtl),
                        boolText(secondaryAdifEnabled)));
     bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
                   .arg(boolText(tertiaryEnabled), tertiaryServerName, QString::number(tertiaryPort),
-                       clientId, interfaceText(tertiaryInterfaces), QString::number(tertiaryTtl),
+                       tertiaryClientId, interfaceText(tertiaryInterfaces), QString::number(tertiaryTtl),
                        boolText(tertiaryAdifEnabled)));
     bridgeLog(QStringLiteral("Reporting config: ADIF TCP %1 target=%2:%3")
                   .arg(boolText(adifTcpEnabled), adifTcpServer, QString::number(adifTcpPort)));
@@ -29276,7 +29275,7 @@ void DecodiumBridge::initUdpMessageClient()
     }
 
     if (secondaryEnabled && !m_udpSecondaryMessageClient) {
-        m_udpSecondaryMessageClient = new MessageClient(clientId, ver, rev,
+        m_udpSecondaryMessageClient = new MessageClient(secondaryClientId, ver, rev,
                                                         secondaryServerName, secondaryPort,
                                                         0, secondaryInterfaces, secondaryTtl,
                                                         this, QStringLiteral("secondary"));
@@ -29298,7 +29297,7 @@ void DecodiumBridge::initUdpMessageClient()
     }
 
     if (tertiaryEnabled && !m_udpTertiaryMessageClient) {
-        m_udpTertiaryMessageClient = new MessageClient(clientId, ver, rev,
+        m_udpTertiaryMessageClient = new MessageClient(tertiaryClientId, ver, rev,
                                                        tertiaryServerName, tertiaryPort,
                                                        0, tertiaryInterfaces, tertiaryTtl,
                                                        this, QStringLiteral("tertiary"));

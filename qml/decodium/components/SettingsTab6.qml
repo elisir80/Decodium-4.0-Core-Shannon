@@ -539,7 +539,7 @@ ScrollView {
         Text { text: qsTr("Client ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
             id: udpClientIdField
-            text: bridge.getSetting("UDPClientId", "Decodium")
+            text: bridge.getSetting("UDPClientId", "WSJTX")
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
             implicitHeight: controlHeight
@@ -552,7 +552,7 @@ ScrollView {
             onEditingFinished: {
                 var cleaned = String(text).trim()
                 if (!cleaned.length)
-                    cleaned = "Decodium"
+                    cleaned = "WSJTX"
                 if (cleaned !== text)
                     text = cleaned
                 bridge.setSetting("UDPClientId", cleaned)
@@ -561,11 +561,11 @@ ScrollView {
         Text { text: qsTr("Preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoComboBox {
             id: udpClientIdPreset
-            model: ["Decodium", "WSJTX"]
+            model: ["WSJTX", "Decodium"]
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
             implicitHeight: controlHeight
-            Component.onCompleted: currentIndex = Math.max(0, find(String(bridge.getSetting("UDPClientId", "Decodium"))))
+            Component.onCompleted: currentIndex = Math.max(0, find(String(bridge.getSetting("UDPClientId", "WSJTX"))))
             onActivated: {
                 udpClientIdField.text = currentText
                 bridge.setSetting("UDPClientId", currentText)
@@ -656,6 +656,47 @@ ScrollView {
             onTextChanged: bridge.setSetting("UDPSecondaryServer", text)
         }
 
+
+        Text { text: qsTr("Secondary Client ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        DecoTextField {
+            id: udpSecondaryIdField
+            text: bridge.getSetting("UDPSecondaryClientId", "Decodium")
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
+            implicitHeight: controlHeight
+            leftPadding: 8
+            maximumLength: 64
+            color: textPrimary
+            font.pixelSize: controlFontSize
+            inputMethodHints: Qt.ImhNoPredictiveText
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onEditingFinished: {
+                var cleaned = String(text).trim()
+                if (!cleaned.length)
+                    cleaned = "Decodium"
+                if (cleaned !== text)
+                    text = cleaned
+                bridge.setSetting("UDPSecondaryClientId", cleaned)
+            }
+        }
+        Text { text: qsTr("Preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        DecoComboBox {
+            id: udpSecondaryIdPreset
+            model: ["Decodium", "WSJTX"]
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
+            implicitHeight: controlHeight
+            Component.onCompleted: currentIndex = Math.max(0, find(String(bridge.getSetting("UDPSecondaryClientId", "Decodium"))))
+            onActivated: {
+                udpSecondaryIdField.text = currentText
+                bridge.setSetting("UDPSecondaryClientId", currentText)
+            }
+            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+            contentItem: Text { text: udpSecondaryIdPreset.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+        }
         Text { text: qsTr("Secondary Port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         SpinBox {
             id: udpSecondaryPortSpin
@@ -720,6 +761,47 @@ ScrollView {
             onTextChanged: bridge.setSetting("UDPTertiaryServer", text)
         }
 
+
+        Text { text: qsTr("Tertiary Client ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        DecoTextField {
+            id: udpTertiaryIdField
+            text: bridge.getSetting("UDPTertiaryClientId", "Decodium")
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
+            implicitHeight: controlHeight
+            leftPadding: 8
+            maximumLength: 64
+            color: textPrimary
+            font.pixelSize: controlFontSize
+            inputMethodHints: Qt.ImhNoPredictiveText
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onEditingFinished: {
+                var cleaned = String(text).trim()
+                if (!cleaned.length)
+                    cleaned = "Decodium"
+                if (cleaned !== text)
+                    text = cleaned
+                bridge.setSetting("UDPTertiaryClientId", cleaned)
+            }
+        }
+        Text { text: qsTr("Preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        DecoComboBox {
+            id: udpTertiaryIdPreset
+            model: ["Decodium", "WSJTX"]
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
+            implicitHeight: controlHeight
+            Component.onCompleted: currentIndex = Math.max(0, find(String(bridge.getSetting("UDPTertiaryClientId", "Decodium"))))
+            onActivated: {
+                udpTertiaryIdField.text = currentText
+                bridge.setSetting("UDPTertiaryClientId", currentText)
+            }
+            background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
+            contentItem: Text { text: udpTertiaryIdPreset.displayText; color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+            delegate: ItemDelegate { contentItem: Text { text: modelData; color: textPrimary; font.pixelSize: 12; elide: Text.ElideRight }
+                background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
+            popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
+        }
         Text { text: qsTr("Tertiary Port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         SpinBox {
             id: udpTertiaryPortSpin
