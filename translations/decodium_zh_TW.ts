@@ -22369,6 +22369,51 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <source>dx.iz7auh.net</source>
         <translation>dx.iz7auh.net</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="664"/>
+        <source>Primary traffic:</source>
+        <translation>主要流量：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="669"/>
+        <source>Decode</source>
+        <translation>解碼</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="670"/>
+        <source>Status</source>
+        <translation>狀態</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="672"/>
+        <source>QSO logged</source>
+        <translation>已記錄的 QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="675"/>
+        <source>WSPR</source>
+        <translation>WSPR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="695"/>
+        <source>Secondary Client ID:</source>
+        <translation>次要用戶端 ID：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="772"/>
+        <source>Secondary traffic:</source>
+        <translation>次要流量：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="806"/>
+        <source>Tertiary Client ID:</source>
+        <translation>第三用戶端 ID：</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <source>Tertiary traffic:</source>
+        <translation>第三流量：</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab7</name>
@@ -23107,6 +23152,11 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="695"/>
         <source>OTP URL:</source>
         <translation>OTP 網址:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="159"/>
+        <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>面向老舊或緩慢電腦的一個開關。啟用：Windows 上保守的 D3D11 圖形（需重新啟動）、低 CPU 模式、最多 4 個 FT 執行緒、普通處理程序優先權、CPU 解碼設定，並隱藏 Live Map 與 Full Spectrum。預設：關閉。</translation>
     </message>
 </context>
 <context>

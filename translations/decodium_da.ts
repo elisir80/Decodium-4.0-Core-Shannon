@@ -22369,6 +22369,51 @@ Koster ekstra CPU under QSO'er. Standard: OFF.</translation>
         <source>dx.iz7auh.net</source>
         <translation>dx.iz7auh.net</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="664"/>
+        <source>Primary traffic:</source>
+        <translation>Primær trafik:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="669"/>
+        <source>Decode</source>
+        <translation>Afkodninger</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="670"/>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="672"/>
+        <source>QSO logged</source>
+        <translation>Loggede QSO'er</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="675"/>
+        <source>WSPR</source>
+        <translation>WSPR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="695"/>
+        <source>Secondary Client ID:</source>
+        <translation>Sekundært klient-id:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="772"/>
+        <source>Secondary traffic:</source>
+        <translation>Sekundær trafik:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="806"/>
+        <source>Tertiary Client ID:</source>
+        <translation>Tertiært klient-id:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <source>Tertiary traffic:</source>
+        <translation>Tertiær trafik:</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab7</name>
@@ -23107,6 +23152,11 @@ Koster ekstra CPU under QSO'er. Standard: OFF.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="695"/>
         <source>OTP URL:</source>
         <translation>OTP URL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="159"/>
+        <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Én kontakt til gamle eller langsomme computere. Aktiverer: konservativ D3D11-grafik på Windows (kræver genstart), lav CPU-tilstand, højst 4 FT-tråde, normal procesprioritet, CPU-afkodningsprofil, og skjuler Live Map og Full Spectrum. Standard: fra.</translation>
     </message>
 </context>
 <context>

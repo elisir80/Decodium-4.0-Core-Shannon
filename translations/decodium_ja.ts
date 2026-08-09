@@ -22369,6 +22369,51 @@ QSO 中に余分な CPU を消費します。デフォルト: OFF。</translatio
         <source>dx.iz7auh.net</source>
         <translation>dx.iz7auh.net</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="664"/>
+        <source>Primary traffic:</source>
+        <translation>主要トラフィック:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="669"/>
+        <source>Decode</source>
+        <translation>デコード</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="670"/>
+        <source>Status</source>
+        <translation>ステータス</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="672"/>
+        <source>QSO logged</source>
+        <translation>記録したQSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="675"/>
+        <source>WSPR</source>
+        <translation>WSPR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="695"/>
+        <source>Secondary Client ID:</source>
+        <translation>副クライアントID:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="772"/>
+        <source>Secondary traffic:</source>
+        <translation>副トラフィック:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="806"/>
+        <source>Tertiary Client ID:</source>
+        <translation>第三クライアントID:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <source>Tertiary traffic:</source>
+        <translation>第三トラフィック:</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab7</name>
@@ -23107,6 +23152,11 @@ QSO 中に余分な CPU を消費します。デフォルト: OFF。</translatio
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="695"/>
         <source>OTP URL:</source>
         <translation>OTP URL:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="159"/>
+        <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>古い、あるいは遅いパソコン向けのひとつのスイッチ。Windows では控えめな D3D11 グラフィックス（再起動が必要）、低CPUモード、FTスレッド最大4、通常のプロセス優先度、CPU デコードプロファイルを有効にし、Live Map と Full Spectrum を隠します。既定: オフ。</translation>
     </message>
 </context>
 <context>
