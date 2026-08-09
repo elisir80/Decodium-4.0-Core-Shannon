@@ -1097,16 +1097,30 @@ int main(int argc, char* argv[])
     // vecchie D3D12 va in device-loss (caso Danilo/Pasquale); OpenGL è stabile e
     // più leggero. Letto qui, prima di QApplication, come UILanguage — QSettings
     // esplicito non richiede istanza applicativa.
+    bool lowEndForcedOpenGl = false;
     {
         QSettings lowEndProbe(QSettings::IniFormat, QSettings::UserScope,
                               QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
         bool const lowEndMode = lowEndProbe.value(QStringLiteral("LowEndMode"), false).toBool();
+        // 1.0.539 iu8lmc - se l'avvio precedente non è mai arrivato a disegnare,
+        // il marcatore è rimasto sul disco. Insistere con OpenGL su un portatile
+        // il cui driver non lo espone significa morire di nuovo con "Failed to
+        // initialize graphics backend for OpenGL", e siccome la modalità è
+        // salvata l'utente non può più entrare nelle impostazioni per
+        // disattivarla: l'applicazione resta murata. In quel caso si lascia
+        // decidere al ripiego automatico più sotto.
+        bool const previousGraphicsStartupFailed = QFile::exists(graphicsStartupPendingFlag);
         if (lowEndMode
+            && !previousGraphicsStartupFailed
             && !qEnvironmentVariableIsSet("DECODIUM_GRAPHICS_BACKEND")
             && !qEnvironmentVariableIsSet("QSG_RHI_BACKEND")
             && !qEnvironmentVariableIsSet("QT_QUICK_BACKEND")) {
             qputenv("DECODIUM_GRAPHICS_BACKEND", "opengl");
+            lowEndForcedOpenGl = true;
             L("Modalità PC lento attiva: backend grafico forzato a OpenGL");
+        } else if (lowEndMode && previousGraphicsStartupFailed) {
+            L("Modalità PC lento: OpenGL non riproposto, l'avvio precedente non ha "
+              "completato l'inizializzazione grafica");
         }
     }
 
@@ -1156,8 +1170,12 @@ int main(int argc, char* argv[])
         pendingGraphicsBackend == QByteArrayLiteral("d3d11");
     bool const persistentD3d11Fallback =
         !commandLineResetSafeGraphics && persistentD3d11FallbackEnabled();
+    // 1.0.539 iu8lmc - OpenGL scelto dalla modalità PC lento non è una scelta
+    // esplicita dell'utente: è nostra. Contarlo come tale spegneva sia il
+    // ripiego su D3D11 sia la grafica di sicurezza, cioè proprio le due vie
+    // di uscita che servono quando quel backend non parte.
     bool const explicitGraphicsBackend =
-        !decodiumGraphicsBackend.isEmpty()
+        (!decodiumGraphicsBackend.isEmpty() && !lowEndForcedOpenGl)
         || !requestedRhiBackend.isEmpty()
         || !requestedQuickBackend.isEmpty();
     bool const slowQmlStartupMarker = QFile::exists(slowQmlStartupFlag);
