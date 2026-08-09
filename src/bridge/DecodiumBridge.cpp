@@ -27002,6 +27002,10 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         QStringLiteral("UDPClientId"),
         QStringLiteral("UDPSecondaryClientId"),
         QStringLiteral("UDPTertiaryClientId"),
+        QStringLiteral("UDPPrimarySendDecode"),
+        QStringLiteral("UDPPrimarySendStatus"),
+        QStringLiteral("UDPPrimarySendQso"),
+        QStringLiteral("UDPPrimarySendWspr"),
         QStringLiteral("UDPTTL"),
         QStringLiteral("AcceptUDPRequests"),
         QStringLiteral("UDPSecondaryEnabled"),
@@ -27011,12 +27015,20 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         QStringLiteral("UDPSecondaryTTL"),
         QStringLiteral("UDPSecondaryQsoLoggedEnabled"),
         QStringLiteral("UDPSecondaryLoggedAdifEnabled"),
+        QStringLiteral("UDPSecondarySendDecode"),
+        QStringLiteral("UDPSecondarySendStatus"),
+        QStringLiteral("UDPSecondarySendQso"),
+        QStringLiteral("UDPSecondarySendWspr"),
         QStringLiteral("UDPTertiaryEnabled"),
         QStringLiteral("UDPTertiaryServer"),
         QStringLiteral("UDPTertiaryServerPort"),
         QStringLiteral("UDPTertiaryInterface"),
         QStringLiteral("UDPTertiaryTTL"),
         QStringLiteral("UDPTertiaryLoggedAdifEnabled"),
+        QStringLiteral("UDPTertiarySendDecode"),
+        QStringLiteral("UDPTertiarySendStatus"),
+        QStringLiteral("UDPTertiarySendQso"),
+        QStringLiteral("UDPTertiarySendWspr"),
     };
     if (udpRuntimeKeys.contains(key)) {
         scheduleUdpMessageClientRestart();
@@ -28786,9 +28798,15 @@ bool DecodiumBridge::isLegacySyncKey(const QString& key) const
         QStringLiteral("UDPServerPort"),
         QStringLiteral("UDPListenPort"),
         QStringLiteral("UDPClientId"),
+        QStringLiteral("UDPSecondaryClientId"),
+        QStringLiteral("UDPTertiaryClientId"),
         QStringLiteral("UDPInterface"),
         QStringLiteral("UDPTTL"),
         QStringLiteral("UDPPrimaryLoggedAdifEnabled"),
+        QStringLiteral("UDPPrimarySendDecode"),
+        QStringLiteral("UDPPrimarySendStatus"),
+        QStringLiteral("UDPPrimarySendQso"),
+        QStringLiteral("UDPPrimarySendWspr"),
         QStringLiteral("UDPSecondaryEnabled"),
         QStringLiteral("UDPSecondaryServer"),
         QStringLiteral("UDPSecondaryServerPort"),
@@ -28796,12 +28814,20 @@ bool DecodiumBridge::isLegacySyncKey(const QString& key) const
         QStringLiteral("UDPSecondaryTTL"),
         QStringLiteral("UDPSecondaryLoggedAdifEnabled"),
         QStringLiteral("UDPSecondaryQsoLoggedEnabled"),
+        QStringLiteral("UDPSecondarySendDecode"),
+        QStringLiteral("UDPSecondarySendStatus"),
+        QStringLiteral("UDPSecondarySendQso"),
+        QStringLiteral("UDPSecondarySendWspr"),
         QStringLiteral("UDPTertiaryEnabled"),
         QStringLiteral("UDPTertiaryServer"),
         QStringLiteral("UDPTertiaryServerPort"),
         QStringLiteral("UDPTertiaryInterface"),
         QStringLiteral("UDPTertiaryTTL"),
         QStringLiteral("UDPTertiaryLoggedAdifEnabled"),
+        QStringLiteral("UDPTertiarySendDecode"),
+        QStringLiteral("UDPTertiarySendStatus"),
+        QStringLiteral("UDPTertiarySendQso"),
+        QStringLiteral("UDPTertiarySendWspr"),
         QStringLiteral("ADIFTcpEnabled"),
         QStringLiteral("ADIFTcpServer"),
         QStringLiteral("ADIFTcpPort"),
@@ -29039,6 +29065,21 @@ static QHostAddress resolveUdpHostAddress(QString const& serverName)
     return {};
 }
 
+bool DecodiumBridge::udpTrafficEnabled(const QString& destinationPrefix,
+                                       const QString& category) const
+{
+    QString const key = destinationPrefix + QStringLiteral("Send") + category;
+    if (category == QStringLiteral("Qso")) {
+        // Existing installations used the ADIF switch as their only logged-QSO
+        // selector. Use it as the migration fallback until the new filter is
+        // explicitly saved.
+        bool const legacyAdifDefault =
+            getSetting(destinationPrefix + QStringLiteral("LoggedAdifEnabled"), true).toBool();
+        return getSetting(key, legacyAdifDefault).toBool();
+    }
+    return getSetting(key, true).toBool();
+}
+
 void DecodiumBridge::initUdpMessageClient()
 {
     // Read UDP settings from the legacy INI (canonical source)
@@ -29055,8 +29096,16 @@ void DecodiumBridge::initUdpMessageClient()
     auto const interfaceText = [] (QStringList const& names) {
         return names.isEmpty() ? QStringLiteral("all") : names.join(QStringLiteral(","));
     };
+    auto const trafficText = [&boolText] (bool decode, bool status, bool qso, bool wspr) {
+        return QStringLiteral("Decode:%1 Status:%2 QSO:%3 WSPR:%4")
+            .arg(boolText(decode), boolText(status), boolText(qso), boolText(wspr));
+    };
     bool const acceptUdpRequests = getSetting(QStringLiteral("AcceptUDPRequests"), true).toBool();
     bool const primaryAdifEnabled = getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool();
+    bool const primaryDecodeEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Decode"));
+    bool const primaryStatusEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Status"));
+    bool const primaryQsoEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Qso"));
+    bool const primaryWsprEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Wspr"));
     bool const secondaryEnabled = getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool();
     QString const secondaryServerName =
         getSetting(QStringLiteral("UDPSecondaryServer"), serverName).toString().trimmed();
@@ -29070,6 +29119,12 @@ void DecodiumBridge::initUdpMessageClient()
         secondaryInterfaces << secondaryInterface;
     }
     bool const secondaryAdifEnabled = getSetting(QStringLiteral("UDPSecondaryLoggedAdifEnabled"), true).toBool();
+    bool const secondaryDecodeEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Decode"));
+    bool const secondaryStatusEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Status"));
+    bool const secondaryQsoEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Qso"));
+    bool const secondaryWsprEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Wspr"));
+    bool const secondaryRealtimeEnabled = secondaryEnabled
+        && (secondaryDecodeEnabled || secondaryStatusEnabled || secondaryWsprEnabled);
     bool const tertiaryEnabled = getSetting(QStringLiteral("UDPTertiaryEnabled"), false).toBool();
     QString const tertiaryServerName =
         getSetting(QStringLiteral("UDPTertiaryServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
@@ -29083,6 +29138,12 @@ void DecodiumBridge::initUdpMessageClient()
         tertiaryInterfaces << tertiaryInterface;
     }
     bool const tertiaryAdifEnabled = getSetting(QStringLiteral("UDPTertiaryLoggedAdifEnabled"), true).toBool();
+    bool const tertiaryDecodeEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Decode"));
+    bool const tertiaryStatusEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Status"));
+    bool const tertiaryQsoEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Qso"));
+    bool const tertiaryWsprEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Wspr"));
+    bool const tertiaryRealtimeEnabled = tertiaryEnabled
+        && (tertiaryDecodeEnabled || tertiaryStatusEnabled || tertiaryWsprEnabled);
     bool const adifTcpEnabled = getSetting(QStringLiteral("ADIFTcpEnabled"), false).toBool();
     QString const adifTcpServer = getSetting(QStringLiteral("ADIFTcpServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
     quint16 const adifTcpPort = udpPortFromSettingValue(getSetting(QStringLiteral("ADIFTcpPort"), 52001), 52001);
@@ -29104,17 +29165,23 @@ void DecodiumBridge::initUdpMessageClient()
     QString const tertiaryClientId = decodium::network::normalizedUdpClientId(
         getSetting(QStringLiteral("UDPTertiaryClientId"), QStringLiteral("Decodium")).toString());
 
-    bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 loggedADIF=%8")
+    bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 filters=[%8] loggedADIF=%9")
                   .arg(serverName.trimmed(), QString::number(serverPort), QString::number(listenPort),
                        clientId, interfaceText(interfaces), QString::number(ttl),
-                       boolText(acceptUdpRequests), boolText(primaryAdifEnabled)));
-    bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
+                       boolText(acceptUdpRequests),
+                       trafficText(primaryDecodeEnabled, primaryStatusEnabled, primaryQsoEnabled, primaryWsprEnabled),
+                       boolText(primaryAdifEnabled)));
+    bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=%4 clientId=%5 interface=%6 ttl=%7 filters=[%8] loggedADIF=%9")
                   .arg(boolText(secondaryEnabled), secondaryServerName, QString::number(secondaryPort),
+                       secondaryRealtimeEnabled ? QStringLiteral("ephemeral") : QStringLiteral("QSO-only"),
                        secondaryClientId, interfaceText(secondaryInterfaces), QString::number(secondaryTtl),
+                       trafficText(secondaryDecodeEnabled, secondaryStatusEnabled, secondaryQsoEnabled, secondaryWsprEnabled),
                        boolText(secondaryAdifEnabled)));
-    bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=ephemeral clientId=%4 interface=%5 ttl=%6 loggedADIF=%7")
+    bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=%4 clientId=%5 interface=%6 ttl=%7 filters=[%8] loggedADIF=%9")
                   .arg(boolText(tertiaryEnabled), tertiaryServerName, QString::number(tertiaryPort),
+                       tertiaryRealtimeEnabled ? QStringLiteral("ephemeral") : QStringLiteral("QSO-only"),
                        tertiaryClientId, interfaceText(tertiaryInterfaces), QString::number(tertiaryTtl),
+                       trafficText(tertiaryDecodeEnabled, tertiaryStatusEnabled, tertiaryQsoEnabled, tertiaryWsprEnabled),
                        boolText(tertiaryAdifEnabled)));
     bridgeLog(QStringLiteral("Reporting config: ADIF TCP %1 target=%2:%3")
                   .arg(boolText(adifTcpEnabled), adifTcpServer, QString::number(adifTcpPort)));
@@ -29274,29 +29341,30 @@ void DecodiumBridge::initUdpMessageClient()
                   + " listen=" + QString::number(listenPort));
     }
 
-    if (secondaryEnabled && !m_udpSecondaryMessageClient) {
+    // A persistent MessageClient emits protocol heartbeats. Keep it alive only
+    // when this destination has at least one real-time category enabled. A
+    // QSO-only secondary receives its raw ADIF datagram at commit time instead.
+    if (secondaryRealtimeEnabled && !m_udpSecondaryMessageClient) {
         m_udpSecondaryMessageClient = new MessageClient(secondaryClientId, ver, rev,
                                                         secondaryServerName, secondaryPort,
                                                         0, secondaryInterfaces, secondaryTtl,
                                                         this, QStringLiteral("secondary"));
         m_udpSecondaryMessageClient->enable(false);
-
         connect(m_udpSecondaryMessageClient, &MessageClient::error, this, [](const QString& msg) {
             bridgeLog("Secondary UDP MessageClient error: " + msg);
         });
-
         bridgeLog("Secondary UDP MessageClient started: server=" + secondaryServerName + ":"
                   + QString::number(secondaryPort) + " listen=0 interface="
                   + interfaceText(secondaryInterfaces) + " ttl="
                   + QString::number(secondaryTtl));
-    } else if (!secondaryEnabled && m_udpSecondaryMessageClient) {
-        bridgeLog(QStringLiteral("Stopping secondary UDP MessageClient"));
+    } else if (!secondaryRealtimeEnabled && m_udpSecondaryMessageClient) {
+        bridgeLog(QStringLiteral("Stopping secondary UDP MessageClient; destination has no real-time traffic"));
         m_udpSecondaryMessageClient->disconnect(this);
         m_udpSecondaryMessageClient->deleteLater();
         m_udpSecondaryMessageClient = nullptr;
     }
 
-    if (tertiaryEnabled && !m_udpTertiaryMessageClient) {
+    if (tertiaryRealtimeEnabled && !m_udpTertiaryMessageClient) {
         m_udpTertiaryMessageClient = new MessageClient(tertiaryClientId, ver, rev,
                                                        tertiaryServerName, tertiaryPort,
                                                        0, tertiaryInterfaces, tertiaryTtl,
@@ -29310,8 +29378,8 @@ void DecodiumBridge::initUdpMessageClient()
         bridgeLog("Tertiary UDP MessageClient started: server=" + tertiaryServerName + ":"
                   + QString::number(tertiaryPort) + " listen=0 interface="
                   + interfaceText(tertiaryInterfaces) + " ttl=" + QString::number(tertiaryTtl));
-    } else if (!tertiaryEnabled && m_udpTertiaryMessageClient) {
-        bridgeLog(QStringLiteral("Stopping tertiary UDP MessageClient"));
+    } else if (!tertiaryRealtimeEnabled && m_udpTertiaryMessageClient) {
+        bridgeLog(QStringLiteral("Stopping tertiary UDP MessageClient; destination has no real-time traffic"));
         m_udpTertiaryMessageClient->disconnect(this);
         m_udpTertiaryMessageClient->deleteLater();
         m_udpTertiaryMessageClient = nullptr;
@@ -29419,9 +29487,15 @@ void DecodiumBridge::udpSendStatus()
         );
     };
 
-    sendStatus(m_udpMessageClient);
-    sendStatus(m_udpSecondaryMessageClient);
-    sendStatus(m_udpTertiaryMessageClient);
+    if (udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Status"))) {
+        sendStatus(m_udpMessageClient);
+    }
+    if (udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Status"))) {
+        sendStatus(m_udpSecondaryMessageClient);
+    }
+    if (udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Status"))) {
+        sendStatus(m_udpTertiaryMessageClient);
+    }
 }
 
 void DecodiumBridge::udpSendDecode(bool isNew, const QString& rawLine, quint64 serial)
@@ -29460,16 +29534,60 @@ void DecodiumBridge::udpSendDecode(bool isNew, const QString& rawLine, quint64 s
         time = QDateTime::currentDateTimeUtc().time();
     }
 
-    if (m_udpMessageClient) {
+    if (m_udpMessageClient
+        && udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Decode"))) {
         m_udpMessageClient->decode(isNew, time, snr, dt, df, m_mode, message, false, false);
     }
-    if (m_udpSecondaryMessageClient) {
+    if (m_udpSecondaryMessageClient
+        && udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Decode"))) {
         m_udpSecondaryMessageClient->decode(isNew, time, snr, dt, df, m_mode, message, false, false);
     }
-    if (m_udpTertiaryMessageClient) {
+    if (m_udpTertiaryMessageClient
+        && udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Decode"))) {
         m_udpTertiaryMessageClient->decode(isNew, time, snr, dt, df, m_mode, message, false, false);
     }
     Q_UNUSED(serial)
+}
+
+void DecodiumBridge::udpSendWsprDecode(bool isNew, const QString& rawLine)
+{
+    if ((!m_udpMessageClient && !m_udpSecondaryMessageClient && !m_udpTertiaryMessageClient)
+        || usingLegacyBackendForTx()) {
+        return;
+    }
+
+    QStringList parts = rawLine.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
+    if (parts.size() == 7) {
+        // A WSPR decode may omit the locator: keep the packet field ordering.
+        parts.insert(6, QString());
+    }
+    if (parts.size() < 8) {
+        return;
+    }
+
+    auto sendWspr = [&](MessageClient* client) {
+        if (!client) return;
+        client->WSPR_decode(isNew,
+                            QTime::fromString(parts.at(0), QStringLiteral("hhmm")),
+                            parts.at(1).toInt(),
+                            parts.at(2).toFloat(),
+                            Radio::frequency(parts.at(3).toFloat(), 6),
+                            parts.at(4).toInt(),
+                            parts.at(5),
+                            parts.at(6),
+                            parts.at(7).toInt(),
+                            false);
+    };
+
+    if (udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Wspr"))) {
+        sendWspr(m_udpMessageClient);
+    }
+    if (udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Wspr"))) {
+        sendWspr(m_udpSecondaryMessageClient);
+    }
+    if (udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Wspr"))) {
+        sendWspr(m_udpTertiaryMessageClient);
+    }
 }
 
 void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGrid,
@@ -29544,26 +29662,21 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
     };
 
     if (wsjtxUdpAvailable) {
-        sendLoggedQso(m_udpMessageClient,
-                      getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool());
-        // D3 used the "secondary UDP / N1MM" path as raw ADIF broadcast, not as
-        // a second WSJT-X log stream. Keep that default so secondary consumers
-        // see the same commit payload as autolog.
-        bool const secondaryEnabled = getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool();
-        if (secondaryEnabled
-            && getSetting(QStringLiteral("UDPSecondaryQsoLoggedEnabled"), false).toBool()) {
-            sendLoggedQso(m_udpSecondaryMessageClient, false);
+        if (udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Qso"))) {
+            sendLoggedQso(m_udpMessageClient,
+                          getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool());
         }
-        if (m_udpTertiaryMessageClient) {
+        if (m_udpTertiaryMessageClient
+            && udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Qso"))) {
             bool const tertiaryAdifEnabled =
                 getSetting(QStringLiteral("UDPTertiaryLoggedAdifEnabled"), true).toBool();
             sendLoggedQso(m_udpTertiaryMessageClient, tertiaryAdifEnabled);
         }
     }
 
-    bool const secondaryAdifEnabled = getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool()
-        && getSetting(QStringLiteral("UDPSecondaryLoggedAdifEnabled"), true).toBool();
-    if (secondaryAdifEnabled) {
+    bool const secondaryQsoEnabled = getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool()
+        && udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Qso"));
+    if (secondaryQsoEnabled) {
         QString const secondaryServerName =
             getSetting(QStringLiteral("UDPSecondaryServer"),
                        getSetting(QStringLiteral("UDPServer"), QStringLiteral("127.0.0.1"))).toString().trimmed();
@@ -29571,6 +29684,20 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
             getSetting(QStringLiteral("UDPSecondaryServerPort"), 2239), 2239);
         if (udpSendRawAdifDatagram(QStringLiteral("UDP secondary raw ADIF"),
                                    secondaryServerName, secondaryPort, dxCall, adifRecord)) {
+            ++rawAdifTargets;
+        }
+    }
+
+    bool const tertiaryQsoOnly = getSetting(QStringLiteral("UDPTertiaryEnabled"), false).toBool()
+        && udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Qso"))
+        && !m_udpTertiaryMessageClient;
+    if (tertiaryQsoOnly) {
+        QString const tertiaryServerName =
+            getSetting(QStringLiteral("UDPTertiaryServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
+        quint16 const tertiaryPort = udpPortFromSettingValue(
+            getSetting(QStringLiteral("UDPTertiaryServerPort"), 2237), 2237);
+        if (udpSendRawAdifDatagram(QStringLiteral("UDP tertiary QSO-only raw ADIF"),
+                                   tertiaryServerName, tertiaryPort, dxCall, adifRecord)) {
             ++rawAdifTargets;
         }
     }
@@ -43880,7 +44007,7 @@ void DecodiumBridge::onWsprDecodeReady(quint64 serial, QStringList rows,
         appendRxDecodeEntry(entry);
         appendLegacyAllTxtDecodeLine(entry);
         queueWorldMapEntryForReplay(entry, false, 250);
-        udpSendDecode(true, row, serial);
+        udpSendWsprDecode(true, row);
         maybePlayDecodeAlert(false, entry.value(QStringLiteral("isMyCall")).toBool());
         changed = true;
         ++accepted;

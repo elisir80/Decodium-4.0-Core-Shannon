@@ -5,6 +5,7 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 ScrollView {
+    id: root
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
@@ -43,6 +44,35 @@ ScrollView {
     function setBoolSettingIfChanged(key, value, fallback) {
         if (dialog)
             dialog.setBoolSettingIfChanged(key, value, fallback)
+    }
+
+    component UdpTrafficCheck: CheckBox {
+        id: trafficCheck
+        property var settingsHost
+        property string settingKey
+        property bool settingFallback: true
+        checked: settingsHost ? settingsHost.boolSetting(settingKey, settingFallback) : settingFallback
+        onToggled: {
+            if (settingsHost)
+                settingsHost.setBoolSettingIfChanged(settingKey, checked, settingFallback)
+        }
+        indicator: Rectangle {
+            width: 18; height: 18; radius: 3
+            color: trafficCheck.settingsHost
+                   ? (trafficCheck.checked ? trafficCheck.settingsHost.primaryBlue : trafficCheck.settingsHost.bgMedium)
+                   : "#101722"
+            border.color: trafficCheck.settingsHost ? trafficCheck.settingsHost.glassBorder : "#334455"
+            y: trafficCheck.height / 2 - height / 2
+        }
+        contentItem: Text {
+            text: trafficCheck.text
+            color: trafficCheck.settingsHost
+                   ? (trafficCheck.enabled ? trafficCheck.settingsHost.textPrimary : trafficCheck.settingsHost.textDim)
+                   : "#f2f5f7"
+            font.pixelSize: 12
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 24
+        }
     }
     clip: true
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
@@ -631,13 +661,18 @@ ScrollView {
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
         }
-        Text { text: qsTr("Send ADIF:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-        CheckBox {
-            id: udpPrimaryAdifCheck
-            checked: boolSetting("UDPPrimaryLoggedAdifEnabled", true)
-            onToggled: setBoolSettingIfChanged("UDPPrimaryLoggedAdifEnabled", checked, true)
-            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-            contentItem: Text { text: ""; leftPadding: 24 }
+        Text { text: qsTr("Primary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        Flow {
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            spacing: 16
+            UdpTrafficCheck { settingsHost: root; text: qsTr("Decode"); settingKey: "UDPPrimarySendDecode" }
+            UdpTrafficCheck { settingsHost: root; text: qsTr("Status"); settingKey: "UDPPrimarySendStatus" }
+            UdpTrafficCheck {
+                settingsHost: root; text: qsTr("QSO logged"); settingKey: "UDPPrimarySendQso"
+                settingFallback: root.boolSetting("UDPPrimaryLoggedAdifEnabled", true)
+            }
+            UdpTrafficCheck { settingsHost: root; text: qsTr("WSPR"); settingKey: "UDPPrimarySendWspr" }
         }
 
         Text { text: qsTr("Secondary UDP:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -734,13 +769,19 @@ ScrollView {
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
         }
-        Text { text: qsTr("Secondary ADIF:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-        CheckBox {
-            id: udpSecondaryAdifCheck
-            checked: boolSetting("UDPSecondaryLoggedAdifEnabled", true)
-            onToggled: setBoolSettingIfChanged("UDPSecondaryLoggedAdifEnabled", checked, true)
-            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-            contentItem: Text { text: ""; leftPadding: 24 }
+        Text { text: qsTr("Secondary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        Flow {
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            spacing: 16
+            UdpTrafficCheck { settingsHost: root; text: qsTr("Decode"); settingKey: "UDPSecondarySendDecode"; enabled: udpSecondaryCheck.checked }
+            UdpTrafficCheck { settingsHost: root; text: qsTr("Status"); settingKey: "UDPSecondarySendStatus"; enabled: udpSecondaryCheck.checked }
+            UdpTrafficCheck {
+                settingsHost: root; text: qsTr("QSO logged"); settingKey: "UDPSecondarySendQso"
+                settingFallback: root.boolSetting("UDPSecondaryLoggedAdifEnabled", true)
+                enabled: udpSecondaryCheck.checked
+            }
+            UdpTrafficCheck { settingsHost: root; text: qsTr("WSPR"); settingKey: "UDPSecondarySendWspr"; enabled: udpSecondaryCheck.checked }
         }
 
         Text { text: qsTr("Tertiary UDP:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -846,17 +887,20 @@ ScrollView {
             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
         }
 
-        Text { text: qsTr("Tertiary ADIF:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-        CheckBox {
-            id: udpTertiaryAdifCheck
-            checked: boolSetting("UDPTertiaryLoggedAdifEnabled", true)
-            enabled: udpTertiaryCheck.checked
-            opacity: enabled ? 1.0 : 0.5
-            onToggled: setBoolSettingIfChanged("UDPTertiaryLoggedAdifEnabled", checked, true)
-            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-            contentItem: Text { text: ""; leftPadding: 24 }
+        Text { text: qsTr("Tertiary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        Flow {
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            spacing: 16
+            UdpTrafficCheck { settingsHost: root; text: qsTr("Decode"); settingKey: "UDPTertiarySendDecode"; enabled: udpTertiaryCheck.checked }
+            UdpTrafficCheck { settingsHost: root; text: qsTr("Status"); settingKey: "UDPTertiarySendStatus"; enabled: udpTertiaryCheck.checked }
+            UdpTrafficCheck {
+                settingsHost: root; text: qsTr("QSO logged"); settingKey: "UDPTertiarySendQso"
+                settingFallback: root.boolSetting("UDPTertiaryLoggedAdifEnabled", true)
+                enabled: udpTertiaryCheck.checked
+            }
+            UdpTrafficCheck { settingsHost: root; text: qsTr("WSPR"); settingKey: "UDPTertiarySendWspr"; enabled: udpTertiaryCheck.checked }
         }
-        Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── N1MM Logger+ / HRD Logbook / EasyLog (ADIF UDP) ──
         Text { text: qsTr("N1MM / HRD LOGBOOK / EASYLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }

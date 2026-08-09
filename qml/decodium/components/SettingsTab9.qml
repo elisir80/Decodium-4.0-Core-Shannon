@@ -156,7 +156,7 @@ ScrollView {
                         dialog.scheduleSettingsPersist()
                     }
                     ToolTip.visible: hovered
-                    ToolTip.text: qsTr("One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.")
+                    ToolTip.text: qsTr("One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.")
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }

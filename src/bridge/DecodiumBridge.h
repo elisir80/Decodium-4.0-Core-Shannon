@@ -2141,8 +2141,11 @@ private:
     void initUdpMessageClient();
     void shutdownUdpMessageClient();
     void scheduleUdpMessageClientRestart();
+    bool udpTrafficEnabled(const QString& destinationPrefix,
+                           const QString& category) const;
     void udpSendStatus();
     void udpSendDecode(bool isNew, const QString& rawLine, quint64 serial);
+    void udpSendWsprDecode(bool isNew, const QString& rawLine);
     void udpSendLoggedQso(const QString& dxCall, const QString& dxGrid,
                           double freqHz, const QString& mode,
                           const QDateTime& timeOnUtc,
