@@ -25,7 +25,7 @@ private slots:
   void normalizesConfiguredId()
   {
     QCOMPARE(decodium::network::normalizedUdpClientId(QString {}),
-             QStringLiteral("WSJTX"));
+             QStringLiteral("Decodium"));
     QCOMPARE(decodium::network::normalizedUdpClientId(QStringLiteral("  Deco   Client  ")),
              QStringLiteral("Deco Client"));
     QCOMPARE(decodium::network::normalizedUdpClientId(QString(80, QLatin1Char('A'))).size(), 64);

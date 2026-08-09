@@ -539,7 +539,7 @@ ScrollView {
         Text { text: qsTr("Client ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
             id: udpClientIdField
-            text: bridge.getSetting("UDPClientId", "WSJTX")
+            text: bridge.getSetting("UDPClientId", "Decodium")
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
             implicitHeight: controlHeight
@@ -552,7 +552,7 @@ ScrollView {
             onEditingFinished: {
                 var cleaned = String(text).trim()
                 if (!cleaned.length)
-                    cleaned = "WSJTX"
+                    cleaned = "Decodium"
                 if (cleaned !== text)
                     text = cleaned
                 bridge.setSetting("UDPClientId", cleaned)
@@ -561,11 +561,11 @@ ScrollView {
         Text { text: qsTr("Preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoComboBox {
             id: udpClientIdPreset
-            model: ["WSJTX", "Decodium"]
+            model: ["Decodium", "WSJTX"]
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
             implicitHeight: controlHeight
-            Component.onCompleted: currentIndex = Math.max(0, find(String(bridge.getSetting("UDPClientId", "WSJTX"))))
+            Component.onCompleted: currentIndex = Math.max(0, find(String(bridge.getSetting("UDPClientId", "Decodium"))))
             onActivated: {
                 udpClientIdField.text = currentText
                 bridge.setSetting("UDPClientId", currentText)

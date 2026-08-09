@@ -2498,13 +2498,22 @@ static int replyTxPeriodForClickedDecode(QString const& mode,
     return dxPidx % 2;
 }
 
+// 1.0.538 iu8lmc - la frequenza entra nella chiave in forma canonica
+// (intero). Prima due formattazioni diverse dello stesso hertz davano due
+// chiavi distinte, e soprattutto non si potevano costruire le chiavi vicine
+// per il confronto a tolleranza usato piu' avanti.
+static constexpr int kNativeDecodeDedupFreqToleranceHz = 5;
+
 static QString decodeDedupKey(QString const& time,
                               QString const& freq,
                               QString const& message)
 {
+    bool freqOk = false;
+    int const freqHz = freq.trimmed().toInt(&freqOk);
+    QString const freqToken = freqOk ? QString::number(freqHz) : freq.trimmed();
     return normalizeUtcDisplayToken(time).trimmed()
         + QLatin1Char('|')
-        + freq.trimmed()
+        + freqToken
         + QLatin1Char('|')
         + canonicalDecodeMessage(message);
 }
@@ -29078,8 +29087,23 @@ void DecodiumBridge::initUdpMessageClient()
     bool const n1mmEnabled = getSetting(QStringLiteral("BroadcastToN1MM"), false).toBool();
     QString const n1mmServer = getSetting(QStringLiteral("N1MMServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
     quint16 const n1mmPort = udpPortFromSettingValue(getSetting(QStringLiteral("N1MMServerPort"), 2333), 2333);
+    // 1.0.538 iu8lmc - migrazione una tantum. Chi aveva gia' aperto il
+    // pannello UDP si ritrovava "WSJTX" salvato nelle impostazioni, e i
+    // collettori scartavano ogni pacchetto leggendo la nostra 1.0.x come se
+    // fosse la versione di WSJT-X. Si sposta a "Decodium" una sola volta:
+    // chi preferisce il vecchio identificativo puo' rimetterlo dal menu a
+    // tendina e la scelta non viene piu' toccata.
+    if (!getSetting(QStringLiteral("UDPClientIdMigratedToDecodium"), false).toBool()) {
+        QString const savedId = getSetting(QStringLiteral("UDPClientId"), QString()).toString().trimmed();
+        if (0 == savedId.compare(QStringLiteral("WSJTX"), Qt::CaseInsensitive)
+            || 0 == savedId.compare(QStringLiteral("WSJT-X"), Qt::CaseInsensitive)) {
+            setSetting(QStringLiteral("UDPClientId"), QStringLiteral("Decodium"));
+            bridgeLog(QStringLiteral("UDP client id migrato da %1 a Decodium").arg(savedId));
+        }
+        setSetting(QStringLiteral("UDPClientIdMigratedToDecodium"), true);
+    }
     QString const clientId = decodium::network::normalizedUdpClientId(
-        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("WSJTX")).toString());
+        getSetting(QStringLiteral("UDPClientId"), QStringLiteral("Decodium")).toString());
 
     bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 loggedADIF=%8")
                   .arg(serverName.trimmed(), QString::number(serverPort), QString::number(listenPort),
@@ -42569,9 +42593,32 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         QString fromCall = extractDecodedCallsign(msg, isCQ);
 
         QString const dedupKey = decodeDedupKey(entryTime, f[7], msg);
+        // 1.0.538 iu8lmc - lo stesso segnale ridecodificato dalla passata
+        // profonda torna con qualche hertz di scarto rispetto alla prima
+        // stima. Con la sola chiave esatta erano due decodifiche distinte:
+        // due righe in lista e due pacchetti UDP per lo stesso messaggio,
+        // che i collettori esterni contavano come traffico doppio. Il
+        // percorso FT2 async quantizzava gia' la frequenza per lo stesso
+        // motivo; qui si confronta con una tolleranza di pochi hertz.
+        bool nearDuplicate = false;
+        if (!legacyUiMirrorActive && !dedupKey.isEmpty()) {
+            bool freqOk = false;
+            int const freqHz = f[7].trimmed().toInt(&freqOk);
+            if (freqOk) {
+                for (int delta = -kNativeDecodeDedupFreqToleranceHz;
+                     delta <= kNativeDecodeDedupFreqToleranceHz && !nearDuplicate;
+                     ++delta) {
+                    if (delta == 0) {
+                        continue;
+                    }
+                    nearDuplicate = isRecentNativeDuplicate(
+                        decodeDedupKey(entryTime, QString::number(freqHz + delta), msg));
+                }
+            }
+        }
         if (!legacyUiMirrorActive
             && !dedupKey.isEmpty()
-            && isRecentNativeDuplicate(dedupKey)) {
+            && (isRecentNativeDuplicate(dedupKey) || nearDuplicate)) {
             skippedDuplicateDecodeKeys.insert(dedupKey);
             logSignoffWatchDrop(QStringLiteral("filtered recent-duplicate"), dedupKey);
             ++duplicatesSkipped;

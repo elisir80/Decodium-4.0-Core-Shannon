@@ -915,6 +915,14 @@ bool MessageClient::impl::message_target_matches (QString const& incoming_id) co
     {
       return true;
     }
+  // 1.0.538 iu8lmc - stessi alias gia' accettati dai messaggi di controllo:
+  // ora che ci firmiamo "Decodium", un programma che ci indirizza come
+  // "WSJTX" deve continuare a essere ascoltato.
+  if (0 == trimmed.compare ("WSJTX", Qt::CaseInsensitive)
+      || 0 == trimmed.compare ("WSJT-X", Qt::CaseInsensitive))
+    {
+      return true;
+    }
   return trimmed.compare ("ALLCALL", Qt::CaseInsensitive) == 0
       || trimmed.compare ("BROADCAST", Qt::CaseInsensitive) == 0
       || trimmed == "*";
