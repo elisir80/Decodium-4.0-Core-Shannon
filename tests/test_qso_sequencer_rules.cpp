@@ -190,7 +190,23 @@ private slots:
     QCOMPARE (st.reportReceived, QString ("-10"));
     QVERIFY (st.sendRR73);
     QVERIFY (!st.qsoLogged);
+    QVERIFY (st.qsoFirstReplyOn.isNull());
     QVERIFY (!st.ft2DeferredLogPending);
+  }
+
+  void qsoLogTimePrefersFirstReply ()
+  {
+    decodium::seq::QsoSequencerState st;
+    QDateTime const initiated {
+        QDate(2026, 8, 10), QTime(12, 0, 0), QTimeZone::UTC};
+    QDateTime const firstReply {
+        QDate(2026, 8, 10), QTime(12, 7, 30), QTimeZone::UTC};
+
+    st.qsoStartedOn = initiated;
+    QCOMPARE(st.effectiveQsoLogTimeOnUtc(), initiated);
+
+    st.qsoFirstReplyOn = firstReply;
+    QCOMPARE(st.effectiveQsoLogTimeOnUtc(), firstReply);
   }
 
   void planAdvanceDecision ()

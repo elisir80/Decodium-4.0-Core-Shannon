@@ -124,6 +124,13 @@ add_executable (test_cat4om_manager
 target_link_libraries (test_cat4om_manager Qt6::Test Qt6::Core Qt6::Network Qt6::WebSockets)
 add_test (NAME test_cat4om_manager COMMAND $<TARGET_FILE:test_cat4om_manager>)
 
+add_executable (test_civ_address_settings
+  test_civ_address_settings.cpp
+  ../src/radio/DecodiumCatManager.cpp
+  ../src/radio/DecodiumCatManager.h)
+target_link_libraries (test_civ_address_settings Qt6::Test Qt6::Core Qt6::SerialPort)
+add_test (NAME test_civ_address_settings COMMAND $<TARGET_FILE:test_civ_address_settings>)
+
 add_executable (test_udp_client_id test_udp_client_id.cpp)
 target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
@@ -157,6 +164,13 @@ add_executable (test_callsign_intelligence
   ../src/security/SecureSettings.cpp)
 target_link_libraries (test_callsign_intelligence Qt6::Test Qt6::Core Qt6::Network Qt6::Sql Qt6::Gui)
 add_test (NAME test_callsign_intelligence COMMAND $<TARGET_FILE:test_callsign_intelligence>)
+
+add_executable (test_dxcc_lookup
+  test_dxcc_lookup.cpp
+  ../src/services/DxccLookup.cpp
+  ../src/services/DxccLookup.h)
+target_link_libraries (test_dxcc_lookup Qt6::Test Qt6::Core)
+add_test (NAME test_dxcc_lookup COMMAND $<TARGET_FILE:test_dxcc_lookup>)
 
 add_executable (test_filedownload test_filedownload.cpp)
 target_link_libraries (test_filedownload wsjt_qt wsjt_cxx Qt6::Test)

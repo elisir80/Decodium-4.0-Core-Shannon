@@ -722,31 +722,54 @@ ScrollView {
             font.pixelSize: 12
             Layout.preferredWidth: 100
         }
-        Rectangle {
+        DecoTextField {
             id: civAddrField
             visible: dialog.usesSerialControls() && dialog.rigIsIcom()
             Layout.fillWidth: true
             Layout.columnSpan: 3
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
-            color: bgMedium
-            border.color: glassBorder
-            radius: 4
-            clip: true
+            property bool invalidAddress: false
+            text: dialog.civAddressText()
+            placeholderText: dialog.civAddressPlaceholderText()
+            selectByMouse: true
+            inputMethodHints: Qt.ImhNoPredictiveText
+            color: textPrimary
+            font.pixelSize: controlFontSize
+            leftPadding: 8
+            ToolTip.visible: activeFocus
+            ToolTip.delay: 500
+            ToolTip.text: qsTr("Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.")
+            background: Rectangle {
+                color: bgMedium
+                border.color: civAddrField.invalidAddress ? "#f44336"
+                             : (civAddrField.activeFocus ? secondaryCyan : glassBorder)
+                radius: 4
+            }
+            onActiveFocusChanged: {
+                if (activeFocus)
+                    invalidAddress = false
+            }
+            onEditingFinished: {
+                var address = dialog.civAddressFromText(text)
+                if (address < 0) {
+                    invalidAddress = true
+                    text = dialog.civAddressText()
+                    return
+                }
 
-            readonly property string valueText: dialog.civAddressText()
-
-            Text {
-                anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                text: civAddrField.valueText.length > 0
-                      ? civAddrField.valueText
-                      : dialog.civAddressPlaceholderText()
-                color: civAddrField.valueText.length > 0 ? textPrimary : textSecondary
-                font.pixelSize: controlFontSize
-                elide: Text.ElideRight
-                verticalAlignment: Text.AlignVCenter
+                invalidAddress = false
+                if (bridge.catManager)
+                    bridge.catManager.civAddress = address
+                text = dialog.civAddressText()
+                dialog.scheduleCatPersist()
+            }
+        }
+        Connections {
+            target: bridge ? bridge.catManager : null
+            function onCivAddressChanged() {
+                if (!civAddrField.activeFocus)
+                    civAddrField.text = dialog.civAddressText()
             }
         }
 

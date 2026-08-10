@@ -148,6 +148,24 @@ DxccEntity DxccLookup::lookup(const QString& callsign) const
         }
     }
 
+    // KG4 is a length-sensitive prefix.  The generic cty.dat entry maps
+    // KG4 to Guantanamo Bay, but US calls using the same prefix are assigned
+    // with one or three suffix characters (KG4A / KG4ABC).  Exact KG4
+    // exceptions have already been handled above and must remain authoritative.
+    // Keep the rule here, in the central DXCC resolver, so every caller gets
+    // the same result without changing the bundled cty.dat file.
+    if (call.startsWith(QStringLiteral("KG4"))) {
+        const int suffixLength = call.size() - 3;
+        if (suffixLength == 1 || suffixLength == 3) {
+            auto usIt = m_prefixMap.constFind(QStringLiteral("K"));
+            if (usIt != m_prefixMap.constEnd()) {
+                const int usIndex = usIt.value();
+                return applyOverrides(m_entities[usIndex],
+                                       m_prefixRaw.value(QStringLiteral("K")));
+            }
+        }
+    }
+
     // ── 2. Longest-prefix match ─────────────────────────────────────
     // Progressively shorten from the full call down to a single character.
     for (int len = call.size(); len >= 1; --len) {

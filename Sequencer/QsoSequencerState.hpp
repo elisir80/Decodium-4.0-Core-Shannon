@@ -31,7 +31,8 @@ struct QsoSequencerState
     bool    sendRR73 {true};   // true=RR73, false=RRR
 
     // --- Deferred / pending sequencing (step B3) ---
-    QDateTime qsoStartedOn;               // epoch apertura QSO (per log On)
+    QDateTime qsoStartedOn;               // epoch apertura QSO (per sequenza/fallback log)
+    QDateTime qsoFirstReplyOn;            // primo decode valido del corrispondente (ADIF TIME_ON)
     bool    logAfterOwn73 {false};        // logga dopo il nostro 73
     bool    ft2DeferredLogPending {false};// attesa ack finale prima del log
     int     cqAutoReplyArmSecond {-1};    // secondo armato per auto-reply a CQ
@@ -56,6 +57,11 @@ struct QsoSequencerState
     QString autoSeqRogerReportBase;
     int     activeTxNumber {0};
     QString activeTxMessage;
+
+    QDateTime effectiveQsoLogTimeOnUtc() const
+    {
+        return qsoFirstReplyOn.isValid() ? qsoFirstReplyOn.toUTC() : qsoStartedOn.toUTC();
+    }
 };
 
 }

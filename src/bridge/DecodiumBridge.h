@@ -339,6 +339,9 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QObject* callsignIntelligence READ callsignIntelligence CONSTANT)
     Q_PROPERTY(QObject* diagnostics READ diagnostics CONSTANT)
     Q_PROPERTY(int qsoCount READ qsoCount NOTIFY qsoCountChanged)
+    Q_PROPERTY(bool adifImportInProgress READ adifImportInProgress NOTIFY adifImportProgressChanged)
+    Q_PROPERTY(int adifImportProgress READ adifImportProgress NOTIFY adifImportProgressChanged)
+    Q_PROPERTY(QString adifImportStatus READ adifImportStatus NOTIFY adifImportProgressChanged)
 
     // === ADIF / LOTW ===
     Q_PROPERTY(int  workedCount  READ workedCount  NOTIFY workedCountChanged)
@@ -1488,6 +1491,10 @@ public:
                                         const QString& toDate) const;
     Q_INVOKABLE QVariantMap getQsoStats() const;
     Q_INVOKABLE void warmLogCacheAsync();
+    bool adifImportInProgress() const { return m_adifImportInProgress; }
+    int adifImportProgress() const { return m_adifImportProgress; }
+    QString adifImportStatus() const { return m_adifImportStatus; }
+    Q_INVOKABLE bool importFromAdifAsync(const QString& filename);
     Q_INVOKABLE int importFromAdif(const QString& filename);
     Q_INVOKABLE bool exportToAdif(const QString& filename);
     Q_INVOKABLE bool deleteQso(const QString& call, const QString& dateTime);
@@ -1838,6 +1845,9 @@ signals:
     void pskReporterConnectedChanged();
     // ADIF / LotW / Cloudlog
     void qsoCountChanged();
+    void adifImportProgressChanged();
+    void adifImportFinished(bool success, int imported, int skipped, int total,
+                            const QString& backupPath, const QString& message);
     void offlineModeChanged();
     void qsoLogCacheChanged();
     void workedCountChanged();
@@ -2054,6 +2064,7 @@ private:
                                          bool markCompletedSignoff = false);
     void clearNextLogClusterSpotOverride();
     QString inferredPartnerForAutolog() const;
+    QDateTime effectiveQsoLogTimeOnUtc() const;
     QString pskReporterProgramInfo() const;
     QString pskReporterRigInfo() const;
     QString pskReporterAntennaInfo() const;
@@ -3032,6 +3043,7 @@ private:
     QDateTime m_lastTxActivityUtc;
     // 1.0.498 step B3 strangler: deferred/pending sequencing -> QsoSequencerState (reference-alias)
     QDateTime& m_qsoStartedOn = m_seqState.qsoStartedOn;
+    QDateTime& m_qsoFirstReplyOn = m_seqState.qsoFirstReplyOn;
     bool&   m_logAfterOwn73 = m_seqState.logAfterOwn73;
     bool&   m_ft2DeferredLogPending = m_seqState.ft2DeferredLogPending;
     int&    m_cqAutoReplyArmSecond = m_seqState.cqAutoReplyArmSecond;
@@ -3320,7 +3332,12 @@ private:
     bool             m_qsoSearchWarmupInProgress {false};
     std::atomic<quint64> m_qsoSearchCacheGeneration {0};
     QFutureWatcher<QVariantMap>* m_confirmedAdifImportWatcher {nullptr};
+    QFutureWatcher<QVariantMap>* m_adifImportWatcher {nullptr};
+    bool m_adifImportInProgress {false};
+    int m_adifImportProgress {0};
+    QString m_adifImportStatus;
     void invalidateQsoSearchCache();
+    void setAdifImportProgress(int progress, const QString& status);
     void appendAdifRecord(const QString& dxCall, const QString& dxGrid,
                           double freqHz, const QString& mode,
                           const QDateTime& timeOnUtc,
