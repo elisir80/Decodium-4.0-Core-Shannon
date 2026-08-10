@@ -10678,9 +10678,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
     Loader {
         id: decometerWindowLoader
-        // Come SatelliteWindow: un Dialog deve conservare le proprie
-        // dimensioni, quindi niente anchors.fill.
-        anchors.centerIn: parent
+        // Riempie la finestra come astroWindowLoader: al Dialog servono
+        // coordinate della finestra per potersi centrare e spostare.
+        anchors.fill: parent
         active: false
         asynchronous: true
         source: "components/DecometerWindow.qml"

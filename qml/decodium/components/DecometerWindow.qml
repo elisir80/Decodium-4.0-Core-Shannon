@@ -20,14 +20,30 @@ Dialog {
     readonly property int faceWidth: 900
     readonly property int faceHeight: 420
 
-    // Il Dialog vive nell'overlay della finestra: dimensionarsi sul proprio
-    // parent (il Loader) creerebbe un anello di binding e lo farebbe collassare.
-    anchors.centerIn: Overlay.overlay
-    readonly property real hostWidth: Overlay.overlay ? Overlay.overlay.width : faceWidth + 24
-    readonly property real hostHeight: Overlay.overlay ? Overlay.overlay.height : faceHeight + 24
+    // Il Loader ospite riempie la finestra (anchors.fill), quindi qui parent
+    // e' l'area della finestra: niente anello di binding e coordinate x/y
+    // utilizzabili per lo spostamento.
+    readonly property real hostWidth: parent ? parent.width : faceWidth
+    readonly property real hostHeight: parent ? parent.height : faceHeight
 
-    width: Math.min(faceWidth + 24, Math.max(320, hostWidth - 32))
-    height: Math.min(faceHeight + 24, Math.max(220, hostHeight - 32))
+    // una sola cornice: la disegna il frontalino, non il Dialog
+    width: Math.min(faceWidth, Math.max(320, hostWidth - 24))
+    height: Math.min(faceHeight, Math.max(220, hostHeight - 24))
+
+    property bool placed: false
+
+    function centerOnHost() {
+        if (!parent) return
+        x = Math.max(0, Math.round((parent.width - width) / 2))
+        y = Math.max(0, Math.round((parent.height - height) / 2))
+        placed = true
+    }
+
+    function clampToHost() {
+        if (!parent) return
+        x = Math.max(0, Math.min(x, parent.width - width))
+        y = Math.max(0, Math.min(y, parent.height - height))
+    }
 
     // ---- tavolozza dello strumento (fissa: e' un frontalino, non un tema) ----
     readonly property color colInk:      "#E8ECEF"
@@ -117,6 +133,8 @@ Dialog {
 
     onVisibleChanged: {
         if (visible) {
+            if (!placed) centerOnHost()
+            else clampToHost()
             clock = 0
             txSeconds = 0
             pepW = 0
@@ -124,12 +142,9 @@ Dialog {
         }
     }
 
-    background: Rectangle {
-        color: "#0B0E11"
-        border.color: "#23292F"
-        border.width: 1
-        radius: 10
-    }
+    // Nessuno sfondo proprio: il pannello e' il frontalino, e due riquadri
+    // sovrapposti darebbero la doppia cornice.
+    background: null
 
     // riga di misura riusata dalle tre schermate del display
     component Readout: Item {
@@ -270,6 +285,27 @@ Dialog {
                     GradientStop { position: 0.0;  color: "#171B21" }
                     GradientStop { position: 0.55; color: "#12161B" }
                     GradientStop { position: 1.0;  color: "#101418" }
+                }
+            }
+
+            // Presa per lo spostamento: dichiarata prima dei comandi, quindi
+            // riceve il trascinamento solo dalle zone libere del frontalino -
+            // pulsanti e chip restano cliccabili.
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: pressed ? Qt.ClosedHandCursor : Qt.ArrowCursor
+                property real grabX: 0
+                property real grabY: 0
+                onPressed: function (mouse) {
+                    grabX = mouse.x
+                    grabY = mouse.y
+                }
+                onPositionChanged: function (mouse) {
+                    if (!pressed) return
+                    var s = faceHolder.fit
+                    decometerWindow.x += (mouse.x - grabX) * s
+                    decometerWindow.y += (mouse.y - grabY) * s
+                    decometerWindow.clampToHost()
                 }
             }
 
@@ -774,6 +810,30 @@ Dialog {
                 text: "DECODIUM"
                 font.pixelSize: 8; font.bold: true; font.letterSpacing: 2.5
                 color: decometerWindow.colDim
+            }
+
+            // chiusura: discreta, all'angolo del frontalino
+            Rectangle {
+                id: closeBtn
+                x: decometerWindow.faceWidth - 32
+                y: 10
+                width: 22; height: 22; radius: 4
+                color: closeMouse.containsMouse ? Qt.rgba(1, 0.29, 0.29, 0.18) : "transparent"
+                border.width: 1
+                border.color: closeMouse.containsMouse ? decometerWindow.colRed : "#2A3138"
+                Text {
+                    anchors.centerIn: parent
+                    text: "✕"
+                    font.pixelSize: 11; font.bold: true
+                    color: closeMouse.containsMouse ? decometerWindow.colRed : decometerWindow.colLabel
+                }
+                MouseArea {
+                    id: closeMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: decometerWindow.close()
+                }
             }
         }
     }
