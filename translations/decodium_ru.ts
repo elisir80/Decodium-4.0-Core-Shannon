@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>ВЧ-измеритель</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>ДИАПАЗОН</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>ЭКРАН</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>АВТО</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>ИМПЕДАНС</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>ВРЕМЯ TX</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: нужен векторный датчик</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>НЕТ ТЕЛЕМЕТРИИ CAT</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>подключено</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>ТРЕВОГА КСВ</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ОГРАНИЧЕНИЕ ALC</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>ДАТЧИК МОЩН.</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>СВЯЗЬ CAT</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>ВЕКТОРНЫЙ ВЧ-ИЗМЕРИТЕЛЬ</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8189,6 +8248,10 @@ Right-click: disconnect</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>ВЧ-измеритель...</translation>
     </message>
 </context>
 <context>

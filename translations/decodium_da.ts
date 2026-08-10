@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="da_DK">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>RF-måler</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>OMRÅDE</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>SKÆRM</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>IMPEDANS</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>TX-TID</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: kræver vektorsensor</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>INGEN CAT-TELEMETRI</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>forbundet</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>SWR-ALARM</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALC-KLIP</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>EFFEKTMÅLING</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CAT-FORBINDELSE</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>RF-VEKTORMÅLER</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8188,6 +8247,10 @@ Højreklik: afbryd</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>RF-måler...</translation>
     </message>
 </context>
 <context>

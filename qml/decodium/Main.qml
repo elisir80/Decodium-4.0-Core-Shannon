@@ -2296,6 +2296,9 @@ ApplicationWindow {
     function openHistoryDialog() {
         runWhenLoaded(historyDialogLoader, function(item) { item.show() })
     }
+    function openDecometerWindow() {
+        runWhenLoaded(decometerWindowLoader, function(item) { item.open() })
+    }
 
     function chooseWavFileForDecode() {
         var path = bridge.openFileDialog(qsTr("Open WAV file for decoding"),
@@ -10674,6 +10677,25 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     Loader {
+        id: decometerWindowLoader
+        // Come SatelliteWindow: un Dialog deve conservare le proprie
+        // dimensioni, quindi niente anchors.fill.
+        anchors.centerIn: parent
+        active: false
+        asynchronous: true
+        source: "components/DecometerWindow.qml"
+        property var pendingAction: null
+        onLoaded: {
+            console.log("Lazy component loaded: DecometerWindow")
+            if (pendingAction) {
+                var action = pendingAction
+                pendingAction = null
+                action(item)
+            }
+        }
+    }
+
+    Loader {
         id: satelliteWindowLoader
         // A Popup/Dialog must keep its own dimensions.  Filling the main
         // window here forces the loaded SatelliteWindow to become a giant
@@ -11405,6 +11427,22 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 text: parent.text
                 font.pixelSize: 12
                 color: bridge.multiAnswerMode ? successGreen : textSecondary
+                leftPadding: 10
+            }
+        }
+
+        MenuItem {
+            text: "📡 DECØMETER — " + qsTr("RF Meter...")
+            onTriggered: mainWindow.openDecometerWindow()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: textSecondary
                 leftPadding: 10
             }
         }

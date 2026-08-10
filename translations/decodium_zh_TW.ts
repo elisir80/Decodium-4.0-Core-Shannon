@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_TW">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>射頻測量錶</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>量程</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>畫面</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>自動</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>阻抗</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>發射時間</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X：需要向量感測器</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>無 CAT 遙測</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>已連線</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>駐波比警報</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALC 削波</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>功率偵測</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CAT 連線</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>射頻向量測量錶</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8185,6 +8244,10 @@ Right-click: disconnect</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>射頻測量錶...</translation>
     </message>
 </context>
 <context>

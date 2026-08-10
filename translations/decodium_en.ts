@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>RF Meter</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>RANGE</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>SCREEN</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>IMPEDANCE</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>TX TIME</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: needs vector sensor</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>NO CAT TELEMETRY</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>connected</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>SWR ALARM</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALC CLIP</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>PWR SENSE</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CAT LINK</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>RF VECTOR METER</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8196,6 +8255,10 @@ Right-click: disconnect</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>RF Meter...</translation>
     </message>
 </context>
 <context>

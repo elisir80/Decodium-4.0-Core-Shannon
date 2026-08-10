@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fr_FR">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>Mesureur RF</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>CALIBRE</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>ÉCRAN</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>IMPÉDANCE</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>DURÉE TX</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X : nécessite un capteur vectoriel</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>PAS DE TÉLÉMÉTRIE CAT</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>connecté</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>ALARME ROS</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ÉCRÊTAGE ALC</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>MESURE PUISS.</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>LIAISON CAT</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>MESUREUR VECTORIEL RF</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8189,6 +8248,10 @@ Clic droit : se déconnecter</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>Mesureur RF...</translation>
     </message>
 </context>
 <context>

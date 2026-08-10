@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="hu_HU">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>RF mérő</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>MÉRÉSHATÁR</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>KÉPERNYŐ</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>IMPEDANCIA</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>TX IDŐ</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: vektoros érzékelő kell</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>NINCS CAT TELEMETRIA</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>csatlakoztatva</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>SWR RIASZTÁS</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALC VÁGÁS</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>TELJESÍTMÉNYMÉRÉS</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CAT KAPCSOLAT</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>RF VEKTORMÉRŐ</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8186,6 +8245,10 @@ Jobb kattintás: lecsatlakozás</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>RF mérő...</translation>
     </message>
 </context>
 <context>

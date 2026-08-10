@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ro_RO">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>Instrument RF</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>DOMENIU</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>ECRAN</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>IMPEDANȚĂ</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>TIMP TX</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: necesită senzor vectorial</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>FĂRĂ TELEMETRIE CAT</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>conectat</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>ALARMĂ ROS</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>LIMITARE ALC</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>SENZOR PUTERE</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>LEGĂTURĂ CAT</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>INSTRUMENT VECTORIAL RF</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -7472,6 +7531,10 @@ Clic dreapta: deconectează</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>Instrument RF...</translation>
     </message>
 </context>
 <context>

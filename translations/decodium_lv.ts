@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="lv_LV">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>RF mērītājs</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>DIAPAZONS</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>EKRĀNS</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>PILNĀ PRETESTĪBA</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>TX LAIKS</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: nepieciešams vektora sensors</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>NAV CAT TELEMETRIJAS</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>savienots</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>SWR TRAUKSME</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALC IEROBEŽOJUMS</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>JAUDAS SENSORS</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CAT SAITE</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>RF VEKTORA MĒRĪTĀJS</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8200,6 +8259,10 @@ Labais klikšķis: atvienot</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>RF mērītājs...</translation>
     </message>
 </context>
 <context>

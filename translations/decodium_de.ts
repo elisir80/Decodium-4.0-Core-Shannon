@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>HF-Messgerät</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>BEREICH</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>ANZEIGE</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>AUTO</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>IMPEDANZ</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>TX-ZEIT</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: benötigt Vektorsensor</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>KEINE CAT-TELEMETRIE</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>verbunden</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>SWR-ALARM</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALC-ÜBERSTEUERUNG</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>LEISTUNGSMESSUNG</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CAT-VERBINDUNG</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>HF-VEKTORMESSGERÄT</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8189,6 +8248,10 @@ Rechtsklick: trennen</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>HF-Messgerät...</translation>
     </message>
 </context>
 <context>

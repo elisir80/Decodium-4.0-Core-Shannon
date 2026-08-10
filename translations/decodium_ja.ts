@@ -2,6 +2,65 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja_JP">
 <context>
+    <name>DecometerWindow</name>
+    <message>
+        <source>RF Meter</source>
+        <translation>RFメーター</translation>
+    </message>
+    <message>
+        <source>RANGE</source>
+        <translation>レンジ</translation>
+    </message>
+    <message>
+        <source>SCREEN</source>
+        <translation>画面</translation>
+    </message>
+    <message>
+        <source>AUTO</source>
+        <translation>オート</translation>
+    </message>
+    <message>
+        <source>IMPEDANCE</source>
+        <translation>インピーダンス</translation>
+    </message>
+    <message>
+        <source>TX TIME</source>
+        <translation>送信時間</translation>
+    </message>
+    <message>
+        <source>X: needs vector sensor</source>
+        <translation>X: ベクトルセンサーが必要</translation>
+    </message>
+    <message>
+        <source>NO CAT TELEMETRY</source>
+        <translation>CATテレメトリなし</translation>
+    </message>
+    <message>
+        <source>connected</source>
+        <translation>接続済み</translation>
+    </message>
+    <message>
+        <source>SWR ALARM</source>
+        <translation>SWR警報</translation>
+    </message>
+    <message>
+        <source>ALC CLIP</source>
+        <translation>ALCクリップ</translation>
+    </message>
+    <message>
+        <source>PWR SENSE</source>
+        <translation>電力検出</translation>
+    </message>
+    <message>
+        <source>CAT LINK</source>
+        <translation>CATリンク</translation>
+    </message>
+    <message>
+        <source>RF VECTOR METER</source>
+        <translation>RFベクトルメーター</translation>
+    </message>
+</context>
+<context>
     <name>AbstractLogWindow</name>
     <message>
         <location filename="../widgets/AbstractLogWindow.cpp" line="161"/>
@@ -8186,6 +8245,10 @@ Right-click: disconnect</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3009"/>
         <source>Az</source>
         <translation>Az</translation>
+    </message>
+    <message>
+        <source>RF Meter...</source>
+        <translation>RFメーター...</translation>
     </message>
 </context>
 <context>
