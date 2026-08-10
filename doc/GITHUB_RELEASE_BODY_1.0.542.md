@@ -32,6 +32,18 @@ operator whose transmissions over TCI did not work with AetherSDR.
   transmission is not lost. The first TxChrono disables the fallback again, so
   with ExpertSDR it never engages.
 
+
+### Romanian, the fifteenth language
+
+- Decodium now speaks Romanian. The interface is fully translated: the 26
+  operational panels, the main window, FT2-Link, the Live Map, every settings
+  page, the service and error messages, and the remaining dialogues.
+- 4035 of 4038 visible messages. The three left out carry an empty source
+  string and contain no text, so the practical coverage is complete.
+- Romanian diacritics are written with the comma below, `ș` and `ț`, not the
+  cedilla. International amateur-radio abbreviations are left unchanged, as in
+  the other fourteen languages.
+
 ### Diagnostics
 
 - The transmit log line now reads `TCI TX audio frame: … push= … serverRate= …`,
@@ -80,6 +92,19 @@ non funzionavano con AetherSDR.
   sessione non ne è mai arrivato uno, la spinta parte al primo tick, così non si
   perde l'inizio della trasmissione. Il primo TxChrono disattiva di nuovo il
   ripiego: con ExpertSDR non entra mai in funzione.
+
+
+### Il rumeno, quindicesima lingua
+
+- Decodium parla ora anche rumeno. L'interfaccia e' tradotta per intero: i 26
+  pannelli operativi, la finestra principale, FT2-Link, la Live Map, tutte le
+  pagine delle impostazioni, i messaggi di servizio e di errore e i dialoghi
+  rimanenti.
+- 4035 messaggi visibili su 4038. I tre esclusi hanno sorgente vuota e non
+  contengono testo, quindi la copertura reale e' completa.
+- I diacritici rumeni sono scritti con la virgola sotto, `ș` e `ț`, non con la
+  cediglia. Le sigle internazionali del radiantismo restano invariate, come
+  nelle altre quattordici lingue.
 
 ### Diagnostica
 
