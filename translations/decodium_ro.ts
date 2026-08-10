@@ -415,6 +415,14 @@
     </message>
 </context>
 <context>
+    <name>CatSettingsDialog</name>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="366"/>
+        <source>Connect</source>
+        <translation>Conectează</translation>
+    </message>
+</context>
+<context>
     <name>ColorHighlighting</name>
     <message>
         <location filename="../widgets/colorhighlighting.ui" line="43"/>
@@ -490,6 +498,14 @@
         <location filename="../widgets/colorhighlighting.ui" line="330"/>
         <source>New ITU Zone on Band</source>
         <translation>Zonă ITU nouă în bandă</translation>
+    </message>
+</context>
+<context>
+    <name>ColorHighlightingDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="180"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
     </message>
 </context>
 <context>
@@ -998,6 +1014,13 @@ Apasă Monitor pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>DecodiumBridge</name>
+    <message>
+        <source>Loading...</source>
+        <translation>Se încarcă...</translation>
+    </message>
+</context>
+<context>
     <name>DecodiumPropagationManager</name>
     <message>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
@@ -1334,6 +1357,26 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>LiveMapPanel</name>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="192"/>
+        <source>Zoom out</source>
+        <translation>Micșorează</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="222"/>
+        <source>Zoom in</source>
+        <translation>Mărește</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="252"/>
+        <source>Reset view (auto-fit)</source>
+        <translation>Resetează vederea (încadrare automată)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="293"/>
+        <source>Toggle day/night greyline overlay</source>
+        <translation>Comută stratul zi/noapte (linia cenușie)</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/LiveMapPanel.qml" line="308"/>
         <source>Dock</source>
         <translation>Andochează</translation>
@@ -1344,28 +1387,1454 @@ Apasă Monitor pentru a începe</translation>
         <translation>Desprinde</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="323"/>
+        <source>Dock Live Map</source>
+        <translation>Andochează harta în direct</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="323"/>
+        <source>Detach Live Map</source>
+        <translation>Desprinde harta în direct</translation>
+    </message>
+    <message>
+        <source>  last %1 s ago</source>
+        <translation>  ultima acum %1 s</translation>
+    </message>
+    <message>
+        <source> spots</source>
+        <translation> raportări</translation>
+    </message>
+    <message>
+        <source>%1  %2</source>
+        <translation>%1  %2</translation>
+    </message>
+    <message>
+        <source>%1  %2  %3 dB  %4  |  %5</source>
+        <translation>%1  %2  %3 dB  %4  |  %5</translation>
+    </message>
+    <message>
+        <source>%1  %2 / %3</source>
+        <translation>%1  %2 / %3</translation>
+    </message>
+    <message>
+        <source>%1 %2  %3  %4  %5</source>
+        <translation>%1 %2  %3  %4  %5</translation>
+    </message>
+    <message>
+        <source>%1 / %2 drives the Award and Wanted roster filters</source>
+        <translation>%1 / %2 determină filtrele de diplomă și de stații căutate din listă</translation>
+    </message>
+    <message>
+        <source>%1 QSO  %2 confirmed  %3 live  %4 PSK</source>
+        <translation>%1 QSO  %2 confirmate  %3 în direct  %4 PSK</translation>
+    </message>
+    <message>
         <source>%1 QSO · %2 QSL</source>
         <translation>%1 QSO · %2 QSL</translation>
+    </message>
+    <message>
+        <source>%1 live  %2 PSK  %3</source>
+        <translation>%1 în direct  %2 PSK  %3</translation>
+    </message>
+    <message>
+        <source>%1 stations · %2 wanted · %3 new · %4 unconfirmed</source>
+        <translation>%1 stații · %2 căutate · %3 noi · %4 neconfirmate</translation>
+    </message>
+    <message>
+        <source>%1 worked  %2 confirmed</source>
+        <translation>%1 lucrate  %2 confirmate</translation>
+    </message>
+    <message>
+        <source>%1 worked / %2 confirmed</source>
+        <translation>%1 lucrate / %2 confirmate</translation>
+    </message>
+    <message>
+        <source>14 MHz</source>
+        <translation>14 MHz</translation>
+    </message>
+    <message>
+        <source>5 MHz</source>
+        <translation>5 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;1 MHz</source>
+        <translation>&lt;1 MHz</translation>
+    </message>
+    <message>
+        <source>&lt;5 MHz</source>
+        <translation>&lt;5 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;14 MHz</source>
+        <translation>&gt;14 MHz</translation>
+    </message>
+    <message>
+        <source>&gt;28 MHz</source>
+        <translation>&gt;28 MHz</translation>
+    </message>
+    <message>
+        <source>4-char grids</source>
+        <translation>Locatoare de 4 caractere</translation>
+    </message>
+    <message>
+        <source>6-char grids</source>
+        <translation>Locatoare de 6 caractere</translation>
+    </message>
+    <message>
+        <source>ADIF  %1</source>
+        <translation>ADIF  %1</translation>
+    </message>
+    <message>
+        <source>ADIF span  %1 — %2</source>
+        <translation>Interval ADIF  %1 — %2</translation>
+    </message>
+    <message>
+        <source>ALERTS</source>
+        <translation>AVERTIZĂRI</translation>
+    </message>
+    <message>
+        <source>ALERTS %1</source>
+        <translation>AVERTIZĂRI %1</translation>
+    </message>
+    <message>
+        <source>ALL TIME</source>
+        <translation>DINTOTDEAUNA</translation>
+    </message>
+    <message>
+        <source>AWARD</source>
+        <translation>DIPLOMĂ</translation>
+    </message>
+    <message>
+        <source>AWARDS</source>
+        <translation>DIPLOME</translation>
+    </message>
+    <message>
+        <source>Active  %1</source>
+        <translation>Active  %1</translation>
+    </message>
+    <message>
+        <source>BASE MAP</source>
+        <translation>HARTA DE BAZĂ</translation>
+    </message>
+    <message>
+        <source>Band scope, optional</source>
+        <translation>Domeniu de bandă, opțional</translation>
+    </message>
+    <message>
+        <source>Mode scope, optional</source>
+        <translation>Domeniu de mod, opțional</translation>
+    </message>
+    <message>
+        <source>Base: %1</source>
+        <translation>Bază: %1</translation>
+    </message>
+    <message>
+        <source>Base: &lt;a href="%1"&gt;%2&lt;/a&gt;</source>
+        <translation>Bază: &lt;a href="%1"&gt;%2&lt;/a&gt;</translation>
     </message>
     <message>
         <source>CALL</source>
         <translation>INDICATIV</translation>
     </message>
     <message>
+        <source>COND</source>
+        <translation>COND</translation>
+    </message>
+    <message>
+        <source>CONFIRMED</source>
+        <translation>CONFIRMATE</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Confirmate</translation>
+    </message>
+    <message>
+        <source>Confirmed  %1</source>
+        <translation>Confirmate  %1</translation>
+    </message>
+    <message>
+        <source>CQ activity</source>
+        <translation>Activitate CQ</translation>
+    </message>
+    <message>
+        <source>Call pattern, e.g. 9H*</source>
+        <translation>Model de indicativ, de ex. 9H*</translation>
+    </message>
+    <message>
+        <source>Call roster text-filter mode</source>
+        <translation>Modul de filtrare după text al listei de indicative</translation>
+    </message>
+    <message>
+        <source>Call, grid, DXCC or message</source>
+        <translation>Indicativ, locator, DXCC sau mesaj</translation>
+    </message>
+    <message>
+        <source>Calls</source>
+        <translation>Indicative</translation>
+    </message>
+    <message>
+        <source>DX</source>
+        <translation>DX</translation>
+    </message>
+    <message>
         <source>DXCC</source>
         <translation>DXCC</translation>
+    </message>
+    <message>
+        <source>PSK</source>
+        <translation>PSK</translation>
+    </message>
+    <message>
+        <source>QSO</source>
+        <translation>QSO</translation>
+    </message>
+    <message>
+        <source>QSO  %1</source>
+        <translation>QSO  %1</translation>
+    </message>
+    <message>
+        <source>USGS</source>
+        <translation>USGS</translation>
+    </message>
+    <message>
+        <source>Regex</source>
+        <translation>Expresie regulată</translation>
+    </message>
+    <message>
+        <source>Center map on the Moon subpoint</source>
+        <translation>Centrează harta pe punctul sublunar</translation>
+    </message>
+    <message>
+        <source>Center this grid</source>
+        <translation>Centrează acest locator</translation>
+    </message>
+    <message>
+        <source>Choose the information shown on each roster row</source>
+        <translation>Alege informațiile arătate pe fiecare rând al listei</translation>
+    </message>
+    <message>
+        <source>Clear all</source>
+        <translation>Golește tot</translation>
+    </message>
+    <message>
+        <source>Clear all watched calls and all call or DXCC exclusions</source>
+        <translation>Șterge toate indicativele urmărite și toate excluderile de indicativ sau DXCC</translation>
+    </message>
+    <message>
+        <source>Clear live station history</source>
+        <translation>Șterge istoricul stațiilor în direct</translation>
+    </message>
+    <message>
+        <source>Click CALL to start a QSO or ROTATE to aim the antenna.</source>
+        <translation>Apasă CALL pentru a începe un QSO sau ROTEȘTE pentru a orienta antena.</translation>
+    </message>
+    <message>
+        <source>Click for event details</source>
+        <translation>Clic pentru detaliile evenimentului</translation>
+    </message>
+    <message>
+        <source>Close details</source>
+        <translation>Închide detaliile</translation>
+    </message>
+    <message>
+        <source>Close grid details</source>
+        <translation>Închide detaliile locatorului</translation>
+    </message>
+    <message>
+        <source>Columns</source>
+        <translation>Coloane</translation>
+    </message>
+    <message>
+        <source>Combined</source>
+        <translation>Combinat</translation>
+    </message>
+    <message>
+        <source>Compare worked and confirmed status globally, by band or by band and mode</source>
+        <translation>Compară starea lucrat și confirmat la nivel global, pe bandă sau pe bandă și mod</translation>
+    </message>
+    <message>
+        <source>Confirmed = paper QSL, LoTW or eQSL received (ADIF status Y)</source>
+        <translation>Confirmat = QSL pe hârtie, LoTW sau eQSL primit (stare ADIF Y)</translation>
+    </message>
+    <message>
+        <source>Confirmed grids contain an imported ADIF QSO with QSL_RCVD=Y, LOTW_QSL_RCVD=Y or EQSL_QSL_RCVD=Y.</source>
+        <translation>Locatoarele confirmate conțin un QSO ADIF importat cu QSL_RCVD=Y, LOTW_QSL_RCVD=Y sau EQSL_QSL_RCVD=Y.</translation>
+    </message>
+    <message>
+        <source>Connect the PSK Reporter MQTT feed</source>
+        <translation>Conectează fluxul MQTT al PSK Reporter</translation>
+    </message>
+    <message>
+        <source>Coverage grid precision</source>
+        <translation>Precizia locatorului de acoperire</translation>
+    </message>
+    <message>
+        <source>Create wanted, ignored or watched rules with optional band and mode scopes</source>
+        <translation>Creează reguli de căutare, ignorare sau urmărire, cu domenii opționale de bandă și mod</translation>
+    </message>
+    <message>
+        <source>Cycle Live, Logbook and combined map views</source>
+        <translation>Treci prin vederile hărții: în direct, jurnal și combinată</translation>
+    </message>
+    <message>
+        <source>DETAILS</source>
+        <translation>DETALII</translation>
+    </message>
+    <message>
+        <source>HIDE DETAILS</source>
+        <translation>ASCUNDE DETALIILE</translation>
+    </message>
+    <message>
+        <source>Decodium Atlas is local. NASA GIBS and MapTiler use the network when Offline mode is disabled.</source>
+        <translation>Atlasul Decodium este local. NASA GIBS și MapTiler folosesc rețeaua atunci când modul fără conexiune este oprit.</translation>
+    </message>
+    <message>
+        <source>Draw active and wanted grids as compact map pins</source>
+        <translation>Desenează locatoarele active și căutate ca pioneze compacte pe hartă</translation>
+    </message>
+    <message>
+        <source>EXTERNAL DATA</source>
+        <translation>DATE EXTERNE</translation>
+    </message>
+    <message>
+        <source>Earthquake</source>
+        <translation>Cutremur</translation>
+    </message>
+    <message>
+        <source>Exclude</source>
+        <translation>Exclude</translation>
+    </message>
+    <message>
+        <source>FILTERED · %1 · %2 of %3 QSO</source>
+        <translation>FILTRAT · %1 · %2 din %3 QSO</translation>
+    </message>
+    <message>
+        <source>Filtering runs in the map database worker</source>
+        <translation>Filtrarea rulează în procesul bazei de date a hărții</translation>
+    </message>
+    <message>
+        <source>GRID %1</source>
+        <translation>LOCATOR %1</translation>
+    </message>
+    <message>
+        <source>Grids</source>
+        <translation>Locatoare</translation>
+    </message>
+    <message>
+        <source>Geographic area</source>
+        <translation>Zonă geografică</translation>
+    </message>
+    <message>
+        <source>Global earthquakes of magnitude 2.5 or greater reported by USGS during the last day.</source>
+        <translation>Cutremure din întreaga lume cu magnitudinea 2,5 sau mai mare, raportate de USGS în ultima zi.</translation>
+    </message>
+    <message>
+        <source>Good</source>
+        <translation>Bune</translation>
+    </message>
+    <message>
+        <source>Poor</source>
+        <translation>Slabe</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Necunoscut</translation>
+    </message>
+    <message>
+        <source>HISTORY</source>
+        <translation>ISTORIC</translation>
+    </message>
+    <message>
+        <source>HISTORY %1</source>
+        <translation>ISTORIC %1</translation>
+    </message>
+    <message>
+        <source>Heat %1  Timeline %2  Paths %3</source>
+        <translation>Densitate %1  Cronologie %2  Trasee %3</translation>
+    </message>
+    <message>
+        <source>Hovered half: %1</source>
+        <translation>Jumătatea indicată: %1</translation>
+    </message>
+    <message>
+        <source>Hunt entities not yet worked or not yet confirmed</source>
+        <translation>Vânează entități încă nelucrate sau neconfirmate</translation>
+    </message>
+    <message>
+        <source>Ignore every station from %1</source>
+        <translation>Ignoră orice stație din %1</translation>
+    </message>
+    <message>
+        <source>Ignore this station until roster preferences are reset</source>
+        <translation>Ignoră această stație până la resetarea preferințelor listei</translation>
+    </message>
+    <message>
+        <source>Keep each station active in the roster for this many minutes</source>
+        <translation>Păstrează fiecare stație activă în listă atâtea minute</translation>
+    </message>
+    <message>
+        <source>Keep this station at the top of the roster</source>
+        <translation>Păstrează această stație în capul listei</translation>
+    </message>
+    <message>
+        <source>LAYERS</source>
+        <translation>STRATURI</translation>
+    </message>
+    <message>
+        <source>LIVE</source>
+        <translation>ÎN DIRECT</translation>
+    </message>
+    <message>
+        <source>LIVE %1</source>
+        <translation>ÎN DIRECT %1</translation>
+    </message>
+    <message>
+        <source>Live</source>
+        <translation>În direct</translation>
+    </message>
+    <message>
+        <source>Live  %1</source>
+        <translation>În direct  %1</translation>
+    </message>
+    <message>
+        <source>LOCATE</source>
+        <translation>LOCALIZEAZĂ</translation>
+    </message>
+    <message>
+        <source>LOGBOOK</source>
+        <translation>JURNAL</translation>
+    </message>
+    <message>
+        <source>LOGBOOK · ALL TIME · %1 QSO</source>
+        <translation>JURNAL · DINTOTDEAUNA · %1 QSO</translation>
+    </message>
+    <message>
+        <source>LOOKUP</source>
+        <translation>CĂUTARE</translation>
+    </message>
+    <message>
+        <source>Lists</source>
+        <translation>Liste</translation>
+    </message>
+    <message>
+        <source>Lists %1</source>
+        <translation>Liste %1</translation>
+    </message>
+    <message>
+        <source>Live 5 min</source>
+        <translation>În direct 5 min</translation>
+    </message>
+    <message>
+        <source>Live 15 min</source>
+        <translation>În direct 15 min</translation>
+    </message>
+    <message>
+        <source>Live 30 min</source>
+        <translation>În direct 30 min</translation>
+    </message>
+    <message>
+        <source>Live 60 min</source>
+        <translation>În direct 60 min</translation>
+    </message>
+    <message>
+        <source>Live MQTT</source>
+        <translation>MQTT în direct</translation>
+    </message>
+    <message>
+        <source>Live spots</source>
+        <translation>Raportări în direct</translation>
+    </message>
+    <message>
+        <source>Live Parks on the Air activator spots. Disabling this layer immediately removes all POTA markers from the map.</source>
+        <translation>Raportări în direct ale activatorilor Parks on the Air. Oprirea acestui strat scoate imediat toate marcajele POTA de pe hartă.</translation>
+    </message>
+    <message>
+        <source>Live and logbook visibility</source>
+        <translation>Vizibilitatea datelor în direct și din jurnal</translation>
+    </message>
+    <message>
+        <source>Loading PSK...</source>
+        <translation>Se încarcă PSK...</translation>
+    </message>
+    <message>
+        <source>Loading...</source>
+        <translation>Se încarcă...</translation>
+    </message>
+    <message>
+        <source>MAP</source>
+        <translation>HARTĂ</translation>
+    </message>
+    <message>
+        <source>MAP OPERATIONS</source>
+        <translation>OPERAȚIUNI PE HARTĂ</translation>
+    </message>
+    <message>
+        <source>MOON</source>
+        <translation>LUNA</translation>
+    </message>
+    <message>
+        <source>POP</source>
+        <translation>POP</translation>
+    </message>
+    <message>
+        <source>MUF and foF2 use MHz. Es is a probability index, not a frequency.</source>
+        <translation>MUF și foF2 se exprimă în MHz. Es este un indice de probabilitate, nu o frecvență.</translation>
+    </message>
+    <message>
+        <source>Map Intelligence</source>
+        <translation>Inteligența hărții</translation>
+    </message>
+    <message>
+        <source>Map item</source>
+        <translation>Element de hartă</translation>
+    </message>
+    <message>
+        <source>Map preset</source>
+        <translation>Presetare de hartă</translation>
+    </message>
+    <message>
+        <source>Map projection</source>
+        <translation>Proiecția hărții</translation>
+    </message>
+    <message>
+        <source>Projection</source>
+        <translation>Proiecție</translation>
+    </message>
+    <message>
+        <source>MapTiler API key</source>
+        <translation>Cheie API MapTiler</translation>
+    </message>
+    <message>
+        <source>Mark read</source>
+        <translation>Marchează citit</translation>
+    </message>
+    <message>
+        <source>Missing  %1</source>
+        <translation>Lipsă  %1</translation>
+    </message>
+    <message>
+        <source>Moon  Az %1°  El %2°  ·  Subpoint %3 %4</source>
+        <translation>Luna  Az %1°  El %2°  ·  Punct sublunar %3 %4</translation>
     </message>
     <message>
         <source>Moon data unavailable</source>
         <translation>Date despre Lună indisponibile</translation>
     </message>
     <message>
+        <source>Propagation data unavailable</source>
+        <translation>Date de propagare indisponibile</translation>
+    </message>
+    <message>
+        <source>Moon visibility hemisphere, sublunar point and path from your station. The marker appears as soon as the ephemeris has been calculated.</source>
+        <translation>Emisfera de vizibilitate a Lunii, punctul sublunar și traseul de la stația ta. Marcajul apare de îndată ce efemeridele au fost calculate.</translation>
+    </message>
+    <message>
+        <source>New grid</source>
+        <translation>Locator nou</translation>
+    </message>
+    <message>
+        <source>Reverse sort</source>
+        <translation>Sortare inversă</translation>
+    </message>
+    <message>
+        <source>No QSO history in this grid</source>
+        <translation>Niciun istoric de QSO în acest locator</translation>
+    </message>
+    <message>
+        <source>No active ADIF logbook</source>
+        <translation>Niciun jurnal ADIF activ</translation>
+    </message>
+    <message>
+        <source>No filter</source>
+        <translation>Fără filtru</translation>
+    </message>
+    <message>
+        <source>No recent traffic in this grid</source>
+        <translation>Niciun trafic recent în acest locator</translation>
+    </message>
+    <message>
+        <source>No watched or ignored entries</source>
+        <translation>Nicio intrare urmărită sau ignorată</translation>
+    </message>
+    <message>
+        <source>OPERATIONAL RULES</source>
+        <translation>REGULI OPERAȚIONALE</translation>
+    </message>
+    <message>
+        <source>Official IOTA Directory groups. Catalog positions are shown on the map; worked and confirmed status is applied only when the imported ADIF QSO contains an IOTA field.</source>
+        <translation>Grupuri oficiale din IOTA Directory. Pozițiile din catalog apar pe hartă; starea lucrat și confirmat se aplică doar dacă QSO-ul ADIF importat conține un câmp IOTA.</translation>
+    </message>
+    <message>
+        <source>Offline</source>
+        <translation>Fără conexiune</translation>
+    </message>
+    <message>
+        <source>Offline mode uses the local Decodium Atlas and stops online base maps, PSK MQTT and external map feeds. ADIF, local cache and radio activity remain available.</source>
+        <translation>Modul fără conexiune folosește atlasul local Decodium și oprește hărțile de bază online, MQTT-ul PSK și fluxurile externe. ADIF-ul, memoria locală și activitatea radio rămân disponibile.</translation>
+    </message>
+    <message>
+        <source>Only</source>
+        <translation>Doar</translation>
+    </message>
+    <message>
+        <source>Open callsign lookup</source>
+        <translation>Deschide căutarea indicativului</translation>
+    </message>
+    <message>
+        <source>Open detailed statistics</source>
+        <translation>Deschide statisticile detaliate</translation>
+    </message>
+    <message>
+        <source>Open global wildfire events published by NASA EONET.</source>
+        <translation>Deschide evenimentele mondiale de incendii publicate de NASA EONET.</translation>
+    </message>
+    <message>
+        <source>Open radio and propagation conditions</source>
+        <translation>Deschide condițiile radio și de propagare</translation>
+    </message>
+    <message>
+        <source>Open the independent call roster</source>
+        <translation>Deschide lista independentă de indicative</translation>
+    </message>
+    <message>
+        <source>Operational marker</source>
+        <translation>Marcaj operațional</translation>
+    </message>
+    <message>
+        <source>Overlay PSK receivers with local activity or replace local activity</source>
+        <translation>Suprapune receptoarele PSK peste activitatea locală sau înlocuiește activitatea locală</translation>
+    </message>
+    <message>
+        <source>PROPAGATION SCALE</source>
+        <translation>SCARA DE PROPAGARE</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: %1 receivers found</source>
+        <translation>PSK Reporter: %1 receptoare găsite</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last hour</source>
+        <translation>PSK Reporter: niciun receptor încărcat pentru ultima oră</translation>
+    </message>
+    <message>
+        <source>PSK grid opacity</source>
+        <translation>Opacitatea locatoarelor PSK</translation>
+    </message>
+    <message>
+        <source>PSK/spot history age</source>
+        <translation>Vechimea istoricului PSK și al raportărilor</translation>
+    </message>
+    <message>
+        <source>Period</source>
+        <translation>Perioadă</translation>
+    </message>
+    <message>
+        <source>Value</source>
+        <translation>Valoare</translation>
+    </message>
+    <message>
+        <source>Propagation  SFI %1  K %2  MUF %3</source>
+        <translation>Propagare  SFI %1  K %2  MUF %3</translation>
+    </message>
+    <message>
+        <source>Propagation controls MUF, foF2, Es and Aurora</source>
+        <translation>Comenzile de propagare: MUF, foF2, Es și auroră</translation>
+    </message>
+    <message>
+        <source>Provider used by lookup actions in grid popups and the roster</source>
+        <translation>Furnizorul folosit de acțiunile de căutare din ferestrele locatoarelor și din listă</translation>
+    </message>
+    <message>
+        <source>Push-pin live grids</source>
+        <translation>Locatoare în direct cu pioneze</translation>
+    </message>
+    <message>
+        <source>ROSTER</source>
+        <translation>LISTĂ</translation>
+    </message>
+    <message>
+        <source>ROTATE</source>
+        <translation>ROTEȘTE</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last hour. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Receptoare care au raportat la PSK Reporter că ți-au auzit indicativul în ultima oră. Nu este nevoie ca trimiterea PSK din Decodium să fie activată.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last hour. PSK upload is independent.</source>
+        <translation>Aduce receptoarele care ți-au auzit indicativul în ultima oră. Trimiterea PSK este independentă.</translation>
+    </message>
+    <message>
+        <source>Refresh PSK</source>
+        <translation>Reîmprospătează PSK</translation>
+    </message>
+    <message>
+        <source>Refresh enabled external layers</source>
+        <translation>Reîmprospătează straturile externe active</translation>
+    </message>
+    <message>
+        <source>Remove rule</source>
+        <translation>Elimină regula</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Elimină această intrare</translation>
+    </message>
+    <message>
+        <source>Remove the temporary map time filter</source>
+        <translation>Elimină filtrul temporar de timp al hărții</translation>
+    </message>
+    <message>
+        <source>Review watched calls and ignored calls or DXCC entities</source>
+        <translation>Revezi indicativele urmărite și indicativele sau entitățile DXCC ignorate</translation>
+    </message>
+    <message>
+        <source>Rules</source>
+        <translation>Reguli</translation>
+    </message>
+    <message>
+        <source>Rules %1</source>
+        <translation>Reguli %1</translation>
+    </message>
+    <message>
+        <source>SCREENSHOT</source>
+        <translation>CAPTURĂ</translation>
+    </message>
+    <message>
+        <source>SHOT</source>
+        <translation>CAPTURĂ</translation>
+    </message>
+    <message>
+        <source>STATS</source>
+        <translation>STATISTICI</translation>
+    </message>
+    <message>
+        <source>Save a screenshot of the map</source>
+        <translation>Salvează o captură a hărții</translation>
+    </message>
+    <message>
+        <source>Select %1 as the active roster award</source>
+        <translation>Alege %1 ca diplomă activă a listei</translation>
+    </message>
+    <message>
+        <source>Select an award to make its missing entities operational targets</source>
+        <translation>Alege o diplomă pentru ca entitățile ei lipsă să devină ținte operaționale</translation>
+    </message>
+    <message>
+        <source>Select the award whose missing entities become wanted stations</source>
+        <translation>Alege diploma ale cărei entități lipsă devin stații căutate</translation>
+    </message>
+    <message>
+        <source>Use this award to identify wanted stations in the roster</source>
+        <translation>Folosește această diplomă pentru a identifica stațiile căutate din listă</translation>
+    </message>
+    <message>
+        <source>Show QSO/QSL history and current activity in separate halves of the same grid</source>
+        <translation>Arată istoricul QSO/QSL și activitatea curentă în jumătăți separate ale aceluiași locator</translation>
+    </message>
+    <message>
+        <source>Split historical and live grid status</source>
+        <translation>Separă starea istorică de cea în direct a locatorului</translation>
+    </message>
+    <message>
+        <source>Show UTC-offset meridians on the map</source>
+        <translation>Arată meridianele de decalaj UTC pe hartă</translation>
+    </message>
+    <message>
+        <source>UTC time zones</source>
+        <translation>Fusuri orare UTC</translation>
+    </message>
+    <message>
+        <source>Show all, new, unconfirmed, wanted or watched stations</source>
+        <translation>Arată toate stațiile, sau doar cele noi, neconfirmate, căutate ori urmărite</translation>
+    </message>
+    <message>
+        <source>Show only active CQ calls in the roster</source>
+        <translation>Arată în listă doar apelurile CQ active</translation>
+    </message>
+    <message>
+        <source>Source correlation filter</source>
+        <translation>Filtru de corelare a surselor</translation>
+    </message>
+    <message>
+        <source>Source: &lt;a href="%1"&gt;%2&lt;/a&gt;</source>
+        <translation>Sursă: &lt;a href="%1"&gt;%2&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <source>Start QSO with this station</source>
+        <translation>Începe un QSO cu această stație</translation>
+    </message>
+    <message>
+        <source>Station locator</source>
+        <translation>Locatorul stației</translation>
+    </message>
+    <message>
+        <source>Stop watching this station</source>
+        <translation>Nu mai urmări această stație</translation>
+    </message>
+    <message>
+        <source>Watch this station</source>
+        <translation>Urmărește această stație</translation>
+    </message>
+    <message>
+        <source>Subscribe to the PSK Reporter MQTT stream for this station</source>
+        <translation>Abonează-te la fluxul MQTT PSK Reporter pentru această stație</translation>
+    </message>
+    <message>
+        <source>The subscription is retained but paused while Offline mode is enabled</source>
+        <translation>Abonamentul se păstrează, dar este suspendat cât timp modul fără conexiune este activ</translation>
+    </message>
+    <message>
+        <source>TOP BANDS</source>
+        <translation>PRINCIPALELE BENZI</translation>
+    </message>
+    <message>
+        <source>TOP MODES</source>
+        <translation>PRINCIPALELE MODURI</translation>
+    </message>
+    <message>
+        <source>The ADIF logbook is loaded, but no QSO matches the current map filters.</source>
+        <translation>Jurnalul ADIF este încărcat, dar niciun QSO nu corespunde filtrelor curente ale hărții.</translation>
+    </message>
+    <message>
+        <source>Time before live grid activity fades out</source>
+        <translation>Timpul după care activitatea în direct a unui locator se stinge</translation>
+    </message>
+    <message>
+        <source>Tsunami flag reported</source>
+        <translation>Semnalizare de tsunami raportată</translation>
+    </message>
+    <message>
+        <source>Unavailable while Offline mode is enabled</source>
+        <translation>Indisponibil cât timp modul fără conexiune este activ</translation>
+    </message>
+    <message>
+        <source>United States county boundaries from the U.S. Census TIGER service. Zoom in after it loads to inspect individual counties.</source>
+        <translation>Limitele comitatelor din Statele Unite, de la serviciul TIGER al U.S. Census. Mărește după încărcare pentru a examina comitatele în parte.</translation>
+    </message>
+    <message>
+        <source>United States state boundaries from the U.S. Census TIGER service. The map focuses on the United States when enabled.</source>
+        <translation>Limitele statelor din Statele Unite, de la serviciul TIGER al U.S. Census. Când este activ, harta se concentrează pe Statele Unite.</translation>
+    </message>
+    <message>
+        <source>Use the local atlas and stop online base maps, PSK MQTT and external overlays. Local logbook and radio data remain available.</source>
+        <translation>Folosește atlasul local și oprește hărțile de bază online, MQTT-ul PSK și straturile externe. Jurnalul local și datele radio rămân disponibile.</translation>
+    </message>
+    <message>
+        <source>VISIBLE ROSTER COLUMNS</source>
+        <translation>COLOANELE VIZIBILE ALE LISTEI</translation>
+    </message>
+    <message>
+        <source>WATCHED / IGNORED LISTS</source>
+        <translation>LISTE URMĂRITE / IGNORATE</translation>
+    </message>
+    <message>
+        <source>WORKED</source>
+        <translation>LUCRATE</translation>
+    </message>
+    <message>
+        <source>Worked  %1</source>
+        <translation>Lucrate  %1</translation>
+    </message>
+    <message>
+        <source>Worked %1 · Confirmed %2 · Remaining %3</source>
+        <translation>Lucrate %1 · Confirmate %2 · Rămase %3</translation>
+    </message>
+    <message>
+        <source>WPX prefixes derived from your imported ADIF log.</source>
+        <translation>Prefixe WPX deduse din jurnalul ADIF importat.</translation>
+    </message>
+    <message>
+        <source>Wildcard pattern matched against callsigns and messages</source>
+        <translation>Model cu metacaractere, comparat cu indicativele și mesajele</translation>
+    </message>
+    <message>
+        <source>n/a</source>
+        <translation>n/a</translation>
+    </message>
+    <message>
+        <source>not updated</source>
+        <translation>neactualizat</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>indisponibil</translation>
+    </message>
+    <message>
+        <source>%1 / 100</source>
+        <translation>%1 / 100</translation>
+    </message>
+    <message>
+        <source>%1 bands / %2h</source>
+        <translation>%1 benzi / %2 h</translation>
+    </message>
+    <message>
+        <source>ACTIVITY</source>
+        <translation>ACTIVITATE</translation>
+    </message>
+    <message>
+        <source>BAND ACTIVITY</source>
+        <translation>ACTIVITATE ÎN BANDĂ</translation>
+    </message>
+    <message>
+        <source>BAND RANKING</source>
+        <translation>CLASAMENTUL BENZILOR</translation>
+    </message>
+    <message>
+        <source>BEST</source>
+        <translation>CEA MAI BUNĂ</translation>
+    </message>
+    <message>
+        <source>BEST BAND</source>
+        <translation>CEA MAI BUNĂ BANDĂ</translation>
+    </message>
+    <message>
+        <source>Analyse the last %1 hours</source>
+        <translation>Analizează ultimele %1 ore</translation>
+    </message>
+    <message>
+        <source>LOCAL RX</source>
+        <translation>RX LOCAL</translation>
+    </message>
+    <message>
+        <source>LOCAL TX</source>
+        <translation>TX LOCAL</translation>
+    </message>
+    <message>
+        <source>Local RX</source>
+        <translation>RX local</translation>
+    </message>
+    <message>
+        <source>Local TX</source>
+        <translation>TX local</translation>
+    </message>
+    <message>
+        <source>PSK RX</source>
+        <translation>PSK RX</translation>
+    </message>
+    <message>
+        <source>PSK TX</source>
+        <translation>PSK TX</translation>
+    </message>
+    <message>
+        <source>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 calls   %6 dB</source>
+        <translation>Local %1 RX / %2 TX   PSK %3 RX / %4 TX   %5 indicative   %6 dB</translation>
+    </message>
+    <message>
+        <source>No activity</source>
+        <translation>Nicio activitate</translation>
+    </message>
+    <message>
+        <source>No band activity in this window</source>
+        <translation>Nicio activitate în bandă în acest interval</translation>
+    </message>
+    <message>
+        <source>now</source>
+        <translation>acum</translation>
+    </message>
+    <message>
+        <source>%1 QSO · %2 QSL · %3%</source>
+        <translation>%1 QSO · %2 QSL · %3%</translation>
+    </message>
+    <message>
+        <source>%1 · %2 / %3 / %4</source>
+        <translation>%1 · %2 / %3 / %4</translation>
+    </message>
+    <message>
+        <source>%1 · %2 · %3</source>
+        <translation>%1 · %2 · %3</translation>
+    </message>
+    <message>
+        <source>OQRS</source>
+        <translation>OQRS</translation>
+    </message>
+    <message>
+        <source>JSON files (*.json)</source>
+        <translation>Fișiere JSON (*.json)</translation>
+    </message>
+    <message>
+        <source>Decodium map configuration (*.json)</source>
+        <translation>Configurație de hartă Decodium (*.json)</translation>
+    </message>
+    <message>
+        <source>%1 / %2 — open roster and map</source>
+        <translation>%1 / %2 — deschide lista și harta</translation>
+    </message>
+    <message>
+        <source>%1 classified · %2 unknown</source>
+        <translation>%1 clasificate · %2 necunoscute</translation>
+    </message>
+    <message>
+        <source>Auto-fit active QSO</source>
+        <translation>Încadrează automat QSO-ul activ</translation>
+    </message>
+    <message>
+        <source>Award endorsement band</source>
+        <translation>Banda de andosare a diplomei</translation>
+    </message>
+    <message>
         <source>Color</source>
         <translation>Culoare</translation>
     </message>
     <message>
+        <source>Opacity</source>
+        <translation>Opacitate</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Lățime</translation>
+    </message>
+    <message>
+        <source>Labels</source>
+        <translation>Etichete</translation>
+    </message>
+    <message>
+        <source>Confirmation source used for the confirmed score</source>
+        <translation>Sursa de confirmare folosită pentru scorul confirmat</translation>
+    </message>
+    <message>
+        <source>Current band/mode use the selected map band and mode; Digital modes includes FT, JT, Q and other digital modes</source>
+        <translation>Banda și modul curente folosesc banda și modul alese pe hartă; modurile digitale includ FT, JT, Q și alte moduri digitale</translation>
+    </message>
+    <message>
+        <source>Max DT</source>
+        <translation>DT maxim</translation>
+    </message>
+    <message>
+        <source>Min SNR</source>
+        <translation>SNR minim</translation>
+    </message>
+    <message>
+        <source>LoTW age</source>
+        <translation>Vechimea LoTW</translation>
+    </message>
+    <message>
+        <source>Decay lifetime for this source</source>
+        <translation>Durata de stingere pentru această sursă</translation>
+    </message>
+    <message>
+        <source>EXCEPTIONS</source>
+        <translation>EXCEPȚII</translation>
+    </message>
+    <message>
+        <source>Export map config</source>
+        <translation>Exportă configurația hărții</translation>
+    </message>
+    <message>
+        <source>Import map config</source>
+        <translation>Importă configurația hărții</translation>
+    </message>
+    <message>
+        <source>Import Decodium map configuration</source>
+        <translation>Importă configurația de hartă Decodium</translation>
+    </message>
+    <message>
+        <source>Import the complete map configuration bundle</source>
+        <translation>Importă pachetul complet de configurare a hărții</translation>
+    </message>
+    <message>
+        <source>Export presets, roster preferences/rules, layer styles, temporal decay and map viewport</source>
+        <translation>Exportă presetările, preferințele și regulile listei, stilurile straturilor, stingerea temporală și vederea hărții</translation>
+    </message>
+    <message>
+        <source>From YYYY-MM-DD</source>
+        <translation>De la AAAA-LL-ZZ</translation>
+    </message>
+    <message>
+        <source>To YYYY-MM-DD</source>
+        <translation>Până la AAAA-LL-ZZ</translation>
+    </message>
+    <message>
+        <source>Historical hover: %1 · Live hover: %2</source>
+        <translation>Indicare istorică: %1 · Indicare în direct: %2</translation>
+    </message>
+    <message>
+        <source>Keep stations with a LoTW confirmation within the configured age</source>
+        <translation>Păstrează stațiile cu o confirmare LoTW mai nouă decât vechimea configurată</translation>
+    </message>
+    <message>
+        <source>LAYER STYLE</source>
+        <translation>STILUL STRATULUI</translation>
+    </message>
+    <message>
+        <source>Limit the roster to your DXCC or to other DXCCs</source>
+        <translation>Limitează lista la DXCC-ul tău sau la celelalte</translation>
+    </message>
+    <message>
+        <source>MISSING LIVE ENTITIES (%1)</source>
+        <translation>ENTITĂȚI LIPSĂ ÎN DIRECT (%1)</translation>
+    </message>
+    <message>
+        <source>Matrix</source>
+        <translation>Matrice</translation>
+    </message>
+    <message>
+        <source>NEW / WANTED MATRIX</source>
+        <translation>MATRICE NOI / CĂUTATE</translation>
+    </message>
+    <message>
+        <source>Operator callsign</source>
+        <translation>Indicativul operatorului</translation>
+    </message>
+    <message>
+        <source>PROPAGATION TYPES</source>
+        <translation>TIPURI DE PROPAGARE</translation>
+    </message>
+    <message>
+        <source>Propagation</source>
+        <translation>Propagare</translation>
+    </message>
+    <message>
+        <source>—</source>
+        <translation>—</translation>
+    </message>
+    <message>
+        <source>RR73=CQ</source>
+        <translation>RR73=CQ</translation>
+    </message>
+    <message>
+        <source>SCOPE</source>
+        <translation>DOMENIU</translation>
+    </message>
+    <message>
+        <source>WANTED</source>
+        <translation>CĂUTATE</translation>
+    </message>
+    <message>
+        <source>Spotted me</source>
+        <translation>M-au raportat</translation>
+    </message>
+    <message>
+        <source>Restore previous view</source>
+        <translation>Readu vederea anterioară</translation>
+    </message>
+    <message>
+        <source>Restore previous map view</source>
+        <translation>Readu vederea anterioară a hărții</translation>
+    </message>
+    <message>
+        <source>Select NEW categories and inspect wanted or exception matrices</source>
+        <translation>Alege categoriile NOI și examinează matricele de căutate sau de excepții</translation>
+    </message>
+    <message>
+        <source>Select the layer whose appearance is being edited</source>
+        <translation>Alege stratul căruia îi modifici aspectul</translation>
+    </message>
+    <message>
+        <source>TEMPORAL LEGEND / SOURCE DECAY</source>
+        <translation>LEGENDĂ TEMPORALĂ / STINGEREA SURSEI</translation>
+    </message>
+    <message>
+        <source>Treat messages containing RR73 as CQ when CQ-only is enabled</source>
+        <translation>Tratează mesajele care conțin RR73 ca CQ atunci când este activ filtrul doar-CQ</translation>
+    </message>
+    <message>
+        <source>Use only PSK Reporter spots heard by your callsign</source>
+        <translation>Folosește doar raportările PSK Reporter auzite de indicativul tău</translation>
+    </message>
+    <message>
+        <source>Use this entity in NEW and UNCONFIRMED calculations</source>
+        <translation>Folosește această entitate în calculele NOI și NECONFIRMATE</translation>
+    </message>
+    <message>
+        <source>provider filters are OR</source>
+        <translation>filtrele de furnizor se combină cu SAU</translation>
+    </message>
+    <message>
+        <source>ready</source>
+        <translation>gata</translation>
+    </message>
+    <message>
+        <source>wanted %1 · exceptions %2</source>
+        <translation>căutate %1 · excepții %2</translation>
+    </message>
+    <message>
+        <source>%1 km</source>
+        <translation>%1 km</translation>
+    </message>
+    <message>
+        <source>AZ</source>
+        <translation>AZ</translation>
+    </message>
+    <message>
+        <source>AZ %1°</source>
+        <translation>AZ %1°</translation>
+    </message>
+    <message>
+        <source>EL %1°</source>
+        <translation>EL %1°</translation>
+    </message>
+    <message>
+        <source>FB AZ %1° / EL %2°</source>
+        <translation>FB AZ %1° / EL %2°</translation>
+    </message>
+    <message>
+        <source>max EL</source>
+        <translation>EL max</translation>
+    </message>
+    <message>
+        <source>min EL</source>
+        <translation>EL min</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation>ms</translation>
+    </message>
+    <message>
+        <source>[%1] </source>
+        <translation>[%1] </translation>
+    </message>
+    <message>
         <source>NEW</source>
         <translation>NOU</translation>
+    </message>
+    <message>
+        <source>UNCONFIRMED</source>
+        <translation>NECONFIRMATE</translation>
+    </message>
+    <message>
+        <source>VALID</source>
+        <translation>VALABIL</translation>
+    </message>
+    <message>
+        <source>EXPIRED</source>
+        <translation>EXPIRAT</translation>
+    </message>
+    <message>
+        <source>VISIBLE</source>
+        <translation>VIZIBIL</translation>
+    </message>
+    <message>
+        <source>BELOW HORIZON</source>
+        <translation>SUB ORIZONT</translation>
+    </message>
+    <message>
+        <source>TRACK</source>
+        <translation>URMĂREȘTE</translation>
+    </message>
+    <message>
+        <source>STOP</source>
+        <translation>OPREȘTE</translation>
+    </message>
+    <message>
+        <source>PARK</source>
+        <translation>PARCHEAZĂ</translation>
+    </message>
+    <message>
+        <source>Rotator</source>
+        <translation>Rotor</translation>
+    </message>
+    <message>
+        <source>Park on stop</source>
+        <translation>Parchează la oprire</translation>
+    </message>
+    <message>
+        <source>Safety</source>
+        <translation>Siguranță</translation>
+    </message>
+    <message>
+        <source>range</source>
+        <translation>interval</translation>
+    </message>
+    <message>
+        <source> · tracking</source>
+        <translation> · urmărire</translation>
+    </message>
+    <message>
+        <source>refresh</source>
+        <translation>reîmprospătare</translation>
+    </message>
+    <message>
+        <source>Clear cache</source>
+        <translation>Golește memoria tampon</translation>
+    </message>
+    <message>
+        <source>STYLE</source>
+        <translation>STIL</translation>
+    </message>
+    <message>
+        <source>Cache obsoleta · aggiornamento in corso</source>
+        <translation>Memorie tampon învechită · actualizare în curs</translation>
+    </message>
+    <message>
+        <source>Fallback attivo: %1</source>
+        <translation>Sursă de rezervă activă: %1</translation>
+    </message>
+    <message>
+        <source>Feedback non disponibile</source>
+        <translation>Reacție indisponibilă</translation>
+    </message>
+    <message>
+        <source>Spot scaduto</source>
+        <translation>Raportare expirată</translation>
+    </message>
+    <message>
+        <source>Spot valido ancora %1 s</source>
+        <translation>Raportare valabilă încă %1 s</translation>
+    </message>
+    <message>
+        <source>Validità non dichiarata dal provider</source>
+        <translation>Valabilitate nedeclarată de furnizor</translation>
+    </message>
+    <message>
+        <source>Image files (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Fișiere imagine (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>World raster (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</source>
+        <translation>Raster mondial (*.png *.jpg *.jpeg *.webp *.tif *.tiff *.bmp)</translation>
+    </message>
+    <message>
+        <source>Import offline raster</source>
+        <translation>Importă raster fără conexiune</translation>
+    </message>
+    <message>
+        <source>Import offline world raster</source>
+        <translation>Importă raster mondial fără conexiune</translation>
+    </message>
+    <message>
+        <source>Import a legally obtained equirectangular world raster, such as a Natural Earth export. Decodium stores a private local copy and does not download tiles.</source>
+        <translation>Importă un raster mondial echirectangular obținut legal, de exemplu un export Natural Earth. Decodium păstrează o copie locală privată și nu descarcă dale.</translation>
+    </message>
+    <message>
+        <source>Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.</source>
+        <translation>Atlas local, OpenStreetMap/OpenTopoMap, batimetrie GEBCO, NASA GIBS și MapTiler. Dacă un furnizor eșuează, se încearcă sursa de rezervă configurată.</translation>
+    </message>
+    <message>
+        <source>Auroral propagation forecast. The temporal legend shows source age and validity.</source>
+        <translation>Prognoză de propagare aurorală. Legenda temporală arată vechimea și valabilitatea sursei.</translation>
+    </message>
+    <message>
+        <source>F2 critical-frequency forecast used to estimate ionospheric support for HF paths.</source>
+        <translation>Prognoza frecvenței critice F2, folosită pentru a estima sprijinul ionosferic al traseelor HF.</translation>
+    </message>
+    <message>
+        <source>Maximum Usable Frequency forecast. The temporal legend reports acquisition time, validity and visual decay.</source>
+        <translation>Prognoza frecvenței maxime utilizabile. Legenda temporală arată momentul achiziției, valabilitatea și stingerea vizuală.</translation>
+    </message>
+    <message>
+        <source>NVIS forecast derived from the current foF2 map; it is kept as a separate operational layer.</source>
+        <translation>Prognoză NVIS dedusă din harta foF2 curentă; este păstrată ca strat operațional separat.</translation>
+    </message>
+    <message>
+        <source>Sporadic-E probability forecast. Cached data fades after its validity window and remains labelled stale.</source>
+        <translation>Prognoza probabilității de E sporadic. Datele din memorie se sting după fereastra de valabilitate și rămân marcate ca învechite.</translation>
+    </message>
+    <message>
+        <source>Offline mode pauses cloud/network services, keeps ADIF, logbook, cache and radio activity available, and can use an imported user-provided world raster.</source>
+        <translation>Modul fără conexiune suspendă serviciile din rețea, păstrează disponibile ADIF-ul, jurnalul, memoria tampon și activitatea radio și poate folosi un raster mondial importat de utilizator.</translation>
+    </message>
+    <message>
+        <source>Pause cloud/network services, keep local ADIF, logbook, cache and radio activity available, and use the local atlas or imported raster pack.</source>
+        <translation>Suspendă serviciile din rețea, păstrează disponibile ADIF-ul local, jurnalul, memoria tampon și activitatea radio și folosește atlasul local sau pachetul raster importat.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: no receivers loaded for the last %1 minutes</source>
+        <translation>PSK Reporter: niciun receptor încărcat pentru ultimele %1 minute</translation>
+    </message>
+    <message>
+        <source>Receivers that reported hearing your callsign to PSK Reporter during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Receptoare care au raportat la PSK Reporter că ți-au auzit indicativul în ultimele %1 minute. Nu este nevoie ca trimiterea PSK din Decodium să fie activată.</translation>
+    </message>
+    <message>
+        <source>Retrieve receivers that heard your callsign during the last %1 minutes. PSK upload is independent.</source>
+        <translation>Aduce receptoarele care ți-au auzit indicativul în ultimele %1 minute. Trimiterea PSK este independentă.</translation>
+    </message>
+    <message>
+        <source>5 min</source>
+        <translation>5 min</translation>
+    </message>
+    <message>
+        <source>10 min</source>
+        <translation>10 min</translation>
+    </message>
+    <message>
+        <source>15 min</source>
+        <translation>15 min</translation>
+    </message>
+    <message>
+        <source>20 min</source>
+        <translation>20 min</translation>
+    </message>
+    <message>
+        <source>25 min</source>
+        <translation>25 min</translation>
+    </message>
+    <message>
+        <source>30 min</source>
+        <translation>30 min</translation>
+    </message>
+    <message>
+        <source>35 min</source>
+        <translation>35 min</translation>
+    </message>
+    <message>
+        <source>40 min</source>
+        <translation>40 min</translation>
+    </message>
+    <message>
+        <source>45 min</source>
+        <translation>45 min</translation>
+    </message>
+    <message>
+        <source>50 min</source>
+        <translation>50 min</translation>
+    </message>
+    <message>
+        <source>55 min</source>
+        <translation>55 min</translation>
+    </message>
+    <message>
+        <source>60 min</source>
+        <translation>60 min</translation>
+    </message>
+    <message>
+        <source>PSK spots</source>
+        <translation>Raportări PSK</translation>
+    </message>
+    <message>
+        <source>Enable the PSK layer to retrieve PSK Reporter spots</source>
+        <translation>Activează stratul PSK pentru a aduce raportările PSK Reporter</translation>
+    </message>
+    <message>
+        <source>Look-back and expiry period for PSK Reporter spots displayed on the Live Map</source>
+        <translation>Perioada de retrospectivă și de expirare a raportărilor PSK Reporter afișate pe harta în direct</translation>
+    </message>
+    <message>
+        <source>PSK Reporter Live Map window: %1 minutes</source>
+        <translation>Fereastra PSK Reporter pentru harta în direct: %1 minute</translation>
+    </message>
+    <message>
+        <source>PSK Reporter: refreshing Live Map spots…</source>
+        <translation>PSK Reporter: se reîmprospătează raportările hărții în direct…</translation>
+    </message>
+    <message>
+        <source>Refresh PSK Reporter spots for the Live Map. PSK upload is independent.</source>
+        <translation>Reîmprospătează raportările PSK Reporter pentru harta în direct. Trimiterea PSK este independentă.</translation>
+    </message>
+    <message>
+        <source>PSK Reporter reception reports for your callsign during the last %1 minutes. Decodium PSK upload does not need to be enabled.</source>
+        <translation>Rapoarte de recepție PSK Reporter pentru indicativul tău din ultimele %1 minute. Nu este nevoie ca trimiterea PSK din Decodium să fie activată.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="557"/>
+        <source>Unspecified</source>
+        <translation>Nespecificat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1493"/>
+        <source>This map marker has no callsign.</source>
+        <translation>Acest marcaj de hartă nu are indicativ.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1521"/>
+        <source>Enable a rotator to aim the antenna.</source>
+        <translation>Activează un rotor pentru a orienta antena.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="1534"/>
+        <source>Enable a rotator to track this satellite.</source>
+        <translation>Activează un rotor pentru a urmări acest satelit.</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2429"/>
@@ -1393,9 +2862,24 @@ Apasă Monitor pentru a începe</translation>
         <translation>Sursă</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2589"/>
+        <source>Continent</source>
+        <translation>Continent</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2607"/>
         <source>CQ only</source>
         <translation>Doar CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2753"/>
+        <source>Connected</source>
+        <translation>Conectat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2753"/>
+        <source>Connect</source>
+        <translation>Conectează</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3587"/>
@@ -1418,6 +2902,11 @@ Apasă Monitor pentru a începe</translation>
         <translation>eQSL</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3913"/>
+        <source>CQ</source>
+        <translation>CQ</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="4215"/>
         <source>Hide</source>
         <translation>Ascunde</translation>
@@ -1431,6 +2920,21 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="847"/>
         <source>Live Map</source>
         <translation>Hartă în direct</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2229"/>
+        <source>#RRGGBB</source>
+        <translation>#RRGGBB</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3241"/>
+        <source>foF2</source>
+        <translation>foF2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="3286"/>
+        <source>Es</source>
+        <translation>Es</translation>
     </message>
 </context>
 <context>
@@ -2996,6 +4500,11 @@ Clic dreapta: deconectează</translation>
         <translation>Adaugă</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="2963"/>
+        <source>CQ</source>
+        <translation>CQ</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="3155"/>
         <source>Grid</source>
         <translation>Locator</translation>
@@ -3019,6 +4528,11 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.ui" line="5392"/>
         <source>DX Cluster</source>
         <translation>Cluster DX</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="3175"/>
+        <source>Continent</source>
+        <translation>Continent</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5130"/>
@@ -3115,6 +4629,29 @@ Clic dreapta: deconectează</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MamWindow.qml" line="452"/>
         <source>No active caller</source>
         <translation>Niciun apelant activ</translation>
+    </message>
+</context>
+<context>
+    <name>MapExternalOverlayService</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="486"/>
+        <source>current</source>
+        <translation>curent</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="488"/>
+        <source>stale</source>
+        <translation>învechit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="490"/>
+        <source>offline cache</source>
+        <translation>memorie fără conexiune</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/services/MapExternalOverlayService.cpp" line="492"/>
+        <source>loading</source>
+        <translation>se încarcă</translation>
     </message>
 </context>
 <context>
@@ -3274,6 +4811,14 @@ Adaugă din coadă</translation>
     </message>
 </context>
 <context>
+    <name>RigControlDialogContent</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="390"/>
+        <source>Connect</source>
+        <translation>Conectează</translation>
+    </message>
+</context>
+<context>
     <name>RigDetectResults</name>
     <message>
         <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
@@ -3424,6 +4969,16 @@ Adaugă din coadă</translation>
         <translation>Aldin</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1958"/>
+        <source>Connect</source>
+        <translation>Conectează</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1952"/>
+        <source>Connected</source>
+        <translation>Conectat</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="2650"/>
         <source>Mode:</source>
         <translation>Mod:</translation>
@@ -3485,6 +5040,16 @@ Adaugă din coadă</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="277"/>
         <source>Status:</source>
         <translation>Stare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="281"/>
+        <source>Connected</source>
+        <translation>Conectat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="287"/>
+        <source>Connect</source>
+        <translation>Conectează</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1133"/>
@@ -3560,6 +5125,16 @@ Adaugă din coadă</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="132"/>
         <source>Status:</source>
         <translation>Stare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="139"/>
+        <source>Connected</source>
+        <translation>Conectat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="148"/>
+        <source>Connect</source>
+        <translation>Conectează</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="670"/>
@@ -4338,6 +5913,44 @@ Apasă MONITOR pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>WorldMapWidget</name>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="909"/>
+        <source>Set your locator to enable the map</source>
+        <translation>Setează-ți locatorul pentru a activa harta</translation>
+    </message>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="922"/>
+        <source>IN-&gt;ME</source>
+        <translation>IN-&gt;ME</translation>
+    </message>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="928"/>
+        <source>ME-&gt;DX</source>
+        <translation>ME-&gt;DX</translation>
+    </message>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="935"/>
+        <source>BAND</source>
+        <translation>BANDĂ</translation>
+    </message>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="943"/>
+        <source>Callers queue %1s</source>
+        <translation>Coadă de apelanți %1 s</translation>
+    </message>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="950"/>
+        <source>%1 active paths | %2 in band</source>
+        <translation>%1 trasee active | %2 în bandă</translation>
+    </message>
+    <message>
+        <location filename="../widgets/worldmapwidget.cpp" line="954"/>
+        <source>%1 active paths</source>
+        <translation>%1 trasee active</translation>
+    </message>
+</context>
+<context>
     <name>configuration_dialog</name>
     <message>
         <location filename="../Configuration.ui" line="823"/>
@@ -4972,6 +6585,25 @@ DXCC %4 · Locator %5 · WPX %6</translation>
     <message>
         <source>UDP command port: %1 • feedback unavailable</source>
         <translation>Port de comandă UDP: %1 • reacție indisponibilă</translation>
+    </message>
+</context>
+<context>
+    <name>MoonEphemeris</name>
+    <message>
+        <source>current</source>
+        <translation>curent</translation>
+    </message>
+    <message>
+        <source>stale</source>
+        <translation>învechit</translation>
+    </message>
+    <message>
+        <source>loading</source>
+        <translation>se încarcă</translation>
+    </message>
+    <message>
+        <source>offline cache</source>
+        <translation>memorie fără conexiune</translation>
     </message>
 </context>
 <context>
