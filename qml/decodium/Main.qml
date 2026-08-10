@@ -1857,6 +1857,7 @@ ApplicationWindow {
         { code: "ja", name: "日本語" },
         { code: "lv", name: "Latviešu" },
         { code: "nl", name: "Nederlands" },
+        { code: "ro", name: "Română" },
         { code: "ru", name: "Русский" },
         { code: "zh", name: "简体中文" },
         { code: "zh_TW", name: "繁體中文" }
@@ -1885,6 +1886,7 @@ ApplicationWindow {
         case "ja": return "言語"
         case "lv": return "Valoda"
         case "nl": return "Taal"
+        case "ro": return "Limbă"
         case "ru": return "Язык"
         case "zh": return "语言"
         case "zh_TW": return "語言"
@@ -11904,6 +11906,13 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		                onTriggered: mainWindow.setUiLanguage("ru")
 		                background: Rectangle { color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"; radius: 6 }
 		                contentItem: Text { text: parent.text; font.pixelSize: 12; color: uiLanguage === "ru" ? successGreen : textSecondary; leftPadding: 10 }
+		            }
+
+		            MenuItem {
+		                text: uiLanguage === "ro" ? "✓ Română" : "☐ Română"
+		                onTriggered: mainWindow.setUiLanguage("ro")
+		                background: Rectangle { color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"; radius: 6 }
+		                contentItem: Text { text: parent.text; font.pixelSize: 12; color: uiLanguage === "ro" ? successGreen : textSecondary; leftPadding: 10 }
 		            }
 
 		            MenuItem {

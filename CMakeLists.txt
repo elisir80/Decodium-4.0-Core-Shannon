@@ -1509,6 +1509,7 @@ set (LANGUAGES
   nl				# Dutch (Nederlands)
   #no				# Norwegian
   #pt				# Portuguese
+  ro				# Romanian
   ru				# Russian
   #sv				# Swedish
   zh				# Chinese

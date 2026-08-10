@@ -238,6 +238,9 @@ namespace
   // si lascia comandare il server se manda TxChrono.
   constexpr int kTxPushIntervalMs = 40;
   constexpr qint64 kTxChronoGraceMs = 500;
+  // margine di audio che si tiene in anticipo sul tempo reale, per coprire
+  // il jitter del timer senza accumulare ritardo.
+  constexpr qint64 kTxPushLeadUs = 120000;
 
   quint64 sample_size_for_format (quint32 format)
   {
@@ -1446,6 +1449,8 @@ void TCITransceiver::on_tx_push_tick ()
   if (!txPushActive_)
     {
       txPushActive_ = true;
+      txPushStartMs_ = now;
+      txPushAudioUs_ = 0;
       qInfo () << "TCI: nessun TxChrono dal server, il client inizia a spingere"
                << "l'audio TX da solo; ultimo chrono"
                << (lastTxChronoMs_ > 0 ? now - lastTxChronoMs_ : -1) << "ms fa";
@@ -1455,6 +1460,23 @@ void TCITransceiver::on_tx_push_tick ()
   quint32 sample_count = qMax<quint32> (2, audioStreamSamples_ * channels);
   if (sample_count & 1u) ++sample_count;
   sample_count = qBound<quint32> (2, sample_count, 8192);
+
+  // 1.0.542 iu8lmc - il ritmo va misurato, non dato per buono. Un frame porta
+  // sample_count/canali campioni per canale, cioe' 42,7 ms a 48 kHz, mentre il
+  // timer scatta ogni 40: senza questo controllo si genera il 6,7% piu' veloce
+  // del tempo reale e su una trasmissione FT8 si accumula quasi un secondo di
+  // ritardo nel buffer del server, con la coda oltre lo slot. Si spedisce solo
+  // finche' l'audio prodotto non supera il tempo trascorso piu' un margine.
+  quint32 const frames_per_channel = qMax<quint32> (1, sample_count / qMax<quint32> (1, channels));
+  quint32 const rate = audioSampleRate ? audioSampleRate : 48000u;
+  qint64 const frame_us = (static_cast<qint64> (frames_per_channel) * 1000000LL) / rate;
+  qint64 const elapsed_us = (now - txPushStartMs_) * 1000LL;
+  if (txPushAudioUs_ > elapsed_us + kTxPushLeadUs)
+    {
+      return;   // siamo gia' avanti: si lascia scorrere il tempo reale
+    }
+
+  txPushAudioUs_ += frame_us;
   send_tx_audio_frame (rx_.toUInt (), sample_count, SampleFloat32, channels);
 }
 // 1.0.542 iu8lmc - impacchetta e spedisce un frame di audio TX. Estratta dal

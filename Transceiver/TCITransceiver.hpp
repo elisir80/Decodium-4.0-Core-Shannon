@@ -335,6 +335,8 @@ private:
   // nulla, perche' l'audio partiva solo come risposta al loro scandire.
   qint64 lastTxChronoMs_ {0};
   bool txPushActive_ {false};
+  qint64 txPushStartMs_ {0};
+  qint64 txPushAudioUs_ {0};
   QTimer * tx_push_timer_ {nullptr};
   QHash<QString,Tci_Cmd> mapCmd_;
   // from Detector

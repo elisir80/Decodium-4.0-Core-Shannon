@@ -2938,6 +2938,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
       {"fr", "Français"},
       {"ja", "日本語"},
       {"zh", "中文"},
+      {"ro", "Română"},
       {"zh_TW", "繁體中文"},
       {"ru", "Русский"},
     };
