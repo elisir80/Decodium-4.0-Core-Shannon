@@ -29,9 +29,84 @@
 <context>
     <name>ActiveStations</name>
     <message>
+        <location filename="../widgets/activeStations.ui" line="14"/>
+        <source>Message Averaging</source>
+        <translation>Medierea mesajelor</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="164"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set maximum number of displayed lines.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stabilește numărul maxim de rânduri afișate.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="170"/>
+        <source>Max N  </source>
+        <translation>N max  </translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="56"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Points logged during the past hour.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Puncte înregistrate în ultima oră.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="37"/>
+        <source>0</source>
+        <translation>0</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="85"/>
+        <source># Wanted only</source>
+        <translation># Doar căutate</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="130"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set maximum elapsed number of T/R sequences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stabilește numărul maxim de secvențe emisie/recepție scurse.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="136"/>
+        <source>Max Age  </source>
+        <translation>Vechime max  </translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="207"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click on a line to call that station. &lt;/p&gt;&lt;p&gt;When using QMAP, single click to transfer QSO data and sked frequency to Decodium v3.0 SE KP5, and double click to call that station.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clic pe un rând pentru a chema acea stație.&lt;/p&gt;&lt;p&gt;Cu QMAP, un clic transferă datele QSO și frecvența programată către Decodium v3.0 SE KP5, iar dublul clic chemă acea stație.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="92"/>
+        <source>Score:</source>
+        <translation>Scor:</translation>
+    </message>
+    <message>
         <location filename="../widgets/activeStations.ui" line="102"/>
         <source>Rate:</source>
         <translation>Ritm:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="34"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Total score accumulated since most recent reset of Cabrillo log.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scorul total adunat de la ultima resetare a jurnalului Cabrillo.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="72"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check this box to show only stations ready to be called.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bifează pentru a arăta doar stațiile gata de chemat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="75"/>
+        <source>Ready only</source>
+        <translation>Doar cele gata</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="24"/>
+        <source>Band Changes:</source>
+        <translation>Schimbări de bandă:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.ui" line="183"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of band changes during the past hour.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Numărul schimbărilor de bandă în ultima oră.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../widgets/activeStations.cpp" line="22"/>
@@ -39,9 +114,19 @@
         <translation>Stații active</translation>
     </message>
     <message>
+        <location filename="../widgets/activeStations.cpp" line="94"/>
+        <source>Wanted only</source>
+        <translation>Doar căutate</translation>
+    </message>
+    <message>
         <location filename="../widgets/activeStations.cpp" line="96"/>
         <source>Message</source>
         <translation>Mesaj</translation>
+    </message>
+    <message>
+        <location filename="../widgets/activeStations.cpp" line="97"/>
+        <source>My call only</source>
+        <translation>Doar indicativul meu</translation>
     </message>
 </context>
 <context>
@@ -90,9 +175,99 @@
 <context>
     <name>Astro</name>
     <message>
+        <location filename="../widgets/astro.ui" line="34"/>
+        <source>Doppler tracking</source>
+        <translation>Urmărire Doppler</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="40"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;One station does all Doppler shift correction, their QSO partner receives and transmits on the sked frequency.&lt;/p&gt;&lt;p&gt;If the rig does not accept CAT QSY commands while transmitting a single correction is applied for the whole transmit period.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;O stație face toată corecția de deplasare Doppler, iar partenerul de QSO recepționează și emite pe frecvența programată.&lt;/p&gt;&lt;p&gt;Dacă aparatul nu acceptă comenzi CAT de QSY în timpul emisiei, se aplică o singură corecție pentru toată perioada de emisie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="43"/>
+        <source>Full Doppler to DX Grid</source>
+        <translation>Doppler complet spre locatorul DX</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="53"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Transmit takes place on sked frequency and receive frequency is  corrected for own echoes. &lt;/p&gt;&lt;p&gt;This mode can be used for calling CQ, or when using Echo mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emisia are loc pe frecvența programată, iar frecvența de recepție este corectată pentru propriile ecouri.&lt;/p&gt;&lt;p&gt;Acest mod se poate folosi pentru a chema CQ sau în modul Ecou.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="56"/>
+        <source>Own Echo</source>
+        <translation>Ecoul propriu</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="63"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Both stations correct for Doppler shift such that they would be heard on the moon at the sked frequency.&lt;/p&gt;&lt;p&gt;If the rig does not accept CAT QSY commands while transmitting a single correction is applied for the whole transmit period.&lt;/p&gt;&lt;p&gt;Use this option also for Echo mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ambele stații corectează deplasarea Doppler astfel încât să fie auzite pe Lună la frecvența programată.&lt;/p&gt;&lt;p&gt;Dacă aparatul nu acceptă comenzi CAT de QSY în timpul emisiei, se aplică o singură corecție pentru toată perioada de emisie.&lt;/p&gt;&lt;p&gt;Folosește această opțiune și pentru modul Ecou.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="66"/>
+        <source>Constant frequency on Moon</source>
+        <translation>Frecvență constantă pe Lună</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="76"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;DX station announces their TX Freq, which is entered as the Sked Freq. Correction applied to RX and TX so you appear on the DX's station's own echo Freq.&lt;/p&gt;&lt;p&gt;If the rig does not accept CAT QSY commands while transmitting a single correction is applied for the whole transmit period.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stația DX își anunță frecvența de emisie, care se introduce ca frecvență programată. Corecția se aplică la recepție și la emisie, ca să apari pe frecvența ecoului propriu al stației DX.&lt;/p&gt;&lt;p&gt;Dacă aparatul nu acceptă comenzi CAT de QSY în timpul emisiei, se aplică o singură corecție pentru toată perioada de emisie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="79"/>
+        <source>On DX Echo</source>
+        <translation>Pe ecoul stației DX</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="89"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tune radio manually and select this mode to put your echo on the same frequency.&lt;/p&gt;&lt;p&gt;If the rig does not accept CAT QSY commands while transmitting a single correction is applied for the whole transmit period.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Acordează aparatul manual și alege acest mod pentru a-ți aduce ecoul pe aceeași frecvență.&lt;/p&gt;&lt;p&gt;Dacă aparatul nu acceptă comenzi CAT de QSY în timpul emisiei, se aplică o singură corecție pentru toată perioada de emisie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="92"/>
+        <source>Call DX</source>
+        <translation>Cheamă DX</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="102"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No Doppler shift correction is applied. This may be used when the QSO partner does full Doppler correction to your grid square.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nu se aplică nicio corecție de deplasare Doppler. Se poate folosi când partenerul de QSO face corecția completă spre locatorul tău.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <location filename="../widgets/astro.ui" line="105"/>
         <source>None</source>
         <translation>Niciunul</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="121"/>
+        <source>Sked frequency</source>
+        <translation>Frecvență programată</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="134"/>
+        <source>0</source>
+        <translation>0</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="168"/>
+        <source>Rx:</source>
+        <translation>Rx:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="182"/>
+        <source>Tx:</source>
+        <translation>Tx:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="189"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Press and hold the CTRL key to adjust the sked frequency manually with the rig's VFO dial or enter frequency directly into the band entry field on the main window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ține apăsată tasta CTRL pentru a regla manual frecvența programată cu butonul VFO al aparatului sau introdu frecvența direct în câmpul de bandă din fereastra principală.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="214"/>
+        <source>Echo Mode</source>
+        <translation>Mod Ecou</translation>
     </message>
     <message>
         <location filename="../widgets/astro.ui" line="228"/>
@@ -100,9 +275,85 @@
         <translation>  Hz</translation>
     </message>
     <message>
+        <location filename="../widgets/astro.ui" line="231"/>
+        <source>RIT  </source>
+        <translation>RIT  </translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="260"/>
+        <source>Dither</source>
+        <translation>Fluctuație</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="272"/>
+        <source>Tx Shift relative to Rx Sked Freq</source>
+        <translation>Deplasarea emisiei față de frecvența programată de recepție</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="278"/>
+        <source>Enter large offset</source>
+        <translation>Introdu un decalaj mare</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="281"/>
+        <source> MHz</source>
+        <translation> MHz</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="284"/>
+        <source>Shift </source>
+        <translation>Deplasare </translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="306"/>
+        <source>Enable</source>
+        <translation>Activează</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.ui" line="337"/>
+        <source>Astro Data</source>
+        <translation>Date astronomice</translation>
+    </message>
+    <message>
         <location filename="../widgets/astro.cpp" line="155"/>
         <source>Astronomical Data</source>
         <translation>Date astronomice</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.cpp" line="238"/>
+        <source>No candidate path generated</source>
+        <translation>Nu s-a generat niciun traseu candidat</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.cpp" line="245"/>
+        <source>Astronomical Data Error</source>
+        <translation>Eroare la datele astronomice</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.cpp" line="246"/>
+        <source>JPLEPH file not found or unreadable.
+
+Searched paths:
+%1
+
+Astronomical calculations are disabled.</source>
+        <translation>Fișierul JPLEPH nu a fost găsit sau nu poate fi citit.
+
+Căi căutate:
+%1
+
+Calculele astronomice sunt dezactivate.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/astro.cpp" line="249"/>
+        <source>JPLEPH file not found or unreadable.
+
+Searched paths:
+%1</source>
+        <translation>Fișierul JPLEPH nu a fost găsit sau nu poate fi citit.
+
+Căi căutate:
+%1</translation>
     </message>
 </context>
 <context>
@@ -321,19 +572,234 @@
     </message>
 </context>
 <context>
+    <name>AsyncModeWidget</name>
+    <message>
+        <location filename="../widgets/asyncmodewidget.cpp" line="77"/>
+        <source>Sine Wave</source>
+        <translation>Sinusoidă</translation>
+    </message>
+    <message>
+        <location filename="../widgets/asyncmodewidget.cpp" line="80"/>
+        <source>S-Meter</source>
+        <translation>S-metru</translation>
+    </message>
+    <message>
+        <location filename="../widgets/asyncmodewidget.cpp" line="84"/>
+        <source>Hide Widget</source>
+        <translation>Ascunde elementul</translation>
+    </message>
+</context>
+<context>
     <name>Bands</name>
+    <message>
+        <location filename="../models/Bands.cpp" line="139"/>
+        <source>Band name</source>
+        <translation>Numele benzii</translation>
+    </message>
+    <message>
+        <location filename="../models/Bands.cpp" line="140"/>
+        <source>Lower frequency limit</source>
+        <translation>Limita inferioară de frecvență</translation>
+    </message>
+    <message>
+        <location filename="../models/Bands.cpp" line="141"/>
+        <source>Upper frequency limit</source>
+        <translation>Limita superioară de frecvență</translation>
+    </message>
     <message>
         <location filename="../models/Bands.cpp" line="203"/>
         <source>Band</source>
         <translation>Bandă</translation>
     </message>
+    <message>
+        <location filename="../models/Bands.cpp" line="204"/>
+        <source>Lower Limit</source>
+        <translation>Limita inferioară</translation>
+    </message>
+    <message>
+        <location filename="../models/Bands.cpp" line="205"/>
+        <source>Upper Limit</source>
+        <translation>Limita superioară</translation>
+    </message>
+</context>
+<context>
+    <name>BootLoader</name>
+    <message>
+        <location filename="../qml/decodium/BootLoader.qml" line="21"/>
+        <source>Decodium 4.0 — Loading...</source>
+        <translation>Decodium 4.0 — se încarcă...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="152"/>
+        <source>DECODIUM 4.0</source>
+        <translation>DECODIUM 4.0</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/BootLoader.qml" line="159"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
+    </message>
 </context>
 <context>
     <name>BugReportDialog</name>
     <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="8"/>
+        <source>Report a problem</source>
+        <translation>Raportează o problemă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="37"/>
+        <source>CAT / HRD</source>
+        <translation>CAT / HRD</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="38"/>
+        <source>Reception / decoding</source>
+        <translation>Recepție / decodificare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="39"/>
+        <source>Transmission</source>
+        <translation>Emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="40"/>
+        <source>Interface</source>
+        <translation>Interfață</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="41"/>
+        <source>Audio &amp; peripherals</source>
+        <translation>Audio și periferice</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="42"/>
+        <source>Installation &amp; updates</source>
+        <translation>Instalare și actualizări</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="43"/>
+        <source>Translations</source>
+        <translation>Traduceri</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="44"/>
+        <source>General / Other</source>
+        <translation>General / altele</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="70"/>
+        <source>Problem in %1</source>
+        <translation>Problemă la %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="80"/>
+        <source>Automatic self-check:</source>
+        <translation>Autoverificare automată:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="119"/>
+        <source>Your report is posted on the community forum, in your language, so others can help.</source>
+        <translation>Raportul tău este publicat pe forumul comunității, în limba ta, ca să te poată ajuta și alții.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="148"/>
+        <source>Found %n likely cause(s) — please check these before reporting:</source>
+        <translation>
+            <numerusform>S-a găsit o cauză probabilă — verific-o înainte de a raporta:</numerusform>
+            <numerusform>S-au găsit %n cauze probabile — verifică-le înainte de a raporta:</numerusform>
+            <numerusform>S-au găsit %n de cauze probabile — verifică-le înainte de a raporta:</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="195"/>
+        <source>Self-check found no known cause — please describe the problem below.</source>
+        <translation>Autoverificarea nu a găsit o cauză cunoscută — descrie problema mai jos.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="206"/>
+        <source>Category:</source>
+        <translation>Categorie:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="222"/>
+        <source>Describe the problem:</source>
+        <translation>Descrie problema:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="249"/>
+        <source>What happens, since when, and what you already tried. Paste any error messages too.</source>
+        <translation>Ce se întâmplă, de când și ce ai încercat deja. Lipește și eventualele mesaje de eroare.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="258"/>
+        <source>Diagnostic info (auto-collected):</source>
+        <translation>Date de diagnostic (culese automat):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="273"/>
+        <source>Diagnostics not available</source>
+        <translation>Diagnostic indisponibil</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="289"/>
+        <source>Copy Report</source>
+        <translation>Copiază raportul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="300"/>
+        <source>Copied!</source>
+        <translation>Copiat!</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="309"/>
+        <source>Sending...</source>
+        <translation>Se trimite...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="309"/>
+        <source>Upload last diagnostic log</source>
+        <translation>Trimite ultimul registru de diagnostic</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="316"/>
+        <source>Diagnostic log — %1 — %2</source>
+        <translation>Registru de diagnostic — %1 — %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="323"/>
+        <source>The diagnostic log could not be read.</source>
+        <translation>Registrul de diagnostic nu a putut fi citit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="327"/>
+        <source>Diagnostic log uploaded from Decodium.</source>
+        <translation>Registru de diagnostic trimis din Decodium.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="338"/>
+        <source>Posting...</source>
+        <translation>Se publică...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="338"/>
+        <source>Post to community</source>
+        <translation>Publică în comunitate</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="345"/>
+        <source>You already reported this recently. Check the community for replies: %1</source>
+        <translation>Ai raportat asta recent. Caută răspunsurile în comunitate: %1</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/BugReportDialog.qml" line="357"/>
         <source>Close</source>
         <translation>Închide</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/BugReportDialog.qml" line="380"/>
+        <source>Posted! Open the groups: %1</source>
+        <translation>Publicat! Deschide grupurile: %1</translation>
     </message>
 </context>
 <context>
@@ -352,9 +818,19 @@
 <context>
     <name>CabrilloLog</name>
     <message>
+        <location filename="../models/CabrilloLog.cpp" line="93"/>
+        <source>Freq(MHz)</source>
+        <translation>Frecv(MHz)</translation>
+    </message>
+    <message>
         <location filename="../models/CabrilloLog.cpp" line="94"/>
         <source>Mode</source>
         <translation>Mod</translation>
+    </message>
+    <message>
+        <location filename="../models/CabrilloLog.cpp" line="95"/>
+        <source>Date &amp; Time(UTC)</source>
+        <translation>Data și ora (UTC)</translation>
     </message>
     <message>
         <location filename="../models/CabrilloLog.cpp" line="96"/>
@@ -627,6 +1103,51 @@
 <context>
     <name>CatSettingsDialog</name>
     <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="8"/>
+        <source>CAT - Radio Settings</source>
+        <translation>CAT - setările aparatului</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="35"/>
+        <source>⚙ CAT — Radio Settings</source>
+        <translation>⚙ CAT — setările aparatului</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="114"/>
+        <source>Search radio...</source>
+        <translation>Caută aparatul...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="169"/>
+        <source>Serial port:</source>
+        <translation>Port serial:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="215"/>
+        <source>Refresh ports</source>
+        <translation>Reîmprospătează porturile</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="228"/>
+        <source>Speed (baud):</source>
+        <translation>Viteză (bauzi):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="292"/>
+        <source>Auto-connect CAT on startup</source>
+        <translation>Conectează CAT automat la pornire</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="318"/>
+        <source>Start audio on connect</source>
+        <translation>Pornește sunetul la conectare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/CatSettingsDialog.qml" line="354"/>
+        <source>Not connected</source>
+        <translation>Neconectat</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/CatSettingsDialog.qml" line="366"/>
         <source>Disconnect</source>
         <translation>Deconectează</translation>
@@ -638,7 +1159,32 @@
     </message>
 </context>
 <context>
+    <name>Cloudlog::impl</name>
+    <message>
+        <location filename="../Network/Cloudlog.cpp" line="303"/>
+        <source>Cloudlog Error!</source>
+        <translation>Eroare Cloudlog!</translation>
+    </message>
+    <message>
+        <location filename="../Network/Cloudlog.cpp" line="304"/>
+        <source>QSO could not be sent to Cloudlog!
+Please check your log.</source>
+        <translation>QSO-ul nu a putut fi trimis la Cloudlog!
+Verifică-ți jurnalul.</translation>
+    </message>
+    <message>
+        <location filename="../Network/Cloudlog.cpp" line="306"/>
+        <source>Reason: %1</source>
+        <translation>Motiv: %1</translation>
+    </message>
+</context>
+<context>
     <name>ColorHighlighting</name>
+    <message>
+        <location filename="../widgets/colorhighlighting.ui" line="20"/>
+        <source>K1ABC</source>
+        <translation>K1ABC</translation>
+    </message>
     <message>
         <location filename="../widgets/colorhighlighting.ui" line="43"/>
         <source>CQ in message</source>
@@ -685,6 +1231,11 @@
         <translation>Indicativ nou în bandă</translation>
     </message>
     <message>
+        <location filename="../widgets/colorhighlighting.ui" line="210"/>
+        <source>Uploads to LotW</source>
+        <translation>Trimite la LoTW</translation>
+    </message>
+    <message>
         <location filename="../widgets/colorhighlighting.ui" line="295"/>
         <source>New Continent</source>
         <translation>Continent nou</translation>
@@ -718,9 +1269,29 @@
 <context>
     <name>ColorHighlightingDialog</name>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="9"/>
+        <source>Color Highlighting</source>
+        <translation>Evidențiere cu culori</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="112"/>
         <source>B4 Strikethrough:</source>
         <translation>Tăiere pentru B4:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="131"/>
+        <source>Alert Sounds:</source>
+        <translation>Sunete de avertizare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="149"/>
+        <source>Choose Color</source>
+        <translation>Alege culoarea</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="170"/>
+        <source>Hex color (#RRGGBB):</source>
+        <translation>Culoare hexazecimală (#RRGGBB):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/ColorHighlightingDialog.qml" line="180"/>
@@ -731,6 +1302,16 @@
 <context>
     <name>Configuration::impl</name>
     <message>
+        <location filename="../Configuration.cpp" line="2336"/>
+        <source>&amp;Delete</source>
+        <translation>&amp;Șterge</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="2337"/>
+        <source>&amp;Insert ...</source>
+        <translation>&amp;Inserează ...</translation>
+    </message>
+    <message>
         <location filename="../Configuration.cpp" line="2386"/>
         <source>HTTP port:</source>
         <translation>Port HTTP:</translation>
@@ -739,6 +1320,11 @@
         <location filename="../Configuration.cpp" line="2401"/>
         <source>Username:</source>
         <translation>Nume de utilizator:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="2594"/>
+        <source>path: "%1"</source>
+        <translation>cale: „%1”</translation>
     </message>
     <message>
         <location filename="../Configuration.cpp" line="4175"/>
@@ -917,6 +1503,74 @@
         <location filename="../widgets/DXClusterWindow.cpp" line="1085"/>
         <source>Filter applied: %1 | Spots: %2 | Band: %3</source>
         <translation>Filtru aplicat: %1 | Raportări: %2 | Bandă: %3</translation>
+    </message>
+</context>
+<context>
+    <name>DXLabSuiteCommanderTransceiver</name>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="77"/>
+        <source>Failed to connect to DX Lab Suite Commander
+</source>
+        <translation>Conectarea la DX Lab Suite Commander a eșuat
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="216"/>
+        <source>DX Lab Suite Commander sent an unrecognised TX state: </source>
+        <translation>DX Lab Suite Commander a trimis o stare de emisie nerecunoscută: </translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="222"/>
+        <source>DX Lab Suite Commander didn't respond correctly polling TX status: </source>
+        <translation>DX Lab Suite Commander nu a răspuns corect la interogarea stării de emisie: </translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="230"/>
+        <source>Transceiver did not respond to PTT On/Off quickly enough; 
+reduce DX Lab Suite Commander's 'Command Interval' setting 
+or contact DXLab support at DXLab@groups.io.</source>
+        <translation>Transceiverul nu a răspuns destul de repede la comanda PTT;
+micșorează intervalul dintre comenzi din DX Lab Suite Commander
+sau scrie la asistența DXLab, la DXLab@groups.io.</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="439"/>
+        <source>DX Lab Suite Commander send command failed
+</source>
+        <translation>Trimiterea comenzii către DX Lab Suite Commander a eșuat
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="451"/>
+        <source>DX Lab Suite Commander send command failed "%1": %2
+</source>
+        <translation>Trimiterea comenzii „%1” către DX Lab Suite Commander a eșuat: %2
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="468"/>
+        <source>DX Lab Suite Commander send command "%1" read reply failed: %2
+</source>
+        <translation>Citirea răspunsului la comanda „%1” din DX Lab Suite Commander a eșuat: %2
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="485"/>
+        <source>DX Lab Suite Commander retries exhausted sending command "%1"</source>
+        <translation>S-au epuizat reîncercările de trimitere a comenzii „%1” către DX Lab Suite Commander</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/DXLabSuiteCommanderTransceiver.cpp" line="543"/>
+        <source>DX Lab Suite Commander sent an unrecognized frequency</source>
+        <translation>DX Lab Suite Commander a trimis o frecvență nerecunoscută</translation>
+    </message>
+</context>
+<context>
+    <name>DecoComboBox</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DecoComboBox.qml" line="114"/>
+        <source>▾</source>
+        <translation>▾</translation>
     </message>
 </context>
 <context>
@@ -1269,6 +1923,10 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Update in progress...</source>
+        <translation>Actualizare în curs...</translation>
+    </message>
+    <message>
         <source>Error</source>
         <translation>Eroare</translation>
     </message>
@@ -1283,6 +1941,139 @@ Apasă Monitor pentru a începe</translation>
     <message>
         <source>File not loaded</source>
         <translation>Fișier neîncărcat</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="28717"/>
+        <source>TX non avviata</source>
+        <translation>Emisia nu a pornit</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="28718"/>
+        <source>Nominativo compresso non risolto</source>
+        <translation>Indicativ comprimat nerezolvat</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="32729"/>
+        <source>AutoCQ fermato</source>
+        <translation>AutoCQ oprit</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="32730"/>
+        <source>Chiamata diretta ricevuta, ma il nominativo non e' risolto</source>
+        <translation>Apel direct primit, dar indicativul nu este rezolvat</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="38151"/>
+        <source>Map selection: %1 %2</source>
+        <translation>Selecție pe hartă: %1 %2</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="38152"/>
+        <source>Map selection: %1</source>
+        <translation>Selecție pe hartă: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumBridge.cpp" line="46183"/>
+        <source>Update checks are disabled in this build.</source>
+        <translation>Verificarea actualizărilor este dezactivată în această versiune.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41382"/>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>Apelul de pe hartă nu a putut alege TX1 pentru %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41442"/>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO cu %1 armat - TX%2 la următorul interval complet</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/src/bridge/DecodiumBridge.cpp" line="41502"/>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO cu %1 armat - TX%2</translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCloudlogLite</name>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="379"/>
+        <source>Cloudlog API URL or API key not configured.</source>
+        <translation>Adresa API sau cheia API Cloudlog nu sunt configurate.</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="423"/>
+        <source>Cloudlog QSO upload</source>
+        <translation>Trimiterea QSO-ului la Cloudlog</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="453"/>
+        <source>Cloudlog disabled</source>
+        <translation>Cloudlog dezactivat</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="469"/>
+        <source>Cloudlog ADIF record is empty.</source>
+        <translation>Înregistrarea ADIF pentru Cloudlog este goală.</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="516"/>
+        <source>Cloudlog raw ADIF upload</source>
+        <translation>Trimitere ADIF brut la Cloudlog</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="536"/>
+        <source>Cloudlog accepted raw ADIF</source>
+        <translation>Cloudlog a acceptat ADIF-ul brut</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="597"/>
+        <source>Cloudlog API test</source>
+        <translation>Test al API-ului Cloudlog</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
+        <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
+        <translation>Cheia API Cloudlog este valabilă, dar nu are drept de scriere.</translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumCommunityReport</name>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="99"/>
+        <source>Please describe the problem before sending.</source>
+        <translation>Descrie problema înainte de a trimite.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="123"/>
+        <source>Cannot reach the community: %1</source>
+        <translation>Comunitatea nu poate fi contactată: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="145"/>
+        <source>The community form could not be prepared. Please try again later or post manually at %1</source>
+        <translation>Formularul comunității nu a putut fi pregătit. Încearcă mai târziu sau publică manual la %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="172"/>
+        <source>
+[...truncated, %1 characters total...]</source>
+        <translation>
+[...trunchiat, %1 caractere în total...]</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="215"/>
+        <source>The community rejected the report (likely too long). Please shorten it and try again.</source>
+        <translation>Comunitatea a respins raportul (probabil prea lung). Scurtează-l și încearcă din nou.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="222"/>
+        <source>Could not send the report: %1</source>
+        <translation>Raportul nu a putut fi trimis: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumCommunityReport.cpp" line="225"/>
+        <source>unexpected server response (%1)</source>
+        <translation>răspuns neașteptat al serverului (%1)</translation>
     </message>
 </context>
 <context>
@@ -1511,25 +2302,353 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>DecodiumPropagationManager</name>
     <message>
+        <location filename="../DecodiumPropagationManager.cpp" line="57"/>
+        <source>Updating propagation data from %1 ...</source>
+        <translation>Se actualizează datele de propagare de la %1 ...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumPropagationManager.cpp" line="83"/>
+        <source>Propagation update failed: empty network reply</source>
+        <translation>Actualizarea propagării a eșuat: răspuns de rețea gol</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumPropagationManager.cpp" line="102"/>
+        <source>Propagation update failed: %1</source>
+        <translation>Actualizarea propagării a eșuat: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumPropagationManager.cpp" line="118"/>
+        <source>Propagation updated: %1 UTC</source>
+        <translation>Propagare actualizată: %1 UTC</translation>
+    </message>
+    <message>
         <location filename="../DecodiumPropagationManager.cpp" line="121"/>
         <source> | Feed time: %1</source>
         <translation> | Ora fluxului: %1</translation>
+    </message>
+    <message>
+        <source>Offline: using cached propagation data</source>
+        <translation>Fără conexiune: se folosesc datele de propagare din memorie</translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumQrzLogbookLite</name>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="84"/>
+        <source>API key mancante.</source>
+        <translation>Lipsește cheia API.</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="106"/>
+        <source>test fallito: %1</source>
+        <translation>testul a eșuat: %1</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="116"/>
+        <source>API key non valida: %1</source>
+        <translation>cheie API nevalabilă: %1</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="126"/>
+        <source>QRZ Logbook disabled</source>
+        <translation>Jurnalul QRZ este dezactivat</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="141"/>
+        <source>record ADIF vuoto.</source>
+        <translation>înregistrare ADIF goală.</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="172"/>
+        <source>upload fallito: %1</source>
+        <translation>trimiterea a eșuat: %1</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="188"/>
+        <source>QRZ Logbook accepted duplicate replacement</source>
+        <translation>Jurnalul QRZ a acceptat înlocuirea duplicatului</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="189"/>
+        <source>QRZ Logbook accepted</source>
+        <translation>Jurnalul QRZ a acceptat</translation>
+    </message>
+    <message>
+        <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
+        <source>upload rifiutato per %1: %2</source>
+        <translation>trimitere respinsă pentru %1: %2</translation>
+    </message>
+</context>
+<context>
+    <name>DecodiumTransceiverManager</name>
+    <message>
+        <location filename="../DecodiumTransceiverManager.cpp" line="2213"/>
+        <source>CAT interrotto, riconnessione automatica (%1/%2)...</source>
+        <translation>CAT întrerupt, reconectare automată (%1/%2)...</translation>
     </message>
 </context>
 <context>
     <name>DecodiumUpdater</name>
     <message>
+        <location filename="../DecodiumUpdater.cpp" line="146"/>
+        <source>Checking for updates...</source>
+        <translation>Se caută actualizări...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="171"/>
+        <source>Could not check for updates: %1</source>
+        <translation>Nu s-au putut căuta actualizări: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="180"/>
+        <source>Could not read the release information.</source>
+        <translation>Informațiile despre versiune nu au putut fi citite.</translation>
+    </message>
+    <message>
         <location filename="../DecodiumUpdater.cpp" line="221"/>
         <source>Decodium is up to date (%1).</source>
         <translation>Decodium este actualizat (%1).</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="227"/>
+        <source>Version %1 is available.</source>
+        <translation>Versiunea %1 este disponibilă.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="244"/>
+        <source>Version %1 will be skipped.</source>
+        <translation>Versiunea %1 va fi sărită.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="267"/>
+        <source>Cannot write to the temporary folder.</source>
+        <translation>Nu se poate scrie în dosarul temporar.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="274"/>
+        <source>Downloading %1...</source>
+        <translation>Se descarcă %1...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="300"/>
+        <source>Download failed: %1</source>
+        <translation>Descărcarea a eșuat: %1</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="308"/>
+        <source>The downloaded file is incomplete. Please try again.</source>
+        <translation>Fișierul descărcat este incomplet. Încearcă din nou.</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="319"/>
+        <source>Starting the installer...</source>
+        <translation>Se pornește programul de instalare...</translation>
+    </message>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="323"/>
+        <source>Could not start the installer.</source>
+        <translation>Programul de instalare nu a putut porni.</translation>
+    </message>
+    <message>
+        <source>Offline: downloads disabled</source>
+        <translation>Fără conexiune: descărcările sunt dezactivate</translation>
+    </message>
+    <message>
+        <source>Offline: update checks disabled</source>
+        <translation>Fără conexiune: verificarea actualizărilor este dezactivată</translation>
+    </message>
+    <message>
+        <source>Online: update checks enabled</source>
+        <translation>Conectat: verificarea actualizărilor este activă</translation>
+    </message>
+</context>
+<context>
+    <name>Designer</name>
+    <message>
+        <location filename="../WFPalette.cpp" line="189"/>
+        <source>&amp;Delete</source>
+        <translation>&amp;Șterge</translation>
+    </message>
+    <message>
+        <location filename="../WFPalette.cpp" line="198"/>
+        <source>&amp;Insert ...</source>
+        <translation>&amp;Inserează ...</translation>
+    </message>
+    <message>
+        <location filename="../WFPalette.cpp" line="206"/>
+        <source>Insert &amp;after ...</source>
+        <translation>Inserează &amp;după ...</translation>
+    </message>
+    <message>
+        <location filename="../WFPalette.cpp" line="221"/>
+        <source>Import Palette</source>
+        <translation>Importă paleta</translation>
+    </message>
+    <message>
+        <location filename="../WFPalette.cpp" line="221"/>
+        <source>Palettes (*.pal)</source>
+        <translation>Palete (*.pal)</translation>
+    </message>
+    <message>
+        <location filename="../WFPalette.cpp" line="232"/>
+        <source>Export Palette</source>
+        <translation>Exportă paleta</translation>
     </message>
 </context>
 <context>
     <name>DevOverlay</name>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="140"/>
+        <source>Decodium DevOverlay</source>
+        <translation>Decodium DevOverlay</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="197"/>
+        <source>Frame (ms):</source>
+        <translation>Cadru (ms):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="215"/>
+        <source>Decode Hz:</source>
+        <translation>Decodificări pe secundă:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="226"/>
+        <source>Delegates:</source>
+        <translation>Delegați:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="244"/>
+        <source>Uptime:</source>
+        <translation>Timp de funcționare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="264"/>
+        <source>Frame time 5s</source>
+        <translation>Timp de cadru 5 s</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="330"/>
+        <source>Copy diagnostics</source>
+        <translation>Copiază diagnosticul</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="347"/>
         <source>Close</source>
         <translation>Închide</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="359"/>
+        <source>Copied to clipboard</source>
+        <translation>Copiat în clipboard</translation>
+    </message>
+</context>
+<context>
+    <name>Dialog</name>
+    <message>
+        <location filename="../WSPR/WSPRBandHopping.cpp" line="116"/>
+        <source>Gray time:</source>
+        <translation>Timp în linia cenușie:</translation>
+    </message>
+</context>
+<context>
+    <name>Directory</name>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="85"/>
+        <source>File</source>
+        <translation>Fișier</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="85"/>
+        <source>Progress</source>
+        <translation>Progres</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="149"/>
+        <source>URL Error</source>
+        <translation>Eroare de adresă</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="150"/>
+        <source>Invalid URL:
+"%1"</source>
+        <translation>Adresă nevalabilă:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="168"/>
+        <source>JSON Error</source>
+        <translation>Eroare JSON</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="169"/>
+        <source>Contents file syntax error %1 at character offset %2</source>
+        <translation>Eroare de sintaxă în fișierul de conținut: %1 la poziția %2</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="176"/>
+        <source>Contents file top level must be a JSON array</source>
+        <translation>Nivelul de bază al fișierului de conținut trebuie să fie o listă JSON</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="187"/>
+        <source>File System Error</source>
+        <translation>Eroare de sistem de fișiere</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="188"/>
+        <source>Failed to open "%1"
+Error: %2 - %3</source>
+        <translation>Deschiderea „%1” a eșuat
+Eroare: %2 - %3</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="214"/>
+        <source>Contents entries must stay within "%1"</source>
+        <translation>Intrările de conținut trebuie să rămână în „%1”</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="251"/>
+        <source>Contents entries must be a JSON array</source>
+        <translation>Intrările de conținut trebuie să fie o listă JSON</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="257"/>
+        <source>Contents entries must have a valid type</source>
+        <translation>Intrările de conținut trebuie să aibă un tip valabil</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="263"/>
+        <source>Contents entries must have a valid name</source>
+        <translation>Intrările de conținut trebuie să aibă un nume valabil</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="269"/>
+        <source>Contents entries must be JSON objects</source>
+        <translation>Intrările de conținut trebuie să fie obiecte JSON</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="276"/>
+        <source>Contents directories must be relative and within "%1"</source>
+        <translation>Dosarele de conținut trebuie să fie relative și să rămână în „%1”</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="362"/>
+        <source>Network Error</source>
+        <translation>Eroare de rețea</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/Directory.cpp" line="362"/>
+        <source>Authentication required</source>
+        <translation>Este necesară autentificarea</translation>
+    </message>
+</context>
+<context>
+    <name>DisplayText</name>
+    <message>
+        <location filename="../widgets/displaytext.cpp" line="53"/>
+        <source>&amp;Erase</source>
+        <translation>&amp;Golește</translation>
     </message>
 </context>
 <context>
@@ -1588,22 +2707,117 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>DxPeditionWorkspace</name>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="255"/>
+        <source>UTC · OPER IU8LMC</source>
+        <translation>UTC · OPER IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="584"/>
+        <source>Full Spectrum · Decode</source>
+        <translation>Spectru complet · decodificare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="615"/>
+        <source>Signal RX · QSO Lock</source>
+        <translation>Signal RX · blocare QSO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="657"/>
+        <source>Log · QSO Entry</source>
+        <translation>Jurnal · introducere QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="182"/>
+        <source>DECODIUM 4</source>
+        <translation>DECODIUM 4</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="187"/>
+        <source>DX-PEDITION MODE</source>
+        <translation>MOD DX-PEDITION</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="537"/>
         <source>PSK Reporter</source>
         <translation>PSK Reporter</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="568"/>
+        <source>Waterfall</source>
+        <translation>Cascadă</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="635"/>
+        <source>TX Macros</source>
+        <translation>Macrouri de emisie</translation>
+    </message>
 </context>
 <context>
     <name>EchoGraph</name>
+    <message>
+        <location filename="../widgets/echograph.ui" line="26"/>
+        <source>Echo Graph</source>
+        <translation>Grafic de ecou</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="101"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compression factor for frequency scale&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Factor de comprimare a scării de frecvență&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
     <message>
         <location filename="../widgets/echograph.ui" line="104"/>
         <source>Bins/Pixel  </source>
         <translation>Benzi/pixel  </translation>
     </message>
     <message>
+        <location filename="../widgets/echograph.ui" line="117"/>
+        <source>Gain</source>
+        <translation>Amplificare</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="124"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Echo spectrum gain&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Amplificarea spectrului de ecou&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="156"/>
+        <source>Zero</source>
+        <translation>Zero</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="163"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Echo spectrum zero&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zeroul spectrului de ecou&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="195"/>
+        <source>Baseline</source>
+        <translation>Linie de bază</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="224"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Smoothing of echo spectrum&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Netezirea spectrului de ecou&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <location filename="../widgets/echograph.ui" line="227"/>
         <source>Smooth  </source>
         <translation>Netezire  </translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="259"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of echo transmissions averaged&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Numărul emisiilor de ecou mediate&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="262"/>
+        <source>N: 0</source>
+        <translation>N: 0</translation>
+    </message>
+    <message>
+        <location filename="../widgets/echograph.ui" line="278"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to cycle through a sequence of colors and line widths.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clic pentru a parcurge o serie de culori și de grosimi de linie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../widgets/echograph.ui" line="281"/>
@@ -1612,11 +2826,49 @@ Apasă Monitor pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>EmulateSplitTransceiver</name>
+    <message>
+        <location filename="../Transceiver/EmulateSplitTransceiver.cpp" line="53"/>
+        <source>Emulated split mode requires rig to be in simplex mode</source>
+        <translation>Modul split emulat cere ca aparatul să fie în simplex</translation>
+    </message>
+</context>
+<context>
     <name>EqualizationToolsDialog::impl</name>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="295"/>
+        <source>Equalization Tools</source>
+        <translation>Unelte de egalizare</translation>
+    </message>
     <message>
         <location filename="../EqualizationToolsDialog.cpp" line="302"/>
         <source>Phase</source>
         <translation>Fază</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="307"/>
+        <source>Freq (Hz)</source>
+        <translation>Frecv (Hz)</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="309"/>
+        <source>Phase (Π)</source>
+        <translation>Fază (Π)</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="311"/>
+        <source>Delay (ms)</source>
+        <translation>Întârziere (ms)</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="320"/>
+        <source>Measured</source>
+        <translation>Măsurat</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="325"/>
+        <source>Proposed</source>
+        <translation>Propus</translation>
     </message>
     <message>
         <location filename="../EqualizationToolsDialog.cpp" line="330"/>
@@ -1624,14 +2876,52 @@ Apasă Monitor pentru a începe</translation>
         <translation>Curent</translation>
     </message>
     <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="333"/>
+        <source>Group Delay</source>
+        <translation>Întârziere de grup</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="344"/>
+        <source>Amplitude</source>
+        <translation>Amplitudine</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="350"/>
+        <source>Relative Power (dB)</source>
+        <translation>Putere relativă (dB)</translation>
+    </message>
+    <message>
         <location filename="../EqualizationToolsDialog.cpp" line="356"/>
         <source>Reference</source>
         <translation>Referință</translation>
     </message>
     <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="363"/>
+        <source>Phase ...</source>
+        <translation>Fază ...</translation>
+    </message>
+    <message>
         <location filename="../EqualizationToolsDialog.cpp" line="364"/>
         <source>Refresh</source>
         <translation>Reîmprospătează</translation>
+    </message>
+    <message>
+        <location filename="../EqualizationToolsDialog.cpp" line="365"/>
+        <source>Discard Measured</source>
+        <translation>Renunță la măsurători</translation>
+    </message>
+</context>
+<context>
+    <name>ExistingNameDialog</name>
+    <message>
+        <location filename="../MultiSettings.cpp" line="123"/>
+        <source>Configuration to Clone From</source>
+        <translation>Configurația din care se clonează</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="128"/>
+        <source>&amp;Source Configuration Name:</source>
+        <translation>Numele configurației &amp;sursă:</translation>
     </message>
 </context>
 <context>
@@ -1647,13 +2937,128 @@ Apasă Monitor pentru a începe</translation>
         <translation>Locație:</translation>
     </message>
     <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="24"/>
+        <source>SNJ</source>
+        <translation>SNJ</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="34"/>
+        <source>Contest:</source>
+        <translation>Concurs:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="44"/>
+        <source>ARRL-RTTY</source>
+        <translation>ARRL-RTTY</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="54"/>
+        <source>Callsign:</source>
+        <translation>Indicativ:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="74"/>
+        <source>Category-Operator: </source>
+        <translation>Categorie-operator: </translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="84"/>
+        <source>SINGLE-OP</source>
+        <translation>SINGLE-OP</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="94"/>
+        <source>Category-Transmitter:</source>
+        <translation>Categorie-emițător:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="104"/>
+        <source>ONE</source>
+        <translation>ONE</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="114"/>
+        <source>Category-Power:</source>
+        <translation>Categorie-putere:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="124"/>
+        <source>LOW</source>
+        <translation>LOW</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="134"/>
+        <source>Category-Assisted:</source>
+        <translation>Categorie-asistat:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="144"/>
+        <source>NON-ASSISTED</source>
+        <translation>NON-ASSISTED</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="154"/>
+        <source>Category-Band:</source>
+        <translation>Categorie-bandă:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="164"/>
+        <source>ALL</source>
+        <translation>ALL</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="174"/>
+        <source>Claimed-Score:</source>
+        <translation>Scor revendicat:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="194"/>
+        <source>Operators:</source>
+        <translation>Operatori:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="214"/>
+        <source>Club:</source>
+        <translation>Club:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="231"/>
+        <source>Name:</source>
+        <translation>Nume:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.ui" line="251"/>
+        <source>Address:</source>
+        <translation>Adresă:</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.cpp" line="79"/>
+        <source>Save Log File</source>
+        <translation>Salvează fișierul jurnal</translation>
+    </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.cpp" line="81"/>
+        <source>Cabrillo Log (*.cbr)</source>
+        <translation>Jurnal Cabrillo (*.cbr)</translation>
+    </message>
+    <message>
         <location filename="../widgets/ExportCabrillo.cpp" line="112"/>
         <source>Cannot open "%1" for writing: %2</source>
         <translation>Nu se poate deschide „%1” pentru scriere: %2</translation>
     </message>
+    <message>
+        <location filename="../widgets/ExportCabrillo.cpp" line="114"/>
+        <source>Export Cabrillo File Error</source>
+        <translation>Eroare la exportul fișierului Cabrillo</translation>
+    </message>
 </context>
 <context>
     <name>FastGraph</name>
+    <message>
+        <location filename="../widgets/fastgraph.ui" line="14"/>
+        <source>Fast Graph</source>
+        <translation>Grafic rapid</translation>
+    </message>
     <message>
         <location filename="../widgets/fastgraph.ui" line="103"/>
         <source>Waterfall gain</source>
@@ -1669,9 +3074,82 @@ Apasă Monitor pentru a începe</translation>
         <source>Spectrum zero</source>
         <translation>Zeroul spectrului</translation>
     </message>
+    <message>
+        <location filename="../widgets/fastgraph.ui" line="208"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set reasonable levels for gain and zero sliders.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stabilește valori rezonabile pentru amplificare și zero.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <location filename="../widgets/fastgraph.ui" line="211"/>
+        <source>Auto Level</source>
+        <translation>Nivel automat</translation>
+    </message>
+</context>
+<context>
+    <name>FileDownload</name>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="291"/>
+        <source>Network Error - SSL/TLS support not installed, cannot fetch:
+'%1'</source>
+        <translation>Eroare de rețea - suportul SSL/TLS nu este instalat, nu se poate descărca:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="304"/>
+        <source>Network Error - Too many redirects:
+'%1'</source>
+        <translation>Eroare de rețea - prea multe redirecționări:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="325"/>
+        <source>Network Error:
+%1</source>
+        <translation>Eroare de rețea:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="397"/>
+        <source>Network Error:
+Network manager not configured</source>
+        <translation>Eroare de rețea:
+Gestionarul de rețea nu este configurat</translation>
+    </message>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="452"/>
+        <source>Network Error:
+Unable to create request</source>
+        <translation>Eroare de rețea:
+Nu se poate crea cererea</translation>
+    </message>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="476"/>
+        <source>File System Error:
+Cannot create directory:
+%1</source>
+        <translation>Eroare de sistem de fișiere:
+Nu se poate crea dosarul:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../Network/FileDownload.cpp" line="491"/>
+        <source>File System Error:
+Cannot open file:
+%1
+Error: %2</source>
+        <translation>Eroare de sistem de fișiere:
+Nu se poate deschide fișierul:
+%1
+Eroare: %2</translation>
+    </message>
 </context>
 <context>
     <name>FoxLog::impl</name>
+    <message>
+        <location filename="../models/FoxLog.cpp" line="169"/>
+        <source>Date &amp; Time(UTC)</source>
+        <translation>Data și ora (UTC)</translation>
+    </message>
     <message>
         <location filename="../models/FoxLog.cpp" line="170"/>
         <source>Call</source>
@@ -1777,6 +3255,69 @@ Apasă Monitor pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>FrequencyDialog</name>
+    <message>
+        <location filename="../Configuration.cpp" line="460"/>
+        <source>Add Frequency</source>
+        <translation>Adaugă frecvență</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="466"/>
+        <source>IARU &amp;Region:</source>
+        <translation>&amp;Regiune IARU:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="467"/>
+        <source>&amp;Mode:</source>
+        <translation>&amp;Mod:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="468"/>
+        <source>&amp;Frequency (MHz):</source>
+        <translation>&amp;Frecvență (MHz):</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="469"/>
+        <source>&amp;Preferred for Band/Mode:</source>
+        <translation>&amp;Preferată pentru bandă și mod:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="470"/>
+        <source>&amp;Description:</source>
+        <translation>&amp;Descriere:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="471"/>
+        <source>&amp;Enable Date Range:</source>
+        <translation>&amp;Activează intervalul de date:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="472"/>
+        <source>S&amp;tart:</source>
+        <translation>În&amp;ceput:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="473"/>
+        <source>&amp;End:</source>
+        <translation>&amp;Sfârșit:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="474"/>
+        <source>&amp;Source:</source>
+        <translation>&amp;Sursă:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="503"/>
+        <source>Invalid Date Range</source>
+        <translation>Interval de date nevalabil</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="503"/>
+        <source>Start date must be before end date</source>
+        <translation>Data de început trebuie să fie înaintea datei de sfârșit</translation>
+    </message>
+</context>
+<context>
     <name>FrequencyList_v2_101</name>
     <message>
         <location filename="../models/FrequencyList.cpp" line="813"/>
@@ -1794,6 +3335,11 @@ Apasă Monitor pentru a începe</translation>
         <translation>Frecvență</translation>
     </message>
     <message>
+        <location filename="../models/FrequencyList.cpp" line="895"/>
+        <source>Frequency (MHz)</source>
+        <translation>Frecvență (MHz)</translation>
+    </message>
+    <message>
         <location filename="../models/FrequencyList.cpp" line="916"/>
         <source>Description</source>
         <translation>Descriere</translation>
@@ -1802,6 +3348,16 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../models/FrequencyList.cpp" line="937"/>
         <source>Source</source>
         <translation>Sursă</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="971"/>
+        <source>Start Time</source>
+        <translation>Ora de început</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="1005"/>
+        <source>End Time</source>
+        <translation>Ora de sfârșit</translation>
     </message>
     <message>
         <location filename="../models/FrequencyList.cpp" line="1028"/>
@@ -1817,6 +3373,31 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../models/FrequencyList.cpp" line="1238"/>
         <source>End Date/Time</source>
         <translation>Data și ora de sfârșit</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="1387"/>
+        <source>Failed to parse JSON file</source>
+        <translation>Fișierul JSON nu a putut fi interpretat</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="1392"/>
+        <source>Information Missing</source>
+        <translation>Lipsesc informații</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="1397"/>
+        <source>No Frequencies were found</source>
+        <translation>Nu s-a găsit nicio frecvență</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="1436"/>
+        <source>Loaded Frequencies from %1</source>
+        <translation>Frecvențe încărcate din %1</translation>
+    </message>
+    <message>
+        <location filename="../models/FrequencyList.cpp" line="1437"/>
+        <source>Entries Valid/Skipped %1</source>
+        <translation>Intrări valabile/sărite %1</translation>
     </message>
 </context>
 <context>
@@ -1855,6 +3436,110 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/FullSpectrumPanel.qml" line="292"/>
         <source>DXCC</source>
         <translation>DXCC</translation>
+    </message>
+</context>
+<context>
+    <name>HRDTransceiver</name>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="396"/>
+        <source>Failed to connect to Ham Radio Deluxe
+</source>
+        <translation>Conectarea la Ham Radio Deluxe a eșuat
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="482"/>
+        <source>Ham Radio Deluxe failed protocol probe using get id/get context</source>
+        <translation>Ham Radio Deluxe nu a trecut proba de protocol cu get id / get context</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="490"/>
+        <source>Failed to open file "%1": %2.</source>
+        <translation>Deschiderea fișierului „%1” a eșuat: %2.</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="505"/>
+        <source>Ham Radio Deluxe: no rig found</source>
+        <translation>Ham Radio Deluxe: niciun aparat găsit</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="914"/>
+        <source>Ham Radio Deluxe: rig doesn't support mode</source>
+        <translation>Ham Radio Deluxe: aparatul nu acceptă acest mod</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="938"/>
+        <source>Ham Radio Deluxe: sent an unrecognised mode</source>
+        <translation>Ham Radio Deluxe: a trimis un mod nerecunoscut</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1048"/>
+        <source>Ham Radio Deluxe: item not found in %1 dropdown list</source>
+        <translation>Ham Radio Deluxe: elementul nu a fost găsit în lista %1</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1108"/>
+        <source>Ham Radio Deluxe: button not available</source>
+        <translation>Ham Radio Deluxe: butonul nu este disponibil</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1584"/>
+        <source>Ham Radio Deluxe didn't respond as expected</source>
+        <translation>Ham Radio Deluxe nu a răspuns cum se aștepta</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="630"/>
+        <source>Ham Radio Deluxe: rig has disappeared or changed</source>
+        <translation>Ham Radio Deluxe: aparatul a dispărut sau s-a schimbat</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1752"/>
+        <source>Ham Radio Deluxe send command "%1" failed %2
+</source>
+        <translation>Trimiterea comenzii „%1” către Ham Radio Deluxe a eșuat: %2
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1794"/>
+        <source>Ham Radio Deluxe: failed to write command "%1"</source>
+        <translation>Ham Radio Deluxe: scrierea comenzii „%1” a eșuat</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1851"/>
+        <source>Ham Radio Deluxe reply to command "%1" is too large</source>
+        <translation>Răspunsul Ham Radio Deluxe la comanda „%1” este prea mare</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1881"/>
+        <source>Ham Radio Deluxe sent an invalid reply to our command "%1"</source>
+        <translation>Ham Radio Deluxe a trimis un răspuns nevalabil la comanda „%1”</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1898"/>
+        <source>Ham Radio Deluxe sent an invalid reply size to our command "%1"</source>
+        <translation>Ham Radio Deluxe a trimis o dimensiune de răspuns nevalabilă la comanda „%1”</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="1978"/>
+        <source>Ham Radio Deluxe failed to reply to command "%1" %2
+</source>
+        <translation>Ham Radio Deluxe nu a răspuns la comanda „%1”: %2
+</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="2003"/>
+        <source>Ham Radio Deluxe TCP accepted, protocol silent while probing command "%1"</source>
+        <translation>Ham Radio Deluxe a acceptat conexiunea TCP, dar protocolul a tăcut la comanda de probă „%1”</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="2054"/>
+        <source>Ham Radio Deluxe retries exhausted sending command "%1"</source>
+        <translation>S-au epuizat reîncercările de trimitere a comenzii „%1” către Ham Radio Deluxe</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/HRDTransceiver.cpp" line="2076"/>
+        <source>Ham Radio Deluxe didn't respond to command "%1" as expected</source>
+        <translation>Ham Radio Deluxe nu a răspuns cum se aștepta la comanda „%1”</translation>
     </message>
 </context>
 <context>
@@ -2048,6 +3733,26 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>IARURegions</name>
     <message>
+        <location filename="../models/IARURegions.cpp" line="15"/>
+        <source>All</source>
+        <translation>Toate</translation>
+    </message>
+    <message>
+        <location filename="../models/IARURegions.cpp" line="16"/>
+        <source>Region 1</source>
+        <translation>Regiunea 1</translation>
+    </message>
+    <message>
+        <location filename="../models/IARURegions.cpp" line="17"/>
+        <source>Region 2</source>
+        <translation>Regiunea 2</translation>
+    </message>
+    <message>
+        <location filename="../models/IARURegions.cpp" line="18"/>
+        <source>Region 3</source>
+        <translation>Regiunea 3</translation>
+    </message>
+    <message>
         <location filename="../models/IARURegions.cpp" line="58"/>
         <source>IARU Region</source>
         <translation>Regiune IARU</translation>
@@ -2056,9 +3761,146 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>InfoDialog</name>
     <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="713"/>
+        <source>Open Settings</source>
+        <translation>Deschide setările</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="714"/>
+        <source>Open Log</source>
+        <translation>Deschide jurnalul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="715"/>
+        <source>Open Macros</source>
+        <translation>Deschide macrourile</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="717"/>
+        <source>Reset windows Layout</source>
+        <translation>Resetează aranjarea ferestrelor</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/InfoDialog.qml" line="718"/>
+        <source>Compact Full Spectrum</source>
+        <translation>Spectru complet compact</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="83"/>
+        <source>DECODIUM INFO</source>
+        <translation>DESPRE DECODIUM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="218"/>
+        <source>4.0 Core Gallager</source>
+        <translation>4.0 Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="227"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</source>
+        <translation>Decodificator avansat de moduri digitale pentru radioamatori
+FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="260"/>
+        <source>Decodium by IU8LMC</source>
+        <translation>Decodium de IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="267"/>
+        <source>Qt6 Modern UI Port by IU8LMC</source>
+        <translation>Portare pe interfața modernă Qt6 de IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="274"/>
+        <source>Developed by Salvatore Raccampo 9H1SR</source>
+        <translation>Dezvoltat de Salvatore Raccampo 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="281"/>
+        <source>WSJT-X Algorithms by K1JT (Joe Taylor)</source>
+        <translation>Algoritmi WSJT-X de K1JT (Joe Taylor)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="290"/>
+        <source>Copyright 2024-2026 - Open Source GPL</source>
+        <translation>Drepturi de autor 2024-2026 - sursă deschisă GPL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="314"/>
+        <source>DECODIUM HISTORY</source>
+        <translation>ISTORICUL DECODIUM</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="410"/>
+        <source>CONTACTS &amp; FEEDBACK</source>
+        <translation>CONTACTE ȘI SUGESTII</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="432"/>
+        <source>Developer: IU8LMC</source>
+        <translation>Dezvoltator: IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="447"/>
+        <source>iu8lmc@gmail.com</source>
+        <translation>iu8lmc@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="465"/>
+        <source>Developer: 9H1SR</source>
+        <translation>Dezvoltator: 9H1SR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="480"/>
+        <source>9h1sr@gmail.com</source>
+        <translation>9h1sr@gmail.com</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="517"/>
+        <source>SEND FEEDBACK</source>
+        <translation>TRIMITE O SUGESTIE</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="528"/>
         <source>Subject</source>
         <translation>Subiect</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="555"/>
+        <source>Message, suggestion, or bug report</source>
+        <translation>Mesaj, sugestie sau raport de defect</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="581"/>
+        <source>Send Feedback</source>
+        <translation>Trimite sugestia</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="628"/>
+        <source>QUICK GUIDE</source>
+        <translation>GHID RAPID</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="652"/>
+        <source>QUICK START</source>
+        <translation>PORNIRE RAPIDĂ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="695"/>
+        <source>KEYBOARD SHORTCUTS</source>
+        <translation>SCURTĂTURI DE TASTATURĂ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="770"/>
+        <source>OPERATING TIPS</source>
+        <translation>SFATURI DE LUCRU</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="811"/>
+        <source>USEFUL LINKS</source>
+        <translation>LEGĂTURI UTILE</translation>
     </message>
 </context>
 <context>
@@ -4511,6 +6353,11 @@ Apasă Monitor pentru a începe</translation>
         <translation>⌨️ Configurarea macrourilor de emisie</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="13"/>
+        <source>Macro Settings</source>
+        <translation>Setările macrourilor</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="131"/>
         <source>Minimize</source>
         <translation>Minimizează</translation>
@@ -4520,6 +6367,46 @@ Apasă Monitor pentru a începe</translation>
         <source>Contest Mode</source>
         <translation>Mod concurs</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="194"/>
+        <source>Contest:</source>
+        <translation>Concurs:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="234"/>
+        <source>Serial #:</source>
+        <translation>Număr de ordine:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="272"/>
+        <source>Exchange:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="316"/>
+        <source>TX Macro Templates</source>
+        <translation>Șabloane de macrouri de emisie</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="325"/>
+        <source>Reset to Default</source>
+        <translation>Readu la valorile implicite</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="349"/>
+        <source>Codes: %M=MyCall  %T=TheirCall  %R=Report  %N=Serial#  %G4=Grid4  %G6=Grid6  %E=Exchange</source>
+        <translation>Coduri: %M=indicativul meu  %T=indicativul lui  %R=raport  %N=număr de ordine  %G4=locator 4  %G6=locator 6  %E=control</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="419"/>
+        <source>Preview</source>
+        <translation>Previzualizare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="464"/>
+        <source>Click 'Preview' to see expanded macro</source>
+        <translation>Apasă „Previzualizare” pentru a vedea macroul desfășurat</translation>
+    </message>
 </context>
 <context>
     <name>MacroDialogContent</name>
@@ -4527,6 +6414,41 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="35"/>
         <source>Contest Mode</source>
         <translation>Mod concurs</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="41"/>
+        <source>Enable Contest Mode</source>
+        <translation>Activează modul concurs</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="45"/>
+        <source>Exchange:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="49"/>
+        <source>e.g., 599 001</source>
+        <translation>de ex. 599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="74"/>
+        <source>TX Macros</source>
+        <translation>Macrouri de emisie</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="122"/>
+        <source>Available Variables:</source>
+        <translation>Variabile disponibile:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="124"/>
+        <source>%CALL - Their callsign | %MYCALL - Your callsign | %GRID - Their grid</source>
+        <translation>%CALL - indicativul lui | %MYCALL - indicativul tău | %GRID - locatorul lui</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="128"/>
+        <source>%RST - Signal report | %EXCH - Contest exchange | %73 - 73 message</source>
+        <translation>%RST - raport de semnal | %EXCH - control de concurs | %73 - mesaj 73</translation>
     </message>
 </context>
 <context>
@@ -5560,6 +7482,11 @@ Clic dreapta: deconectează</translation>
         <translation>Doar CQ</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="872"/>
+        <source>&amp;Erase</source>
+        <translation>&amp;Golește</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="5946"/>
         <source>Active Stations</source>
         <translation>Stații active</translation>
@@ -5625,6 +7552,11 @@ Clic dreapta: deconectează</translation>
         <translation>FST4</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="20"/>
+        <source>Decodium v3.0 SE KP5</source>
+        <translation>Decodium v3.0 SE KP5</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="3175"/>
         <source>Continent</source>
         <translation>Continent</translation>
@@ -5633,6 +7565,11 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.ui" line="4662"/>
         <source>CW</source>
         <translation>CW</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="5078"/>
+        <source>File</source>
+        <translation>Fișier</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5130"/>
@@ -5658,6 +7595,11 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.ui" line="5362"/>
         <source>About Decodium</source>
         <translation>Despre Decodium</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="5400"/>
+        <source>Waterfall</source>
+        <translation>Cascadă</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5406"/>
@@ -5690,6 +7632,11 @@ Clic dreapta: deconectează</translation>
         <translation>Creator de mesaje</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="6259"/>
+        <source>QSY Monitor</source>
+        <translation>Monitor QSY</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="6291"/>
         <source>Auto</source>
         <translation>Auto</translation>
@@ -5705,6 +7652,21 @@ Clic dreapta: deconectează</translation>
         <translation>JT65</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="5623"/>
+        <source>WSPR</source>
+        <translation>WSPR</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="5628"/>
+        <source>Echo Graph</source>
+        <translation>Grafic de ecou</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="5655"/>
+        <source>Fast Graph</source>
+        <translation>Grafic rapid</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="5674"/>
         <source>MSK144</source>
         <translation>MSK144</translation>
@@ -5718,6 +7680,11 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.ui" line="4811"/>
         <source>FT4</source>
         <translation>FT4</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="2605"/>
+        <source>Receiving</source>
+        <translation>Se recepționează</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
@@ -5745,6 +7712,11 @@ Clic dreapta: deconectează</translation>
         <translation>Eroare la fișierul jurnal</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="3015"/>
+        <source>Idle</source>
+        <translation>În repaus</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.cpp" line="3340"/>
         <source>Error</source>
         <translation>Eroare</translation>
@@ -5753,6 +7725,21 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.cpp" line="9372"/>
         <source>Check for updates...</source>
         <translation>Caută actualizări...</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="9456"/>
+        <source>Update checks are disabled in this build.</source>
+        <translation>Verificarea actualizărilor este dezactivată în această versiune.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="9489"/>
+        <source>Checking for updates...</source>
+        <translation>Se caută actualizări...</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="9774"/>
+        <source>Skip this version</source>
+        <translation>Sari peste această versiune</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="22383"/>
@@ -5765,6 +7752,11 @@ Clic dreapta: deconectează</translation>
         <translation>Raportare automată respinsă pentru %1 pe %2:%3</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.cpp" line="23737"/>
+        <source>RTTY Received Text</source>
+        <translation>Text RTTY primit</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.cpp" line="23872"/>
         <source>Hound</source>
         <translation>Hound</translation>
@@ -5773,6 +7765,32 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.cpp" line="24802"/>
         <source>Confirm Reset</source>
         <translation>Confirmă resetarea</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="33264"/>
+        <source>Network Error - SSL/TLS support not installed, cannot fetch:
+'%1'</source>
+        <translation>Eroare de rețea - suportul SSL/TLS nu este instalat, nu se poate descărca:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="33274"/>
+        <source>Network Error - Too many redirects:
+'%1'</source>
+        <translation>Eroare de rețea - prea multe redirecționări:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="33288"/>
+        <source>Network Error:
+%1</source>
+        <translation>Eroare de rețea:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="27213"/>
+        <source>Network Error</source>
+        <translation>Eroare de rețea</translation>
     </message>
 </context>
 <context>
@@ -5845,6 +7863,19 @@ Clic dreapta: deconectează</translation>
     </message>
 </context>
 <context>
+    <name>MessageAveraging</name>
+    <message>
+        <location filename="../widgets/messageaveraging.ui" line="14"/>
+        <source>Message Averaging</source>
+        <translation>Medierea mesajelor</translation>
+    </message>
+    <message>
+        <location filename="../widgets/messageaveraging.ui" line="29"/>
+        <source>   UTC  Sync    DT  Freq   </source>
+        <translation>   UTC  Sync    DT  Frecv   </translation>
+    </message>
+</context>
+<context>
     <name>MessageAvgPanel</name>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/MessageAvgPanel.qml" line="43"/>
@@ -5894,11 +7925,108 @@ Clic dreapta: deconectează</translation>
     </message>
 </context>
 <context>
+    <name>MultiSettings::impl</name>
+    <message>
+        <location filename="../MultiSettings.cpp" line="489"/>
+        <source>&amp;Switch To</source>
+        <translation>&amp;Comută la</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="497"/>
+        <source>&amp;Clone</source>
+        <translation>&amp;Clonează</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="508"/>
+        <source>Clone &amp;Into ...</source>
+        <translation>Clonează &amp;în ...</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="515"/>
+        <source>R&amp;eset</source>
+        <translation>R&amp;esetează</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="521"/>
+        <source>&amp;Rename ...</source>
+        <translation>&amp;Redenumește ...</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="529"/>
+        <source>&amp;Delete</source>
+        <translation>&amp;Șterge</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="672"/>
+        <source>Clone Into Configuration</source>
+        <translation>Clonează în configurația</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="673"/>
+        <source>Confirm overwrite of all values for configuration "%1" with values from "%2"?</source>
+        <translation>Confirmi înlocuirea tuturor valorilor configurației „%1” cu cele din „%2”?</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="718"/>
+        <source>Reset Configuration</source>
+        <translation>Resetează configurația</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="719"/>
+        <source>Confirm reset to default values for configuration "%1"?</source>
+        <translation>Confirmi revenirea configurației „%1” la valorile implicite?</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="805"/>
+        <source>Delete Configuration</source>
+        <translation>Șterge configurația</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="806"/>
+        <source>Confirm deletion of configuration "%1"?</source>
+        <translation>Confirmi ștergerea configurației „%1”?</translation>
+    </message>
+</context>
+<context>
+    <name>NameDialog</name>
+    <message>
+        <location filename="../MultiSettings.cpp" line="76"/>
+        <source>New Configuration Name</source>
+        <translation>Numele configurației noi</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="79"/>
+        <source>Old name:</source>
+        <translation>Numele vechi:</translation>
+    </message>
+    <message>
+        <location filename="../MultiSettings.cpp" line="81"/>
+        <source>&amp;New name:</source>
+        <translation>Numele &amp;nou:</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkAccessManager</name>
+    <message>
+        <location filename="../Network/NetworkAccessManager.cpp" line="61"/>
+        <source>Network SSL/TLS Errors</source>
+        <translation>Erori de rețea SSL/TLS</translation>
+    </message>
+</context>
+<context>
     <name>PSKReporterPanel</name>
     <message>
         <location filename="../qml/decodium/components/PSKReporterPanel.qml" line="133"/>
         <source>updating…</source>
         <translation>se actualizează…</translation>
+    </message>
+</context>
+<context>
+    <name>PollingTransceiver</name>
+    <message>
+        <location filename="../Transceiver/PollingTransceiver.cpp" line="245"/>
+        <source>Unexpected rig error</source>
+        <translation>Eroare neașteptată a aparatului</translation>
     </message>
 </context>
 <context>
@@ -6410,9 +8538,41 @@ Fișierul descărcat depășește limita de %1 MiB:
 <context>
     <name>QSYDialog</name>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="78"/>
+        <source>SUGGESTED FREQUENCIES</source>
+        <translation>FRECVENȚE SUGERATE</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/dialogs/QSYDialog.qml" line="168"/>
         <source>Close</source>
         <translation>Închide</translation>
+    </message>
+</context>
+<context>
+    <name>QSYMessage</name>
+    <message>
+        <location filename="../widgets/QSYMessage.ui" line="26"/>
+        <source>Decodium v3.0 SE KP5</source>
+        <translation>Decodium v3.0 SE KP5</translation>
+    </message>
+    <message>
+        <location filename="../widgets/QSYMessage.ui" line="44"/>
+        <source>TextLabel</source>
+        <translation>TextLabel</translation>
+    </message>
+    <message>
+        <location filename="../widgets/QSYMessage.ui" line="72"/>
+        <source>Reply 
+Yes</source>
+        <translation>Răspuns 
+Da</translation>
+    </message>
+    <message>
+        <location filename="../widgets/QSYMessage.ui" line="92"/>
+        <source>Reply 
+No</source>
+        <translation>Răspuns 
+Nu</translation>
     </message>
 </context>
 <context>
@@ -6777,17 +8937,57 @@ nu vor fi afișate!</translation>
 <context>
     <name>QSYMonitor</name>
     <message>
+        <location filename="../widgets/qsymonitor.ui" line="32"/>
+        <source>QSYMonitor</source>
+        <translation>QSYMonitor</translation>
+    </message>
+    <message>
         <location filename="../widgets/qsymonitor.ui" line="60"/>
         <source>Clear</source>
         <translation>Golește</translation>
+    </message>
+    <message>
+        <location filename="../widgets/qsymonitor.cpp" line="24"/>
+        <source>QSY Monitor</source>
+        <translation>Monitor QSY</translation>
     </message>
 </context>
 <context>
     <name>QsyQuickPickerDialog</name>
     <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="18"/>
+        <source>QSY Quick Picker</source>
+        <translation>Alegere rapidă de QSY</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="82"/>
+        <source>QSY to Working Frequencies preset</source>
+        <translation>QSY la o frecvență de lucru predefinită</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="89"/>
+        <source>%1 presets · %2 visible</source>
+        <translation>%1 presetări · %2 vizibile</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="102"/>
+        <source>Preferred only</source>
+        <translation>Doar cele preferate</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="108"/>
+        <source>Modo:</source>
+        <translation>Mod:</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="116"/>
         <source>Band:</source>
         <translation>Bandă:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="213"/>
+        <source>Click a preset to QSY · F2 to reopen</source>
+        <translation>Clic pe o presetare pentru QSY · F2 pentru a redeschide</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/QsyQuickPickerDialog.qml" line="220"/>
@@ -6843,6 +9043,132 @@ Adaugă din coadă</translation>
     </message>
 </context>
 <context>
+    <name>RTTYTerminalWidget</name>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="34"/>
+        <source>45.45 baud Baudot terminal. Received text appears above; type the text to send below.</source>
+        <translation>Terminal Baudot la 45,45 bauzi. Textul primit apare deasupra; scrie mai jos textul de trimis.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="39"/>
+        <source>RTTY Received Text</source>
+        <translation>Text RTTY primit</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="40"/>
+        <source>Clear RX</source>
+        <translation>Golește recepția</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="50"/>
+        <source>Waiting for RTTY traffic...</source>
+        <translation>Se așteaptă trafic RTTY...</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="57"/>
+        <source>RTTY Transmit Buffer</source>
+        <translation>Zona de emisie RTTY</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="58"/>
+        <source>Clear TX</source>
+        <translation>Golește emisia</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="67"/>
+        <source>Type your RTTY message here, then press Send RTTY.</source>
+        <translation>Scrie aici mesajul RTTY, apoi apasă Trimite RTTY.</translation>
+    </message>
+    <message>
+        <location filename="../widgets/RTTYTerminalWidget.cpp" line="71"/>
+        <source>Send RTTY</source>
+        <translation>Trimite RTTY</translation>
+    </message>
+</context>
+<context>
+    <name>RemoteFile</name>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="78"/>
+        <source>File System Error</source>
+        <translation>Eroare de sistem de fișiere</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="79"/>
+        <source>Cannot rename file:
+"%1"
+to: "%2"
+Error(%3): %4</source>
+        <translation>Fișierul nu poate fi redenumit:
+„%1”
+în: „%2”
+Eroare(%3): %4</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="150"/>
+        <source>Cannot delete file:
+"%1"</source>
+        <translation>Fișierul nu poate fi șters:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="168"/>
+        <source>Network Error</source>
+        <translation>Eroare de rețea</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="168"/>
+        <source>Network manager not configured</source>
+        <translation>Gestionarul de rețea nu este configurat</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="207"/>
+        <source>Unable to create request</source>
+        <translation>Nu se poate crea cererea</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="270"/>
+        <source>Too many redirects: %1</source>
+        <translation>Prea multe redirecționări: %1</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="282"/>
+        <source>Redirect not followed: %1</source>
+        <translation>Redirecționare neurmată: %1</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="316"/>
+        <source>Cannot commit changes to:
+"%1"</source>
+        <translation>Modificările nu pot fi scrise în:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="375"/>
+        <source>Cannot open file:
+"%1"
+Error(%2): %3</source>
+        <translation>Fișierul nu poate fi deschis:
+„%1”
+Eroare(%2): %3</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="388"/>
+        <source>Cannot make path:
+"%1"</source>
+        <translation>Calea nu poate fi creată:
+„%1”</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader/RemoteFile.cpp" line="399"/>
+        <source>Cannot write to file:
+"%1"
+Error(%2): %3</source>
+        <translation>Nu se poate scrie în fișierul:
+„%1”
+Eroare(%2): %3</translation>
+    </message>
+</context>
+<context>
     <name>RigControlDialog</name>
     <message>
         <source>Management:</source>
@@ -6861,14 +9187,101 @@ Adaugă din coadă</translation>
         <translation>Cere controlul automat</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="13"/>
+        <source>CAT — Transceiver Settings</source>
+        <translation>CAT — setările transceiverului</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="86"/>
+        <source>CAT — Transceiver Control</source>
+        <translation>CAT — comanda transceiverului</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="114"/>
+        <source>Not connected</source>
+        <translation>Neconectat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="153"/>
+        <source>CAT active</source>
+        <translation>CAT activ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="153"/>
+        <source>CAT not connected</source>
+        <translation>CAT neconectat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="217"/>
+        <source>The backend can only be changed when the radio is disconnected.</source>
+        <translation>Modulul se poate schimba doar când aparatul este deconectat.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="239"/>
+        <source>
+Tip: close OmniRig from the Windows tray icon, then press Connect again.</source>
+        <translation>
+Sfat: închide OmniRig din pictograma din bara de sistem Windows, apoi apasă din nou Conectează.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="301"/>
+        <source>Rig name…</source>
+        <translation>Numele aparatului…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="309"/>
+        <source>Choose…</source>
+        <translation>Alege…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="319"/>
+        <source>Select Transceiver</source>
+        <translation>Alege transceiverul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="328"/>
+        <source>⚙  Choose Transceiver (%1 available)</source>
+        <translation>⚙  Alege transceiverul (%1 disponibile)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="337"/>
+        <source>Filter by name (e.g. Icom, Yaesu, FT-991…)</source>
+        <translation>Filtrează după nume (de ex. Icom, Yaesu, FT-991…)</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="372"/>
         <source>Cancel</source>
         <translation>Anulează</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="536"/>
+        <source>Connect on startup</source>
+        <translation>Conectează la pornire</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="542"/>
+        <source>Start monitor</source>
+        <translation>Pornește monitorul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="707"/>
+        <source>▶  Connect</source>
+        <translation>▶  Conectează</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="740"/>
+        <source>■  Disconnect</source>
+        <translation>■  Deconectează</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="758"/>
         <source>Close</source>
         <translation>Închide</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="None"/>
+        <source>…(%1 more lines)</source>
+        <translation>…(încă %1 rânduri)</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="None"/>
@@ -6878,6 +9291,16 @@ Adaugă din coadă</translation>
 </context>
 <context>
     <name>RigControlDialogContent</name>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="145"/>
+        <source>Search radio...</source>
+        <translation>Caută aparatul...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="74"/>
+        <source>Auto-detect</source>
+        <translation>Detectare automată</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/components/RigControlDialogContent.qml" line="79"/>
         <source>Detect my radio</source>
@@ -6892,6 +9315,46 @@ Adaugă din coadă</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="101"/>
         <source>Radio</source>
         <translation>Aparat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="224"/>
+        <source>Network host</source>
+        <translation>Gazdă de rețea</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="247"/>
+        <source>Serial port</source>
+        <translation>Port serial</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="273"/>
+        <source>Refresh ports</source>
+        <translation>Reîmprospătează porturile</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="278"/>
+        <source>Baud rate</source>
+        <translation>Viteză în bauzi</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="302"/>
+        <source>PTT method</source>
+        <translation>Metodă PTT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="325"/>
+        <source>Auto-connect on startup</source>
+        <translation>Conectare automată la pornire</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="340"/>
+        <source>Auto-start audio</source>
+        <translation>Pornire automată a sunetului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="364"/>
+        <source>TS-590S USB: Menu 60 COM = USB, Menu 62 BAUD = 115200 (default)</source>
+        <translation>TS-590S USB: meniul 60 COM = USB, meniul 62 BAUD = 115200 (implicit)</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="380"/>
@@ -6912,14 +9375,112 @@ Adaugă din coadă</translation>
 <context>
     <name>RigDetectResults</name>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="96"/>
+        <source>Detected radios</source>
+        <translation>Aparate detectate</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="117"/>
+        <source>Nothing has been changed yet. Check the proposal, then apply it.</source>
+        <translation>Încă nu s-a schimbat nimic. Verifică propunerea, apoi aplic-o.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="118"/>
+        <source>No serial device found. Is the radio on and the USB cable connected?</source>
+        <translation>Niciun dispozitiv serial găsit. Aparatul este pornit și cablul USB conectat?</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="159"/>
+        <source>confidence %1%</source>
+        <translation>încredere %1%</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="171"/>
+        <source>CAT port: %1</source>
+        <translation>Port CAT: %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="173"/>
+        <source> — %1 baud</source>
+        <translation> — %1 bauzi</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="176"/>
+        <source> (other ports of the same device: %1)</source>
+        <translation> (alte porturi ale aceluiași dispozitiv: %1)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="187"/>
+        <source>Audio: in %1 / out %2</source>
+        <translation>Audio: intrare %1 / ieșire %2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="188"/>
+        <source>not found</source>
+        <translation>negăsit</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/RigDetectResults.qml" line="204"/>
         <source>Apply</source>
         <translation>Aplică</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/RigDetectResults.qml" line="234"/>
+        <source>Also set the radio's audio devices</source>
+        <translation>Setează și dispozitivele audio ale aparatului</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/RigDetectResults.qml" line="35"/>
         <source>Close</source>
         <translation>Închide</translation>
+    </message>
+</context>
+<context>
+    <name>SampleDownloader::impl</name>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="91"/>
+        <source>Download Samples</source>
+        <translation>Descarcă mostre</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="104"/>
+        <source>&amp;Abort</source>
+        <translation>&amp;Renunță</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="105"/>
+        <source>&amp;Refresh</source>
+        <translation>&amp;Reîmprospătează</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="108"/>
+        <source>&amp;Details</source>
+        <translation>&amp;Detalii</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="112"/>
+        <source>Base URL for samples:</source>
+        <translation>Adresa de bază pentru mostre:</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="113"/>
+        <source>Only use HTTP:</source>
+        <translation>Folosește doar HTTP:</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="114"/>
+        <source>Check this if you get SSL/TLS errors</source>
+        <translation>Bifează dacă primești erori SSL/TLS</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="132"/>
+        <source>Input Error</source>
+        <translation>Eroare de introducere</translation>
+    </message>
+    <message>
+        <location filename="../SampleDownloader.cpp" line="132"/>
+        <source>Invalid URL format</source>
+        <translation>Format de adresă nevalabil</translation>
     </message>
 </context>
 <context>
@@ -11439,6 +14000,16 @@ Dacă eziți, alege înaltă.</translation>
         <source>Calibrate ALC (transmits a carrier)</source>
         <translation>Calibrează ALC (emite o purtătoare)</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="825"/>
+        <source>localhost:50001</source>
+        <translation>localhost:50001</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsTab1.qml" line="866"/>
+        <source>TCI RX gain:</source>
+        <translation>Amplificare RX TCI:</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>
@@ -11887,6 +14458,11 @@ Dacă eziți, alege înaltă.</translation>
         <translation>INFORMAȚII DESPRE INDICATIVE</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="62"/>
+        <source>Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.</source>
+        <translation>Căutare locală cu revenire la DXCC, memorie tampon SQLite și furnizori actualizabili. Datele de autentificare eQSL și Club Log sunt păstrate în seiful de chei, prin canalul de setări securizate.</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="72"/>
         <source>Apertura automatica all'avvio QSO</source>
         <translation>Deschidere automată la începutul QSO-ului</translation>
@@ -11920,6 +14496,56 @@ Dacă eziți, alege înaltă.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="93"/>
         <source>Durata cache (minuti)</source>
         <translation>Durata memoriei tampon (minute)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="101"/>
+        <source>eQSL INBOX — CONFERME RICEVUTE</source>
+        <translation>eQSL INBOX — CONFIRMĂRI PRIMITE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="103"/>
+        <source>Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.</source>
+        <translation>Descarcă InBox-ul sau arhiva eQSL în format ADIF și sincronizează confirmările în jurnalul activ. Numele de utilizator implicit este indicativul stației.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="107"/>
+        <source>QRZ.com usa la chiave API già configurata nella sezione QRZ Logbook. Il pulsante Aggiorna scarica solo le conferme; in alternativa puoi importare qui un file ADI esportato da QRZ. Download, paginazione e sincronizzazione del logbook avvengono in background e lo stato resta visibile nella scheda.</source>
+        <translation>QRZ.com folosește cheia API deja configurată în secțiunea jurnalului QRZ. Butonul Actualizează descarcă doar confirmările; alternativ, poți importa aici un fișier ADI exportat din QRZ. Descărcarea, parcurgerea paginilor și sincronizarea jurnalului au loc în fundal, iar starea rămâne vizibilă în filă.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="115"/>
+        <source>Username/callsign eQSL</source>
+        <translation>Nume de utilizator sau indicativ eQSL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="119"/>
+        <source>Callsign eQSL o nickname account</source>
+        <translation>Indicativ eQSL sau porecla contului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="122"/>
+        <source>Password eQSL</source>
+        <translation>Parolă eQSL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="131"/>
+        <source>LoTW — CONFERME RICEVUTE</source>
+        <translation>LoTW — CONFIRMĂRI PRIMITE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="133"/>
+        <source>Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.</source>
+        <translation>Descarcă QSL-urile LoTW primite și sincronizează-le în jurnal. Parola este preluată din secțiunea Raportare → LoTW; numele de utilizator LoTW poate fi diferit de indicativul de lucru.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="141"/>
+        <source>Username LoTW</source>
+        <translation>Nume de utilizator LoTW</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="145"/>
+        <source>Callsign o username LoTW</source>
+        <translation>Indicativ sau nume de utilizator LoTW</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="150"/>
@@ -12022,6 +14648,26 @@ Dacă eziți, alege înaltă.</translation>
         <translation>Importă</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="266"/>
+        <source>%1 confirmations in last sync</source>
+        <translation>%1 confirmări la ultima sincronizare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="268"/>
+        <source>No confirmations</source>
+        <translation>Nicio confirmare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="324"/>
+        <source>Optional ADI file to merge into the logbook</source>
+        <translation>Fișier ADI opțional de îmbinat în jurnal</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="348"/>
+        <source>Import confirmations ADI</source>
+        <translation>Importă confirmările din ADI</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
         <source>ADIF files (*.adi *.adif)</source>
         <translation>Fișiere ADIF (*.adi *.adif)</translation>
@@ -12030,6 +14676,16 @@ Dacă eziți, alege înaltă.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
         <source>All files (*)</source>
         <translation>Toate fișierele (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="359"/>
+        <source>Import ADI</source>
+        <translation>Importă ADI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="377"/>
+        <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
+        <translation>Doar pentru recuperare manuală: importul unui ADI îi îmbină confirmările în jurnalul activ, la fel ca Actualizarea. Nu avansează cursorul descărcărilor LoTW online.</translation>
     </message>
 </context>
 <context>
@@ -14213,6 +16869,11 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <translation>Port UDP:</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="850"/>
+        <source>UDP Server:</source>
+        <translation>Server UDP:</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="862"/>
         <source>Accept UDP:</source>
         <translation>Acceptă UDP:</translation>
@@ -14248,6 +16909,16 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <translation>Server TCP:</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="111"/>
+        <source>dx.iz7auh.net</source>
+        <translation>dx.iz7auh.net</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="664"/>
+        <source>Primary traffic:</source>
+        <translation>Trafic primar:</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="669"/>
         <source>Decode</source>
         <translation>Decodificare</translation>
@@ -14256,6 +16927,36 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="670"/>
         <source>Status</source>
         <translation>Stare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="672"/>
+        <source>QSO logged</source>
+        <translation>QSO înregistrate</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="675"/>
+        <source>WSPR</source>
+        <translation>WSPR</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="695"/>
+        <source>Secondary Client ID:</source>
+        <translation>ID client secundar:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="772"/>
+        <source>Secondary traffic:</source>
+        <translation>Trafic secundar:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="806"/>
+        <source>Tertiary Client ID:</source>
+        <translation>ID client terțiar:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <source>Tertiary traffic:</source>
+        <translation>Trafic terțiar:</translation>
     </message>
 </context>
 <context>
@@ -14996,6 +17697,11 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <source>OTP URL:</source>
         <translation>Adresă OTP:</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="159"/>
+        <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Un singur comutator pentru calculatoare vechi sau lente. Activează: grafica prudentă D3D11 pe Windows (cere repornire), modul cu procesor redus, cel mult 4 fire FT, prioritate normală de proces, profil de decodificare pe procesor și ascunde implicit harta în direct și spectrul complet. Implicit: oprit.</translation>
+    </message>
 </context>
 <context>
     <name>SignalRxPanel</name>
@@ -15011,7 +17717,264 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
     </message>
 </context>
 <context>
+    <name>SoundInput</name>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="628"/>
+        <source>Audio RX input open error: Qt could not open the selected input device. %1</source>
+        <translation>Eroare la deschiderea intrării audio de recepție: Qt nu a putut deschide dispozitivul ales. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="632"/>
+        <source>Audio RX input read error: Qt reported an I/O failure while reading samples. %1</source>
+        <translation>Eroare la citirea intrării audio de recepție: Qt a semnalat o defecțiune de intrare/ieșire la citirea eșantioanelor. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="636"/>
+        <source>Audio RX input fatal error: the selected input device is not usable now. %1</source>
+        <translation>Eroare gravă la intrarea audio de recepție: dispozitivul ales nu poate fi folosit acum. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="642"/>
+        <source>Audio RX input underrun: capture fell behind but will continue. %1</source>
+        <translation>Golire a intrării audio de recepție: captarea a rămas în urmă, dar va continua. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="809"/>
+        <source>Audio RX format unsupported: device="%1" does not accept requested=%2; preferred=%3; selected-channel=%4</source>
+        <translation>Format audio de recepție neacceptat: dispozitivul „%1” nu acceptă formatul cerut %2; preferat %3; canal ales %4</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="877"/>
+        <source>Audio RX pull stream could not be started: input device="%1"</source>
+        <translation>Fluxul de recepție nu a putut porni: dispozitiv de intrare „%1”</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="910"/>
+        <source>Audio RX sink initialization failed: input device="%1", requested=%2, selected-channel=%3</source>
+        <translation>Inițializarea recepției audio a eșuat: dispozitiv de intrare „%1”, cerut %2, canal ales %3</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="1092"/>
+        <source>Idle</source>
+        <translation>În repaus</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="558"/>
+        <source>Receiving</source>
+        <translation>Se recepționează</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="443"/>
+        <source>Native macOS AudioQueue input requires PCM Int16 format, got %1</source>
+        <translation>Intrarea nativă AudioQueue din macOS cere formatul PCM Int16, s-a primit %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="451"/>
+        <source>Native macOS AudioQueue sink initialization failed: input device="%1", requested=%2, selected-channel=%3</source>
+        <translation>Inițializarea nativă AudioQueue din macOS a eșuat: dispozitiv de intrare „%1”, cerut %2, canal ales %3</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="523"/>
+        <source>Native macOS AudioQueue buffer allocation failed for "%1": %2</source>
+        <translation>Alocarea zonei tampon AudioQueue din macOS a eșuat pentru „%1”: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="533"/>
+        <source>Native macOS AudioQueue buffer enqueue failed for "%1": %2</source>
+        <translation>Punerea la coadă a zonei tampon AudioQueue din macOS a eșuat pentru „%1”: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="545"/>
+        <source>Native macOS AudioQueue input start failed for "%1": %2</source>
+        <translation>Pornirea intrării AudioQueue din macOS a eșuat pentru „%1”: %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="1101"/>
+        <source>Suspended</source>
+        <translation>Suspendat</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="1107"/>
+        <source>Audio RX input stopped with error: device="%1", state=%2</source>
+        <translation>Intrarea audio de recepție s-a oprit cu eroare: dispozitiv „%1”, stare %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundin.cpp" line="1114"/>
+        <source>Stopped</source>
+        <translation>Oprit</translation>
+    </message>
+</context>
+<context>
+    <name>SoundOutput</name>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="248"/>
+        <source>Audio TX output open error: Qt could not open the selected output device. %1</source>
+        <translation>Eroare la deschiderea ieșirii audio de emisie: Qt nu a putut deschide dispozitivul ales. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="251"/>
+        <source>Audio TX output write error: Qt reported an I/O failure while writing samples. %1</source>
+        <translation>Eroare la scrierea ieșirii audio de emisie: Qt a semnalat o defecțiune de intrare/ieșire la scrierea eșantioanelor. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="255"/>
+        <source>Audio TX output underrun: the audio sink fell behind but will continue. %1</source>
+        <translation>Golire a ieșirii audio de emisie: redarea a rămas în urmă, dar va continua. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="259"/>
+        <source>Audio TX output fatal error: the selected output device is not usable now. %1</source>
+        <translation>Eroare gravă la ieșirea audio de emisie: dispozitivul ales nu poate fi folosit acum. %1</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="359"/>
+        <source>Audio TX format invalid: device="%1", requested=%2, preferred=%3</source>
+        <translation>Format audio de emisie nevalabil: dispozitiv „%1”, cerut %2, preferat %3</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="366"/>
+        <source>TX audio: device does not natively support %1 Hz / Int16 (preferred: %2 Hz / %3 ch) – relying on Qt/CoreAudio conversion</source>
+        <translation>Audio de emisie: dispozitivul nu acceptă nativ %1 Hz / Int16 (preferat: %2 Hz / %3 canale) – se folosește conversia Qt/CoreAudio</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="395"/>
+        <source>Audio TX output device is not configured: select an output device in Settings &gt; Audio.</source>
+        <translation>Dispozitivul de ieșire audio pentru emisie nu este configurat: alege unul în Setări &gt; Audio.</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="427"/>
+        <source>Audio TX output start failed: Qt did not return a writable sink device. device="%1", format=%2, state=%3, qt-error=%4</source>
+        <translation>Pornirea ieșirii audio de emisie a eșuat: Qt nu a returnat un dispozitiv în care se poate scrie. Dispozitiv „%1”, format %2, stare %3, eroare Qt %4</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="651"/>
+        <source>Audio TX output write error: Qt rejected buffered audio data. device="%1", format=%2, state=%3, qt-error=%4</source>
+        <translation>Eroare la scrierea ieșirii audio de emisie: Qt a respins datele audio din zona tampon. Dispozitiv „%1”, format %2, stare %3, eroare Qt %4</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="703"/>
+        <source>Audio TX source read error: generated TX audio source was closed before playback completed. device="%1", format=%2</source>
+        <translation>Eroare la citirea sursei audio de emisie: sursa generată a fost închisă înainte de terminarea redării. Dispozitiv „%1”, format %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="712"/>
+        <source>Audio TX source read error: Decodium could not read generated TX audio before writing it. device="%1", format=%2</source>
+        <translation>Eroare la citirea sursei audio de emisie: Decodium nu a putut citi sunetul generat înainte de a-l scrie. Dispozitiv „%1”, format %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="732"/>
+        <source>Audio TX output write error: Qt rejected generated TX audio data. device="%1", format=%2, state=%3, qt-error=%4</source>
+        <translation>Eroare la scrierea ieșirii audio de emisie: Qt a respins sunetul generat. Dispozitiv „%1”, format %2, stare %3, eroare Qt %4</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="771"/>
+        <source>Idle</source>
+        <translation>În repaus</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="774"/>
+        <source>Sending</source>
+        <translation>Se emite</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="777"/>
+        <source>Suspended</source>
+        <translation>Suspendat</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="782"/>
+        <source>TX output stopped while parked</source>
+        <translation>Ieșirea de emisie s-a oprit în repaus</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="787"/>
+        <source>Audio TX output stopped with error: device="%1", state=%2</source>
+        <translation>Ieșirea audio de emisie s-a oprit cu eroare: dispozitiv „%1”, stare %2</translation>
+    </message>
+    <message>
+        <location filename="../Audio/soundout.cpp" line="791"/>
+        <source>Stopped</source>
+        <translation>Oprit</translation>
+    </message>
+</context>
+<context>
+    <name>SplashScreen</name>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="192"/>
+        <source>Loading…</source>
+        <translation>Se încarcă…</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="212"/>
+        <source>☕  Buy me a coffee</source>
+        <translation>☕  Fă-mi cinste cu o cafea</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="233"/>
+        <source>Start  ▶</source>
+        <translation>Pornește  ▶</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="255"/>
+        <source>Named after Robert G. Gallager · Father of LDPC Codes</source>
+        <translation>Numit după Robert G. Gallager · părintele codurilor LDPC</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SplashScreen.qml" line="262"/>
+        <source>© 2024-2026 IU8LMC  ·  GPL Open Source  ·  Based on WSJT-X by K1JT et al. &amp; WSJT-X by K1JT</source>
+        <translation>© 2024-2026 IU8LMC  ·  sursă deschisă GPL  ·  bazat pe WSJT-X de K1JT și colaboratorii</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="131"/>
+        <source>Core Gallager</source>
+        <translation>Core Gallager</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SplashScreen.qml" line="142"/>
+        <source>Advanced Digital Mode Decoder for Amateur Radio</source>
+        <translation>Decodificator avansat de moduri digitale pentru radioamatori</translation>
+    </message>
+</context>
+<context>
+    <name>StationDialog</name>
+    <message>
+        <location filename="../Configuration.cpp" line="553"/>
+        <source>Add Station</source>
+        <translation>Adaugă stație</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="558"/>
+        <source>&amp;Band:</source>
+        <translation>&amp;Bandă:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="559"/>
+        <source>&amp;Offset (MHz):</source>
+        <translation>&amp;Decalaj (MHz):</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="560"/>
+        <source>&amp;Antenna:</source>
+        <translation>&amp;Antenă:</translation>
+    </message>
+</context>
+<context>
     <name>StationList::impl</name>
+    <message>
+        <location filename="../models/StationList.cpp" line="302"/>
+        <source>Band name</source>
+        <translation>Numele benzii</translation>
+    </message>
+    <message>
+        <location filename="../models/StationList.cpp" line="328"/>
+        <source>Frequency offset</source>
+        <translation>Decalaj de frecvență</translation>
+    </message>
+    <message>
+        <location filename="../models/StationList.cpp" line="350"/>
+        <source>Antenna description</source>
+        <translation>Descrierea antenei</translation>
+    </message>
     <message>
         <location filename="../models/StationList.cpp" line="372"/>
         <source>Band</source>
@@ -15051,6 +18014,149 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/StatusBar.qml" line="654"/>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
+    </message>
+</context>
+<context>
+    <name>TCITransceiver</name>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="505"/>
+        <source>ConnectionRefused</source>
+        <translation>ConnectionRefused</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="506"/>
+        <source>RemoteHostClosed</source>
+        <translation>RemoteHostClosed</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="507"/>
+        <source>HostNotFound</source>
+        <translation>HostNotFound</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="508"/>
+        <source>SocketAccess</source>
+        <translation>SocketAccess</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="509"/>
+        <source>SocketResource</source>
+        <translation>SocketResource</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="510"/>
+        <source>SocketTimeout</source>
+        <translation>SocketTimeout</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="511"/>
+        <source>DatagramTooLarge</source>
+        <translation>DatagramTooLarge</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="512"/>
+        <source>Network</source>
+        <translation>Network</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="513"/>
+        <source>AddressInUse</source>
+        <translation>AddressInUse</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="514"/>
+        <source>SocketAddressNotAvailable</source>
+        <translation>SocketAddressNotAvailable</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="515"/>
+        <source>UnsupportedSocketOperation</source>
+        <translation>UnsupportedSocketOperation</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="516"/>
+        <source>UnfinishedSocketOperation</source>
+        <translation>UnfinishedSocketOperation</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="517"/>
+        <source>ProxyAuthenticationRequired</source>
+        <translation>ProxyAuthenticationRequired</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="518"/>
+        <source>SslHandshakeFailed</source>
+        <translation>SslHandshakeFailed</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="519"/>
+        <source>ProxyConnectionRefused</source>
+        <translation>ProxyConnectionRefused</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="520"/>
+        <source>ProxyConnectionClosed</source>
+        <translation>ProxyConnectionClosed</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="521"/>
+        <source>ProxyConnectionTimeout</source>
+        <translation>ProxyConnectionTimeout</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="522"/>
+        <source>ProxyNotFound</source>
+        <translation>ProxyNotFound</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="523"/>
+        <source>ProxyProtocol</source>
+        <translation>ProxyProtocol</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="524"/>
+        <source>Operation</source>
+        <translation>Operation</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="525"/>
+        <source>SslInternal</source>
+        <translation>SslInternal</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="526"/>
+        <source>SslInvalidUserData</source>
+        <translation>SslInvalidUserData</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="527"/>
+        <source>Temporary</source>
+        <translation>Temporary</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="528"/>
+        <source>UnknownSocket</source>
+        <translation>UnknownSocket</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="673"/>
+        <source>TCI websocket error: %1</source>
+        <translation>Eroare de websocket TCI: %1</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="921"/>
+        <source>TCI could not be opened</source>
+        <translation>TCI nu a putut fi deschis</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="1712"/>
+        <source>TCI should use PTT via CAT</source>
+        <translation>TCI ar trebui să folosească PTT prin CAT</translation>
+    </message>
+    <message>
+        <location filename="../Transceiver/TCITransceiver.cpp" line="2031"/>
+        <source>TCI modulator not Idle</source>
+        <translation>Modulatorul TCI nu este în repaus</translation>
     </message>
 </context>
 <context>
@@ -15254,6 +18360,14 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/TimeSyncPanel.qml" line="250"/>
         <source>Adjusting</source>
         <translation>În ajustare</translation>
+    </message>
+</context>
+<context>
+    <name>TransceiverBase</name>
+    <message>
+        <location filename="../Transceiver/TransceiverBase.cpp" line="15"/>
+        <source>Unexpected rig error</source>
+        <translation>Eroare neașteptată a aparatului</translation>
     </message>
 </context>
 <context>
@@ -15518,6 +18632,49 @@ Apăsare lungă: modifică mesajul</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2259"/>
         <source>Satellite:</source>
         <translation>Satelit:</translation>
+    </message>
+</context>
+<context>
+    <name>UpdateDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="14"/>
+        <source>Update available</source>
+        <translation>Actualizare disponibilă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="42"/>
+        <source>Decodium %1 is available</source>
+        <translation>Decodium %1 este disponibil</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="51"/>
+        <source>You are running %1.</source>
+        <translation>Rulezi versiunea %1.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="58"/>
+        <source>What's new:</source>
+        <translation>Ce este nou:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="104"/>
+        <source>Decodium will close and the installer will start. Your settings and QSO log are kept.</source>
+        <translation>Decodium se va închide și va porni programul de instalare. Setările și jurnalul QSO se păstrează.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="116"/>
+        <source>Skip this version</source>
+        <translation>Sari peste această versiune</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="125"/>
+        <source>Later</source>
+        <translation>Mai târziu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/UpdateDialog.qml" line="132"/>
+        <source>Update now</source>
+        <translation>Actualizează acum</translation>
     </message>
 </context>
 <context>
@@ -15919,6 +19076,29 @@ Apasă MONITOR pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>WorkedBefore</name>
+    <message>
+        <location filename="../logbook/WorkedBefore.cpp" line="286"/>
+        <source>Invalid ADIF field %0: %1</source>
+        <translation>Câmp ADIF nevalabil %0: %1</translation>
+    </message>
+    <message>
+        <location filename="../logbook/WorkedBefore.cpp" line="303"/>
+        <source>Malformed ADIF field %0: %1</source>
+        <translation>Câmp ADIF deformat %0: %1</translation>
+    </message>
+    <message>
+        <location filename="../logbook/WorkedBefore.cpp" line="344"/>
+        <source>Invalid ADIF header</source>
+        <translation>Antet ADIF nevalabil</translation>
+    </message>
+    <message>
+        <location filename="../logbook/WorkedBefore.cpp" line="390"/>
+        <source>Error opening ADIF log file for read: %0</source>
+        <translation>Eroare la deschiderea pentru citire a jurnalului ADIF: %0</translation>
+    </message>
+</context>
+<context>
     <name>WorldMapWidget</name>
     <message>
         <location filename="../widgets/worldmapwidget.cpp" line="909"/>
@@ -16039,14 +19219,29 @@ Apasă MONITOR pentru a începe</translation>
         <translation>Reîmprospătează</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="1994"/>
+        <source>TextLabel</source>
+        <translation>TextLabel</translation>
+    </message>
+    <message>
         <location filename="../Configuration.ui" line="2028"/>
         <source>Location:</source>
         <translation>Locație:</translation>
     </message>
     <message>
+        <location filename="../Configuration.ui" line="2142"/>
+        <source>&amp;Delete</source>
+        <translation>&amp;Șterge</translation>
+    </message>
+    <message>
         <location filename="../Configuration.ui" line="2306"/>
         <source>Op Call:</source>
         <translation>Indicativul operatorului:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="2436"/>
+        <source>UDP Server:</source>
+        <translation>Server UDP:</translation>
     </message>
     <message>
         <location filename="../Configuration.ui" line="2648"/>
@@ -16172,6 +19367,52 @@ Apasă MONITOR pentru a începe</translation>
         <location filename="../Configuration.ui" line="4603"/>
         <source>Filters</source>
         <translation>Filtre</translation>
+    </message>
+</context>
+<context>
+    <name>main</name>
+    <message>
+        <location filename="../main.cpp" line="446"/>
+        <source>Failed to create a temporary directory</source>
+        <translation>Crearea unui dosar temporar a eșuat</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="447"/>
+        <source>Path: "%1"</source>
+        <translation>Cale: „%1”</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="453"/>
+        <source>Failed to create a usable temporary directory</source>
+        <translation>Crearea unui dosar temporar utilizabil a eșuat</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="454"/>
+        <source>Another application may be locking the directory</source>
+        <translation>Este posibil ca altă aplicație să blocheze dosarul</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="470"/>
+        <source>Failed to create data directory</source>
+        <translation>Crearea dosarului de date a eșuat</translation>
+    </message>
+    <message>
+        <location filename="../main.cpp" line="471"/>
+        <source>path: "%1"</source>
+        <translation>cale: „%1”</translation>
+    </message>
+</context>
+<context>
+    <name>wf_palette_design_dialog</name>
+    <message>
+        <location filename="../wf_palette_design_dialog.ui" line="14"/>
+        <source>Palette Designer</source>
+        <translation>Proiectant de palete</translation>
+    </message>
+    <message>
+        <location filename="../wf_palette_design_dialog.ui" line="23"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Double click a color to edit it.&lt;/p&gt;&lt;p&gt;Right click to insert or delete colors.&lt;/p&gt;&lt;p&gt;Colors at the top represent weak signals&lt;/p&gt;&lt;p&gt;and colors at the bottom represent strong&lt;/p&gt;&lt;p&gt;signals. You can have up to 256 colors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dublu clic pe o culoare pentru a o modifica.&lt;/p&gt;&lt;p&gt;Clic dreapta pentru a insera sau a șterge culori.&lt;/p&gt;&lt;p&gt;Culorile de sus reprezintă semnale slabe,&lt;/p&gt;&lt;p&gt;iar cele de jos semnale puternice.&lt;/p&gt;&lt;p&gt;Poți avea până la 256 de culori.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -16432,6 +19673,21 @@ DXCC %4 · Locator %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Câmp de sortare</translation>
+    </message>
+</context>
+<context>
+    <name>BandRange</name>
+    <message>
+        <source>Map CALL could not select TX1 for %1</source>
+        <translation>Apelul de pe hartă nu a putut alege TX1 pentru %1</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2</source>
+        <translation>QSO cu %1 armat - TX%2</translation>
+    </message>
+    <message>
+        <source>QSO with %1 armed - TX%2 at next full slot</source>
+        <translation>QSO cu %1 armat - TX%2 la următorul interval complet</translation>
     </message>
 </context>
 <context>
