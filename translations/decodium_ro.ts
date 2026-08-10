@@ -509,6 +509,24 @@
     </message>
 </context>
 <context>
+    <name>Configuration::impl</name>
+    <message>
+        <location filename="../Configuration.cpp" line="5777"/>
+        <source>Load Working Frequencies</source>
+        <translation>Încarcă frecvențele de lucru</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="5797"/>
+        <source>Merge Working Frequencies</source>
+        <translation>Îmbină frecvențele de lucru</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.cpp" line="5874"/>
+        <source>Save Working Frequencies</source>
+        <translation>Salvează frecvențele de lucru</translation>
+    </message>
+</context>
+<context>
     <name>DXClusterWindow</name>
     <message>
         <location filename="../widgets/DXClusterWindow.cpp" line="492"/>
@@ -1103,6 +1121,14 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="537"/>
         <source>PSK Reporter</source>
         <translation>PSK Reporter</translation>
+    </message>
+</context>
+<context>
+    <name>EchoGraph</name>
+    <message>
+        <location filename="../widgets/echograph.ui" line="281"/>
+        <source>Colors</source>
+        <translation>Culori</translation>
     </message>
 </context>
 <context>
@@ -4540,6 +4566,11 @@ Clic dreapta: deconectează</translation>
         <translation>Filtre</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="5164"/>
+        <source>Decode</source>
+        <translation>Decodificare</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="5297"/>
         <source>Mode</source>
         <translation>Mod</translation>
@@ -4553,6 +4584,11 @@ Clic dreapta: deconectează</translation>
         <location filename="../widgets/mainwindow.ui" line="5406"/>
         <source>Open</source>
         <translation>Deschide</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="6291"/>
+        <source>Auto</source>
+        <translation>Auto</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="4574"/>
@@ -4800,6 +4836,22 @@ Adaugă din coadă</translation>
 <context>
     <name>RigControlDialog</name>
     <message>
+        <source>Management:</source>
+        <translation>Administrare:</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Proprietate:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Cere controlul automat</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/RigControlDialog.qml" line="372"/>
         <source>Cancel</source>
         <translation>Anulează</translation>
@@ -4809,9 +4861,19 @@ Adaugă din coadă</translation>
         <source>Close</source>
         <translation>Închide</translation>
     </message>
+    <message>
+        <location filename="../qml/decodium/components/RigControlDialog.qml" line="None"/>
+        <source>Advanced</source>
+        <translation>Avansat</translation>
+    </message>
 </context>
 <context>
     <name>RigControlDialogContent</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="101"/>
+        <source>Radio</source>
+        <translation>Aparat</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/RigControlDialogContent.qml" line="390"/>
         <source>Connect</source>
@@ -4834,9 +4896,243 @@ Adaugă din coadă</translation>
 <context>
     <name>SettingsDialog</name>
     <message>
+        <source>Experimental function under development</source>
+        <translation>Funcție experimentală, în dezvoltare</translation>
+    </message>
+    <message>
+        <source>Use receiver IF output:</source>
+        <translation>Folosește ieșirea de frecvență intermediară a receptorului:</translation>
+    </message>
+    <message>
+        <source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source>
+        <translation>Păstrează frecvența afișată a aparatului pentru afișare, înregistrare și decodificare, în timp ce RTL-SDR-ul este acordat pe ieșirea de frecvență intermediară fixă a receptorului.</translation>
+    </message>
+    <message>
+        <source>IF frequency (Hz):</source>
+        <translation>Frecvența intermediară (Hz):</translation>
+    </message>
+    <message>
+        <source>IF sideband:</source>
+        <translation>Banda laterală a frecvenței intermediare:</translation>
+    </message>
+    <message>
+        <source>Automatic</source>
+        <translation>Automat</translation>
+    </message>
+    <message>
+        <source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source>
+        <translation>Modul automat folosește LSB doar cu demodulatorul LSB; modurile pentru semnale slabe, precum FT8, folosesc USB.</translation>
+    </message>
+    <message>
+        <source>USB shift (Hz):</source>
+        <translation>Deplasare USB (Hz):</translation>
+    </message>
+    <message>
+        <source>LSB shift (Hz):</source>
+        <translation>Deplasare LSB (Hz):</translation>
+    </message>
+    <message>
+        <source>Invert IF spectrum:</source>
+        <translation>Inversează spectrul frecvenței intermediare:</translation>
+    </message>
+    <message>
+        <source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source>
+        <translation>Activează această opțiune când semnalele se mișcă în sens invers pe panadaptor, pentru că mixerul de frecvență intermediară al receptorului inversează spectrul.</translation>
+    </message>
+    <message>
+        <source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source>
+        <translation>Mod cu frecvență intermediară: Decodium păstrează pe ecran frecvența aparatului și acordează RTL-SDR-ul pe frecvența intermediară plus deplasarea USB/LSB aleasă.</translation>
+    </message>
+    <message>
+        <source>LOCAL DATABASES</source>
+        <translation>BAZE DE DATE LOCALE</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - activitatea utilizatorilor</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - confirmări primite</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - confirmări primite</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - confirmări primite</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
+    </message>
+    <message>
+        <source>CALL3.TXT</source>
+        <translation>CALL3.TXT</translation>
+    </message>
+    <message>
+        <source>No records</source>
+        <translation>Nicio înregistrare</translation>
+    </message>
+    <message>
+        <source>Never updated</source>
+        <translation>Niciodată actualizat</translation>
+    </message>
+    <message>
+        <source>Last update: %1</source>
+        <translation>Ultima actualizare: %1</translation>
+    </message>
+    <message>
+        <source>File: %1</source>
+        <translation>Fișier: %1</translation>
+    </message>
+    <message>
+        <source>File not found</source>
+        <translation>Fișier negăsit</translation>
+    </message>
+    <message>
+        <source>Optional local file path</source>
+        <translation>Cale locală de fișier, opțională</translation>
+    </message>
+    <message>
+        <source>Import callsign database</source>
+        <translation>Importă baza de date de indicative</translation>
+    </message>
+    <message>
+        <source>Databases and CSV (*)</source>
+        <translation>Baze de date și CSV (*)</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Importă</translation>
+    </message>
+    <message>
+        <source>Clear global lookup cache</source>
+        <translation>Golește memoria globală a căutărilor</translation>
+    </message>
+    <message>
+        <source>All locally stored callsign lookup results for every provider will be deleted. The FCC, LoTW, eQSL and Club Log databases will not be deleted. Continue?</source>
+        <translation>Toate rezultatele căutărilor de indicative păstrate local, pentru fiecare furnizor, vor fi șterse. Bazele de date FCC, LoTW, eQSL și Club Log nu vor fi șterse. Continui?</translation>
+    </message>
+    <message>
+        <source>Management:</source>
+        <translation>Administrare:</translation>
+    </message>
+    <message>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <source>Radio group:</source>
+        <translation>Grup de aparate:</translation>
+    </message>
+    <message>
+        <source>Automatic discovery</source>
+        <translation>Descoperire automată</translation>
+    </message>
+    <message>
+        <source>First available radio</source>
+        <translation>Primul aparat disponibil</translation>
+    </message>
+    <message>
+        <source>Ownership:</source>
+        <translation>Proprietate:</translation>
+    </message>
+    <message>
+        <source>Request control automatically</source>
+        <translation>Cere controlul automat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7477"/>
+        <source>Slow-PC mode:</source>
+        <translation>Mod pentru calculatoare lente:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7486"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Un singur comutator pentru calculatoare vechi sau lente. Activează: grafica OpenGL (stabilă pe plăci video vechi, cere repornire), modul cu procesor redus, cel mult 4 fire FT, prioritate normală de proces, profil de decodificare pe procesor și ascunde implicit harta în direct și spectrul complet. Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3817"/>
+        <source>⚠ TX Watchdog is active and 'hard cap' below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ Supraveghetorul de emisie este activ și limita fermă de mai jos este oprită: limita de reîncercări de mai sus este IGNORATĂ până la expirarea supraveghetorului.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3849"/>
+        <source>When ON (default), the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Când este pornit (implicit), limita de reîncercări pe TX1/TX2 oprește apelul chiar dacă supraveghetorul de emisie este activ — numărul stabilit este o limită fermă reală.
+
+Când este oprit (comportamentul din 1.0.438 al proiectului de bază): supraveghetorul de emisie are prioritate și ignoră limita de reîncercări până la propria expirare, așa că un apel se poate repeta pe toată durata supraveghetorului (implicit 6 min).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="21"/>
+        <source>Settings</source>
+        <translation>Setări</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="520"/>
+        <source>Select AzEl directory</source>
+        <translation>Alege dosarul AzEl</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="520"/>
+        <source>Select save directory</source>
+        <translation>Alege dosarul de salvare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="532"/>
+        <source>Merge Working Frequencies</source>
+        <translation>Îmbină frecvențele de lucru</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="532"/>
+        <source>Load Working Frequencies</source>
+        <translation>Încarcă frecvențele de lucru</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="534"/>
+        <source>Frequency files (*.qrg *.qrg.json)</source>
+        <translation>Fișiere de frecvențe (*.qrg *.qrg.json)</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="534"/>
         <source>All files (*)</source>
         <translation>Toate fișierele (*)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="542"/>
+        <source>Save Working Frequencies</source>
+        <translation>Salvează frecvențele de lucru</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="731"/>
+        <source>Auto</source>
+        <translation>Auto</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1214"/>
+        <source>Transmitted Message</source>
+        <translation>Mesaj emis</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1215"/>
+        <source>My Callsign</source>
+        <translation>Indicativul meu</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1216"/>
@@ -4889,14 +5185,144 @@ Adaugă din coadă</translation>
         <translation>Locator nou</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1226"/>
+        <source>New Callsign on Band</source>
+        <translation>Indicativ nou în bandă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1227"/>
+        <source>New Callsign</source>
+        <translation>Indicativ nou</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1229"/>
+        <source>CQ in Message</source>
+        <translation>CQ în mesaj</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1230"/>
+        <source>DX Entity</source>
+        <translation>Entitate DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1231"/>
+        <source>73 / RR73</source>
+        <translation>73 / RR73</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1232"/>
+        <source>B4 (Worked)</source>
+        <translation>B4 (lucrat)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1233"/>
+        <source>Normal decodes</source>
+        <translation>Decodificări normale</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1500"/>
+        <source>Changes are applied immediately where supported.</source>
+        <translation>Modificările se aplică imediat acolo unde este posibil.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1516"/>
         <source>Close</source>
         <translation>Închide</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Station</source>
+        <translation>Stație</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Radio</source>
+        <translation>Aparat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Audio</source>
+        <translation>Audio</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>TX</source>
+        <translation>Emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Display</source>
+        <translation>Afișare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Decode</source>
+        <translation>Decodificare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Reporting</source>
+        <translation>Raportare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Colors</source>
+        <translation>Culori</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Advanced</source>
+        <translation>Avansat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Alerts</source>
+        <translation>Avertizări</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
         <source>Filters</source>
         <translation>Filtre</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1258"/>
+        <source>Choose Decoded Font</source>
+        <translation>Alege caracterul textului decodificat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1258"/>
+        <source>Choose Font</source>
+        <translation>Alege caracterul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1266"/>
+        <source>Search:</source>
+        <translation>Caută:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1276"/>
+        <source>filter by name</source>
+        <translation>filtrează după nume</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
+        <source>Monospaced fonts:</source>
+        <translation>Caractere cu lățime fixă:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1292"/>
+        <source>Fonts:</source>
+        <translation>Caractere:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1340"/>
+        <source>Selected:</source>
+        <translation>Ales:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1350"/>
+        <source>Size:</source>
+        <translation>Dimensiune:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1413"/>
@@ -4909,6 +5335,196 @@ Adaugă din coadă</translation>
         <translation>Aplică</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Frequencies</source>
+        <translation>Frecvențe</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>UI Buttons</source>
+        <translation>Butoanele interfeței</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2077"/>
+        <source>Search radio, model or brand...</source>
+        <translation>Caută aparat, model sau marcă...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1683"/>
+        <source>STATION INFO</source>
+        <translation>DATELE STAȚIEI</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1686"/>
+        <source>Station Name:</source>
+        <translation>Numele stației:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4843"/>
+        <source>Choose</source>
+        <translation>Alege</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4353"/>
+        <source>2x Tone Spacing:</source>
+        <translation>Spațiere între tonuri 2x:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5747"/>
+        <source>4-digit Grids:</source>
+        <translation>Locatoare de 4 caractere:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4367"/>
+        <source>4x Tone Spacing:</source>
+        <translation>Spațiere între tonuri 4x:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6198"/>
+        <source>ADIF TCP</source>
+        <translation>ADIF TCP</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5029"/>
+        <source>ALIGNMENT</source>
+        <translation>ALINIERE</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8289"/>
+        <source>ALWAYS PASS</source>
+        <translation>TRECE ÎNTOTDEAUNA</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5376"/>
+        <source>AP Decode:</source>
+        <translation>Decodificare AP:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5572"/>
+        <source>API Key:</source>
+        <translation>Cheie API:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5561"/>
+        <source>API URL:</source>
+        <translation>Adresă API:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8022"/>
+        <source>AUDIO ALERTS</source>
+        <translation>AVERTIZĂRI SONORE</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2924"/>
+        <source>AUDIO DEVICES</source>
+        <translation>DISPOZITIVE AUDIO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3297"/>
+        <source>AUTO SEQUENCE</source>
+        <translation>SECVENȚIERE AUTOMATĂ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="6170"/>
+        <source>Accept UDP:</source>
+        <translation>Acceptă UDP:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5874"/>
+        <source>Access token:</source>
+        <translation>Jeton de acces:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7710"/>
+        <source>Activity:</source>
+        <translation>Activitate:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5264"/>
+        <source>Aggressive:</source>
+        <translation>Agresiv:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8025"/>
+        <source>Alerts Enabled:</source>
+        <translation>Avertizări active:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5049"/>
+        <source>Align Steps 2:</source>
+        <translation>Pași de aliniere 2:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5039"/>
+        <source>Align Steps:</source>
+        <translation>Pași de aliniere:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5032"/>
+        <source>Align:</source>
+        <translation>Aliniere:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="5975"/>
+        <source>All interfaces</source>
+        <translation>Toate interfețele</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3228"/>
+        <source>Allow TX QSY:</source>
+        <translation>Permite QSY la emisie:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="7628"/>
+        <source>Alt Erase Btn:</source>
+        <translation>Buton Șterge alternativ:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4388"/>
+        <source>Alt F1-F6 Bind:</source>
+        <translation>Asociere Alt F1-F6:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8332"/>
+        <source>Always Pass 10:</source>
+        <translation>Trece întotdeauna 10:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8336"/>
+        <source>Always Pass 11:</source>
+        <translation>Trece întotdeauna 11:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8339"/>
+        <source>Always Pass 12:</source>
+        <translation>Trece întotdeauna 12:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="8301"/>
+        <source>Always Pass 1:</source>
+        <translation>Trece întotdeauna 1:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2199"/>
+        <source>Refresh serial ports</source>
+        <translation>Reîmprospătează porturile seriale</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2299"/>
+        <source>HRD Radio:</source>
+        <translation>Aparat HRD:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2308"/>
+        <source>Strict match (abort if configured radio is not current in HRD)</source>
+        <translation>Potrivire strictă (renunță dacă aparatul configurat nu este cel curent în HRD)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="2737"/>
+        <source>Connecting...</source>
+        <translation>Se conectează...</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3084"/>
         <source>Auto RX level active</source>
         <translation>Nivel de recepție automat activ</translation>
@@ -4917,6 +5533,362 @@ Adaugă din coadă</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3085"/>
         <source>Auto RX level disabled</source>
         <translation>Nivel de recepție automat dezactivat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3381"/>
+        <source>Resume QSO on partner reply:</source>
+        <translation>Reia QSO-ul la răspunsul partenerului:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3443"/>
+        <source>FT2 UTILITY</source>
+        <translation>UTILITARE FT2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3448"/>
+        <source>FT2: signoff retries (73/RR73):</source>
+        <translation>FT2: repetări de încheiere (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3469"/>
+        <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner's ack before logging and closing.
+
+Default: 4 (~28s).
+
+Lower = closes earlier (less 'stuck' on the same station).
+Higher = more patient with weak/QSB partners.
+
+Doesn't affect FT8/FT4.</source>
+        <translation>De câte ori se repetă 73/RR73 final în FT2, așteptând confirmarea partenerului înainte de a înregistra și a încheia.
+
+Implicit: 4 (circa 28 s).
+
+Mai puțin = se încheie mai devreme (rămâi mai puțin blocat pe aceeași stație).
+Mai mult = mai multă răbdare cu partenerii slabi sau cu QSB.
+
+Nu afectează FT8/FT4.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3474"/>
+        <source>FT4: signoff retries (73/RR73):</source>
+        <translation>FT4: repetări de încheiere (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3495"/>
+        <source>How many times to repeat the final 73/RR73 in FT4.
+
+Default: 4 (~30s).
+
+Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
+
+Doesn't affect FT2/FT8.</source>
+        <translation>De câte ori se repetă 73/RR73 final în FT4.
+
+Implicit: 4 (circa 30 s).
+
+Crește la 6-8 pentru parteneri slabi sau cu QSB (înlocuiește vechile adaosuri automate pentru semnale slabe).
+
+Nu afectează FT2/FT8.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3500"/>
+        <source>FT8: signoff retries (73/RR73):</source>
+        <translation>FT8: repetări de încheiere (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3521"/>
+        <source>How many times to repeat the final 73/RR73 in FT8.
+
+Default: 3 (~45s).
+
+Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
+
+Doesn't affect FT2/FT4.</source>
+        <translation>De câte ori se repetă 73/RR73 final în FT8.
+
+Implicit: 3 (circa 45 s).
+
+Crește la 6-8 pentru parteneri slabi sau cu QSB (înlocuiește vechile adaosuri automate pentru semnale slabe).
+
+Nu afectează FT2/FT4.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3652"/>
+        <source>Immediate TX on click (1.0.283 style):</source>
+        <translation>Emisie imediată la clic (stil 1.0.283):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3674"/>
+        <source>Restores the 'TX starts IMMEDIATELY on double-click' behaviour of 1.0.283.
+
+• FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
+• FT8/FT4: raises the clickable window cap to d3CapMs (~11s on FT8, 5.6s on FT4) = real 1.0.283 behaviour
+
+Default: OFF (= safe upstream behaviour).
+
+Enable if it bothers you to wait 1 cycle after the click.</source>
+        <translation>Readuce comportamentul „emisia pornește IMEDIAT la dublu clic” din 1.0.283.
+
+• FT2: relaxează bariera de perioadă (TX1 pornit prin clic nu mai așteaptă intervalul următor)
+• FT8/FT4: ridică limita ferestrei de clic la d3CapMs (circa 11 s pe FT8, 5,6 s pe FT4) = comportamentul real din 1.0.283
+
+Implicit: oprit (= comportamentul prudent al proiectului de bază).
+
+Activează-l dacă te deranjează să aștepți un ciclu după clic.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3706"/>
+        <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
+        <translation>FT8: secvențe rapide (stil WSJT-X/JTDX):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3728"/>
+        <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
+
+Two changes:
+  (1) Boundary grace 1200ms → 400ms = TX starts ~800ms earlier after the slot boundary
+  (2) onFt8DecodeReady accepts late decodes within d3CapMs (~11s) instead of dropping the slot = no more '15s extra after the partner's reply'
+
+SAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety &gt; reactivity on loaded PCs).
+
+Default: OFF (= conservative upstream behaviour, max decode reliability).</source>
+        <translation>Reduce așteptările secvenței FT8 pentru cine preferă reactivitatea în stil WSJT-X/JTDX.
+
+Două schimbări:
+  (1) Toleranța la limita intervalului 1200 ms → 400 ms = emisia pornește cu circa 800 ms mai devreme după limita intervalului
+  (2) onFt8DecodeReady acceptă decodificările întârziate în limita d3CapMs (circa 11 s) în loc să piardă intervalul = gata cu cele 15 s în plus după răspunsul partenerului
+
+SIGURANȚĂ: la încărcare mare a procesorului, limitarea existentă impune o toleranță de cel puțin 900 ms (siguranța înaintea reactivității pe calculatoare încărcate).
+
+Implicit: oprit (= comportamentul prudent al proiectului de bază, fiabilitate maximă la decodificare).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3899"/>
+        <source>Conservative FT2 (weak-signal mode):</source>
+        <translation>FT2 prudent (mod pentru semnale slabe):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3920"/>
+        <source>Anti-QSB tuning:
+  • Ghost filter -24 dB instead of -22
+  • Retry cap extended SNR-adaptive (+2..+4 extra)
+  • Same-step wait relaxed for weak partners
+
+Default: OFF — enable it if you have weak DX partners or marginal propagation.</source>
+        <translation>Reglaje împotriva QSB:
+  • Filtrul de decodificări fantomă la -24 dB în loc de -22
+  • Limita de reîncercări extinsă în funcție de raportul semnal/zgomot (+2..+4 în plus)
+  • Așteptarea în același pas relaxată pentru partenerii slabi
+
+Implicit: oprit — activează-l dacă ai parteneri DX slabi sau propagare la limită.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3925"/>
+        <source>FT2: full decode in AutoCQ:</source>
+        <translation>FT2: decodificare completă în AutoCQ:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3946"/>
+        <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
+
+Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
+
+Default: OFF.</source>
+        <translation>Cât timp cheamă CQ (AutoCQ), păstrează adâncimea de decodificare la maxim (OSD + a patra trecere de scădere + mediere pentru semnale slabe) în loc să o reducă la 2.
+
+Ajută să auzi stațiile slabe care răspund. Oricum se reduce automat la încărcare mare a procesorului.
+
+Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3951"/>
+        <source>FT2: close strong partners earlier:</source>
+        <translation>FT2: încheie mai devreme cu partenerii puternici:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3972"/>
+        <source>If a STRONG partner (SNR &gt; 0 dB) doesn't send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
+
+Weak partners keep the extra anti-QSB repetitions.
+
+Default: OFF.</source>
+        <translation>Dacă un partener PUTERNIC (raport semnal/zgomot peste 0 dB) nu trimite 73 final, reduce repetările RR73 de la 8 la 4 (circa 15 s în loc de 30 s) înainte de a înregistra și a reveni la CQ.
+
+Partenerii slabi păstrează repetările suplimentare împotriva QSB.
+
+Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3977"/>
+        <source>FT2: adaptive decode (CPU saver):</source>
+        <translation>FT2: decodificare adaptivă (economisește procesorul):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3998"/>
+        <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn't re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
+
+When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
+
+Useful mainly on modest PCs.
+
+Default: OFF.</source>
+        <translation>În modul de simplă ascultare (fără CQ și fără QSO în curs), rărește redecodificarea asincronă de la 100 ms la circa 350 ms: nu mai redecodifică sunet suprapus în proporție de 95% → economisește procesor și reduce vârfurile care pot micșora adâncimea de decodificare.
+
+Când se așteaptă un răspuns (AutoCQ sau QSO) rămâne la cadență completă. Nu se pierde nicio decodificare.
+
+Util mai ales pe calculatoare modeste.
+
+Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4148"/>
+        <source>FT2 partner-memory (anti-QSB):</source>
+        <translation>Memoria partenerului FT2 (împotriva QSB):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4170"/>
+        <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
+
+Requires Conservative FT2 active.
+
+Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.</source>
+        <translation>Păstrează starea partenerului (indicativ, numărul TX, stadiul QSO și raportul semnal/zgomot) timp de 30 de secunde: dacă partenerul dispare din cauza QSB și reapare în 30 s, se reia stadiul QSO în loc să se pornească iar de la TX1.
+
+Cere modul FT2 prudent activ.
+
+Implicit: oprit (opțional după revenirea din 1.0.186 — condiție strictă și consemnare [FT2WS-F]). Se dezactivează automat dacă modul prudent este oprit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4175"/>
+        <source>FT2 TX2 re-send on stall:</source>
+        <translation>FT2: retrimite TX2 la blocaj:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4197"/>
+        <source>If you're in TX3 (R+report) and the partner doesn't reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
+
+Helps with weak partners that didn't ack the first time. Capped to 1 re-send per QSO (no loops).
+
+Requires Conservative FT2 active. Default: ON under Conservative.</source>
+        <translation>Dacă ești în TX3 (R + raport) și partenerul nu răspunde timp de două perioade (circa 7,5 s), retrimite o dată TX2 (raportul de semnal) înainte de a părăsi QSO-ul.
+
+Ajută cu partenerii slabi care nu au confirmat prima oară. Limitat la o singură retrimitere pe QSO (fără bucle).
+
+Cere modul FT2 prudent activ. Implicit: pornit sub modul prudent.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4205"/>
+        <source>Smooth decode flow:</source>
+        <translation>Flux de decodificare fluid:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4419"/>
+        <source>ASPETTO / TEMA</source>
+        <translation>ASPECT / TEMĂ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4422"/>
+        <source>Theme:</source>
+        <translation>Temă:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4547"/>
+        <source>UI Scale:</source>
+        <translation>Scara interfeței:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4579"/>
+        <source>↻ restart to apply</source>
+        <translation>↻ repornește pentru a aplica</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4586"/>
+        <source>OPERATING BANDS</source>
+        <translation>BENZI DE LUCRU</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4589"/>
+        <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
+        <translation>Clic pentru a arăta sau ascunde benzile în selector. Benzile deselectate dispar din bara HF / V-U / SHF.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4618"/>
+        <source>visible (click to hide)</source>
+        <translation>vizibilă (clic pentru a ascunde)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4618"/>
+        <source>hidden (click to show)</source>
+        <translation>ascunsă (clic pentru a arăta)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4627"/>
+        <source>UI — PERFORMANCE</source>
+        <translation>INTERFAȚĂ — PERFORMANȚĂ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4631"/>
+        <source>UI Quality preset:</source>
+        <translation>Presetare de calitate a interfeței:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4648"/>
+        <source>Low = no effects (modest PCs).
+Medium = light animations.
+High = all available animations.
+
+Default: Medium.</source>
+        <translation>Scăzută = fără efecte (calculatoare modeste).
+Medie = animații ușoare.
+Înaltă = toate animațiile disponibile.
+
+Implicit: medie.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4672"/>
+        <source>UI Style (restart):</source>
+        <translation>Stilul interfeței (cere repornire):</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4706"/>
+        <source>Frameless pop-out:</source>
+        <translation>Ferestre desprinse fără ramă:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4719"/>
+        <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
+
+Windows 11 aesthetic.
+
+Default: OFF. Requires closing and reopening the window.</source>
+        <translation>Ferestrele desprinse (cascada, perioada 1, DecoSync) rămân fără ramă, cu deplasare de pe margine.
+
+Aspect în stil Windows 11.
+
+Implicit: oprit. Cere închiderea și redeschiderea ferestrei.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4724"/>
+        <source>Detach Full Spectrum:</source>
+        <translation>Desprinde spectrul complet:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4737"/>
+        <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
+
+Reduces stalls on modest PCs.
+
+Default: OFF. Requires restart.</source>
+        <translation>La pornire, deschide spectrul complet (activitatea din bandă) într-o fereastră separată, izolând firul de desenare al ferestrei principale de animațiile listei.
+
+Reduce blocajele pe calculatoare modeste.
+
+Implicit: oprit. Cere repornire.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4756"/>
+        <source>Spectrum FPS cap:</source>
+        <translation>Limita de cadre a spectrului:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6265"/>
@@ -5025,6 +5997,14 @@ Adaugă din coadă</translation>
     </message>
 </context>
 <context>
+    <name>SettingsTab0</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab0.qml" line="148"/>
+        <source>STATION INFO</source>
+        <translation>DATELE STAȚIEI</translation>
+    </message>
+</context>
+<context>
     <name>SettingsTab1</name>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="210"/>
@@ -5052,13 +6032,174 @@ Adaugă din coadă</translation>
         <translation>Conectează</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="442"/>
+        <source>Search radio, model or brand...</source>
+        <translation>Caută aparat, model sau marcă...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="495"/>
+        <source>Management:</source>
+        <translation>Administrare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="515"/>
+        <source>Control:</source>
+        <translation>Control:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="535"/>
+        <source>Radio group:</source>
+        <translation>Grup de aparate:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="550"/>
+        <source>Automatic discovery</source>
+        <translation>Descoperire automată</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="576"/>
+        <source>First available radio</source>
+        <translation>Primul aparat disponibil</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="587"/>
+        <source>Ownership:</source>
+        <translation>Proprietate:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="595"/>
+        <source>Request control automatically</source>
+        <translation>Cere controlul automat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="681"/>
+        <source>Refresh serial ports</source>
+        <translation>Reîmprospătează porturile seriale</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="781"/>
+        <source>HRD Radio:</source>
+        <translation>Aparat HRD:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="790"/>
+        <source>Strict match (abort if configured radio is not current in HRD)</source>
+        <translation>Potrivire strictă (renunță dacă aparatul configurat nu este cel curent în HRD)</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1133"/>
         <source>Mode:</source>
         <translation>Mod:</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab1.qml" line="1220"/>
+        <source>Connecting...</source>
+        <translation>Se conectează...</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab10</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="61"/>
+        <source>AUDIO ALERTS</source>
+        <translation>AVERTIZĂRI SONORE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab10.qml" line="64"/>
+        <source>Alerts Enabled:</source>
+        <translation>Avertizări active:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab11</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="172"/>
+        <source>ALWAYS PASS</source>
+        <translation>TRECE ÎNTOTDEAUNA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="184"/>
+        <source>Always Pass 1:</source>
+        <translation>Trece întotdeauna 1:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="215"/>
+        <source>Always Pass 10:</source>
+        <translation>Trece întotdeauna 10:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="219"/>
+        <source>Always Pass 11:</source>
+        <translation>Trece întotdeauna 11:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="222"/>
+        <source>Always Pass 12:</source>
+        <translation>Trece întotdeauna 12:</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab13</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="181"/>
+        <source>Clear global lookup cache</source>
+        <translation>Golește memoria globală a căutărilor</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="192"/>
+        <source>LOCAL DATABASES</source>
+        <translation>BAZE DE DATE LOCALE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="263"/>
+        <source>No records</source>
+        <translation>Nicio înregistrare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="271"/>
+        <source>Never updated</source>
+        <translation>Niciodată actualizat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="281"/>
+        <source>Last update: %1</source>
+        <translation>Ultima actualizare: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="296"/>
+        <source>File: %1</source>
+        <translation>Fișier: %1</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="297"/>
+        <source>File not found</source>
+        <translation>Fișier negăsit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="315"/>
+        <source>Optional local file path</source>
+        <translation>Cale locală de fișier, opțională</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="324"/>
+        <source>Choose</source>
+        <translation>Alege</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="337"/>
+        <source>Import callsign database</source>
+        <translation>Importă baza de date de indicative</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="337"/>
+        <source>Databases and CSV (*)</source>
+        <translation>Baze de date și CSV (*)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="343"/>
+        <source>Import</source>
+        <translation>Importă</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab13.qml" line="352"/>
         <source>ADIF files (*.adi *.adif)</source>
@@ -5072,6 +6213,71 @@ Adaugă din coadă</translation>
 </context>
 <context>
     <name>SettingsTab2</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="61"/>
+        <source>AUDIO DEVICES</source>
+        <translation>DISPOZITIVE AUDIO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="202"/>
+        <source>Experimental function under development</source>
+        <translation>Funcție experimentală, în dezvoltare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="366"/>
+        <source>Use receiver IF output:</source>
+        <translation>Folosește ieșirea de frecvență intermediară a receptorului:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="378"/>
+        <source>Keeps the radio dial frequency for display, logging and decoding while the RTL-SDR is tuned to the receiver's fixed IF output.</source>
+        <translation>Păstrează frecvența afișată a aparatului pentru afișare, înregistrare și decodificare, în timp ce RTL-SDR-ul este acordat pe ieșirea de frecvență intermediară fixă a receptorului.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="381"/>
+        <source>IF frequency (Hz):</source>
+        <translation>Frecvența intermediară (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="397"/>
+        <source>IF sideband:</source>
+        <translation>Banda laterală a frecvenței intermediare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="401"/>
+        <source>Automatic</source>
+        <translation>Automat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="416"/>
+        <source>Automatic uses LSB only with the LSB demodulator; weak-signal modes such as FT8 use USB.</source>
+        <translation>Modul automat folosește LSB doar cu demodulatorul LSB; modurile pentru semnale slabe, precum FT8, folosesc USB.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="419"/>
+        <source>USB shift (Hz):</source>
+        <translation>Deplasare USB (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="435"/>
+        <source>LSB shift (Hz):</source>
+        <translation>Deplasare LSB (Hz):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="451"/>
+        <source>Invert IF spectrum:</source>
+        <translation>Inversează spectrul frecvenței intermediare:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="463"/>
+        <source>Enable this when signals move in the opposite direction on the panadapter because the receiver's IF mixer reverses the spectrum.</source>
+        <translation>Activează această opțiune când semnalele se mișcă în sens invers pe panadaptor, pentru că mixerul de frecvență intermediară al receptorului inversează spectrul.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="468"/>
+        <source>IF mode: Decodium keeps the radio dial frequency on screen and tunes the RTL-SDR to IF plus the selected USB/LSB shift.</source>
+        <translation>Mod cu frecvență intermediară: Decodium păstrează pe ecran frecvența aparatului și acordează RTL-SDR-ul pe frecvența intermediară plus deplasarea USB/LSB aleasă.</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="727"/>
         <source>Auto RX level active</source>
@@ -5091,6 +6297,277 @@ Adaugă din coadă</translation>
 <context>
     <name>SettingsTab3</name>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="109"/>
+        <source>Allow TX QSY:</source>
+        <translation>Permite QSY la emisie:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="178"/>
+        <source>AUTO SEQUENCE</source>
+        <translation>SECVENȚIERE AUTOMATĂ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="262"/>
+        <source>Resume QSO on partner reply:</source>
+        <translation>Reia QSO-ul la răspunsul partenerului:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="324"/>
+        <source>FT2 UTILITY</source>
+        <translation>UTILITARE FT2</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="329"/>
+        <source>FT2: signoff retries (73/RR73):</source>
+        <translation>FT2: repetări de încheiere (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="350"/>
+        <source>How many times to repeat the final 73/RR73 in FT2 waiting for the partner's ack before logging and closing.
+
+Default: 4 (~28s).
+
+Lower = closes earlier (less 'stuck' on the same station).
+Higher = more patient with weak/QSB partners.
+
+Doesn't affect FT8/FT4.</source>
+        <translation>De câte ori se repetă 73/RR73 final în FT2, așteptând confirmarea partenerului înainte de a înregistra și a încheia.
+
+Implicit: 4 (circa 28 s).
+
+Mai puțin = se încheie mai devreme (rămâi mai puțin blocat pe aceeași stație).
+Mai mult = mai multă răbdare cu partenerii slabi sau cu QSB.
+
+Nu afectează FT8/FT4.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="355"/>
+        <source>FT4: signoff retries (73/RR73):</source>
+        <translation>FT4: repetări de încheiere (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="376"/>
+        <source>How many times to repeat the final 73/RR73 in FT4.
+
+Default: 4 (~30s).
+
+Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
+
+Doesn't affect FT2/FT8.</source>
+        <translation>De câte ori se repetă 73/RR73 final în FT4.
+
+Implicit: 4 (circa 30 s).
+
+Crește la 6-8 pentru parteneri slabi sau cu QSB (înlocuiește vechile adaosuri automate pentru semnale slabe).
+
+Nu afectează FT2/FT8.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="381"/>
+        <source>FT8: signoff retries (73/RR73):</source>
+        <translation>FT8: repetări de încheiere (73/RR73):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="402"/>
+        <source>How many times to repeat the final 73/RR73 in FT8.
+
+Default: 3 (~45s).
+
+Increase to 6-8 for weak/QSB partners (replaces the former automatic weak/conservative extras).
+
+Doesn't affect FT2/FT4.</source>
+        <translation>De câte ori se repetă 73/RR73 final în FT8.
+
+Implicit: 3 (circa 45 s).
+
+Crește la 6-8 pentru parteneri slabi sau cu QSB (înlocuiește vechile adaosuri automate pentru semnale slabe).
+
+Nu afectează FT2/FT4.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="533"/>
+        <source>Immediate TX on click (1.0.283 style):</source>
+        <translation>Emisie imediată la clic (stil 1.0.283):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="555"/>
+        <source>Restores the 'TX starts IMMEDIATELY on double-click' behaviour of 1.0.283.
+
+• FT2: relaxes the period-gate (TX1 from click bypasses waiting for the next slot)
+• FT8/FT4: raises the clickable window cap to d3CapMs (~11s on FT8, 5.6s on FT4) = real 1.0.283 behaviour
+
+Default: OFF (= safe upstream behaviour).
+
+Enable if it bothers you to wait 1 cycle after the click.</source>
+        <translation>Readuce comportamentul „emisia pornește IMEDIAT la dublu clic” din 1.0.283.
+
+• FT2: relaxează bariera de perioadă (TX1 pornit prin clic nu mai așteaptă intervalul următor)
+• FT8/FT4: ridică limita ferestrei de clic la d3CapMs (circa 11 s pe FT8, 5,6 s pe FT4) = comportamentul real din 1.0.283
+
+Implicit: oprit (= comportamentul prudent al proiectului de bază).
+
+Activează-l dacă te deranjează să aștepți un ciclu după clic.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="587"/>
+        <source>FT8: fast sequences (WSJT-X/JTDX style):</source>
+        <translation>FT8: secvențe rapide (stil WSJT-X/JTDX):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="609"/>
+        <source>Reduces FT8 sequence waits for users who prefer WSJT-X/JTDX-style reactivity.
+
+Two changes:
+  (1) Boundary grace 1200ms → 400ms = TX starts ~800ms earlier after the slot boundary
+  (2) onFt8DecodeReady accepts late decodes within d3CapMs (~11s) instead of dropping the slot = no more '15s extra after the partner's reply'
+
+SAFETY: under CPU pressure the pre-existing clamp forces grace ≥900ms (safety &gt; reactivity on loaded PCs).
+
+Default: OFF (= conservative upstream behaviour, max decode reliability).</source>
+        <translation>Reduce așteptările secvenței FT8 pentru cine preferă reactivitatea în stil WSJT-X/JTDX.
+
+Două schimbări:
+  (1) Toleranța la limita intervalului 1200 ms → 400 ms = emisia pornește cu circa 800 ms mai devreme după limita intervalului
+  (2) onFt8DecodeReady acceptă decodificările întârziate în limita d3CapMs (circa 11 s) în loc să piardă intervalul = gata cu cele 15 s în plus după răspunsul partenerului
+
+SIGURANȚĂ: la încărcare mare a procesorului, limitarea existentă impune o toleranță de cel puțin 900 ms (siguranța înaintea reactivității pe calculatoare încărcate).
+
+Implicit: oprit (= comportamentul prudent al proiectului de bază, fiabilitate maximă la decodificare).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="698"/>
+        <source>⚠ TX Watchdog is active and 'hard cap' below is OFF: the Caller-retries limit above is IGNORED until the watchdog timeout.</source>
+        <translation>⚠ Supraveghetorul de emisie este activ și limita fermă de mai jos este oprită: limita de reîncercări de mai sus este IGNORATĂ până la expirarea supraveghetorului.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="730"/>
+        <source>When ON (default), the 'Caller retries' cap on TX1/TX2 halts the call even if the TX Watchdog is enabled — the number you set is a real hard limit.
+
+When OFF (upstream 1.0.438 behaviour): the TX Watchdog takes priority and ignores the Caller-retries cap until its own timeout, so a call can repeat for the whole watchdog duration (default 6 min).</source>
+        <translation>Când este pornit (implicit), limita de reîncercări pe TX1/TX2 oprește apelul chiar dacă supraveghetorul de emisie este activ — numărul stabilit este o limită fermă reală.
+
+Când este oprit (comportamentul din 1.0.438 al proiectului de bază): supraveghetorul de emisie are prioritate și ignoră limita de reîncercări până la propria expirare, așa că un apel se poate repeta pe toată durata supraveghetorului (implicit 6 min).</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="792"/>
+        <source>Conservative FT2 (weak-signal mode):</source>
+        <translation>FT2 prudent (mod pentru semnale slabe):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="813"/>
+        <source>Anti-QSB tuning:
+  • Ghost filter -24 dB instead of -22
+  • Retry cap extended SNR-adaptive (+2..+4 extra)
+  • Same-step wait relaxed for weak partners
+
+Default: OFF — enable it if you have weak DX partners or marginal propagation.</source>
+        <translation>Reglaje împotriva QSB:
+  • Filtrul de decodificări fantomă la -24 dB în loc de -22
+  • Limita de reîncercări extinsă în funcție de raportul semnal/zgomot (+2..+4 în plus)
+  • Așteptarea în același pas relaxată pentru partenerii slabi
+
+Implicit: oprit — activează-l dacă ai parteneri DX slabi sau propagare la limită.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="818"/>
+        <source>FT2: full decode in AutoCQ:</source>
+        <translation>FT2: decodificare completă în AutoCQ:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="839"/>
+        <source>While calling CQ (AutoCQ), keeps the decode depth at full (OSD + 4th subtraction pass + weak-signal averaging) instead of reducing it to 2.
+
+Helps you hear weak responders. Reduces automatically under CPU pressure anyway.
+
+Default: OFF.</source>
+        <translation>Cât timp cheamă CQ (AutoCQ), păstrează adâncimea de decodificare la maxim (OSD + a patra trecere de scădere + mediere pentru semnale slabe) în loc să o reducă la 2.
+
+Ajută să auzi stațiile slabe care răspund. Oricum se reduce automat la încărcare mare a procesorului.
+
+Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="844"/>
+        <source>FT2: close strong partners earlier:</source>
+        <translation>FT2: încheie mai devreme cu partenerii puternici:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="865"/>
+        <source>If a STRONG partner (SNR &gt; 0 dB) doesn't send the final 73, reduces RR73 repetitions from 8 to 4 (~15s instead of 30s) before logging and returning to CQ.
+
+Weak partners keep the extra anti-QSB repetitions.
+
+Default: OFF.</source>
+        <translation>Dacă un partener PUTERNIC (raport semnal/zgomot peste 0 dB) nu trimite 73 final, reduce repetările RR73 de la 8 la 4 (circa 15 s în loc de 30 s) înainte de a înregistra și a reveni la CQ.
+
+Partenerii slabi păstrează repetările suplimentare împotriva QSB.
+
+Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="870"/>
+        <source>FT2: adaptive decode (CPU saver):</source>
+        <translation>FT2: decodificare adaptivă (economisește procesorul):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="891"/>
+        <source>In LISTEN-ONLY mode (not calling CQ nor in a QSO), thins async re-decode from 100ms to ~350ms: doesn't re-decode 95%-overlapping audio → saves CPU and reduces the peaks that may lower decode depth.
+
+When waiting for a reply (AutoCQ/QSO) it stays at full cadence. Loses no decodes.
+
+Useful mainly on modest PCs.
+
+Default: OFF.</source>
+        <translation>În modul de simplă ascultare (fără CQ și fără QSO în curs), rărește redecodificarea asincronă de la 100 ms la circa 350 ms: nu mai redecodifică sunet suprapus în proporție de 95% → economisește procesor și reduce vârfurile care pot micșora adâncimea de decodificare.
+
+Când se așteaptă un răspuns (AutoCQ sau QSO) rămâne la cadență completă. Nu se pierde nicio decodificare.
+
+Util mai ales pe calculatoare modeste.
+
+Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1041"/>
+        <source>FT2 partner-memory (anti-QSB):</source>
+        <translation>Memoria partenerului FT2 (împotriva QSB):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1063"/>
+        <source>Caches partner state (callsign + TX num + qsoProgress + SNR) for 30 seconds: if the partner disappears for QSB and reappears within 30s, restores the qsoProgress instead of restarting from TX1.
+
+Requires Conservative FT2 active.
+
+Default: OFF (opt-in after the 1.0.186 revert — strict gate + [FT2WS-F] log). Automatically disabled if Conservative is OFF.</source>
+        <translation>Păstrează starea partenerului (indicativ, numărul TX, stadiul QSO și raportul semnal/zgomot) timp de 30 de secunde: dacă partenerul dispare din cauza QSB și reapare în 30 s, se reia stadiul QSO în loc să se pornească iar de la TX1.
+
+Cere modul FT2 prudent activ.
+
+Implicit: oprit (opțional după revenirea din 1.0.186 — condiție strictă și consemnare [FT2WS-F]). Se dezactivează automat dacă modul prudent este oprit.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1068"/>
+        <source>FT2 TX2 re-send on stall:</source>
+        <translation>FT2: retrimite TX2 la blocaj:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1090"/>
+        <source>If you're in TX3 (R+report) and the partner doesn't reply for 2 periods (~7.5s), re-sends TX2 (signal report) once before leaving the QSO.
+
+Helps with weak partners that didn't ack the first time. Capped to 1 re-send per QSO (no loops).
+
+Requires Conservative FT2 active. Default: ON under Conservative.</source>
+        <translation>Dacă ești în TX3 (R + raport) și partenerul nu răspunde timp de două perioade (circa 7,5 s), retrimite o dată TX2 (raportul de semnal) înainte de a părăsi QSO-ul.
+
+Ajută cu partenerii slabi care nu au confirmat prima oară. Limitat la o singură retrimitere pe QSO (fără bucle).
+
+Cere modul FT2 prudent activ. Implicit: pornit sub modul prudent.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1098"/>
+        <source>Smooth decode flow:</source>
+        <translation>Flux de decodificare fluid:</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
         <source>Off</source>
         <translation>Oprit</translation>
@@ -5105,13 +6582,175 @@ Adaugă din coadă</translation>
         <source>Count</source>
         <translation>Număr</translation>
     </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1246"/>
+        <source>2x Tone Spacing:</source>
+        <translation>Spațiere între tonuri 2x:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1260"/>
+        <source>4x Tone Spacing:</source>
+        <translation>Spațiere între tonuri 4x:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1281"/>
+        <source>Alt F1-F6 Bind:</source>
+        <translation>Asociere Alt F1-F6:</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab4</name>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="65"/>
+        <source>ASPETTO / TEMA</source>
+        <translation>ASPECT / TEMĂ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="68"/>
+        <source>Theme:</source>
+        <translation>Temă:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="193"/>
+        <source>UI Scale:</source>
+        <translation>Scara interfeței:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="225"/>
+        <source>↻ restart to apply</source>
+        <translation>↻ repornește pentru a aplica</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="232"/>
+        <source>OPERATING BANDS</source>
+        <translation>BENZI DE LUCRU</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="235"/>
+        <source>Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.</source>
+        <translation>Clic pentru a arăta sau ascunde benzile în selector. Benzile deselectate dispar din bara HF / V-U / SHF.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="264"/>
+        <source>visible (click to hide)</source>
+        <translation>vizibilă (clic pentru a ascunde)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="264"/>
+        <source>hidden (click to show)</source>
+        <translation>ascunsă (clic pentru a arăta)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="273"/>
+        <source>UI — PERFORMANCE</source>
+        <translation>INTERFAȚĂ — PERFORMANȚĂ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="277"/>
+        <source>UI Quality preset:</source>
+        <translation>Presetare de calitate a interfeței:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="294"/>
+        <source>Low = no effects (modest PCs).
+Medium = light animations.
+High = all available animations.
+
+Default: Medium.</source>
+        <translation>Scăzută = fără efecte (calculatoare modeste).
+Medie = animații ușoare.
+Înaltă = toate animațiile disponibile.
+
+Implicit: medie.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="322"/>
+        <source>UI Style (restart):</source>
+        <translation>Stilul interfeței (cere repornire):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="356"/>
+        <source>Frameless pop-out:</source>
+        <translation>Ferestre desprinse fără ramă:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="369"/>
+        <source>Pop-out windows (Waterfall, Period1, DecoSync) become frameless with drag via the border.
+
+Windows 11 aesthetic.
+
+Default: OFF. Requires closing and reopening the window.</source>
+        <translation>Ferestrele desprinse (cascada, perioada 1, DecoSync) rămân fără ramă, cu deplasare de pe margine.
+
+Aspect în stil Windows 11.
+
+Implicit: oprit. Cere închiderea și redeschiderea ferestrei.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="374"/>
+        <source>Detach Full Spectrum:</source>
+        <translation>Desprinde spectrul complet:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="387"/>
+        <source>At startup, opens Full Spectrum (Band Activity) in a separate window, isolating the Main render thread from ListView animations.
+
+Reduces stalls on modest PCs.
+
+Default: OFF. Requires restart.</source>
+        <translation>La pornire, deschide spectrul complet (activitatea din bandă) într-o fereastră separată, izolând firul de desenare al ferestrei principale de animațiile listei.
+
+Reduce blocajele pe calculatoare modeste.
+
+Implicit: oprit. Cere repornire.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="406"/>
+        <source>Spectrum FPS cap:</source>
+        <translation>Limita de cadre a spectrului:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="493"/>
+        <source>Choose</source>
+        <translation>Alege</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="500"/>
         <source>Reset</source>
         <translation>Resetează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="689"/>
+        <source>ALIGNMENT</source>
+        <translation>ALINIERE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="692"/>
+        <source>Align:</source>
+        <translation>Aliniere:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="699"/>
+        <source>Align Steps:</source>
+        <translation>Pași de aliniere:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="709"/>
+        <source>Align Steps 2:</source>
+        <translation>Pași de aliniere 2:</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab5</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="248"/>
+        <source>Aggressive:</source>
+        <translation>Agresiv:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="360"/>
+        <source>AP Decode:</source>
+        <translation>Decodificare AP:</translation>
     </message>
 </context>
 <context>
@@ -5135,6 +6774,46 @@ Adaugă din coadă</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="148"/>
         <source>Connect</source>
         <translation>Conectează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="205"/>
+        <source>API URL:</source>
+        <translation>Adresă API:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="216"/>
+        <source>API Key:</source>
+        <translation>Cheie API:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="391"/>
+        <source>4-digit Grids:</source>
+        <translation>Locatoare de 4 caractere:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="518"/>
+        <source>Access token:</source>
+        <translation>Jeton de acces:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="619"/>
+        <source>All interfaces</source>
+        <translation>Toate interfețele</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="862"/>
+        <source>Accept UDP:</source>
+        <translation>Acceptă UDP:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
+        <source>ADIF TCP</source>
+        <translation>ADIF TCP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="669"/>
+        <source>Decode</source>
+        <translation>Decodificare</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="670"/>
@@ -5210,6 +6889,26 @@ Adaugă din coadă</translation>
 </context>
 <context>
     <name>SettingsTab9</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="150"/>
+        <source>Slow-PC mode:</source>
+        <translation>Mod pentru calculatoare lente:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="159"/>
+        <source>One switch for old/slow PCs. Enables: OpenGL graphics (stable on old GPUs, needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
+        <translation>Un singur comutator pentru calculatoare vechi sau lente. Activează: grafica OpenGL (stabilă pe plăci video vechi, cere repornire), modul cu procesor redus, cel mult 4 fire FT, prioritate normală de proces, profil de decodificare pe procesor și ascunde implicit harta în direct și spectrul complet. Implicit: oprit.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="328"/>
+        <source>Alt Erase Btn:</source>
+        <translation>Buton Șterge alternativ:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="410"/>
+        <source>Activity:</source>
+        <translation>Activitate:</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab9.qml" line="511"/>
         <source>Sync Now</source>
@@ -5953,6 +7652,11 @@ Apasă MONITOR pentru a începe</translation>
 <context>
     <name>configuration_dialog</name>
     <message>
+        <location filename="../Configuration.ui" line="177"/>
+        <source>Display</source>
+        <translation>Afișare</translation>
+    </message>
+    <message>
         <location filename="../Configuration.ui" line="823"/>
         <source>Mode</source>
         <translation>Mod</translation>
@@ -5966,6 +7670,26 @@ Apasă MONITOR pentru a începe</translation>
         <location filename="../Configuration.ui" line="2028"/>
         <source>Location:</source>
         <translation>Locație:</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="2648"/>
+        <source>Frequencies</source>
+        <translation>Frecvențe</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="2860"/>
+        <source>Colors</source>
+        <translation>Culori</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="3215"/>
+        <source>Advanced</source>
+        <translation>Avansat</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="4319"/>
+        <source>Alerts</source>
+        <translation>Avertizări</translation>
     </message>
     <message>
         <location filename="../Configuration.ui" line="4410"/>
@@ -6386,6 +8110,45 @@ DXCC %4 · Locator %5 · WPX %6</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/CallsignLookupWindow.qml" line="144"/>
         <source>Club Log</source>
         <translation>Club Log</translation>
+    </message>
+</context>
+<context>
+    <name>CallsignIntelligenceService</name>
+    <message>
+        <source>Never updated</source>
+        <translation>Niciodată actualizat</translation>
+    </message>
+    <message>
+        <source>FCC ULS</source>
+        <translation>FCC ULS</translation>
+    </message>
+    <message>
+        <source>LoTW - User activity</source>
+        <translation>LoTW - activitatea utilizatorilor</translation>
+    </message>
+    <message>
+        <source>LoTW - Confirmations received</source>
+        <translation>LoTW - confirmări primite</translation>
+    </message>
+    <message>
+        <source>eQSL AG</source>
+        <translation>eQSL AG</translation>
+    </message>
+    <message>
+        <source>eQSL InBox - Confirmations received</source>
+        <translation>eQSL InBox - confirmări primite</translation>
+    </message>
+    <message>
+        <source>QRZ.com - Confirmations received</source>
+        <translation>QRZ.com - confirmări primite</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS</source>
+        <translation>Club Log OQRS</translation>
+    </message>
+    <message>
+        <source>DXCC cty.dat</source>
+        <translation>DXCC cty.dat</translation>
     </message>
 </context>
 <context>
