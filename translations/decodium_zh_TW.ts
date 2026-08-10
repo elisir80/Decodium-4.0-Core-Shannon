@@ -6875,6 +6875,22 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>MAX DIST</source>
         <translation>最遠距離</translation>
     </message>
+    <message>
+        <source>Import ADIF</source>
+        <translation>匯入 ADIF</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>ADIF 匯入完成</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>ADIF 匯入失敗</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>正在匯入 ADIF…</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -7091,6 +7107,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
         <source>Rcvd</source>
         <translation>接收</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>ADIF 匯入完成</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>ADIF 匯入失敗</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>正在匯入 ADIF…</translation>
     </message>
 </context>
 <context>
@@ -19523,6 +19551,10 @@ If unsure, use High.</source>
         <location filename="../qml/decodium/components/SettingsTab1.qml" line="866"/>
         <source>TCI RX gain:</source>
         <translation>TCI 接收增益：</translation>
+    </message>
+    <message>
+        <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
+        <translation>請以十六進位輸入電台的 CI-V 位址，範圍 0x00 到 0xFF。該位址會隨 CAT 設定一起儲存。</translation>
     </message>
 </context>
 <context>

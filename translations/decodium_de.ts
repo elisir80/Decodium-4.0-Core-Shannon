@@ -6879,6 +6879,22 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>MAX DIST</source>
         <translation>MAX. ENTF</translation>
     </message>
+    <message>
+        <source>Import ADIF</source>
+        <translation>ADIF importieren</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>ADIF-Import abgeschlossen</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>ADIF-Import fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>ADIF wird importiert …</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -7095,6 +7111,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
         <source>Rcvd</source>
         <translation>Rcvd</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>ADIF-Import abgeschlossen</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>ADIF-Import fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>ADIF wird importiert …</translation>
     </message>
 </context>
 <context>
@@ -19525,6 +19553,10 @@ Im Zweifel Hoch verwenden.</translation>
         <location filename="../qml/decodium/components/SettingsTab1.qml" line="866"/>
         <source>TCI RX gain:</source>
         <translation>TCI-RX-Verstärkung:</translation>
+    </message>
+    <message>
+        <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
+        <translation>Geben Sie die CI-V-Adresse des Funkgeräts hexadezimal ein, von 0x00 bis 0xFF. Die Adresse wird mit den CAT-Einstellungen gespeichert.</translation>
     </message>
 </context>
 <context>

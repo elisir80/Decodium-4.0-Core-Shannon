@@ -6876,6 +6876,22 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>MAX DIST</source>
         <translation>最長距離</translation>
     </message>
+    <message>
+        <source>Import ADIF</source>
+        <translation>ADIFを取り込む</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>ADIFの取り込みが完了しました</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>ADIFの取り込みに失敗しました</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>ADIFを取り込み中…</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -7092,6 +7108,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
         <source>Rcvd</source>
         <translation>受信</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>ADIFの取り込みが完了しました</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>ADIFの取り込みに失敗しました</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>ADIFを取り込み中…</translation>
     </message>
 </context>
 <context>
@@ -19523,6 +19551,10 @@ If unsure, use High.</source>
         <location filename="../qml/decodium/components/SettingsTab1.qml" line="866"/>
         <source>TCI RX gain:</source>
         <translation>TCI 受信ゲイン:</translation>
+    </message>
+    <message>
+        <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
+        <translation>無線機のCI-Vアドレスを16進数で入力してください（0x00〜0xFF）。アドレスはCAT設定と一緒に保存されます。</translation>
     </message>
 </context>
 <context>

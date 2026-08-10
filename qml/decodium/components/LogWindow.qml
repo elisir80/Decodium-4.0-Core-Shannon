@@ -774,7 +774,7 @@ Popup {
                     border.color: Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.5)
                     Behavior on color { ColorAnimation { duration: 150 } }
 
-                    Text { id: importLabel; anchors.centerIn: parent; text: qsTr("Importa ADIF"); font.pixelSize: 10; font.bold: true; color: importMA.enabled ? accentGreen : textSecondary }
+                    Text { id: importLabel; anchors.centerIn: parent; text: qsTr("Import ADIF"); font.pixelSize: 10; font.bold: true; color: importMA.enabled ? accentGreen : textSecondary }
                     MouseArea {
                         id: importMA; anchors.fill: parent; hoverEnabled: true
                         enabled: !(bridge && bridge.adifImportInProgress)

@@ -6879,6 +6879,22 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>MAX DIST</source>
         <translation>МАКС. РАССТ</translation>
     </message>
+    <message>
+        <source>Import ADIF</source>
+        <translation>Импорт ADIF</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>Импорт ADIF завершён</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>Не удалось импортировать ADIF</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>Импорт ADIF…</translation>
+    </message>
 </context>
 <context>
     <name>LogWindowContent</name>
@@ -7095,6 +7111,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LogWindowContent.qml" line="770"/>
         <source>Rcvd</source>
         <translation>рвд</translation>
+    </message>
+    <message>
+        <source>ADIF import completed</source>
+        <translation>Импорт ADIF завершён</translation>
+    </message>
+    <message>
+        <source>ADIF import failed</source>
+        <translation>Не удалось импортировать ADIF</translation>
+    </message>
+    <message>
+        <source>Importing ADIF...</source>
+        <translation>Импорт ADIF…</translation>
     </message>
 </context>
 <context>
@@ -19537,6 +19565,10 @@ If unsure, use High.</source>
         <location filename="../qml/decodium/components/SettingsTab1.qml" line="866"/>
         <source>TCI RX gain:</source>
         <translation>Усиление приёма TCI:</translation>
+    </message>
+    <message>
+        <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
+        <translation>Введите CI-V-адрес трансивера в шестнадцатеричном виде, от 0x00 до 0xFF. Адрес сохраняется вместе с настройками CAT.</translation>
     </message>
 </context>
 <context>
