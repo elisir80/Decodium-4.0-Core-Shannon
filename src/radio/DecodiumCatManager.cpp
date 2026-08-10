@@ -1072,6 +1072,10 @@ void DecodiumCatManager::loadSettings()
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("CAT_Native");
+    // A CI-V address explicitly selected by the operator takes precedence over
+    // the model default.  The default is used only for existing installations
+    // that do not yet have this setting.
+    bool const hasSavedCivAddress = s.contains("civAddress");
     m_rigName        = s.value("rigName",        "Kenwood TS-590S").toString();
     m_serialPort     = s.value("serialPort",     QString{}).toString();
     m_baudRate       = s.value("baudRate",        57600).toInt();
@@ -1083,8 +1087,10 @@ void DecodiumCatManager::loadSettings()
         m_pttMethod = QStringLiteral("CAT");
     m_pttPort        = s.value("pttPort",         "CAT").toString();
     m_civAddress     = s.value("civAddress",      0).toInt();
-    if (auto const* defaults = findRigDefaults(m_rigName)) {
-        m_civAddress = defaults->civAddress;
+    if (!hasSavedCivAddress) {
+        if (auto const* defaults = findRigDefaults(m_rigName)) {
+            m_civAddress = defaults->civAddress;
+        }
     }
     m_pollInterval   = s.value("pollInterval",    2).toInt();
     m_catKeepAlive   = s.value("catKeepAlive",    false).toBool();

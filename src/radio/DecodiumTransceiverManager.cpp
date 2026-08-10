@@ -992,6 +992,7 @@ DecodiumTransceiverManager::DecodiumTransceiverManager(QObject* parent)
     connect(this, &DecodiumTransceiverManager::handshakeChanged,      this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::pttMethodChanged,      this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::pttPortChanged,        this, scheduleSave);
+    connect(this, &DecodiumTransceiverManager::civAddressChanged,     this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::forceDtrChanged,       this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::dtrHighChanged,        this, scheduleSave);
     connect(this, &DecodiumTransceiverManager::forceRtsChanged,       this, scheduleSave);
@@ -2619,6 +2620,8 @@ void DecodiumTransceiverManager::loadSettings()
     decodium::beginActiveSettingsProfile(s);
     s.beginGroup("Transceiver");
     auto get = [&](const QString& k, const QVariant& def) { return s.value(k, def); };
+    bool const hasSavedCivAddress = s.contains(QStringLiteral("civAddress"));
+    int const savedCivAddress = qBound(0, get(QStringLiteral("civAddress"), 0).toInt(), 0xff);
     m_serialPort   = normalizeDevicePath(get("serialPort",   m_serialPort).toString());
     m_baudRate     = get("baudRate",     m_baudRate).toInt();
     m_dataBits     = normalizeDataBitsChoice(get("dataBits",     m_dataBits).toString());
@@ -2654,6 +2657,13 @@ void DecodiumTransceiverManager::loadSettings()
     }
     m_splitMode = splitModeName(parseSplit(m_splitMode.trimmed().toLower()));
     setRigName(rig);
+    // setRigName supplies a Hamlib/model default for a newly selected radio.
+    // Do not let that default overwrite a CI-V address the operator saved for
+    // this CAT configuration/profile.
+    if (hasSavedCivAddress && m_civAddress != savedCivAddress) {
+        m_civAddress = savedCivAddress;
+        emit civAddressChanged();
+    }
     bool networkEndpointNormalized = false;
     QString const cleanEndpoint = normalizeNetworkEndpoint(m_networkPort, m_rigName,
                                                            &networkEndpointNormalized);

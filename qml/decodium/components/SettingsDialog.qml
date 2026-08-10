@@ -784,6 +784,20 @@ Dialog {
         return qsTr("Auto")
     }
 
+    // CI-V addresses are conventionally written in hexadecimal.  Bare values
+    // such as "94" therefore mean 0x94, not decimal 94.  Keep this parser in
+    // the dialog so every CAT backend exposed by catManager uses the same UI
+    // validation before its integer property is updated.
+    function civAddressFromText(value) {
+        var raw = String(value || "").trim()
+        if (!/^(?:0[xX])?[0-9a-fA-F]{1,2}$/.test(raw))
+            return -1
+        if (raw.length >= 2 && raw.slice(0, 2).toLowerCase() === "0x")
+            raw = raw.slice(2)
+        var parsed = parseInt(raw, 16)
+        return isFinite(parsed) && parsed >= 0 && parsed <= 255 ? parsed : -1
+    }
+
     function usesSerialControls() {
         var portType = activeCatPortType()
         return portType === "serial" || portType === "usb"

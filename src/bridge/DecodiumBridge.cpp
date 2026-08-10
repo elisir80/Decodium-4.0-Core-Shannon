@@ -3061,7 +3061,6 @@ static QString adifRecordDedupeKey(QMap<QString, QString> const& fields)
     }.join(QLatin1Char('|'));
 }
 
-constexpr qint64 kMaxAdifDocumentBytes = 32LL * 1024LL * 1024LL;
 constexpr int kMaxAdifRecords = 200000;
 constexpr int kMaxAdifFieldBytes = 65536;
 constexpr int kMaxAdifFieldsPerRecord = 128;
@@ -3169,15 +3168,6 @@ static ParsedAdifDocument loadAdifDocument(QString const& path)
     QFile file(path);
     if (!file.exists()) {
         doc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
-        return doc;
-    }
-    QFileInfo const info(path);
-    if (info.size() > kMaxAdifDocumentBytes) {
-        doc.header = QStringLiteral("Decodium4 ADIF Log\n<EOH>\n");
-        qWarning().noquote() << "[ADIF] skipped oversized ADIF document"
-                             << path
-                             << "size" << info.size()
-                             << "limit" << kMaxAdifDocumentBytes;
         return doc;
     }
     if (!file.open(QIODevice::ReadOnly)) {
@@ -10757,6 +10747,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 DecodiumBridge::~DecodiumBridge()
 {
     beginDecodeCallbackShutdown();
+    if (m_adifImportWatcher) {
+        m_adifImportWatcher->disconnect(this);
+        m_adifImportWatcher->waitForFinished();
+        delete m_adifImportWatcher;
+        m_adifImportWatcher = nullptr;
+    }
     if (m_confirmedAdifImportWatcher) {
         m_confirmedAdifImportWatcher->disconnect(this);
         m_confirmedAdifImportWatcher->waitForFinished();
@@ -31439,6 +31435,7 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
     m_lastAutoSeqMs = 0;
     m_ft2ManualClickTx1BypassPeriodOnce = false;
     m_qsoStartedOn = QDateTime::currentDateTimeUtc();
+    m_qsoFirstReplyOn = QDateTime {};
     clearPendingAutoLogSnapshot();
     if (newQso) {
         clearAutoCqPartnerLock();
@@ -31943,9 +31940,15 @@ void DecodiumBridge::capturePendingAutoLogSnapshot()
             decodium::seq::signalReportFromMessage(buildCurrentTxMessage());
     }
     m_pendingAutoLogRptRcvd = m_reportReceived.trimmed();
-    m_pendingAutoLogOn = m_qsoStartedOn.isValid() ? m_qsoStartedOn : nowUtc;
+    QDateTime const effectiveLogOn = effectiveQsoLogTimeOnUtc();
+    m_pendingAutoLogOn = effectiveLogOn.isValid() ? effectiveLogOn : nowUtc;
     m_pendingAutoLogOff = nowUtc < m_pendingAutoLogOn ? m_pendingAutoLogOn : nowUtc;
     m_pendingAutoLogDialFreq = m_frequency;
+}
+
+QDateTime DecodiumBridge::effectiveQsoLogTimeOnUtc() const
+{
+    return m_seqState.effectiveQsoLogTimeOnUtc();
 }
 
 void DecodiumBridge::clearPendingAutoLogSnapshot()
@@ -32352,6 +32355,7 @@ void DecodiumBridge::clearFt2AsyncAbortQsoState(const QString& reason)
     m_activeTxNumber = 0;
     m_activeTxMessage.clear();
     m_qsoStartedOn = QDateTime {};
+    m_qsoFirstReplyOn = QDateTime {};
     m_asyncLastTxEndMs = 0;
     m_ft2AsyncLastDecodeMs = 0;
     m_ft2AsyncFirstDecodeMs = 0;
@@ -34109,6 +34113,7 @@ void DecodiumBridge::resetQsoStateForNextSequence(bool preserveAutoTx)
 {
     noteAutoCallQsoCompleted();
     m_qsoLogged = false;  // reset per il prossimo QSO
+    m_qsoFirstReplyOn = QDateTime {};
     m_logAfterOwn73 = false;
     m_ft2DeferredLogPending = false;
     m_pendingAutoSeqTxAfterActiveTx = 0;
@@ -34994,6 +34999,7 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             m_activeTxNumber = 0;
             m_activeTxMessage.clear();
             m_qsoStartedOn = QDateTime {};
+            m_qsoFirstReplyOn = QDateTime {};
             clearPendingAutoSeqTx(retryReason);
             forgetPartnerMemoryForCall(abandonedPartner, retryReason);
             clearAutoCqPartnerLock();
@@ -35267,6 +35273,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
     }
     QString const messagePartner = fallbackDirectedPartner.isEmpty() ? from : fallbackDirectedPartner;
     QString const messagePartnerBase = Radio::base_callsign(messagePartner).trimmed().toUpper();
+
     // 1.0.174 — Aggiorna SNR del partner corrente. Usato da ghost filter
     // e retry cap/wait adattivi (FT2 weak-signal pack). Memoria singolo
     // valore (no storage costoso); 127 = sentinel "no data".
@@ -35841,6 +35848,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             setReportReceived(QStringLiteral("-10"));
             setDxCall(messagePartner);
             m_qsoStartedOn = QDateTime::currentDateTimeUtc();
+            m_qsoFirstReplyOn = QDateTime {};
             m_lastTransmittedMessage.clear();
             if (!isGridTokenStrict(last)) {
                 setDxGrid(QString());
@@ -36046,6 +36054,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
                 setReportReceived(QStringLiteral("-10"));
                 setDxCall(messagePartner);
                 m_qsoStartedOn = QDateTime::currentDateTimeUtc();
+                m_qsoFirstReplyOn = QDateTime {};
                 m_lastTransmittedMessage.clear();
             }
             setReportSent(QString::number(decodeSnrOrDefault(f.value(1), -10)));
@@ -36055,6 +36064,33 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         }
     } else {
         return;
+    }
+
+    // ADIF/LoTW: the QSO start is the first valid reply from the DX station,
+    // not the time at which the operator first armed the call.  This is done
+    // after the message has been accepted by the sequencer and after any new
+    // partner has been installed in m_dxCall, so a queued AutoCQ caller is
+    // timestamped correctly as well.
+    if (directedToMeEffective
+        && m_qsoFirstReplyOn.isNull()
+        && !messagePartnerBase.isEmpty()) {
+        QString const activePartnerBase =
+            Radio::base_callsign(m_dxCall).trimmed().toUpper();
+        if (activePartnerBase.isEmpty() || activePartnerBase == messagePartnerBase) {
+            int const decodeSeconds = secondsFromUtcDisplayToken(f.value(0));
+            if (decodeSeconds >= 0) {
+                QDateTime const decodeUtc = approxUtcDateTimeForDisplayToken(f.value(0));
+                bool const notStaleBeforeQsoStart =
+                    !m_qsoStartedOn.isValid()
+                    || decodeUtc >= m_qsoStartedOn.toUTC().addSecs(-30);
+                if (decodeUtc.isValid() && notStaleBeforeQsoStart) {
+                    m_qsoFirstReplyOn = decodeUtc.toUTC();
+                    bridgeLog(QStringLiteral("qso-log: first valid DX reply %1 at %2 -> TIME_ON")
+                                  .arg(messagePartnerBase,
+                                       m_qsoFirstReplyOn.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss UTC"))));
+                }
+            }
+        }
     }
 
     if (nextTx > 0) {
@@ -38549,7 +38585,10 @@ QVariantMap DecodiumBridge::pendingLogQsoPreview() const
     QString logRptSent = m_reportSent.trimmed();
     QString logRptRcvd = m_reportReceived.trimmed();
     double logFreqHz = m_frequency;
-    QDateTime logOnUtc = QDateTime::currentDateTimeUtc();
+    QDateTime logOnUtc = effectiveQsoLogTimeOnUtc();
+    if (!logOnUtc.isValid()) {
+        logOnUtc = QDateTime::currentDateTimeUtc();
+    }
     QDateTime logOffUtc = logOnUtc;
 
     if (m_pendingAutoLogValid) {
@@ -38733,7 +38772,10 @@ void DecodiumBridge::capturePromptLogSnapshot(const QVariantMap& preview)
         m_promptLogOn = m_lateAutoLogOn;
         m_promptLogOff = m_lateAutoLogOff.isValid() ? m_lateAutoLogOff : nowUtc;
     } else {
-        m_promptLogOn = nowUtc;
+        m_promptLogOn = effectiveQsoLogTimeOnUtc();
+        if (!m_promptLogOn.isValid()) {
+            m_promptLogOn = nowUtc;
+        }
         m_promptLogOff = nowUtc;
     }
     if (m_promptLogOff.isValid() && m_promptLogOn.isValid() && m_promptLogOff < m_promptLogOn) {
@@ -39219,11 +39261,15 @@ void DecodiumBridge::logQsoNow()
                                                 legacyLogSatellite,
                                                 legacyLogSatMode,
                                                 m_promptLogSnapshotValid);
+        QDateTime legacyFallbackTimeOn = effectiveQsoLogTimeOnUtc();
+        if (!legacyFallbackTimeOn.isValid()) {
+            legacyFallbackTimeOn = QDateTime::currentDateTimeUtc();
+        }
         QDateTime legacyTimeOn = m_promptLogOn.isValid()
             ? m_promptLogOn
             : (m_pendingAutoLogOn.isValid()
                    ? m_pendingAutoLogOn
-                   : (m_lateAutoLogOn.isValid() ? m_lateAutoLogOn : QDateTime::currentDateTimeUtc()));
+                   : (m_lateAutoLogOn.isValid() ? m_lateAutoLogOn : legacyFallbackTimeOn));
         QDateTime legacyTimeOff = m_promptLogOff.isValid()
             ? m_promptLogOff
             : (m_pendingAutoLogOff.isValid()
@@ -39262,7 +39308,10 @@ void DecodiumBridge::logQsoNow()
     QString logRptRcvd = m_reportReceived.trimmed();
     QString logMode = m_mode.trimmed();
     double  logFreqHz = m_frequency;
-    QDateTime utcOn = QDateTime::currentDateTimeUtc();
+    QDateTime utcOn = effectiveQsoLogTimeOnUtc();
+    if (!utcOn.isValid()) {
+        utcOn = QDateTime::currentDateTimeUtc();
+    }
     QDateTime utcOff = utcOn;
 
     if (m_promptLogSnapshotValid) {
@@ -41477,6 +41526,7 @@ void DecodiumBridge::processMapContactClick(const QString& call, const QString& 
     m_qsoLogged = false;
     m_lastTransmittedMessage.clear();
     m_qsoStartedOn = QDateTime::currentDateTimeUtc();
+    m_qsoFirstReplyOn = QDateTime {};
     clearPendingAutoLogSnapshot();
     if (newQso) {
         clearAutoCqPartnerLock();
@@ -49411,6 +49461,7 @@ void DecodiumBridge::processNextInQueue()
         clearPendingAutoSeqTx(QStringLiteral("process-next-in-queue"));
         m_lastTransmittedMessage.clear();
         m_qsoStartedOn = QDateTime::currentDateTimeUtc();
+        m_qsoFirstReplyOn = QDateTime {};
         setReportSent(QString::number(snr));
         setReportReceived(QStringLiteral("-10"));
 
@@ -51469,28 +51520,7 @@ bool DecodiumBridge::exportAdif(const QString& filename)
 
 bool DecodiumBridge::importAdif(const QString& filename)
 {
-    QFile f(filename);
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        emit errorMessage("Impossibile aprire ADIF: " + filename);
-        return false;
-    }
-    QString data = QString::fromLocal8Bit(f.readAll());
-    f.close();
-    int eoh = data.indexOf("<EOH>", Qt::CaseInsensitive);
-    if (eoh >= 0) data = data.mid(eoh + 5);
-    QRegularExpression reCall("<CALL:\\d+>([^<\\s]+)", QRegularExpression::CaseInsensitiveOption);
-    auto it = reCall.globalMatch(data);
-    int imported = 0;
-    while (it.hasNext()) {
-        auto m = it.next();
-        m_workedCalls.insert(m.captured(1).toUpper());
-        ++imported;
-    }
-    invalidateQsoSearchCache();
-    emit qsoCountChanged();
-    emit workedCountChanged();
-    emit statusMessage(QString("ADIF importato: %1 callsign caricati").arg(imported));
-    return true;
+    return importFromAdifAsync(filename);
 }
 
 // ============================================================
@@ -52138,6 +52168,217 @@ void DecodiumBridge::mirrorLegacyLoggedAdif(QByteArray const& adif)
                   .arg(activePath));
 }
 
+using AdifImportProgressCallback = std::function<void(int, const QString&)>;
+
+static bool copyFileAtomically(QString const& sourcePath, QString const& destinationPath,
+                               QString* errorMessage)
+{
+    QFile source(sourcePath);
+    if (!source.open(QIODevice::ReadOnly)) {
+        if (errorMessage) {
+            *errorMessage = source.errorString();
+        }
+        return false;
+    }
+
+    QSaveFile destination(destinationPath);
+    if (!destination.open(QIODevice::WriteOnly)) {
+        if (errorMessage) {
+            *errorMessage = destination.errorString();
+        }
+        return false;
+    }
+
+    QByteArray buffer;
+    buffer.resize(1024 * 1024);
+    while (!source.atEnd()) {
+        const qint64 read = source.read(buffer.data(), buffer.size());
+        if (read < 0) {
+            if (errorMessage) {
+                *errorMessage = source.errorString();
+            }
+            destination.cancelWriting();
+            return false;
+        }
+        if (read == 0) {
+            break;
+        }
+        if (destination.write(buffer.constData(), read) != read) {
+            if (errorMessage) {
+                *errorMessage = destination.errorString();
+            }
+            destination.cancelWriting();
+            return false;
+        }
+    }
+
+    if (!destination.commit()) {
+        if (errorMessage) {
+            *errorMessage = destination.errorString();
+        }
+        return false;
+    }
+    return true;
+}
+
+static QString uniqueAdifBackupPath(QString const& logbookPath)
+{
+    QFileInfo const info(logbookPath);
+    const QString stamp = QDateTime::currentDateTimeUtc().toString(QStringLiteral("yyyyMMdd_HHmmss"));
+    const QString base = info.absolutePath() + QDir::separator()
+        + info.completeBaseName() + QStringLiteral(".backup.") + stamp;
+
+    QString candidate = base + QStringLiteral(".adi");
+    for (int suffix = 1; QFile::exists(candidate); ++suffix) {
+        candidate = base + QStringLiteral(".%1.adi").arg(suffix);
+    }
+    return candidate;
+}
+
+static QVariantMap importAdifDocumentInBackground(QString const& sourcePath,
+                                                   QString const& destinationPath,
+                                                   AdifImportProgressCallback const& reportProgress)
+{
+    QVariantMap result;
+    const auto report = [&reportProgress](int progress, QString const& status) {
+        if (reportProgress) {
+            reportProgress(qBound(0, progress, 100), status);
+        }
+    };
+
+    const QString sourceFilePath = QFileInfo(sourcePath).absoluteFilePath();
+    const QString destinationFilePath = QFileInfo(destinationPath).absoluteFilePath();
+    if (sourceFilePath == destinationFilePath) {
+        result.insert(QStringLiteral("error"), QStringLiteral("il file sorgente è già il logbook attivo"));
+        return result;
+    }
+
+    QFileInfo const sourceBefore(sourceFilePath);
+    if (!sourceBefore.exists() || !sourceBefore.isFile()) {
+        result.insert(QStringLiteral("error"), QStringLiteral("file ADIF sorgente non trovato"));
+        return result;
+    }
+
+    QFileInfo const destinationBefore(destinationFilePath);
+    const bool destinationExisted = destinationBefore.exists();
+    const qint64 destinationSize = destinationExisted ? destinationBefore.size() : -1;
+    const QDateTime destinationModified = destinationExisted ? destinationBefore.lastModified() : QDateTime();
+
+    report(3, QStringLiteral("Apertura del file ADIF sorgente..."));
+    ParsedAdifDocument source = loadAdifDocument(sourceFilePath);
+    if (!source.loaded) {
+        result.insert(QStringLiteral("error"), QStringLiteral("impossibile leggere il file ADIF sorgente"));
+        return result;
+    }
+    const int sourceCount = source.records.size();
+    result.insert(QStringLiteral("sourceCount"), sourceCount);
+    if (sourceCount <= 0) {
+        result.insert(QStringLiteral("error"), QStringLiteral("il file ADIF non contiene QSO validi"));
+        return result;
+    }
+    report(20, QStringLiteral("File sorgente letto: %1 QSO...").arg(sourceCount));
+
+    ParsedAdifDocument destination = loadAdifDocument(destinationFilePath);
+    if (destinationExisted && !destination.loaded) {
+        result.insert(QStringLiteral("error"), QStringLiteral("impossibile leggere il logbook ADIF attivo"));
+        return result;
+    }
+    report(35, QStringLiteral("Logbook attivo letto: %1 QSO...").arg(destination.records.size()));
+
+    QSet<QString> existingKeys;
+    existingKeys.reserve(destination.records.size() + source.records.size());
+    for (ParsedAdifRecord const& record : destination.records) {
+        const QString key = adifRecordDedupeKey(record.fields);
+        if (!key.isEmpty()) {
+            existingKeys.insert(key);
+        }
+    }
+
+    int imported = 0;
+    for (int index = 0; index < source.records.size(); ++index) {
+        ParsedAdifRecord normalizedRecord = normalizeImportedAdifRecord(source.records.at(index));
+        const QString key = adifRecordDedupeKey(normalizedRecord.fields);
+        if (!key.isEmpty() && !existingKeys.contains(key)) {
+            destination.records.append(normalizedRecord);
+            existingKeys.insert(key);
+            ++imported;
+        }
+
+        if ((index & 0x1FF) == 0 || index + 1 == source.records.size()) {
+            const int mergeProgress = 38 + ((index + 1) * 37 / qMax(1, source.records.size()));
+            report(mergeProgress,
+                   QStringLiteral("Analisi QSO: %1/%2...").arg(index + 1).arg(source.records.size()));
+        }
+    }
+
+    const QFileInfo sourceAfter(sourceFilePath);
+    const QFileInfo destinationAfterMerge(destinationFilePath);
+    const bool sourceChanged = sourceAfter.exists() != sourceBefore.exists()
+        || (sourceAfter.exists()
+            && (sourceAfter.size() != sourceBefore.size()
+                || sourceAfter.lastModified() != sourceBefore.lastModified()));
+    const bool destinationChanged = destinationAfterMerge.exists() != destinationExisted
+        || (destinationAfterMerge.exists()
+            && (destinationAfterMerge.size() != destinationSize
+                || destinationAfterMerge.lastModified() != destinationModified));
+    if (sourceChanged) {
+        result.insert(QStringLiteral("error"), QStringLiteral("il file sorgente è cambiato durante l'importazione; riprovare"));
+        return result;
+    }
+    if (destinationChanged) {
+        result.insert(QStringLiteral("error"), QStringLiteral("il logbook è cambiato durante l'importazione; riprovare"));
+        return result;
+    }
+
+    QString backupPath;
+    if (imported > 0) {
+        if (destinationExisted) {
+            backupPath = uniqueAdifBackupPath(destinationFilePath);
+            report(82, QStringLiteral("Creazione del backup prima della scrittura..."));
+            QString backupError;
+            if (!copyFileAtomically(destinationFilePath, backupPath, &backupError)) {
+                result.insert(QStringLiteral("error"),
+                              QStringLiteral("backup del logbook non riuscito: %1").arg(backupError));
+                return result;
+            }
+            result.insert(QStringLiteral("backupPath"), backupPath);
+        }
+
+        report(91, QStringLiteral("Salvataggio del logbook aggiornato..."));
+        if (!writeAdifDocument(destinationFilePath, destination)) {
+            result.insert(QStringLiteral("error"),
+                          backupPath.isEmpty()
+                              ? QStringLiteral("impossibile salvare il logbook ADIF aggiornato")
+                              : QStringLiteral("impossibile salvare il logbook ADIF aggiornato; backup disponibile in %1")
+                                    .arg(backupPath));
+            return result;
+        }
+    }
+
+    QStringList workedCalls;
+    QSet<QString> workedCallSet;
+    workedCallSet.reserve(destination.records.size());
+    for (ParsedAdifRecord const& record : destination.records) {
+        const QString call = record.fields.value(QStringLiteral("CALL")).trimmed().toUpper();
+        if (!call.isEmpty() && !workedCallSet.contains(call)) {
+            workedCallSet.insert(call);
+            workedCalls.append(call);
+        }
+    }
+
+    const int skipped = qMax(0, sourceCount - imported);
+    result.insert(QStringLiteral("ok"), true);
+    result.insert(QStringLiteral("imported"), imported);
+    result.insert(QStringLiteral("skipped"), skipped);
+    result.insert(QStringLiteral("total"), destination.records.size());
+    result.insert(QStringLiteral("backupPath"), backupPath);
+    result.insert(QStringLiteral("workedCalls"), workedCalls);
+    report(100, imported > 0
+        ? QStringLiteral("Importazione completata: %1 nuovi QSO.").arg(imported)
+        : QStringLiteral("Importazione completata: nessun QSO nuovo."));
+    return result;
+}
+
 static QVariantMap importConfirmedAdifDocumentInBackground(QString const& sourcePath,
                                                            QString const& destinationPath,
                                                            QString const& provider)
@@ -52162,10 +52403,6 @@ static QVariantMap importConfirmedAdifDocumentInBackground(QString const& source
     const int sourceCount = source.records.size();
 
     QFileInfo const destinationInfo(destinationPath);
-    if (destinationInfo.exists() && destinationInfo.size() > kMaxAdifDocumentBytes) {
-        result.insert(QStringLiteral("error"), QStringLiteral("il logbook attivo supera il limite di importazione ADIF"));
-        return result;
-    }
     ParsedAdifDocument destination = loadAdifDocument(destinationPath);
     if (destinationInfo.exists() && !destination.loaded) {
         result.insert(QStringLiteral("error"), QStringLiteral("impossibile leggere il logbook ADIF attivo"));
@@ -52364,61 +52601,135 @@ void DecodiumBridge::importConfirmedAdifIntoLogbookAsync(const QString& provider
     }));
 }
 
+void DecodiumBridge::setAdifImportProgress(int progress, const QString& status)
+{
+    const int boundedProgress = qBound(0, progress, 100);
+    if (m_adifImportProgress == boundedProgress && m_adifImportStatus == status) {
+        return;
+    }
+    m_adifImportProgress = boundedProgress;
+    m_adifImportStatus = status;
+    emit adifImportProgressChanged();
+}
+
+bool DecodiumBridge::importFromAdifAsync(const QString& filename)
+{
+    if (m_shuttingDown) {
+        return false;
+    }
+    if (m_adifImportWatcher || m_adifImportInProgress) {
+        const QString message = QStringLiteral("Un'importazione ADIF è già in corso.");
+        setAdifImportProgress(m_adifImportProgress, message);
+        emit statusMessage(message);
+        return false;
+    }
+
+    QString sourcePath = filename.trimmed();
+    const QUrl sourceUrl(sourcePath);
+    if (sourceUrl.isLocalFile()) {
+        sourcePath = sourceUrl.toLocalFile();
+    }
+    if (sourcePath.isEmpty() || !QFileInfo::exists(sourcePath)) {
+        const QString message = QStringLiteral("Impossibile importare ADIF: file sorgente non trovato.");
+        setAdifImportProgress(0, message);
+        emit errorMessage(message);
+        return false;
+    }
+
+    const QString destinationPath = ensureAdifLogPath();
+    if (destinationPath.isEmpty()) {
+        const QString message = QStringLiteral("Impossibile importare ADIF: logbook attivo non disponibile.");
+        setAdifImportProgress(0, message);
+        emit errorMessage(message);
+        return false;
+    }
+
+    m_adifImportInProgress = true;
+    setAdifImportProgress(0, QStringLiteral("Preparazione importazione ADIF..."));
+    emit statusMessage(QStringLiteral("Importazione ADIF in background..."));
+
+    m_adifImportWatcher = new QFutureWatcher<QVariantMap>(this);
+    QFutureWatcher<QVariantMap>* const watcher = m_adifImportWatcher;
+    QPointer<DecodiumBridge> guard(this);
+
+    connect(watcher, &QFutureWatcher<QVariantMap>::finished, this, [this, watcher]() {
+        const QVariantMap result = watcher->result();
+        if (m_adifImportWatcher == watcher) {
+            m_adifImportWatcher = nullptr;
+        }
+        watcher->deleteLater();
+
+        const bool success = result.value(QStringLiteral("ok")).toBool();
+        const int imported = result.value(QStringLiteral("imported")).toInt();
+        const int skipped = result.value(QStringLiteral("skipped")).toInt();
+        const int total = result.value(QStringLiteral("total")).toInt();
+        const QString backupPath = result.value(QStringLiteral("backupPath")).toString();
+        QString message;
+
+        m_adifImportInProgress = false;
+        if (success) {
+            const QStringList workedCalls = result.value(QStringLiteral("workedCalls")).toStringList();
+            m_workedCalls.clear();
+            for (const QString& call : workedCalls) {
+                m_workedCalls.insert(call);
+            }
+            m_qsoCountCache = total;
+            invalidateQsoSearchCache();
+            warmLogCacheAsync();
+            emit qsoCountChanged();
+            emit workedCountChanged();
+            if (m_mapIntelligenceService && imported > 0) {
+                m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
+            }
+
+            message = QStringLiteral("Importazione ADIF completata: %1 nuovi QSO, %2 ignorati, totale %3.")
+                          .arg(imported)
+                          .arg(skipped)
+                          .arg(total);
+            if (!backupPath.isEmpty()) {
+                message += QStringLiteral(" Backup creato: %1").arg(backupPath);
+            }
+            setAdifImportProgress(100, message);
+            emit statusMessage(message);
+            bridgeLog(QStringLiteral("importFromAdif async: source=%1 imported=%2 skipped=%3 total=%4 backup=%5")
+                          .arg(result.value(QStringLiteral("sourcePath")).toString())
+                          .arg(imported)
+                          .arg(skipped)
+                          .arg(total)
+                          .arg(backupPath));
+        } else {
+            message = result.value(QStringLiteral("error"),
+                                   QStringLiteral("Importazione ADIF non riuscita.")).toString();
+            setAdifImportProgress(0, message);
+            emit errorMessage(message);
+        }
+
+        emit adifImportFinished(success, imported, skipped, total, backupPath, message);
+    });
+
+    watcher->setFuture(QtConcurrent::run([guard, sourcePath, destinationPath]() {
+        const AdifImportProgressCallback reportProgress = [guard](int progress, const QString& status) {
+            if (!guard) {
+                return;
+            }
+            QMetaObject::invokeMethod(guard.data(), [guard, progress, status]() {
+                if (guard && guard->m_adifImportInProgress) {
+                    guard->setAdifImportProgress(progress, status);
+                }
+            }, Qt::QueuedConnection);
+        };
+        QVariantMap result = importAdifDocumentInBackground(sourcePath, destinationPath, reportProgress);
+        result.insert(QStringLiteral("sourcePath"), sourcePath);
+        return result;
+    }));
+    return true;
+}
+
 int DecodiumBridge::importFromAdif(const QString& filename)
 {
-    QElapsedTimer timer;
-    timer.start();
-    ParsedAdifDocument source = loadAdifDocument(filename);
-    if (!source.loaded && source.records.isEmpty()) {
-        emit errorMessage(QStringLiteral("Impossibile importare ADIF: %1").arg(filename));
-        return 0;
-    }
-
-    ParsedAdifDocument dest = loadAdifDocument(ensureAdifLogPath());
-    QSet<QString> existingKeys;
-    for (ParsedAdifRecord const& record : dest.records) {
-        QString const key = adifRecordDedupeKey(record.fields);
-        if (!key.isEmpty()) {
-            existingKeys.insert(key);
-        }
-    }
-
-    int imported = 0;
-    for (ParsedAdifRecord const& record : source.records) {
-        ParsedAdifRecord normalizedRecord = normalizeImportedAdifRecord(record);
-        QString const key = adifRecordDedupeKey(normalizedRecord.fields);
-        if (key.isEmpty()) {
-            continue;
-        }
-        if (!existingKeys.contains(key)) {
-            dest.records.append(normalizedRecord);
-            existingKeys.insert(key);
-            ++imported;
-        }
-    }
-
-    if (imported > 0 && !writeAdifDocument(ensureAdifLogPath(), dest)) {
-        emit errorMessage(QStringLiteral("Impossibile aggiornare il log ADIF"));
-        return 0;
-    }
-
-    rebuildWorkedCallsFromDocument(m_workedCalls, dest.records);
-    rebuildWorkedSetsFromAdifRecords(dest.records);
-    m_qsoCountCache = dest.records.size();
-    invalidateQsoSearchCache();
-    warmLogCacheAsync();
-    emit qsoCountChanged();
-    emit workedCountChanged();
-    if (m_mapIntelligenceService && imported > 0) {
-        m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
-    }
-    emit statusMessage(QStringLiteral("ADIF importato: %1 QSO").arg(imported));
-    bridgeLog(QStringLiteral("importFromAdif: source=%1 imported=%2 total=%3 elapsed=%4ms")
-                  .arg(filename)
-                  .arg(imported)
-                  .arg(m_qsoCountCache)
-                  .arg(timer.elapsed()));
-    return imported;
+    // Compatibility wrapper: imports are now asynchronous. A positive return
+    // value means that the job was accepted, not that all records are done.
+    return importFromAdifAsync(filename) ? 1 : 0;
 }
 
 bool DecodiumBridge::exportToAdif(const QString& filename)

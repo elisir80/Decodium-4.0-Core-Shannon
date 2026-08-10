@@ -30,6 +30,8 @@ Rectangle {
     property var logbookProfiles: []
     property var logbookNames: []
     property bool updatingLogbookCombo: false
+    property bool adifImportNoticeVisible: false
+    property string adifImportNotice: ""
 
     Component.onCompleted: if (refreshActive) {
         if (appEngine && appEngine.logManager && appEngine.logManager.warmLogCacheAsync)
@@ -51,6 +53,13 @@ Rectangle {
         onTriggered: if (logContent.refreshActive) refreshLog()
     }
 
+    Timer {
+        id: adifImportNoticeTimer
+        interval: 12000
+        repeat: false
+        onTriggered: logContent.adifImportNoticeVisible = false
+    }
+
     Connections {
         target: appEngine && appEngine.logManager ? appEngine.logManager : null
         function onQsoLogCacheChanged() {
@@ -64,6 +73,11 @@ Rectangle {
             clearSelection()
             if (logContent.refreshActive)
                 refreshLog()
+        }
+        function onAdifImportFinished(success, imported, skipped, total, backupPath, message) {
+            logContent.adifImportNotice = String(message || (success ? qsTr("ADIF import completed") : qsTr("ADIF import failed")))
+            logContent.adifImportNoticeVisible = true
+            adifImportNoticeTimer.restart()
         }
     }
 
@@ -130,9 +144,11 @@ Rectangle {
                                          "",
                                          [qsTr("ADIF files (*.adi *.adif)"), qsTr("All files (*)")])
         if (path.length > 0 && appEngine && appEngine.logManager) {
-            appEngine.logManager.importFromAdif(path)
+            if (appEngine.logManager.importFromAdifAsync)
+                appEngine.logManager.importFromAdifAsync(path)
+            else
+                appEngine.logManager.importFromAdif(path)
             clearSelection()
-            refreshLog()
         }
     }
 
@@ -349,6 +365,47 @@ Rectangle {
         anchors.margins: 6
         spacing: 4
 
+        Rectangle {
+            id: adifImportBanner
+            Layout.fillWidth: true
+            Layout.preferredHeight: visible ? 38 : 0
+            visible: (bridge && bridge.adifImportInProgress) || logContent.adifImportNoticeVisible
+            radius: 5
+            color: bridge && bridge.adifImportInProgress
+                   ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.12)
+                   : Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.12)
+            border.color: bridge && bridge.adifImportInProgress ? secondaryCyan : accentGreen
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                spacing: 8
+                Text {
+                    Layout.fillWidth: true
+                    text: bridge && bridge.adifImportInProgress
+                          ? String(bridge.adifImportStatus || qsTr("Importing ADIF..."))
+                          : logContent.adifImportNotice
+                    color: textPrimary
+                    font.pixelSize: 10
+                    elide: Text.ElideMiddle
+                }
+                ProgressBar {
+                    visible: bridge && bridge.adifImportInProgress
+                    Layout.preferredWidth: 110
+                    from: 0; to: 100
+                    value: bridge ? bridge.adifImportProgress : 0
+                }
+                Text {
+                    visible: bridge && bridge.adifImportInProgress
+                    text: (bridge ? bridge.adifImportProgress : 0) + "%"
+                    color: secondaryCyan
+                    font.pixelSize: 10
+                    font.bold: true
+                }
+            }
+        }
+
         // Stats + Filter bar
         Rectangle {
             Layout.fillWidth: true
@@ -507,10 +564,18 @@ Rectangle {
                 // Import ADIF
                 Rectangle {
                     width: 22; height: 22; radius: 3
-                    color: importFloatMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.3) : "transparent"
+                    color: !importFloatMA.enabled ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.04)
+                           : importFloatMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.3) : "transparent"
                     Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: qsTr("\u2B07"); font.pixelSize: 11; color: importFloatMA.containsMouse ? accentGreen : textSecondary }
-                    MouseArea { id: importFloatMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: logContent.openImportAdifDialog() }
+                    Text { anchors.centerIn: parent; text: qsTr("\u2B07"); font.pixelSize: 11; color: importFloatMA.enabled && importFloatMA.containsMouse ? accentGreen : textSecondary }
+                    MouseArea {
+                        id: importFloatMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: !(bridge && bridge.adifImportInProgress)
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: logContent.openImportAdifDialog()
+                    }
                     ToolTip.visible: importFloatMA.containsMouse; ToolTip.text: qsTr("Import ADIF"); ToolTip.delay: 500
                 }
 
