@@ -34,6 +34,11 @@
         <translation>Ritm:</translation>
     </message>
     <message>
+        <location filename="../widgets/activeStations.cpp" line="22"/>
+        <source>Active Stations</source>
+        <translation>Stații active</translation>
+    </message>
+    <message>
         <location filename="../widgets/activeStations.cpp" line="96"/>
         <source>Message</source>
         <translation>Mesaj</translation>
@@ -319,6 +324,14 @@
         <location filename="../qml/decodium/components/BugReportDialog.qml" line="357"/>
         <source>Close</source>
         <translation>Închide</translation>
+    </message>
+</context>
+<context>
+    <name>CAboutDlg</name>
+    <message>
+        <location filename="../widgets/about.ui" line="9"/>
+        <source>About Decodium</source>
+        <translation>Despre Decodium</translation>
     </message>
 </context>
 <context>
@@ -993,6 +1006,14 @@ Apasă Monitor pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>DecodiumUpdater</name>
+    <message>
+        <location filename="../DecodiumUpdater.cpp" line="221"/>
+        <source>Decodium is up to date (%1).</source>
+        <translation>Decodium este actualizat (%1).</translation>
+    </message>
+</context>
+<context>
     <name>DevOverlay</name>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DevOverlay.qml" line="347"/>
@@ -1051,6 +1072,14 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxClusterPanel.qml" line="340"/>
         <source>Clear</source>
         <translation>Golește</translation>
+    </message>
+</context>
+<context>
+    <name>DxPeditionWorkspace</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/DxPeditionWorkspace.qml" line="537"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
     </message>
 </context>
 <context>
@@ -1237,6 +1266,14 @@ Apasă Monitor pentru a începe</translation>
     </message>
 </context>
 <context>
+    <name>InfoDialog</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/InfoDialog.qml" line="528"/>
+        <source>Subject</source>
+        <translation>Subiect</translation>
+    </message>
+</context>
+<context>
     <name>IonosphericForecastWindow</name>
     <message>
         <location filename="../widgets/IonosphericForecastWindow.cpp" line="69"/>
@@ -1297,6 +1334,16 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>LiveMapPanel</name>
     <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="308"/>
+        <source>Dock</source>
+        <translation>Andochează</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/LiveMapPanel.qml" line="308"/>
+        <source>Detach</source>
+        <translation>Desprinde</translation>
+    </message>
+    <message>
         <source>%1 QSO · %2 QSL</source>
         <translation>%1 QSO · %2 QSL</translation>
     </message>
@@ -1315,6 +1362,10 @@ Apasă Monitor pentru a începe</translation>
     <message>
         <source>Color</source>
         <translation>Culoare</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NOU</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="2429"/>
@@ -1375,6 +1426,11 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="4245"/>
         <source>Add</source>
         <translation>Adaugă</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/LiveMapPanel.qml" line="847"/>
+        <source>Live Map</source>
+        <translation>Hartă în direct</translation>
     </message>
 </context>
 <context>
@@ -1871,17 +1927,99 @@ Apasă Monitor pentru a începe</translation>
 <context>
     <name>MacroDialog</name>
     <message>
+        <location filename="../qml/decodium/components/MacroDialog.qml" line="95"/>
+        <source>⌨️ TX Macro Configuration</source>
+        <translation>⌨️ Configurarea macrourilor de emisie</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="131"/>
         <source>Minimize</source>
         <translation>Minimizează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialog.qml" line="184"/>
+        <source>Contest Mode</source>
+        <translation>Mod concurs</translation>
+    </message>
+</context>
+<context>
+    <name>MacroDialogContent</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/MacroDialogContent.qml" line="35"/>
+        <source>Contest Mode</source>
+        <translation>Mod concurs</translation>
     </message>
 </context>
 <context>
     <name>Main</name>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9960"/>
+        <source>Slow-PC mode</source>
+        <translation>Mod pentru calculatoare lente</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9976"/>
+        <source>If Decodium feels slow or the graphics freeze on this computer, you can turn on Slow-PC mode: it switches to OpenGL graphics (stable on older video cards), lightens CPU usage, and hides the heavy Live Map.
+
+Turn it on now? You can change this anytime in Settings.</source>
+        <translation>Dacă Decodium pare lent sau grafica îngheață pe acest calculator, poți porni modul pentru calculatoare lente: trece la grafica OpenGL (stabilă pe plăci video mai vechi), reduce încărcarea procesorului și ascunde harta în direct, care este grea.
+
+Îl pornim acum? Poți schimba oricând din Setări.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7987"/>
+        <source>Clear Full Spectrum</source>
+        <translation>Golește spectrul complet</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10814"/>
+        <source>About Decodium</source>
+        <translation>Despre Decodium</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10831"/>
+        <source>Useful Links...</source>
+        <translation>Legături utile...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10855"/>
+        <source>Keyboard Shortcuts</source>
+        <translation>Scurtături de tastatură</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10871"/>
+        <source>SWL Mode (RX Only)</source>
+        <translation>Mod SWL (doar recepție)</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="10887"/>
         <source>Multi-Answer Mode</source>
         <translation>Mod cu răspunsuri multiple</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10903"/>
+        <source>MAM Window...</source>
+        <translation>Fereastra MAM...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10943"/>
+        <source>TX Watchdog</source>
+        <translation>Supraveghetor de emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10959"/>
+        <source>Contest Mode</source>
+        <translation>Mod concurs</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11258"/>
+        <source>Show clock</source>
+        <translation>Arată ceasul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11689"/>
+        <source>Rule: 1 point per worked station</source>
+        <translation>Regulă: 1 punct pentru fiecare stație lucrată</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="10999"/>
@@ -1889,9 +2027,85 @@ Apasă Monitor pentru a începe</translation>
         <translation>Doar CQ</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="9233"/>
+        <source>Detach</source>
+        <translation>Desprinde</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9245"/>
+        <source>Detach the DX Cluster to a window</source>
+        <translation>Desprinde clusterul DX într-o fereastră</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9876"/>
+        <source>Bring all floating windows back into the main window
+and re-center Decodium on the primary monitor?
+
+The saved coordinates will be cleared.</source>
+        <translation>Readuci toate ferestrele desprinse în fereastra principală
+și recentrezi Decodium pe monitorul principal?
+
+Coordonatele salvate vor fi șterse.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9946"/>
+        <source>The legacy radio backend reported a problem.</source>
+        <translation>Modulul radio vechi a semnalat o problemă.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9966"/>
+        <source>Hide details</source>
+        <translation>Ascunde detaliile</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9966"/>
+        <source>Show details</source>
+        <translation>Arată detaliile</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10919"/>
+        <source>Open ALL.TXT folder</source>
+        <translation>Deschide dosarul ALL.TXT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11015"/>
+        <source>My Call Only</source>
+        <translation>Doar indicativul meu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11039"/>
+        <source>Deep Search</source>
+        <translation>Căutare profundă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11055"/>
+        <source>Avg Decode</source>
+        <translation>Decodificare mediată</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11089"/>
+        <source>VHF/UHF Features</source>
+        <translation>Funcții VHF/UHF</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11113"/>
+        <source>Record RX</source>
+        <translation>Înregistrează recepția</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11129"/>
+        <source>Record TX</source>
+        <translation>Înregistrează emisia</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="12928"/>
         <source>decodes</source>
         <translation>decodificări</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="13660"/>
+        <source>msgs</source>
+        <translation>mesaje</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="12942"/>
@@ -1899,9 +2113,480 @@ Apasă Monitor pentru a începe</translation>
         <translation>Golește</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="991"/>
+        <source>Full screen</source>
+        <translation>Ecran complet</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="1994"/>
+        <source>Decodium is up to date (%1).</source>
+        <translation>Decodium este actualizat (%1).</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="3456"/>
+        <source>Valid range: 100-5000 Hz</source>
+        <translation>Interval valid: 100-5000 Hz</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="3539"/>
+        <source>Dock the Waterfall here</source>
+        <translation>Andochează cascada aici</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4055"/>
+        <source>Click: sync NTP now to align DT (FT8/FT4)</source>
+        <translation>Clic: sincronizează NTP acum pentru a alinia DT (FT8/FT4)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4293"/>
+        <source>Gallager — deep dig for weak signals.
+Enables a second decoding pass (LDPC subpass
+parallelized across cores, named after R. Gallager, father of LDPC)
+that recovers near-noise stations missed by the normal decode.
+Requires a multi-core CPU: on old PCs it may burden the audio
+→ in that case leave it off.</source>
+        <translation>Gallager — săpătură adâncă după semnale slabe.
+Activează o a doua trecere de decodificare (subtrecere LDPC
+paralelizată pe nuclee, numită după R. Gallager, părintele LDPC)
+care recuperează stațiile de la limita zgomotului, pierdute la decodificarea normală.
+Cere un procesor cu mai multe nuclee: pe calculatoare vechi poate încărca audio
+→ în acest caz lasă-l oprit.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4632"/>
+        <source>Click: open a WAV file
+Right-click: decode a folder</source>
+        <translation>Clic: deschide un fișier WAV
+Clic dreapta: decodifică un dosar</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4732"/>
+        <source>Reset layout (Ctrl+Shift+L)</source>
+        <translation>Resetează aranjarea (Ctrl+Shift+L)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4764"/>
+        <source>Decode history (Ctrl+Shift+H)</source>
+        <translation>Istoricul decodificărilor (Ctrl+Shift+H)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
+        <source>Weak-signal / DX</source>
+        <translation>Semnale slabe / DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
+        <source>Contest</source>
+        <translation>Concurs</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
+        <source>CPU-limited</source>
+        <translation>Procesor limitat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5102"/>
+        <source>Drag to reposition the clock</source>
+        <translation>Trage pentru a muta ceasul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5603"/>
+        <source>Restore astronomical data</source>
+        <translation>Readu datele astronomice</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5879"/>
+        <source>Bypass CQ/My Call and setup filters</source>
+        <translation>Ocolește filtrele CQ / indicativ propriu și cele din setări</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5926"/>
+        <source>Restore Macro configuration</source>
+        <translation>Readu configurația macrourilor</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6186"/>
+        <source>Restore TX panel</source>
+        <translation>Readu panoul de emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6441"/>
+        <source>Clock</source>
+        <translation>Ceas</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6656"/>
+        <source>Dock Waterfall</source>
+        <translation>Andochează cascada</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6656"/>
+        <source>Waterfall detached</source>
+        <translation>Cascadă desprinsă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6664"/>
+        <source>Use Dock to re-attach it</source>
+        <translation>Folosește Andochează pentru a o reatașa</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7794"/>
+        <source>Drag the window here</source>
+        <translation>Trage fereastra aici</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7979"/>
+        <source>Return to normal row height</source>
+        <translation>Revino la înălțimea normală a rândurilor</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="7980"/>
+        <source>Compact rows (2x visible decodes)</source>
+        <translation>Rânduri compacte (de două ori mai multe decodificări vizibile)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8028"/>
+        <source>◀  Move left</source>
+        <translation>◀  Mută la stânga</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8029"/>
+        <source>Move right  ▶</source>
+        <translation>Mută la dreapta  ▶</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8030"/>
+        <source>Hide this column</source>
+        <translation>Ascunde această coloană</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8036"/>
+        <source>✓  Message</source>
+        <translation>✓  Mesaj</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8041"/>
+        <source>Newest on top</source>
+        <translation>Cele mai noi sus</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8043"/>
+        <source>Reset columns</source>
+        <translation>Resetează coloanele</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8557"/>
+        <source>Go to the latest decode</source>
+        <translation>Mergi la ultima decodificare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="14804"/>
+        <source>Insert into layout:</source>
+        <translation>Inserează în aranjare:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="14811"/>
+        <source>◧ next to Full Spectrum</source>
+        <translation>◧ lângă spectrul complet</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="14812"/>
+        <source>◧ next to Signal RX</source>
+        <translation>◧ lângă Signal RX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9507"/>
+        <source>Drag to swap the column</source>
+        <translation>Trage pentru a schimba coloana</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9718"/>
+        <source>Detach TX panel</source>
+        <translation>Desprinde panoul de emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11199"/>
+        <source>Report a problem...</source>
+        <translation>Raportează o problemă...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11215"/>
+        <source>Checking...</source>
+        <translation>Se verifică...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11215"/>
+        <source>Check for updates...</source>
+        <translation>Caută actualizări...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11230"/>
+        <source>Esporta Cabrillo...</source>
+        <translation>Exportă Cabrillo...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11440"/>
+        <source>Waterfall / Panadapter</source>
+        <translation>Cascadă / Panadaptor</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11757"/>
+        <source>F9: toggle RX-only 1st/2nd</source>
+        <translation>F9: comută recepția doar pe perioada 1 sau 2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11758"/>
+        <source>Escape: Halt (immediate TX stop)</source>
+        <translation>Escape: oprire imediată a emisiei</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11768"/>
+        <source>Ctrl+A: toggle Auto Sequence</source>
+        <translation>Ctrl+A: comută secvențierea automată</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11770"/>
+        <source>Ctrl+Z: toggle ZAP mode</source>
+        <translation>Ctrl+Z: comută modul ZAP</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11780"/>
+        <source>Alt+L: log the current QSO</source>
+        <translation>Alt+L: înregistrează QSO-ul curent</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11781"/>
+        <source>Alt+M: clear the decode list (Monitor)</source>
+        <translation>Alt+M: golește lista decodificărilor (Monitor)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11782"/>
+        <source>Alt+S: stop TX</source>
+        <translation>Alt+S: oprește emisia</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12063"/>
+        <source>Dock</source>
+        <translation>Andochează</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12539"/>
+        <source>⌨️ TX Macro Configuration</source>
+        <translation>⌨️ Configurarea macrourilor de emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="14288"/>
+        <source>Dock TX panel</source>
+        <translation>Andochează panoul de emisie</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11072"/>
+        <source>Hide ASYNC icon</source>
+        <translation>Ascunde pictograma ASYNC</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="2054"/>
+        <source>Open WAV file for decoding</source>
+        <translation>Deschide un fișier WAV pentru decodificare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="2056"/>
+        <source>File WAV (*.wav)</source>
+        <translation>Fișier WAV (*.wav)</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/Main.qml" line="2056"/>
         <source>All files (*)</source>
         <translation>Toate fișierele (*)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="2064"/>
+        <source>Select folder with WAV files</source>
+        <translation>Alege dosarul cu fișiere WAV</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4138"/>
+        <source>Auto RX level active</source>
+        <translation>Nivel de recepție automat activ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4139"/>
+        <source>Auto RX level disabled</source>
+        <translation>Nivel de recepție automat dezactivat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5293"/>
+        <source>Search city...</source>
+        <translation>Caută orașul...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5401"/>
+        <source>Type a city name</source>
+        <translation>Scrie numele unui oraș</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5401"/>
+        <source>No matching city</source>
+        <translation>Niciun oraș găsit</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5436"/>
+        <source>Analog clock</source>
+        <translation>Ceas analogic</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5440"/>
+        <source>Digital clock</source>
+        <translation>Ceas digital</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5444"/>
+        <source>City labels</source>
+        <translation>Etichete de orașe</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5451"/>
+        <source>Hide clock</source>
+        <translation>Ascunde ceasul</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5499"/>
+        <source>Restore Waterfall</source>
+        <translation>Readu cascada</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5551"/>
+        <source>Restore QSO Log</source>
+        <translation>Readu jurnalul QSO</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5660"/>
+        <source>Restore Live Map</source>
+        <translation>Readu harta în direct</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5801"/>
+        <source>DX Cluster
+Left-click: open and connect
+Right-click: disconnect</source>
+        <translation>Cluster DX
+Clic stânga: deschide și conectează
+Clic dreapta: deconectează</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5878"/>
+        <source>Disable filter bypass</source>
+        <translation>Dezactivează ocolirea filtrelor</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="5978"/>
+        <source>Restore Rig Control</source>
+        <translation>Readu comanda aparatului</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6031"/>
+        <source>Restore Full Spectrum</source>
+        <translation>Readu spectrul complet</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6083"/>
+        <source>Restore Period 2</source>
+        <translation>Readu perioada 2</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6134"/>
+        <source>Restore Signal RX</source>
+        <translation>Readu Signal RX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8010"/>
+        <source>Detach Full Spectrum</source>
+        <translation>Desprinde spectrul complet</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8743"/>
+        <source>Clear Signal RX</source>
+        <translation>Golește Signal RX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="8808"/>
+        <source>Detach Signal RX</source>
+        <translation>Desprinde Signal RX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="9860"/>
+        <source>Reset Layout</source>
+        <translation>Resetează aranjarea</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10177"/>
+        <source>Notifica</source>
+        <translation>Notificare</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="10983"/>
+        <source>Bypass Filters</source>
+        <translation>Ocolește filtrele</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11073"/>
+        <source>Show ASYNC icon</source>
+        <translation>Arată pictograma ASYNC</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11153"/>
+        <source>Alert on CQ</source>
+        <translation>Avertizare la CQ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11174"/>
+        <source>Color Highlighting...</source>
+        <translation>Evidențiere cu culori...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11186"/>
+        <source>QSY...</source>
+        <translation>QSY...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11242"/>
+        <source>cty.dat downloading...</source>
+        <translation>se descarcă cty.dat...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11242"/>
+        <source>Update cty.dat</source>
+        <translation>Actualizează cty.dat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11273"/>
+        <source>Show DX Cluster</source>
+        <translation>Arată clusterul DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11288"/>
+        <source>Show PSK Reporter</source>
+        <translation>Arată PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11412"/>
+        <source>Time Sync Panel</source>
+        <translation>Panoul de sincronizare orară</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11426"/>
+        <source>Active Stations</source>
+        <translation>Stații active</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11455"/>
+        <source>Live Map</source>
+        <translation>Hartă în direct</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11470"/>
+        <source>Astro / EME</source>
+        <translation>Astro / EME</translation>
     </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="11485"/>
@@ -1909,9 +2594,198 @@ Apasă Monitor pentru a începe</translation>
         <translation>Monitor DecoSyncTime</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/Main.qml" line="11499"/>
+        <source>DX Cluster Panel</source>
+        <translation>Panoul clusterului DX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="11513"/>
+        <source>Alert on My Call</source>
+        <translation>Avertizare la indicativul meu</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4858"/>
+        <source>Balanced</source>
+        <translation>Echilibrat</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4859"/>
+        <source>Profiles...</source>
+        <translation>Profiluri...</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="4864"/>
+        <source>Ready profiles - apply FT2/decode toggles as a group. Details in Setup -&gt; TX.</source>
+        <translation>Profiluri gata făcute - aplică în bloc comutatoarele FT2 și de decodificare. Detalii în Setări -&gt; TX.</translation>
+    </message>
+    <message>
+        <source>Active on bands during the last %1 minutes:</source>
+        <translation>Active în benzi în ultimele %1 minute:</translation>
+    </message>
+    <message>
+        <source>Astronomical Data - Decodium</source>
+        <translation>Date astronomice - Decodium</translation>
+    </message>
+    <message>
+        <source>Satellite tracking - Decodium</source>
+        <translation>Urmărire sateliți - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6493"/>
+        <source>Switch to the dark theme</source>
+        <translation>Treci la tema închisă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="6494"/>
+        <source>Switch to the light theme</source>
+        <translation>Treci la tema deschisă</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="15320"/>
+        <source>Decodium found a radio connected to this computer. Applying the proposal sets the CAT port, the model and the audio devices, so you can start without hunting for the right COM port.</source>
+        <translation>Decodium a găsit un aparat radio conectat la acest calculator. Aplicarea propunerii setează portul CAT, modelul și dispozitivele audio, ca să poți începe fără să cauți portul COM potrivit.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="1111"/>
+        <source>F11 / Esc</source>
+        <translation>F11 / Esc</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3319"/>
+        <source>FT2-Link access</source>
+        <translation>Acces FT2-Link</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3327"/>
+        <source>Enter password to unlock this mode.</source>
+        <translation>Introdu parola pentru a debloca acest mod.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3336"/>
+        <source>Password</source>
+        <translation>Parolă</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3372"/>
+        <source>Unlock</source>
+        <translation>Deblochează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3478"/>
+        <source>Based on WSJT-X by K1JT et al.</source>
+        <translation>Bazat pe WSJT-X de K1JT și colaboratorii.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3485"/>
+        <source>QML Interface by IU8LMC</source>
+        <translation>Interfață QML de IU8LMC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3677"/>
+        <source>No recent activity found
+(last 15 minutes)</source>
+        <translation>Nicio activitate recentă
+(ultimele 15 minute)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3914"/>
+        <source>Menu</source>
+        <translation>Meniu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="4875"/>
+        <source>Setup</source>
+        <translation>Setări</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5036"/>
+        <source>Layout</source>
+        <translation>Aranjare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="5070"/>
+        <source>History</source>
+        <translation>Istoric</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6066"/>
+        <source>Auto Spot</source>
+        <translation>Raportare automată</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6143"/>
+        <source>Bypass</source>
+        <translation>Ocolire</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6150"/>
+        <source>Filters</source>
+        <translation>Filtre</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6502"/>
+        <source>PSK Reporter</source>
+        <translation>PSK Reporter</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="6713"/>
+        <source>Reset</source>
+        <translation>Resetează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7169"/>
+        <source>Detach Waterfall</source>
+        <translation>Desprinde cascada</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="7983"/>
+        <source>FT2-Link popped out</source>
+        <translation>FT2-Link desprins</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="8873"/>
         <source>No decodes</source>
         <translation>Nicio decodificare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10435"/>
+        <source>Configure radio</source>
+        <translation>Configurează aparatul</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="10444"/>
+        <source>Retry</source>
+        <translation>Reîncearcă</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="11070"/>
+        <source>Decodium reported a non-blocking problem.</source>
+        <translation>Decodium a semnalat o problemă care nu blochează funcționarea.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12047"/>
+        <source>Export Cabrillo</source>
+        <translation>Exportă Cabrillo</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12059"/>
+        <source>Output file path:</source>
+        <translation>Calea fișierului de ieșire:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12076"/>
+        <source>Export</source>
+        <translation>Exportă</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12111"/>
+        <source>Watchdog Mode</source>
+        <translation>Mod supraveghetor</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12121"/>
+        <source>Off</source>
+        <translation>Oprit</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12127"/>
@@ -1919,9 +2793,139 @@ Apasă Monitor pentru a începe</translation>
         <translation>Ora</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12133"/>
+        <source>Count</source>
+        <translation>Număr</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12142"/>
+        <source>Time (min):</source>
+        <translation>Timp (min):</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12153"/>
+        <source>Max TX:</source>
+        <translation>Emisii maxime:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12188"/>
+        <source>Contest Type</source>
+        <translation>Tip de concurs</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12213"/>
+        <source>Exchange</source>
+        <translation>Schimb de control</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12224"/>
+        <source>Example: 599 001</source>
+        <translation>Exemplu: 599 001</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12231"/>
+        <source>Serial Number:</source>
+        <translation>Număr de ordine:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12266"/>
+        <source>TRANSMISSION</source>
+        <translation>EMISIE</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12271"/>
+        <source>F1 - F7: Select TX1 - TX7</source>
+        <translation>F1 - F7: selectează TX1 - TX7</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12278"/>
+        <source>CONTROLS (Ctrl+)</source>
+        <translation>COMENZI (Ctrl+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12284"/>
+        <source>Ctrl+G: Generate all TX messages</source>
+        <translation>Ctrl+G: generează toate mesajele de emisie</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12290"/>
+        <source>ACTIONS (Alt+)</source>
+        <translation>ACȚIUNI (Alt+)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12320"/>
+        <source>Waterfall - Decodium</source>
+        <translation>Cascadă - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12498"/>
+        <source>Zoom:</source>
+        <translation>Mărire:</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12625"/>
         <source>Minimize</source>
         <translation>Minimizează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12722"/>
+        <source>QSO Log - Decodium</source>
+        <translation>Jurnal QSO - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="12779"/>
+        <source>📋 QSO Log</source>
+        <translation>📋 Jurnal QSO</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13016"/>
+        <source>Macro - Decodium</source>
+        <translation>Macrouri - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13147"/>
+        <source>Rig Control - Decodium</source>
+        <translation>Comanda aparatului - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13201"/>
+        <source>📻 Rig Control (CAT)</source>
+        <translation>📻 Comanda aparatului (CAT)</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13252"/>
+        <source>Live Map - Decodium</source>
+        <translation>Hartă în direct - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="13330"/>
+        <source>Full Spectrum - Decodium</source>
+        <translation>Spectru complet - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14057"/>
+        <source>Period 2 - Decodium</source>
+        <translation>Perioada 2 - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14092"/>
+        <source>Signal RX - Decodium</source>
+        <translation>Signal RX - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14572"/>
+        <source>TX Panel - Decodium</source>
+        <translation>Panou de emisie - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="14899"/>
+        <source>FT2-Link - Decodium</source>
+        <translation>FT2-Link - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="15302"/>
+        <source>DX Cluster - Decodium</source>
+        <translation>Cluster DX - Decodium</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/Main.qml" line="3001"/>
@@ -1977,6 +2981,11 @@ Apasă Monitor pentru a începe</translation>
         <translation>Doar CQ</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="5946"/>
+        <source>Active Stations</source>
+        <translation>Stații active</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="1177"/>
         <source>DX Call</source>
         <translation>Indicativ DX</translation>
@@ -1990,6 +2999,11 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../widgets/mainwindow.ui" line="3155"/>
         <source>Grid</source>
         <translation>Locator</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="3085"/>
+        <source>Reset</source>
+        <translation>Resetează</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="3150"/>
@@ -2007,9 +3021,19 @@ Apasă Monitor pentru a începe</translation>
         <translation>Cluster DX</translation>
     </message>
     <message>
+        <location filename="../widgets/mainwindow.ui" line="5130"/>
+        <source>Filters</source>
+        <translation>Filtre</translation>
+    </message>
+    <message>
         <location filename="../widgets/mainwindow.ui" line="5297"/>
         <source>Mode</source>
         <translation>Mod</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.ui" line="5362"/>
+        <source>About Decodium</source>
+        <translation>Despre Decodium</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.ui" line="5406"/>
@@ -2030,6 +3054,16 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../widgets/mainwindow.cpp" line="11962"/>
         <source>Confirm Delete</source>
         <translation>Confirmă ștergerea</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="12000"/>
+        <source>Keyboard Shortcuts</source>
+        <translation>Scurtături de tastatură</translation>
+    </message>
+    <message>
+        <location filename="../widgets/mainwindow.cpp" line="9372"/>
+        <source>Check for updates...</source>
+        <translation>Caută actualizări...</translation>
     </message>
     <message>
         <location filename="../widgets/mainwindow.cpp" line="24802"/>
@@ -2156,6 +3190,11 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../widgets/QSYMessageCreator.ui" line="574"/>
         <source>Band</source>
         <translation>Bandă</translation>
+    </message>
+    <message>
+        <location filename="../widgets/QSYMessageCreator.ui" line="614"/>
+        <source>SAVE</source>
+        <translation>SALVEAZĂ</translation>
     </message>
 </context>
 <context>
@@ -2310,6 +3349,11 @@ Adaugă din coadă</translation>
         <translation>Închide</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="1581"/>
+        <source>Filters</source>
+        <translation>Filtre</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1413"/>
         <source>Cancel</source>
         <translation>Anulează</translation>
@@ -2318,6 +3362,16 @@ Adaugă din coadă</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1418"/>
         <source>Apply</source>
         <translation>Aplică</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3084"/>
+        <source>Auto RX level active</source>
+        <translation>Nivel de recepție automat activ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="3085"/>
+        <source>Auto RX level disabled</source>
+        <translation>Nivel de recepție automat dezactivat</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="6265"/>
@@ -2338,6 +3392,11 @@ Adaugă din coadă</translation>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="4238"/>
         <source>Time</source>
         <translation>Ora</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4238"/>
+        <source>Count</source>
+        <translation>Număr</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="1903"/>
@@ -2370,9 +3429,19 @@ Adaugă din coadă</translation>
         <translation>Mod:</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="871"/>
+        <source>Off</source>
+        <translation>Oprit</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="7259"/>
         <source>Palette:</source>
         <translation>Paletă:</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/SettingsDialog.qml" line="4850"/>
+        <source>Reset</source>
+        <translation>Resetează</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5457"/>
@@ -2437,11 +3506,47 @@ Adaugă din coadă</translation>
     </message>
 </context>
 <context>
+    <name>SettingsTab2</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="727"/>
+        <source>Auto RX level active</source>
+        <translation>Nivel de recepție automat activ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="728"/>
+        <source>Auto RX level disabled</source>
+        <translation>Nivel de recepție automat dezactivat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab2.qml" line="705"/>
+        <source>Off</source>
+        <translation>Oprit</translation>
+    </message>
+</context>
+<context>
     <name>SettingsTab3</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
+        <source>Off</source>
+        <translation>Oprit</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
         <source>Time</source>
         <translation>Ora</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="1131"/>
+        <source>Count</source>
+        <translation>Număr</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTab4</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab4.qml" line="500"/>
+        <source>Reset</source>
+        <translation>Resetează</translation>
     </message>
 </context>
 <context>
@@ -2468,6 +3573,11 @@ Adaugă din coadă</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="71"/>
         <source>Refresh</source>
         <translation>Reîmprospătează</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="139"/>
+        <source>Reset</source>
+        <translation>Resetează</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab7.qml" line="200"/>
@@ -2507,6 +3617,11 @@ Adaugă din coadă</translation>
 </context>
 <context>
     <name>SettingsTab8</name>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="194"/>
+        <source>Reset</source>
+        <translation>Resetează</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab8.qml" line="217"/>
         <source>Bold</source>
@@ -3212,6 +4327,11 @@ Apasă MONITOR pentru a începe</translation>
 <context>
     <name>WideGraph</name>
     <message>
+        <location filename="../widgets/widegraph.ui" line="275"/>
+        <source>Off</source>
+        <translation>Oprit</translation>
+    </message>
+    <message>
         <location filename="../widgets/widegraph.ui" line="385"/>
         <source>Freq</source>
         <translation>Frecv</translation>
@@ -3293,6 +4413,11 @@ Apasă MONITOR pentru a începe</translation>
         <location filename="../Configuration.ui" line="4514"/>
         <source>CQ in message</source>
         <translation>CQ în mesaj</translation>
+    </message>
+    <message>
+        <location filename="../Configuration.ui" line="4603"/>
+        <source>Filters</source>
+        <translation>Filtre</translation>
     </message>
 </context>
 <context>
@@ -3851,9 +4976,318 @@ DXCC %4 · Locator %5 · WPX %6</translation>
 </context>
 <context>
     <name>FT2LinkPanel</name>
+    <message numerus="yes">
+        <source>%n item</source>
+        <translation>
+            <numerusform>%n element</numerusform>
+            <numerusform>%n elemente</numerusform>
+            <numerusform>%n de elemente</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source> / %n unread</source>
+        <translation>
+            <numerusform> / %n necitit</numerusform>
+            <numerusform> / %n necitite</numerusform>
+            <numerusform> / %n de necitite</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n save pending</source>
+        <translation>
+            <numerusform>%n salvare în așteptare</numerusform>
+            <numerusform>%n salvări în așteptare</numerusform>
+            <numerusform>%n de salvări în așteptare</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>received file</source>
+        <translation>fișier primit</translation>
+    </message>
+    <message>
+        <source>Marked read %1</source>
+        <translation>Marcat ca citit %1</translation>
+    </message>
+    <message>
+        <source>Marked unread %1</source>
+        <translation>Marcat ca necitit %1</translation>
+    </message>
+    <message numerus="yes">
+        <source>Marked read %n received file</source>
+        <translation>
+            <numerusform>Marcat ca citit %n fișier primit</numerusform>
+            <numerusform>Marcate ca citite %n fișiere primite</numerusform>
+            <numerusform>Marcate ca citite %n de fișiere primite</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>No unread received files</source>
+        <translation>Niciun fișier primit necitit</translation>
+    </message>
+    <message>
+        <source>Deleted %1</source>
+        <translation>Șters %1</translation>
+    </message>
+    <message>
+        <source>Delete failed: %1</source>
+        <translation>Ștergere eșuată: %1</translation>
+    </message>
+    <message numerus="yes">
+        <source>Deleted %n read received file</source>
+        <translation>
+            <numerusform>Șters %n fișier primit citit</numerusform>
+            <numerusform>Șterse %n fișiere primite citite</numerusform>
+            <numerusform>Șterse %n de fișiere primite citite</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>No read received files</source>
+        <translation>Niciun fișier primit citit</translation>
+    </message>
+    <message>
+        <source>Received file has no content</source>
+        <translation>Fișierul primit nu are conținut</translation>
+    </message>
+    <message>
+        <source>Asynchronous file saving is unavailable</source>
+        <translation>Salvarea asincronă a fișierelor este indisponibilă</translation>
+    </message>
+    <message>
+        <source>Save already in progress</source>
+        <translation>O salvare este deja în curs</translation>
+    </message>
+    <message>
+        <source>Unable to queue received file save</source>
+        <translation>Nu se poate pune la coadă salvarea fișierului primit</translation>
+    </message>
+    <message>
+        <source>Auto-saving %1...</source>
+        <translation>Se salvează automat %1...</translation>
+    </message>
+    <message>
+        <source>Saving %1...</source>
+        <translation>Se salvează %1...</translation>
+    </message>
+    <message>
+        <source>Save As is unavailable</source>
+        <translation>Salvarea sub alt nume este indisponibilă</translation>
+    </message>
+    <message>
+        <source>Save FT2-Link received file as</source>
+        <translation>Salvează fișierul primit prin FT2-Link ca</translation>
+    </message>
     <message>
         <source>All files (*)</source>
         <translation>Toate fișierele (*)</translation>
+    </message>
+    <message>
+        <source>Text files (*.txt *.md *.log *.csv *.json)</source>
+        <translation>Fișiere text (*.txt *.md *.log *.csv *.json)</translation>
+    </message>
+    <message>
+        <source>Images (*.png *.jpg *.jpeg *.gif *.bmp)</source>
+        <translation>Imagini (*.png *.jpg *.jpeg *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <source>Save As cancelled</source>
+        <translation>Salvare sub alt nume anulată</translation>
+    </message>
+    <message>
+        <source>Folder selection is unavailable</source>
+        <translation>Alegerea dosarului este indisponibilă</translation>
+    </message>
+    <message>
+        <source>Select FT2-Link received files folder</source>
+        <translation>Alege dosarul fișierelor primite prin FT2-Link</translation>
+    </message>
+    <message>
+        <source>Receive folder: %1</source>
+        <translation>Dosar de primire: %1</translation>
+    </message>
+    <message>
+        <source>Open folder is unavailable</source>
+        <translation>Deschiderea dosarului este indisponibilă</translation>
+    </message>
+    <message>
+        <source>Opening received files folder...</source>
+        <translation>Se deschide dosarul fișierelor primite...</translation>
+    </message>
+    <message>
+        <source>unknown error</source>
+        <translation>eroare necunoscută</translation>
+    </message>
+    <message>
+        <source>Auto-save failed: %1</source>
+        <translation>Salvarea automată a eșuat: %1</translation>
+    </message>
+    <message>
+        <source>Save failed: %1</source>
+        <translation>Salvarea a eșuat: %1</translation>
+    </message>
+    <message>
+        <source>Auto-saved %1</source>
+        <translation>Salvat automat %1</translation>
+    </message>
+    <message>
+        <source>Saved %1</source>
+        <translation>Salvat %1</translation>
+    </message>
+    <message>
+        <source>Opened %1</source>
+        <translation>Deschis %1</translation>
+    </message>
+    <message>
+        <source>receive folder</source>
+        <translation>dosar de primire</translation>
+    </message>
+    <message>
+        <source>Open folder failed: %1</source>
+        <translation>Deschiderea dosarului a eșuat: %1</translation>
+    </message>
+    <message>
+        <source>RECEIVED FILES</source>
+        <translation>FIȘIERE PRIMITE</translation>
+    </message>
+    <message>
+        <source>AUTO ON</source>
+        <translation>AUTO PORNIT</translation>
+    </message>
+    <message>
+        <source>AUTO OFF</source>
+        <translation>AUTO OPRIT</translation>
+    </message>
+    <message>
+        <source>Automatically save new files in the receive folder</source>
+        <translation>Salvează automat fișierele noi în dosarul de primire</translation>
+    </message>
+    <message>
+        <source>FOLDER</source>
+        <translation>DOSAR</translation>
+    </message>
+    <message>
+        <source>Choose the received files folder</source>
+        <translation>Alege dosarul fișierelor primite</translation>
+    </message>
+    <message>
+        <source>OPEN</source>
+        <translation>DESCHIDE</translation>
+    </message>
+    <message>
+        <source>Open the received files folder</source>
+        <translation>Deschide dosarul fișierelor primite</translation>
+    </message>
+    <message>
+        <source>READ ALL</source>
+        <translation>TOATE CITITE</translation>
+    </message>
+    <message>
+        <source>Clear unread marker for all received files</source>
+        <translation>Șterge marcajul de necitit pentru toate fișierele primite</translation>
+    </message>
+    <message>
+        <source>CLEAR</source>
+        <translation>GOLEȘTE</translation>
+    </message>
+    <message>
+        <source>Delete received files already marked read</source>
+        <translation>Șterge fișierele primite deja marcate ca citite</translation>
+    </message>
+    <message>
+        <source>NEW</source>
+        <translation>NOU</translation>
+    </message>
+    <message>
+        <source>IMG</source>
+        <translation>IMG</translation>
+    </message>
+    <message>
+        <source>FILE</source>
+        <translation>FIȘIER</translation>
+    </message>
+    <message>
+        <source>SAVE</source>
+        <translation>SALVEAZĂ</translation>
+    </message>
+    <message>
+        <source>Save to the configured receive folder</source>
+        <translation>Salvează în dosarul de primire configurat</translation>
+    </message>
+    <message>
+        <source>SAVE AS</source>
+        <translation>SALVEAZĂ CA</translation>
+    </message>
+    <message>
+        <source>Save with another name or in another folder</source>
+        <translation>Salvează cu alt nume sau în alt dosar</translation>
+    </message>
+    <message>
+        <source>READ</source>
+        <translation>CITIT</translation>
+    </message>
+    <message>
+        <source>UNREAD</source>
+        <translation>NECITIT</translation>
+    </message>
+    <message>
+        <source>Mark received file as read</source>
+        <translation>Marchează fișierul primit ca citit</translation>
+    </message>
+    <message>
+        <source>Mark received file as unread</source>
+        <translation>Marchează fișierul primit ca necitit</translation>
+    </message>
+    <message>
+        <source>COPY</source>
+        <translation>COPIAZĂ</translation>
+    </message>
+    <message>
+        <source>Copy received file content</source>
+        <translation>Copiază conținutul fișierului primit</translation>
+    </message>
+    <message>
+        <source>Copied %1</source>
+        <translation>Copiat %1</translation>
+    </message>
+    <message>
+        <source>DEL</source>
+        <translation>ȘTERGE</translation>
+    </message>
+    <message>
+        <source>Delete this received file entry</source>
+        <translation>Șterge această intrare de fișier primit</translation>
+    </message>
+    <message>
+        <source>No received files</source>
+        <translation>Niciun fișier primit</translation>
+    </message>
+    <message>
+        <source>Folder: %1</source>
+        <translation>Dosar: %1</translation>
+    </message>
+    <message>
+        <source>Waiting for files in %1</source>
+        <translation>Se așteaptă fișiere în %1</translation>
+    </message>
+    <message>
+        <source>Cannot create receive directory: %1</source>
+        <translation>Nu se poate crea dosarul de primire: %1</translation>
+    </message>
+    <message>
+        <source>Received binary file has no data</source>
+        <translation>Fișierul binar primit nu conține date</translation>
+    </message>
+    <message>
+        <source>Received binary file has invalid Base64 data</source>
+        <translation>Fișierul binar primit are date Base64 nevalide</translation>
+    </message>
+    <message>
+        <source>The system file manager could not open the receive directory</source>
+        <translation>Managerul de fișiere al sistemului nu a putut deschide dosarul de primire</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5421"/>
+        <source>FT2-LINK</source>
+        <translation>FT2-LINK</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5612"/>
@@ -3861,14 +5295,444 @@ DXCC %4 · Locator %5 · WPX %6</translation>
         <translation>Doar CQ</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="5651"/>
+        <source>AUTO CQ</source>
+        <translation>AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6005"/>
+        <source>LOOP ACK</source>
+        <translation>LOOP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6094"/>
+        <source>No sessions</source>
+        <translation>Nicio sesiune</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6194"/>
+        <source>DROP DATA</source>
+        <translation>DROP DATA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6203"/>
+        <source>DROP ACK</source>
+        <translation>DROP ACK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6797"/>
+        <source>No tags</source>
+        <translation>Nicio etichetă</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6847"/>
+        <source>SET CF</source>
+        <translation>SET CF</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6856"/>
+        <source>CF TAG</source>
+        <translation>CF TAG</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="6894"/>
         <source>Message</source>
         <translation>Mesaj</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7015"/>
+        <source>key=value; key=value</source>
+        <translation>key=value; key=value</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7232"/>
+        <source>BBS group. Empty means ALL.</source>
+        <translation>Grup BBS. Gol înseamnă TOȚI.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7269"/>
+        <source>Bulletin title</source>
+        <translation>Titlul buletinului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7276"/>
+        <source>Short BBS subject/title.</source>
+        <translation>Subiect sau titlu scurt pentru BBS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7311"/>
+        <source>BBS message body</source>
+        <translation>Corpul mesajului BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7319"/>
+        <source>Text to store and send as the BBS bulletin body.</source>
+        <translation>Text de păstrat și trimis ca text al buletinului BBS.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7368"/>
+        <source>server-file.txt</source>
+        <translation>server-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7387"/>
+        <source>BBS server file body</source>
+        <translation>Conținutul fișierului de pe serverul BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7456"/>
+        <source>remote-file.txt</source>
+        <translation>remote-file.txt</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7595"/>
+        <source>No BBS server files</source>
+        <translation>Niciun fișier pe serverul BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7640"/>
+        <source>SAVE GROUP</source>
+        <translation>SALVEAZĂ GRUPUL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7668"/>
+        <source>BBS BULLETINS</source>
+        <translation>BULETINE BBS</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7705"/>
+        <source>MARK ALL READ</source>
+        <translation>MARCHEAZĂ TOT CITIT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7886"/>
+        <source>Broadcast message</source>
+        <translation>Mesaj de difuzare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7928"/>
+        <source>Alert tags: WX, POTA, NET</source>
+        <translation>Etichete de avertizare: WX, POTA, NET</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="7980"/>
+        <source>PATH CALL</source>
+        <translation>PATH CALL</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8108"/>
+        <source>Digipeater payload</source>
+        <translation>Conținutul digipeaterului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8149"/>
+        <source>DIGIPEATER</source>
+        <translation>DIGIPEATER</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8177"/>
+        <source>ALERT CENTER</source>
+        <translation>CENTRUL DE AVERTIZĂRI</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8206"/>
+        <source>CLEAR ARCH</source>
+        <translation>GOLEȘTE ARHIVA</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8370"/>
+        <source>Subject</source>
+        <translation>Subiect</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8381"/>
+        <source>Mail body</source>
+        <translation>Corpul mesajului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8547"/>
+        <source>USE PATH</source>
+        <translation>USE PATH</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8557"/>
+        <source>CALL RLY</source>
+        <translation>CALL RLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8594"/>
+        <source>smtp.host</source>
+        <translation>smtp.host</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8637"/>
+        <source>SMTP user</source>
+        <translation>Utilizator SMTP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8655"/>
+        <source>From email</source>
+        <translation>Adresa expeditorului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8667"/>
+        <source>SMTP password</source>
+        <translation>Parolă SMTP</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="8904"/>
+        <source>No mail</source>
+        <translation>Niciun mesaj</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9072"/>
+        <source>Away message</source>
+        <translation>Mesaj de absență</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9093"/>
+        <source>Welcome message</source>
+        <translation>Mesaj de întâmpinare</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9104"/>
+        <source>AUTO REPLY</source>
+        <translation>AUTO REPLY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9127"/>
+        <source>AUTO AWAY</source>
+        <translation>AUTO AWAY</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9170"/>
+        <source>CALL ID</source>
+        <translation>CALL ID</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9195"/>
+        <source>AUTO DISC</source>
+        <translation>AUTO DISC</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9221"/>
+        <source>PING RX</source>
+        <translation>PING RX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9299"/>
+        <source>LH PEEK</source>
+        <translation>LH PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9308"/>
+        <source>SNR TX</source>
+        <translation>SNR TX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9317"/>
+        <source>VSNR OK</source>
+        <translation>VSNR OK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9326"/>
+        <source>LC PEEK</source>
+        <translation>LC PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9335"/>
+        <source>VM PEEK</source>
+        <translation>VM PEEK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9344"/>
+        <source>VM PARK</source>
+        <translation>VM PARK</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9353"/>
+        <source>INFO REQ</source>
+        <translation>INFO REQ</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9585"/>
         <source>Comment</source>
         <translation>Comentariu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9717"/>
+        <source>No contacts</source>
+        <translation>Niciun contact</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="9877"/>
+        <source>Shared cluster JSON path</source>
+        <translation>Calea fișierului JSON partajat al clusterului</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10019"/>
+        <source>Paste cluster JSON here, or press EXPORT</source>
+        <translation>Lipește aici fișierul JSON al clusterului sau apasă EXPORT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10145"/>
+        <source>No cluster last-heard records</source>
+        <translation>Nicio înregistrare de ultim recepționat din cluster</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10289"/>
+        <source>not tracked</source>
+        <translation>neurmărit</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10406"/>
+        <source>No path reports</source>
+        <translation>Niciun raport de traseu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10572"/>
+        <source>Select an export</source>
+        <translation>Alege un export</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="10712"/>
+        <source>Run audit</source>
+        <translation>Rulează verificarea</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11157"/>
+        <source>description</source>
+        <translation>descriere</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11169"/>
+        <source>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</source>
+        <translation>template text with &lt;MYCALL&gt;, &lt;CALL&gt;, &lt;QTH&gt;...</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11276"/>
+        <source>No custom presets</source>
+        <translation>Niciun preset propriu</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11308"/>
+        <source>county/state</source>
+        <translation>județ/stat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11335"/>
+        <source>weather line optional</source>
+        <translation>rând meteo opțional</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11363"/>
+        <source>Wednesday check-in: MAIL sets address, subject and body; CHAT inserts only the body.</source>
+        <translation>Prezență de miercuri: MAIL setează adresa, subiectul și textul; CHAT introduce doar textul.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11395"/>
+        <source>14105000|20m|Main, 7105000|40m|Main</source>
+        <translation>14105000|20m|Main, 7105000|40m|Main</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11433"/>
+        <source>0000-2359|CALLING|14105000|20m main|CQ</source>
+        <translation>0000-2359|CALLING|14105000|20m main|CQ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11521"/>
+        <source>14101250-14108750|20m, 7101250-7108750|40m</source>
+        <translation>14101250-14108750|20m, 7101250-7108750|40m</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11550"/>
+        <source>FREQ stores calling-frequency presets, UTC schedule windows and allowed QSY ranges. Schedule actions CALLING/CQ/BEACON/EMCOMM/QUIET protect the active frequency; DATA marks a data window. CAT auto-QSY is not performed.</source>
+        <translation>FREQ păstrează frecvențele de apel predefinite, ferestrele orare în UTC și intervalele de QSY permise. Acțiunile CALLING/CQ/BEACON/EMCOMM/QUIET protejează frecvența activă; DATA marchează o fereastră de date. Nu se face QSY automat prin CAT.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11694"/>
+        <source>CALL1, CALL2, Z6/TEST</source>
+        <translation>CALL1, CALL2, Z6/TEST</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11729"/>
+        <source>Add callsign</source>
+        <translation>Adaugă indicativ</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11750"/>
+        <source>Blocked calls cannot start a session, are hidden from last-heard, and their beacon, CQ, ping and broadcast traffic is ignored locally.</source>
+        <translation>Indicativele blocate nu pot deschide o sesiune, nu apar printre ultimele recepționate, iar traficul lor de far, CQ, ping și difuzare este ignorat local.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11819"/>
+        <source>No blocked calls</source>
+        <translation>Niciun indicativ blocat</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11840"/>
+        <source>SATELLITE HALF-DUPLEX</source>
+        <translation>SATELIT SEMI-DUPLEX</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11848"/>
+        <source>Enable independent RX/TX VFOs</source>
+        <translation>Activează VFO-uri independente pentru recepție și emisie</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11863"/>
+        <source>RX MHz</source>
+        <translation>RX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11875"/>
+        <source>downlink dial MHz</source>
+        <translation>frecvența de coborâre în MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11903"/>
+        <source>TX MHz</source>
+        <translation>TX MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11915"/>
+        <source>uplink dial MHz</source>
+        <translation>frecvența de urcare în MHz</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11929"/>
+        <source>SETTLE ms</source>
+        <translation>SETTLE ms</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="11957"/>
+        <source>READ RX/TX FROM RIG</source>
+        <translation>CITEȘTE RX/TX DIN APARAT</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12020"/>
+        <source>Use the normal FT2-Link ARM control for every RF transmission. This mode is half-duplex: receive audio pauses on TX, PTT is released before the RX VFO is restored, and a manual stop follows the same safe return path.</source>
+        <translation>Folosește comanda ARM obișnuită din FT2-Link pentru fiecare emisie. Acest mod este semi-duplex: sunetul de recepție se oprește la emisie, PTT-ul este eliberat înainte de restabilirea VFO-ului de recepție, iar oprirea manuală urmează același drum sigur de întoarcere.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12041"/>
+        <source>QO-100 / cross-band setup</source>
+        <translation>Configurare QO-100 / cross-band</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12050"/>
+        <source>Enter the actual CAT dial frequencies used by your station or transverter. No fixed QO-100 defaults are applied: radio IF plans and transverter offsets differ.</source>
+        <translation>Introdu frecvențele CAT reale folosite de stația sau de transverterul tău. Nu se aplică valori fixe pentru QO-100: planurile de frecvență intermediară și decalajele transverterelor diferă.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12059"/>
+        <source>The normal FT audio-offset split is deliberately bypassed for this mode, so a cross-band TX cannot reuse or move the FT2-Link chat/session view.</source>
+        <translation>În acest mod se ocolește intenționat split-ul obișnuit prin decalaj audio al modurilor FT, astfel încât o emisie cross-band să nu poată refolosi sau muta vederea de conversație și sesiune din FT2-Link.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/panels/FT2LinkPanel.qml" line="12070"/>
+        <source>CAT diagnostics are recorded with the [FT2SAT] tag. Start with low power and verify the rig VFOs before on-air use.</source>
+        <translation>Diagnosticul CAT este consemnat cu eticheta [FT2SAT]. Începe cu putere mică și verifică VFO-urile aparatului înainte de a lucra în eter.</translation>
     </message>
 </context>
 </TS>
