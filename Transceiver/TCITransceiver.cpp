@@ -1404,7 +1404,12 @@ void TCITransceiver::onBinaryReceived(const QByteArray &data)
 // ExpertSDR, che scandisce sempre lui, non entra mai in funzione.
 void TCITransceiver::update_tx_push_state ()
 {
-  bool const transmitting = tx_audio_ || m_tuning || PTT_ || requested_PTT_;
+  // 1.0.542 iu8lmc - condizione stretta: non basta che il modulatore sia
+  // armato (tx_audio_ resta vero anche a trasmissione finita), serve che il
+  // trasmettitore sia davvero in emissione. Con la sola tx_audio_ il ripiego
+  // push continuava a spingere frame all'infinito verso il server TCI.
+  bool const keyed = PTT_ || requested_PTT_ || m_tuning;
+  bool const transmitting = keyed && (tx_audio_ || m_tuning);
   if (!tci_audio_ || !transmitting || !inConnected || !stream_audio_)
     {
       if (txPushActive_)
@@ -1433,7 +1438,12 @@ void TCITransceiver::update_tx_push_state ()
 // il ritmo da soli.
 void TCITransceiver::on_tx_push_tick ()
 {
-  bool const transmitting = tx_audio_ || m_tuning || PTT_ || requested_PTT_;
+  // 1.0.542 iu8lmc - condizione stretta: non basta che il modulatore sia
+  // armato (tx_audio_ resta vero anche a trasmissione finita), serve che il
+  // trasmettitore sia davvero in emissione. Con la sola tx_audio_ il ripiego
+  // push continuava a spingere frame all'infinito verso il server TCI.
+  bool const keyed = PTT_ || requested_PTT_ || m_tuning;
+  bool const transmitting = keyed && (tx_audio_ || m_tuning);
   if (!tci_audio_ || !transmitting || !inConnected || !stream_audio_)
     {
       update_tx_push_state ();
@@ -1563,6 +1573,7 @@ void TCITransceiver::send_tx_audio_frame (quint32 receiver, quint32 sample_count
                    << "txAudio=" << tx_audio_
                    << "frames=" << txChronoFrames_
                    << "sent=" << txAudioFrames_
+                   << "ptt=" << PTT_
                    << "push=" << txPushActive_
                    << "serverRate=" << negotiatedSampleRate_;
         }
