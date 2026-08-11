@@ -19909,6 +19909,42 @@ En caso de duda, usa Alta.</translation>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>Introduzca la dirección CI-V de la radio en hexadecimal, de 0x00 a 0xFF. La dirección se guarda con la configuración CAT.</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>CAT COMPARTIDO</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>Compartir CAT:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>Puerto compartido:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>Permitir control:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>Permitir transmisión:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>Escuchando en 127.0.0.1:%1 · programas conectados: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>No compartido: ningún otro programa puede usar la radio mientras Decodium tiene el puerto serie.</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>en los demás programas elija «Hamlib NET rigctl»</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>No se ha iniciado la compartición: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

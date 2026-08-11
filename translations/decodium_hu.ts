@@ -19438,6 +19438,42 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>Adja meg a rádió CI-V címét hexadecimálisan, 0x00 és 0xFF között. A cím a CAT beállításokkal együtt mentődik.</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>MEGOSZTOTT CAT</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>CAT megosztása:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>Megosztott port:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>Vezérlés engedélyezése:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>Adás engedélyezése:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>Figyel a 127.0.0.1:%1 címen · csatlakozott programok: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>Nincs megosztva: más program nem használhatja a rádiót, amíg a soros portot a Decodium tartja.</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>a többi programban válassza a „Hamlib NET rigctl” lehetőséget</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>A megosztás nem indult el: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

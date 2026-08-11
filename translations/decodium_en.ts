@@ -19580,6 +19580,42 @@ If unsure, use High.</translation>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>SHARED CAT</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>Share CAT:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>Shared port:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>Allow control:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>Allow transmit:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>Listening on 127.0.0.1:%1 · connected programs: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>Not shared: other programs cannot use the radio while Decodium holds the serial port.</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>in other programs choose &quot;Hamlib NET rigctl&quot;</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>Sharing not started: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

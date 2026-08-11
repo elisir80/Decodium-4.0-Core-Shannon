@@ -14117,6 +14117,42 @@ Dacă eziți, alege înaltă.</translation>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>Introduceți adresa CI-V a stației în hexazecimal, de la 0x00 la 0xFF. Adresa se salvează împreună cu setările CAT.</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>CAT PARTAJAT</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>Partajează CAT:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>Port partajat:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>Permite controlul:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>Permite emisia:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>Ascultă pe 127.0.0.1:%1 · programe conectate: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>Nepartajat: niciun alt program nu poate folosi stația cât timp Decodium ține portul serial.</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>în celelalte programe alegeți „Hamlib NET rigctl”</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>Partajarea nu a pornit: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

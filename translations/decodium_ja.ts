@@ -19568,6 +19568,42 @@ If unsure, use High.</source>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>無線機のCI-Vアドレスを16進数で入力してください（0x00〜0xFF）。アドレスはCAT設定と一緒に保存されます。</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>CATの共有</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>CATを共有:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>共有ポート:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>操作を許可:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>送信を許可:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>127.0.0.1:%1 で待機中 · 接続中のプログラム: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>未共有: Decodiumがシリアルポートを保持している間、他のプログラムは無線機を使用できません。</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>他のプログラムでは「Hamlib NET rigctl」を選んでください</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>共有を開始できません: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

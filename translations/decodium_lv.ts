@@ -19583,6 +19583,42 @@ Noklusējums: IZSL.</translation>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>Ievadiet radio CI-V adresi heksadecimāli, no 0x00 līdz 0xFF. Adrese tiek saglabāta kopā ar CAT iestatījumiem.</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>KOPĪGOTS CAT</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>Kopīgot CAT:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>Kopīgotais ports:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>Atļaut vadību:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>Atļaut raidīšanu:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>Klausās uz 127.0.0.1:%1 · pievienotās programmas: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>Nav kopīgots: citas programmas nevar izmantot radio, kamēr Decodium tur seriālo portu.</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>citās programmās izvēlieties “Hamlib NET rigctl”</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>Kopīgošana nav sākta: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

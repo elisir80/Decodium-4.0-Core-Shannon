@@ -7,6 +7,16 @@ import QtQuick.Layouts
 ScrollView {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
+
+    // Applica in un colpo solo lo stato dei quattro comandi della CAT
+    // condivisa: il server apre o chiude la porta di conseguenza.
+    function applyCatShare() {
+        if (!bridge) return
+        var p = parseInt(catSharePort.text, 10)
+        if (isNaN(p) || p < 1024 || p > 65535) p = 4532
+        bridge.configureCatShare(catShareEnabled.checked, p,
+                                 catShareControl.checked, catSharePtt.checked)
+    }
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
@@ -1232,6 +1242,75 @@ ScrollView {
         }
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
+        // ── CAT condivisa ──
+        // Decodium tiene la seriale e la rivende in rete con il protocollo
+        // rigctld: gli altri programmi si collegano come "Hamlib NET rigctl".
+        Text { text: qsTr("SHARED CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+        Text { text: qsTr("Share CAT:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: catShareEnabled
+            checked: (bridge && bridge.catShare) ? bridge.catShare.enabled : false
+            onToggled: applyCatShare()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        Text { text: qsTr("Shared port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: catSharePort
+            text: (bridge && bridge.catShare) ? String(bridge.catShare.port) : "4532"
+            inputMethodHints: Qt.ImhDigitsOnly
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            font.pixelSize: controlFontSize
+            onEditingFinished: applyCatShare()
+        }
+
+        Text { text: qsTr("Allow control:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: catShareControl
+            checked: (bridge && bridge.catShare) ? bridge.catShare.allowControl : false
+            enabled: catShareEnabled.checked
+            onToggled: applyCatShare()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        // La trasmissione ha un interruttore proprio: cambiare frequenza a una
+        // radio altrui e' un fastidio, mandarla in aria e' un'altra cosa.
+        Text { text: qsTr("Allow transmit:"); color: "#ff6b6b"; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: catSharePtt
+            checked: (bridge && bridge.catShare) ? bridge.catShare.allowPtt : false
+            enabled: catShareEnabled.checked && catShareControl.checked
+            onToggled: applyCatShare()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? "#ff6b6b" : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+
+        Text {
+            Layout.columnSpan: 4
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: (bridge && bridge.catShare && bridge.catShare.listening) ? accentGreen
+                   : ((bridge && bridge.catShare && bridge.catShare.enabled) ? "#ff6b6b" : textSecondary)
+            text: {
+                if (!bridge || !bridge.catShare)
+                    return ""
+                if (!bridge.catShare.listening) {
+                    // Un guasto va detto: "non condivisa" senza il motivo manda
+                    // a cercare il problema nel posto sbagliato. Il caso tipico
+                    // e' la porta gia' occupata da un altro programma.
+                    if (bridge.catShare.enabled)
+                        return qsTr("Sharing not started: %1").arg(bridge.catShare.status)
+                    return qsTr("Not shared: other programs cannot use the radio while Decodium holds the serial port.")
+                }
+                return qsTr("Listening on 127.0.0.1:%1 \u00b7 connected programs: %2")
+                       .arg(bridge.catShare.port).arg(bridge.catShare.clientCount)
+                       + "  \u00b7  " + qsTr("in other programs choose \"Hamlib NET rigctl\"")
+            }
+        }
         // ── Diagnostica ──
         Text { text: qsTr("DIAGNOSTICS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }

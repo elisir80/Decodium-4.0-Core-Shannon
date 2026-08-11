@@ -19568,6 +19568,42 @@ If unsure, use High.</source>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>请以十六进制输入电台的 CI-V 地址，范围 0x00 到 0xFF。该地址随 CAT 设置一起保存。</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>共享 CAT</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>共享 CAT：</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>共享端口：</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>允许控制：</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>允许发射：</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>正在监听 127.0.0.1:%1 · 已连接程序：%2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>未共享：当 Decodium 占用串口时，其他程序无法使用电台。</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>在其他程序中选择「Hamlib NET rigctl」</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>共享未启动：%1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

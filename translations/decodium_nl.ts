@@ -19580,6 +19580,42 @@ Gebruik Hoog als u het niet zeker weet.</translation>
         <source>Enter the radio CI-V address in hexadecimal, from 0x00 to 0xFF. The address is saved with the CAT settings.</source>
         <translation>Voer het CI-V-adres van de radio hexadecimaal in, van 0x00 tot 0xFF. Het adres wordt met de CAT-instellingen opgeslagen.</translation>
     </message>
+    <message>
+        <source>SHARED CAT</source>
+        <translation>GEDEELDE CAT</translation>
+    </message>
+    <message>
+        <source>Share CAT:</source>
+        <translation>CAT delen:</translation>
+    </message>
+    <message>
+        <source>Shared port:</source>
+        <translation>Gedeelde poort:</translation>
+    </message>
+    <message>
+        <source>Allow control:</source>
+        <translation>Bediening toestaan:</translation>
+    </message>
+    <message>
+        <source>Allow transmit:</source>
+        <translation>Zenden toestaan:</translation>
+    </message>
+    <message>
+        <source>Listening on 127.0.0.1:%1 · connected programs: %2</source>
+        <translation>Luistert op 127.0.0.1:%1 · verbonden programma's: %2</translation>
+    </message>
+    <message>
+        <source>Not shared: other programs cannot use the radio while Decodium holds the serial port.</source>
+        <translation>Niet gedeeld: andere programma's kunnen de radio niet gebruiken zolang Decodium de seriële poort bezet.</translation>
+    </message>
+    <message>
+        <source>in other programs choose &quot;Hamlib NET rigctl&quot;</source>
+        <translation>kies in de andere programma's ‘Hamlib NET rigctl’</translation>
+    </message>
+    <message>
+        <source>Sharing not started: %1</source>
+        <translation>Delen niet gestart: %1</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>
