@@ -66,6 +66,19 @@ vero obbligherebbe a riprodurne fedelmente tutte le capacità, e ogni
 discrepanza diventerebbe un difetto del client. Il modello neutro descrive
 quello che il server sa davvero fare.
 
+## Porta
+
+Il valore predefinito e' **4533**, non 4532. La porta canonica di `rigctld` e'
+la 4532, ma e' anche quella su cui Decodium si aspetta di trovare un rigctld
+*esterno* quando lo usa come client, ed e' risultata gia' occupata da un altro
+programma sulla macchina di prova (Decodium SDR). Partire da una porta libera
+evita che la condivisione fallisca al primo avvio con un messaggio che nessuno
+va a leggere. Resta configurabile: chi vuole la porta canonica la imposta.
+
+Quando l'apertura fallisce, il pannello riporta il motivo invece di limitarsi a
+dire che la condivisione non e' attiva: il caso tipico e' proprio la porta gia'
+in uso, e senza quel dettaglio si cerca il guasto altrove.
+
 ## Comandi
 
 | Comando | Significato | Risposta |

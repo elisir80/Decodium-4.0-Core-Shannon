@@ -76,7 +76,7 @@ private:
     bool m_enabled {false};
     bool m_allowControl {false};
     bool m_allowPtt {false};
-    int  m_port {4532};
+    int  m_port {4533};
     QString m_lastError;
 };
 

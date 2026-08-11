@@ -13,7 +13,7 @@ ScrollView {
     function applyCatShare() {
         if (!bridge) return
         var p = parseInt(catSharePort.text, 10)
-        if (isNaN(p) || p < 1024 || p > 65535) p = 4532
+        if (isNaN(p) || p < 1024 || p > 65535) p = 4533
         bridge.configureCatShare(catShareEnabled.checked, p,
                                  catShareControl.checked, catSharePtt.checked)
     }
@@ -1259,7 +1259,7 @@ ScrollView {
         Text { text: qsTr("Shared port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
             id: catSharePort
-            text: (bridge && bridge.catShare) ? String(bridge.catShare.port) : "4532"
+            text: (bridge && bridge.catShare) ? String(bridge.catShare.port) : "4533"
             inputMethodHints: Qt.ImhDigitsOnly
             Layout.fillWidth: true
             implicitHeight: controlHeight

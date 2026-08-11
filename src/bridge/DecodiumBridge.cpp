@@ -9658,7 +9658,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     if (m_catShare && decodium::profiledSettingsValue({}, QStringLiteral("CatShareEnabled"), false).toBool()) {
         m_catShare->configure(
             true,
-            decodium::profiledSettingsValue({}, QStringLiteral("CatSharePort"), 4532).toInt(),
+            decodium::profiledSettingsValue({}, QStringLiteral("CatSharePort"), 4533).toInt(),
             decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowControl"), false).toBool(),
             decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowPtt"), false).toBool());
     }
@@ -19199,7 +19199,7 @@ void DecodiumBridge::configureCatShare(bool enabled, int port,
                                        bool allowControl, bool allowPtt)
 {
     if (port < 1024 || port > 65535)
-        port = 4532;
+        port = 4533;
     setSetting(QStringLiteral("CatShareEnabled"), enabled);
     setSetting(QStringLiteral("CatSharePort"), port);
     setSetting(QStringLiteral("CatShareAllowControl"), allowControl);
