@@ -27,12 +27,14 @@ ProtectControlGroups=yes
 RestrictAddressFamilies=AF_INET AF_INET6
 RestrictNamespaces=yes
 LockPersonality=yes
-MemoryDenyWriteExecute=yes
 SystemCallArchitectures=native
 ReadOnlyPaths=/opt/decodium-agent
 # clone del repository: unica area scrivibile (/var/lib/decodium-agent)
 StateDirectory=decodium-agent
 StateDirectoryMode=0750
+# Claude Code scrive configurazione e cache sotto HOME
+CacheDirectory=decodium-agent
+Environment=HOME=/var/lib/decodium-agent
 CapabilityBoundingSet=
 
 [Install]

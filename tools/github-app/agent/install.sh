@@ -42,6 +42,12 @@ DECOAGENT_REPOS=iu8lmc/Decodium-4.0-Core-Shannon
 DECOAGENT_LABEL=decodium-eligible
 # Fase 2 - analisi del codice e proposta di modifica.
 # Senza chiave l'agente si limita a confermare la ricezione.
+# Strada consigliata: token durevole da abbonamento, ottenuto con
+#   claude setup-token
+CLAUDE_CODE_OAUTH_TOKEN=
+DECOAGENT_CLAUDE_BIN=/usr/local/bin/claude
+# In alternativa, chiave API a consumo (sk-ant-...). Se ci sono entrambe
+# vince l'abbonamento.
 DECOAGENT_ANTHROPIC_KEY=
 DECOAGENT_MODEL=claude-opus-5
 DECOAGENT_REPO_DIR=/var/lib/decodium-agent/repo

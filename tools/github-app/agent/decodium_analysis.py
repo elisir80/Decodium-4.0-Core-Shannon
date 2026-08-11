@@ -190,9 +190,20 @@ Regole non negoziabili:
 """
 
 
-def ask_model(api_key, model, issue_title, issue_body, files_text, max_tokens=8000):
-    prompt = ("SEGNALAZIONE\ntitolo: %s\n\n%s\n\nESTRATTI DEL REPOSITORY\n%s"
-              % (issue_title, (issue_body or "")[:8000], files_text))
+def _clean_json(text):
+    text = (text or "").strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-z]*\n|\n```$", "", text)
+    return json.loads(text)
+
+
+def build_prompt(issue_title, issue_body, files_text):
+    return ("SEGNALAZIONE\ntitolo: %s\n\n%s\n\nESTRATTI DEL REPOSITORY\n%s"
+            % (issue_title, (issue_body or "")[:8000], files_text))
+
+
+def ask_via_api(api_key, model, prompt, max_tokens=8000):
+    """Percorso a consumo: API Messages con chiave sk-ant-..."""
     body = {
         "model": model,
         "max_tokens": max_tokens,
@@ -204,13 +215,35 @@ def ask_model(api_key, model, issue_title, issue_body, files_text, max_tokens=80
     req.add_header("x-api-key", api_key)
     req.add_header("anthropic-version", "2023-06-01")
     req.add_header("content-type", "application/json")
-    with urllib.request.urlopen(req, timeout=180) as resp:
+    with urllib.request.urlopen(req, timeout=240) as resp:
         payload = json.loads(resp.read())
-    text = "".join(b.get("text", "") for b in payload.get("content", []))
-    text = text.strip()
-    if text.startswith("```"):
-        text = re.sub(r"^```[a-z]*\n|\n```$", "", text)
-    return json.loads(text)
+    return _clean_json("".join(b.get("text", "") for b in payload.get("content", [])))
+
+
+def ask_via_cli(claude_bin, oauth_token, model, prompt, timeout=300):
+    """Percorso ad abbonamento: la CLI di Claude Code con un token durevole.
+
+    Tutti gli strumenti sono disabilitati di proposito: qui serve un'analisi
+    testuale, non un agente che tocchi il disco. Le modifiche al repository le
+    fa questo modulo, dopo aver verificato il diff.
+    """
+    env = dict(os.environ)
+    if oauth_token:
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
+    cmd = [claude_bin, "-p", "--bare", "--output-format", "json",
+           "--append-system-prompt", SYSTEM,
+           "--disallowed-tools", "Bash", "Read", "Write", "Edit", "NotebookEdit",
+           "WebFetch", "WebSearch", "Glob", "Grep", "Task", "Agent"]
+    if model:
+        cmd += ["--model", model]
+    p = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                       timeout=timeout, env=env)
+    if p.returncode != 0 and not p.stdout.strip():
+        raise RuntimeError("claude: " + (p.stderr or "")[:300])
+    wrapper = json.loads(p.stdout)
+    if wrapper.get("is_error"):
+        raise RuntimeError("claude: " + str(wrapper.get("result"))[:300])
+    return _clean_json(wrapper.get("result", ""))
 
 
 # -------------------------------------------------------------- verifica diff

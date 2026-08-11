@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Ricevitore webhook per la GitHub App decodium-agent.
 
-Fase 1: la catena completa, deliberatamente inerte.
-Verifica la firma, si autentica come app, ottiene un token di installazione e
-risponde alla segnalazione con un commento che dichiara cosa ha ricevuto.
-Nessuna analisi, nessuna modifica al codice, nessuna pull request: quella parte
-arriva quando questa e' dimostrata sul campo.
+Riceve le consegne di GitHub, ne verifica la firma, si autentica come app e
+decide se intervenire. Con l'analisi configurata esamina il codice e puo'
+proporre una modifica (vedi decodium_analysis.py); senza, si limita a
+confermare la ricezione invece di improvvisare.
+
+Il modello si raggiunge per due strade alternative:
+  - abbonamento: CLAUDE_CODE_OAUTH_TOKEN, tramite la CLI di Claude Code;
+  - a consumo:   DECOAGENT_ANTHROPIC_KEY, tramite l'API Messages.
+Se ci sono entrambe vince l'abbonamento.
 
 Configurazione tramite ambiente (vedi decodium-agent.service):
   DECOAGENT_APP_ID          identificativo numerico dell'app        (obbligatorio)
@@ -17,6 +21,11 @@ Configurazione tramite ambiente (vedi decodium-agent.service):
   DECOAGENT_LABEL           etichetta che abilita l'intervento
                             (default decodium-eligible)
   DECOAGENT_DRY_RUN         1 = non scrive nulla su GitHub, registra soltanto
+  CLAUDE_CODE_OAUTH_TOKEN   token durevole da abbonamento (claude setup-token)
+  DECOAGENT_CLAUDE_BIN      percorso della CLI, default "claude"
+  DECOAGENT_ANTHROPIC_KEY   in alternativa, chiave API a consumo
+  DECOAGENT_MODEL           modello, default claude-opus-5
+  DECOAGENT_REPO_DIR        copia di lavoro del repository
 """
 
 import base64
@@ -60,6 +69,10 @@ class Config:
         # Fase 2: senza chiave l'agente resta al solo riscontro, invece di
         # improvvisare un'analisi che non e' in grado di fare.
         self.api_key = os.environ.get("DECOAGENT_ANTHROPIC_KEY", "").strip()
+        # Percorso ad abbonamento: token durevole di Claude Code, alternativo
+        # alla chiave API. Se ci sono entrambi vince l'abbonamento.
+        self.oauth = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN", "").strip()
+        self.claude_bin = os.environ.get("DECOAGENT_CLAUDE_BIN", "claude").strip()
         self.model = os.environ.get("DECOAGENT_MODEL", "claude-opus-5").strip()
         self.repo_dir = os.environ.get("DECOAGENT_REPO_DIR",
                                        "/var/lib/decodium-agent/repo").strip()
@@ -186,7 +199,7 @@ def handle_event(cfg, event, payload):
         return
 
     number = issue.get("number")
-    if not cfg.api_key:
+    if not (cfg.api_key or cfg.oauth):
         comment(cfg, installation, repo, number,
                 ACK.format(event=event, action=action, label=cfg.label,
                            when=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())))
@@ -240,8 +253,14 @@ def analyse(cfg, installation_id, repo_full, issue):
         "\n=== %s ===\n%s\n" % (f, an.excerpt(cfg.repo_dir, f, idents, budget))
         for f in files)
 
-    result = an.ask_model(cfg.api_key, cfg.model, issue.get("title") or "",
-                          issue.get("body") or "", excerpts)
+    prompt = an.build_prompt(issue.get("title") or "", issue.get("body") or "",
+                             excerpts)
+    if cfg.oauth:
+        log.info("analisi via abbonamento (Claude Code)")
+        result = an.ask_via_cli(cfg.claude_bin, cfg.oauth, cfg.model, prompt)
+    else:
+        log.info("analisi via API a consumo")
+        result = an.ask_via_api(cfg.api_key, cfg.model, prompt)
     patch = result.get("patch") or ""
     ok, why, touched = an.validate_patch(cfg.repo_dir, patch)
     log.info("proposta: %s (%s)", "accettata" if ok else "scartata", why)
