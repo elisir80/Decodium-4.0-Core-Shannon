@@ -69,6 +69,22 @@ Dialog {
     readonly property real  rawAlc:    (typeof bridge !== "undefined") ? bridge.rigAlc : 0
     readonly property bool  alcValid:  catUp && (typeof bridge !== "undefined") && bridge.rigAlcValid
 
+    // Il polling di potenza e ROS e' spento di serie: senza di esso nessun
+    // apparato fornisce un metro, e uno strumento muto senza spiegazione manda
+    // a cercare il guasto nel posto sbagliato.
+    readonly property bool telemetryPolling: (typeof bridge !== "undefined")
+                                             && (bridge.getSetting("PWRandSWR", false) === true
+                                                 || bridge.getSetting("CheckSWR", false) === true)
+    readonly property string statusLine: {
+        if (!catUp)             return qsTr("NO CAT LINK")
+        if (!telemetryPolling)  return qsTr("TELEMETRY OFF — ENABLE PWR/SWR")
+        if (txOn && !pwrValid && !swrValid) return qsTr("RIG REPORTS NO METER")
+        var n = (typeof bridge !== "undefined" && bridge.catRigName.length)
+                ? bridge.catRigName : qsTr("connected")
+        return "CAT: " + n.toUpperCase()
+    }
+    readonly property color statusColor: (!catUp || !telemetryPolling) ? colAmber : colDim
+
     // coefficiente di riflessione: rho = (ROS-1)/(ROS+1)
     readonly property real  rho:       rawSwr > 1 ? (rawSwr - 1) / (rawSwr + 1) : 0
 
@@ -526,17 +542,18 @@ Dialog {
                     anchors.rightMargin: 14
                     anchors.bottomMargin: 8
                     spacing: 5
-                    opacity: decometerWindow.txOn ? 1 : 0.45
+                    // a riposo il display si attenua, ma un avviso deve restare
+                    // leggibile: e' l'unico posto dove si spiega il silenzio
+                    opacity: (decometerWindow.txOn || !decometerWindow.catUp
+                              || !decometerWindow.telemetryPolling) ? 1 : 0.45
 
                     Item {
                         width: parent.width; height: 11
                         Text {
                             anchors.left: parent.left
-                            text: decometerWindow.catUp
-                                  ? ("CAT: " + (bridge.catRigName.length ? bridge.catRigName : qsTr("connected")).toUpperCase())
-                                  : qsTr("NO CAT TELEMETRY")
+                            text: decometerWindow.statusLine
                             font.pixelSize: 9; font.letterSpacing: 1; font.family: "monospace"
-                            color: decometerWindow.colDim
+                            color: decometerWindow.statusColor
                         }
                         Text {
                             anchors.right: parent.right

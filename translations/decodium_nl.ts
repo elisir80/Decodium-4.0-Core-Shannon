@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>RF-VECTORMETER</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>GEEN CAT-VERBINDING</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRIE UIT — PWR/SWR INSCHAKELEN</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>RADIO GEEFT GEEN METING</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

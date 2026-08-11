@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>MESURADOR VECTORIAL RF</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>SENSE ENLLAÇ CAT</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRIA DESACTIVADA — ACTIVEU PWR/SWR</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>LA RÀDIO NO DÓNA MESURA</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

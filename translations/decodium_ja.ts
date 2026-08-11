@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>RFベクトルメーター</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>CAT未接続</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>テレメトリ無効 — PWR/SWRを有効に</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>無線機が計測値を返しません</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

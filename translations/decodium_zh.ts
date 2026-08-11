@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>射频矢量测量表</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>无 CAT 连接</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>遥测已关闭 — 请启用 PWR/驻波比</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>电台未提供测量值</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

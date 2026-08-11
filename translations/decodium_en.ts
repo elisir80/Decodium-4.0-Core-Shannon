@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>RF VECTOR METER</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>NO CAT LINK</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRY OFF — ENABLE PWR/SWR</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>RIG REPORTS NO METER</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

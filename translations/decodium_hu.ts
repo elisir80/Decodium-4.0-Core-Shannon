@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>RF VEKTORMÉRŐ</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>NINCS CAT KAPCSOLAT</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRIA KI — KAPCSOLJA BE A PWR/SWR-T</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>A RÁDIÓ NEM AD MÉRÉST</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

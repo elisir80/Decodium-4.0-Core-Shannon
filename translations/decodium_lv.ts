@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>RF VEKTORA MĒRĪTĀJS</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>NAV CAT SAITES</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRIJA IZSLĒGTA — IESLĒDZIET PWR/SWR</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>RADIO NESNIEDZ MĒRĪJUMU</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

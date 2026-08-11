@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>HF-VEKTORMESSGERÄT</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>KEINE CAT-VERBINDUNG</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRIE AUS — PWR/SWR AKTIVIEREN</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>FUNKGERÄT LIEFERT KEINE MESSUNG</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>RF-VEKTORMÅLER</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>INGEN CAT-FORBINDELSE</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRI FRA — SLÅ PWR/SWR TIL</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>RADIOEN GIVER INGEN MÅLING</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

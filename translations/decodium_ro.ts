@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>INSTRUMENT VECTORIAL RF</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>FĂRĂ LEGĂTURĂ CAT</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>TELEMETRIE OPRITĂ — ACTIVAȚI PWR/ROS</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>STAȚIA NU FURNIZEAZĂ MĂSURĂTOARE</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>

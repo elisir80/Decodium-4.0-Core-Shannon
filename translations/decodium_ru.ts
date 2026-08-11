@@ -59,6 +59,18 @@
         <source>RF VECTOR METER</source>
         <translation>ВЕКТОРНЫЙ ВЧ-ИЗМЕРИТЕЛЬ</translation>
     </message>
+    <message>
+        <source>NO CAT LINK</source>
+        <translation>НЕТ СВЯЗИ CAT</translation>
+    </message>
+    <message>
+        <source>TELEMETRY OFF — ENABLE PWR/SWR</source>
+        <translation>ТЕЛЕМЕТРИЯ ВЫКЛ — ВКЛЮЧИТЕ PWR/КСВ</translation>
+    </message>
+    <message>
+        <source>RIG REPORTS NO METER</source>
+        <translation>ТРАНСИВЕР НЕ ДАЁТ ПОКАЗАНИЙ</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
