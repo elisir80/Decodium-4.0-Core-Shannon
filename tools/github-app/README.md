@@ -1,5 +1,19 @@
 # decodium-agent — GitHub App
 
+**Registered.** <https://github.com/apps/decodium-agent>
+
+| | |
+|---|---|
+| App ID | `4558437` |
+| Client ID | `Iv23liO0CgAfiPmmkgrE` |
+| Owner | `iu8lmc` |
+| Installable by | any account (public) |
+
+Both identifiers above are public — they appear on the app's own page and are
+meant to be quoted in configuration. What must **never** be committed, pasted
+into a chat, or shared is the **private key** (`.pem`) and the **client
+secret**: those are the credentials that let something act *as* the app.
+
 Registration material for a project assistant modelled on
 [`aethersdr-agent`](https://github.com/apps/aethersdr-agent): triage of issues,
 code review against the real sources, and pull requests opened for human review.
