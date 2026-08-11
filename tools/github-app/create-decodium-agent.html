@@ -53,8 +53,9 @@
 <div class="card warn">
   Premendo il pulsante si apre GitHub con il modulo <strong>già compilato</strong>.
   Nulla viene creato finché non premi tu «Create GitHub App» su GitHub.
-  Dopo la creazione, nella pagina dell'app: genera una <em>private key</em>,
-  annota l'<em>App ID</em> e installala sul repository desiderato.
+  Dopo la creazione GitHub ti riporta all'elenco delle tue app: apri
+  <code>decodium-agent</code>, genera una <em>private key</em>, annota
+  l'<em>App ID</em> e installala sul repository desiderato.
 </div>
 
 <form id="f" method="post" target="_blank">
@@ -67,6 +68,8 @@ const manifest = {
   name: "decodium-agent",
   description: "Automated assistant for the Decodium 4 project: triages issues, reviews code against the actual sources, and opens pull requests for human review. It cannot merge its own work, push to the upstream repository, or modify CI workflows.",
   url: "https://github.com/iu8lmc/Decodium-4.0-Core-Shannon",
+  // obbligatorio nel manifest flow: GitHub ci rimanda dopo la creazione
+  redirect_url: "https://github.com/settings/apps",
   public: true,
   hook_attributes: { url: "https://groups.ft2.it/decodium-agent/webhook", active: false },
   default_permissions: {

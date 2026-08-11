@@ -27,6 +27,14 @@ an identity on your account.
 `decodium-agent-manifest.json` holds the same manifest for reference or for a
 scripted flow with a callback server.
 
+`redirect_url` is **mandatory** — GitHub rejects the manifest without it
+("Invalid GitHub App configuration … `redirect_url` wasn't supplied"), even
+when no automatic credential exchange is wanted. It points at
+`https://github.com/settings/apps`, so creation lands on the list of your apps,
+which is where the private key is generated. GitHub appends a one-time `code`
+to that URL; ignoring it is harmless — it only exists for the API call that
+would hand back the App ID, private key and webhook secret automatically.
+
 ## What it grants
 
 | Permission | Level | Why |
