@@ -1,0 +1,71 @@
+# decodium-agent — GitHub App
+
+Registration material for a project assistant modelled on
+[`aethersdr-agent`](https://github.com/apps/aethersdr-agent): triage of issues,
+code review against the real sources, and pull requests opened for human review.
+
+## Why this is not a script
+
+There is no API or `gh` command that registers a GitHub App. The only
+automatable route is the **app manifest flow**: a pre-filled manifest is handed
+to GitHub and a human presses *Create GitHub App*. That is by design — an App is
+an identity on your account.
+
+## Steps
+
+1. Open `create-decodium-agent.html` in a browser.
+2. Leave the organisation field empty for a personal app, or type the
+   organisation name.
+3. Press the button. GitHub opens with the form already filled in. **Nothing is
+   created until you press *Create GitHub App* on GitHub.**
+4. On the app page afterwards:
+   - note the **App ID**;
+   - **Generate a private key** and store the `.pem` somewhere safe — GitHub
+     shows it once;
+   - **Install App** on the repositories it should act on.
+
+`decodium-agent-manifest.json` holds the same manifest for reference or for a
+scripted flow with a callback server.
+
+## What it grants
+
+| Permission | Level | Why |
+|---|---|---|
+| `metadata` | read | mandatory for every app |
+| `issues` | write | comment on and label triaged issues |
+| `pull_requests` | write | open pull requests and review comments |
+| `contents` | write | push the branch a pull request is built from |
+| `checks` | read | read CI results to reason about failures |
+| `actions` | read | read workflow runs and logs |
+
+`workflows` is deliberately **not** granted, so the app cannot alter the CI
+pipelines — the same limitation `aethersdr-agent` states.
+
+The app is created **public**: it is listed at `github.com/apps/decodium-agent`
+and anyone may install it on their own repositories. An installation grants
+those permissions on *their* repositories only, and nothing happens unless your
+backend chooses to act on the events it receives. To restrict it later, set the
+app back to private on its settings page.
+
+## Important
+
+The App is only an identity and a permission set. **On its own it does
+nothing.** Something has to run somewhere, authenticate as the app with the
+private key, receive events and act. Until that backend exists, keep the webhook
+disabled — as the manifest does.
+
+### Before enabling the webhook
+
+`groups.ft2.it` currently answers with a redirect, and it drops the path:
+
+```
+POST https://groups.ft2.it/decodium-agent/webhook
+  → 301 https://community.ft2.it/groups
+```
+
+GitHub does **not** follow redirects when delivering a webhook; it records the
+3xx as a failed delivery. So the host has to serve `/decodium-agent/webhook`
+directly — on `groups.ft2.it` itself, or by pointing the manifest at
+`community.ft2.it`, which answers on that path without redirecting (403 today,
+because nothing is listening there yet). This only matters the day the webhook
+is switched on.
