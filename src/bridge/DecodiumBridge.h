@@ -30,6 +30,7 @@
 #include "DecodiumCat4OmManager.h"
 #include "DecodiumOmniRigManager.h"
 #include "DecodiumTransceiverManager.h"
+#include "DecodiumCatShare.h"
 #include "DecodeListModel.h"
 #include "Network/DecoSyncTime.hpp"
 #include "FtRuntimeAdaptivePolicy.hpp"
@@ -244,6 +245,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int  asyncSnrDb         READ asyncSnrDb                                     NOTIFY asyncSnrDbChanged)
 
     // === CAT/TRANSCEIVER ===
+    // CAT condivisa: il server rigctld esposto ai pannelli QML.
+    Q_PROPERTY(QObject* catShare READ catShareObject CONSTANT)
     Q_PROPERTY(bool catConnected READ catConnected NOTIFY catConnectedChanged)
     Q_PROPERTY(QString catRigName READ catRigName NOTIFY catRigNameChanged)
     Q_PROPERTY(QString catMode READ catMode NOTIFY catModeChanged)
@@ -780,6 +783,9 @@ public:
     void setDeepSearchEnabled(bool v) { if (m_deepSearchEnabled!=v){m_deepSearchEnabled=v;emit deepSearchEnabledChanged();} }
 
     // CAT
+    QObject* catShareObject() const;
+    Q_INVOKABLE void configureCatShare(bool enabled, int port,
+                                       bool allowControl, bool allowPtt);
     bool catConnected() const;
     QString catRigName() const;
     QString catMode() const;
@@ -2634,6 +2640,7 @@ private:
     DecodiumCat4OmManager*        m_cat4OmCat     {nullptr};
     DecodiumOmniRigManager*       m_omniRigCat    {nullptr};
     DecodiumTransceiverManager*   m_hamlibCat     {nullptr};
+    DecodiumCatShare*             m_catShare      {nullptr};
     QString                       m_catBackend    {"hamlib"};
     bool                          m_suppressCatErrors {false};
     RemoteCommandServer*          m_remoteServer {nullptr};

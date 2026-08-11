@@ -9643,11 +9643,25 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_cat4OmCat       = new DecodiumCat4OmManager(this);
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
+    m_catShare        = new DecodiumCatShare(m_hamlibCat, this);
     noteActiveCatProfileAtStartup();
     m_nativeCat->loadSettings();
     m_cat4OmCat->loadSettings();
     m_omniRigCat->loadSettings();
     m_hamlibCat->loadSettings();
+    // CAT condivisa: si apre solo se l'utente l'ha chiesto. A interruttore
+    // spento non viene aperta alcuna porta e il comportamento resta quello
+    // di sempre.
+    // Lettura con ricaduta sulla radice: getSetting resta confinato al profilo
+    // attivo e una chiave scritta a livello globale risulterebbe invisibile,
+    // con l'interruttore acceso e nessun effetto.
+    if (m_catShare && decodium::profiledSettingsValue({}, QStringLiteral("CatShareEnabled"), false).toBool()) {
+        m_catShare->configure(
+            true,
+            decodium::profiledSettingsValue({}, QStringLiteral("CatSharePort"), 4532).toInt(),
+            decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowControl"), false).toBool(),
+            decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowPtt"), false).toBool());
+    }
     m_dxCluster       = new DecodiumDxCluster(this);
     if (m_mapIntelligenceService) {
         m_dxCluster->setOfflineMode(m_mapIntelligenceService->offlineMode());
@@ -19173,6 +19187,27 @@ void DecodiumBridge::tickTargetCallOnTx()
 }
 
 // === CAT ===
+QObject* DecodiumBridge::catShareObject() const
+{
+    return m_catShare;
+}
+
+// CAT condivisa. Le impostazioni passano dallo stesso archivio di tutte le
+// altre: un secondo percorso di lettura e scrittura e' gia' costato caro in
+// passato, con interruttori che risultavano accesi e non avevano effetto.
+void DecodiumBridge::configureCatShare(bool enabled, int port,
+                                       bool allowControl, bool allowPtt)
+{
+    if (port < 1024 || port > 65535)
+        port = 4532;
+    setSetting(QStringLiteral("CatShareEnabled"), enabled);
+    setSetting(QStringLiteral("CatSharePort"), port);
+    setSetting(QStringLiteral("CatShareAllowControl"), allowControl);
+    setSetting(QStringLiteral("CatShareAllowPtt"), allowPtt);
+    if (m_catShare)
+        m_catShare->configure(enabled, port, allowControl, allowPtt);
+}
+
 bool DecodiumBridge::catConnected() const { return m_catConnected; }
 QString DecodiumBridge::catRigName() const { return m_catRigName; }
 QString DecodiumBridge::catMode() const { return m_catMode; }
