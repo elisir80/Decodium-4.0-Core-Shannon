@@ -35,6 +35,29 @@ which is where the private key is generated. GitHub appends a one-time `code`
 to that URL; ignoring it is harmless — it only exists for the API call that
 would hand back the App ID, private key and webhook secret automatically.
 
+## If the manifest route misbehaves
+
+The manifest flow is a convenience, not the only way. The app can be registered
+by hand at <https://github.com/settings/apps/new>, which is deterministic:
+
+| Field | Value |
+|---|---|
+| GitHub App name | `decodium-agent` (must be unique across all of GitHub) |
+| Homepage URL | `https://github.com/iu8lmc/Decodium-4.0-Core-Shannon` |
+| Webhook → Active | **unticked** |
+| Webhook URL | `https://groups.ft2.it/decodium-agent/webhook` (only if Active is ticked) |
+| Repository permissions | Issues: *Read and write* · Pull requests: *Read and write* · Contents: *Read and write* · Checks: *Read-only* · Actions: *Read-only* |
+| Workflows | leave at *No access* — this is what stops the app touching CI |
+| Subscribe to events | Issues, Issue comment, Pull request, Pull request review, Pull request review comment |
+| Where can this be installed | *Any account* for a public app, *Only on this account* for a private one |
+
+Metadata read-only is granted automatically and cannot be removed.
+
+Note that the app is created the moment *Create GitHub App* is pressed — the
+manifest flow's third step only retrieves credentials. So if the app does not
+appear in <https://github.com/settings/apps>, the creation itself never
+happened; there is nothing to clean up before retrying.
+
 ## What it grants
 
 | Permission | Level | Why |
