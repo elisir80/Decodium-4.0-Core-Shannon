@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+"""Ricevitore webhook per la GitHub App decodium-agent.
+
+Fase 1: la catena completa, deliberatamente inerte.
+Verifica la firma, si autentica come app, ottiene un token di installazione e
+risponde alla segnalazione con un commento che dichiara cosa ha ricevuto.
+Nessuna analisi, nessuna modifica al codice, nessuna pull request: quella parte
+arriva quando questa e' dimostrata sul campo.
+
+Configurazione tramite ambiente (vedi decodium-agent.service):
+  DECOAGENT_APP_ID          identificativo numerico dell'app        (obbligatorio)
+  DECOAGENT_PRIVATE_KEY     percorso del file .pem                  (obbligatorio)
+  DECOAGENT_WEBHOOK_SECRET  segreto del webhook                     (obbligatorio)
+  DECOAGENT_PORT            porta locale, default 8787
+  DECOAGENT_BIND            indirizzo di ascolto, default 127.0.0.1
+  DECOAGENT_REPOS           elenco separato da virgole di owner/repo ammessi
+  DECOAGENT_LABEL           etichetta che abilita l'intervento
+                            (default decodium-eligible)
+  DECOAGENT_DRY_RUN         1 = non scrive nulla su GitHub, registra soltanto
+"""
+
+import base64
+import hashlib
+import hmac
+import json
+import logging
+import os
+import sys
+import threading
+import time
+import urllib.error
+import urllib.request
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+try:
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import padding
+except ImportError:  # pragma: no cover
+    sys.stderr.write("serve il pacchetto python3-cryptography\n")
+    raise
+
+API = "https://api.github.com"
+UA = "decodium-agent"
+
+log = logging.getLogger("decodium-agent")
+
+
+# ----------------------------------------------------------------- configurazione
+class Config:
+    def __init__(self):
+        self.app_id = os.environ.get("DECOAGENT_APP_ID", "").strip()
+        self.key_path = os.environ.get("DECOAGENT_PRIVATE_KEY", "").strip()
+        self.secret = os.environ.get("DECOAGENT_WEBHOOK_SECRET", "").encode()
+        self.port = int(os.environ.get("DECOAGENT_PORT", "8787"))
+        self.bind = os.environ.get("DECOAGENT_BIND", "127.0.0.1")
+        self.label = os.environ.get("DECOAGENT_LABEL", "decodium-eligible").strip()
+        self.dry_run = os.environ.get("DECOAGENT_DRY_RUN", "") in ("1", "true", "yes")
+        repos = os.environ.get("DECOAGENT_REPOS", "").strip()
+        self.repos = {r.strip().lower() for r in repos.split(",") if r.strip()}
+
+    def problems(self):
+        missing = []
+        if not self.app_id:
+            missing.append("DECOAGENT_APP_ID")
+        if not self.key_path:
+            missing.append("DECOAGENT_PRIVATE_KEY")
+        elif not os.path.exists(self.key_path):
+            missing.append("DECOAGENT_PRIVATE_KEY (file inesistente: %s)" % self.key_path)
+        if not self.secret:
+            missing.append("DECOAGENT_WEBHOOK_SECRET")
+        return missing
+
+
+# ------------------------------------------------------------------ autenticazione
+def _b64(raw: bytes) -> bytes:
+    return base64.urlsafe_b64encode(raw).rstrip(b"=")
+
+
+def app_jwt(cfg: Config) -> str:
+    """JWT RS256 firmato con la chiave privata dell'app.
+
+    Vale dieci minuti; l'orologio viene arretrato di un minuto perche' GitHub
+    rifiuta un iat nel futuro e i VPS derivano facilmente di qualche secondo.
+    """
+    with open(cfg.key_path, "rb") as fh:
+        key = serialization.load_pem_private_key(fh.read(), password=None)
+    now = int(time.time())
+    header = {"alg": "RS256", "typ": "JWT"}
+    payload = {"iat": now - 60, "exp": now + 540, "iss": cfg.app_id}
+    signing_input = b".".join((
+        _b64(json.dumps(header, separators=(",", ":")).encode()),
+        _b64(json.dumps(payload, separators=(",", ":")).encode()),
+    ))
+    signature = key.sign(signing_input, padding.PKCS1v15(), hashes.SHA256())
+    return (signing_input + b"." + _b64(signature)).decode()
+
+
+def api(method, path, token, body=None, accept="application/vnd.github+json"):
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(API + path, data=data, method=method)
+    req.add_header("Authorization", "Bearer " + token)
+    req.add_header("Accept", accept)
+    req.add_header("X-GitHub-Api-Version", "2022-11-28")
+    req.add_header("User-Agent", UA)
+    if data:
+        req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=25) as resp:
+        raw = resp.read()
+        return resp.status, (json.loads(raw) if raw else None)
+
+
+_token_cache = {}
+_token_lock = threading.Lock()
+
+
+def installation_token(cfg: Config, installation_id: int) -> str:
+    """Token di installazione, riusato finche' manca piu' di un minuto alla scadenza."""
+    with _token_lock:
+        hit = _token_cache.get(installation_id)
+        if hit and hit[1] - time.time() > 60:
+            return hit[0]
+    status, body = api("POST",
+                       "/app/installations/%d/access_tokens" % installation_id,
+                       app_jwt(cfg))
+    token = body["token"]
+    expires = time.mktime(time.strptime(body["expires_at"], "%Y-%m-%dT%H:%M:%SZ"))
+    with _token_lock:
+        _token_cache[installation_id] = (token, expires)
+    return token
+
+
+# ------------------------------------------------------------------------ azioni
+def comment(cfg, installation_id, repo_full, issue_number, text):
+    if cfg.dry_run:
+        log.info("[prova a vuoto] avrei commentato su %s#%s:\n%s",
+                 repo_full, issue_number, text)
+        return
+    token = installation_token(cfg, installation_id)
+    api("POST", "/repos/%s/issues/%s/comments" % (repo_full, issue_number),
+        token, {"body": text})
+    log.info("commento pubblicato su %s#%s", repo_full, issue_number)
+
+
+ACK = """**decodium-agent** ha preso in carico questa segnalazione.
+
+| | |
+|---|---|
+| Evento | `{event}` / `{action}` |
+| Etichetta abilitante | `{label}` |
+| Ricevuto | {when} UTC |
+
+In questa fase l'agente si limita a confermare la ricezione: non analizza il
+codice e non apre pull request. Quando l'analisi sara' attiva, la risposta
+conterra' i file coinvolti e una valutazione del rischio, e ogni proposta di
+modifica passera' comunque da una revisione umana.
+"""
+
+
+def handle_event(cfg, event, payload):
+    """Decide se e come rispondere. Non solleva: gli errori vanno nel registro."""
+    action = payload.get("action", "")
+    repo = (payload.get("repository") or {}).get("full_name", "")
+    installation = (payload.get("installation") or {}).get("id")
+
+    if not repo or installation is None:
+        log.info("ignorato: evento senza repository o installazione (%s/%s)", event, action)
+        return
+    if cfg.repos and repo.lower() not in cfg.repos:
+        log.info("ignorato: %s non e' fra i repository ammessi", repo)
+        return
+    if event != "issues" or action not in ("opened", "labeled", "reopened"):
+        log.info("ignorato: %s/%s non richiede intervento", event, action)
+        return
+
+    issue = payload.get("issue") or {}
+    labels = {(l or {}).get("name", "") for l in issue.get("labels") or []}
+    if cfg.label and cfg.label not in labels:
+        log.info("ignorato: %s#%s non ha l'etichetta %s",
+                 repo, issue.get("number"), cfg.label)
+        return
+
+    comment(cfg, installation, repo, issue.get("number"),
+            ACK.format(event=event, action=action, label=cfg.label,
+                       when=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())))
+
+
+# ------------------------------------------------------------------------- server
+class Handler(BaseHTTPRequestHandler):
+    server_version = UA
+    cfg = None
+
+    def log_message(self, fmt, *args):  # silenzia il registro di default
+        log.debug("%s - %s", self.address_string(), fmt % args)
+
+    def _reply(self, code, text=b""):
+        self.send_response(code)
+        self.send_header("Content-Length", str(len(text)))
+        self.end_headers()
+        if text:
+            self.wfile.write(text)
+
+    def do_GET(self):
+        # sonda di salute, per il monitoraggio e per accertare che nginx instradi
+        if self.path.rstrip("/").endswith("/health"):
+            self._reply(200, b"decodium-agent ok\n")
+        else:
+            self._reply(404)
+
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length") or 0)
+        if length <= 0 or length > 8 * 1024 * 1024:
+            self._reply(400, b"lunghezza non valida\n")
+            return
+        raw = self.rfile.read(length)
+
+        signature = self.headers.get("X-Hub-Signature-256", "")
+        expected = "sha256=" + hmac.new(self.cfg.secret, raw, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(signature, expected):
+            # Una firma che non torna non e' un errore di rete: e' qualcuno che
+            # non possiede il segreto. Si rifiuta e si annota.
+            log.warning("firma non valida da %s", self.address_string())
+            self._reply(401, b"firma non valida\n")
+            return
+
+        event = self.headers.get("X-GitHub-Event", "")
+        delivery = self.headers.get("X-GitHub-Delivery", "")
+        try:
+            payload = json.loads(raw)
+        except ValueError:
+            self._reply(400, b"corpo non JSON\n")
+            return
+
+        # GitHub considera fallita una consegna che non risponde entro dieci
+        # secondi: si accetta subito e si lavora a parte.
+        self._reply(204)
+        log.info("consegna %s evento=%s", delivery, event)
+        try:
+            handle_event(self.cfg, event, payload)
+        except urllib.error.HTTPError as exc:
+            log.error("GitHub ha risposto %s: %s", exc.code, exc.read()[:400])
+        except Exception:
+            log.exception("errore nel trattamento di %s", delivery)
+
+
+def main():
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(levelname)s %(message)s")
+    cfg = Config()
+    problems = cfg.problems()
+    if problems:
+        log.error("configurazione incompleta: %s", ", ".join(problems))
+        return 2
+
+    Handler.cfg = cfg
+    srv = ThreadingHTTPServer((cfg.bind, cfg.port), Handler)
+    log.info("in ascolto su %s:%d - app=%s etichetta=%s repository=%s%s",
+             cfg.bind, cfg.port, cfg.app_id, cfg.label or "(qualsiasi)",
+             ", ".join(sorted(cfg.repos)) or "(qualsiasi)",
+             " [prova a vuoto]" if cfg.dry_run else "")
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
