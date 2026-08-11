@@ -8300,6 +8300,22 @@ Right-click: disconnect</translation>
         <source>RF Meter...</source>
         <translation>RF Meter...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Active Stations - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Multi-Answer Mode - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Settings - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - RF Meter - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

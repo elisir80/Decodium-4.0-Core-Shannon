@@ -8290,6 +8290,22 @@ Jobb kattintás: lecsatlakozás</translation>
         <source>RF Meter...</source>
         <translation>RF mérő...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Aktív állomások - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Többválaszos mód - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Beállítások - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - RF mérő - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

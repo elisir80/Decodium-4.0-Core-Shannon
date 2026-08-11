@@ -8292,6 +8292,22 @@ Clic dret: desconnecta</translation>
         <source>RF Meter...</source>
         <translation>Mesurador RF...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Estacions actives - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Mode multiresposta - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Configuració - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - Mesurador RF - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

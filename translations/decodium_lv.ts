@@ -8304,6 +8304,22 @@ Labais klikšķis: atvienot</translation>
         <source>RF Meter...</source>
         <translation>RF mērītājs...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Aktīvās stacijas - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Vairākatbilžu režīms - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Iestatījumi - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - RF mērītājs - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

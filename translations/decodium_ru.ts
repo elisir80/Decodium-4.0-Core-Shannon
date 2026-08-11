@@ -8293,6 +8293,22 @@ Right-click: disconnect</source>
         <source>RF Meter...</source>
         <translation>ВЧ-измеритель...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Активные станции - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Режим многих ответов - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Настройки - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - ВЧ-измеритель - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

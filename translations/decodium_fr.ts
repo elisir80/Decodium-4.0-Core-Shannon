@@ -8293,6 +8293,22 @@ Clic droit : se déconnecter</translation>
         <source>RF Meter...</source>
         <translation>Mesureur RF...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Stations actives - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Mode multi-réponse - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Réglages - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - Mesureur RF - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

@@ -8292,6 +8292,22 @@ Højreklik: afbryd</translation>
         <source>RF Meter...</source>
         <translation>RF-måler...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Aktive stationer - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Multisvar-tilstand - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Indstillinger - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - RF-måler - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

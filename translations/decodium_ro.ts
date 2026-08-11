@@ -7576,6 +7576,22 @@ Clic dreapta: deconectează</translation>
         <source>RF Meter...</source>
         <translation>Instrument RF...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Stații active - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Mod multi-răspuns - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Setări - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - Instrument RF - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

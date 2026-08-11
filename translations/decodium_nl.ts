@@ -8300,6 +8300,22 @@ Rechtermuisklik: verbinding verbreken</translation>
         <source>RF Meter...</source>
         <translation>RF-meter...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Actieve stations - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Multi-antwoordmodus - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Instellingen - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - RF-meter - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

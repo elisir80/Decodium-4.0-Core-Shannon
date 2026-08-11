@@ -8289,6 +8289,22 @@ Right-click: disconnect</source>
         <source>RF Meter...</source>
         <translation>射頻測量錶...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>活躍電台 - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>多應答模式 - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>設定 - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - 射頻測量錶 - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

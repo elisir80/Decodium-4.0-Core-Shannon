@@ -8308,6 +8308,22 @@ Clic destro: disconnetti</translation>
         <source>RF Meter...</source>
         <translation>Misuratore RF...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Stazioni attive - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Modalità Multi-Risposta - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Impostazioni - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - Misuratore RF - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

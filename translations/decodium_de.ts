@@ -8293,6 +8293,22 @@ Rechtsklick: trennen</translation>
         <source>RF Meter...</source>
         <translation>HF-Messgerät...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>Aktive Stationen - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>Mehrfachantwort-Modus - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>Einstellungen - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - HF-Messgerät - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>

@@ -8290,6 +8290,22 @@ Right-click: disconnect</source>
         <source>RF Meter...</source>
         <translation>RFメーター...</translation>
     </message>
+    <message>
+        <source>Active Stations - Decodium</source>
+        <translation>アクティブ局 - Decodium</translation>
+    </message>
+    <message>
+        <source>Multi-Answer Mode - Decodium</source>
+        <translation>マルチアンサーモード - Decodium</translation>
+    </message>
+    <message>
+        <source>Settings - Decodium</source>
+        <translation>設定 - Decodium</translation>
+    </message>
+    <message>
+        <source>DECØMETER - RF Meter - Decodium</source>
+        <translation>DECØMETER - RFメーター - Decodium</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
