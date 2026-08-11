@@ -57,6 +57,12 @@ class Config:
         self.dry_run = os.environ.get("DECOAGENT_DRY_RUN", "") in ("1", "true", "yes")
         repos = os.environ.get("DECOAGENT_REPOS", "").strip()
         self.repos = {r.strip().lower() for r in repos.split(",") if r.strip()}
+        # Fase 2: senza chiave l'agente resta al solo riscontro, invece di
+        # improvvisare un'analisi che non e' in grado di fare.
+        self.api_key = os.environ.get("DECOAGENT_ANTHROPIC_KEY", "").strip()
+        self.model = os.environ.get("DECOAGENT_MODEL", "claude-opus-5").strip()
+        self.repo_dir = os.environ.get("DECOAGENT_REPO_DIR",
+                                       "/var/lib/decodium-agent/repo").strip()
 
     def problems(self):
         missing = []
@@ -179,9 +185,91 @@ def handle_event(cfg, event, payload):
                  repo, issue.get("number"), cfg.label)
         return
 
-    comment(cfg, installation, repo, issue.get("number"),
-            ACK.format(event=event, action=action, label=cfg.label,
-                       when=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())))
+    number = issue.get("number")
+    if not cfg.api_key:
+        comment(cfg, installation, repo, number,
+                ACK.format(event=event, action=action, label=cfg.label,
+                           when=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())))
+        return
+
+    analyse(cfg, installation, repo, issue)
+
+
+REPORT = """**decodium-agent** ha esaminato questa segnalazione.
+
+{analysis}
+
+| | |
+|---|---|
+| Confidenza | {confidence} |
+| Rischio | {risk} |
+| File esaminati | {files} |
+
+{outcome}
+
+---
+<sub>Analisi automatica sul codice alla revisione `{sha}`. Va letta come una
+traccia da verificare, non come una diagnosi certa: nessuna modifica viene
+fusa senza revisione umana.</sub>
+"""
+
+
+def analyse(cfg, installation_id, repo_full, issue):
+    """Analizza la segnalazione e, se la modifica regge, apre una pull request."""
+    import decodium_analysis as an
+
+    number = issue.get("number")
+    token = installation_token(cfg, installation_id)
+    sha = an.ensure_clone(cfg.repo_dir, repo_full, token)
+    log.info("repository alla revisione %s", sha[:12])
+
+    text = (issue.get("title") or "") + "\n" + (issue.get("body") or "")
+    files, idents = an.candidate_files(cfg.repo_dir, text)
+    log.info("file candidati: %s", ", ".join(files) or "nessuno")
+    if not files:
+        comment(cfg, installation_id, repo_full, number,
+                "**decodium-agent**: dal testo della segnalazione non emergono "
+                "riferimenti a file o simboli presenti nel repository, quindi "
+                "non ho un punto da cui partire. Aggiungere il nome di una "
+                "funzione, di un file o un estratto del registro diagnostico "
+                "renderebbe l'analisi possibile.")
+        return
+
+    budget = an.MAX_EXCERPT_BYTES // max(1, len(files))
+    excerpts = "".join(
+        "\n=== %s ===\n%s\n" % (f, an.excerpt(cfg.repo_dir, f, idents, budget))
+        for f in files)
+
+    result = an.ask_model(cfg.api_key, cfg.model, issue.get("title") or "",
+                          issue.get("body") or "", excerpts)
+    patch = result.get("patch") or ""
+    ok, why, touched = an.validate_patch(cfg.repo_dir, patch)
+    log.info("proposta: %s (%s)", "accettata" if ok else "scartata", why)
+
+    if not ok:
+        outcome = ("Non allego una modifica: %s. L'analisi qui sopra resta "
+                   "valida come traccia." % why)
+    elif cfg.dry_run:
+        outcome = ("[prova a vuoto] avrei aperto una pull request su %s (%s)."
+                   % (", ".join("`%s`" % t for t in touched), why))
+    else:
+        branch = "agent/issue-%s" % number
+        pr = an.open_pull_request(
+            cfg.repo_dir, api, token, repo_full, branch,
+            "Proposta per la segnalazione #%s" % number,
+            "Chiude parzialmente #%s\n\n%s\n\n*Bozza aperta automaticamente da "
+            "decodium-agent: richiede revisione umana.*"
+            % (number, result.get("analysis", "")),
+            patch)
+        outcome = "Proposta in bozza: #%s (%s)." % (pr["number"], why)
+
+    body = REPORT.format(
+        analysis=result.get("analysis", "").strip(),
+        confidence=result.get("confidence", "?"),
+        risk=result.get("risk", "?"),
+        files=", ".join("`%s`" % f for f in files),
+        outcome=outcome, sha=sha[:12])
+    comment(cfg, installation_id, repo_full, number, body)
 
 
 # ------------------------------------------------------------------------- server

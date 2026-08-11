@@ -26,6 +26,7 @@ id -u "$USER" >/dev/null 2>&1 || useradd --system --home-dir "$DIR" --shell /usr
 echo "== file =="
 install -d -o root -g root -m 0755 "$DIR"
 install -o root -g root -m 0644 "$SRC/decodium_agent.py" "$DIR/decodium_agent.py"
+install -o root -g root -m 0644 "$SRC/decodium_analysis.py" "$DIR/decodium_analysis.py"
 install -o root -g root -m 0644 "$SRC/decodium-agent.service" /etc/systemd/system/decodium-agent.service
 
 if [ ! -f "$ENVF" ]; then
@@ -39,6 +40,11 @@ DECOAGENT_BIND=127.0.0.1
 DECOAGENT_PORT=8787
 DECOAGENT_REPOS=iu8lmc/Decodium-4.0-Core-Shannon
 DECOAGENT_LABEL=decodium-eligible
+# Fase 2 - analisi del codice e proposta di modifica.
+# Senza chiave l'agente si limita a confermare la ricezione.
+DECOAGENT_ANTHROPIC_KEY=
+DECOAGENT_MODEL=claude-opus-5
+DECOAGENT_REPO_DIR=/var/lib/decodium-agent/repo
 # Finche' vale 1 l'agente non scrive nulla su GitHub: registra soltanto.
 DECOAGENT_DRY_RUN=1
 EOF

@@ -30,6 +30,9 @@ LockPersonality=yes
 MemoryDenyWriteExecute=yes
 SystemCallArchitectures=native
 ReadOnlyPaths=/opt/decodium-agent
+# clone del repository: unica area scrivibile (/var/lib/decodium-agent)
+StateDirectory=decodium-agent
+StateDirectoryMode=0750
 CapabilityBoundingSet=
 
 [Install]
