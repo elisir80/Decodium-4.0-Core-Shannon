@@ -220,3 +220,21 @@ telemetry when Hamlib does not expose those meters.
   per il parsing della telemetria QMX, comprese risposte malformate e overflow.
 - Restano disponibili pacchetti specifici per piattaforma: installer Windows
   x64, pacchetti macOS Apple Silicon e Intel, AppImage Linux x86_64 e aarch64.
+
+---
+
+## Localisation (iu8lmc build)
+
+The pop-out windows introduced in this release — active stations, multi-answer,
+settings and the DECØMETER — carried translatable titles that had not yet been
+translated. They are now available in all fifteen interface languages, reusing
+the wording already established for the RF meter. All catalogues report zero
+unfinished messages.
+
+## Localizzazione (build iu8lmc)
+
+Le finestre staccabili introdotte in questa versione — stazioni attive,
+multi-risposta, impostazioni e DECØMETER — avevano titoli traducibili ma non
+ancora tradotti. Ora sono disponibili in tutte e quindici le lingue, riusando
+le rese gia' stabilite per il misuratore RF. Tutti i cataloghi riportano zero
+messaggi non finiti.
