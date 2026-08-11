@@ -1,0 +1,55 @@
+name: Claude Code
+
+# Integrazione ufficiale anthropics/claude-code-action.
+# Claude interviene quando qualcuno scrive @claude in una segnalazione, in un
+# commento o in una revisione: legge il codice, risponde e - se richiesto -
+# apre una pull request. Non parte da solo su ogni evento.
+#
+# Autenticazione tramite abbonamento: il segreto CLAUDE_CODE_OAUTH_TOKEN si
+# ottiene con "claude setup-token" ed e' legato all'abbonamento di chi lo
+# genera. In alternativa si userebbe anthropic_api_key, a consumo.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened]
+
+# Una sola esecuzione per segnalazione: evita che una raffica di commenti
+# avvii dieci runner in parallelo.
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  claude:
+    if: >-
+      contains(github.event.comment.body, '@claude') ||
+      contains(github.event.review.body, '@claude') ||
+      contains(github.event.issue.body, '@claude') ||
+      contains(github.event.issue.title, '@claude')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write        # per spingere il ramo di una proposta
+      pull-requests: write   # per aprire e commentare le pull request
+      issues: write          # per rispondere nelle segnalazioni
+      id-token: write        # richiesto dall'autenticazione dell'azione
+      actions: read          # per leggere gli esiti della CI
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Tetto ai giri di conversazione: un compito mal posto non deve
+          # consumare l'abbonamento all'infinito.
+          claude_args: |
+            --max-turns 15
