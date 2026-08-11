@@ -12,6 +12,7 @@ Dialog {
     id: settingsDialog
     // 1.0.412 — richiesta di schermo intero gestita da Main.qml (mainWindow non è in scope qui).
     signal fullScreenRequested()
+    property var nativeHostWindow: null
     readonly property int popupViewportMargin: 16
     readonly property int popupParentWidth: (parent && parent.width > 0) ? Math.round(parent.width) : 1440
     readonly property int popupParentHeight: (parent && parent.height > 0) ? Math.round(parent.height) : 960
@@ -34,8 +35,12 @@ Dialog {
     title: qsTr("Settings")
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
-    width: Math.min(Math.max(360, Math.round(popupBaseWidth * 0.998)), popupMaxWidth, 2200)
-    height: Math.min(Math.max(320, Math.round(popupBaseHeight * 0.98)), popupMaxHeight, 1080)
+    width: nativeHostWindow && parent
+           ? Math.max(360, parent.width)
+           : Math.min(Math.max(360, Math.round(popupBaseWidth * 0.998)), popupMaxWidth, 2200)
+    height: nativeHostWindow && parent
+            ? Math.max(320, parent.height)
+            : Math.min(Math.max(320, Math.round(popupBaseHeight * 0.98)), popupMaxHeight, 1080)
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
     property bool warmupInProgress: false
@@ -172,8 +177,11 @@ Dialog {
     function availableScreenGeometry() {
         var geometry = null
         try {
+            if (nativeHostWindow && nativeHostWindow.screen
+                    && nativeHostWindow.screen.availableGeometry)
+                geometry = nativeHostWindow.screen.availableGeometry
             if (bridge && typeof bridge.primaryScreenAvailableGeometry === "function")
-                geometry = bridge.primaryScreenAvailableGeometry()
+                geometry = geometry || bridge.primaryScreenAvailableGeometry()
         } catch (error) {
             console.log("SettingsDialog: screen geometry unavailable: " + error)
         }
@@ -1130,7 +1138,7 @@ Dialog {
     }
 
     function clampToParent() {
-        if (!parent) return
+        if (nativeHostWindow || !parent) return
         var parentWidth = parent.width > 0 ? parent.width : width
         var parentHeight = parent.height > 0 ? parent.height : height
         x = Math.max(0, Math.min(x, parentWidth - width))
@@ -1139,11 +1147,41 @@ Dialog {
 
     function ensureInitialPosition() {
         if (positionInitialized || !parent) return
+        if (nativeHostWindow) {
+            x = 0
+            y = 0
+            positionInitialized = true
+            return
+        }
         var parentWidth = parent.width > 0 ? parent.width : width
         var parentHeight = parent.height > 0 ? parent.height : height
         x = Math.max(0, Math.round((parentWidth - width) / 2))
         y = Math.max(0, Math.round((parentHeight - height) / 2))
         positionInitialized = true
+    }
+
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("Settings startSystemMove failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        settingsDialog.close()
     }
 
     onAboutToShow: {
@@ -1481,16 +1519,43 @@ Dialog {
         MouseArea {
             anchors.fill: parent
             property point clickPos: Qt.point(0, 0)
+            property point pressGlobalPos: Qt.point(0, 0)
+            property point pressWindowPos: Qt.point(0, 0)
+            property bool nativeMoveActive: false
             cursorShape: Qt.SizeAllCursor
             onPressed: function(mouse) {
                 clickPos = Qt.point(mouse.x, mouse.y)
                 settingsDialog.positionInitialized = true
+                if (settingsDialog.nativeHostWindow) {
+                    pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    pressWindowPos = Qt.point(settingsDialog.nativeHostWindow.x,
+                                              settingsDialog.nativeHostWindow.y)
+                    nativeMoveActive = settingsDialog.startNativeHostMove()
+                }
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
+                if (settingsDialog.nativeHostWindow) {
+                    if (nativeMoveActive)
+                        return
+                    var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    settingsDialog.nativeHostWindow.x = Math.round(
+                                pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+                    settingsDialog.nativeHostWindow.y = Math.round(
+                                pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+                    return
+                }
                 settingsDialog.x += mouse.x - clickPos.x
                 settingsDialog.y += mouse.y - clickPos.y
                 settingsDialog.clampToParent()
+            }
+            onReleased: {
+                nativeMoveActive = false
+                settingsDialog.finishNativeHostMove()
+            }
+            onCanceled: {
+                nativeMoveActive = false
+                settingsDialog.finishNativeHostMove()
             }
         }
 
@@ -1510,7 +1575,7 @@ Dialog {
                 color: closeMA.containsMouse ? Qt.rgba(0.95,0.26,0.21,0.3) : Qt.rgba(1,1,1,0.1)
                 border.color: closeMA.containsMouse ? "#f44336" : glassBorder
                 Text { anchors.centerIn: parent; text: qsTr("\u2715"); color: closeMA.containsMouse ? "#f44336" : textPrimary; font.pixelSize: 14 }
-                MouseArea { id: closeMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: settingsDialog.close() }
+                MouseArea { id: closeMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: settingsDialog.requestWindowClose() }
             }
         }
     }
@@ -1555,7 +1620,7 @@ Dialog {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: settingsDialog.close()
+                    onClicked: settingsDialog.requestWindowClose()
                 }
             }
 

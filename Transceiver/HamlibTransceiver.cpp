@@ -14,6 +14,7 @@
 #include <QJsonValue>
 #include <QDebug>
 #include <hamlib/rig.h>
+#include "QmxTelemetry.hpp"
 #include "pimpl_impl.hpp"
 #include "moc_HamlibTransceiver.cpp"
 
@@ -786,6 +787,8 @@ int HamlibTransceiver::do_start ()
   m_->get_vfo_works_ = true;
   m_->set_vfo_works_ = true;
   bool const requestedTransmitTelemetry = do_pwr_ || do_pwr2_ || do_swr_ || do_alc_;
+  bool const requestedPowerTelemetry = do_pwr_ || do_pwr2_;
+  bool const requestedSwrTelemetry = do_swr_;
   bool const hasGetLevelFunction = !m_->is_dummy_ && rig_get_function_ptr (m_->model_, RIG_FUNCTION_GET_LEVEL);
   setting_t const getLevelCaps = !m_->is_dummy_ ? static_cast<setting_t>(rig_get_caps_int (m_->model_, RIG_CAPS_HAS_GET_LEVEL)) : 0; // 1.0.326 B1: was int (32-bit truncation; RIG_LEVEL_RFPOWER_METER_WATTS is bit 39)
   bool const hasRfPowerMeterWatts = hasGetLevelFunction
@@ -811,9 +814,26 @@ int HamlibTransceiver::do_start ()
   alc_probe_pending_ = do_alc_ && hasGetLevelFunction && !hasAlcCap && !port_is_serial;
   bool const hasAlc = hasAlcCap || alc_probe_pending_;
 
-  do_pwr_ &= hasRfPowerMeterWatts;
-  do_pwr2_ &= hasRfPower;
-  do_swr_ &= hasSwr;
+#if HAVE_HAMLIB_SEND_RAW && defined (RIG_MODEL_QRPLABS_QMX)
+  // Hamlib 4.7.x knows the QMX CAT backend, but does not expose get_level or
+  // PWR/SWR capabilities for it. QMX firmware >= 1.03 nevertheless documents
+  // PC; (tenths of a watt) and SW; (hundredths of SWR). Use Hamlib's own raw
+  // transaction API so the commands remain serialized on this worker and on
+  // the already-open rig port. Never open or contend for the serial device.
+  bool const isQmx = !m_->is_dummy_ && port_is_serial && m_->model_ == RIG_MODEL_QRPLABS_QMX;
+  qmx_raw_power_ = isQmx && requestedPowerTelemetry
+      && !hasRfPowerMeterWatts && !hasRfPower;
+  qmx_raw_swr_ = isQmx && requestedSwrTelemetry && !hasSwr;
+#else
+  qmx_raw_power_ = false;
+  qmx_raw_swr_ = false;
+#endif
+  qmx_raw_power_failures_ = 0;
+  qmx_raw_swr_failures_ = 0;
+
+  do_pwr_ = requestedPowerTelemetry && (hasRfPowerMeterWatts || qmx_raw_power_);
+  do_pwr2_ = requestedPowerTelemetry && !do_pwr_ && hasRfPower;
+  do_swr_ = requestedSwrTelemetry && (hasSwr || qmx_raw_swr_);
   do_alc_ &= hasAlc;
   if (requestedTransmitTelemetry)
     {
@@ -828,6 +848,10 @@ int HamlibTransceiver::do_start ()
         << "alc=" << hasAlc
         << "alcCap=" << hasAlcCap
         << "alcProbe=" << alc_probe_pending_
+        << "qmxRawPower=" << qmx_raw_power_
+        << "qmxRawSwr=" << qmx_raw_swr_
+        << "effectivePower=" << (do_pwr_ || do_pwr2_)
+        << "effectiveSwr=" << do_swr_
         << "passiveStatePoll=" << poll_passive_state_
         << "frequencyPoll=" << poll_frequency_state_
         << "passivePttPoll=" << poll_ptt_state_
@@ -1886,15 +1910,49 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
   int rc {RIG_OK};
   if (do_swr_)
     {
-      rc = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_SWR, &strength);
-      if (RIG_OK == rc && tx_active)
+#if HAVE_HAMLIB_SEND_RAW
+      if (qmx_raw_swr_)
         {
-          update_swr (strength.f >= 1.000 ? static_cast<unsigned int> (strength.f * 100) : 0);
+          static unsigned char const command[] {'S', 'W', ';'};
+          unsigned char response[32] {};
+          unsigned char terminator[] {';', '\0'};
+          rc = rig_send_raw (rig, command, sizeof command, response, sizeof response, terminator);
+          QByteArray const frame = rc >= 0
+              ? QByteArray {reinterpret_cast<char const *> (response), rc}
+              : QByteArray {};
+          unsigned int swrHundredths = 0;
+          if (rc >= 0 && decodium::qmx_telemetry::parse_swr_hundredths (frame, &swrHundredths))
+            {
+              qmx_raw_swr_failures_ = 0;
+              update_swr (swrHundredths >= 100 ? swrHundredths : 0);
+            }
+          else
+            {
+              ++qmx_raw_swr_failures_;
+              CAT_TRACE ("QMX raw SW telemetry failed rc=" << rc << " reply=" << frame);
+              update_swr (0);
+              if (qmx_raw_swr_failures_ >= kQmxRawTelemetryMaxFailures_)
+                {
+                  do_swr_ = false;
+                  qWarning ().noquote ()
+                    << "[CATDBG] QMX raw SWR telemetry disabled after repeated failures"
+                    << "rc=" << rc << "reply=" << frame;
+                }
+            }
         }
       else
+#endif
         {
-          CAT_TRACE ("rig_get_level RIG_LEVEL_SWR failed with rc:" << rc << "ignoring");
-          update_swr (0);
+          rc = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_SWR, &strength);
+          if (RIG_OK == rc && tx_active)
+            {
+              update_swr (strength.f >= 1.000 ? static_cast<unsigned int> (strength.f * 100) : 0);
+            }
+          else
+            {
+              CAT_TRACE ("rig_get_level RIG_LEVEL_SWR failed with rc:" << rc << "ignoring");
+              update_swr (0);
+            }
         }
     }
 
@@ -1952,15 +2010,49 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
 
   if (do_pwr_)
     {
-      rc = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_RFPOWER_METER_WATTS, &strength);
-      if (RIG_OK == rc)
+#if HAVE_HAMLIB_SEND_RAW
+      if (qmx_raw_power_)
         {
-          update_power (static_cast<unsigned int> (strength.f * 1000));
+          static unsigned char const command[] {'P', 'C', ';'};
+          unsigned char response[32] {};
+          unsigned char terminator[] {';', '\0'};
+          rc = rig_send_raw (rig, command, sizeof command, response, sizeof response, terminator);
+          QByteArray const frame = rc >= 0
+              ? QByteArray {reinterpret_cast<char const *> (response), rc}
+              : QByteArray {};
+          unsigned int milliwatts = 0;
+          if (rc >= 0 && decodium::qmx_telemetry::parse_power_milliwatts (frame, &milliwatts))
+            {
+              qmx_raw_power_failures_ = 0;
+              update_power (milliwatts);
+            }
+          else
+            {
+              ++qmx_raw_power_failures_;
+              CAT_TRACE ("QMX raw PC telemetry failed rc=" << rc << " reply=" << frame);
+              update_power (0);
+              if (qmx_raw_power_failures_ >= kQmxRawTelemetryMaxFailures_)
+                {
+                  do_pwr_ = false;
+                  qWarning ().noquote ()
+                    << "[CATDBG] QMX raw power telemetry disabled after repeated failures"
+                    << "rc=" << rc << "reply=" << frame;
+                }
+            }
         }
       else
+#endif
         {
-          CAT_TRACE ("rig_get_level RFPOWER_METER_WATTS failed with rc:" << rc << "ignoring");
-          update_power (0);
+          rc = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_RFPOWER_METER_WATTS, &strength);
+          if (RIG_OK == rc)
+            {
+              update_power (static_cast<unsigned int> (strength.f * 1000));
+            }
+          else
+            {
+              CAT_TRACE ("rig_get_level RFPOWER_METER_WATTS failed with rc:" << rc << "ignoring");
+              update_power (0);
+            }
         }
     }
   else if (do_pwr2_)

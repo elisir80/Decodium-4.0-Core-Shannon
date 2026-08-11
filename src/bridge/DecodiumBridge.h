@@ -2828,6 +2828,8 @@ private:
     qint64             m_lastAudioCaptureStartMs {0};
     QAudioSink*        m_txAudioSink  {nullptr};
     bool               m_rxAudioSuspendedForTx {false};
+    bool               m_rxAudioKeptOpenForTx {false};
+    bool               m_rxAudioIoRecoveryQueued {false};
     QString            m_activeRxInputDeviceName;
     QString            m_activeRxInputDeviceId;
     qint64             m_rxAudioStartupStartMs {0};
@@ -3820,6 +3822,7 @@ private:
     void resumeNonAudioTxWork(const QString& reason);
     void applyTxAudioSchedulingBoost(const QString& reason);
     void restoreTxAudioSchedulingBoost(const QString& reason);
+    void pauseRxAudioForTx(const QString& context);
     void resumeRxAudioAfterTx(const QString& reason);
     bool noteTxPlaybackFinished(const QString& reason, bool error);
     void completeTxPlayback(const QString& reason, bool error = false);

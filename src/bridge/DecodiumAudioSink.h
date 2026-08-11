@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
 #include <functional>
 #include <QObject>
@@ -39,6 +40,23 @@ public:
 
     void setSampleCallback(std::function<void(short)> cb) { m_sampleCallback = std::move(cb); }
 
+    // Keep QAudioSource alive while deliberately ignoring its PCM stream.
+    // This is used by the Windows TX path because suspend()/resume() can leave
+    // some WASAPI USB inputs in StoppedState/IOError after PTT is released.
+    // The flag is changed under the same mutex used by writeData(), so no TX
+    // sample can slip into the decoder buffer after discarding has been armed.
+    void setDiscardSamples(bool discard)
+    {
+        QMutexLocker locker(m_bufferMutex);
+        if (m_discardSamples.load(std::memory_order_relaxed) == discard) {
+            return;
+        }
+        m_discardSamples.store(discard, std::memory_order_release);
+        m_dsfCounter = 0;
+        m_filterDelay.fill(0.0f);
+        m_pendingFullRate.clear();
+    }
+
     void resetDecimationPhase()
     {
         if (m_bufferMutex) {
@@ -58,6 +76,11 @@ public:
     qint64 writeData(const char* data, qint64 maxSize) override
     {
         if (!data || maxSize <= 0) return 0;
+
+        // Consume the backend data without performing conversion, buffering,
+        // level metering or callbacks. QAudioSource therefore remains active,
+        // while TX audio cannot reach the waterfall or any decoder path.
+        if (m_discardSamples.load(std::memory_order_acquire)) return maxSize;
 
         const qint64 frameBytes = static_cast<qint64>(bytesPerFrame());
         const qint64 numFrames  = maxSize / frameBytes;
@@ -80,6 +103,9 @@ public:
         QVector<short> emittedSamples;
         {
             QMutexLocker locker(m_bufferMutex);
+            // setDiscardSamples() may have been waiting for this lock after
+            // the fast-path check above. Recheck before appending anything.
+            if (m_discardSamples.load(std::memory_order_acquire)) return maxSize;
             prevSize = m_buffer.size();
             if (m_dsf == kFil4Downsample) {
                 appendFilteredFil4(tmp.constData(), static_cast<int>(numFrames));
@@ -212,6 +238,7 @@ private:
     QVector<short>  m_pendingFullRate;
     double          m_lastRms {0.0};
     std::function<void(short)> m_sampleCallback;
+    std::atomic_bool m_discardSamples {false};
 };
 
 #endif // DECODIUM_AUDIO_SINK_H

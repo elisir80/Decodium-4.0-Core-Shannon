@@ -10,14 +10,16 @@ import QtQuick.Layouts
 
 Popup {
     id: logWindow
-    width: 960
-    height: 720
+    property var nativeHostWindow: null
+    width: nativeHostWindow && parent ? Math.max(600, parent.width) : 960
+    height: nativeHostWindow && parent ? Math.max(400, parent.height) : 720
     modal: false
     closePolicy: Popup.CloseOnEscape
     padding: 0
     property bool positionInitialized: false
 
     function clampToParent() {
+        if (nativeHostWindow) return
         if (!parent) return
         x = Math.max(0, Math.min(x, parent.width - width))
         y = Math.max(0, Math.min(y, parent.height - height))
@@ -25,9 +27,39 @@ Popup {
 
     function ensureInitialPosition() {
         if (positionInitialized || !parent) return
+        if (nativeHostWindow) {
+            x = 0
+            y = 0
+            positionInitialized = true
+            return
+        }
         x = Math.max(0, Math.round((parent.width - width) / 2))
         y = Math.max(0, Math.round((parent.height - height) / 2))
         positionInitialized = true
+    }
+
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("Log startSystemMove failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        logWindow.close()
     }
 
     // Dynamic theme colors from ThemeManager
@@ -455,16 +487,43 @@ Popup {
             MouseArea {
                 anchors.fill: parent
                 property point clickPos: Qt.point(0, 0)
+                property point pressGlobalPos: Qt.point(0, 0)
+                property point pressWindowPos: Qt.point(0, 0)
+                property bool nativeMoveActive: false
                 cursorShape: Qt.SizeAllCursor
                 onPressed: function(mouse) {
                     clickPos = Qt.point(mouse.x, mouse.y)
                     logWindow.positionInitialized = true
+                    if (logWindow.nativeHostWindow) {
+                        pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                        pressWindowPos = Qt.point(logWindow.nativeHostWindow.x,
+                                                  logWindow.nativeHostWindow.y)
+                        nativeMoveActive = logWindow.startNativeHostMove()
+                    }
                 }
                 onPositionChanged: function(mouse) {
                     if (!pressed) return
+                    if (logWindow.nativeHostWindow) {
+                        if (nativeMoveActive)
+                            return
+                        var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                        logWindow.nativeHostWindow.x = Math.round(
+                                    pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+                        logWindow.nativeHostWindow.y = Math.round(
+                                    pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+                        return
+                    }
                     logWindow.x += mouse.x - clickPos.x
                     logWindow.y += mouse.y - clickPos.y
                     logWindow.clampToParent()
+                }
+                onReleased: {
+                    nativeMoveActive = false
+                    logWindow.finishNativeHostMove()
+                }
+                onCanceled: {
+                    nativeMoveActive = false
+                    logWindow.finishNativeHostMove()
                 }
             }
 
@@ -537,7 +596,14 @@ Popup {
                     MouseArea {
                         id: logMinMA; anchors.fill: parent; hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: { logWindowMinimized = true; logWindow.close() }
+                        onClicked: {
+                            logWindowMinimized = true
+                            if (logWindow.nativeHostWindow
+                                    && typeof logWindow.nativeHostWindow.minimizeHostedWindow === "function")
+                                logWindow.nativeHostWindow.minimizeHostedWindow()
+                            else
+                                logWindow.close()
+                        }
                     }
                     ToolTip.visible: logMinMA.containsMouse
                     ToolTip.text: qsTr("Minimize"); ToolTip.delay: 500
@@ -558,7 +624,7 @@ Popup {
                     MouseArea {
                         id: logCloseMA; anchors.fill: parent; hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: logWindow.close()
+                        onClicked: logWindow.requestWindowClose()
                     }
                     ToolTip.visible: logCloseMA.containsMouse
                     ToolTip.text: qsTr("Close"); ToolTip.delay: 500

@@ -6,6 +6,7 @@ import QtQuick.Controls
 Rectangle {
     id: activePanel
     signal closeRequested()
+    property var nativeHostWindow: null
     color: Qt.rgba(0, 0, 0, 0.75)
     border.color: Qt.rgba(0, 188, 212, 0.4)
     border.width: 1
@@ -13,54 +14,122 @@ Rectangle {
     implicitHeight: 280
     implicitWidth: 340
 
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("Active Stations startSystemMove failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        closeRequested()
+    }
+
     Column {
         anchors.fill: parent
         anchors.margins: 6
         spacing: 4
 
         // Header
-        RowLayout {
+        Item {
             width: parent.width
-            spacing: 6
+            height: 22
 
-            Text {
-                text: qsTr("ACTIVE STATIONS")
-                font.family: decodiumMonoFontFamily
-                font.pixelSize: 10
-                font.bold: true
-                color: "#00BCD4"
+            MouseArea {
+                id: activeStationsDragArea
+                anchors.fill: parent
+                anchors.rightMargin: 30
+                acceptedButtons: Qt.LeftButton
+                preventStealing: true
+                property point pressGlobalPos: Qt.point(0, 0)
+                property point pressWindowPos: Qt.point(0, 0)
+                property bool nativeMoveActive: false
+                cursorShape: activePanel.nativeHostWindow ? Qt.SizeAllCursor : Qt.ArrowCursor
+                onPressed: function(mouse) {
+                    if (!activePanel.nativeHostWindow)
+                        return
+                    pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    pressWindowPos = Qt.point(activePanel.nativeHostWindow.x,
+                                              activePanel.nativeHostWindow.y)
+                    nativeMoveActive = activePanel.startNativeHostMove()
+                    mouse.accepted = true
+                }
+                onPositionChanged: function(mouse) {
+                    if (!pressed || !activePanel.nativeHostWindow || nativeMoveActive)
+                        return
+                    var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    activePanel.nativeHostWindow.x = Math.round(
+                                pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+                    activePanel.nativeHostWindow.y = Math.round(
+                                pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+                    mouse.accepted = true
+                }
+                onReleased: {
+                    nativeMoveActive = false
+                    activePanel.finishNativeHostMove()
+                }
+                onCanceled: {
+                    nativeMoveActive = false
+                    activePanel.finishNativeHostMove()
+                }
             }
 
-            Item { Layout.fillWidth: true }
-
-            Text {
-                text: (bridge.activeStations ? bridge.activeStations.count : 0) + " stn"
-                font.family: decodiumMonoFontFamily
-                font.pixelSize: 10
-                color: "#B0BEC5"
-            }
-
-            Rectangle {
-                width: 22
-                height: 22
-                radius: 4
-                color: closeMA.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent"
-                border.color: Qt.rgba(0, 188, 212, 0.3)
+            RowLayout {
+                anchors.fill: parent
+                spacing: 6
 
                 Text {
-                    anchors.centerIn: parent
-                    text: "X"
+                    text: qsTr("ACTIVE STATIONS")
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
+                    font.bold: true
                     color: "#00BCD4"
                 }
 
-                MouseArea {
-                    id: closeMA
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: activePanel.closeRequested()
+                Item { Layout.fillWidth: true }
+
+                Text {
+                    text: (bridge.activeStations ? bridge.activeStations.count : 0) + " stn"
+                    font.family: decodiumMonoFontFamily
+                    font.pixelSize: 10
+                    color: "#B0BEC5"
+                }
+
+                Rectangle {
+                    width: 22
+                    height: 22
+                    radius: 4
+                    color: closeMA.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent"
+                    border.color: Qt.rgba(0, 188, 212, 0.3)
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "X"
+                        font.family: decodiumMonoFontFamily
+                        font.pixelSize: 10
+                        color: "#00BCD4"
+                    }
+
+                    MouseArea {
+                        id: closeMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: activePanel.requestWindowClose()
+                    }
                 }
             }
         }

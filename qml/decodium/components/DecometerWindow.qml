@@ -12,10 +12,22 @@ import QtQuick.Controls
 
 Dialog {
     id: decometerWindow
-    title: qsTr("RF Meter")
+    // DECOMETER draws its own complete instrument face.  The stock Dialog
+    // header would otherwise add a separate white "RF Meter" strip on macOS
+    // and steal height from the gauge.
+    title: ""
+    header: null
+    footer: null
+    popupType: Popup.Item
     modal: false
     padding: 0
+    spacing: 0
     closePolicy: Popup.CloseOnEscape
+
+    // When hosted by Main.qml in a real top-level Window, x/y belong to that
+    // Window rather than to this Popup.  This is what lets the instrument cross
+    // monitor boundaries on macOS, Windows and Linux.
+    property var nativeHostWindow: null
 
     readonly property int faceWidth: 900
     readonly property int faceHeight: 420
@@ -27,22 +39,50 @@ Dialog {
     readonly property real hostHeight: parent ? parent.height : faceHeight
 
     // una sola cornice: la disegna il frontalino, non il Dialog
-    width: Math.min(faceWidth, Math.max(320, hostWidth - 24))
-    height: Math.min(faceHeight, Math.max(220, hostHeight - 24))
+    width: nativeHostWindow && parent
+           ? parent.width
+           : Math.min(faceWidth, Math.max(320, hostWidth - 24))
+    height: nativeHostWindow && parent
+            ? parent.height
+            : Math.min(faceHeight, Math.max(220, hostHeight - 24))
 
     property bool placed: false
 
     function centerOnHost() {
         if (!parent) return
-        x = Math.max(0, Math.round((parent.width - width) / 2))
-        y = Math.max(0, Math.round((parent.height - height) / 2))
+        x = nativeHostWindow ? 0 : Math.max(0, Math.round((parent.width - width) / 2))
+        y = nativeHostWindow ? 0 : Math.max(0, Math.round((parent.height - height) / 2))
         placed = true
     }
 
     function clampToHost() {
-        if (!parent) return
+        if (nativeHostWindow || !parent) return
         x = Math.max(0, Math.min(x, parent.width - width))
         y = Math.max(0, Math.min(y, parent.height - height))
+    }
+
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("Decometer startSystemMove failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        close()
     }
 
     // ---- tavolozza dello strumento (fissa: e' un frontalino, non un tema) ----
@@ -61,24 +101,60 @@ Dialog {
     // Sorgenti reali. Nessun valore viene inventato: se il rig non fornisce
     // il dato, il display resta muto.
     readonly property bool  catUp:     !!(typeof bridge !== "undefined" && bridge.catConnected)
-    readonly property bool  txOn:      !!(typeof bridge !== "undefined" && bridge.transmitting)
+    // La telemetria CAT e' disponibile anche durante TUNE, quando Decodium
+    // mantiene transmitting=false. Inoltre il PTT puo' essere comandato
+    // direttamente dalla radio o da un altro client: in quel caso la potenza
+    // misurata e' l'indicazione autorevole che RF e' realmente presente.
+    readonly property bool  appRfOn:   !!(typeof bridge !== "undefined"
+                                         && (bridge.transmitting || bridge.tuning))
     readonly property real  rawFwd:    (typeof bridge !== "undefined" && bridge.rigPowerWatts > 0) ? bridge.rigPowerWatts : 0
     readonly property real  rawSwr:    (typeof bridge !== "undefined" && bridge.rigSwr >= 1) ? bridge.rigSwr : 1
+    readonly property bool  txOn:      appRfOn || rawFwd > 0.05
     readonly property bool  swrValid:  catUp && (typeof bridge !== "undefined") && bridge.rigSwr >= 1
     readonly property bool  pwrValid:  catUp && rawFwd > 0
     readonly property real  rawAlc:    (typeof bridge !== "undefined") ? bridge.rigAlc : 0
     readonly property bool  alcValid:  catUp && (typeof bridge !== "undefined") && bridge.rigAlcValid
 
+    // La potenza CAT e' anche una sorgente attendibile dello stato RF. Alcuni
+    // backend/apparati aggiornano correttamente i meter senza riflettere nello
+    // stesso istante il PTT in bridge.transmitting (per esempio TUNE o PTT
+    // azionato dalla radio). In quel caso non bisogna scartare misure valide.
+    readonly property bool  rfActive:  txOn || rawFwd > 0.05
+
     // Il polling di potenza e ROS e' spento di serie: senza di esso nessun
     // apparato fornisce un metro, e uno strumento muto senza spiegazione manda
     // a cercare il guasto nel posto sbagliato.
-    readonly property bool telemetryPolling: (typeof bridge !== "undefined")
-                                             && (bridge.getSetting("PWRandSWR", false) === true
-                                                 || bridge.getSetting("CheckSWR", false) === true)
+    property bool telemetryPolling: false
+    property bool telemetryEnableDeferred: false
+
+    function refreshTelemetryPolling() {
+        telemetryPolling = (typeof bridge !== "undefined")
+                           && (!!bridge.getSetting("PWRandSWR", false)
+                               || !!bridge.getSetting("CheckSWR", false))
+    }
+
+    function ensureTelemetryPolling() {
+        refreshTelemetryPolling()
+        if (!visible || telemetryPolling || typeof bridge === "undefined")
+            return
+
+        // Cambiare questa opzione riconnette la CAT per ricreare il backend
+        // con i meter abilitati. Non farlo mai mentre la radio e' in aria.
+        if (bridge.transmitting || bridge.tuning) {
+            telemetryEnableDeferred = true
+            return
+        }
+
+        telemetryEnableDeferred = false
+        // Abilita soltanto la lettura dei meter. CheckSWR resta una scelta
+        // esplicita dell'operatore e non viene attivato aprendo lo strumento.
+        bridge.setSetting("PWRandSWR", true)
+    }
+
     readonly property string statusLine: {
         if (!catUp)             return qsTr("NO CAT LINK")
         if (!telemetryPolling)  return qsTr("TELEMETRY OFF — ENABLE PWR/SWR")
-        if (txOn && !pwrValid && !swrValid) return qsTr("RIG REPORTS NO METER")
+        if (rfActive && !pwrValid && !swrValid) return qsTr("RIG REPORTS NO METER")
         var n = (typeof bridge !== "undefined" && bridge.catRigName.length)
                 ? bridge.catRigName : qsTr("connected")
         return "CAT: " + n.toUpperCase()
@@ -149,6 +225,7 @@ Dialog {
 
     onVisibleChanged: {
         if (visible) {
+            ensureTelemetryPolling()
             if (!placed) centerOnHost()
             else clampToHost()
             clock = 0
@@ -158,9 +235,33 @@ Dialog {
         }
     }
 
-    // Nessuno sfondo proprio: il pannello e' il frontalino, e due riquadri
-    // sovrapposti darebbero la doppia cornice.
-    background: null
+    Component.onCompleted: refreshTelemetryPolling()
+
+    Connections {
+        target: (typeof bridge !== "undefined") ? bridge : null
+        ignoreUnknownSignals: true
+        function onSettingValueChanged(key, value) {
+            if (key === "PWRandSWR" || key === "CheckSWR")
+                decometerWindow.refreshTelemetryPolling()
+        }
+        function onTransmittingChanged() {
+            if (decometerWindow.telemetryEnableDeferred && !bridge.transmitting)
+                decometerWindow.ensureTelemetryPolling()
+        }
+        function onTuningChanged() {
+            if (decometerWindow.telemetryEnableDeferred && !bridge.tuning)
+                decometerWindow.ensureTelemetryPolling()
+        }
+    }
+
+    // Sfondo trasparente: il pannello resta l'unica cornice visibile. Non usare
+    // null, perche' lo stile Material di Qt legge comunque background.radius e
+    // su macOS produce un TypeError quando il Dialog viene aperto.
+    background: Rectangle {
+        color: "transparent"
+        border.width: 0
+        radius: 0
+    }
 
     // riga di misura riusata dalle tre schermate del display
     component Readout: Item {
@@ -211,7 +312,7 @@ Dialog {
 
     Timer {
         id: engine
-        interval: (decometerWindow.txOn || decometerWindow.settling) ? 40 : 200
+        interval: (decometerWindow.rfActive || decometerWindow.settling) ? 40 : 200
         running: decometerWindow.visible
         repeat: true
         onTriggered: decometerWindow.tick(interval / 1000)
@@ -220,8 +321,8 @@ Dialog {
     function tick(dt) {
         clock += dt
 
-        var fwdT = (txOn && pwrValid) ? rawFwd : 0
-        var swrT = (txOn && swrValid) ? rawSwr : vSwr
+        var fwdT = (rfActive && pwrValid) ? rawFwd : 0
+        var swrT = (rfActive && swrValid) ? rawSwr : vSwr
 
         // attacco istantaneo, rilascio esponenziale (0.5 s potenza, 0.4 s ROS)
         function rel(cur, tgt, tau) {
@@ -231,7 +332,7 @@ Dialog {
 
         vFwd = rel(vFwd, fwdT, 0.5)
         vRef = rel(vRef, refT, 0.5)
-        if (txOn && swrValid)
+        if (rfActive && swrValid)
             vSwr = rel(vSwr, swrT, 0.4)
 
         // ritenuta di picco 3 s, poi discesa con tau 0.9 s
@@ -246,7 +347,7 @@ Dialog {
         var sF = Math.max(0, (vSwr - 1) / (vSwr + 1))
         p = peak(sF, pkSwrV, pkSwrT); pkSwrV = p[0]; pkSwrT = p[1]
 
-        if (txOn) {
+        if (rfActive) {
             txSeconds += dt
             if (vFwd > pepW) pepW = vFwd
             avgW = avgW + (vFwd - avgW) * (1 - Math.exp(-dt / 3.0))
@@ -279,7 +380,7 @@ Dialog {
 
         // il frontalino ha proporzioni fisse: si adatta scalando, non deformando
         readonly property real fit: Math.min(width / decometerWindow.faceWidth,
-                                            height / decometerWindow.faceHeight, 1)
+                                            height / decometerWindow.faceHeight)
 
         Item {
             id: face
@@ -312,16 +413,44 @@ Dialog {
                 cursorShape: pressed ? Qt.ClosedHandCursor : Qt.ArrowCursor
                 property real grabX: 0
                 property real grabY: 0
+                property point pressGlobalPos: Qt.point(0, 0)
+                property point pressWindowPos: Qt.point(0, 0)
+                property bool nativeMoveActive: false
                 onPressed: function (mouse) {
                     grabX = mouse.x
                     grabY = mouse.y
+                    decometerWindow.placed = true
+                    if (decometerWindow.nativeHostWindow) {
+                        pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                        pressWindowPos = Qt.point(decometerWindow.nativeHostWindow.x,
+                                                  decometerWindow.nativeHostWindow.y)
+                        nativeMoveActive = decometerWindow.startNativeHostMove()
+                    }
                 }
                 onPositionChanged: function (mouse) {
                     if (!pressed) return
+                    if (decometerWindow.nativeHostWindow) {
+                        if (nativeMoveActive)
+                            return
+                        var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                        decometerWindow.nativeHostWindow.x = Math.round(
+                                    pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+                        decometerWindow.nativeHostWindow.y = Math.round(
+                                    pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+                        return
+                    }
                     var s = faceHolder.fit
                     decometerWindow.x += (mouse.x - grabX) * s
                     decometerWindow.y += (mouse.y - grabY) * s
                     decometerWindow.clampToHost()
+                }
+                onReleased: {
+                    nativeMoveActive = false
+                    decometerWindow.finishNativeHostMove()
+                }
+                onCanceled: {
+                    nativeMoveActive = false
+                    decometerWindow.finishNativeHostMove()
                 }
             }
 
@@ -806,17 +935,24 @@ Dialog {
 
             // ------------------------------------------------------- marchio
             Column {
-                x: 22; y: decometerWindow.faceHeight - 46
+                x: 22
+                y: decometerWindow.faceHeight - 58
+                width: 136
                 spacing: 3
+                clip: true
                 Text {
+                    width: parent.width
                     textFormat: Text.StyledText
                     text: "DEC<font color=\"#27C4D4\">Ø</font>METER"
                     font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.5
                     color: decometerWindow.colLabel
                 }
                 Text {
-                    text: qsTr("RF VECTOR METER") + " · 1.8–500 MHz"
-                    font.pixelSize: 8; font.letterSpacing: 1.2
+                    width: parent.width
+                    text: qsTr("RF VECTOR METER") + "\n1.8–500 MHz"
+                    wrapMode: Text.Wrap
+                    maximumLineCount: 2
+                    font.pixelSize: 8; font.letterSpacing: 1.0
                     color: decometerWindow.colMuted
                 }
             }
@@ -849,7 +985,7 @@ Dialog {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: decometerWindow.close()
+                    onClicked: decometerWindow.requestWindowClose()
                 }
             }
         }

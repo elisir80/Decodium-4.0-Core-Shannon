@@ -648,7 +648,18 @@ bool SoundInput::checkStream ()
           break;
 
         case QAudio::IOError:
-          Q_EMIT error (tr ("Audio RX input read error: Qt reported an I/O failure while reading samples. %1").arg(context));
+          {
+            QString const message = tr ("Audio RX input read error: Qt reported an I/O failure while reading samples. %1").arg(context);
+#if defined(Q_OS_WIN)
+            // A WASAPI USB endpoint can enter IOError after suspend/resume
+            // even though the device is still present and can be reopened.
+            // Let the bridge recover it without blocking the UI with a modal
+            // error. Other platforms retain their established behaviour.
+            Q_EMIT recoverableError (message);
+#else
+            Q_EMIT error (message);
+#endif
+          }
           break;
 
         case QAudio::FatalError:
@@ -1072,7 +1083,11 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
       return;
     }
 
+#if defined(Q_OS_LINUX)
   qDebug() << "SoundInput: non-destructive PipeWire recovery for" << device.description();
+#else
+  qDebug() << "SoundInput: non-destructive audio input recovery for" << device.description();
+#endif
   m_sink = sink;
   m_sink->setInputGainLinear (m_inputGain);
   m_expectedSuspend_ = false;

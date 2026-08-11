@@ -731,6 +731,10 @@ ApplicationWindow {
         states.astroFloatingWindow = snapshot(astroFloatingWindow, astroWindowDetached, astroWindowMinimized)
         states.satelliteFloatingWindow = snapshot(satelliteFloatingWindow, satelliteWindowDetached, false)
         states.macroFloatingWindow = snapshot(macroFloatingWindow, macroDialogDetached, macroDialogMinimized)
+        states.settingsFloatingWindow = snapshot(settingsFloatingWindow, false, false)
+        states.mamFloatingWindow = snapshot(mamFloatingWindow, false, false)
+        states.decometerFloatingWindow = snapshot(decometerFloatingWindow, false, false)
+        states.activeStationsFloatingWindow = snapshot(activeStationsFloatingWindow, false, false)
         states.rigFloatingWindow = snapshot(rigFloatingWindow, rigControlDetached, rigControlMinimized)
         states.period1FloatingWindow = snapshot(period1FloatingWindow, period1Detached, period1Minimized)
         states.period2FloatingWindow = snapshot(period2FloatingWindow, period2Detached, period2Minimized)
@@ -759,6 +763,11 @@ ApplicationWindow {
             if (astroFloatingWindow) astroFloatingWindow.hide()
             if (satelliteFloatingWindow) satelliteFloatingWindow.hide()
             macroDialogDetached = false; macroDialogMinimized = false
+            if (settingsFloatingWindow) settingsFloatingWindow.hideHostedWindow()
+            if (mamFloatingWindow) mamFloatingWindow.hideHostedWindow()
+            if (decometerFloatingWindow) decometerFloatingWindow.hideHostedWindow()
+            activeStationsPanelVisible = false
+            if (activeStationsFloatingWindow) activeStationsFloatingWindow.hide()
             rigControlDetached = false;  rigControlMinimized = false
             period1Detached = false;     period1Minimized = false
             period2Detached = false;     period2Minimized = false
@@ -810,6 +819,12 @@ ApplicationWindow {
         console.log("Main window closing - shutting down application")
         // Close all floating windows
         if (waterfallWindow) waterfallWindow.close()
+        if (logFloatingWindow) logFloatingWindow.close()
+        if (macroFloatingWindow) macroFloatingWindow.close()
+        if (settingsFloatingWindow) settingsFloatingWindow.close()
+        if (mamFloatingWindow) mamFloatingWindow.close()
+        if (decometerFloatingWindow) decometerFloatingWindow.close()
+        if (activeStationsFloatingWindow) activeStationsFloatingWindow.close()
         if (logWindowLoader.item) logWindowLoader.item.close()
         closeLoaded(astroWindowLoader)
         closeLoaded(macroDialogLoader)
@@ -999,6 +1014,103 @@ ApplicationWindow {
                     resizeRoot.resizeTop(mouse.y)
                 }
             }
+        }
+    }
+
+    // Corner-only resize for fixed-aspect instruments.  The handles live
+    // inside the face, so they do not create a second frame or an external
+    // input gutter.  Width drives height and the opposite corner stays fixed.
+    component ProportionalResizeHandles: Item {
+        id: proportionalResizeRoot
+        property var targetWindow
+        property real aspectRatio: 15 / 7
+        property int minWidth: 450
+        property int maxWidth: 1800
+        property int cornerSize: 18
+
+        anchors.fill: parent
+        enabled: !!targetWindow && aspectRatio > 0
+        z: 1000
+
+        function boundedWidth(value) {
+            return Math.max(minWidth, Math.min(maxWidth, Math.round(value)))
+        }
+
+        function applyBottomResize(handle, mouse, fromLeft) {
+            if (!targetWindow || !handle.pressed)
+                return
+            var currentGlobal = handle.mapToGlobal(mouse.x, mouse.y)
+            var deltaX = currentGlobal.x - handle.pressGlobalPos.x
+            var deltaY = currentGlobal.y - handle.pressGlobalPos.y
+            var horizontalGrowth = fromLeft ? -deltaX : deltaX
+            var verticalGrowthAsWidth = deltaY * aspectRatio
+            var widthGrowth = Math.abs(horizontalGrowth) >= Math.abs(verticalGrowthAsWidth)
+                              ? horizontalGrowth : verticalGrowthAsWidth
+            var newWidth = boundedWidth(handle.pressWindowSize.width + widthGrowth)
+            var newHeight = Math.round(newWidth / aspectRatio)
+
+            if (fromLeft)
+                targetWindow.x = Math.round(handle.pressWindowPos.x
+                                             + handle.pressWindowSize.width - newWidth)
+            targetWindow.width = newWidth
+            targetWindow.height = newHeight
+        }
+
+        function finishResize() {
+            if (!targetWindow)
+                return
+            mainWindow.finishFloatingWindowDrag(targetWindow)
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        MouseArea {
+            id: proportionalBottomLeft
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: proportionalResizeRoot.cornerSize
+            height: proportionalResizeRoot.cornerSize
+            acceptedButtons: Qt.LeftButton
+            cursorShape: Qt.SizeBDiagCursor
+            property point pressGlobalPos: Qt.point(0, 0)
+            property point pressWindowPos: Qt.point(0, 0)
+            property size pressWindowSize: Qt.size(0, 0)
+            onPressed: function(mouse) {
+                pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                pressWindowPos = Qt.point(proportionalResizeRoot.targetWindow.x,
+                                          proportionalResizeRoot.targetWindow.y)
+                pressWindowSize = Qt.size(proportionalResizeRoot.targetWindow.width,
+                                          proportionalResizeRoot.targetWindow.height)
+            }
+            onPositionChanged: function(mouse) {
+                proportionalResizeRoot.applyBottomResize(proportionalBottomLeft, mouse, true)
+            }
+            onReleased: proportionalResizeRoot.finishResize()
+            onCanceled: proportionalResizeRoot.finishResize()
+        }
+
+        MouseArea {
+            id: proportionalBottomRight
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            width: proportionalResizeRoot.cornerSize
+            height: proportionalResizeRoot.cornerSize
+            acceptedButtons: Qt.LeftButton
+            cursorShape: Qt.SizeFDiagCursor
+            property point pressGlobalPos: Qt.point(0, 0)
+            property point pressWindowPos: Qt.point(0, 0)
+            property size pressWindowSize: Qt.size(0, 0)
+            onPressed: function(mouse) {
+                pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                pressWindowPos = Qt.point(proportionalResizeRoot.targetWindow.x,
+                                          proportionalResizeRoot.targetWindow.y)
+                pressWindowSize = Qt.size(proportionalResizeRoot.targetWindow.width,
+                                          proportionalResizeRoot.targetWindow.height)
+            }
+            onPositionChanged: function(mouse) {
+                proportionalResizeRoot.applyBottomResize(proportionalBottomRight, mouse, false)
+            }
+            onReleased: proportionalResizeRoot.finishResize()
+            onCanceled: proportionalResizeRoot.finishResize()
         }
     }
 
@@ -1931,7 +2043,16 @@ ApplicationWindow {
         persistUiSetting("uiAsyncIconVisible", visible)
     }
     onTimeSyncPanelVisibleChanged: persistUiSetting("uiTimeSyncPanelVisible", timeSyncPanelVisible)
-    onActiveStationsPanelVisibleChanged: persistUiSetting("uiActiveStationsPanelVisible", activeStationsPanelVisible)
+    onActiveStationsPanelVisibleChanged: {
+        persistUiSetting("uiActiveStationsPanelVisible", activeStationsPanelVisible)
+        if (typeof activeStationsFloatingWindow !== "undefined") {
+            if (activeStationsPanelVisible) {
+                activeStationsFloatingWindow.showHostedWindow()
+            } else if (activeStationsFloatingWindow.visible) {
+                activeStationsFloatingWindow.hide()
+            }
+        }
+    }
     onCallerQueuePanelVisibleChanged: persistUiSetting("uiCallerQueuePanelVisible", callerQueuePanelVisible)
     onAstroPanelVisibleChanged: persistUiSetting("uiAstroPanelVisible", astroPanelVisible)
     onDxClusterPanelVisibleChanged: {
@@ -2202,6 +2323,9 @@ ApplicationWindow {
             astroFloatingWindow,
             satelliteFloatingWindow,
             macroFloatingWindow,
+            mamFloatingWindow,
+            decometerFloatingWindow,
+            activeStationsFloatingWindow,
             rigFloatingWindow,
             period1FloatingWindow,
             period2FloatingWindow,
@@ -2248,9 +2372,15 @@ ApplicationWindow {
     }
 
     function openLogWindow() {
-        runWhenLoaded(logWindowLoader, function(item) { item.open() })
+        logWindowDetached = true
+        logWindowMinimized = false
+        logFloatingWindow.showHostedWindow()
     }
-    function openMacroDialog() { runWhenLoaded(macroDialogLoader, function(item) { item.open() }) }
+    function openMacroDialog() {
+        macroDialogDetached = true
+        macroDialogMinimized = false
+        macroFloatingWindow.showHostedWindow()
+    }
     function openAstroWindow() {
         astroWindowDetached = true
         astroWindowMinimized = false
@@ -2263,26 +2393,18 @@ ApplicationWindow {
     function openSettingsDialog() {
         var requestedAt = Date.now()
         console.log("SETUP requested loaded=" + !!settingsDialogLoader.item)
-        runWhenLoaded(settingsDialogLoader, function(item) {
-            Qt.callLater(function() {
-                var openStartedAt = Date.now()
-                console.log("SETUP open begin wait_ms=" + (openStartedAt - requestedAt))
-                suspendTopmostPopoutsForSettings()
-                item.open()
-                console.log("SETUP open returned elapsed_ms=" + (Date.now() - openStartedAt))
-            })
-        })
+        var openStartedAt = Date.now()
+        console.log("SETUP open begin wait_ms=" + (openStartedAt - requestedAt))
+        suspendTopmostPopoutsForSettings()
+        settingsFloatingWindow.showHostedWindow(-1)
+        console.log("SETUP open returned elapsed_ms=" + (Date.now() - openStartedAt))
     }
     function openSettingsTab(tabIndex) {
-        runWhenLoaded(settingsDialogLoader, function(item) {
-            Qt.callLater(function() {
-                suspendTopmostPopoutsForSettings()
-                item.openTab(tabIndex)
-            })
-        })
+        suspendTopmostPopoutsForSettings()
+        settingsFloatingWindow.showHostedWindow(tabIndex)
     }
     function openMamWindow() {
-        runWhenLoaded(mamWindowLoader, function(item) { item.open() })
+        mamFloatingWindow.showHostedWindow()
     }
     function openInfoDialog(tabIndex) {
         runWhenLoaded(infoDialogLoader, function(item) {
@@ -2297,7 +2419,7 @@ ApplicationWindow {
         runWhenLoaded(historyDialogLoader, function(item) { item.show() })
     }
     function openDecometerWindow() {
-        runWhenLoaded(decometerWindowLoader, function(item) { item.open() })
+        decometerFloatingWindow.showHostedWindow()
     }
 
     function chooseWavFileForDecode() {
@@ -10723,20 +10845,111 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
     }
 
-    Loader {
-        id: settingsDialogLoader
-        anchors.fill: parent
-        active: false
-        asynchronous: true
-        source: "components/SettingsDialog.qml"
-        property var pendingAction: null
-        onLoaded: {
-            console.log("Lazy component loaded: SettingsDialog tab=" + (item ? item.currentTab : -1))
-            if (pendingAction) {
-                var action = pendingAction
-                pendingAction = null
-                action(item)
+    // Setup is hosted by a real top-level window.  Popup coordinates are local
+    // to Main.qml and cannot cross a monitor boundary on macOS; this host uses
+    // desktop-global coordinates while preserving the existing themed dialog.
+    Window {
+        id: settingsFloatingWindow
+        property int requestedTab: -1
+        width: 1500
+        height: 900
+        minimumWidth: 800
+        minimumHeight: 560
+        visible: false
+        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        title: qsTr("Settings - Decodium")
+        color: "transparent"
+
+        x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
+        y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(settingsFloatingWindow)
+        }
+
+        function showHostedWindow(tabIndex) {
+            requestedTab = Number(tabIndex)
+            if (!isFinite(requestedTab))
+                requestedTab = -1
+            settingsDialogLoader.active = true
+            show()
+            raise()
+            requestActivate()
+            if (settingsDialogLoader.item) {
+                settingsDialogLoader.item.nativeHostWindow = settingsFloatingWindow
+                if (requestedTab >= 0)
+                    settingsDialogLoader.item.currentTab = Math.max(0, Math.min(13, Math.floor(requestedTab)))
+                if (!settingsDialogLoader.item.visible)
+                    settingsDialogLoader.item.open()
             }
+        }
+
+        function hideAfterDialogClosed() {
+            hide()
+            mainWindow.restoreTopmostPopoutsAfterSettings()
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        function hideHostedWindow() {
+            if (settingsDialogLoader.item && settingsDialogLoader.item.visible) {
+                settingsDialogLoader.item.close()
+                return
+            }
+            hideAfterDialogClosed()
+        }
+
+        Component.onCompleted: mainWindow.restoreFloatingWindowState(
+                                   settingsFloatingWindow,
+                                   "settingsFloatingWindow",
+                                   "",
+                                   "")
+        onXChanged: mainWindow.scheduleWindowStateSave()
+        onYChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onClosing: function(close) {
+            if (!mainWindow.applicationClosing) {
+                close.accepted = false
+                hideHostedWindow()
+                return
+            }
+            close.accepted = true
+        }
+
+        Loader {
+            id: settingsDialogLoader
+            anchors.fill: parent
+            active: false
+            asynchronous: true
+            source: "components/SettingsDialog.qml"
+            property var pendingAction: null
+            onLoaded: {
+                item.nativeHostWindow = settingsFloatingWindow
+                console.log("Lazy component loaded: SettingsDialog tab=" + (item ? item.currentTab : -1))
+                if (settingsFloatingWindow.requestedTab >= 0)
+                    item.currentTab = Math.max(0, Math.min(13, Math.floor(settingsFloatingWindow.requestedTab)))
+                if (settingsFloatingWindow.visible && !item.visible)
+                    item.open()
+                if (pendingAction) {
+                    var action = pendingAction
+                    pendingAction = null
+                    action(item)
+                }
+            }
+        }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: settingsFloatingWindow
+            maxWidth: 2400
+            maxHeight: 1600
+        }
+
+        Shortcut {
+            enabled: settingsFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: settingsFloatingWindow.hideHostedWindow()
         }
     }
 
@@ -10748,7 +10961,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         target: settingsDialogLoader.item
         ignoreUnknownSignals: true
         function onClosed() {
-            mainWindow.restoreTopmostPopoutsAfterSettings()
+            settingsFloatingWindow.hideAfterDialogClosed()
         }
     }
 
@@ -11213,22 +11426,244 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
     }
 
-    // MAM Window - Multi-Answer Mode
-    Loader {
-        id: mamWindowLoader
-        anchors.fill: parent
-        active: false
-        asynchronous: true
-        source: "components/MamWindow.qml"
-        property var pendingAction: null
-        onLoaded: {
-            item.engine = bridge
-            console.log("Lazy component loaded: MamWindow")
-            if (pendingAction) {
-                var action = pendingAction
-                pendingAction = null
-                action(item)
+    // MAM Window - Multi-Answer Mode.  Use a desktop Window so its position is
+    // global and it can be moved to any monitor on every supported platform.
+    Window {
+        id: mamFloatingWindow
+        width: 700
+        height: 450
+        minimumWidth: 500
+        minimumHeight: 360
+        visible: false
+        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        title: qsTr("Multi-Answer Mode - Decodium")
+        color: "transparent"
+
+        x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
+        y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(mamFloatingWindow)
+        }
+
+        function showHostedWindow() {
+            mamWindowLoader.active = true
+            show()
+            raise()
+            requestActivate()
+            if (mamWindowLoader.item) {
+                mamWindowLoader.item.engine = bridge
+                mamWindowLoader.item.nativeHostWindow = mamFloatingWindow
+                if (!mamWindowLoader.item.visible)
+                    mamWindowLoader.item.open()
             }
+        }
+
+        function hideAfterDialogClosed() {
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        function hideHostedWindow() {
+            if (mamWindowLoader.item && mamWindowLoader.item.visible) {
+                mamWindowLoader.item.close()
+                return
+            }
+            hideAfterDialogClosed()
+        }
+
+        Component.onCompleted: mainWindow.restoreFloatingWindowState(
+                                   mamFloatingWindow,
+                                   "mamFloatingWindow",
+                                   "",
+                                   "")
+        onXChanged: mainWindow.scheduleWindowStateSave()
+        onYChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onClosing: function(close) {
+            if (!mainWindow.applicationClosing) {
+                close.accepted = false
+                hideHostedWindow()
+                return
+            }
+            close.accepted = true
+        }
+
+        Loader {
+            id: mamWindowLoader
+            anchors.fill: parent
+            active: false
+            asynchronous: true
+            source: "components/MamWindow.qml"
+            property var pendingAction: null
+            onLoaded: {
+                item.engine = bridge
+                item.nativeHostWindow = mamFloatingWindow
+                console.log("Lazy component loaded: MamWindow")
+                if (mamFloatingWindow.visible && !item.visible)
+                    item.open()
+                if (pendingAction) {
+                    var action = pendingAction
+                    pendingAction = null
+                    action(item)
+                }
+            }
+        }
+
+        Connections {
+            target: mamWindowLoader.item
+            ignoreUnknownSignals: true
+            function onClosed() { mamFloatingWindow.hideAfterDialogClosed() }
+        }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: mamFloatingWindow
+            maxWidth: 1400
+            maxHeight: 1000
+        }
+
+        Shortcut {
+            enabled: mamFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: mamFloatingWindow.hideHostedWindow()
+        }
+    }
+
+    // DECOMETER uses a real desktop window so its RF face can be placed on a
+    // dedicated external display without changing the CAT/telemetry path.
+    Window {
+        id: decometerFloatingWindow
+        property bool contentRequested: false
+        readonly property real faceAspectRatio: 15 / 7
+        readonly property int screenLimitedMaximumWidth: {
+            if (!screen || !screen.availableGeometry)
+                return maximumWidth
+            var usableWidth = Math.max(minimumWidth,
+                                       Number(screen.availableGeometry.width) - 24)
+            var usableHeightAsWidth = Math.max(minimumWidth,
+                                               (Number(screen.availableGeometry.height) - 24)
+                                               * faceAspectRatio)
+            return Math.round(Math.min(maximumWidth, usableWidth, usableHeightAsWidth))
+        }
+        width: 900
+        height: 420
+        minimumWidth: 450
+        minimumHeight: 210
+        maximumWidth: 1800
+        maximumHeight: 840
+        visible: false
+        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        title: qsTr("DECØMETER - RF Meter - Decodium")
+        color: "transparent"
+
+        x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
+        y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(decometerFloatingWindow)
+            setProportionalWidth(width)
+            mainWindow.finishFloatingWindowDrag(decometerFloatingWindow)
+        }
+
+        function setProportionalWidth(requestedWidth) {
+            var boundedWidth = Math.max(minimumWidth,
+                                        Math.min(screenLimitedMaximumWidth,
+                                                 Math.round(requestedWidth)))
+            width = boundedWidth
+            height = Math.round(boundedWidth / faceAspectRatio)
+        }
+
+        function normalizeProportionalSize() {
+            var restoredWidth = Number(width)
+            var restoredHeight = Number(height)
+            if (!isFinite(restoredWidth) || restoredWidth <= 0
+                    || !isFinite(restoredHeight) || restoredHeight <= 0) {
+                setProportionalWidth(900)
+                return
+            }
+            // Fit the old rectangle inside the 15:7 face.  This also migrates
+            // the obsolete 924x444 host-with-gutter geometry without bars.
+            var scale = Math.min(restoredWidth / 900, restoredHeight / 420)
+            setProportionalWidth(900 * scale)
+        }
+
+        function showHostedWindow() {
+            normalizeProportionalSize()
+            contentRequested = true
+            show()
+            raise()
+            requestActivate()
+            if (decometerFloatingLoader.item && !decometerFloatingLoader.item.visible)
+                decometerFloatingLoader.item.open()
+        }
+
+        function hideAfterDialogClosed() {
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        function hideHostedWindow() {
+            if (decometerFloatingLoader.item && decometerFloatingLoader.item.visible) {
+                decometerFloatingLoader.item.close()
+                return
+            }
+            hideAfterDialogClosed()
+        }
+
+        Component.onCompleted: {
+            mainWindow.restoreFloatingWindowState(decometerFloatingWindow,
+                                                  "decometerFloatingWindow",
+                                                  "",
+                                                  "")
+            normalizeProportionalSize()
+        }
+        onXChanged: mainWindow.scheduleWindowStateSave()
+        onYChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onClosing: function(close) {
+            if (!mainWindow.applicationClosing) {
+                close.accepted = false
+                hideHostedWindow()
+                return
+            }
+            close.accepted = true
+        }
+
+        Loader {
+            id: decometerFloatingLoader
+            anchors.fill: parent
+            active: decometerFloatingWindow.contentRequested
+            asynchronous: true
+            source: "components/DecometerWindow.qml"
+            onLoaded: {
+                item.nativeHostWindow = decometerFloatingWindow
+                if (decometerFloatingWindow.visible && !item.visible)
+                    item.open()
+            }
+        }
+
+        Connections {
+            target: decometerFloatingLoader.item
+            ignoreUnknownSignals: true
+            function onClosed() { decometerFloatingWindow.hideAfterDialogClosed() }
+        }
+
+        ProportionalResizeHandles {
+            targetWindow: decometerFloatingWindow
+            aspectRatio: decometerFloatingWindow.faceAspectRatio
+            minWidth: decometerFloatingWindow.minimumWidth
+            maxWidth: decometerFloatingWindow.screenLimitedMaximumWidth
+        }
+
+        Shortcut {
+            enabled: decometerFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: decometerFloatingWindow.hideHostedWindow()
         }
     }
 
@@ -12761,8 +13196,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     // ========== DETACHABLE LOG WINDOW ==========
     Window {
         id: logFloatingWindow
-        width: 900
-        height: 600
+        property bool contentRequested: false
+        width: 960
+        height: 720
         minimumWidth: 600
         minimumHeight: 400
         flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
@@ -12776,13 +13212,61 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         onYChanged: mainWindow.scheduleWindowStateSave()
         onWidthChanged: mainWindow.scheduleWindowStateSave()
         onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onVisibleChanged: {
+            if (visible) {
+                contentRequested = true
+                if (logNativePopupLoader.item && !logNativePopupLoader.item.visible)
+                    logNativePopupLoader.item.open()
+            }
+        }
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(logFloatingWindow)
+        }
+
+        function showHostedWindow() {
+            contentRequested = true
+            show()
+            raise()
+            requestActivate()
+            if (logNativePopupLoader.item && !logNativePopupLoader.item.visible)
+                logNativePopupLoader.item.open()
+        }
+
+        function hideAfterDialogClosed() {
+            logWindowDetached = false
+            logWindowMinimized = false
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        function hideHostedWindow() {
+            if (logNativePopupLoader.item && logNativePopupLoader.item.visible) {
+                logNativePopupLoader.item.close()
+                return
+            }
+            hideAfterDialogClosed()
+        }
+
+        function minimizeHostedWindow() {
+            logWindowMinimized = true
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
 
         onClosing: function(close) {
-            logWindowDetached = false
+            if (!mainWindow.applicationClosing) {
+                close.accepted = false
+                hideHostedWindow()
+                return
+            }
             close.accepted = true
         }
 
         Rectangle {
+            // Legacy duplicate shell retained inert during the transition to
+            // the complete LogWindow popup hosted below.
+            visible: false
             anchors.fill: parent
             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
             radius: 10
@@ -12803,17 +13287,40 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
                     MouseArea {
                         id: logDragArea
-                        anchors.fill: parent
-                        property point clickPos: Qt.point(0, 0)
+                        z: 2
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.rightMargin: 88
+                        acceptedButtons: Qt.LeftButton
+                        preventStealing: true
+                        property point pressGlobalPos: Qt.point(0, 0)
+                        property point pressWindowPos: Qt.point(0, 0)
+                        property bool nativeMoveActive: false
                         cursorShape: Qt.SizeAllCursor
-
-                        onPressed: function(mouse) { clickPos = Qt.point(mouse.x, mouse.y) }
+                        onPressed: function(mouse) {
+                            pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                            pressWindowPos = Qt.point(logFloatingWindow.x, logFloatingWindow.y)
+                            nativeMoveActive = mainWindow.startNativeFloatingWindowMove(logFloatingWindow)
+                            mouse.accepted = true
+                        }
                         onPositionChanged: function(mouse) {
-                            if (pressed) {
-                                var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
-                                logFloatingWindow.x += delta.x
-                                logFloatingWindow.y += delta.y
-                            }
+                            if (!pressed || nativeMoveActive)
+                                return
+                            mainWindow.dragFloatingWindowToGlobal(logFloatingWindow,
+                                                                  pressWindowPos,
+                                                                  pressGlobalPos,
+                                                                  mapToGlobal(mouse.x, mouse.y))
+                            mouse.accepted = true
+                        }
+                        onReleased: {
+                            nativeMoveActive = false
+                            mainWindow.finishFloatingWindowDrag(logFloatingWindow)
+                        }
+                        onCanceled: {
+                            nativeMoveActive = false
+                            mainWindow.finishFloatingWindowDrag(logFloatingWindow)
                         }
                     }
 
@@ -12854,11 +13361,44 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 Loader {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    active: logFloatingWindow.visible
+                    active: false
                     asynchronous: true
                     sourceComponent: logContentComponent
                 }
             }
+        }
+
+        Loader {
+            id: logNativePopupLoader
+            anchors.fill: parent
+            active: logFloatingWindow.contentRequested
+            asynchronous: true
+            source: "components/LogWindow.qml"
+            onLoaded: {
+                item.nativeHostWindow = logFloatingWindow
+                if (logFloatingWindow.visible && !item.visible)
+                    item.open()
+            }
+        }
+
+        Connections {
+            target: logNativePopupLoader.item
+            ignoreUnknownSignals: true
+            function onClosed() { logFloatingWindow.hideAfterDialogClosed() }
+        }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: logFloatingWindow
+            maxWidth: 2200
+            maxHeight: 1400
+        }
+
+        Shortcut {
+            enabled: logFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: logFloatingWindow.hideHostedWindow()
         }
     }
 
@@ -13054,6 +13594,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     // ========== DETACHABLE MACRO WINDOW ==========
     Window {
         id: macroFloatingWindow
+        property bool contentRequested: false
         width: 700
         height: 600
         minimumWidth: 500
@@ -13070,13 +13611,61 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         onYChanged: mainWindow.scheduleWindowStateSave()
         onWidthChanged: mainWindow.scheduleWindowStateSave()
         onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onVisibleChanged: {
+            if (visible) {
+                contentRequested = true
+                if (macroNativeDialogLoader.item && !macroNativeDialogLoader.item.visible)
+                    macroNativeDialogLoader.item.open()
+            }
+        }
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(macroFloatingWindow)
+        }
+
+        function showHostedWindow() {
+            contentRequested = true
+            show()
+            raise()
+            requestActivate()
+            if (macroNativeDialogLoader.item && !macroNativeDialogLoader.item.visible)
+                macroNativeDialogLoader.item.open()
+        }
+
+        function hideAfterDialogClosed() {
+            macroDialogDetached = false
+            macroDialogMinimized = false
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        function hideHostedWindow() {
+            if (macroNativeDialogLoader.item && macroNativeDialogLoader.item.visible) {
+                macroNativeDialogLoader.item.close()
+                return
+            }
+            hideAfterDialogClosed()
+        }
+
+        function minimizeHostedWindow() {
+            macroDialogMinimized = true
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
 
         onClosing: function(close) {
-            macroDialogDetached = false
+            if (!mainWindow.applicationClosing) {
+                close.accepted = false
+                hideHostedWindow()
+                return
+            }
             close.accepted = true
         }
 
         Rectangle {
+            // The old reduced floating editor is kept inert; the complete
+            // MacroDialog is hosted below so no functionality is lost.
+            visible: false
             anchors.fill: parent
             color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.98)
             radius: 10
@@ -13169,11 +13758,44 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 Loader {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    active: macroFloatingWindow.visible
+                    active: false
                     asynchronous: true
                     sourceComponent: macroContentComponent
                 }
             }
+        }
+
+        Loader {
+            id: macroNativeDialogLoader
+            anchors.fill: parent
+            active: macroFloatingWindow.contentRequested
+            asynchronous: true
+            source: "components/MacroDialog.qml"
+            onLoaded: {
+                item.nativeHostWindow = macroFloatingWindow
+                if (macroFloatingWindow.visible && !item.visible)
+                    item.open()
+            }
+        }
+
+        Connections {
+            target: macroNativeDialogLoader.item
+            ignoreUnknownSignals: true
+            function onClosed() { macroFloatingWindow.hideAfterDialogClosed() }
+        }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: macroFloatingWindow
+            maxWidth: 1600
+            maxHeight: 1200
+        }
+
+        Shortcut {
+            enabled: macroFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: macroFloatingWindow.hideHostedWindow()
         }
     }
 
@@ -15150,80 +15772,86 @@ NumberAnimation {
         }
     }
 
-    // ActiveStationsPanel — posizione sotto TimeSyncPanel
-    Item {
-        id: activeStationsOverlay
-        visible: activeStationsPanelVisible
-        z: 200
-        property bool userPositioned: mainWindow.settingBool("uiActiveStationsPanelUserPositioned", false)
-        property real savedX: Number(mainWindow.safeBridgeSetting("uiActiveStationsPanelX", -1))
-        property real savedY: Number(mainWindow.safeBridgeSetting("uiActiveStationsPanelY", -1))
-        function boundedX(value) {
-            return Math.round(Math.min(Math.max(0, Number(value) || 0),
-                                       Math.max(0, mainWindow.width - width)))
-        }
-        function boundedY(value) {
-            return Math.round(Math.min(Math.max(0, Number(value) || 0),
-                                       Math.max(0, mainWindow.height - height)))
-        }
-        function defaultX() {
-            return Math.max(12, mainWindow.width - width - 12)
-        }
-        function defaultY() {
-            return Math.min(timeSyncPanelVisible ? timeSyncOverlay.y + timeSyncOverlay.height + 8
-                                                 : Math.max(100, headerBar.y + headerBar.height + 8),
-                            Math.max(12, mainWindow.height - height - 12))
-        }
-        function savePosition() {
-            userPositioned = true
-            savedX = boundedX(x)
-            savedY = boundedY(y)
-            x = savedX
-            y = savedY
-            mainWindow.persistUiSetting("uiActiveStationsPanelUserPositioned", true)
-            mainWindow.persistUiSetting("uiActiveStationsPanelX", savedX)
-            mainWindow.persistUiSetting("uiActiveStationsPanelY", savedY)
-        }
-        function clampSavedPosition() {
-            if (!userPositioned)
-                return
-            savedX = boundedX(savedX)
-            savedY = boundedY(savedY)
-            x = savedX
-            y = savedY
-            mainWindow.persistUiSetting("uiActiveStationsPanelX", savedX)
-            mainWindow.persistUiSetting("uiActiveStationsPanelY", savedY)
-        }
-        x: userPositioned ? boundedX(savedX) : defaultX()
-        y: userPositioned ? boundedY(savedY) : defaultY()
-        width: Math.min(360, Math.max(280, mainWindow.width - 24))
-        height: 280
-        onWidthChanged: Qt.callLater(clampSavedPosition)
-        onHeightChanged: Qt.callLater(clampSavedPosition)
+    // Active Stations is a desktop window rather than a Main.qml overlay.
+    // Its x/y values are therefore global and remain valid on external screens.
+    Window {
+        id: activeStationsFloatingWindow
+        width: 360
+        height: 300
+        minimumWidth: 300
+        minimumHeight: 220
+        visible: false
+        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        title: qsTr("Active Stations - Decodium")
+        color: "transparent"
 
-        MouseArea {
-            anchors.fill: parent
-            drag.target: activeStationsOverlay
-            drag.axis: Drag.XAndYAxis
-            drag.minimumX: 0; drag.maximumX: Math.max(0, mainWindow.width - activeStationsOverlay.width)
-            drag.minimumY: 0; drag.maximumY: Math.max(0, mainWindow.height - activeStationsOverlay.height)
-            onReleased: activeStationsOverlay.savePosition()
+        x: mainWindow.x + Math.max(12, mainWindow.width - width - 24)
+        y: mainWindow.y + 120
+
+        function finishDesktopMove() {
+            mainWindow.finishFloatingWindowDrag(activeStationsFloatingWindow)
+        }
+
+        function showHostedWindow() {
+            activeStationsPanelVisible = true
+            activeStationsLoader.active = true
+            show()
+            raise()
+            requestActivate()
+        }
+
+        function hideHostedWindow() {
+            activeStationsPanelVisible = false
+            hide()
+            mainWindow.scheduleWindowStateSave()
+        }
+
+        Component.onCompleted: {
+            mainWindow.restoreFloatingWindowState(activeStationsFloatingWindow,
+                                                   "activeStationsFloatingWindow",
+                                                   "",
+                                                   "")
+            if (activeStationsPanelVisible)
+                Qt.callLater(showHostedWindow)
+        }
+        onXChanged: mainWindow.scheduleWindowStateSave()
+        onYChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onClosing: function(close) {
+            if (!mainWindow.applicationClosing)
+                activeStationsPanelVisible = false
+            mainWindow.scheduleWindowStateSave()
+            close.accepted = true
         }
 
         Loader {
             id: activeStationsLoader
             anchors.fill: parent
-            active: activeStationsPanelVisible
+            active: false
             asynchronous: true
             source: "../panels/ActiveStationsPanel.qml"
+            onLoaded: item.nativeHostWindow = activeStationsFloatingWindow
         }
 
         Connections {
             target: activeStationsLoader.item
             ignoreUnknownSignals: true
-            function onCloseRequested() {
-                activeStationsPanelVisible = false
-            }
+            function onCloseRequested() { activeStationsFloatingWindow.hideHostedWindow() }
+        }
+
+        FloatingResizeHandles {
+            z: 100
+            targetWindow: activeStationsFloatingWindow
+            maxWidth: 900
+            maxHeight: 1000
+        }
+
+        Shortcut {
+            enabled: activeStationsFloatingWindow.visible
+            sequence: "Escape"
+            context: Qt.WindowShortcut
+            onActivated: activeStationsFloatingWindow.hideHostedWindow()
         }
     }
 

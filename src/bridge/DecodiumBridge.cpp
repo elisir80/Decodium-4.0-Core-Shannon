@@ -20011,9 +20011,7 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     if (m_soundInput
         && !m_ft2LinkTxActive
         && !(m_mode == QStringLiteral("FT2") && m_asyncTxEnabled)) {
-        m_soundInput->suspend();
-        m_rxAudioSuspendedForTx = true;
-        bridgeLog(QStringLiteral("SoundInput suspended during legacy bridge TX"));
+        pauseRxAudioForTx(QStringLiteral("legacy bridge TX"));
     }
 
     appendTxDecodeEntry(msg);
@@ -20549,30 +20547,83 @@ void DecodiumBridge::updateSoundOutputDevice()
               " fmt=" + audioFormatToString(fmt));
 }
 
+void DecodiumBridge::pauseRxAudioForTx(const QString& context)
+{
+    if (!m_soundInput) {
+        return;
+    }
+
+#if defined(Q_OS_WIN)
+    if (m_audioSink) {
+        // Do not suspend a WASAPI USB input around every TX. Qt can fail to
+        // resume otherwise healthy USB Audio CODEC endpoints with IOError.
+        // Keep the endpoint active and discard its PCM before it reaches any
+        // buffer, meter, waterfall, recording or decoder callback.
+        m_audioSink->setDiscardSamples(true);
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            m_audioBuffer.clear();
+            m_audioBuffer.reserve(m_periodTicksMax * TIMER_MS * SAMPLE_RATE / 1000);
+        }
+        m_rxAudioKeptOpenForTx = true;
+        bridgeLog(QStringLiteral("SoundInput kept active with RX samples discarded during %1 (Windows WASAPI)")
+                      .arg(context));
+        return;
+    }
+#endif
+
+    m_soundInput->suspend();
+    m_rxAudioSuspendedForTx = true;
+    bridgeLog(QStringLiteral("SoundInput suspended during %1").arg(context));
+}
+
 void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
 {
     const bool wasSuspended = m_rxAudioSuspendedForTx;
+    const bool wasKeptOpen = m_rxAudioKeptOpenForTx;
     int bufferedBeforeResume = 0;
     {
         QMutexLocker locker(&m_audioBufferMutex);
         bufferedBeforeResume = m_audioBuffer.size();
     }
     m_rxAudioSuspendedForTx = false;
+    m_rxAudioKeptOpenForTx = false;
     // 1.0.166 — marca timestamp fine TX per hold-off NTP rearm
     m_lastTxEndMs = QDateTime::currentMSecsSinceEpoch();
     const bool legacyPcmTapSingleCapture =
         usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
         && !useDedicatedModernAudioCaptureWithLegacy();
-    bridgeLog(QStringLiteral("RX resume after TX: reason=%1 wasSuspended=%2 monitor=%3 monitorRequested=%4 soundInput=%5 tci=%6 bufferedBefore=%7 legacyTap=%8")
+    bridgeLog(QStringLiteral("RX resume after TX: reason=%1 wasSuspended=%2 keptOpen=%3 monitor=%4 monitorRequested=%5 soundInput=%6 tci=%7 bufferedBefore=%8 legacyTap=%9")
                   .arg(reason)
                   .arg(wasSuspended ? 1 : 0)
+                  .arg(wasKeptOpen ? 1 : 0)
                   .arg(m_monitoring ? 1 : 0)
                   .arg(m_monitorRequested ? 1 : 0)
                   .arg(m_soundInput ? QStringLiteral("alive") : QStringLiteral("null"))
                   .arg(m_tciAudioCaptureActive ? 1 : 0)
                   .arg(bufferedBeforeResume)
                   .arg(legacyPcmTapSingleCapture ? 1 : 0));
+
+    if (wasKeptOpen) {
+        // Keep discarding until the old RX/TX transition samples have been
+        // removed, then reopen the sink path without touching QAudioSource.
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            m_audioBuffer.clear();
+            m_audioBuffer.reserve(m_periodTicksMax * TIMER_MS * SAMPLE_RATE / 1000);
+        }
+        if (m_audioSink) {
+            m_audioSink->setDiscardSamples(false);
+            bridgeLog(QStringLiteral("SoundInput remained active; RX sample flow restored after TX %1")
+                          .arg(reason));
+        } else {
+            bridgeLog(QStringLiteral("Audio sink missing after kept-open TX %1; restarting capture")
+                          .arg(reason));
+            restartAudioCaptureFromWatchdog(QStringLiteral("post-TX audio sink missing (%1)").arg(reason));
+            return;
+        }
+    }
 
     if (!m_monitoring
         && !(m_monitorRequested && usingLegacyBackendForRx())) {
@@ -23614,11 +23665,9 @@ void DecodiumBridge::startTx()
         if (m_soundInput
             && (!m_ft2LinkTxActive || satelliteHalfDuplex)
             && !(m_mode == "FT2" && m_asyncTxEnabled)) {
-            m_soundInput->suspend();
-            m_rxAudioSuspendedForTx = true;
-            bridgeLog(QStringLiteral("SoundInput suspended during TX (sync mode): ft2Link=%1 mode=%2")
-                          .arg(m_ft2LinkTxActive ? 1 : 0)
-                          .arg(m_mode));
+            pauseRxAudioForTx(QStringLiteral("TX (sync mode): ft2Link=%1 mode=%2")
+                                  .arg(m_ft2LinkTxActive ? 1 : 0)
+                                  .arg(m_mode));
         }
 
         if (!m_ft2LinkTxActive) {
@@ -23880,11 +23929,9 @@ void DecodiumBridge::startTx()
     if (m_monitoring && m_soundInput
         && (!m_ft2LinkTxActive || satelliteHalfDuplex)
         && !(m_mode == "FT2" && m_asyncTxEnabled)) {
-        m_soundInput->suspend();
-        m_rxAudioSuspendedForTx = true;
-        bridgeLog(QStringLiteral("SoundInput suspended during TX (sync mode): ft2Link=%1 mode=%2")
-                      .arg(m_ft2LinkTxActive ? 1 : 0)
-                      .arg(m_mode));
+        pauseRxAudioForTx(QStringLiteral("TX (sync mode): ft2Link=%1 mode=%2")
+                              .arg(m_ft2LinkTxActive ? 1 : 0)
+                              .arg(m_mode));
     }
 
     if (!m_ft2LinkTxActive) {
@@ -46173,6 +46220,39 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
             }
             emit errorMessage(text);
         });
+        connect(m_soundInput, &SoundInput::recoverableError, this, [this](const QString& msg) {
+            QString text = msg.trimmed();
+            if (!text.startsWith(QStringLiteral("Audio "), Qt::CaseInsensitive)) {
+                text = QStringLiteral("Audio RX: ") + text;
+            }
+            bridgeLog(QStringLiteral("Recoverable audio input failure: %1").arg(text));
+            emit statusMessage(QStringLiteral("Audio RX temporaneamente interrotto; recupero automatico in corso"));
+
+            if (m_rxAudioIoRecoveryQueued || !m_monitoring) {
+                return;
+            }
+            if (m_transmitting || m_tuning || m_rxAudioKeptOpenForTx) {
+                // resumeRxAudioAfterTx() already verifies fresh PCM and starts
+                // the watchdog if the kept-open stream did not recover.
+                bridgeLog(QStringLiteral("Audio RX I/O recovery deferred until TX ends"));
+                return;
+            }
+
+            m_rxAudioIoRecoveryQueued = true;
+            QTimer::singleShot(0, this, [this]() {
+                if (!m_monitoring || m_transmitting || m_tuning) {
+                    m_rxAudioIoRecoveryQueued = false;
+                    return;
+                }
+                restartAudioCaptureFromWatchdog(QStringLiteral("Qt audio input I/O error"));
+                // Keep duplicate stateChanged/checkStream notifications from
+                // restarting the same endpoint repeatedly while the existing
+                // 3.5-second recovery probe is still evaluating fresh PCM.
+                QTimer::singleShot(4500, this, [this]() {
+                    m_rxAudioIoRecoveryQueued = false;
+                });
+            });
+        });
         connect(m_soundInput, &SoundInput::status, this, [this](const QString& msg) {
             QString text = msg.trimmed();
             if (!text.startsWith(QStringLiteral("Audio "), Qt::CaseInsensitive)) {
@@ -46864,9 +46944,12 @@ void DecodiumBridge::stopAudioCapture()
         m_soundInput->stop();
     }
     if (m_audioSink) {
+        m_audioSink->setDiscardSamples(false);
         m_audioSink->resetDecimationPhase();
     }
     m_rxAudioSuspendedForTx = false;
+    m_rxAudioKeptOpenForTx = false;
+    m_rxAudioIoRecoveryQueued = false;
     m_audioUnhealthyStartMs = 0;
     m_audioWatchdogIgnoreUntilMs = 0;
 }
@@ -46892,6 +46975,8 @@ void DecodiumBridge::teardownAudioCapture()
         }
     }
     m_rxAudioSuspendedForTx = false;
+    m_rxAudioKeptOpenForTx = false;
+    m_rxAudioIoRecoveryQueued = false;
     m_audioUnhealthyStartMs = 0;
     m_audioWatchdogIgnoreUntilMs = 0;
 

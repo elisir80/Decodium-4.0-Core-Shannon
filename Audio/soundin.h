@@ -57,6 +57,10 @@ public:
   float inputGain () const;
 
   Q_SIGNAL void error (QString message) const;
+  // Windows/WASAPI can report a recoverable input IOError after a USB audio
+  // endpoint transition. The Decodium bridge handles this without a modal
+  // dialog and starts its bounded audio-watchdog recovery path.
+  Q_SIGNAL void recoverableError (QString message) const;
   Q_SIGNAL void status (QString message) const;
 
 private:

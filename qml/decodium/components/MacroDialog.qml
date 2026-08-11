@@ -11,14 +11,16 @@ import QtQuick.Layouts
 Dialog {
     id: macroDialog
     title: qsTr("Macro Settings")
+    property var nativeHostWindow: null
     modal: false
     dim: false
-    width: 700
-    height: 600
+    width: nativeHostWindow && parent ? Math.max(500, parent.width) : 700
+    height: nativeHostWindow && parent ? Math.max(400, parent.height) : 600
     closePolicy: Popup.CloseOnEscape
     property bool positionInitialized: false
 
     function clampToParent() {
+        if (nativeHostWindow) return
         if (!parent) return
         x = Math.max(0, Math.min(x, parent.width - width))
         y = Math.max(0, Math.min(y, parent.height - height))
@@ -26,9 +28,39 @@ Dialog {
 
     function ensureInitialPosition() {
         if (positionInitialized || !parent) return
+        if (nativeHostWindow) {
+            x = 0
+            y = 0
+            positionInitialized = true
+            return
+        }
         x = Math.max(0, Math.round((parent.width - width) / 2))
         y = Math.max(0, Math.round((parent.height - height) / 2))
         positionInitialized = true
+    }
+
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("Macro startSystemMove failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        macroDialog.close()
     }
 
     onAboutToShow: ensureInitialPosition()
@@ -69,20 +101,44 @@ Dialog {
             preventStealing: true
             property point pressGlobalPos: Qt.point(0, 0)
             property point pressWindowPos: Qt.point(0, 0)
+            property bool nativeMoveActive: false
             cursorShape: Qt.SizeAllCursor
             onPressed: function(mouse) {
                 pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
-                pressWindowPos = Qt.point(macroDialog.x, macroDialog.y)
                 macroDialog.positionInitialized = true
+                if (macroDialog.nativeHostWindow) {
+                    pressWindowPos = Qt.point(macroDialog.nativeHostWindow.x,
+                                              macroDialog.nativeHostWindow.y)
+                    nativeMoveActive = macroDialog.startNativeHostMove()
+                } else {
+                    pressWindowPos = Qt.point(macroDialog.x, macroDialog.y)
+                }
                 mouse.accepted = true
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
                 var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                if (macroDialog.nativeHostWindow) {
+                    if (nativeMoveActive)
+                        return
+                    macroDialog.nativeHostWindow.x = Math.round(
+                                pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+                    macroDialog.nativeHostWindow.y = Math.round(
+                                pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+                    return
+                }
                 macroDialog.x = pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x
                 macroDialog.y = pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y
                 macroDialog.clampToParent()
                 mouse.accepted = true
+            }
+            onReleased: {
+                nativeMoveActive = false
+                macroDialog.finishNativeHostMove()
+            }
+            onCanceled: {
+                nativeMoveActive = false
+                macroDialog.finishNativeHostMove()
             }
         }
 
@@ -123,7 +179,11 @@ Dialog {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         macroDialogMinimized = true
-                        macroDialog.close()
+                        if (macroDialog.nativeHostWindow
+                                && typeof macroDialog.nativeHostWindow.minimizeHostedWindow === "function")
+                            macroDialog.nativeHostWindow.minimizeHostedWindow()
+                        else
+                            macroDialog.close()
                     }
                 }
 
@@ -153,7 +213,7 @@ Dialog {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: macroDialog.close()
+                    onClicked: macroDialog.requestWindowClose()
                 }
 
                 ToolTip.visible: macroCloseMA.containsMouse

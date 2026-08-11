@@ -3092,6 +3092,10 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
   connect (this, &MainWindow::finished, m_soundInput, &SoundInput::stop);
   connect(m_soundInput, &SoundInput::error, this, &MainWindow::showSoundInError);
   connect(m_soundInput, &SoundInput::error, &m_config, &Configuration::invalidate_audio_input_device);
+  // The widget UI has no audio watchdog, so retain its existing visible error
+  // handling for the recoverable Windows/WASAPI signal used by the QML bridge.
+  connect(m_soundInput, &SoundInput::recoverableError, this, &MainWindow::showSoundInError);
+  connect(m_soundInput, &SoundInput::recoverableError, &m_config, &Configuration::invalidate_audio_input_device);
   // connect(m_soundInput, &SoundInput::status, this, &MainWindow::showStatusMessage);
   connect (&m_audioThread, &QThread::finished, m_soundInput, &QObject::deleteLater);
 

@@ -948,13 +948,16 @@ QString normalizeHandshakeChoice(QString const& value)
 }
 
 // ── PIMPL privato ──────────────────────────────────────────────────────────
-// Il transceiver gira su xcvThread; usiamo raw pointer + deleteLater
-// per evitare che unique_ptr venga distrutto dal thread sbagliato.
+// Il transceiver gira su xcvThread ed entrambi vengono eliminati tramite il
+// ciclo eventi Qt.  I puntatori devono quindi auto-invalidarsi: il segnale
+// QThread::finished può completare i deleteLater prima che la callback nel
+// thread GUI azzeri lo stato del manager (in particolare durante l'uscita
+// dall'applicazione).
 struct DecodiumTransceiverManagerPrivate
 {
     TransceiverFactory  factory;
-    Transceiver*        transceiver {nullptr};   // owned via deleteLater
-    QThread*            xcvThread   {nullptr};   // owned via parent (DecodiumTransceiverManager)
+    QPointer<Transceiver> transceiver;            // owned via deleteLater
+    QPointer<QThread>     xcvThread;               // owned via deleteLater / manager shutdown
     std::atomic<unsigned> seqNum    {0};
     Transceiver::TransceiverState desired;
 };
@@ -1009,21 +1012,34 @@ DecodiumTransceiverManager::DecodiumTransceiverManager(QObject* parent)
 
 DecodiumTransceiverManager::~DecodiumTransceiverManager()
 {
-    auto* xcv = d->transceiver;
-    auto* thread = d->xcvThread;
-    d->transceiver = nullptr;
-    d->xcvThread = nullptr;
+    // QPointer is essential here.  A finished transceiver may already have
+    // been destroyed by deleteLater while the queued GUI cleanup callback has
+    // not run yet.  Raw pointers made the virtual xcv->stop() below call into
+    // freed memory during application shutdown.
+    QPointer<Transceiver> xcv = d->transceiver;
+    QPointer<QThread> thread = d->xcvThread;
+    d->transceiver.clear();
+    d->xcvThread.clear();
+
+    // No state/reconnect callback may re-enter this manager while its derived
+    // destructor is running.  Keep the worker-local finished->deleteLater and
+    // finished->quit connections intact so Qt can still dispose it on the
+    // correct thread.
+    if (xcv) {
+        QObject::disconnect(xcv.data(), nullptr, this, nullptr);
+    }
+    if (thread) {
+        QObject::disconnect(thread.data(), nullptr, this, nullptr);
+    }
 
     // Chiudi il rig prima di distruggere il QThread per evitare il fatal
     // "QThread: Destroyed while thread is still running".
-    if (xcv) {
-        if (!thread || !thread->isRunning() || xcv->thread() == QThread::currentThread()) {
-            xcv->stop();
-        } else {
-            QMetaObject::invokeMethod(xcv, [xcv]() {
+    if (xcv && thread && thread->isRunning()) {
+        QMetaObject::invokeMethod(xcv.data(), [xcv]() {
+            if (xcv) {
                 xcv->stop();
-            }, Qt::BlockingQueuedConnection);
-        }
+            }
+        }, Qt::BlockingQueuedConnection);
     }
 
     if (thread && thread->isRunning()) {
@@ -1035,7 +1051,7 @@ DecodiumTransceiverManager::~DecodiumTransceiverManager()
     }
 
     if (thread) {
-        delete thread;
+        delete thread.data();
     }
 }
 
@@ -2087,8 +2103,8 @@ void DecodiumTransceiverManager::disconnectRigInternal(bool reconnectAfterDiscon
         return;
     }
 
-    auto* xcv    = d->transceiver;
-    auto* thread = d->xcvThread;
+    auto* xcv    = d->transceiver.data();
+    auto* thread = d->xcvThread.data();
     m_disconnectInProgress = true;
 
     // Keep both pointers valid until QThread::finished().  They are the
@@ -2216,7 +2232,7 @@ void DecodiumTransceiverManager::updateTelemetry(double powerWatts, double swr, 
 static void sendState(DecodiumTransceiverManagerPrivate* d)
 {
     if (!d->transceiver) return;
-    auto* xcv  = d->transceiver;
+    auto* xcv  = d->transceiver.data();
     auto  st   = d->desired;                    // copia locale (valore)
     unsigned seq = ++(d->seqNum);
     QMetaObject::invokeMethod(xcv, [xcv, st, seq]() {
@@ -2227,7 +2243,7 @@ static void sendState(DecodiumTransceiverManagerPrivate* d)
 static void sendStateAsync(DecodiumTransceiverManagerPrivate* d, char const* context)
 {
     if (!d->transceiver) return;
-    auto* xcv = d->transceiver;
+    auto* xcv = d->transceiver.data();
     auto  st  = d->desired;
     unsigned seq = ++(d->seqNum);
     qInfo().noquote() << "[CAT-QUEUE] Hamlib state queued"

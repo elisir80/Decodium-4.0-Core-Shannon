@@ -1006,12 +1006,15 @@ ScrollView {
             popup: SettingsComboPopup { combo: pttPortCombo }
         }
         Item { visible: dialog.usesSeparatePttPort(); Layout.fillWidth: true; Layout.columnSpan: 2 }
-        Text { visible: !dialog.usesCat4OmControls(); text: qsTr("Poll Interval (s):"); color: textSecondary; font.pixelSize: 12; Layout.column: 0; Layout.preferredWidth: 100 }
+        // Let GridLayout place this row sequentially.  Setting Layout.column
+        // without Layout.row pins the controls to row 0 and collides with the
+        // first CAT controls when their visibility changes.
+        Text { visible: !dialog.usesCat4OmControls(); text: qsTr("Poll Interval (s):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         SpinBox {
             id: pollSpin
             visible: !dialog.usesCat4OmControls()
             from: 1; to: 99; value: bridge.catManager ? bridge.catManager.pollInterval : 3; editable: true
-            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.column: 1; Layout.columnSpan: 3
+            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.columnSpan: 3
             onValueChanged: {
                 if (bridge.catManager) bridge.catManager.pollInterval = value
                 dialog.scheduleCatPersist()

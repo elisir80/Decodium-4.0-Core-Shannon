@@ -77,6 +77,10 @@ private:
   bool do_swr_ = false;
   bool do_alc_ = false;  // 1.0.323 — lettura RIG_LEVEL_ALC in TX (ALC automatico, fase 1 display)
   bool alc_probe_pending_ = false;
+  bool qmx_raw_power_ = false;
+  bool qmx_raw_swr_ = false;
+  int qmx_raw_power_failures_ = 0;
+  int qmx_raw_swr_failures_ = 0;
 
   // 1.0.204 — throttle telemetry polling: SWR/PWR add ~300ms per poll on slow
   // rigs (FT-991 38400 baud). Polling at full 1Hz blocks the worker thread
@@ -84,6 +88,7 @@ private:
   // concurrently. Skip telemetry on N-1 ticks of every N (default 4) when
   // any telemetry channel is enabled.
   static constexpr int kTelemetrySkipRatio_ = 4;
+  static constexpr int kQmxRawTelemetryMaxFailures_ = 8;
   static constexpr int kCatKeepAliveIntervalMs_ = 300;
   static constexpr int kCatKeepAliveMaxFailures_ = 3;
   static constexpr int kFrequencyPollMaxFailures_ = 2;

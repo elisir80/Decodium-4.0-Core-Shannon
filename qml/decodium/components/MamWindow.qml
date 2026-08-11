@@ -9,17 +9,19 @@ import QtQuick.Layouts
 Dialog {
     id: mamWindow
     title: qsTr("Multi-Answer Mode")
-    width: 700
-    height: 450
+    width: nativeHostWindow && parent ? Math.max(500, parent.width) : 700
+    height: nativeHostWindow && parent ? Math.max(360, parent.height) : 450
     modal: false
     // 1.0.364+ — niente CloseOnPressOutside: la finestra MAM non si chiude piu' per
     // un click accidentale fuori. Resta chiudibile con Esc o con la X (in tema)
     // nell'header. Rimosso standardButtons (footer di stile default fuori-tema).
     closePolicy: Popup.CloseOnEscape
     property var engine: null
+    property var nativeHostWindow: null
     property bool positionInitialized: false
 
     function clampToParent() {
+        if (nativeHostWindow) return
         if (!parent) return
         x = Math.max(0, Math.min(x, parent.width - width))
         y = Math.max(0, Math.min(y, parent.height - height))
@@ -27,9 +29,39 @@ Dialog {
 
     function ensureInitialPosition() {
         if (positionInitialized || !parent) return
+        if (nativeHostWindow) {
+            x = 0
+            y = 0
+            positionInitialized = true
+            return
+        }
         x = Math.max(0, Math.round((parent.width - width) / 2))
         y = Math.max(0, Math.round((parent.height - height) / 2))
         positionInitialized = true
+    }
+
+    function startNativeHostMove() {
+        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+            return false
+        try {
+            return nativeHostWindow.startSystemMove()
+        } catch (error) {
+            console.log("MAM startSystemMove failed: " + error)
+        }
+        return false
+    }
+
+    function finishNativeHostMove() {
+        if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
+            nativeHostWindow.finishDesktopMove()
+    }
+
+    function requestWindowClose() {
+        if (nativeHostWindow && typeof nativeHostWindow.hideHostedWindow === "function") {
+            nativeHostWindow.hideHostedWindow()
+            return
+        }
+        mamWindow.close()
     }
 
     onAboutToShow: ensureInitialPosition()
@@ -205,16 +237,43 @@ Dialog {
         MouseArea {
             anchors.fill: parent
             property point clickPos: Qt.point(0, 0)
+            property point pressGlobalPos: Qt.point(0, 0)
+            property point pressWindowPos: Qt.point(0, 0)
+            property bool nativeMoveActive: false
             cursorShape: Qt.SizeAllCursor
             onPressed: function(mouse) {
                 clickPos = Qt.point(mouse.x, mouse.y)
                 mamWindow.positionInitialized = true
+                if (mamWindow.nativeHostWindow) {
+                    pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    pressWindowPos = Qt.point(mamWindow.nativeHostWindow.x,
+                                              mamWindow.nativeHostWindow.y)
+                    nativeMoveActive = mamWindow.startNativeHostMove()
+                }
             }
             onPositionChanged: function(mouse) {
                 if (!pressed) return
+                if (mamWindow.nativeHostWindow) {
+                    if (nativeMoveActive)
+                        return
+                    var currentGlobalPos = mapToGlobal(mouse.x, mouse.y)
+                    mamWindow.nativeHostWindow.x = Math.round(
+                                pressWindowPos.x + currentGlobalPos.x - pressGlobalPos.x)
+                    mamWindow.nativeHostWindow.y = Math.round(
+                                pressWindowPos.y + currentGlobalPos.y - pressGlobalPos.y)
+                    return
+                }
                 mamWindow.x += mouse.x - clickPos.x
                 mamWindow.y += mouse.y - clickPos.y
                 mamWindow.clampToParent()
+            }
+            onReleased: {
+                nativeMoveActive = false
+                mamWindow.finishNativeHostMove()
+            }
+            onCanceled: {
+                nativeMoveActive = false
+                mamWindow.finishNativeHostMove()
             }
         }
 
@@ -250,7 +309,7 @@ Dialog {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: mamWindow.close()
+                onClicked: mamWindow.requestWindowClose()
             }
         }
     }
