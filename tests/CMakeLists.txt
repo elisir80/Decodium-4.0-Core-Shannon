@@ -75,6 +75,12 @@ add_executable (test_audio_sink_tx_gate
 target_link_libraries (test_audio_sink_tx_gate Qt6::Test Qt6::Core)
 add_test (NAME test_audio_sink_tx_gate COMMAND $<TARGET_FILE:test_audio_sink_tx_gate>)
 
+add_executable (test_amplifier_telemetry test_amplifier_telemetry.cpp
+                ../src/radio/DecodiumAmplifier.cpp)
+target_include_directories (test_amplifier_telemetry PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries (test_amplifier_telemetry Qt6::Test Qt6::Core Qt6::SerialPort)
+add_test (NAME test_amplifier_telemetry COMMAND $<TARGET_FILE:test_amplifier_telemetry>)
+
 add_executable (test_qmx_telemetry test_qmx_telemetry.cpp)
 target_link_libraries (test_qmx_telemetry Qt6::Test Qt6::Core)
 add_test (NAME test_qmx_telemetry COMMAND $<TARGET_FILE:test_qmx_telemetry>)
