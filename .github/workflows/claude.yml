@@ -49,7 +49,9 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Tetto ai giri di conversazione: un compito mal posto non deve
-          # consumare l'abbonamento all'infinito.
+          # Tetto ai giri di conversazione. Quindici erano troppo pochi: su un
+          # repository di questa mole l'esplorazione del codice li esauriva
+          # prima di produrre una risposta, e la richiesta falliva comunque
+          # dopo aver consumato. Il freno vero resta il timeout del job.
           claude_args: |
-            --max-turns 15
+            --max-turns 60
