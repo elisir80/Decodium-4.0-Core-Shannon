@@ -1,9 +1,13 @@
-name: Claude Code
+name: Decodium Agent
 
 # Integrazione ufficiale anthropics/claude-code-action.
-# Claude interviene quando qualcuno scrive @claude in una segnalazione, in un
-# commento o in una revisione: legge il codice, risponde e - se richiesto -
-# apre una pull request. Non parte da solo su ogni evento.
+# L'agente interviene quando qualcuno scrive @decodium_agent in una
+# segnalazione, in un commento o in una revisione: legge il codice, risponde e
+# - se richiesto - apre una pull request. Non parte da solo su ogni evento.
+#
+# La parola di richiamo e' nostra, ma la firma dei commenti resta claude[bot]:
+# le operazioni su GitHub le compie l'app ufficiale di Anthropic, e il suo nome
+# non e' modificabile da qui.
 #
 # Autenticazione tramite abbonamento: il segreto CLAUDE_CODE_OAUTH_TOKEN si
 # ottiene con "claude setup-token" ed e' legato all'abbonamento di chi lo
@@ -22,16 +26,16 @@ on:
 # Una sola esecuzione per segnalazione: evita che una raffica di commenti
 # avvii dieci runner in parallelo.
 concurrency:
-  group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
+  group: decodium-agent-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
   cancel-in-progress: false
 
 jobs:
   claude:
     if: >-
-      contains(github.event.comment.body, '@claude') ||
-      contains(github.event.review.body, '@claude') ||
-      contains(github.event.issue.body, '@claude') ||
-      contains(github.event.issue.title, '@claude')
+      contains(github.event.comment.body, '@decodium_agent') ||
+      contains(github.event.review.body, '@decodium_agent') ||
+      contains(github.event.issue.body, '@decodium_agent') ||
+      contains(github.event.issue.title, '@decodium_agent')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -49,6 +53,8 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Parola di richiamo del progetto, al posto di @claude.
+          trigger_phrase: "@decodium_agent"
           # Tetto ai giri di conversazione. Quindici erano troppo pochi: su un
           # repository di questa mole l'esplorazione del codice li esauriva
           # prima di produrre una risposta, e la richiesta falliva comunque
