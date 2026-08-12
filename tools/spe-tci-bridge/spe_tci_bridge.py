@@ -256,6 +256,101 @@ class HamlibAmp(threading.Thread):
             time.sleep(self.period)
 
 
+
+# ------------------------------------------- sorgente: SPE Expert (protocollo)
+# Protocollo dalla Application Programmer's Guide di SPE; vedi
+# doc/protocollo-spe-expert.md. Richiesta di stato:
+#   0x55 0x55 0x55 0x01 0x90 0x90
+# Risposta: 0xAA 0xAA 0xAA 0x43 <67 caratteri separati da virgola> CHK CHK CR LF
+SPE_RICHIESTA = bytes([0x55, 0x55, 0x55, 0x01, 0x90, 0x90])
+
+
+def spe_analizza(trama):
+    """Estrae (tx, watt, ros) dalla stringa di stato. None se non valida.
+
+    La verifica della somma di controllo non e' pignoleria: su una seriale
+    disturbata una trama mutila darebbe letture assurde proprio mentre si
+    trasmette a piena potenza.
+    """
+    i = trama.find(bytes([0xAA, 0xAA, 0xAA]))
+    if i < 0 or len(trama) < i + 5:
+        return None
+    n = trama[i + 3]
+    corpo = trama[i + 4:i + 4 + n]
+    if len(corpo) < n:
+        return None
+    somma = sum(corpo)
+    chk = trama[i + 4 + n:i + 6 + n]
+    if len(chk) == 2 and (chk[0] != somma % 256 or chk[1] != (somma // 256) % 256):
+        return None
+
+    campi = corpo.decode("latin-1").split(",")
+    if len(campi) < 12:
+        return None
+    try:
+        tx = campi[2].strip().upper() == "T"
+        watt = float(campi[9].strip() or 0)
+        ros = float(campi[11].strip() or 1)      # ROS d'antenna
+        if ros < 1.0:
+            ros = float(campi[10].strip() or 1)  # ripiego: ROS prima dell'ATU
+    except (ValueError, IndexError):
+        return None
+    return tx, watt, max(1.0, ros)
+
+
+class SpeAmp(threading.Thread):
+    """Amplificatore SPE Expert letto con il protocollo del costruttore."""
+
+    daemon = True
+
+    def __init__(self, stato, port, baud=9600, period=0.2):
+        super().__init__(name="amp-spe")
+        self.stato, self.port, self.baud, self.period = stato, port, baud, period
+
+    def run(self):
+        try:
+            import serial
+        except ImportError:
+            log("amplificatore SPE: serve il modulo pyserial  ->  pip install pyserial")
+            return
+        try:
+            ser = serial.Serial(self.port, self.baud, timeout=0.5)
+        except Exception as exc:
+            log("amplificatore SPE: apertura di %s fallita (%s). Il software del "
+                "costruttore va chiuso: una seriale la apre un solo programma."
+                % (self.port, exc))
+            return
+        log("amplificatore SPE: aperto su %s a %d baud" % (self.port, self.baud))
+
+        muto = 0
+        while True:
+            try:
+                ser.reset_input_buffer()
+                ser.write(SPE_RICHIESTA)
+                risposta = ser.read(96)
+                esito = spe_analizza(risposta)
+            except Exception as exc:
+                log("amplificatore SPE: %s" % exc)
+                esito = None
+            if esito:
+                tx, watt, ros = esito
+                muto = 0
+                with self.stato.lock:
+                    self.stato.amp_ok = True
+                    self.stato.fwd = watt if tx else 0.0
+                    self.stato.swr = ros if tx else 1.0
+                    rho = (ros - 1) / (ros + 1)
+                    self.stato.ref = self.stato.fwd * rho * rho
+            else:
+                muto += 1
+                if muto == 10:
+                    log("amplificatore SPE: nessuna risposta valida. Porta giusta? "
+                        "Velocita' giusta? Software del costruttore chiuso?")
+                with self.stato.lock:
+                    self.stato.amp_ok = False
+            time.sleep(self.period)
+
+
 # --------------------------------------------------------------- server TCI
 GUID = b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
@@ -451,7 +546,8 @@ def main():
     ap.add_argument("--rigctld", default="",
                     help="radio da inoltrare, es. 127.0.0.1:4533 (facoltativo)")
     ap.add_argument("--amp", default="demo",
-                    help="'demo' oppure 'hamlib:<modello>:<porta>', es. hamlib:401:COM7")
+                    help="'demo', 'spe:<porta>[:<baud>]' oppure "
+                         "'hamlib:<modello>:<porta>'. Es. spe:COM7 · hamlib:401:COM7")
     ap.add_argument("--device", default="SPE-Bridge", help="nome annunciato")
     ap.add_argument("--rate", type=float, default=0.2,
                     help="cadenza della telemetria in secondi (default 0.2 = 5 Hz)")
@@ -485,6 +581,11 @@ def main():
         log("amplificatore: SIMULATO (%.0f W di picco) - serve a provare la catena"
             % args.watt)
         DemoAmp(stato, args.watt).start()
+    elif args.amp.startswith("spe:"):
+        parti = args.amp.split(":")
+        porta = parti[1]
+        baud = int(parti[2]) if len(parti) > 2 else 9600
+        SpeAmp(stato, porta, baud).start()
     elif args.amp.startswith("hamlib:"):
         _, model, port = args.amp.split(":", 2)
         HamlibAmp(stato, int(model), port).start()

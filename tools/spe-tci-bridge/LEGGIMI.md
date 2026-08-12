@@ -35,7 +35,10 @@ Solo libreria standard: nessuna dipendenza da installare.
 # prova della catena, senza hardware e senza mandare in aria la radio
 python spe_tci_bridge.py --amp demo --simulate-tx
 
-# amplificatore vero, radio inoltrata dalla CAT condivisa di Decodium
+# SPE Expert col protocollo del costruttore (serve pyserial)
+python spe_tci_bridge.py --rigctld 127.0.0.1:4533 --amp spe:COM7
+
+# in alternativa, tramite l'interfaccia amplificatori di Hamlib
 python spe_tci_bridge.py --rigctld 127.0.0.1:4533 --amp hamlib:401:COM7
 ```
 
@@ -47,7 +50,7 @@ scartata anche se arriva.
 |---|---|
 | `--listen` | dove ascoltare, default `127.0.0.1:50001` |
 | `--rigctld` | radio da inoltrare, es. `127.0.0.1:4533` |
-| `--amp` | `demo` oppure `hamlib:<modello>:<porta>` (401 = SPE Expert FA) |
+| `--amp` | `demo`, `spe:<porta>[:<baud>]`, oppure `hamlib:<modello>:<porta>` |
 | `--rate` | cadenza telemetria, default 0.2 s (5 Hz) |
 | `--simulate-tx` | alterna TX/RX ogni 8 s per collaudare senza trasmettere |
 
@@ -57,11 +60,14 @@ scartata anche se arriva.
 alternato, e `tx_power` / `tx_swr` a 5 Hz con i valori giusti. La radio
 inoltrata da rigctld riporta frequenza e modo reali.
 
-**Non verificato**: che un vero SPE risponda a Hamlib. Il backend Expert
-dichiara `has_get_level = 0x0` pur avendo la funzione implementata — solo
-l'apparato può dirlo, e serve la sonda in `tools/amp-probe/`. Se non
-rispondesse, il punto in cui innestare il protocollo SPE è la classe
-`HamlibAmp`: tutto il resto del ponte resta valido.
+Verificata anche **l'analisi della trama SPE**, con trame sintetiche costruite
+dalla guida del costruttore: 407 W e ROS 1.20 in trasmissione, zero in
+ricezione, e rifiuto di trame con somma di controllo errata, mutile o di puro
+rumore. Il protocollo è documentato in `doc/protocollo-spe-expert.md`.
+
+**Non verificato**: il dialogo con un amplificatore reale, che non abbiamo. La
+sorgente `spe:` richiede `pyserial` (`pip install pyserial`); tutto il resto
+del ponte non ha dipendenze.
 
 ## Due avvertenze pratiche
 
