@@ -24372,6 +24372,50 @@ Lang indrukken: bericht bewerken</translation>
         <source>Update now</source>
         <translation>Nu bijwerken</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Kan de map Downloads niet aanmaken.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Kan niet naar de map Downloads schrijven.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>De AppImage kon niet veilig worden geïnstalleerd: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>De AppImage is bijgewerkt. Decodium wordt opnieuw gestart…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>De AppImage is bijgewerkt in %1. Start Decodium handmatig opnieuw.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>De AppImage is opgeslagen in %1. Start deze handmatig om de update te voltooien.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>De huidige AppImage wordt veilig vervangen en Decodium start opnieuw. Uw instellingen en QSO-log blijven behouden.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>De nieuwe AppImage wordt opgeslagen in uw map Downloads. Start deze handmatig om de update te voltooien.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Het updatepakket wordt gedownload en geopend. Uw instellingen en QSO-log blijven behouden.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>AppImage bijwerken</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Update downloaden</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

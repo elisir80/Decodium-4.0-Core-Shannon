@@ -24362,6 +24362,50 @@ Appui long : éditer le message</translation>
         <source>Update now</source>
         <translation>Mettre à jour maintenant</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Impossible de créer le dossier Téléchargements.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Impossible d'écrire dans le dossier Téléchargements.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>Impossible d'installer l'AppImage en toute sécurité : %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>L'AppImage a été mise à jour. Redémarrage de Decodium…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>L'AppImage a été mise à jour dans %1. Redémarrez Decodium manuellement.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>L'AppImage a été enregistrée dans %1. Lancez-la manuellement pour terminer la mise à jour.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>L'AppImage actuelle sera remplacée en toute sécurité et Decodium redémarrera. Vos réglages et votre journal de QSO sont conservés.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>La nouvelle AppImage sera enregistrée dans le dossier Téléchargements. Lancez-la manuellement pour terminer la mise à jour.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Le paquet de mise à jour sera téléchargé et ouvert. Vos réglages et votre journal de QSO sont conservés.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Mettre à jour l'AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Télécharger la mise à jour</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

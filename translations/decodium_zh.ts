@@ -24360,6 +24360,50 @@ Long-press: edit message</source>
         <source>Update now</source>
         <translation>立即更新</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>无法创建“下载”文件夹。</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>无法写入“下载”文件夹。</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>无法安全安装 AppImage：%1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage 已更新。正在重启 Decodium…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage 已在 %1 更新。请手动重启 Decodium。</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage 已保存到 %1。请手动启动以完成更新。</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>当前 AppImage 将被安全替换，Decodium 将重启。您的设置和 QSO 日志将保留。</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>新的 AppImage 将保存到“下载”文件夹。请手动启动以完成更新。</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>更新包将被下载并打开。您的设置和 QSO 日志将保留。</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>更新 AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>下载更新</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

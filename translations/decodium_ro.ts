@@ -18887,6 +18887,50 @@ Apăsare lungă: modifică mesajul</translation>
         <source>Update now</source>
         <translation>Actualizează acum</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Nu se poate crea folderul Descărcări.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Nu se poate scrie în folderul Descărcări.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>AppImage nu a putut fi instalată în siguranță: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage a fost actualizată. Decodium repornește…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage a fost actualizată în %1. Reporniți Decodium manual.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage a fost salvată în %1. Lansați-o manual pentru a finaliza actualizarea.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>AppImage curentă va fi înlocuită în siguranță, iar Decodium va reporni. Setările și jurnalul QSO se păstrează.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>Noua AppImage va fi salvată în folderul Descărcări. Lansați-o manual pentru a finaliza actualizarea.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Pachetul de actualizare va fi descărcat și deschis. Setările și jurnalul QSO se păstrează.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Actualizează AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Descarcă actualizarea</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

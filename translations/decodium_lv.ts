@@ -24375,6 +24375,50 @@ Ilgs nospiediens: rediģēt ziņojumu</translation>
         <source>Update now</source>
         <translation>Atjaunināt tagad</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Nevar izveidot mapi “Lejupielādes”.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Nevar rakstīt mapē “Lejupielādes”.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>Neizdevās droši instalēt AppImage: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage veiksmīgi atjaunināts. Decodium tiek restartēts…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage atjaunināts šeit: %1. Lūdzu, restartējiet Decodium manuāli.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage saglabāts šeit: %1. Palaidiet to manuāli, lai pabeigtu atjaunināšanu.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>Pašreizējais AppImage tiks droši aizstāts, un Decodium tiks restartēts. Jūsu iestatījumi un QSO žurnāls tiks saglabāti.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>Jaunais AppImage tiks saglabāts mapē “Lejupielādes”. Palaidiet to manuāli, lai pabeigtu atjaunināšanu.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Atjauninājuma pakotne tiks lejupielādēta un atvērta. Jūsu iestatījumi un QSO žurnāls tiks saglabāti.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Atjaunināt AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Lejupielādēt atjauninājumu</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

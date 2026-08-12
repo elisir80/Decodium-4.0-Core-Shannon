@@ -24361,6 +24361,50 @@ Langt tryk: rediger besked</translation>
         <source>Update now</source>
         <translation>Opdater nu</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Mappen Overførsler kan ikke oprettes.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Der kan ikke skrives til mappen Overførsler.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>AppImage kunne ikke installeres sikkert: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage blev opdateret. Decodium genstarter…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage blev opdateret i %1. Genstart Decodium manuelt.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage blev gemt i %1. Start den manuelt for at fuldføre opdateringen.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>Den nuværende AppImage udskiftes sikkert, og Decodium genstarter. Dine indstillinger og din QSO-log bevares.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>Den nye AppImage gemmes i mappen Overførsler. Start den manuelt for at fuldføre opdateringen.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Opdateringspakken hentes og åbnes. Dine indstillinger og din QSO-log bevares.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Opdater AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Hent opdatering</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

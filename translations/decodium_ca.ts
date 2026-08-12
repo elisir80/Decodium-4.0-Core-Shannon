@@ -24363,6 +24363,50 @@ Premut llarg: edita el missatge</translation>
         <source>Update now</source>
         <translation>Actualitza ara</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>No es pot crear la carpeta Baixades.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>No es pot escriure a la carpeta Baixades.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>No s'ha pogut instal·lar l'AppImage de manera segura: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>L'AppImage s'ha actualitzat correctament. S'està reiniciant Decodium…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>L'AppImage s'ha actualitzat a %1. Reinicieu Decodium manualment.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>L'AppImage s'ha desat a %1. Executeu-la manualment per completar l'actualització.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>L'AppImage actual se substituirà de manera segura i Decodium es reiniciarà. Es conserven la configuració i el registre de QSO.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>La nova AppImage es desarà a la carpeta Baixades. Executeu-la manualment per completar l'actualització.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>El paquet d'actualització es baixarà i s'obrirà. Es conserven la configuració i el registre de QSO.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Actualitza l'AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Baixa l'actualització</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

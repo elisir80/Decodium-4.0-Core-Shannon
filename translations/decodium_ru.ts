@@ -24374,6 +24374,50 @@ Long-press: edit message</source>
         <source>Update now</source>
         <translation>Обновить сейчас</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Не удалось создать папку «Загрузки».</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Не удалось записать в папку «Загрузки».</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>Не удалось безопасно установить AppImage: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage успешно обновлён. Перезапуск Decodium…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage обновлён в %1. Перезапустите Decodium вручную.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage сохранён в %1. Запустите его вручную, чтобы завершить обновление.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>Текущий AppImage будет безопасно заменён, и Decodium перезапустится. Настройки и журнал QSO сохранятся.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>Новый AppImage будет сохранён в папке «Загрузки». Запустите его вручную, чтобы завершить обновление.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Пакет обновления будет загружен и открыт. Настройки и журнал QSO сохранятся.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Обновить AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Загрузить обновление</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

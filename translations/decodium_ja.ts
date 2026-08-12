@@ -24361,6 +24361,50 @@ Long-press: edit message</source>
         <source>Update now</source>
         <translation>今すぐ更新</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>ダウンロードフォルダーを作成できません。</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>ダウンロードフォルダーに書き込めません。</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>AppImage を安全にインストールできませんでした: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage を更新しました。Decodium を再起動しています…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>%1 の AppImage を更新しました。Decodium を手動で再起動してください。</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage を %1 に保存しました。手動で起動して更新を完了してください。</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>現在の AppImage を安全に置き換え、Decodium を再起動します。設定と QSO ログは保持されます。</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>新しい AppImage はダウンロードフォルダーに保存されます。手動で起動して更新を完了してください。</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>更新パッケージをダウンロードして開きます。設定と QSO ログは保持されます。</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>AppImage を更新</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>更新をダウンロード</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

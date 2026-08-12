@@ -24230,6 +24230,50 @@ Hosszú nyomás: üzenet szerkesztése</translation>
         <source>Update now</source>
         <translation>Frissítés most</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>A Letöltések mappa nem hozható létre.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>A Letöltések mappába nem lehet írni.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>Az AppImage nem telepíthető biztonságosan: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>Az AppImage frissítése megtörtént. A Decodium újraindul…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>Az AppImage frissítve lett itt: %1. Indítsa újra a Decodiumot kézzel.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>Az AppImage ide lett mentve: %1. Indítsa el kézzel a frissítés befejezéséhez.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>A jelenlegi AppImage biztonságosan lecserélődik, és a Decodium újraindul. A beállítások és a QSO-napló megmaradnak.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>Az új AppImage a Letöltések mappába kerül. Indítsa el kézzel a frissítés befejezéséhez.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>A frissítési csomag letöltődik és megnyílik. A beállítások és a QSO-napló megmaradnak.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>AppImage frissítése</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Frissítés letöltése</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>

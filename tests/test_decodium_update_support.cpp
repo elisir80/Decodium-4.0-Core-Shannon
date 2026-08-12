@@ -100,7 +100,12 @@ private slots:
         QFile installed(target);
         QVERIFY(installed.open(QIODevice::ReadOnly));
         QCOMPARE(installed.readAll(), QByteArray("new-image"));
-        QVERIFY(QFileInfo(installed).permission(QFileDevice::ExeOwner));
+    #ifdef Q_OS_UNIX
+    // Il bit di esecuzione esiste su Unix. Su Windows QFileInfo lo deduce
+    // dall'estensione, quindi un file .AppImage risulterebbe non eseguibile
+    // e la prova fallirebbe per costruzione, non per un difetto.
+    QVERIFY(QFileInfo(installed).permission(QFileDevice::ExeOwner));
+#endif
     }
 };
 

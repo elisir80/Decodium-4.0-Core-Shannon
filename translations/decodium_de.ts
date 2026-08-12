@@ -24362,6 +24362,50 @@ Langes Drücken: Nachricht bearbeiten</translation>
         <source>Update now</source>
         <translation>Jetzt aktualisieren</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Der Ordner „Downloads“ kann nicht erstellt werden.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>In den Ordner „Downloads“ kann nicht geschrieben werden.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>Das AppImage konnte nicht sicher installiert werden: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>Das AppImage wurde aktualisiert. Decodium wird neu gestartet…</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>Das AppImage wurde unter %1 aktualisiert. Bitte starten Sie Decodium manuell neu.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>Das AppImage wurde unter %1 gespeichert. Starten Sie es manuell, um die Aktualisierung abzuschließen.</translation>
+    </message>
+    <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>Das aktuelle AppImage wird sicher ersetzt und Decodium neu gestartet. Ihre Einstellungen und Ihr QSO-Log bleiben erhalten.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>Das neue AppImage wird im Ordner „Downloads“ gespeichert. Starten Sie es manuell, um die Aktualisierung abzuschließen.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Das Aktualisierungspaket wird heruntergeladen und geöffnet. Ihre Einstellungen und Ihr QSO-Log bleiben erhalten.</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>AppImage aktualisieren</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Aktualisierung herunterladen</translation>
+    </message>
 </context>
 <context>
     <name>Waterfall</name>
