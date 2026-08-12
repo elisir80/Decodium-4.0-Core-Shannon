@@ -196,6 +196,11 @@ extern "C" void ftx_ft8_stage4_seed_hash_call_c(char const* call);
 #endif
 #include <vector>
 
+// La porta dell'amplificatore non deve mai essere quella del CAT.
+static bool amplifierPortClashesWithCat(DecodiumTransceiverManager* cat,
+                                        const QString& port);
+
+
 static QString extractRightCallsign(const QString& msg);
 
 namespace {
@@ -9665,10 +9670,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     }
     // Amplificatore: si apre solo se richiesto. Lettura con ricaduta sulla
     // radice, per la stessa ragione della CAT condivisa.
-    if (m_amplifier && decodium::profiledSettingsValue({}, QStringLiteral("AmpEnabled"), false).toBool()) {
+    QString const ampPort = decodium::profiledSettingsValue({}, QStringLiteral("AmpPort"), QString()).toString();
+    if (m_amplifier && decodium::profiledSettingsValue({}, QStringLiteral("AmpEnabled"), false).toBool()
+        && !amplifierPortClashesWithCat(m_hamlibCat, ampPort)) {
         m_amplifier->configure(
             true,
-            decodium::profiledSettingsValue({}, QStringLiteral("AmpPort"), QString()).toString(),
+            ampPort,
             decodium::profiledSettingsValue({}, QStringLiteral("AmpBaud"), 9600).toInt(),
             decodium::profiledSettingsValue({}, QStringLiteral("AmpPassive"), true).toBool(),
             decodium::profiledSettingsValue({}, QStringLiteral("AmpPollMs"), 500).toInt());
@@ -19210,9 +19217,29 @@ QObject* DecodiumBridge::amplifierObject() const
 
 // Lettura dell'amplificatore. Come per la CAT condivisa, le impostazioni
 // passano dallo stesso archivio di tutte le altre.
+// Rifiuta la porta gia' usata dal CAT. Non e' pignoleria: in modo
+// interrogante finirebbero sei byte al ricetrasmettitore, che potrebbe
+// leggerli come un comando; e anche in sola lettura aprire quella porta la
+// toglierebbe al controllo della radio. Meglio un rifiuto che una diagnosi
+// difficile con la radio in aria.
+static bool amplifierPortClashesWithCat(DecodiumTransceiverManager* cat, const QString& port)
+{
+    if (!cat || port.trimmed().isEmpty())
+        return false;
+    QString const wanted = port.trimmed().toUpper();
+    return wanted == cat->serialPort().trimmed().toUpper()
+        || wanted == cat->pttPort().trimmed().toUpper();
+}
+
 void DecodiumBridge::configureAmplifier(bool enabled, const QString& port,
                                         int baud, bool passive, int pollMs)
 {
+    if (enabled && amplifierPortClashesWithCat(m_hamlibCat, port)) {
+        qWarning().noquote()
+            << "[AMP] rifiutata la porta" << port
+            << ": e' quella del CAT. Indicare la porta dell'amplificatore.";
+        enabled = false;
+    }
     setSetting(QStringLiteral("AmpEnabled"), enabled);
     setSetting(QStringLiteral("AmpPort"), port);
     setSetting(QStringLiteral("AmpBaud"), baud);
