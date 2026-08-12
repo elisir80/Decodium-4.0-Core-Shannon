@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>ТРАНСИВЕР НЕ ДАЁТ ПОКАЗАНИЙ</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>усилитель</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>УСИЛИТЕЛЬ МОЛЧИТ — ПОКАЗАН ВОЗБУДИТЕЛЬ</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19633,6 +19649,42 @@ If unsure, use High.</source>
     <message>
         <source>Sharing not started: %1</source>
         <translation>Общий доступ не запущен: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>УСИЛИТЕЛЬ</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Читать усилитель:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Порт усилителя:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Только приём:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Скорость:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Чтение: %1 Вт, КСВ %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>Порт не открыт: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>Порт открыт, но корректных кадров пока нет.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>DECØMETER показывает мощность возбудителя. Для чтения усилителя нужен его последовательный порт или зеркальный виртуальный порт, если родная программа должна оставаться открытой.</translation>
     </message>
 </context>
 <context>

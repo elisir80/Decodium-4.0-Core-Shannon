@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>LA RADIO NO DA MEDIDA</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>amplificador</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP MUDO — MOSTRANDO EXCITADOR</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19960,6 +19976,42 @@ En caso de duda, usa Alta.</translation>
     <message>
         <source>Sharing not started: %1</source>
         <translation>No se ha iniciado la compartición: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>AMPLIFICADOR</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Leer el amplificador:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Puerto del amplificador:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Solo escuchar:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Velocidad:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Leyendo: %1 W, ROE %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>Puerto no abierto: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>Puerto abierto, pero aún ninguna trama válida.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>El DECØMETER muestra la potencia del excitador. Leer el amplificador requiere su puerto serie, o un puerto virtual duplicado si su propio programa debe permanecer abierto.</translation>
     </message>
 </context>
 <context>

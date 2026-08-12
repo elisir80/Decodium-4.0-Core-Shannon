@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>RADIOEN GIVER INGEN MÅLING</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>forstærker</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP TAVS — VISER EXCITER</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19619,6 +19635,42 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <source>Sharing not started: %1</source>
         <translation>Deling ikke startet: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>FORSTÆRKER</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Læs forstærker:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Forstærkerport:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Kun lytte:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Hastighed:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Læser: %1 W, SWR %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>Port ikke åbnet: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>Porten er åben, men endnu ingen gyldig ramme.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>DECØMETER viser exciterens effekt. At læse forstærkeren kræver dens serielport, eller en spejlet virtuel port hvis dens eget program skal blive åbent.</translation>
     </message>
 </context>
 <context>

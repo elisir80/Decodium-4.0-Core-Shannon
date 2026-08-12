@@ -107,11 +107,14 @@ Dialog {
     // misurata e' l'indicazione autorevole che RF e' realmente presente.
     readonly property bool  appRfOn:   !!(typeof bridge !== "undefined"
                                          && (bridge.transmitting || bridge.tuning))
-    readonly property real  rawFwd:    (typeof bridge !== "undefined" && bridge.rigPowerWatts > 0) ? bridge.rigPowerWatts : 0
-    readonly property real  rawSwr:    (typeof bridge !== "undefined" && bridge.rigSwr >= 1) ? bridge.rigSwr : 1
+    readonly property real  rawFwd:    usingAmp ? amp.watts
+                                       : ((typeof bridge !== "undefined" && bridge.rigPowerWatts > 0) ? bridge.rigPowerWatts : 0)
+    readonly property real  rawSwr:    usingAmp ? Math.max(1, amp.swr)
+                                       : ((typeof bridge !== "undefined" && bridge.rigSwr >= 1) ? bridge.rigSwr : 1)
     readonly property bool  txOn:      appRfOn || rawFwd > 0.05
-    readonly property bool  swrValid:  catUp && (typeof bridge !== "undefined") && bridge.rigSwr >= 1
-    readonly property bool  pwrValid:  catUp && rawFwd > 0
+    readonly property bool  swrValid:  usingAmp ? true
+                                       : (catUp && (typeof bridge !== "undefined") && bridge.rigSwr >= 1)
+    readonly property bool  pwrValid:  usingAmp ? true : (catUp && rawFwd > 0)
     readonly property real  rawAlc:    (typeof bridge !== "undefined") ? bridge.rigAlc : 0
     readonly property bool  alcValid:  catUp && (typeof bridge !== "undefined") && bridge.rigAlcValid
 
@@ -155,11 +158,26 @@ Dialog {
         if (!catUp)             return qsTr("NO CAT LINK")
         if (!telemetryPolling)  return qsTr("TELEMETRY OFF — ENABLE PWR/SWR")
         if (rfActive && !pwrValid && !swrValid) return qsTr("RIG REPORTS NO METER")
+        // Mostrare 400 W senza dire da dove vengono sarebbe peggio che non
+        // mostrarli: la sorgente va sempre dichiarata.
+        if (usingAmp)
+            return qsTr("AMP") + ": " + qsTr("amplifier")
+        if (preferAmp && !ampReading)
+            return qsTr("AMP SILENT - SHOWING EXCITER")
         var n = (typeof bridge !== "undefined" && bridge.catRigName.length)
                 ? bridge.catRigName : qsTr("connected")
         return "CAT: " + n.toUpperCase()
     }
     readonly property color statusColor: (!catUp || !telemetryPolling) ? colAmber : colDim
+
+    // ---------------------------------------------------- amplificatore
+    // Sorgente indipendente dalla radio: se tace, la radio non se ne accorge.
+    readonly property var  amp:        (typeof bridge !== "undefined") ? bridge.amplifier : null
+    readonly property bool ampReading: !!(amp && amp.responding)
+    // La scelta e' dell'operatore, ma senza dati non si mostra un quadrante
+    // vuoto: si ricade sull'eccitatrice, dichiarandolo.
+    property bool preferAmp: false
+    readonly property bool usingAmp:   preferAmp && ampReading
 
     // coefficiente di riflessione: rho = (ROS-1)/(ROS+1)
     readonly property real  rho:       rawSwr > 1 ? (rawSwr - 1) / (rawSwr + 1) : 0
@@ -231,6 +249,8 @@ Dialog {
             clock = 0
             txSeconds = 0
             pepW = 0
+            if (typeof bridge !== "undefined")
+                preferAmp = !!bridge.getSetting("DecometerPreferAmp", false)
             face.forceActiveFocus()
         }
     }
@@ -929,6 +949,47 @@ Dialog {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: decometerWindow.autoRange = !decometerWindow.autoRange
+                    }
+                }
+
+                // Sorgente della misura: eccitatrice o amplificatore. Compare
+                // solo se un amplificatore e' configurato, per non offrire una
+                // scelta che non esiste.
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 6
+                    visible: !!decometerWindow.amp && decometerWindow.amp.enabled
+                    Repeater {
+                        model: [{ useAmp: false, label: qsTr("EXC") },
+                                { useAmp: true,  label: qsTr("AMP") }]
+                        delegate: Rectangle {
+                            id: srcChip
+                            required property var modelData
+                            readonly property bool on: decometerWindow.preferAmp === srcChip.modelData.useAmp
+                            width: 76; height: 26; radius: 5
+                            color: on ? Qt.rgba(0.153, 0.769, 0.831, 0.14) : "#181D22"
+                            border.width: 1
+                            border.color: on ? decometerWindow.colCyan
+                                             : (srcMouse.containsMouse ? "#3A424A" : "#2A3138")
+                            Text {
+                                anchors.centerIn: parent
+                                text: srcChip.modelData.label
+                                font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.5
+                                color: srcChip.on ? decometerWindow.colCyan : decometerWindow.colLabel
+                            }
+                            MouseArea {
+                                id: srcMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    decometerWindow.preferAmp = srcChip.modelData.useAmp
+                                    if (typeof bridge !== "undefined")
+                                        bridge.setSetting("DecometerPreferAmp",
+                                                          decometerWindow.preferAmp)
+                                }
+                            }
+                        }
                     }
                 }
             }

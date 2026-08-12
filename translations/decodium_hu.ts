@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>A RÁDIÓ NEM AD MÉRÉST</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>erősítő</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP NÉMA — A MEGHAJTÓ LÁTSZIK</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19489,6 +19505,42 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
     <message>
         <source>Sharing not started: %1</source>
         <translation>A megosztás nem indult el: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>ERŐSÍTŐ</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Erősítő olvasása:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Erősítő portja:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Csak hallgatás:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Sebesség:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Olvasás: %1 W, SWR %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>A port nincs megnyitva: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>A port nyitva, de még nincs érvényes keret.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>A DECØMETER a meghajtó teljesítményét mutatja. Az erősítő olvasásához annak soros portja kell, vagy egy tükrözött virtuális port, ha a saját szoftverének nyitva kell maradnia.</translation>
     </message>
 </context>
 <context>

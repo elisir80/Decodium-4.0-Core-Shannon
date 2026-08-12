@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>LA RADIO NON FORNISCE MISURA</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>ECC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>amplificatore</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP MUTO — MOSTRA L'ECCITATRICE</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19648,6 +19664,42 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <source>Sharing not started: %1</source>
         <translation>Condivisione non avviata: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>AMPLIFICATORE</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Leggi l'amplificatore:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Porta dell'amplificatore:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Solo ascolto:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Velocità:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Lettura: %1 W, ROS %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>Porta non aperta: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>Porta aperta, ma nessuna trama valida finora.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>Il DECØMETER mostra la potenza dell'eccitatrice. Per leggere l'amplificatore serve la sua porta seriale, oppure una porta virtuale rispecchiata se il suo programma deve restare aperto.</translation>
     </message>
 </context>
 <context>

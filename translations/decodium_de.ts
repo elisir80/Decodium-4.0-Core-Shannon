@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>FUNKGERÄT LIEFERT KEINE MESSUNG</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>Endstufe</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP STUMM — ZEIGT TREIBER</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19621,6 +19637,42 @@ Im Zweifel Hoch verwenden.</translation>
     <message>
         <source>Sharing not started: %1</source>
         <translation>Teilen nicht gestartet: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>ENDSTUFE</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Endstufe auslesen:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Endstufen-Port:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Nur mithören:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Geschwindigkeit:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Liest: %1 W, SWR %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>Port nicht geöffnet: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>Port offen, aber noch kein gültiger Rahmen.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>Das DECØMETER zeigt die Leistung des Treibers. Zum Auslesen der Endstufe wird deren serielle Schnittstelle benötigt, oder ein gespiegelter virtueller Port, falls deren eigene Software geöffnet bleiben muss.</translation>
     </message>
 </context>
 <context>

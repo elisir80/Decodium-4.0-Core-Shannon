@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>电台未提供测量值</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>功放</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>功放无响应 — 显示激励级</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19619,6 +19635,42 @@ If unsure, use High.</source>
     <message>
         <source>Sharing not started: %1</source>
         <translation>共享未启动：%1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>功放</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>读取功放：</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>功放端口：</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>仅监听：</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>速率：</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>读取中：%1 W，驻波比 %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>端口未打开：%1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>端口已打开，但尚未收到有效帧。</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>DECØMETER 显示激励级的功率。读取功放需要占用其串口；若功放自带软件必须保持打开，则需要一个镜像的虚拟串口。</translation>
     </message>
 </context>
 <context>

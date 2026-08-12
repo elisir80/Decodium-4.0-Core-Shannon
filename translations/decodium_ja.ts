@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>無線機が計測値を返しません</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>アンプ</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP 無応答 — 励振段を表示</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19619,6 +19635,42 @@ If unsure, use High.</source>
     <message>
         <source>Sharing not started: %1</source>
         <translation>共有を開始できません: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>アンプ</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>アンプを読む:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>アンプのポート:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>受信のみ:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>速度:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>読み取り中: %1 W, SWR %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>ポート未オープン: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>ポートは開いていますが、有効なフレームがまだありません。</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>DECØMETERは励振段の電力を表示します。アンプを読むにはそのシリアルポートが必要で、アンプ付属ソフトを開いたままにする場合はミラーした仮想ポートが必要です。</translation>
     </message>
 </context>
 <context>

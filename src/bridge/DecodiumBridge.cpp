@@ -9644,6 +9644,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_omniRigCat      = new DecodiumOmniRigManager(this);
     m_hamlibCat       = new DecodiumTransceiverManager(this);
     m_catShare        = new DecodiumCatShare(m_hamlibCat, this);
+    m_amplifier       = new DecodiumAmplifier(this);
     noteActiveCatProfileAtStartup();
     m_nativeCat->loadSettings();
     m_cat4OmCat->loadSettings();
@@ -9661,6 +9662,16 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             decodium::profiledSettingsValue({}, QStringLiteral("CatSharePort"), 4533).toInt(),
             decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowControl"), false).toBool(),
             decodium::profiledSettingsValue({}, QStringLiteral("CatShareAllowPtt"), false).toBool());
+    }
+    // Amplificatore: si apre solo se richiesto. Lettura con ricaduta sulla
+    // radice, per la stessa ragione della CAT condivisa.
+    if (m_amplifier && decodium::profiledSettingsValue({}, QStringLiteral("AmpEnabled"), false).toBool()) {
+        m_amplifier->configure(
+            true,
+            decodium::profiledSettingsValue({}, QStringLiteral("AmpPort"), QString()).toString(),
+            decodium::profiledSettingsValue({}, QStringLiteral("AmpBaud"), 9600).toInt(),
+            decodium::profiledSettingsValue({}, QStringLiteral("AmpPassive"), true).toBool(),
+            decodium::profiledSettingsValue({}, QStringLiteral("AmpPollMs"), 500).toInt());
     }
     m_dxCluster       = new DecodiumDxCluster(this);
     if (m_mapIntelligenceService) {
@@ -19190,6 +19201,25 @@ void DecodiumBridge::tickTargetCallOnTx()
 QObject* DecodiumBridge::catShareObject() const
 {
     return m_catShare;
+}
+
+QObject* DecodiumBridge::amplifierObject() const
+{
+    return m_amplifier;
+}
+
+// Lettura dell'amplificatore. Come per la CAT condivisa, le impostazioni
+// passano dallo stesso archivio di tutte le altre.
+void DecodiumBridge::configureAmplifier(bool enabled, const QString& port,
+                                        int baud, bool passive, int pollMs)
+{
+    setSetting(QStringLiteral("AmpEnabled"), enabled);
+    setSetting(QStringLiteral("AmpPort"), port);
+    setSetting(QStringLiteral("AmpBaud"), baud);
+    setSetting(QStringLiteral("AmpPassive"), passive);
+    setSetting(QStringLiteral("AmpPollMs"), pollMs);
+    if (m_amplifier)
+        m_amplifier->configure(enabled, port, baud, passive, pollMs);
 }
 
 // CAT condivisa. Le impostazioni passano dallo stesso archivio di tutte le

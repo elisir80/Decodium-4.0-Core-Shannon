@@ -10,6 +10,15 @@ ScrollView {
 
     // Applica in un colpo solo lo stato dei quattro comandi della CAT
     // condivisa: il server apre o chiude la porta di conseguenza.
+    // Applica in un colpo solo i comandi dell'amplificatore.
+    function applyAmplifier() {
+        if (!bridge) return
+        var b = parseInt(ampBaud.text, 10)
+        if (isNaN(b) || b < 300) b = 9600
+        bridge.configureAmplifier(ampEnabled.checked, ampPort.text.trim(),
+                                  b, ampPassive.checked, 500)
+    }
+
     function applyCatShare() {
         if (!bridge) return
         var p = parseInt(catSharePort.text, 10)
@@ -1312,6 +1321,73 @@ ScrollView {
                 return qsTr("Listening on 127.0.0.1:%1 \u00b7 connected programs: %2")
                        .arg(bridge.catShare.port).arg(bridge.catShare.clientCount)
                        + "  \u00b7  " + qsTr("in other programs choose \"Hamlib NET rigctl\"")
+            }
+        }
+        // ── Amplificatore ──
+        // Sorgente di misura indipendente dalla radio: il DECOMETER puo
+        // mostrare i watt del PA invece di quelli dell'eccitatrice.
+        Text { text: qsTr("AMPLIFIER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+        Text { text: qsTr("Read amplifier:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: ampEnabled
+            checked: (bridge && bridge.amplifier) ? bridge.amplifier.enabled : false
+            onToggled: applyAmplifier()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        Text { text: qsTr("Amplifier port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: ampPort
+            text: (bridge && bridge.amplifier) ? bridge.amplifier.port : ""
+            placeholderText: "COM7"
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            font.pixelSize: controlFontSize
+            onEditingFinished: applyAmplifier()
+        }
+
+        // In ascolto la porta si apre in sola lettura: e' la sola via se il
+        // software del costruttore deve restare aperto.
+        Text { text: qsTr("Listen only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: ampPassive
+            checked: (bridge && bridge.amplifier) ? bridge.amplifier.passive : true
+            enabled: ampEnabled.checked
+            onToggled: applyAmplifier()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        Text { text: qsTr("Speed:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: ampBaud
+            text: "9600"
+            inputMethodHints: Qt.ImhDigitsOnly
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            font.pixelSize: controlFontSize
+            onEditingFinished: applyAmplifier()
+        }
+
+        Text {
+            Layout.columnSpan: 4
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: (bridge && bridge.amplifier && bridge.amplifier.responding)
+                   ? accentGreen
+                   : ((bridge && bridge.amplifier && bridge.amplifier.enabled) ? "#ff6b6b" : textSecondary)
+            text: {
+                if (!bridge || !bridge.amplifier || !bridge.amplifier.enabled)
+                    return qsTr("The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.")
+                if (bridge.amplifier.responding)
+                    return qsTr("Reading: %1 W, SWR %2")
+                           .arg(bridge.amplifier.watts.toFixed(0))
+                           .arg(bridge.amplifier.swr.toFixed(2))
+                if (!bridge.amplifier.connected)
+                    return qsTr("Port not open: %1").arg(bridge.amplifier.status)
+                return qsTr("Port open, but no valid frame yet.")
             }
         }
         // ── Diagnostica ──

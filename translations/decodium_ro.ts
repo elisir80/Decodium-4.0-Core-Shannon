@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>STAȚIA NU FURNIZEAZĂ MĂSURĂTOARE</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>amplificator</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>AMP TACE — SE AFIȘEAZĂ EXCITATORUL</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -14168,6 +14184,42 @@ Dacă eziți, alege înaltă.</translation>
     <message>
         <source>Sharing not started: %1</source>
         <translation>Partajarea nu a pornit: %1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>AMPLIFICATOR</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>Citește amplificatorul:</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>Portul amplificatorului:</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>Doar ascultare:</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>Viteză:</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>Citire: %1 W, ROS %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>Portul nu este deschis: %1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>Port deschis, dar încă niciun cadru valid.</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>DECØMETER afișează puterea excitatorului. Citirea amplificatorului necesită portul său serial sau un port virtual oglindit dacă programul propriu trebuie să rămână deschis.</translation>
     </message>
 </context>
 <context>

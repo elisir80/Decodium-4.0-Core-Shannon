@@ -71,6 +71,22 @@
         <source>RIG REPORTS NO METER</source>
         <translation>電台未提供測量值</translation>
     </message>
+    <message>
+        <source>AMP</source>
+        <translation>AMP</translation>
+    </message>
+    <message>
+        <source>EXC</source>
+        <translation>EXC</translation>
+    </message>
+    <message>
+        <source>amplifier</source>
+        <translation>功率放大器</translation>
+    </message>
+    <message>
+        <source>AMP SILENT - SHOWING EXCITER</source>
+        <translation>功放無回應 — 顯示激勵級</translation>
+    </message>
 </context>
 <context>
     <name>AbstractLogWindow</name>
@@ -19619,6 +19635,42 @@ If unsure, use High.</source>
     <message>
         <source>Sharing not started: %1</source>
         <translation>共享未啟動：%1</translation>
+    </message>
+    <message>
+        <source>AMPLIFIER</source>
+        <translation>功率放大器</translation>
+    </message>
+    <message>
+        <source>Read amplifier:</source>
+        <translation>讀取功放：</translation>
+    </message>
+    <message>
+        <source>Amplifier port:</source>
+        <translation>功放埠：</translation>
+    </message>
+    <message>
+        <source>Listen only:</source>
+        <translation>僅監聽：</translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation>速率：</translation>
+    </message>
+    <message>
+        <source>Reading: %1 W, SWR %2</source>
+        <translation>讀取中：%1 W，駐波比 %2</translation>
+    </message>
+    <message>
+        <source>Port not open: %1</source>
+        <translation>埠未開啟：%1</translation>
+    </message>
+    <message>
+        <source>Port open, but no valid frame yet.</source>
+        <translation>埠已開啟，但尚未收到有效訊框。</translation>
+    </message>
+    <message>
+        <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
+        <translation>DECØMETER 顯示激勵級的功率。讀取功放需要占用其序列埠；若功放自帶軟體必須保持開啟，則需要一個鏡像的虛擬序列埠。</translation>
     </message>
 </context>
 <context>
