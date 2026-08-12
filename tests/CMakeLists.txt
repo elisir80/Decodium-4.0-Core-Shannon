@@ -85,6 +85,10 @@ add_executable (test_qmx_telemetry test_qmx_telemetry.cpp)
 target_link_libraries (test_qmx_telemetry Qt6::Test Qt6::Core)
 add_test (NAME test_qmx_telemetry COMMAND $<TARGET_FILE:test_qmx_telemetry>)
 
+add_executable (test_decodium_update_support test_decodium_update_support.cpp)
+target_link_libraries (test_decodium_update_support Qt6::Test Qt6::Core)
+add_test (NAME test_decodium_update_support COMMAND $<TARGET_FILE:test_decodium_update_support>)
+
 add_executable (test_jt4_roundtrip test_jt4_roundtrip.cpp)
 target_link_libraries (test_jt4_roundtrip wsjt_qt wsjt_cxx Qt6::Core)
 add_test (NAME test_jt4_roundtrip COMMAND $<TARGET_FILE:test_jt4_roundtrip>)

@@ -1161,7 +1161,11 @@ Dialog {
     }
 
     function startNativeHostMove() {
-        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
+        if (!nativeHostWindow)
+            return false
+        if (typeof nativeHostWindow.beginDesktopMove === "function")
+            nativeHostWindow.beginDesktopMove()
+        if (typeof nativeHostWindow.startSystemMove !== "function")
             return false
         try {
             return nativeHostWindow.startSystemMove()

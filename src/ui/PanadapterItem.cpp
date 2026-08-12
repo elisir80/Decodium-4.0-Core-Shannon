@@ -1804,7 +1804,8 @@ bool PanadapterItem::shaderWaterfallSupported()
         m_shaderWaterfallDisabledReason = QStringLiteral("scenegraph window not ready; colored texture upload");
         return false;
     }
-    QSGRendererInterface::GraphicsApi const api = window()->rendererInterface()->graphicsApi();
+    QSGRendererInterface::GraphicsApi const api =
+        static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey());
     if (api == QSGRendererInterface::Software
         || api == QSGRendererInterface::Null
         || api == QSGRendererInterface::Unknown) {
@@ -1865,7 +1866,8 @@ bool PanadapterItem::spectrumGraphSupported() const
         return false;
     if (!window() || !window()->rendererInterface())
         return false;
-    QSGRendererInterface::GraphicsApi const api = window()->rendererInterface()->graphicsApi();
+    QSGRendererInterface::GraphicsApi const api =
+        static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey());
     return api != QSGRendererInterface::Software
         && api != QSGRendererInterface::Null
         && api != QSGRendererInterface::Unknown
@@ -4075,6 +4077,12 @@ void PanadapterItem::connectBridgePcmFrameFeed()
 
 void PanadapterItem::itemChange(ItemChange change, const ItemChangeData& value)
 {
+    if (change == ItemSceneChange) {
+        m_sceneGraphApiKey.store(-1, std::memory_order_release);
+        m_loggedWaterfallApi = -1;
+        m_loggedWaterfallPath = -1;
+        m_loggedWaterfallReason.clear();
+    }
     if (change == ItemSceneChange && value.window) {
         connectBridgePcmFrameFeed();
         connect(value.window,
@@ -4089,6 +4097,10 @@ void PanadapterItem::itemChange(ItemChange change, const ItemChangeData& value)
 
 void PanadapterItem::releaseResources()
 {
+    m_sceneGraphApiKey.store(-1, std::memory_order_release);
+    m_loggedWaterfallApi = -1;
+    m_loggedWaterfallPath = -1;
+    m_loggedWaterfallReason.clear();
     releaseGpuFftResources();
     QQuickItem::releaseResources();
 }
@@ -5018,11 +5030,14 @@ void PanadapterItem::recordGpuFftCompute()
 
 void PanadapterItem::logWaterfallRenderPath(bool gpu, const QString& reason)
 {
-    QSGRendererInterface::GraphicsApi api = QSGRendererInterface::Unknown;
-    if (window() && window()->rendererInterface())
-        api = window()->rendererInterface()->graphicsApi();
-
     int const path = gpu ? 1 : 0;
+    // This runs inside updatePaintNode(). Querying QSGRendererInterface on
+    // every frame can serialize with D3D present on some Windows drivers.
+    if (m_loggedWaterfallPath == path && m_loggedWaterfallReason == reason)
+        return;
+
+    QSGRendererInterface::GraphicsApi const api =
+        static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey());
     int const apiKey = static_cast<int>(api);
     if (m_loggedWaterfallPath == path && m_loggedWaterfallApi == apiKey
         && m_loggedWaterfallReason == reason)
@@ -5048,6 +5063,23 @@ void PanadapterItem::logWaterfallRenderPath(bool gpu, const QString& reason)
 #endif
         )
         << "reason=" << reason;
+}
+
+int PanadapterItem::sceneGraphApiKey() const
+{
+    int const cached = m_sceneGraphApiKey.load(std::memory_order_acquire);
+    if (cached >= 0)
+        return cached;
+
+    QQuickWindow* win = window();
+    QSGRendererInterface* renderer = win ? win->rendererInterface() : nullptr;
+    QSGRendererInterface::GraphicsApi const api = renderer
+        ? renderer->graphicsApi()
+        : QSGRendererInterface::Unknown;
+    int const key = static_cast<int>(api);
+    if (api != QSGRendererInterface::Unknown)
+        m_sceneGraphApiKey.store(key, std::memory_order_release);
+    return key;
 }
 
 // ─── Qt Scene Graph update ────────────────────────────────────────────────────

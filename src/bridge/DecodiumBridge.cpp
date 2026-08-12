@@ -26822,6 +26822,11 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         return;
     }
 
+    bool const isCatTelemetrySetting =
+        key == QStringLiteral("PWRandSWR") || key == QStringLiteral("CheckSWR");
+    bool const catTelemetrySettingChanged =
+        isCatTelemetrySetting && getSetting(key, false).toBool() != value.toBool();
+
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
     if (isProfileServiceCompatibilitySetting(key)) {
@@ -27179,12 +27184,23 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         emit statusMessage(QStringLiteral("TX Audio Src: riconnessione CAT per applicare la sorgente audio"));
         QTimer::singleShot(0, this, [this]() { retryRigConnection(); });
     }
-    if ((key == QStringLiteral("PWRandSWR") || key == QStringLiteral("CheckSWR"))
+    if (catTelemetrySettingChanged
         && isHamlibFamilyBackend(m_catBackend)
         && m_hamlibCat
-        && m_hamlibCat->connected()) {
+        && m_hamlibCat->connected()
+        && !m_catTelemetryReconnectPending) {
+        m_catTelemetryReconnectPending = true;
         emit statusMessage(QStringLiteral("PWR/SWR: riconnessione CAT per applicare il polling"));
-        QTimer::singleShot(0, this, [this]() { retryRigConnection(); });
+        QTimer::singleShot(0, this, [this]() {
+            m_catTelemetryReconnectPending = false;
+            if (m_shuttingDown
+                || !isHamlibFamilyBackend(m_catBackend)
+                || !m_hamlibCat
+                || !m_hamlibCat->connected()) {
+                return;
+            }
+            retryRigConnection();
+        });
     }
 }
 

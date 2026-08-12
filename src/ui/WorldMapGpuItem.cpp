@@ -166,10 +166,12 @@ public:
     QSGGeometryNode* iotaHaloMarkers {nullptr};
     QSGGeometryNode* wpxHaloMarkers {nullptr};
     QSGGeometryNode* moonHaloMarkers {nullptr};
+    QSGGeometryNode* satelliteHaloMarkers {nullptr};
     QSGGeometryNode* potaCoreMarkers {nullptr};
     QSGGeometryNode* iotaCoreMarkers {nullptr};
     QSGGeometryNode* wpxCoreMarkers {nullptr};
     QSGGeometryNode* moonCoreMarkers {nullptr};
+    QSGGeometryNode* satelliteCoreMarkers {nullptr};
     QSGGeometryNode* legendIncomingLine {nullptr};
     QSGGeometryNode* legendOutgoingLine {nullptr};
     QSGGeometryNode* legendBandMarker {nullptr};
@@ -1526,6 +1528,89 @@ void updateScreenCircleNode(QSGNode* parent, QSGGeometryNode*& node,
     node->markDirty(QSGNode::DirtyGeometry);
 }
 
+void updateScreenSatelliteNode(QSGNode* parent, QSGGeometryNode*& node,
+                               const QVector<QPointF>& points, const QColor& color,
+                               float scale)
+{
+    if (!node) {
+        auto* geometry = new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 0);
+        geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+        geometry->setVertexDataPattern(QSGGeometry::DynamicPattern);
+
+        auto* material = new QSGFlatColorMaterial;
+        material->setColor(color);
+
+        node = new QSGGeometryNode;
+        node->setGeometry(geometry);
+        node->setFlag(QSGNode::OwnsGeometry);
+        node->setMaterial(material);
+        node->setFlag(QSGNode::OwnsMaterial);
+        parent->appendChildNode(node);
+    }
+    if (auto* material = static_cast<QSGFlatColorMaterial*>(node->material())) {
+        material->setColor(color);
+        node->markDirty(QSGNode::DirtyMaterial);
+    }
+
+    // A compact, platform-independent satellite silhouette: central bus,
+    // solar panels, panel struts and a short antenna.  Keeping this as QSG
+    // triangle geometry avoids font/emoji differences and texture uploads.
+    constexpr int verticesPerSatellite = 45;
+    auto* geometry = node->geometry();
+    geometry->allocate(points.size() * verticesPerSatellite);
+    geometry->setDrawingMode(QSGGeometry::DrawTriangles);
+    auto* vertices = geometry->vertexDataAsPoint2D();
+    int out = 0;
+    auto write = [&](const QPointF& point) {
+        vertices[out++].set(static_cast<float>(point.x()),
+                            static_cast<float>(point.y()));
+    };
+    auto triangle = [&](const QPointF& a, const QPointF& b, const QPointF& c) {
+        write(a);
+        write(b);
+        write(c);
+    };
+    auto quad = [&](const QPointF& topLeft, const QPointF& bottomRight) {
+        QPointF const topRight(bottomRight.x(), topLeft.y());
+        QPointF const bottomLeft(topLeft.x(), bottomRight.y());
+        triangle(topLeft, topRight, bottomLeft);
+        triangle(topRight, bottomRight, bottomLeft);
+    };
+    auto relative = [scale](qreal x, qreal y) {
+        return QPointF(x * scale, y * scale);
+    };
+
+    for (const QPointF& center : points) {
+        // Central equipment bus (a softly hexagonal body).
+        QPointF const bodyTopLeft = center + relative(-3.4, -4.0);
+        QPointF const bodyTopRight = center + relative(3.4, -4.0);
+        QPointF const bodyRight = center + relative(4.4, 0.0);
+        QPointF const bodyBottomRight = center + relative(3.4, 4.0);
+        QPointF const bodyBottomLeft = center + relative(-3.4, 4.0);
+        QPointF const bodyLeft = center + relative(-4.4, 0.0);
+        triangle(center, bodyTopLeft, bodyTopRight);
+        triangle(center, bodyTopRight, bodyRight);
+        triangle(center, bodyRight, bodyBottomRight);
+        triangle(center, bodyBottomRight, bodyBottomLeft);
+        triangle(center, bodyBottomLeft, bodyLeft);
+        triangle(center, bodyLeft, bodyTopLeft);
+
+        // Two solar panels and their short support arms.
+        quad(center + relative(-12.0, -3.0), center + relative(-6.0, 3.0));
+        quad(center + relative(6.0, -3.0), center + relative(12.0, 3.0));
+        quad(center + relative(-6.0, -0.65), center + relative(-4.2, 0.65));
+        quad(center + relative(4.2, -0.65), center + relative(6.0, 0.65));
+
+        // Antenna mast, wide enough to remain visible at normal map scale.
+        triangle(center + relative(-0.8, -3.8),
+                 center + relative(0.8, -3.8),
+                 center + relative(0.0, -7.2));
+    }
+    Q_ASSERT(out == points.size() * verticesPerSatellite);
+    geometry->markVertexDataDirty();
+    node->markDirty(QSGNode::DirtyGeometry);
+}
+
 void updatePathNode(QSGNode* parent, QSGGeometryNode*& node,
                     const QVector<WorldMapGpuItem::PathLine>& paths,
                     const QColor& color,
@@ -2725,6 +2810,10 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
                                m_batch.moonMarkers,
                                styledColor(QStringLiteral("moon"), QColor(196, 224, 255), 145),
                                static_cast<float>(10.0 * layerThickness(QStringLiteral("moon"))));
+        updateScreenSatelliteNode(geometryLayer, geometryLayer->satelliteHaloMarkers,
+                                  m_batch.satelliteMarkers,
+                                  styledColor(QStringLiteral("wpx"), QColor(242, 178, 61), 120),
+                                  1.22f);
         updateScreenCircleNode(geometryLayer, geometryLayer->potaCoreMarkers,
                                m_batch.potaMarkers,
                                styledColor(QStringLiteral("pota"), QColor(166, 255, 154), 240),
@@ -2741,6 +2830,10 @@ QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*
                                m_batch.moonMarkers,
                                styledColor(QStringLiteral("moon"), QColor(245, 249, 255), 250),
                                static_cast<float>(4.5 * layerThickness(QStringLiteral("moon"))));
+        updateScreenSatelliteNode(geometryLayer, geometryLayer->satelliteCoreMarkers,
+                                  m_batch.satelliteMarkers,
+                                  styledColor(QStringLiteral("wpx"), QColor(255, 215, 145), 245),
+                                  1.0f);
         if (azimuthalProjectionEnabled()) {
             auto screenPaths = [this, &rect](const QVector<PathLine>& paths) {
                 QVector<QPointF> lines;
@@ -4571,6 +4664,8 @@ void WorldMapGpuItem::rebuildGeometryBatch()
             m_batch.iotaMarkers << point;
         } else if (type == QStringLiteral("MOON")) {
             m_batch.moonMarkers << point;
+        } else if (type == QStringLiteral("SATELLITE")) {
+            m_batch.satelliteMarkers << point;
         } else {
             m_batch.wpxMarkers << point;
         }
@@ -4595,9 +4690,10 @@ void WorldMapGpuItem::rebuildGeometryBatch()
                        : (type == QStringLiteral("MOON")
                           ? QColor(235, 244, 255, 245)
                           : QColor(255, 215, 145, 235)));
+                QPointF const labelOffset = type == QStringLiteral("SATELLITE")
+                    ? QPointF(15.0, -8.0) : QPointF(7.0, -7.0);
                 m_labels.push_back(
-                    {label.left(18), point + QPointF(7.0, -7.0),
-                     QRectF(), color});
+                    {label.left(18), point + labelOffset, QRectF(), color});
                 ++operationalLabelCount;
             }
         }

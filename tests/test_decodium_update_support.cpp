@@ -1,0 +1,108 @@
+#include <QtTest>
+#include <QFile>
+#include <QFileInfo>
+#include <QTemporaryDir>
+
+#include "src/app/DecodiumUpdateSupport.hpp"
+
+class TestDecodiumUpdateSupport final : public QObject
+{
+    Q_OBJECT
+
+private slots:
+    void linuxX86DoesNotSelectArmFirst()
+    {
+        const QStringList assets {
+            QStringLiteral("decodium4-ft2-1.0.548-linux-aarch64.AppImage"),
+            QStringLiteral("decodium4-ft2-1.0.548-linux-aarch64.AppImage.sha256.txt"),
+            QStringLiteral("decodium4-ft2-1.0.548-linux-x86_64.AppImage")
+        };
+        QCOMPARE(decodium::update::bestAssetIndex(
+                     assets, QStringLiteral("linux"), QStringLiteral("x86_64")), 2);
+    }
+
+    void linuxArmDoesNotSelectX86First()
+    {
+        const QStringList assets {
+            QStringLiteral("decodium4-ft2-1.0.548-linux-x86_64.AppImage"),
+            QStringLiteral("decodium4-ft2-1.0.548-linux-aarch64.AppImage")
+        };
+        QCOMPARE(decodium::update::bestAssetIndex(
+                     assets, QStringLiteral("linux"), QStringLiteral("arm64")), 1);
+    }
+
+    void architectureSpecificPackageBeatsGenericPackage()
+    {
+        const QStringList assets {
+            QStringLiteral("decodium4-ft2-linux.AppImage"),
+            QStringLiteral("decodium4-ft2-linux-x86_64.AppImage")
+        };
+        QCOMPARE(decodium::update::bestAssetIndex(
+                     assets, QStringLiteral("linux"), QStringLiteral("amd64")), 1);
+    }
+
+    void macArchitectureIsAlsoRespected()
+    {
+        const QStringList assets {
+            QStringLiteral("decodium-macos-sequoia-arm64.dmg"),
+            QStringLiteral("decodium-macos-sequoia-x86_64.dmg")
+        };
+        QCOMPARE(decodium::update::bestAssetIndex(
+                     assets, QStringLiteral("macos"), QStringLiteral("x86_64")), 1);
+    }
+
+    void windowsStillSelectsTheSetupExecutable()
+    {
+        const QStringList assets {
+            QStringLiteral("Decodium-portable.exe"),
+            QStringLiteral("Decodium_1.0.548_Setup_x64.exe")
+        };
+        QCOMPARE(decodium::update::bestAssetIndex(
+                     assets, QStringLiteral("windows"), QStringLiteral("x86_64")), 1);
+    }
+
+    void unknownArchitectureRejectsTaggedPackages()
+    {
+        const QStringList assets {
+            QStringLiteral("decodium-linux-aarch64.AppImage"),
+            QStringLiteral("decodium-linux-x86_64.AppImage"),
+            QStringLiteral("decodium-linux.AppImage")
+        };
+        QCOMPARE(decodium::update::bestAssetIndex(
+                     assets, QStringLiteral("linux"), QStringLiteral("riscv64")), 2);
+    }
+
+    void appImageReplacementIsAtomicAndExecutable()
+    {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const QString target = directory.filePath(QStringLiteral("Decodium.AppImage"));
+
+        QFile original(target);
+        QVERIFY(original.open(QIODevice::WriteOnly));
+        QCOMPARE(original.write("old-image"), qint64(9));
+        original.close();
+
+        QSaveFile update(target);
+        update.setDirectWriteFallback(false);
+        QVERIFY(update.open(QIODevice::WriteOnly));
+        QCOMPARE(update.write("new-image"), qint64(9));
+
+        const QFileDevice::Permissions permissions =
+            QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner
+            | QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ExeUser
+            | QFileDevice::ReadGroup | QFileDevice::ExeGroup
+            | QFileDevice::ReadOther | QFileDevice::ExeOther;
+        QString error;
+        QVERIFY2(decodium::update::commitAtomicFile(update, permissions, &error),
+                 qPrintable(error));
+
+        QFile installed(target);
+        QVERIFY(installed.open(QIODevice::ReadOnly));
+        QCOMPARE(installed.readAll(), QByteArray("new-image"));
+        QVERIFY(QFileInfo(installed).permission(QFileDevice::ExeOwner));
+    }
+};
+
+QTEST_MAIN(TestDecodiumUpdateSupport)
+#include "test_decodium_update_support.moc"

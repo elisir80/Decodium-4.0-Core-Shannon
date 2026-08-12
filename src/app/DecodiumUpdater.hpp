@@ -19,8 +19,10 @@ class QNetworkReply;
 // nuova.
 //
 // Qui il ciclo e' completo: controlla -> avvisa -> l'utente conferma ->
-// scarica -> lancia l'installer -> esce. Mai nulla di automatico alle spalle
-// dell'utente: nessun download parte senza un clic esplicito.
+// scarica -> installa/aggiorna -> esce. Su Windows avvia l'installer; su Linux
+// sostituisce in modo atomico l'AppImage corrente quando la cartella e'
+// scrivibile. Mai nulla di automatico alle spalle dell'utente: nessun download
+// parte senza un clic esplicito.
 //
 // Classe separata dal bridge di proposito: DecodiumBridge.cpp e' il file che
 // elisir80 riscrive di piu' e ogni riga toccata li' e' un conflitto agli
@@ -39,6 +41,7 @@ class DecodiumUpdater : public QObject
     Q_PROPERTY(QString statusText      READ statusText      NOTIFY statusTextChanged)
     Q_PROPERTY(bool    checkOnStartup  READ checkOnStartup  WRITE setCheckOnStartup NOTIFY checkOnStartupChanged)
     Q_PROPERTY(bool    offlineMode     READ offlineMode     WRITE setOfflineMode NOTIFY offlineModeChanged)
+    Q_PROPERTY(bool    appImageRuntime READ appImageRuntime CONSTANT)
 
 public:
     explicit DecodiumUpdater(QObject* parent = nullptr);
@@ -52,6 +55,7 @@ public:
     QString statusText()     const { return m_statusText; }
     bool    checkOnStartup() const { return m_checkOnStartup; }
     bool    offlineMode() const { return m_offlineMode; }
+    bool    appImageRuntime() const { return m_appImageRuntime; }
     void    setCheckOnStartup(bool on);
     void    setOfflineMode(bool offline);
 
@@ -63,9 +67,9 @@ public:
     // una volta al giorno.
     Q_INVOKABLE void checkOnStartupIfDue();
 
-    // Scarica l'installer della versione trovata e lo lancia, poi chiude
-    // Decodium (l'installer disinstalla da solo la versione precedente).
-    // Parte SOLO su conferma esplicita dell'utente.
+    // Scarica il pacchetto della versione trovata. Su Windows lancia
+    // l'installer; su Linux aggiorna l'AppImage o la salva in Downloads se il
+    // percorso corrente non e' scrivibile. Parte SOLO su conferma esplicita.
     Q_INVOKABLE void downloadAndInstall();
 
     // "Salta questa versione": non avvisare piu' finche' non ne esce un'altra.
@@ -105,6 +109,7 @@ private:
     QString m_statusText;
     bool    m_checkOnStartup {true};
     bool    m_offlineMode {false};
+    bool    m_appImageRuntime {false};
 };
 
 #endif  // DECODIUMUPDATER_HPP

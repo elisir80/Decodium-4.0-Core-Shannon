@@ -1,4 +1,5 @@
 #include "DecodiumUpdater.hpp"
+#include "DecodiumUpdateSupport.hpp"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -13,8 +14,10 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
+#include <QSaveFile>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QSysInfo>
 #include <QUrl>
 
 #ifndef FORK_RELEASE_VERSION
@@ -67,17 +70,23 @@ bool isNewer(const QString& candidate, const QString& current)
     return false;
 }
 
-// L'asset giusto per questa piattaforma. Su Windows e' l'installer Inno.
-bool isAssetForThisPlatform(const QString& name)
+QString currentPlatformKey()
 {
 #if defined(Q_OS_WIN)
-    return name.endsWith(QLatin1String(".exe"), Qt::CaseInsensitive)
-           && name.contains(QLatin1String("Setup"), Qt::CaseInsensitive);
+    return QStringLiteral("windows");
 #elif defined(Q_OS_MACOS)
-    return name.endsWith(QLatin1String(".dmg"), Qt::CaseInsensitive);
+    return QStringLiteral("macos");
 #else
-    return name.endsWith(QLatin1String(".AppImage"), Qt::CaseInsensitive);
+    return QStringLiteral("linux");
 #endif
+}
+
+QFileDevice::Permissions executableAppImagePermissions()
+{
+    return QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner
+           | QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ExeUser
+           | QFileDevice::ReadGroup | QFileDevice::ExeGroup
+           | QFileDevice::ReadOther | QFileDevice::ExeOther;
 }
 
 }  // namespace
@@ -88,6 +97,10 @@ DecodiumUpdater::DecodiumUpdater(QObject* parent)
     , m_currentVersion(QStringLiteral(FORK_RELEASE_VERSION))
 {
     m_checkOnStartup = settingsStore().value(kKeyCheckOnStartup, true).toBool();
+    if (currentPlatformKey() == QLatin1String("linux")) {
+        const QString appImagePath = qEnvironmentVariable("APPIMAGE").trimmed();
+        m_appImageRuntime = !appImagePath.isEmpty() && QFileInfo(appImagePath).isFile();
+    }
 }
 
 void DecodiumUpdater::setBusy(bool b)
@@ -231,13 +244,18 @@ void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent)
     m_downloadUrl.clear();
     m_assetName.clear();
     const QJsonArray assets = root.value(QStringLiteral("assets")).toArray();
+    const QString platform = currentPlatformKey();
+    const QString architecture = QSysInfo::currentCpuArchitecture();
+    int bestAssetScore = 0;
     for (const QJsonValue& v : assets) {
         const QJsonObject a = v.toObject();
         const QString name = a.value(QStringLiteral("name")).toString();
-        if (isAssetForThisPlatform(name)) {
+        const int score = decodium::update::assetMatchScore(
+            name, platform, architecture);
+        if (score > bestAssetScore) {
+            bestAssetScore = score;
             m_assetName   = name;
             m_downloadUrl = a.value(QStringLiteral("browser_download_url")).toString();
-            break;
         }
     }
 
@@ -289,17 +307,74 @@ void DecodiumUpdater::downloadAndInstall()
         return;
     }
 
-    const QString dir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-    QDir().mkpath(dir);
-    const QString target = QDir(dir).absoluteFilePath(m_assetName);
-    QFile::remove(target);  // un download interrotto in precedenza sarebbe corrotto
+    QString target;
+    QFileDevice* output = nullptr;
+    QSaveFile* atomicFile = nullptr;
+    QFile* regularFile = nullptr;
+    bool replaceRunningAppImage = false;
+    bool appImageSavedToDownloads = false;
+    QFileDevice::Permissions targetPermissions;
 
-    auto* file = new QFile(target);
-    if (!file->open(QIODevice::WriteOnly)) {
-        delete file;
-        setStatus(tr("Cannot write to the temporary folder."));
-        emit errorOccurred(m_statusText);
-        return;
+    if (currentPlatformKey() == QLatin1String("linux")) {
+        // APPIMAGE is the canonical path supplied by the AppImage runtime.  A
+        // QSaveFile writes a sibling temporary file and commits it with one rename,
+        // so a failed/interrupted download can never destroy the working image.
+        const QString runningPath = qEnvironmentVariable("APPIMAGE").trimmed();
+        const QFileInfo runningInfo(runningPath);
+        if (!runningPath.isEmpty() && runningInfo.isFile()) {
+            target = runningInfo.absoluteFilePath();
+            targetPermissions = runningInfo.permissions() | executableAppImagePermissions();
+            auto* candidate = new QSaveFile(target);
+            candidate->setDirectWriteFallback(false);
+            if (candidate->open(QIODevice::WriteOnly)) {
+                atomicFile = candidate;
+                output = candidate;
+                replaceRunningAppImage = true;
+            } else {
+                delete candidate;
+            }
+        }
+
+        // A read-only installation directory is common for system-managed files.
+        // Never fall back to /tmp: the package would disappear on reboot and look
+        // as though the update had succeeded.  Put it in Downloads instead.
+        if (!output) {
+            QString dir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+            if (dir.isEmpty())
+                dir = QDir::home().absoluteFilePath(QStringLiteral("Downloads"));
+            if (!QDir().mkpath(dir)) {
+                setStatus(tr("Cannot create the Downloads folder."));
+                emit errorOccurred(m_statusText);
+                return;
+            }
+            target = QDir(dir).absoluteFilePath(m_assetName);
+            targetPermissions = executableAppImagePermissions();
+            auto* candidate = new QSaveFile(target);
+            candidate->setDirectWriteFallback(false);
+            if (!candidate->open(QIODevice::WriteOnly)) {
+                delete candidate;
+                setStatus(tr("Cannot write to the Downloads folder."));
+                emit errorOccurred(m_statusText);
+                return;
+            }
+            atomicFile = candidate;
+            output = candidate;
+            appImageSavedToDownloads = true;
+        }
+    } else {
+        const QString dir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+        QDir().mkpath(dir);
+        target = QDir(dir).absoluteFilePath(m_assetName);
+        QFile::remove(target);  // un download interrotto in precedenza sarebbe corrotto
+
+        regularFile = new QFile(target);
+        if (!regularFile->open(QIODevice::WriteOnly)) {
+            delete regularFile;
+            setStatus(tr("Cannot write to the temporary folder."));
+            emit errorOccurred(m_statusText);
+            return;
+        }
+        output = regularFile;
     }
 
     setBusy(true);
@@ -312,24 +387,34 @@ void DecodiumUpdater::downloadAndInstall()
                      QNetworkRequest::NoLessSafeRedirectPolicy);
     QNetworkReply* reply = m_nam->get(req);
 
-    connect(reply, &QNetworkReply::readyRead, this, [reply, file]() {
-        file->write(reply->readAll());
+    connect(reply, &QNetworkReply::readyRead, this, [reply, output]() {
+        output->write(reply->readAll());
     });
     connect(reply, &QNetworkReply::downloadProgress, this,
             [this](qint64 got, qint64 total) {
                 setProgress(total > 0 ? int((got * 100) / total) : -1);
             });
-    connect(reply, &QNetworkReply::finished, this, [this, reply, file, target]() {
+    connect(reply, &QNetworkReply::finished, this,
+            [this, reply, output, atomicFile, regularFile, target,
+             targetPermissions, replaceRunningAppImage, appImageSavedToDownloads]() {
         reply->deleteLater();
-        file->write(reply->readAll());
-        file->flush();
-        const qint64 size = file->size();
-        file->close();
-        file->deleteLater();
-        setBusy(false);
+        output->write(reply->readAll());
+        const qint64 size = output->size();
+
+        const auto discardDownload = [atomicFile, regularFile, target]() {
+            if (atomicFile) {
+                atomicFile->cancelWriting();
+                atomicFile->deleteLater();
+            } else if (regularFile) {
+                regularFile->close();
+                regularFile->deleteLater();
+                QFile::remove(target);
+            }
+        };
 
         if (reply->error() != QNetworkReply::NoError) {
-            QFile::remove(target);
+            discardDownload();
+            setBusy(false);
             setStatus(tr("Download failed: %1").arg(reply->errorString()));
             emit errorOccurred(m_statusText);
             return;
@@ -337,11 +422,58 @@ void DecodiumUpdater::downloadAndInstall()
         // Un file troncato manderebbe in errore l'installer con un messaggio
         // incomprensibile: meglio accorgersene qui.
         if (size < 1024 * 1024) {
-            QFile::remove(target);
+            discardDownload();
+            setBusy(false);
             setStatus(tr("The downloaded file is incomplete. Please try again."));
             emit errorOccurred(m_statusText);
             return;
         }
+
+        if (atomicFile) {
+            QString installError;
+            if (!decodium::update::commitAtomicFile(
+                    *atomicFile, targetPermissions, &installError)) {
+                atomicFile->deleteLater();
+                setBusy(false);
+                setStatus(tr("The AppImage could not be installed safely: %1")
+                              .arg(installError));
+                emit errorOccurred(m_statusText);
+                return;
+            }
+            atomicFile->deleteLater();
+        } else if (regularFile) {
+            regularFile->flush();
+            regularFile->close();
+            regularFile->deleteLater();
+        }
+
+        setBusy(false);
+
+        if (replaceRunningAppImage) {
+            setStatus(tr("The AppImage was updated successfully. Restarting Decodium..."));
+            QStringList arguments = QCoreApplication::arguments();
+            if (!arguments.isEmpty())
+                arguments.removeFirst();
+            if (!QProcess::startDetached(target, arguments,
+                                         QFileInfo(target).absolutePath())) {
+                setStatus(tr("The AppImage was updated at %1. Please restart Decodium manually.")
+                              .arg(QDir::toNativeSeparators(target)));
+                QDesktopServices::openUrl(
+                    QUrl::fromLocalFile(QFileInfo(target).absolutePath()));
+                return;
+            }
+            QCoreApplication::quit();
+            return;
+        }
+
+        if (appImageSavedToDownloads) {
+            setStatus(tr("The AppImage was saved to %1. Launch it manually to complete the update.")
+                          .arg(QDir::toNativeSeparators(target)));
+            QDesktopServices::openUrl(
+                QUrl::fromLocalFile(QFileInfo(target).absolutePath()));
+            return;
+        }
+
         launchInstaller(target);
     });
 }

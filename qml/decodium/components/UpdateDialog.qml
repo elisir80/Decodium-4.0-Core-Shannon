@@ -6,9 +6,9 @@ import QtQuick.Layouts
 // IU8LMC — Avviso di aggiornamento con conferma esplicita.
 //
 // Niente parte da solo: l'app avvisa, l'utente decide. "Aggiorna ora" scarica e
-// lancia l'installer (che disinstalla da solo la versione precedente e propone
-// il riavvio); "Piu' tardi" richiude e basta; "Salta questa versione" silenzia
-// SOLO questa versione, non le successive.
+// installa il pacchetto appropriato; "Piu' tardi" richiude e basta; "Salta
+// questa versione" silenzia SOLO questa versione, non le successive. Su Linux
+// l'AppImage corrente viene sostituita atomicamente quando possibile.
 Dialog {
     id: updateDialog
     title: qsTr("Update available")
@@ -101,9 +101,32 @@ Dialog {
         Label {
             Layout.fillWidth: true
             visible: !updater.busy
-            text: qsTr("Decodium will close and the installer will start. Your settings and "
-                       + "QSO log are kept.")
+            text: {
+                if (Qt.platform.os === "linux") {
+                    if (updater.appImageRuntime) {
+                        return qsTr("The current AppImage will be replaced safely and Decodium "
+                                    + "will restart. Your settings and QSO log are kept.")
+                    }
+                    return qsTr("The new AppImage will be saved to your Downloads folder. "
+                                + "Launch it manually to complete the update.")
+                }
+                if (Qt.platform.os === "windows") {
+                    return qsTr("Decodium will close and the installer will start. Your settings "
+                                + "and QSO log are kept.")
+                }
+                return qsTr("The update package will be downloaded and opened. Your settings "
+                            + "and QSO log are kept.")
+            }
             color: "#8b949e"
+            font.pixelSize: 11
+            wrapMode: Text.Wrap
+        }
+
+        Label {
+            Layout.fillWidth: true
+            visible: !updater.busy && updater.statusText.length > 0
+            text: updater.statusText
+            color: "#c9d1d9"
             font.pixelSize: 11
             wrapMode: Text.Wrap
         }
@@ -129,7 +152,10 @@ Dialog {
             }
 
             Button {
-                text: qsTr("Update now")
+                text: Qt.platform.os === "linux"
+                      ? qsTr("Update AppImage")
+                      : (Qt.platform.os === "windows"
+                         ? qsTr("Update now") : qsTr("Download update"))
                 enabled: !updater.busy
                 highlighted: true
                 onClicked: updater.downloadAndInstall()

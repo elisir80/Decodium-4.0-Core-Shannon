@@ -154,6 +154,7 @@ private:
         QVector<QPointF> iotaMarkers;
         QVector<QPointF> wpxMarkers;
         QVector<QPointF> moonMarkers;
+        QVector<QPointF> satelliteMarkers;
         // Geographic boundaries have both a filled wide-line path and a thin
         // line fallback. The latter remains visible on renderers that do not
         // reliably update dynamic triangle buffers after a layer is enabled.

@@ -2536,6 +2536,7 @@ private:
     QString m_lastCatError;
     quint64 m_omniRigReconnectSerial {0};
     bool    m_omniRigReconnectInProgress {false};
+    bool    m_catTelemetryReconnectPending {false};
     QString m_catMode;
     double m_rigPowerWatts {0.0};
     double m_rigSwr {0.0};

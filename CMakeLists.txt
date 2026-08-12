@@ -1831,6 +1831,7 @@ add_executable (decodium_qml
   src/app/DecodiumSelfCheck.hpp
   src/app/DecodiumUpdater.cpp
   src/app/DecodiumUpdater.hpp
+  src/app/DecodiumUpdateSupport.hpp
   src/services/DecodiumCommunityReport.cpp
   src/services/DecodiumCommunityReport.hpp
   src/bridge/DecodiumBridge.cpp

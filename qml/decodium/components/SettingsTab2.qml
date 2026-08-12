@@ -5,6 +5,8 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 ScrollView {
+    id: settingsTab2
+
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
@@ -44,6 +46,50 @@ ScrollView {
         if (dialog)
             dialog.setBoolSettingIfChanged(key, value, fallback)
     }
+
+    component RtlCheckBox: CheckBox {
+        id: rtlCheckControl
+        required property var theme
+        implicitWidth: 24
+        implicitHeight: theme.controlHeight
+        hoverEnabled: true
+
+        indicator: Rectangle {
+            implicitWidth: 20
+            implicitHeight: 20
+            x: 2
+            y: (rtlCheckControl.height - height) / 2
+            radius: 4
+            color: rtlCheckControl.checked
+                   ? (rtlCheckControl.enabled
+                      ? rtlCheckControl.theme.primaryBlue
+                      : Qt.alpha(rtlCheckControl.theme.primaryBlue, 0.48))
+                   : (rtlCheckControl.hovered && rtlCheckControl.enabled
+                      ? rtlCheckControl.theme.bgLight : rtlCheckControl.theme.bgMedium)
+            border.width: 2
+            border.color: !rtlCheckControl.enabled
+                          ? Qt.alpha(rtlCheckControl.theme.textSecondary, 0.48)
+                          : (rtlCheckControl.checked
+                             ? rtlCheckControl.theme.secondaryCyan
+                             : Qt.alpha(rtlCheckControl.theme.textSecondary, 0.82))
+
+            Text {
+                anchors.centerIn: parent
+                text: rtlCheckControl.checked ? "✓" : ""
+                color: rtlCheckControl.enabled
+                       ? rtlCheckControl.theme.textPrimary
+                       : Qt.alpha(rtlCheckControl.theme.textPrimary, 0.68)
+                font.pixelSize: 14
+                font.bold: true
+            }
+        }
+
+        contentItem: Item {
+            implicitWidth: 0
+            implicitHeight: 0
+        }
+    }
+
     clip: true
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
@@ -162,6 +208,7 @@ ScrollView {
                 background: Rectangle { color: parent.highlighted ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.3) : bgMedium } }
             popup.background: Rectangle { color: bgDeep; border.color: glassBorder; radius: 4 }
         }
+        Item { Layout.columnSpan: 2 }
 
         // ── RTL-SDR ──
         Text { text: qsTr("RTL-SDR RECEIVER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 2; Layout.topMargin: 10 }
@@ -185,8 +232,9 @@ ScrollView {
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Use RTL-SDR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-        CheckBox {
+        RtlCheckBox {
             id: rtlEnabledCheck
+            theme: settingsTab2
             checked: bridge.getSetting("RtlSdrEnabled", false)
             enabled: bridge.rtlSdrSupported
             Layout.preferredHeight: controlHeight
@@ -321,8 +369,9 @@ ScrollView {
                           : qsTr("Demodulates receive audio separately. TX and Tune remain disabled with RTL-SDR.")
         }
         Text { text: qsTr("Listen to receiver audio:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-        CheckBox {
+        RtlCheckBox {
             id: rtlReceiverAudioCheck
+            theme: settingsTab2
             checked: bridge.getSetting("RtlSdrAudioEnabled", rtlDemodCombo.currentIndex !== 0)
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.currentIndex !== 0
             Layout.preferredHeight: controlHeight
@@ -352,8 +401,9 @@ ScrollView {
                 rowSpacing: 8
 
                 Text { text: qsTr("Follow dial frequency:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                CheckBox {
+                RtlCheckBox {
                     id: rtlFollowDialCheck
+                    theme: settingsTab2
                     checked: bridge.getSetting("RtlSdrFollowDial", true)
                     enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
                     Layout.preferredHeight: controlHeight
@@ -365,8 +415,9 @@ ScrollView {
                 }
 
                 Text { text: qsTr("Use receiver IF output:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                CheckBox {
+                RtlCheckBox {
                     id: rtlIfEnabledCheck
+                    theme: settingsTab2
                     checked: bridge.getSetting("RtlSdrIfEnabled", false)
                     enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
                     Layout.preferredHeight: controlHeight
@@ -450,8 +501,9 @@ ScrollView {
                 }
 
                 Text { text: qsTr("Invert IF spectrum:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-                CheckBox {
+                RtlCheckBox {
                     id: rtlIfSpectrumInvertedCheck
+                    theme: settingsTab2
                     checked: bridge.getSetting("RtlSdrIfSpectrumInverted", false)
                     enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
                     Layout.preferredHeight: controlHeight
@@ -587,8 +639,9 @@ ScrollView {
         }
 
         Text { text: qsTr("Tuner AGC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-        CheckBox {
+        RtlCheckBox {
             id: rtlAgcCheck
+            theme: settingsTab2
             checked: bridge.getSetting("RtlSdrGainTenthsDb", -1) < 0
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.preferredHeight: controlHeight
@@ -616,7 +669,8 @@ ScrollView {
         }
 
         Text { text: qsTr("Digital AGC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-        CheckBox {
+        RtlCheckBox {
+            theme: settingsTab2
             checked: bridge.getSetting("RtlSdrDigitalAgc", false)
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.preferredHeight: controlHeight
@@ -630,7 +684,8 @@ ScrollView {
         Item { Layout.columnSpan: 2; Layout.fillWidth: true; implicitHeight: 1 }
 
         Text { text: qsTr("Bias tee:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
-        CheckBox {
+        RtlCheckBox {
+            theme: settingsTab2
             checked: bridge.getSetting("RtlSdrBiasTee", false)
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.preferredHeight: controlHeight

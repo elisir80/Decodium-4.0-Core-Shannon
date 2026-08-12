@@ -1398,7 +1398,11 @@ ScrollView {
         CheckBox {
             checked: dialog.supportsSwrTelemetry() ? bridge.getSetting("CheckSWR", false) : false
             enabled: dialog.supportsSwrTelemetry()
-            onCheckedChanged: if (enabled) {
+            // Only a user gesture may change CAT telemetry settings.  A
+            // checked binding is evaluated while this lazy page is created;
+            // onCheckedChanged used to treat that initial value as an edit
+            // and unnecessarily reconnect Hamlib whenever Setup was opened.
+            onToggled: if (enabled) {
                 bridge.setSetting("CheckSWR", checked)
                 if (checked && !bridge.getSetting("PWRandSWR", false))
                     bridge.setSetting("PWRandSWR", true)
@@ -1410,7 +1414,7 @@ ScrollView {
         CheckBox {
             checked: dialog.supportsSwrTelemetry() ? bridge.getSetting("PWRandSWR", false) : false
             enabled: dialog.supportsSwrTelemetry()
-            onCheckedChanged: if (enabled) bridge.setSetting("PWRandSWR", checked)
+            onToggled: if (enabled) bridge.setSetting("PWRandSWR", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }

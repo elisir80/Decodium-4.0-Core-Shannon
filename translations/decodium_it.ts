@@ -3159,6 +3159,30 @@ Premi Monitor per iniziare</translation>
         <source>Online: update checks enabled</source>
         <translation>Online: controllo aggiornamenti abilitato</translation>
     </message>
+    <message>
+        <source>Cannot create the Downloads folder.</source>
+        <translation>Impossibile creare la cartella Download.</translation>
+    </message>
+    <message>
+        <source>Cannot write to the Downloads folder.</source>
+        <translation>Impossibile scrivere nella cartella Download.</translation>
+    </message>
+    <message>
+        <source>The AppImage could not be installed safely: %1</source>
+        <translation>Impossibile installare l’AppImage in modo sicuro: %1</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated successfully. Restarting Decodium...</source>
+        <translation>AppImage aggiornata correttamente. Riavvio di Decodium...</translation>
+    </message>
+    <message>
+        <source>The AppImage was updated at %1. Please restart Decodium manually.</source>
+        <translation>AppImage aggiornata in %1. Riavvia Decodium manualmente.</translation>
+    </message>
+    <message>
+        <source>The AppImage was saved to %1. Launch it manually to complete the update.</source>
+        <translation>AppImage salvata in %1. Avviala manualmente per completare l’aggiornamento.</translation>
+    </message>
 </context>
 <context>
     <name>Designer</name>
@@ -24375,6 +24399,18 @@ Pressione prolungata: modifica messaggio</translation>
         <translation>Decodium si chiuderà e verrà avviato il programma di installazione. Le tue impostazioni e il log QSO vengono mantenuti.</translation>
     </message>
     <message>
+        <source>The current AppImage will be replaced safely and Decodium will restart. Your settings and QSO log are kept.</source>
+        <translation>L’AppImage corrente verrà sostituita in modo sicuro e Decodium verrà riavviato. Le impostazioni e il log QSO saranno mantenuti.</translation>
+    </message>
+    <message>
+        <source>The new AppImage will be saved to your Downloads folder. Launch it manually to complete the update.</source>
+        <translation>La nuova AppImage verrà salvata nella cartella Download. Avviala manualmente per completare l’aggiornamento.</translation>
+    </message>
+    <message>
+        <source>The update package will be downloaded and opened. Your settings and QSO log are kept.</source>
+        <translation>Il pacchetto di aggiornamento verrà scaricato e aperto. Le impostazioni e il log QSO saranno mantenuti.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/UpdateDialog.qml" line="116"/>
         <source>Skip this version</source>
         <translation>Ignora questa versione</translation>
@@ -24388,6 +24424,14 @@ Pressione prolungata: modifica messaggio</translation>
         <location filename="../qml/decodium/components/UpdateDialog.qml" line="132"/>
         <source>Update now</source>
         <translation>Aggiorna ora</translation>
+    </message>
+    <message>
+        <source>Update AppImage</source>
+        <translation>Aggiorna AppImage</translation>
+    </message>
+    <message>
+        <source>Download update</source>
+        <translation>Scarica aggiornamento</translation>
     </message>
 </context>
 <context>

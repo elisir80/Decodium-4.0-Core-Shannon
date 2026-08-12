@@ -984,6 +984,18 @@ static void qtMsgHandler(QtMsgType, const QMessageLogContext&, const QString& ms
         }
     }
 #endif
+    // Performance telemetry can originate from the GUI or scene-graph render
+    // thread. Keep it off the synchronous startup-file/stderr path: L() opens
+    // and closes a file for every line, which can itself create the stall the
+    // telemetry is measuring on Windows. The diagnostic writer is ordered and
+    // asynchronous, so these records remain available for support analysis.
+    if (msg.startsWith(QStringLiteral("[PANMETRIC]"))
+        || msg.startsWith(QStringLiteral("[MAINWATCH]"))
+        || msg.startsWith(QStringLiteral("[MAINDISPATCH]"))
+        || msg.startsWith(QStringLiteral("[GPUDBG] Panadapter waterfall GPU persistent upload"))) {
+        DIAG_INFO(msg);
+        return;
+    }
     if (g_shuttingDown.load(std::memory_order_relaxed) && isIgnorableShutdownQmlMessage(msg))
         return;
     if (msg.startsWith(QStringLiteral("[TX-TL]"))

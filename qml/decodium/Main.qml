@@ -31,6 +31,8 @@ ApplicationWindow {
          | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
     title: "Decodium 4.0 — " + (bridge ? bridge.mode : "") + " — " + (bridge ? bridge.callsign : "")
     property bool windowStateRestoreInProgress: true
+    property int floatingGeometryInteractionDepth: 0
+    property bool deferredWindowStateSave: false
     readonly property bool txVisualActive: !!(bridge && (bridge.transmitting || bridge.tuning))
     // Build the expensive visual surfaces after the first interactive frame on
     // every platform.  The Waterfall loader also owns PanadapterItem, so this
@@ -252,6 +254,73 @@ ApplicationWindow {
         }
     }
 
+    function geometryForWindowScreen(windowRef) {
+        var screens = availableScreenGeometries()
+        if (screens.length === 0)
+            return null
+
+        // Use a point near the draggable header rather than the window centre:
+        // an oversized window may still have its centre on the monitor it is
+        // leaving, and some platforms update QWindow::screen only after move.
+        if (windowRef) {
+            var anchorX = safeNumber(windowRef.x, 0)
+                          + Math.min(64, Math.max(1, safeNumber(windowRef.width, 1) / 2))
+            var anchorY = safeNumber(windowRef.y, 0)
+                          + Math.min(32, Math.max(1, safeNumber(windowRef.height, 1) / 2))
+            for (var i = 0; i < screens.length; ++i) {
+                var candidate = screens[i]
+                if (anchorX >= candidate.x && anchorX < candidate.x + candidate.width
+                        && anchorY >= candidate.y && anchorY < candidate.y + candidate.height)
+                    return candidate
+            }
+        }
+
+        if (windowRef && windowRef.screen) {
+            for (var j = 0; j < screens.length; ++j) {
+                if (screens[j].screen === windowRef.screen)
+                    return screens[j]
+            }
+        }
+        return screens[0]
+    }
+
+    function fitWindowSizeToGeometry(windowRef, target, preserveAspectRatio) {
+        if (!windowRef || !target)
+            return
+
+        var currentWidth = safeNumber(windowRef.width, 0)
+        var currentHeight = safeNumber(windowRef.height, 0)
+        var minimumWidthValue = Math.max(1, safeNumber(windowRef.minimumWidth, 1))
+        var minimumHeightValue = Math.max(1, safeNumber(windowRef.minimumHeight, 1))
+        var declaredMaximumWidth = Math.max(minimumWidthValue,
+                                            safeNumber(windowRef.maximumWidth, 10000))
+        var declaredMaximumHeight = Math.max(minimumHeightValue,
+                                             safeNumber(windowRef.maximumHeight, 6000))
+        var maximumWidth = Math.max(minimumWidthValue,
+                                    Math.min(declaredMaximumWidth, target.width - 16))
+        var maximumHeight = Math.max(minimumHeightValue,
+                                     Math.min(declaredMaximumHeight, target.height - 16))
+        var aspectRatio = safeNumber(preserveAspectRatio, 0)
+
+        if (aspectRatio > 0) {
+            maximumWidth = Math.max(minimumWidthValue,
+                                    Math.min(maximumWidth, maximumHeight * aspectRatio))
+            var proportionalWidth = Math.max(minimumWidthValue,
+                                             Math.min(currentWidth, maximumWidth))
+            var proportionalHeight = Math.round(proportionalWidth / aspectRatio)
+            if (proportionalHeight < minimumHeightValue) {
+                proportionalHeight = minimumHeightValue
+                proportionalWidth = Math.round(proportionalHeight * aspectRatio)
+            }
+            windowRef.width = Math.round(proportionalWidth)
+            windowRef.height = proportionalHeight
+            return
+        }
+
+        windowRef.width = Math.max(minimumWidthValue, Math.min(currentWidth, maximumWidth))
+        windowRef.height = Math.max(minimumHeightValue, Math.min(currentHeight, maximumHeight))
+    }
+
     // A saved window geometry may come from a larger monitor or from a
     // previous multi-monitor setup.  Clamping only x/y leaves the window
     // wider/taller than the current screen, which makes the right-hand part
@@ -283,12 +352,7 @@ ApplicationWindow {
         if (!target)
             target = screens[0]
 
-        var minimumWidthValue = Math.max(0, safeNumber(windowRef.minimumWidth, 0))
-        var minimumHeightValue = Math.max(0, safeNumber(windowRef.minimumHeight, 0))
-        var maximumWidth = Math.max(minimumWidthValue, target.width - 16)
-        var maximumHeight = Math.max(minimumHeightValue, target.height - 16)
-        windowRef.width = Math.min(savedWidth, maximumWidth)
-        windowRef.height = Math.min(savedHeight, maximumHeight)
+        fitWindowSizeToGeometry(windowRef, target)
     }
 
     function dragFloatingWindowToGlobal(windowRef, pressWindowPos, pressGlobalPos, currentGlobalPos) {
@@ -313,15 +377,60 @@ ApplicationWindow {
         return false
     }
 
-    function finishFloatingWindowDrag(windowRef) {
+    function finishFloatingWindowDrag(windowRef, preserveAspectRatio) {
         if (!windowRef)
             return
-        var pos = clampWindowPosition(windowRef.x, windowRef.y, windowRef.width, windowRef.height)
-        if (pos.screen && windowRef.screen !== pos.screen)
-            windowRef.screen = pos.screen
-        windowRef.x = pos.x
-        windowRef.y = pos.y
+        var target = geometryForWindowScreen(windowRef)
+        fitWindowSizeToGeometry(windowRef, target, preserveAspectRatio)
+        if (target) {
+            if (target.screen && windowRef.screen !== target.screen)
+                windowRef.screen = target.screen
+            windowRef.x = Math.max(target.x,
+                                   Math.min(windowRef.x,
+                                            target.x + Math.max(0, target.width - windowRef.width)))
+            windowRef.y = Math.max(target.y,
+                                   Math.min(windowRef.y,
+                                            target.y + Math.max(0, target.height - windowRef.height)))
+        }
         scheduleWindowStateSave()
+    }
+
+    function beginFloatingGeometryInteraction() {
+        floatingGeometryInteractionDepth += 1
+        deferredWindowStateSave = true
+        if (typeof windowStateSaveTimer !== "undefined" && windowStateSaveTimer)
+            windowStateSaveTimer.stop()
+    }
+
+    function endFloatingGeometryInteraction() {
+        floatingGeometryInteractionDepth = Math.max(0, floatingGeometryInteractionDepth - 1)
+        if (floatingGeometryInteractionDepth === 0 && deferredWindowStateSave)
+            scheduleWindowStateSave(true)
+    }
+
+    function resetFloatingWindowGeometry(windowRef, preferredWidth, preferredHeight) {
+        if (!windowRef)
+            return
+
+        var screens = availableScreenGeometries()
+        if (screens.length === 0)
+            return
+        var target = screens[0]
+        var minimumWidthValue = Math.max(1, safeNumber(windowRef.minimumWidth, 1))
+        var minimumHeightValue = Math.max(1, safeNumber(windowRef.minimumHeight, 1))
+        var availableWidth = Math.max(minimumWidthValue, safeNumber(target.width, preferredWidth) - 16)
+        var availableHeight = Math.max(minimumHeightValue, safeNumber(target.height, preferredHeight) - 16)
+        var resetWidth = Math.max(minimumWidthValue,
+                                  Math.min(Math.round(preferredWidth), availableWidth))
+        var resetHeight = Math.max(minimumHeightValue,
+                                   Math.min(Math.round(preferredHeight), availableHeight))
+
+        if (target.screen && windowRef.screen !== target.screen)
+            windowRef.screen = target.screen
+        windowRef.width = resetWidth
+        windowRef.height = resetHeight
+        windowRef.x = Math.round(target.x + Math.max(0, (target.width - resetWidth) / 2))
+        windowRef.y = Math.round(target.y + Math.max(0, (target.height - resetHeight) / 2))
     }
 
     function safeStoredPanelWidth(value, fallback, minimum) {
@@ -611,8 +720,13 @@ ApplicationWindow {
         if (typeof saveTimer !== "undefined" && saveTimer)
             saveTimer.restart()
     }
-    function scheduleWindowStateSave() {
+    function scheduleWindowStateSave(forceSave) {
+        if (!forceSave && floatingGeometryInteractionDepth > 0) {
+            deferredWindowStateSave = true
+            return
+        }
         if (!windowStateRestoreInProgress && typeof windowStateSaveTimer !== "undefined" && windowStateSaveTimer) {
+            deferredWindowStateSave = false
             windowStateSaveTimer.restart()
         }
     }
@@ -659,10 +773,21 @@ ApplicationWindow {
         if (!windowRef)
             return {}
         var state = safeWindowState(key)
-        var restoredWidth = safeNumber(state.width, windowRef.width)
-        var restoredHeight = safeNumber(state.height, windowRef.height)
-        if (restoredWidth > 0) windowRef.width = restoredWidth
-        if (restoredHeight > 0) windowRef.height = restoredHeight
+        var minimumWidthValue = Math.max(1, safeNumber(windowRef.minimumWidth, 1))
+        var minimumHeightValue = Math.max(1, safeNumber(windowRef.minimumHeight, 1))
+        var defaultWidth = Math.max(minimumWidthValue, safeNumber(windowRef.width, minimumWidthValue))
+        var defaultHeight = Math.max(minimumHeightValue, safeNumber(windowRef.height, minimumHeightValue))
+        var restoredWidth = Number(state.width)
+        var restoredHeight = Number(state.height)
+
+        // Reject corrupted or obsolete geometries instead of allowing a
+        // floating window to shrink progressively at every restore.
+        if (!isFinite(restoredWidth) || restoredWidth < minimumWidthValue || restoredWidth > 10000)
+            restoredWidth = defaultWidth
+        if (!isFinite(restoredHeight) || restoredHeight < minimumHeightValue || restoredHeight > 6000)
+            restoredHeight = defaultHeight
+        windowRef.width = Math.round(restoredWidth)
+        windowRef.height = Math.round(restoredHeight)
         var restoredX = safeNumber(state.x, NaN)
         var restoredY = safeNumber(state.y, NaN)
         fitWindowSizeToAvailableScreen(windowRef, restoredX, restoredY)
@@ -714,11 +839,15 @@ ApplicationWindow {
 
     function persistWindowLayouts() {
         function snapshot(windowRef, detached, minimized) {
+            var minimumWidthValue = Math.max(1, safeNumber(windowRef.minimumWidth, 1))
+            var minimumHeightValue = Math.max(1, safeNumber(windowRef.minimumHeight, 1))
             return {
                 x: Math.round(windowRef.x),
                 y: Math.round(windowRef.y),
-                width: Math.round(windowRef.width),
-                height: Math.round(windowRef.height),
+                width: Math.max(minimumWidthValue,
+                                Math.round(safeNumber(windowRef.width, minimumWidthValue))),
+                height: Math.max(minimumHeightValue,
+                                 Math.round(safeNumber(windowRef.height, minimumHeightValue))),
                 detached: !!detached,
                 minimized: !!minimized
             }
@@ -763,7 +892,10 @@ ApplicationWindow {
             if (astroFloatingWindow) astroFloatingWindow.hide()
             if (satelliteFloatingWindow) satelliteFloatingWindow.hide()
             macroDialogDetached = false; macroDialogMinimized = false
-            if (settingsFloatingWindow) settingsFloatingWindow.hideHostedWindow()
+            if (settingsFloatingWindow) {
+                settingsFloatingWindow.hideHostedWindow()
+                resetFloatingWindowGeometry(settingsFloatingWindow, 1500, 900)
+            }
             if (mamFloatingWindow) mamFloatingWindow.hideHostedWindow()
             if (decometerFloatingWindow) decometerFloatingWindow.hideHostedWindow()
             activeStationsPanelVisible = false
@@ -853,6 +985,14 @@ ApplicationWindow {
         property int cornerSize: 16
         property int maxWidth: 10000
         property int maxHeight: 6000
+        property bool resizeActive: false
+        property bool resizeFromLeft: false
+        property bool resizeFromTop: false
+        property bool resizeFromRight: false
+        property bool resizeFromBottom: false
+        property point pressGlobalPos: Qt.point(0, 0)
+        property point pressWindowPos: Qt.point(0, 0)
+        property size pressWindowSize: Qt.size(0, 0)
 
         anchors.fill: parent
         enabled: !!targetWindow
@@ -872,31 +1012,64 @@ ApplicationWindow {
                             Math.min(value, maxHeight))
         }
 
-        function resizeRight(delta) {
-            targetWindow.width = boundedWidth(targetWindow.width + delta)
+        function beginResize(handle, mouse, fromLeft, fromTop, fromRight, fromBottom) {
+            if (!targetWindow || resizeActive)
+                return
+            resizeActive = true
+            resizeFromLeft = fromLeft
+            resizeFromTop = fromTop
+            resizeFromRight = fromRight
+            resizeFromBottom = fromBottom
+            pressGlobalPos = handle.mapToGlobal(mouse.x, mouse.y)
+            pressWindowPos = Qt.point(targetWindow.x, targetWindow.y)
+            pressWindowSize = Qt.size(targetWindow.width, targetWindow.height)
+            mainWindow.beginFloatingGeometryInteraction()
         }
 
-        function resizeBottom(delta) {
-            targetWindow.height = boundedHeight(targetWindow.height + delta)
+        function applyResize(handle, mouse) {
+            if (!targetWindow || !resizeActive)
+                return
+
+            var currentGlobal = handle.mapToGlobal(mouse.x, mouse.y)
+            var deltaX = currentGlobal.x - pressGlobalPos.x
+            var deltaY = currentGlobal.y - pressGlobalPos.y
+            var newWidth = pressWindowSize.width
+            var newHeight = pressWindowSize.height
+            var newX = pressWindowPos.x
+            var newY = pressWindowPos.y
+
+            if (resizeFromLeft) {
+                newWidth = boundedWidth(pressWindowSize.width - deltaX)
+                newX = pressWindowPos.x + pressWindowSize.width - newWidth
+            } else if (resizeFromRight) {
+                newWidth = boundedWidth(pressWindowSize.width + deltaX)
+            }
+
+            if (resizeFromTop) {
+                newHeight = boundedHeight(pressWindowSize.height - deltaY)
+                newY = pressWindowPos.y + pressWindowSize.height - newHeight
+            } else if (resizeFromBottom) {
+                newHeight = boundedHeight(pressWindowSize.height + deltaY)
+            }
+
+            if (resizeFromLeft)
+                targetWindow.x = Math.round(newX)
+            if (resizeFromTop)
+                targetWindow.y = Math.round(newY)
+            targetWindow.width = Math.round(newWidth)
+            targetWindow.height = Math.round(newHeight)
         }
 
-        function resizeLeft(delta) {
-            var oldWidth = targetWindow.width
-            var newWidth = boundedWidth(oldWidth - delta)
-            var applied = oldWidth - newWidth
-            targetWindow.x += applied
-            targetWindow.width = newWidth
-        }
-
-        function resizeTop(delta) {
-            var oldHeight = targetWindow.height
-            var newHeight = boundedHeight(oldHeight - delta)
-            var applied = oldHeight - newHeight
-            targetWindow.y += applied
-            targetWindow.height = newHeight
+        function finishResize() {
+            if (!resizeActive)
+                return
+            resizeActive = false
+            mainWindow.finishFloatingWindowDrag(targetWindow)
+            mainWindow.endFloatingGeometryInteraction()
         }
 
         MouseArea {
+            id: resizeRightHandle
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -905,13 +1078,20 @@ ApplicationWindow {
             width: resizeRoot.edgeSize
             cursorShape: Qt.SizeHorCursor
             acceptedButtons: Qt.LeftButton
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeRightHandle, mouse, false, false, true, false)
+            }
             onPositionChanged: function(mouse) {
                 if (pressed)
-                    resizeRoot.resizeRight(mouse.x - width / 2)
+                    resizeRoot.applyResize(resizeRightHandle, mouse)
             }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeLeftHandle
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -920,13 +1100,20 @@ ApplicationWindow {
             width: resizeRoot.edgeSize
             cursorShape: Qt.SizeHorCursor
             acceptedButtons: Qt.LeftButton
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeLeftHandle, mouse, true, false, false, false)
+            }
             onPositionChanged: function(mouse) {
                 if (pressed)
-                    resizeRoot.resizeLeft(mouse.x)
+                    resizeRoot.applyResize(resizeLeftHandle, mouse)
             }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeBottomHandle
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
@@ -935,13 +1122,20 @@ ApplicationWindow {
             height: resizeRoot.edgeSize
             cursorShape: Qt.SizeVerCursor
             acceptedButtons: Qt.LeftButton
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeBottomHandle, mouse, false, false, false, true)
+            }
             onPositionChanged: function(mouse) {
                 if (pressed)
-                    resizeRoot.resizeBottom(mouse.y - height / 2)
+                    resizeRoot.applyResize(resizeBottomHandle, mouse)
             }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeTopHandle
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
@@ -950,70 +1144,96 @@ ApplicationWindow {
             height: resizeRoot.edgeSize
             cursorShape: Qt.SizeVerCursor
             acceptedButtons: Qt.LeftButton
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeTopHandle, mouse, false, true, false, false)
+            }
             onPositionChanged: function(mouse) {
                 if (pressed)
-                    resizeRoot.resizeTop(mouse.y)
+                    resizeRoot.applyResize(resizeTopHandle, mouse)
             }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeBottomRightHandle
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             width: resizeRoot.cornerSize
             height: resizeRoot.cornerSize
             cursorShape: Qt.SizeFDiagCursor
             acceptedButtons: Qt.LeftButton
-            onPositionChanged: function(mouse) {
-                if (pressed) {
-                    resizeRoot.resizeRight(mouse.x - width / 2)
-                    resizeRoot.resizeBottom(mouse.y - height / 2)
-                }
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeBottomRightHandle, mouse, false, false, true, true)
             }
+            onPositionChanged: function(mouse) {
+                if (pressed)
+                    resizeRoot.applyResize(resizeBottomRightHandle, mouse)
+            }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeBottomLeftHandle
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             width: resizeRoot.cornerSize
             height: resizeRoot.cornerSize
             cursorShape: Qt.SizeBDiagCursor
             acceptedButtons: Qt.LeftButton
-            onPositionChanged: function(mouse) {
-                if (pressed) {
-                    resizeRoot.resizeLeft(mouse.x)
-                    resizeRoot.resizeBottom(mouse.y - height / 2)
-                }
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeBottomLeftHandle, mouse, true, false, false, true)
             }
+            onPositionChanged: function(mouse) {
+                if (pressed)
+                    resizeRoot.applyResize(resizeBottomLeftHandle, mouse)
+            }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeTopRightHandle
             anchors.right: parent.right
             anchors.top: parent.top
             width: resizeRoot.cornerSize
             height: resizeRoot.cornerSize
             cursorShape: Qt.SizeBDiagCursor
             acceptedButtons: Qt.LeftButton
-            onPositionChanged: function(mouse) {
-                if (pressed) {
-                    resizeRoot.resizeRight(mouse.x - width / 2)
-                    resizeRoot.resizeTop(mouse.y)
-                }
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeTopRightHandle, mouse, false, true, true, false)
             }
+            onPositionChanged: function(mouse) {
+                if (pressed)
+                    resizeRoot.applyResize(resizeTopRightHandle, mouse)
+            }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
 
         MouseArea {
+            id: resizeTopLeftHandle
             anchors.left: parent.left
             anchors.top: parent.top
             width: resizeRoot.cornerSize
             height: resizeRoot.cornerSize
             cursorShape: Qt.SizeFDiagCursor
             acceptedButtons: Qt.LeftButton
-            onPositionChanged: function(mouse) {
-                if (pressed) {
-                    resizeRoot.resizeLeft(mouse.x)
-                    resizeRoot.resizeTop(mouse.y)
-                }
+            preventStealing: true
+            onPressed: function(mouse) {
+                resizeRoot.beginResize(resizeTopLeftHandle, mouse, true, true, false, false)
             }
+            onPositionChanged: function(mouse) {
+                if (pressed)
+                    resizeRoot.applyResize(resizeTopLeftHandle, mouse)
+            }
+            onReleased: resizeRoot.finishResize()
+            onCanceled: resizeRoot.finishResize()
         }
     }
 
@@ -1027,6 +1247,7 @@ ApplicationWindow {
         property int minWidth: 450
         property int maxWidth: 1800
         property int cornerSize: 18
+        property bool resizeActive: false
 
         anchors.fill: parent
         enabled: !!targetWindow && aspectRatio > 0
@@ -1034,6 +1255,13 @@ ApplicationWindow {
 
         function boundedWidth(value) {
             return Math.max(minWidth, Math.min(maxWidth, Math.round(value)))
+        }
+
+        function beginResize() {
+            if (resizeActive)
+                return
+            resizeActive = true
+            mainWindow.beginFloatingGeometryInteraction()
         }
 
         function applyBottomResize(handle, mouse, fromLeft) {
@@ -1057,10 +1285,11 @@ ApplicationWindow {
         }
 
         function finishResize() {
-            if (!targetWindow)
+            if (!targetWindow || !resizeActive)
                 return
-            mainWindow.finishFloatingWindowDrag(targetWindow)
-            mainWindow.scheduleWindowStateSave()
+            resizeActive = false
+            mainWindow.finishFloatingWindowDrag(targetWindow, aspectRatio)
+            mainWindow.endFloatingGeometryInteraction()
         }
 
         MouseArea {
@@ -1071,6 +1300,7 @@ ApplicationWindow {
             height: proportionalResizeRoot.cornerSize
             acceptedButtons: Qt.LeftButton
             cursorShape: Qt.SizeBDiagCursor
+            preventStealing: true
             property point pressGlobalPos: Qt.point(0, 0)
             property point pressWindowPos: Qt.point(0, 0)
             property size pressWindowSize: Qt.size(0, 0)
@@ -1080,6 +1310,7 @@ ApplicationWindow {
                                           proportionalResizeRoot.targetWindow.y)
                 pressWindowSize = Qt.size(proportionalResizeRoot.targetWindow.width,
                                           proportionalResizeRoot.targetWindow.height)
+                proportionalResizeRoot.beginResize()
             }
             onPositionChanged: function(mouse) {
                 proportionalResizeRoot.applyBottomResize(proportionalBottomLeft, mouse, true)
@@ -1096,6 +1327,7 @@ ApplicationWindow {
             height: proportionalResizeRoot.cornerSize
             acceptedButtons: Qt.LeftButton
             cursorShape: Qt.SizeFDiagCursor
+            preventStealing: true
             property point pressGlobalPos: Qt.point(0, 0)
             property point pressWindowPos: Qt.point(0, 0)
             property size pressWindowSize: Qt.size(0, 0)
@@ -1105,6 +1337,7 @@ ApplicationWindow {
                                           proportionalResizeRoot.targetWindow.y)
                 pressWindowSize = Qt.size(proportionalResizeRoot.targetWindow.width,
                                           proportionalResizeRoot.targetWindow.height)
+                proportionalResizeRoot.beginResize()
             }
             onPositionChanged: function(mouse) {
                 proportionalResizeRoot.applyBottomResize(proportionalBottomRight, mouse, false)
@@ -2260,11 +2493,24 @@ ApplicationWindow {
     }
 
     // IU8LMC — Aggiornamento: avviso + conferma.
-    Loader { id: updateDialogLoader; source: "components/UpdateDialog.qml"; active: false; asynchronous: true }
+    Loader {
+        id: updateDialogLoader
+        source: "components/UpdateDialog.qml"
+        active: false
+        asynchronous: true
+        onLoaded: {
+            // The first update request used to create the asynchronous Loader
+            // without ever opening its item.  The second request worked only
+            // because the item had finished loading by then.
+            if (item)
+                item.open()
+        }
+    }
 
     function openUpdateDialog() {
         updateDialogLoader.active = true
-        runWhenLoaded(updateDialogLoader, function (item) { item.open() })
+        if (updateDialogLoader.item)
+            updateDialogLoader.item.open()
     }
 
     Connections {
@@ -10851,6 +11097,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     Window {
         id: settingsFloatingWindow
         property int requestedTab: -1
+        property bool desktopMoveActive: false
         width: 1500
         height: 900
         minimumWidth: 800
@@ -10863,8 +11110,19 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
         y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
 
+        function beginDesktopMove() {
+            if (desktopMoveActive)
+                return
+            desktopMoveActive = true
+            mainWindow.beginFloatingGeometryInteraction()
+        }
+
         function finishDesktopMove() {
+            if (!desktopMoveActive)
+                return
             mainWindow.finishFloatingWindowDrag(settingsFloatingWindow)
+            desktopMoveActive = false
+            mainWindow.endFloatingGeometryInteraction()
         }
 
         function showHostedWindow(tabIndex) {
@@ -11563,9 +11821,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
 
         function finishDesktopMove() {
-            mainWindow.finishFloatingWindowDrag(decometerFloatingWindow)
+            mainWindow.finishFloatingWindowDrag(decometerFloatingWindow, faceAspectRatio)
             setProportionalWidth(width)
-            mainWindow.finishFloatingWindowDrag(decometerFloatingWindow)
+            mainWindow.finishFloatingWindowDrag(decometerFloatingWindow, faceAspectRatio)
         }
 
         function setProportionalWidth(requestedWidth) {

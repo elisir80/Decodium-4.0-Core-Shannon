@@ -275,6 +275,7 @@ private:
                          float dataFreqMax);
     void rebuildRgbWaterfallFromIntensity();
     void logWaterfallRenderPath(bool gpu, const QString& reason);
+    int sceneGraphApiKey() const;
     bool consumeUpdateBudgetLocked();
     bool shaderWaterfallSupported();
     bool spectrumGraphSupported() const;
@@ -427,6 +428,7 @@ private:
     int   m_loggedWaterfallApi = -1;
     QString m_loggedWaterfallReason;
     QString m_shaderWaterfallDisabledReason;
+    mutable std::atomic<int> m_sceneGraphApiKey {-1};
     bool  m_loggedWaterfallGpuUploadStats = false;
     int   m_lastWaterfallGpuStatsRow = -1;
     int   m_waterfallGpuUploadedWriteRow = 0;
