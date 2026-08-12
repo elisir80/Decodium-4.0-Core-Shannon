@@ -35,7 +35,10 @@ Solo libreria standard: nessuna dipendenza da installare.
 # prova della catena, senza hardware e senza mandare in aria la radio
 python spe_tci_bridge.py --amp demo --simulate-tx
 
-# SPE Expert col protocollo del costruttore (serve pyserial)
+# SPE: ascolto PASSIVO, lasciando la USB al software del costruttore
+python spe_tci_bridge.py --rigctld 127.0.0.1:4533 --amp spe-listen:COM12
+
+# SPE interrogato direttamente (richiede la porta libera)
 python spe_tci_bridge.py --rigctld 127.0.0.1:4533 --amp spe:COM7
 
 # in alternativa, tramite l'interfaccia amplificatori di Hamlib
@@ -50,7 +53,7 @@ scartata anche se arriva.
 |---|---|
 | `--listen` | dove ascoltare, default `127.0.0.1:50001` |
 | `--rigctld` | radio da inoltrare, es. `127.0.0.1:4533` |
-| `--amp` | `demo`, `spe:<porta>[:<baud>]`, oppure `hamlib:<modello>:<porta>` |
+| `--amp` | `demo`, `spe-listen:<porta>` (passivo), `spe:<porta>`, `hamlib:<modello>:<porta>` |
 | `--rate` | cadenza telemetria, default 0.2 s (5 Hz) |
 | `--simulate-tx` | alterna TX/RX ogni 8 s per collaudare senza trasmettere |
 
@@ -68,6 +71,27 @@ rumore. Il protocollo è documentato in `doc/protocollo-spe-expert.md`.
 **Non verificato**: il dialogo con un amplificatore reale, che non abbiamo. La
 sorgente `spe:` richiede `pyserial` (`pip install pyserial`); tutto il resto
 del ponte non ha dipendenze.
+
+## Lasciare la USB al software SPE: ascolto passivo
+
+Non serve togliere la porta al programma del costruttore. Quel programma
+interroga gia' l'amplificatore piu' volte al secondo, e l'amplificatore
+risponde: basta **leggere quel traffico**, senza inviare nulla.
+
+Serve uno sdoppiatore di porta seriale che rispecchi la USB su una seconda
+porta virtuale — su Windows [com0com + hub4com](https://sourceforge.net/projects/com0com/)
+(libero) oppure VSPE. Poi:
+
+```
+python spe_tci_bridge.py --amp spe-listen:COM12
+```
+
+Il ponte non trasmette un solo byte sulla linea: nessuna contesa, e il
+software SPE continua a funzionare esattamente come prima.
+
+Verificato su un flusso realistico contenente le richieste del software SPE,
+le risposte dell'amplificatore e byte di disturbo: tre trame su tre estratte
+correttamente (407 W / ROS 1.20, 512 W / ROS 1.35, ricezione a zero).
 
 ## Due avvertenze pratiche
 

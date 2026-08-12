@@ -351,6 +351,81 @@ class SpeAmp(threading.Thread):
             time.sleep(self.period)
 
 
+
+class SpeListen(threading.Thread):
+    """Ascolto PASSIVO del dialogo fra l'amplificatore e il suo software.
+
+    Il software del costruttore interroga gia' l'amplificatore piu' volte al
+    secondo. Se la porta e' rispecchiata su una seconda porta virtuale, qui
+    basta leggere: non si invia nulla, quindi non c'e' contesa e il software
+    SPE continua a funzionare come sempre.
+
+    E' la modalita' da preferire quando la USB deve restare al costruttore.
+    """
+
+    daemon = True
+
+    def __init__(self, stato, port, baud=9600):
+        super().__init__(name="amp-spe-listen")
+        self.stato, self.port, self.baud = stato, port, baud
+
+    def run(self):
+        try:
+            import serial
+        except ImportError:
+            log("ascolto SPE: serve il modulo pyserial  ->  pip install pyserial")
+            return
+        try:
+            ser = serial.Serial(self.port, self.baud, timeout=0.3)
+        except Exception as exc:
+            log("ascolto SPE: apertura di %s fallita (%s)" % (self.port, exc))
+            return
+        log("ascolto SPE passivo su %s a %d baud: non viene inviato nulla"
+            % (self.port, self.baud))
+
+        buf = b""
+        ultimo = 0.0
+        while True:
+            try:
+                buf += ser.read(256)
+            except Exception as exc:
+                log("ascolto SPE: %s" % exc)
+                time.sleep(1)
+                continue
+            if len(buf) > 4096:
+                buf = buf[-1024:]
+
+            # Estrae ogni trama completa che passa, scartando il resto: sulla
+            # linea viaggiano anche le richieste del software SPE.
+            while True:
+                i = buf.find(bytes([0xAA, 0xAA, 0xAA]))
+                if i < 0 or len(buf) < i + 4:
+                    break
+                n = buf[i + 3]
+                fine = i + 6 + n
+                if len(buf) < fine:
+                    break
+                esito = spe_analizza(buf[i:fine])
+                buf = buf[fine:]
+                if not esito:
+                    continue
+                tx, watt, ros = esito
+                ultimo = time.time()
+                with self.stato.lock:
+                    self.stato.amp_ok = True
+                    self.stato.fwd = watt if tx else 0.0
+                    self.stato.swr = ros if tx else 1.0
+                    rho = (ros - 1) / (ros + 1)
+                    self.stato.ref = self.stato.fwd * rho * rho
+
+            if ultimo and time.time() - ultimo > 5:
+                with self.stato.lock:
+                    self.stato.amp_ok = False
+                ultimo = 0
+                log("ascolto SPE: nessuna trama da 5 s. Il software del "
+                    "costruttore sta interrogando l'amplificatore?")
+
+
 # --------------------------------------------------------------- server TCI
 GUID = b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
@@ -581,6 +656,9 @@ def main():
         log("amplificatore: SIMULATO (%.0f W di picco) - serve a provare la catena"
             % args.watt)
         DemoAmp(stato, args.watt).start()
+    elif args.amp.startswith("spe-listen:"):
+        parti = args.amp.split(":")
+        SpeListen(stato, parti[1], int(parti[2]) if len(parti) > 2 else 9600).start()
     elif args.amp.startswith("spe:"):
         parti = args.amp.split(":")
         porta = parti[1]
