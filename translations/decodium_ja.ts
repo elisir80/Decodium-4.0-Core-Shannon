@@ -2672,6 +2672,30 @@ Monitor を押すと開始します</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>%1 との QSO を準備 - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>2 つ目のインスタンスに名前を付けてください。</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>名前に \ / , は使えません</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>このインスタンスがすでにその名前を使っています。</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>共有 CAT はポート %1 で待ち受けていません: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>利用できません</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>%1 を起動できませんでした</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19691,6 +19715,30 @@ If unsure, use High.</source>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>ポート %1 は別のプログラムが使用しています - 通常はアンプ付属のソフトです。Windows はシリアルポートを一度に一つのプログラムにのみ割り当てます。読み取りでも同じです: そのプログラムを閉じるか、ポートをミラーして Decodium をその複製に向けてください。</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>2 つ目のインスタンス:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>名前 (例: RX2)</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>共有 CAT を使う:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>2 つ目の Decodium を開く</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>2 つ目のインスタンスを起動しました。そちらで専用のオーディオ機器を選び、別の受信機があればその無線機も指定してください。こうして 2 つのバンドを同時に聞けます。</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>設定プロファイルを別に持つ 2 つ目の Decodium です。シリアルポートは取りません: こちらが保持し、共有します。</translation>
     </message>
 </context>
 <context>

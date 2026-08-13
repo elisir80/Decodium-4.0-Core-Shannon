@@ -1391,6 +1391,82 @@ ScrollView {
             text: qsTr("For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.")
         }
 
+        // ── Aprire la seconda istanza ──
+        // Farlo a mano vuol dire una riga di comando e un profilo da
+        // sistemare. Qui si da' un nome e si preme: il profilo nasce gia'
+        // senza la seriale di questa istanza (che e' occupata) e, se
+        // richiesto, gia' puntato sulla CAT condivisa.
+        Text { text: qsTr("Second instance:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: secondInstanceName
+            text: bridge.getSetting("SecondInstanceName", "RX2")
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            leftPadding: 8
+            color: textPrimary
+            font.pixelSize: controlFontSize
+            placeholderText: qsTr("name, e.g. RX2")
+            selectByMouse: true
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onEditingFinished: bridge.setSetting("SecondInstanceName", text.trim())
+        }
+        Text { text: qsTr("On shared CAT:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: secondInstanceShared
+            checked: bridge.getSetting("SecondInstanceSharedCat", true)
+            onToggled: bridge.setSetting("SecondInstanceSharedCat", checked)
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+
+        Item { Layout.preferredWidth: 100 }
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.columnSpan: 3
+            implicitHeight: controlHeight
+            radius: 6
+            color: secondInstanceMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : bgMedium
+            border.color: accentGreen
+            Text {
+                anchors.centerIn: parent
+                text: qsTr("Open a second Decodium")
+                color: accentGreen
+                font.pixelSize: controlFontSize
+            }
+            MouseArea {
+                id: secondInstanceMA
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    var name = secondInstanceName.text.trim()
+                    bridge.setSetting("SecondInstanceName", name)
+                    bridge.setSetting("SecondInstanceSharedCat", secondInstanceShared.checked)
+                    var problem = bridge.launchSecondInstance(name, secondInstanceShared.checked)
+                    secondInstanceResult.problem = problem
+                    secondInstanceResult.opened = (problem.length === 0)
+                }
+            }
+        }
+
+        Text {
+            id: secondInstanceResult
+            property string problem: ""
+            property bool opened: false
+            Layout.columnSpan: 4
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: problem.length > 0 ? "#ff6b6b" : (opened ? accentGreen : textSecondary)
+            text: {
+                if (problem.length > 0)
+                    return problem
+                if (opened)
+                    return qsTr("Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.")
+                return qsTr("A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.")
+            }
+        }
+
         // ── Amplificatore ──
         // Sorgente di misura indipendente dalla radio: il DECOMETER puo
         // mostrare i watt del PA invece di quelli dell'eccitatrice.

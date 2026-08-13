@@ -2674,6 +2674,30 @@ Click Monitor to start</source>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO с %1 подготовлено - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Задайте имя второму экземпляру.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>Имя не может содержать \ / или ,</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Этот экземпляр уже использует это имя.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>Общий CAT не слушает порт %1: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>недоступен</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Не удалось запустить %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19705,6 +19729,30 @@ If unsure, use High.</source>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>Порт %1 занят другой программой - обычно программой самого усилителя. Windows отдаёт последовательный порт одной программе за раз, в том числе для чтения: закройте её или создайте зеркало порта и укажите Decodium на копию.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>Второй экземпляр:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>имя, например RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>Через общий CAT:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Открыть второй Decodium</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>Второй экземпляр запущен. Выберите ему собственное звуковое устройство и, если есть отдельный приёмник, свою радиостанцию: так можно слушать два диапазона сразу.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Второй Decodium с собственным профилем настроек. Последовательный порт он не занимает: тот остаётся здесь и передаётся ему по сети.</translation>
     </message>
 </context>
 <context>

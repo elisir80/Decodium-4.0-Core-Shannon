@@ -2672,6 +2672,30 @@ Click Monitor to start</source>
         <source>QSO with %1 armed - TX%2</source>
         <translation>与 %1 的 QSO 已就绪 - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>请为第二个实例取一个名称。</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>名称不能包含 \ / 或 ,</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>本实例已在使用该名称。</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>共享 CAT 未在端口 %1 上侦听：%2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>不可用</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>无法启动 %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19691,6 +19715,30 @@ If unsure, use High.</source>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>端口 %1 已被其他程序占用——通常是功放自带的软件。Windows 一次只把串口交给一个程序，读取也不例外：关闭该程序，或镜像该端口并让 Decodium 指向副本。</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>第二个实例：</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>名称，例如 RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>使用共享 CAT：</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>打开第二个 Decodium</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>第二个实例已启动。请在那边选择它自己的音频设备；若另有接收机，也指定它自己的电台：这样就能同时收听两个波段。</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>拥有独立设置配置的第二个 Decodium。它不会占用串口：串口仍由本实例持有并共享。</translation>
     </message>
 </context>
 <context>

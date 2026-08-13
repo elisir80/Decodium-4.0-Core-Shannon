@@ -2674,6 +2674,30 @@ Klik på Monitor for at starte</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO med %1 klar - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Giv den anden instans et navn.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>Navnet må ikke indeholde \ / eller ,</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Denne instans bruger allerede det navn.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>Delt CAT lytter ikke på port %1: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>ikke tilgængelig</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Kunne ikke starte %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19691,6 +19715,30 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>Porten %1 holdes af et andet program - som regel forstærkerens eget. Windows giver en seriel port til ét program ad gangen, også ved læsning: luk det program, eller spejl porten og peg Decodium på kopien.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>Anden instans:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>navn, f.eks. RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>På delt CAT:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Åbn et andet Decodium</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>Anden instans startet. Vælg dens eget lydkort og, hvis du har en separat modtager, dens egen radio: sådan lytter man på to bånd samtidig.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Et andet Decodium med sin egen indstillingsprofil. Den tager ikke den serielle port: den bliver hos denne, som deler den.</translation>
     </message>
 </context>
 <context>

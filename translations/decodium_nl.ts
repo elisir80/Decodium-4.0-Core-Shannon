@@ -2683,6 +2683,30 @@ Klik op Monitor om te starten</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO met %1 gereed - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Geef de tweede instantie een naam.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>De naam mag geen \ / of , bevatten</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Deze instantie gebruikt die naam al.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>Gedeelde CAT luistert niet op poort %1: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>niet beschikbaar</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Kon %1 niet starten</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19703,6 +19727,30 @@ Gebruik Hoog als u het niet zeker weet.</translation>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>Poort %1 is in gebruik door een ander programma - meestal de software van de versterker zelf. Windows geeft een seriële poort aan één programma tegelijk, ook om te lezen: sluit dat programma, of spiegel de poort en laat Decodium naar de kopie wijzen.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>Tweede instantie:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>naam, bijvoorbeeld RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>Via gedeelde CAT:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Een tweede Decodium openen</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>Tweede instantie gestart. Kies daar een eigen geluidsapparaat en, als je een aparte ontvanger hebt, een eigen set: zo luister je op twee banden tegelijk.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Een tweede Decodium met een eigen instellingenprofiel. Het neemt de seriële poort niet: die blijft hier en wordt gedeeld.</translation>
     </message>
 </context>
 <context>

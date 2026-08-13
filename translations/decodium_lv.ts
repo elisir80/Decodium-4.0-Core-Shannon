@@ -2687,6 +2687,30 @@ Noklikšķiniet uz Monitor, lai sāktu</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO ar %1 sagatavots - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Piešķiriet otrajai instancei nosaukumu.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>Nosaukumā nedrīkst būt \ / vai ,</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Šī instance jau lieto šo nosaukumu.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>Koplietotais CAT neklausās portā %1: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>nav pieejams</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Neizdevās palaist %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19706,6 +19730,30 @@ Noklusējums: IZSL.</translation>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>Portu %1 aizņem cita programma - parasti paša pastiprinātāja programmatūra. Windows seriālo portu piešķir vienai programmai vienlaikus, arī lasīšanai: aizveriet to programmu vai dublējiet portu un norādiet Decodium uz kopiju.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>Otrā instance:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>nosaukums, piemēram, RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>Uz koplietotā CAT:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Atvērt otru Decodium</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>Otrā instance palaista. Izvēlieties tai savu skaņas ierīci un, ja ir atsevišķs uztvērējs, savu radio: tā var klausīties divus joslas vienlaikus.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Otrs Decodium ar savu iestatījumu profilu. Seriālo portu tas neaizņem: to patur šī instance un koplieto.</translation>
     </message>
 </context>
 <context>

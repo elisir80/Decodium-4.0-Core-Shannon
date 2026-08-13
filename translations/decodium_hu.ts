@@ -2677,6 +2677,30 @@ A kezdéshez kattintson a Monitor gombra</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO %1 állomással előkészítve - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Adjon nevet a második példánynak.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>A név nem tartalmazhat \ / vagy , karaktert</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Ez a példány már ezt a nevet használja.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>A megosztott CAT nem figyel a(z) %1 porton: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>nem érhető el</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Nem sikerült elindítani: %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19561,6 +19585,30 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>A(z) %1 portot egy másik program tartja - általában az erősítő saját szoftvere. A Windows egyszerre egy programnak adja a soros portot, olvasáshoz is: zárja be azt a programot, vagy tükrözze a portot, és a Decodiumot a másolatra állítsa.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>Második példány:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>név, például RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>Megosztott CAT-en:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Második Decodium megnyitása</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>A második példány elindult. Válasszon neki saját hangkártyát, és ha van külön vevője, saját rádiót: így lehet egyszerre két sávot hallgatni.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Egy második Decodium saját beállítási profillal. A soros portot nem veszi el: az ennél marad, amely megosztja.</translation>
     </message>
 </context>
 <context>

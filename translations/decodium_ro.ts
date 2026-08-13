@@ -2079,6 +2079,30 @@ Apasă Monitor pentru a începe</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO cu %1 armat - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Dați un nume celei de-a doua instanțe.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>Numele nu poate conține \ / sau ,</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Această instanță folosește deja acel nume.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>CAT-ul partajat nu ascultă pe portul %1: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>indisponibil</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Nu s-a putut porni %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -14240,6 +14264,30 @@ Dacă eziți, alege înaltă.</translation>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>Portul %1 este ocupat de alt program - de obicei cel al amplificatorului. Windows dă un port serial unui singur program pe rând, inclusiv pentru citire: închideți acel program, sau oglindiți portul și îndreptați Decodium spre copie.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>A doua instanță:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>nume, de exemplu RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>Pe CAT partajat:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Deschide un al doilea Decodium</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>A doua instanță a pornit. Alegeți-i acolo o placă de sunet proprie și, dacă aveți un receptor separat, radioul său: așa se ascultă două benzi deodată.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Un al doilea Decodium cu profil de setări propriu. Nu ia portul serial: acesta rămâne aici și îi este partajat.</translation>
     </message>
 </context>
 <context>

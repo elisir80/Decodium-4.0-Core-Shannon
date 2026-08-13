@@ -792,6 +792,10 @@ public:
                                         int baud, bool passive, int pollMs);
     Q_INVOKABLE void configureCatShare(bool enabled, int port,
                                        bool allowControl, bool allowPtt);
+    // Apre una seconda istanza su un profilo suo. Torna stringa vuota se e'
+    // partita, altrimenti il motivo - da mostrare, non da ingoiare.
+    Q_INVOKABLE QString launchSecondInstance(const QString& profileName,
+                                             bool useSharedCat);
     bool catConnected() const;
     QString catRigName() const;
     QString catMode() const;

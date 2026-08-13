@@ -2057,7 +2057,12 @@ int main(int argc, char* argv[])
 
     QString configName = parser.value(configOption).trimmed();
     QSettings rootSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
-    if (configName.isEmpty() && !rigName.isEmpty()) {
+    // --rig-name sceglie la configurazione per QUESTA istanza soltanto.
+    // Scriverla nella radice faceva ripartire anche la prima istanza dentro
+    // il profilo della seconda: chi apriva un secondo Decodium si ritrovava
+    // le impostazioni scambiate al riavvio successivo.
+    bool const configFromRigName = configName.isEmpty() && !rigName.isEmpty();
+    if (configFromRigName) {
         configName = rigName;
     }
     if (configName.isEmpty()) {
@@ -2065,8 +2070,10 @@ int main(int argc, char* argv[])
     }
     if (!configName.isEmpty()) {
         app.setProperty("decodiumConfigName", configName);
-        rootSettings.setValue(QStringLiteral("CurrentMultiSettingsConfiguration"), configName);
-        rootSettings.sync();
+        if (!configFromRigName) {
+            rootSettings.setValue(QStringLiteral("CurrentMultiSettingsConfiguration"), configName);
+            rootSettings.sync();
+        }
     }
 #ifdef Q_OS_WIN
     configureWindowsQmlDiskCache(configName);

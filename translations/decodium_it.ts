@@ -2676,6 +2676,30 @@ Premi Monitor per iniziare</translation>
         <source>QSO with %1 armed - TX%2</source>
         <translation>QSO con %1 pronto - TX%2</translation>
     </message>
+    <message>
+        <source>Give the second instance a name.</source>
+        <translation>Dai un nome alla seconda istanza.</translation>
+    </message>
+    <message>
+        <source>The name cannot contain \ / or ,</source>
+        <translation>Il nome non può contenere \ / o ,</translation>
+    </message>
+    <message>
+        <source>This instance is already using that name.</source>
+        <translation>Questa istanza sta già usando quel nome.</translation>
+    </message>
+    <message>
+        <source>Shared CAT is not listening on port %1: %2</source>
+        <translation>La CAT condivisa non è in ascolto sulla porta %1: %2</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>non disponibile</translation>
+    </message>
+    <message>
+        <source>Could not start %1</source>
+        <translation>Impossibile avviare %1</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -19744,6 +19768,30 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
         <translation>La porta %1 ce l'ha un altro programma - di solito quello del costruttore dell'amplificatore. Windows dà una seriale a un programma alla volta, lettura compresa: chiudi quel programma, oppure rispecchia la porta e punta Decodium sulla copia.</translation>
+    </message>
+    <message>
+        <source>Second instance:</source>
+        <translation>Seconda istanza:</translation>
+    </message>
+    <message>
+        <source>name, e.g. RX2</source>
+        <translation>nome, per esempio RX2</translation>
+    </message>
+    <message>
+        <source>On shared CAT:</source>
+        <translation>Su CAT condivisa:</translation>
+    </message>
+    <message>
+        <source>Open a second Decodium</source>
+        <translation>Apri un secondo Decodium</translation>
+    </message>
+    <message>
+        <source>Second instance started. Choose its own audio device and, if it has a receiver of its own, its own radio: that is what lets you listen on two bands at once.</source>
+        <translation>Seconda istanza avviata. Scegli lì una scheda audio sua e, se hai un ricevitore a parte, la sua radio: è così che si ascoltano due bande insieme.</translation>
+    </message>
+    <message>
+        <source>A second Decodium with its own settings profile. It does not take the serial port - this one keeps it and shares it.</source>
+        <translation>Un secondo Decodium con un profilo di impostazioni suo. Non prende la porta seriale: la tiene questa, e gliela condivide.</translation>
     </message>
 </context>
 <context>
