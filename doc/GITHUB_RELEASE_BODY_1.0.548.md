@@ -158,3 +158,34 @@ polish, and the supporting tests and translations.
   Windows e la sostituzione atomica dell’AppImage eseguibile.
 - I workflow di rilascio verificano layout del repository e versione
   dichiarata prima di costruire installer Windows, DMG macOS e AppImage Linux.
+
+---
+
+## In this fork (iu8lmc)
+
+- The eleven new updater messages are available in **all fifteen languages**,
+  not only English and Italian. A translation catalogue that never received a
+  string reports nothing unfinished, so the gap is silent: it shows up only as
+  an update dialog half in English, at the moment the program asks permission
+  to replace itself.
+- `appImageReplacementIsAtomicAndExecutable` no longer fails on Windows. The
+  atomic replacement and the file contents are still verified everywhere; the
+  executable-bit assertion is confined to Unix, where that permission exists.
+  On Windows `QFileInfo` infers it from the file extension, and `.AppImage`
+  is not an executable one — so the test was failing by construction rather
+  than reporting a defect.
+
+## In questo fork (iu8lmc)
+
+- Gli undici messaggi nuovi dell’aggiornamento sono disponibili in **tutte e
+  quindici le lingue**, non solo in inglese e italiano. Un catalogo che una
+  stringa non l’ha mai ricevuta non ha nulla da segnalare come non finito:
+  la lacuna è silenziosa, e si vede soltanto come una finestra di
+  aggiornamento a metà in inglese, proprio quando il programma chiede il
+  permesso di sostituirsi.
+- `appImageReplacementIsAtomicAndExecutable` non fallisce più su Windows. La
+  sostituzione atomica e il contenuto del file si continuano a verificare
+  ovunque; l’asserzione sul bit di esecuzione resta a Unix, dove quel permesso
+  esiste. Su Windows `QFileInfo` lo deduce dall’estensione, e `.AppImage` non
+  è eseguibile: la prova falliva per costruzione, non per un difetto.
+
