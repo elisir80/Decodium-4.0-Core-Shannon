@@ -19684,6 +19684,18 @@ Gebruik Hoog als u het niet zeker weet.</translation>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>De DECØMETER toont het vermogen van de stuurtrap. Het uitlezen van de versterker vereist diens seriële poort, of een gespiegelde virtuele poort als de eigen software open moet blijven.</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>Gedeelde CAT gebruiken:</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>Voor een tweede Decodium-instantie op dezelfde set: start deze met --rig-name en verbind hem hier. De seriële poort blijft bij de eerste, die hem deelt.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

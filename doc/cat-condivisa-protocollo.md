@@ -114,3 +114,35 @@ Un comando non gestito si rifiuta con `RPRT -11`.
   rimasto incollato.
 - **Retrocompatibilità.** A interruttore spento non si apre alcuna porta e il
   comportamento è identico a oggi.
+
+## Due istanze di Decodium sulla stessa radio
+
+La seriale la apre un solo programma alla volta, e questo vale anche fra due
+Decodium. La seconda istanza non prende la porta: si collega alla prima, che
+gliela rivende.
+
+1. **Prima istanza** — Impostazioni, CAT, *CAT condivisa*: interruttore
+   acceso, porta 4533. Se la seconda deve anche trasmettere serve *Consenti
+   trasmissione*, che ha un interruttore suo apposta.
+2. **Seconda istanza** — si avvia con `decodium.exe --rig-name seconda`. Il
+   nome cambia il file di blocco, quindi la protezione a istanza singola non
+   la ferma, e le impostazioni finiscono in un profilo separato.
+3. Nella seconda: Impostazioni, CAT, *Usa una CAT condivisa* →
+   `127.0.0.1:4533` → **Collegati**. Il bottone sceglie da solo il backend
+   Hamlib e il rig `Hamlib NET rigctl`.
+
+Il passo 3 si può fare anche a mano, ed è quello che facevano finora i
+programmi esterni: backend Hamlib, rig `Hamlib NET rigctl`, campo Host:Port.
+Verificato con `rigctl -m 2 -r 127.0.0.1:4533`, che legge frequenza, modo e
+VFO dalla radio della prima istanza.
+
+Due avvertenze che vale la pena dire prima che le scopra l'utente:
+
+- **La seconda istanza non condivide a sua volta.** Se il suo interruttore di
+  condivisione è acceso e la porta è la stessa, non riesce ad aprirla e lo
+  scrive: la porta ce l'ha già la prima. Basta spegnerlo, o dargliene
+  un'altra.
+- **Chi comanda la radio.** Con la scrittura abilitata entrambe le istanze
+  possono cambiare frequenza. Non c'è arbitraggio: l'ultima che scrive vince.
+  Per il secondo posto di ascolto conviene lasciare la scrittura spenta.
+

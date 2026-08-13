@@ -19672,6 +19672,18 @@ If unsure, use High.</source>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>DECØMETERは励振段の電力を表示します。アンプを読むにはそのシリアルポートが必要で、アンプ付属ソフトを開いたままにする場合はミラーした仮想ポートが必要です。</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>共有 CAT を使う:</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>接続する</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>同じ無線機で Decodium をもう一つ起動する場合: --rig-name を付けて起動し、ここで接続します。シリアルポートは、それを共有している最初のインスタンスが保持します。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

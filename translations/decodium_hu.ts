@@ -19542,6 +19542,18 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>A DECØMETER a meghajtó teljesítményét mutatja. Az erősítő olvasásához annak soros portja kell, vagy egy tükrözött virtuális port, ha a saját szoftverének nyitva kell maradnia.</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>Megosztott CAT használata:</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>Csatlakozás</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>Egy második Decodium-példányhoz ugyanazon a rádión: indítsa a --rig-name kapcsolóval, és itt csatlakoztassa. A soros port az elsőnél marad, amely megosztja azt.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

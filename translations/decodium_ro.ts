@@ -14221,6 +14221,18 @@ Dacă eziți, alege înaltă.</translation>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>DECØMETER afișează puterea excitatorului. Citirea amplificatorului necesită portul său serial sau un port virtual oglindit dacă programul propriu trebuie să rămână deschis.</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>Folosește un CAT partajat:</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>Conectează-te</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>Pentru o a doua instanță Decodium pe același radio: porniți-o cu --rig-name și conectați-o aici. Portul serial rămâne la prima, care îl partajează.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

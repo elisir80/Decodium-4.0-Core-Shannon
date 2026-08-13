@@ -19708,6 +19708,18 @@ If unsure, use High.</translation>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>Use a shared CAT:</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>Connect to it</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

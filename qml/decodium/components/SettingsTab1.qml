@@ -1323,6 +1323,74 @@ ScrollView {
                        + "  \u00b7  " + qsTr("in other programs choose \"Hamlib NET rigctl\"")
             }
         }
+
+        // ── L'altro capo: usare la CAT condivisa da qualcun altro ──
+        // Il motore lo sapeva gia' fare (Hamlib "NET rigctl" e' un rig di rete
+        // come Ham Radio Deluxe), ma bisognava saperlo scegliere fra trecento
+        // radio e digitare l'indirizzo a mano. Qui e' un bottone: serve a chi
+        // apre una seconda istanza, che la seriale non puo' averla, perche' ce
+        // l'ha gia' la prima.
+        Text { text: qsTr("Use a shared CAT:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: catClientAddress
+            text: bridge.getSetting("CatShareClientAddress", "127.0.0.1:4533")
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            leftPadding: 8
+            color: textPrimary
+            font.pixelSize: controlFontSize
+            placeholderText: "127.0.0.1:4533"
+            selectByMouse: true
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onEditingFinished: bridge.setSetting("CatShareClientAddress", text.trim())
+        }
+        Item { Layout.preferredWidth: 100 }
+        Rectangle {
+            id: catClientConnect
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            radius: 6
+            color: catClientMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : bgMedium
+            border.color: accentGreen
+            Text {
+                anchors.centerIn: parent
+                text: qsTr("Connect to it")
+                color: accentGreen
+                font.pixelSize: controlFontSize
+            }
+            MouseArea {
+                id: catClientMA
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    var address = catClientAddress.text.trim()
+                    if (address.length === 0)
+                        address = "127.0.0.1:4533"
+                    bridge.setSetting("CatShareClientAddress", address)
+                    // Il cambio di backend rifa' il gestore CAT: rig e indirizzo
+                    // si scrivono dopo, quando c'e' quello nuovo ad ascoltare.
+                    bridge.catBackend = "hamlib"
+                    Qt.callLater(function() {
+                        if (!bridge.catManager)
+                            return
+                        bridge.catManager.rigName = "Hamlib NET rigctl"
+                        bridge.catManager.networkPort = address
+                        dialog.scheduleCatPersist()
+                    })
+                }
+            }
+        }
+
+        Text {
+            Layout.columnSpan: 4
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: textSecondary
+            text: qsTr("For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.")
+        }
+
         // ── Amplificatore ──
         // Sorgente di misura indipendente dalla radio: il DECOMETER puo
         // mostrare i watt del PA invece di quelli dell'eccitatrice.

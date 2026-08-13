@@ -19687,6 +19687,18 @@ Noklusējums: IZSL.</translation>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>DECØMETER rāda ierosinātāja jaudu. Lai nolasītu pastiprinātāju, nepieciešams tā seriālais ports vai spoguļots virtuāls ports, ja tā programmatūrai jāpaliek atvērtai.</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>Izmantot koplietotu CAT:</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>Savienoties</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>Otrai Decodium instancei ar to pašu radio: palaidiet to ar --rig-name un savienojiet šeit. Seriālais ports paliek pirmajai, kas to koplieto.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

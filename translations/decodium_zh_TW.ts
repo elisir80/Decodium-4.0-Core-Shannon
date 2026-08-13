@@ -19672,6 +19672,18 @@ If unsure, use High.</source>
         <source>The DECOMETER shows the exciter's power. Reading the amplifier requires its serial port, or a mirrored virtual port if its own software must stay open.</source>
         <translation>DECØMETER 顯示激勵級的功率。讀取功放需要占用其序列埠；若功放自帶軟體必須保持開啟，則需要一個鏡像的虛擬序列埠。</translation>
     </message>
+    <message>
+        <source>Use a shared CAT:</source>
+        <translation>使用共用 CAT：</translation>
+    </message>
+    <message>
+        <source>Connect to it</source>
+        <translation>連線</translation>
+    </message>
+    <message>
+        <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
+        <translation>在同一台電台上執行第二個 Decodium 實例：以 --rig-name 啟動並在此連線。序列埠仍由第一個實例持有並共用。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>
