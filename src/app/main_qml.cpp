@@ -41,6 +41,10 @@
 #include <QList>
 #include <QLocale>
 #include <QWindow>
+#if defined(Q_OS_LINUX) && QT_CONFIG(vulkan)
+#include <QVulkanFunctions>
+#include <QVulkanInstance>
+#endif
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -290,6 +294,239 @@ static void logFirstQuickWindowGraphicsApi(QQmlApplicationEngine& engine, const 
 {
     logQtQuickGraphicsApi(firstQuickWindow(engine), context);
 }
+
+#if defined(Q_OS_LINUX) && QT_CONFIG(vulkan)
+struct LinuxVulkanGpuCandidate
+{
+    uint32_t index = 0;
+    QByteArray name;
+    VkPhysicalDeviceType type = VK_PHYSICAL_DEVICE_TYPE_OTHER;
+    quint64 localMemoryBytes = 0;
+    uint32_t apiVersion = 0;
+    bool hasGraphicsComputePresentQueue = false;
+    bool hasSwapchain = false;
+
+    bool eligible() const
+    {
+        return type != VK_PHYSICAL_DEVICE_TYPE_CPU
+            && hasGraphicsComputePresentQueue
+            && hasSwapchain;
+    }
+};
+
+static const char* linuxVulkanDeviceTypeName(VkPhysicalDeviceType type)
+{
+    switch (type) {
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: return "dedicated";
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return "integrated";
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return "virtual";
+    case VK_PHYSICAL_DEVICE_TYPE_CPU: return "software";
+    case VK_PHYSICAL_DEVICE_TYPE_OTHER: return "other";
+    default: return "unknown";
+    }
+}
+
+static int linuxVulkanDevicePriority(VkPhysicalDeviceType type)
+{
+    switch (type) {
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: return 400;
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return 300;
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return 200;
+    case VK_PHYSICAL_DEVICE_TYPE_OTHER: return 100;
+    case VK_PHYSICAL_DEVICE_TYPE_CPU: return 0;
+    default: return 0;
+    }
+}
+
+static quint64 linuxVulkanLocalMemoryBytes(QVulkanFunctions* functions,
+                                           VkPhysicalDevice physicalDevice)
+{
+    VkPhysicalDeviceMemoryProperties memoryProperties {};
+    functions->vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
+    quint64 bytes = 0;
+    for (uint32_t i = 0; i < memoryProperties.memoryHeapCount; ++i) {
+        if (memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+            bytes += memoryProperties.memoryHeaps[i].size;
+    }
+    return bytes;
+}
+
+static bool linuxVulkanHasSwapchain(QVulkanFunctions* functions,
+                                    VkPhysicalDevice physicalDevice)
+{
+    uint32_t extensionCount = 0;
+    if (functions->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, nullptr, &extensionCount, nullptr) != VK_SUCCESS
+        || extensionCount == 0) {
+        return false;
+    }
+
+    std::vector<VkExtensionProperties> extensions(extensionCount);
+    if (functions->vkEnumerateDeviceExtensionProperties(
+            physicalDevice, nullptr, &extensionCount, extensions.data()) != VK_SUCCESS) {
+        return false;
+    }
+    return std::any_of(extensions.cbegin(), extensions.cend(), [](VkExtensionProperties const& extension) {
+        return std::strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0;
+    });
+}
+
+static bool linuxVulkanHasGraphicsComputePresentQueue(QVulkanInstance& instance,
+                                                       QVulkanFunctions* functions,
+                                                       VkPhysicalDevice physicalDevice,
+                                                       QWindow* probeWindow)
+{
+    uint32_t queueCount = 0;
+    functions->vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, nullptr);
+    if (queueCount == 0)
+        return false;
+
+    std::vector<VkQueueFamilyProperties> queues(queueCount);
+    functions->vkGetPhysicalDeviceQueueFamilyProperties(
+        physicalDevice, &queueCount, queues.data());
+    for (uint32_t i = 0; i < queueCount; ++i) {
+        VkQueueFlags const required = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT;
+        if ((queues[i].queueFlags & required) == required
+            && instance.supportsPresent(physicalDevice, i, probeWindow)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void configureLinuxVulkanGpuSelection()
+{
+    QByteArray const backend = qgetenv("QSG_RHI_BACKEND").trimmed().toLower();
+    QByteArray const quickBackend = qgetenv("QT_QUICK_BACKEND").trimmed().toLower();
+    bool const explicitVulkan = backend == QByteArrayLiteral("vulkan");
+
+    if (qEnvironmentVariableIntValue("DECODIUM_DISABLE_LINUX_GPU_AUTOSELECT") != 0) {
+        L("[GPUSEL] Linux GPU auto-selection disabled by environment");
+        return;
+    }
+    if (qEnvironmentVariableIsSet("QT_VK_PHYSICAL_DEVICE_INDEX")) {
+        L((QByteArray("[GPUSEL] Vulkan physical device index supplied by environment: ")
+           + qgetenv("QT_VK_PHYSICAL_DEVICE_INDEX")).constData());
+        return;
+    }
+    if (!quickBackend.isEmpty() || (!backend.isEmpty() && !explicitVulkan)) {
+        L("[GPUSEL] Linux Vulkan GPU auto-selection skipped: another graphics backend was requested");
+        return;
+    }
+
+    QVulkanInstance instance;
+    if (!instance.create()) {
+        L((QByteArray("[GPUSEL] Vulkan probe unavailable; preserving Qt Linux fallback, error=")
+           + QByteArray::number(instance.errorCode())).constData());
+        return;
+    }
+    QVulkanFunctions* functions = instance.functions();
+    if (!functions) {
+        L("[GPUSEL] Vulkan probe has no instance functions; preserving Qt Linux fallback");
+        return;
+    }
+
+    uint32_t physicalDeviceCount = 0;
+    if (functions->vkEnumeratePhysicalDevices(
+            instance.vkInstance(), &physicalDeviceCount, nullptr) != VK_SUCCESS
+        || physicalDeviceCount == 0) {
+        L("[GPUSEL] No Vulkan physical device found; preserving Qt Linux fallback");
+        return;
+    }
+
+    std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+    if (functions->vkEnumeratePhysicalDevices(
+            instance.vkInstance(), &physicalDeviceCount, physicalDevices.data()) != VK_SUCCESS) {
+        L("[GPUSEL] Vulkan device enumeration failed; preserving Qt Linux fallback");
+        return;
+    }
+
+    QWindow probeWindow;
+    probeWindow.setSurfaceType(QSurface::VulkanSurface);
+    probeWindow.setVulkanInstance(&instance);
+    probeWindow.create();
+
+    std::vector<LinuxVulkanGpuCandidate> candidates;
+    candidates.reserve(physicalDeviceCount);
+    bool sawDedicatedDevice = false;
+    for (uint32_t i = 0; i < physicalDeviceCount; ++i) {
+        VkPhysicalDeviceProperties properties {};
+        functions->vkGetPhysicalDeviceProperties(physicalDevices[i], &properties);
+
+        LinuxVulkanGpuCandidate candidate;
+        candidate.index = i;
+        candidate.name = QByteArray(properties.deviceName);
+        candidate.type = properties.deviceType;
+        candidate.apiVersion = properties.apiVersion;
+        candidate.localMemoryBytes = linuxVulkanLocalMemoryBytes(functions, physicalDevices[i]);
+        candidate.hasSwapchain = linuxVulkanHasSwapchain(functions, physicalDevices[i]);
+        candidate.hasGraphicsComputePresentQueue =
+            linuxVulkanHasGraphicsComputePresentQueue(
+                instance, functions, physicalDevices[i], &probeWindow);
+        sawDedicatedDevice = sawDedicatedDevice
+            || candidate.type == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+
+        QByteArray message("[GPUSEL] Vulkan device");
+        message += " index=" + QByteArray::number(candidate.index);
+        message += " name=" + candidate.name;
+        message += " type=" + QByteArray(linuxVulkanDeviceTypeName(candidate.type));
+        message += " api=" + QByteArray::number(VK_VERSION_MAJOR(candidate.apiVersion));
+        message += "." + QByteArray::number(VK_VERSION_MINOR(candidate.apiVersion));
+        message += "." + QByteArray::number(VK_VERSION_PATCH(candidate.apiVersion));
+        message += " local_mem_mib=" + QByteArray::number(candidate.localMemoryBytes / (1024 * 1024));
+        message += " graphics_compute_present="
+            + QByteArray::number(candidate.hasGraphicsComputePresentQueue ? 1 : 0);
+        message += " swapchain=" + QByteArray::number(candidate.hasSwapchain ? 1 : 0);
+        message += " eligible=" + QByteArray::number(candidate.eligible() ? 1 : 0);
+        L(message.constData());
+        candidates.push_back(std::move(candidate));
+    }
+
+    auto betterCandidate = [](LinuxVulkanGpuCandidate const& left,
+                              LinuxVulkanGpuCandidate const& right) {
+        if (left.eligible() != right.eligible())
+            return !left.eligible();
+        int const leftPriority = linuxVulkanDevicePriority(left.type);
+        int const rightPriority = linuxVulkanDevicePriority(right.type);
+        if (leftPriority != rightPriority)
+            return leftPriority < rightPriority;
+        return left.localMemoryBytes < right.localMemoryBytes;
+    };
+    auto best = std::max_element(candidates.cbegin(), candidates.cend(), betterCandidate);
+    if (best == candidates.cend() || !best->eligible()) {
+        L("[GPUSEL] No eligible hardware Vulkan device; preserving Qt Linux fallback");
+        return;
+    }
+
+    // Do not force Vulkan on ordinary single/iGPU Linux systems. Hybrid systems
+    // switch to Vulkan so Qt can address the dedicated adapter explicitly. If a
+    // dedicated adapter was enumerated but did not qualify, the sorted choice is
+    // the integrated hardware fallback. An explicit Vulkan request always gets
+    // the best eligible hardware device.
+    bool const bestIsDedicated = best->type == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+    if (!explicitVulkan && !bestIsDedicated && !sawDedicatedDevice) {
+        L("[GPUSEL] No dedicated Vulkan GPU found; preserving Qt automatic integrated-GPU path");
+        return;
+    }
+
+    qputenv("QT_VK_PHYSICAL_DEVICE_INDEX", QByteArray::number(best->index));
+    if (backend.isEmpty())
+        qputenv("QSG_RHI_BACKEND", "vulkan");
+
+    QByteArray selected("[GPUSEL] Selected Linux GPU");
+    selected += " index=" + QByteArray::number(best->index);
+    selected += " name=" + best->name;
+    selected += " type=" + QByteArray(linuxVulkanDeviceTypeName(best->type));
+    selected += bestIsDedicated ? " policy=prefer_dedicated" : " policy=integrated_fallback";
+    selected += " backend=vulkan";
+    L(selected.constData());
+}
+#elif defined(Q_OS_LINUX)
+static void configureLinuxVulkanGpuSelection()
+{
+    L("[GPUSEL] This Qt build has no Vulkan support; preserving Qt Linux fallback");
+}
+#endif
 
 static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
 {
@@ -1407,6 +1644,9 @@ int main(int argc, char* argv[])
     DecodiumApplication app(argc, argv);
     DecodiumLogging::installCrashHandler();
     L("QApplication OK");
+#ifdef Q_OS_LINUX
+    configureLinuxVulkanGpuSelection();
+#endif
 #ifdef Q_OS_WIN
     L("Windows dGPU preference requested via NVIDIA Optimus / AMD PowerXpress exports");
 #endif
@@ -1433,6 +1673,7 @@ int main(int argc, char* argv[])
        + " ABI=" + QSysInfo::buildAbi().toLocal8Bit()
        + " CPU=" + QSysInfo::currentCpuArchitecture().toLocal8Bit()).constData());
     logEnvVar("QSG_RHI_BACKEND");
+    logEnvVar("QT_VK_PHYSICAL_DEVICE_INDEX");
     logEnvVar("QSG_RHI_PREFER_SOFTWARE_RENDERER");
     logEnvVar("QT_OPENGL");
     logEnvVar("QT_QUICK_BACKEND");

@@ -593,6 +593,17 @@ if [[ -L "${APPDIR}/AppRun" || -f "${APPDIR}/AppRun" ]]; then
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "$0")")"
 
+# Preserve the host values before linuxdeploy's AppRun and this wrapper add
+# bundle paths.  Decodium restores these snapshots only for host helpers such
+# as secret-tool; the application itself keeps using the bundled libraries.
+export DECODIUM_HOST_LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+export DECODIUM_HOST_LD_PRELOAD="${LD_PRELOAD:-}"
+export DECODIUM_HOST_GIO_EXTRA_MODULES="${GIO_EXTRA_MODULES:-}"
+export DECODIUM_HOST_GI_TYPELIB_PATH="${GI_TYPELIB_PATH:-}"
+export DECODIUM_HOST_GSETTINGS_SCHEMA_DIR="${GSETTINGS_SCHEMA_DIR:-}"
+export DECODIUM_HOST_GTK_PATH="${GTK_PATH:-}"
+export DECODIUM_HOST_XDG_DATA_DIRS="${XDG_DATA_DIRS:-}"
+
 # The Qt 6.11 Wayland platform plugin can be present but unusable on some
 # Ubuntu/AppImage combinations because part of the compositor stack is supplied
 # by the host. Prefer XCB unless the user explicitly overrides it.
@@ -643,6 +654,11 @@ mkdir -p "${verify_dir}"
   APPIMAGE_EXTRACT_AND_RUN=1 "${OUTPUT_DIR}/${APPIMAGE_NAME}" --appimage-extract >/dev/null
 )
 EXTRACTED_APPDIR="${verify_dir}/squashfs-root"
+for host_variable in \
+  LD_LIBRARY_PATH LD_PRELOAD GIO_EXTRA_MODULES GI_TYPELIB_PATH \
+  GSETTINGS_SCHEMA_DIR GTK_PATH XDG_DATA_DIRS; do
+  grep -q "DECODIUM_HOST_${host_variable}" "${EXTRACTED_APPDIR}/AppRun"
+done
 test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/qmldir"
 test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
 test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"

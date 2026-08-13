@@ -263,6 +263,9 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QString alcCalibrationStatus  READ alcCalibrationStatus                                   NOTIFY alcCalibrationStatusChanged)
     Q_PROPERTY(double processCpuUsage READ processCpuUsage NOTIFY processCpuUsageChanged)
     Q_PROPERTY(double processGpuUsage READ processGpuUsage NOTIFY processGpuUsageChanged)
+    Q_PROPERTY(QString processGpuUsageSource READ processGpuUsageSource NOTIFY processGpuUsageChanged)
+    Q_PROPERTY(bool panadapterGpuFftActive READ panadapterGpuFftActive NOTIFY panadapterGpuFftActiveChanged)
+    Q_PROPERTY(QString panadapterGpuFftBackend READ panadapterGpuFftBackend NOTIFY panadapterGpuFftActiveChanged)
     Q_PROPERTY(QString lastCatError READ lastCatError NOTIFY lastCatErrorChanged)
 
     // === LED STATUS INDICATORS ===
@@ -806,6 +809,13 @@ public:
     Q_INVOKABLE void setAlcTarget(int v);
     double processCpuUsage() const { return m_processCpuUsage; }
     double processGpuUsage() const { return m_processGpuUsage; }
+    QString processGpuUsageSource() const { return m_processGpuUsageSource; }
+    bool panadapterGpuFftActive() const { return m_panadapterGpuFftActive; }
+    QString panadapterGpuFftBackend() const { return m_panadapterGpuFftBackend; }
+    bool openGlGpuPanadapterFftEnabled() const
+    {
+        return m_openGlGpuPanadapterFftEnabled.load(std::memory_order_relaxed);
+    }
     QString lastCatError() const { return m_lastCatError; }
 
     // LED status
@@ -1036,7 +1046,7 @@ public:
     Q_INVOKABLE void setDecodeColorBg(const QString& prop, const QString& hex);
     Q_INVOKABLE void setDecodeColorBgEnabled(const QString& prop, bool enabled);
     bool b4Strikethrough()  const { return m_b4Strikethrough; }
-    void setB4Strikethrough(bool v) { if (m_b4Strikethrough!=v){m_b4Strikethrough=v;emit b4StrikethroughChanged();} }
+    void setB4Strikethrough(bool v);
 
     // B8 — Alert sounds
     bool alertSoundsEnabled() const { return m_alertSoundsEnabled; }
@@ -1513,6 +1523,7 @@ public:
     Q_INVOKABLE bool editQso(const QString& call, const QString& dateTime, const QVariantMap& newData);
     Q_INVOKABLE QStringList workedCallsigns() const;
     Q_INVOKABLE void setGpuPanadapterFftAvailable(bool available, const QString& reason = QString());
+    Q_INVOKABLE void setGpuPanadapterFftActive(bool active, const QString& backend = QString());
     void registerPanadapterItem(PanadapterItem* item);
     void unregisterPanadapterItem(PanadapterItem* item);
     int workedCount() const;
@@ -1718,6 +1729,7 @@ signals:
     void alcCalibrationStatusChanged();
     void processCpuUsageChanged();
     void processGpuUsageChanged();
+    void panadapterGpuFftActiveChanged();
     void lastCatErrorChanged();
     void dxClusterConnectedChanged();
     void dxClusterSpotsChanged();
@@ -2556,15 +2568,19 @@ private:
     void    finishAlcCalibration(bool success, const QString& reason);
     double m_processCpuUsage {0.0};
     double m_processGpuUsage {-1.0};
+    QString m_processGpuUsageSource {QStringLiteral("unavailable")};
     qint64 m_cpuPressureUntilMs {0};
     qint64 m_cpuPressureSevereUntilMs {0};
     qint64 m_lastCpuPressureLogMs {0};
     quint64 m_lastProcessCpuUsec {0};
     quint64 m_lastProcessGpuTimeNs {0};
+    quint64 m_lastProcessGpuBusyCycles {0};
+    quint64 m_lastProcessGpuTotalCycles {0};
     int m_processGpuZeroSampleCount {0};
     int m_processCpuLogicalCores {1};
     bool m_processCpuSampleInitialized {false};
     bool m_processGpuSampleInitialized {false};
+    bool m_processGpuCycleSampleInitialized {false};
     QElapsedTimer m_processCpuSampleClock;
     QElapsedTimer m_processGpuSampleClock;
     QElapsedTimer m_uiStallClock;
@@ -3269,6 +3285,7 @@ private:
     // Append a single QSO to m_worked. Called from logQsoNow().
     void appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz,
                          const QString& mode, const QString& qsoDateUtc = QString());
+    void refreshWorkedBeforeDecodeEntriesForCall(const QString& call);
 
     // B8 — Alert sounds
     bool                 m_alertSoundsEnabled {false};
@@ -3428,6 +3445,9 @@ private:
     std::atomic_bool m_gpuPanadapterFftAvailable {true};
     std::atomic_bool m_forceGpuPanadapterFft {true};
     std::atomic_bool m_gpuPanadapterFftStallGuard {false};
+    std::atomic_bool m_openGlGpuPanadapterFftEnabled {false};
+    bool m_panadapterGpuFftActive {false};
+    QString m_panadapterGpuFftBackend {QStringLiteral("CPU FFTW")};
     qint64 m_lastGpuPanadapterProbeMs {0};
     QList<QPointer<PanadapterItem>> m_panadapterItems;
 
@@ -3461,7 +3481,7 @@ private:
     QString lookupUsStateForDecode(const QString& call, const QString& gridHint) const;
     void reloadLotwUsers(bool forceDownload);
     void startLotwUsersDownload(const QString& cachePath, bool reportErrors);
-    void enrichDecodeEntry(QVariantMap& entry) const;
+    void enrichDecodeEntry(QVariantMap& entry, bool countAsReceived = true) const;
     // 1.0.142: throttle helper per decodeListChanged. Vedi commento timer.
     void emitDecodeListChangedThrottled();
     void emitRxDecodeListChangedThrottled(bool normalizeBeforeEmit = true);

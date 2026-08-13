@@ -95,9 +95,9 @@ public:
     bool  autoRange()      const { return m_autoRange; }
     bool  peakHold()       const { return m_peakHold; }
     bool  spectrum3d()           const { return m_spectrum3d; }
-    // The GPU-direct FFT keeps its history exclusively in RHI textures.  A
-    // stacked 3D spectrum needs CPU-visible dB rows instead, so the bridge
-    // uses this only to select its existing asynchronous FFT fallback.
+    // The GPU-direct FFT keeps its history in RHI textures.  The stacked 3D
+    // shader consumes those textures directly; this asks the bridge for its
+    // asynchronous CPU history only when that GPU path is unavailable.
     bool  requiresCpuSpectrumHistory() const;
     int   spectrum3dTraces()     const { return m_spectrum3dTraces; }
     float spectrum3dFloorDepth() const { return m_spectrum3dFloorDepth; }
@@ -243,6 +243,7 @@ signals:
     void throttleActiveChanged();
     void throttleIntervalMsChanged();
     void spectrumGpuOverlayAvailableChanged();
+    void gpuFftActivated(QString backend);
     void gpuFftUnavailable(QString reason);
     void showDxClusterSpotsChanged();
     void dxClusterSpotColorChanged();
@@ -279,15 +280,18 @@ private:
     bool consumeUpdateBudgetLocked();
     bool shaderWaterfallSupported();
     bool spectrumGraphSupported() const;
+    bool spectrum3dGpuSupported() const;
     void updateSpectrumGraphNodes(QSGNode* spectrumRoot, int w, int h);
     void removeSpectrumGraphNodes(QSGNode* spectrumRoot);
     void updateSpectrum3dNodes(QSGNode* spectrumRoot, int w, int h);
+    void updateSpectrum3dGpuNodes(QSGNode* spectrumRoot, int w, int h);
     void rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectReady);
     void updateSpectrumOverlayNode(QSGNode* spectrumRoot, int w, int h, bool gpuDirectReady, bool gpuSpectrumGraph);
     bool gpuFftSupported(QString* reason = nullptr) const;
     void recordGpuFftCompute();
     void releaseGpuFftResources();
     void failGpuFft(const QString& reason);
+    void notifyGpuFftActive(const QString& backend);
     void connectBridgePcmFrameFeed();
     void recordOverlayMetric(qint64 elapsedUs, int decodeLabels, int clusterLabels, const QSize& size);
     void recordOverlayNodeMetric(qint64 elapsedUs,
@@ -423,6 +427,7 @@ private:
     bool  m_geometryDirty = true;
     bool  m_useShaderWaterfall = false;
     bool  m_shaderWaterfallBlocked = false;
+    std::atomic_bool m_spectrum3dGpuBlocked {false};
     bool  m_waterfallRgbValid = true;
     int   m_loggedWaterfallPath = -1;
     int   m_loggedWaterfallApi = -1;
@@ -436,6 +441,7 @@ private:
     int   m_paletteGeneration = 0;
     bool  m_gpuFftFailed = false;
     QString m_gpuFftFailureReason;
+    bool  m_gpuFftActiveNotified = false;
     bool  m_bridgePcmFrameFeedRegistered = false;
     bool  m_loggedGpuFftRejected = false;
     bool  m_loggedGpuFftAccepted = false;
@@ -461,6 +467,7 @@ private:
     qint64 m_lastSpectrumOverlayRebuildMs = 0;
     bool  m_loggedSpectrumCppOverlay = false;
     bool  m_loggedGpuWaterfallDetached = false;
+    bool  m_loggedGpuSpectrum3d = false;
     QQuickWindow* m_qsgMetricWindow = nullptr;
     QMetaObject::Connection m_qsgFrameConnection;
     QMetaObject::Connection m_qsgBeforeSyncConnection;

@@ -1694,6 +1694,93 @@ quint64 decodiumCurrentProcessCpuUsec()
 #endif
 }
 
+#ifdef Q_OS_LINUX
+bool decodiumCurrentProcessLinuxGpuSamples(
+    quint64* gpuTimeNs,
+    decodium::gpu_usage::LinuxDrmCycleSample* cycleSample,
+    bool* hasEngineTime,
+    bool* hasCycleSample,
+    QString* pciDevice = nullptr)
+{
+    QDir fdInfoDir(QStringLiteral("/proc/self/fdinfo"));
+    QStringList const entries = fdInfoDir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+    if (entries.isEmpty())
+        return false;
+
+    QList<decodium::gpu_usage::LinuxDrmFdInfo> descriptors;
+    descriptors.reserve(entries.size());
+    for (QString const& entry : entries) {
+        QFile file(fdInfoDir.absoluteFilePath(entry));
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            continue;
+        descriptors.push_back({ entry, QString::fromLatin1(file.readAll()) });
+    }
+
+    bool const engineAvailable =
+        decodium::gpu_usage::aggregateLinuxDrmEngineTimeNs(descriptors, gpuTimeNs);
+    bool const cyclesAvailable =
+        decodium::gpu_usage::aggregateLinuxDrmCycleSample(descriptors, cycleSample);
+    if (pciDevice)
+        *pciDevice = decodium::gpu_usage::primaryLinuxDrmPciDevice(descriptors);
+    if (hasEngineTime)
+        *hasEngineTime = engineAvailable;
+    if (hasCycleSample)
+        *hasCycleSample = cyclesAvailable;
+    return engineAvailable || cyclesAvailable;
+}
+
+struct LinuxDrmDeviceUsageSample
+{
+    double immediateUsage {-1.0};
+};
+
+static bool readLinuxGpuCounter(QString const& path, quint64* value)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+    bool ok = false;
+    quint64 const parsed = QString::fromLatin1(file.readAll()).trimmed().toULongLong(&ok);
+    if (ok && value)
+        *value = parsed;
+    return ok;
+}
+
+// DRM fdinfo is the preferred per-process source. Some drivers instead expose
+// a device-wide gpu_busy_percent counter. Do not derive utilization from i915
+// RC6 residency: it measures deep-idle time, so its complement is GPU awake
+// time rather than GPU busy time and can misleadingly remain at 100%.
+static bool decodiumCurrentLinuxGpuDeviceUsage(QString const& pciDevice,
+                                               LinuxDrmDeviceUsageSample* sample)
+{
+    static QRegularExpression const pciDeviceRe(
+        QStringLiteral("^[0-9a-fA-F]{4,8}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\\.[0-7]$"));
+    if (!sample || !pciDeviceRe.match(pciDevice).hasMatch())
+        return false;
+
+    QString const pciRoot = QStringLiteral("/sys/bus/pci/devices/") + pciDevice;
+    quint64 busyPercent = 0;
+    if (readLinuxGpuCounter(pciRoot + QStringLiteral("/gpu_busy_percent"), &busyPercent)) {
+        sample->immediateUsage = qBound(0.0, static_cast<double>(busyPercent) / 100.0, 1.0);
+        return true;
+    }
+
+    QDir drmDir(pciRoot + QStringLiteral("/drm"));
+    QStringList const cards = drmDir.entryList(
+        {QStringLiteral("card[0-9]*")}, QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    for (QString const& card : cards) {
+        QString const cardRoot = drmDir.absoluteFilePath(card);
+        if (readLinuxGpuCounter(cardRoot + QStringLiteral("/device/gpu_busy_percent"),
+                                &busyPercent)) {
+            sample->immediateUsage = qBound(
+                0.0, static_cast<double>(busyPercent) / 100.0, 1.0);
+            return true;
+        }
+    }
+    return false;
+}
+#endif
+
 bool decodiumCurrentProcessGpuTimeNs(quint64* gpuTimeNs)
 {
 #ifdef Q_OS_MAC
@@ -1719,20 +1806,16 @@ bool decodiumCurrentProcessGpuTimeNs(quint64* gpuTimeNs)
     return false;
 #endif
 #elif defined(Q_OS_LINUX)
-    QDir fdInfoDir(QStringLiteral("/proc/self/fdinfo"));
-    QStringList const entries = fdInfoDir.entryList(QDir::Files | QDir::NoDotAndDotDot);
-    if (entries.isEmpty())
-        return false;
-
-    QList<decodium::gpu_usage::LinuxDrmFdInfo> descriptors;
-    descriptors.reserve(entries.size());
-    for (QString const& entry : entries) {
-        QFile file(fdInfoDir.absoluteFilePath(entry));
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            continue;
-        descriptors.push_back({ entry, QString::fromLatin1(file.readAll()) });
-    }
-    return decodium::gpu_usage::aggregateLinuxDrmEngineTimeNs(descriptors, gpuTimeNs);
+    decodium::gpu_usage::LinuxDrmCycleSample ignoredCycles;
+    bool hasEngineTime = false;
+    bool hasCycleSample = false;
+    decodiumCurrentProcessLinuxGpuSamples(gpuTimeNs,
+                                          &ignoredCycles,
+                                          &hasEngineTime,
+                                          &hasCycleSample,
+                                          nullptr);
+    Q_UNUSED(hasCycleSample);
+    return hasEngineTime;
 #else
     Q_UNUSED(gpuTimeNs);
     return false;
@@ -9327,6 +9410,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             }
         });
 
+    bool const openGlGpuFftRequested =
+        qEnvironmentVariableIsSet("DECODIUM_ENABLE_EXPERIMENTAL_OPENGL_GPU_PANADAPTER_FFT")
+        || getSetting(QStringLiteral("OpenGlGpuPanadapterFft"), false).toBool();
+    m_openGlGpuPanadapterFftEnabled.store(openGlGpuFftRequested,
+                                           std::memory_order_relaxed);
+
     if (qEnvironmentVariableIsSet("DECODIUM_DISABLE_GPU_PANADAPTER_FFT")) {
         m_gpuPanadapterFftAvailable.store(false);
         m_forceGpuPanadapterFft.store(false);
@@ -9340,6 +9429,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         qInfo().noquote()
             << "[PANDBG] Panadapter visual FFT GPU-first path"
             << "force=" << (m_forceGpuPanadapterFft.load() ? 1 : 0)
+            << "opengl_opt_in=" << (openGlGpuFftRequested ? 1 : 0)
             << "fallback=FFTW_CPU_on_failure";
     }
 
@@ -14874,6 +14964,47 @@ void DecodiumBridge::appendWorkedQso(const QString& call, const QString& grid, q
     }
 }
 
+void DecodiumBridge::refreshWorkedBeforeDecodeEntriesForCall(const QString& call)
+{
+    const QString targetBase = normalizedBaseCall(call);
+    if (targetBase.isEmpty())
+        return;
+
+    auto refreshList = [this, &targetBase](QVariantList& entries) {
+        bool changed = false;
+        for (QVariant& value : entries) {
+            QVariantMap entry = value.toMap();
+            if (entry.isEmpty() || entry.value(QStringLiteral("isSeparator")).toBool())
+                continue;
+
+            QString entryCall = entry.value(QStringLiteral("dxCallsign")).toString();
+            if (entryCall.trimmed().isEmpty())
+                entryCall = entry.value(QStringLiteral("fromCall")).toString();
+            if (normalizedBaseCall(entryCall) != targetBase)
+                continue;
+
+            // Re-enrich only rows for the QSO just logged. This updates B4 and
+            // the related worked/new flags immediately without replaying every
+            // decode or inflating the performance counters.
+            enrichDecodeEntry(entry, false);
+            value = entry;
+            changed = true;
+        }
+        return changed;
+    };
+
+    const bool bandChanged = refreshList(m_decodeList);
+    const bool rxChanged = refreshList(m_rxDecodeList);
+    if (!bandChanged && !rxChanged)
+        return;
+
+    invalidateDecodeUiPredicateCaches();
+    if (bandChanged)
+        rebuildBandActivityModel();
+    if (bandChanged || rxChanged)
+        rebuildRxDecodeModel();
+}
+
 void DecodiumBridge::rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> const& records)
 {
     m_worked.clear();
@@ -15024,6 +15155,23 @@ bool DecodiumBridge::decodeColorEnabled(const QString& prop) const
     if (!isDecodeColorProperty(prop))
         return true;
     return m_decodeColorEnabled.value(prop, true);
+}
+
+void DecodiumBridge::setB4Strikethrough(bool enabled)
+{
+    if (m_b4Strikethrough == enabled)
+        return;
+
+    m_b4Strikethrough = enabled;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("b4Strikethrough"), enabled);
+    settings.sync();
+    syncSettingToLegacyIni(QStringLiteral("b4Strikethrough"), enabled);
+
+    emit b4StrikethroughChanged();
+    emit settingValueChanged(QStringLiteral("b4Strikethrough"), enabled);
 }
 
 void DecodiumBridge::setDecodeColorEnabled(const QString& prop, bool enabled)
@@ -19330,13 +19478,87 @@ void DecodiumBridge::updateProcessCpuUsage()
 void DecodiumBridge::updateProcessGpuUsage()
 {
     double usage = -1.0;
+    QString usageSource = QStringLiteral("unavailable");
 
 #ifdef Q_OS_WIN
     bool available = false;
     usage = decodiumCurrentProcessGpuUsage(&available);
     if (!available || !std::isfinite(usage))
         usage = -1.0;
-#elif defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+    else
+        usageSource = QStringLiteral("process");
+#elif defined(Q_OS_LINUX)
+    quint64 currentGpuTimeNs = 0;
+    decodium::gpu_usage::LinuxDrmCycleSample cycleSample;
+    bool hasEngineTime = false;
+    bool hasCycleSample = false;
+    QString pciDevice;
+    decodiumCurrentProcessLinuxGpuSamples(&currentGpuTimeNs,
+                                          &cycleSample,
+                                          &hasEngineTime,
+                                          &hasCycleSample,
+                                          &pciDevice);
+    qint64 const wallNs = m_processGpuSampleClock.isValid()
+        ? m_processGpuSampleClock.nsecsElapsed()
+        : 0;
+    if (hasEngineTime) {
+        m_processGpuCycleSampleInitialized = false;
+        usageSource = QStringLiteral("drm-process");
+        if (!m_processGpuSampleInitialized
+            || wallNs <= 0
+            || currentGpuTimeNs < m_lastProcessGpuTimeNs) {
+            m_lastProcessGpuTimeNs = currentGpuTimeNs;
+            m_processGpuSampleClock.restart();
+            m_processGpuSampleInitialized = true;
+            return;
+        }
+
+        quint64 const gpuDeltaNs = currentGpuTimeNs - m_lastProcessGpuTimeNs;
+        usage = static_cast<double>(gpuDeltaNs) / static_cast<double>(wallNs);
+        m_lastProcessGpuTimeNs = currentGpuTimeNs;
+        m_processGpuSampleClock.restart();
+    } else if (hasCycleSample) {
+        m_processGpuSampleInitialized = false;
+        usageSource = QStringLiteral("drm-process");
+        bool const resetSample =
+            !m_processGpuCycleSampleInitialized
+            || cycleSample.busyCycles < m_lastProcessGpuBusyCycles
+            || cycleSample.totalCycles <= m_lastProcessGpuTotalCycles;
+        if (resetSample) {
+            m_lastProcessGpuBusyCycles = cycleSample.busyCycles;
+            m_lastProcessGpuTotalCycles = cycleSample.totalCycles;
+            m_processGpuCycleSampleInitialized = true;
+            m_processGpuSampleClock.restart();
+            return;
+        }
+
+        quint64 const busyDelta = cycleSample.busyCycles - m_lastProcessGpuBusyCycles;
+        quint64 const totalDelta = cycleSample.totalCycles - m_lastProcessGpuTotalCycles;
+        usage = totalDelta > 0
+            ? static_cast<double>(busyDelta) / static_cast<double>(totalDelta)
+            : -1.0;
+        m_lastProcessGpuBusyCycles = cycleSample.busyCycles;
+        m_lastProcessGpuTotalCycles = cycleSample.totalCycles;
+        m_processGpuSampleClock.restart();
+    } else {
+        m_processGpuSampleInitialized = false;
+        m_processGpuCycleSampleInitialized = false;
+        LinuxDrmDeviceUsageSample deviceSample;
+        if (decodiumCurrentLinuxGpuDeviceUsage(pciDevice, &deviceSample)
+            && deviceSample.immediateUsage >= 0.0) {
+            usage = deviceSample.immediateUsage;
+            usageSource = QStringLiteral("drm-device");
+            m_processGpuSampleClock.restart();
+        } else {
+            m_processGpuSampleClock.restart();
+            usage = -1.0;
+        }
+    }
+
+    if (usage >= 0.0) {
+        usage = std::isfinite(usage) ? qBound(0.0, usage, 1.0) : -1.0;
+    }
+#elif defined(Q_OS_MAC)
     quint64 currentGpuTimeNs = 0;
     bool const available = decodiumCurrentProcessGpuTimeNs(&currentGpuTimeNs);
     qint64 const wallNs = m_processGpuSampleClock.isValid()
@@ -19344,7 +19566,6 @@ void DecodiumBridge::updateProcessGpuUsage()
         : 0;
 
     bool gpuCounterUnavailable = !available;
-#ifdef Q_OS_MAC
     if (available && currentGpuTimeNs == 0) {
         m_processGpuZeroSampleCount = qMin(m_processGpuZeroSampleCount + 1, 1000);
         if (m_processGpuZeroSampleCount >= 4) {
@@ -19353,7 +19574,6 @@ void DecodiumBridge::updateProcessGpuUsage()
     } else if (available) {
         m_processGpuZeroSampleCount = 0;
     }
-#endif
 
     if (gpuCounterUnavailable) {
         m_processGpuSampleInitialized = false;
@@ -19375,15 +19595,26 @@ void DecodiumBridge::updateProcessGpuUsage()
             usage = qBound(0.0, usage, 1.0);
         m_lastProcessGpuTimeNs = currentGpuTimeNs;
         m_processGpuSampleClock.restart();
+        usageSource = QStringLiteral("process");
     }
 #else
     usage = -1.0;
 #endif
 
-    if (std::abs(m_processGpuUsage - usage) < 0.0005)
+    bool const sourceChanged = m_processGpuUsageSource != usageSource;
+    if (std::abs(m_processGpuUsage - usage) < 0.0005 && !sourceChanged)
         return;
     m_processGpuUsage = usage;
+    m_processGpuUsageSource = usageSource;
     emit processGpuUsageChanged();
+    if (sourceChanged) {
+        qInfo().noquote()
+            << "[GPUDBG] GPU usage counter source"
+            << "source=" << usageSource
+            << "scope=" << (usageSource == QStringLiteral("drm-device")
+                                  ? QStringLiteral("whole_device")
+                                  : QStringLiteral("process"));
+    }
 }
 
 // 1.0.179 — Ritorna true se negli ultimi windowMs c'e' stato uno stall
@@ -26812,6 +27043,11 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
 
 void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
 {
+    if (key == QStringLiteral("b4Strikethrough")) {
+        setB4Strikethrough(value.toBool());
+        return;
+    }
+
     if (key == QStringLiteral("PskReporterTimeSpanMinutes")) {
         setPskReporterTimeSpanMinutes(value.toInt());
         return;
@@ -27050,6 +27286,16 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
             m_directVisualAudioCaptureUnsafe = directVisual;
             applyDirectVisualAudioCaptureMode(QStringLiteral("settings"));
         }
+    } else if (key == QStringLiteral("OpenGlGpuPanadapterFft")) {
+        bool const enabled = value.toBool();
+#ifdef Q_OS_LINUX
+        if (m_openGlGpuPanadapterFftEnabled.load(std::memory_order_relaxed) != enabled)
+            emit statusMessage(enabled
+                ? QStringLiteral("OpenGL GPU panadapter FFT will be enabled after restarting Decodium")
+                : QStringLiteral("OpenGL GPU panadapter FFT will be disabled after restarting Decodium"));
+#else
+        Q_UNUSED(enabled);
+#endif
     } else if (key == QStringLiteral("CloudLogStationID")) {
         if (m_cloudlog) {
             m_cloudlog->setStationId(qBound(0, value.toInt(), 999));
@@ -39441,11 +39687,45 @@ void DecodiumBridge::logQsoNow()
         }
         m_legacyBackend->logQso();
         syncLegacyBackendState();
+        const QString legacyCompletedCall = completedLogCallForStateClear();
+        QString legacyCompletedGrid = m_dxGrid;
+        QString legacyCompletedMode = m_mode;
+        double legacyCompletedFrequency = m_frequency;
+        QDateTime legacyCompletedOn = legacyTimeOn;
+        if (m_promptLogSnapshotValid) {
+            legacyCompletedGrid = m_promptLogGrid;
+            if (!m_promptLogMode.trimmed().isEmpty())
+                legacyCompletedMode = m_promptLogMode;
+            if (m_promptLogDialFreq > 0.0)
+                legacyCompletedFrequency = m_promptLogDialFreq;
+        } else if (m_pendingAutoLogValid) {
+            if (!m_pendingAutoLogGrid.trimmed().isEmpty())
+                legacyCompletedGrid = m_pendingAutoLogGrid;
+            if (m_pendingAutoLogDialFreq > 0.0)
+                legacyCompletedFrequency = m_pendingAutoLogDialFreq;
+            if (m_pendingAutoLogOn.isValid())
+                legacyCompletedOn = m_pendingAutoLogOn;
+        } else if (m_lateAutoLogValid) {
+            if (!m_lateAutoLogGrid.trimmed().isEmpty())
+                legacyCompletedGrid = m_lateAutoLogGrid;
+            if (m_lateAutoLogDialFreq > 0.0)
+                legacyCompletedFrequency = m_lateAutoLogDialFreq;
+            if (m_lateAutoLogOn.isValid())
+                legacyCompletedOn = m_lateAutoLogOn;
+        }
+        const QString legacyQsoDate =
+            (legacyCompletedOn.isValid() ? legacyCompletedOn.toUTC()
+                                         : QDateTime::currentDateTimeUtc())
+                .date().toString(QStringLiteral("yyyyMMdd"));
+        m_workedCalls.insert(legacyCompletedCall.trimmed().toUpper());
+        appendWorkedQso(legacyCompletedCall, legacyCompletedGrid,
+                        static_cast<quint64>(qMax(0.0, legacyCompletedFrequency)),
+                        legacyCompletedMode, legacyQsoDate);
+        refreshWorkedBeforeDecodeEntriesForCall(legacyCompletedCall);
         QTimer::singleShot(250, this, [this]() {
             emit qsoCountChanged();
             emit workedCountChanged();
         });
-        QString const legacyCompletedCall = completedLogCallForStateClear();
         clearPromptLogSnapshot();
         clearPendingAutoLogSnapshot();
         m_qsoLogged = true;
@@ -41859,9 +42139,10 @@ void DecodiumBridge::processMapRosterCall(const QString& call, const QString& gr
                            .arg(m_currentTx));
 }
 
-void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry) const
+void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry, bool countAsReceived) const
 {
-    noteDecodeReceived();  // 1.0.233 DevOverlay counter (no-op se overlay off)
+    if (countAsReceived)
+        noteDecodeReceived();  // 1.0.233 DevOverlay counter (no-op se overlay off)
     QString msg = entry.value("message").toString();
     QString aptype = entry.value(QStringLiteral("aptype")).toString().trimmed();
     msg = stripDecodeApAnnotation(msg, &aptype);
@@ -44715,9 +44996,11 @@ void DecodiumBridge::onSpectrumTimer()
         }
     }
 #endif
-    // The remote waterfall and the opt-in 3D spectrum both need dB rows that
-    // are visible to the CPU.  Do not turn off GPU FFT globally: this selects
-    // the existing asynchronous FFTW producer only while one is required.
+    // The remote waterfall still needs CPU-visible dB rows.  The local 3D
+    // spectrum normally samples GPU history directly and reaches this branch
+    // only when its shader path is unavailable or has failed.  Do not turn off
+    // GPU FFT globally: select asynchronous FFTW only while a CPU consumer is
+    // actually present.
     bool const panadapterNeedsCpuSpectrumHistory =
         remoteWaterfallNeedsCpu || spectrum3dNeedsCpuHistory;
     if (!m_spectrumVisible && !remoteWaterfallNeedsCpu) {
@@ -44977,6 +45260,12 @@ void DecodiumBridge::onSpectrumTimer()
                 metricUsable = usable;
                 return;
             }
+
+            // The next frame is being produced by the asynchronous FFTW
+            // fallback (3D history, Low CPU, unsupported/failed compute, or a
+            // stall guard). Keep the status bar aligned with the real worker.
+            if (m_panadapterGpuFftActive)
+                setGpuPanadapterFftActive(false, QStringLiteral("CPU FFTW"));
 
             QVector<short> panadapterSamples(fftLen);
             panadapterSamples.fill(0);
@@ -51348,6 +51637,7 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     QString const qsoDate = (timeOnUtc.isValid() ? timeOnUtc.toUTC() : QDateTime::currentDateTimeUtc())
                                 .date().toString(QStringLiteral("yyyyMMdd"));
     appendWorkedQso(dxCall, dxGrid, freqHz, mode, qsoDate);
+    refreshWorkedBeforeDecodeEntriesForCall(dxCall);
     if (m_qsoCountCache >= 0) {
         ++m_qsoCountCache;
     }
@@ -51993,6 +52283,11 @@ int         DecodiumBridge::workedCount()      const { return m_workedCalls.size
 void DecodiumBridge::setGpuPanadapterFftAvailable(bool available, const QString& reason)
 {
     bool const previous = m_gpuPanadapterFftAvailable.exchange(available);
+    if (!available) {
+        if (reason.startsWith(QStringLiteral("OpenGL GPU FFT disabled")))
+            m_forceGpuPanadapterFft.store(false);
+        setGpuPanadapterFftActive(false, QStringLiteral("CPU FFTW"));
+    }
     if (previous == available)
         return;
 
@@ -52006,6 +52301,25 @@ void DecodiumBridge::setGpuPanadapterFftAvailable(bool available, const QString&
             << "reason=" << (reason.isEmpty() ? QStringLiteral("PanadapterItem rejected GPU compute") : reason)
             << "fallback=FFTW_CPU";
     }
+}
+
+void DecodiumBridge::setGpuPanadapterFftActive(bool active, const QString& backend)
+{
+    QString const resolvedBackend = active
+        ? (backend.trimmed().isEmpty() ? QStringLiteral("GPU RHI") : backend.trimmed())
+        : QStringLiteral("CPU FFTW");
+    if (m_panadapterGpuFftActive == active
+        && m_panadapterGpuFftBackend == resolvedBackend) {
+        return;
+    }
+
+    m_panadapterGpuFftActive = active;
+    m_panadapterGpuFftBackend = resolvedBackend;
+    emit panadapterGpuFftActiveChanged();
+    qInfo().noquote()
+        << "[PANDBG] Panadapter FFT runtime backend"
+        << "active=" << (active ? 1 : 0)
+        << "backend=" << resolvedBackend;
 }
 
 void DecodiumBridge::registerPanadapterItem(PanadapterItem* item)

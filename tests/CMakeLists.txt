@@ -221,6 +221,11 @@ add_executable (test_legacy_decode_window test_legacy_decode_window.cpp)
 target_link_libraries (test_legacy_decode_window Qt6::Test Qt6::Core)
 add_test (NAME test_legacy_decode_window COMMAND $<TARGET_FILE:test_legacy_decode_window>)
 
+add_executable (test_b4_worked_before test_b4_worked_before.cpp)
+target_compile_definitions (test_b4_worked_before PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_b4_worked_before Qt6::Test Qt6::Core)
+add_test (NAME test_b4_worked_before COMMAND $<TARGET_FILE:test_b4_worked_before>)
+
 add_executable (test_ft2link test_ft2link.cpp)
 target_link_libraries (test_ft2link ft2link_core Qt6::Test)
 add_test (NAME test_ft2link COMMAND $<TARGET_FILE:test_ft2link>)

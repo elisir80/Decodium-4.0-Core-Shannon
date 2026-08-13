@@ -472,6 +472,20 @@ class PanadapterSpectrumOverlayNode final : public QSGSimpleTextureNode
 {
 };
 
+class PanadapterSpectrum3dNode final : public QSGNode
+{
+public:
+    ~PanadapterSpectrum3dNode() override
+    {
+        delete sharedMaterial;
+    }
+
+    QSize meshSize;
+    int meshTraces = 0;
+    int meshPoints = 0;
+    QSGMaterial* sharedMaterial = nullptr;
+};
+
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
 QImage rgba8888TextureImage(const QImage& image)
 {
@@ -1277,6 +1291,164 @@ QSGMaterialShader* PanadapterSpectrumMaterial::createShader(QSGRendererInterface
 }
 #endif
 
+#if defined(DECODIUM_GPU_PANADAPTER_SPECTRUM_3D_QSB)
+class PanadapterSpectrum3dMaterial final : public QSGMaterial
+{
+public:
+    PanadapterSpectrum3dMaterial()
+    {
+        setFlag(QSGMaterial::NoBatching);
+        setFlag(QSGMaterial::RequiresFullMatrix);
+    }
+
+    ~PanadapterSpectrum3dMaterial() override
+    {
+        delete historyTexture;
+        delete rowParamsTexture;
+        delete paletteTexture;
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        delete fallbackTexture;
+#endif
+        for (QSGTexture* texture : retiredTextures)
+            delete texture;
+    }
+
+    QSGMaterialType* type() const override
+    {
+        static QSGMaterialType type;
+        return &type;
+    }
+
+    QSGMaterialShader* createShader(QSGRendererInterface::RenderMode) const override;
+
+    int compare(const QSGMaterial* other) const override
+    {
+        auto const* rhs = static_cast<const PanadapterSpectrum3dMaterial*>(other);
+        if (historyTexture != rhs->historyTexture)
+            return historyTexture < rhs->historyTexture ? -1 : 1;
+        if (rowParamsTexture != rhs->rowParamsTexture)
+            return rowParamsTexture < rhs->rowParamsTexture ? -1 : 1;
+        if (paletteTexture != rhs->paletteTexture)
+            return paletteTexture < rhs->paletteTexture ? -1 : 1;
+        return 0;
+    }
+
+    QSGTexture* historyTexture = nullptr;
+    QSGTexture* rowParamsTexture = nullptr;
+    QSGTexture* paletteTexture = nullptr;
+    // panel width/height, ridge line width, glow width (logical pixels)
+    float geometryParams[4] = {1.0f, 1.0f, 1.5f, 4.5f};
+    // next write row, history rows, trace count, floor depth in dB
+    float historyParams[4] = {0.0f, 1.0f, 2.0f, 6.0f};
+    // far Y ratio, maximum X shrink, ridge height ratio, depth exponent
+    float perspectiveParams[4] = {0.28f, 0.32f, 0.55f, 2.0f};
+    // source X scale/bias, clamp flag, minimum 3D dB span
+    float xParams[4] = {1.0f, 0.0f, 1.0f, 80.0f};
+    int paletteGeneration = -1;
+
+    void retireTexture(QSGTexture*& texture)
+    {
+        if (!texture)
+            return;
+        retiredTextures.append(texture);
+        texture = nullptr;
+        while (retiredTextures.size() > 4)
+            delete retiredTextures.takeFirst();
+    }
+
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+    QSGTexture* fallbackSampledTexture()
+    {
+        if (!fallbackTexture) {
+            auto* texture = new DecodiumRhiImageTexture(false);
+            texture->setFiltering(QSGTexture::Nearest);
+            QImage image(1, 1, QImage::Format_RGBA8888);
+            image.fill(Qt::black);
+            texture->uploadFullRgbaImage(image, false);
+            fallbackTexture = texture;
+        }
+        return fallbackTexture;
+    }
+
+    QSGTexture* fallbackTexture = nullptr;
+#endif
+    QVector<QSGTexture*> retiredTextures;
+};
+
+class PanadapterSpectrum3dShader final : public QSGMaterialShader
+{
+public:
+    PanadapterSpectrum3dShader()
+    {
+        setShaderFileName(VertexStage, QStringLiteral(":/shaders/panadapter_spectrum3d.vert.qsb"));
+        setShaderFileName(FragmentStage, QStringLiteral(":/shaders/panadapter_spectrum3d.frag.qsb"));
+    }
+
+    bool updateUniformData(RenderState& state, QSGMaterial* newMaterial, QSGMaterial*) override
+    {
+        QByteArray* uniformData = state.uniformData();
+        if (uniformData->size() < 144) {
+            uniformData->resize(144);
+            std::memset(uniformData->data(), 0, static_cast<size_t>(uniformData->size()));
+        }
+        auto* material = static_cast<PanadapterSpectrum3dMaterial*>(newMaterial);
+        QMatrix4x4 const matrix = state.combinedMatrix();
+        std::memcpy(uniformData->data(), matrix.constData(), 64);
+        float const opacity = state.opacity();
+        std::memcpy(uniformData->data() + 64, &opacity, 4);
+        std::memcpy(uniformData->data() + 80,
+                    material->geometryParams,
+                    sizeof(material->geometryParams));
+        std::memcpy(uniformData->data() + 96,
+                    material->historyParams,
+                    sizeof(material->historyParams));
+        std::memcpy(uniformData->data() + 112,
+                    material->perspectiveParams,
+                    sizeof(material->perspectiveParams));
+        std::memcpy(uniformData->data() + 128,
+                    material->xParams,
+                    sizeof(material->xParams));
+        return true;
+    }
+
+    void updateSampledImage(RenderState& state, int binding, QSGTexture** texture,
+                            QSGMaterial* newMaterial, QSGMaterial*) override
+    {
+        auto* material = static_cast<PanadapterSpectrum3dMaterial*>(newMaterial);
+        QSGTexture* selected = nullptr;
+        if (binding == 1)
+            selected = material->historyTexture;
+        else if (binding == 2)
+            selected = material->rowParamsTexture;
+        else if (binding == 3)
+            selected = material->paletteTexture;
+
+#ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
+        auto commitReadyTexture = [&state](QSGTexture* candidate) -> QSGTexture* {
+            if (!candidate)
+                return nullptr;
+            candidate->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+            return candidate->rhiTexture() ? candidate : nullptr;
+        };
+
+        QSGTexture* ready = commitReadyTexture(selected);
+        if (!ready)
+            ready = commitReadyTexture(material->fallbackSampledTexture());
+        *texture = ready;
+#else
+        *texture = selected;
+        if (*texture)
+            (*texture)->commitTextureOperations(state.rhi(), state.resourceUpdateBatch());
+#endif
+    }
+};
+
+QSGMaterialShader* PanadapterSpectrum3dMaterial::createShader(QSGRendererInterface::RenderMode) const
+{
+    return new PanadapterSpectrum3dShader;
+}
+#endif
+
 // ─── FlexRadio SmartSDR waterfall palette ────────────────────────────────────
 // Nero → blu scuro → blu → ciano → verde → giallo → arancio → rosso
 // Riprodotto dalle descrizioni della community FlexRadio
@@ -1877,6 +2049,29 @@ bool PanadapterItem::spectrumGraphSupported() const
 #endif
 }
 
+bool PanadapterItem::spectrum3dGpuSupported() const
+{
+#if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) \
+    && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB) \
+    && defined(DECODIUM_GPU_PANADAPTER_SPECTRUM_3D_QSB)
+    if (qEnvironmentVariableIsSet("DECODIUM_DISABLE_SPECTRUM_3D_GPU")
+        || m_spectrum3dGpuBlocked.load(std::memory_order_acquire)) {
+        return false;
+    }
+    if (!window() || !window()->rendererInterface())
+        return false;
+    QSGRendererInterface::GraphicsApi const api =
+        static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey());
+    return QSGRendererInterface::isApiRhiBased(api)
+        && api != QSGRendererInterface::Software
+        && api != QSGRendererInterface::Null
+        && api != QSGRendererInterface::Unknown
+        && api != QSGRendererInterface::OpenVG;
+#else
+    return false;
+#endif
+}
+
 // ─── Palette ────────────────────────────────────────────────────────────────
 void PanadapterItem::buildPalette(int idx)
 {
@@ -2136,16 +2331,16 @@ void PanadapterItem::setExternalSpectrumActive(bool active)
 bool PanadapterItem::requiresCpuSpectrumHistory() const
 {
     QMutexLocker lock(&m_mutex);
-    // Keep the regular GPU path whenever it can already provide dB rows.  The
-    // bridge only falls back when the zero-readback direct texture path is the
-    // active producer; that path intentionally has no CPU history to turn
-    // into stacked 3D traces.
+    // The normal 3D path samples the GPU history texture directly.  Ask the
+    // bridge for asynchronous FFTW rows only when that shader path is not
+    // compiled, explicitly disabled, or blocked after a resource failure.
     return m_spectrum3d
         && !m_externalSpectrumActive
         && m_gpuDirectTextureReady
         && !m_gpuFftFailed
         && m_gpuFft
-        && m_gpuFft->directTexturePathActive;
+        && m_gpuFft->directTexturePathActive
+        && !spectrum3dGpuSupported();
 }
 
 void PanadapterItem::setSpectrum3d(bool enabled)
@@ -2342,11 +2537,20 @@ bool PanadapterItem::gpuFftSupported(QString* reason) const
         return false;
     }
     auto api = rif->graphicsApi();
-    if (api == QSGRendererInterface::OpenGL
-        && !qEnvironmentVariableIsSet("DECODIUM_ENABLE_EXPERIMENTAL_OPENGL_GPU_PANADAPTER_FFT")) {
+    bool openGlGpuFftEnabled =
+        qEnvironmentVariableIsSet("DECODIUM_ENABLE_EXPERIMENTAL_OPENGL_GPU_PANADAPTER_FFT");
+    if (api == QSGRendererInterface::OpenGL && !openGlGpuFftEnabled) {
+        QCoreApplication* app = QCoreApplication::instance();
+        QObject* bridgeObject = app
+            ? app->property("decodiumBridge").value<QObject*>()
+            : nullptr;
+        auto* bridge = qobject_cast<DecodiumBridge*>(bridgeObject);
+        openGlGpuFftEnabled = bridge && bridge->openGlGpuPanadapterFftEnabled();
+    }
+    if (api == QSGRendererInterface::OpenGL && !openGlGpuFftEnabled) {
         if (reason)
             *reason = QStringLiteral(
-                "OpenGL GPU FFT disabled by default; set DECODIUM_ENABLE_EXPERIMENTAL_OPENGL_GPU_PANADAPTER_FFT=1 to force it");
+                "OpenGL GPU FFT disabled; enable Advanced > OpenGL GPU FFT or set DECODIUM_ENABLE_EXPERIMENTAL_OPENGL_GPU_PANADAPTER_FFT=1");
         return false;
     }
     if (!QSGRendererInterface::isApiRhiBased(api)
@@ -3233,6 +3437,229 @@ void PanadapterItem::updateSpectrum3dNodes(QSGNode* spectrumRoot, int w, int h)
     }
 }
 
+void PanadapterItem::updateSpectrum3dGpuNodes(QSGNode* spectrumRoot, int w, int h)
+{
+#if defined(DECODIUM_QT_RHI_TEXTURE_UPLOAD) \
+    && defined(DECODIUM_GPU_PANADAPTER_FFT_QSB) \
+    && defined(DECODIUM_GPU_PANADAPTER_SPECTRUM_3D_QSB)
+    if (!spectrumRoot || w <= 1 || h <= 1
+        || !spectrum3dGpuSupported()
+        || !m_gpuFft
+        || !m_gpuFft->directTexturePathActive
+        || !m_gpuFft->directWaterfallTexture
+        || !m_gpuFft->directRowParamsTexture) {
+        updateSpectrum3dNodes(spectrumRoot, w, h);
+        return;
+    }
+
+    int const historyRows = m_gpuFft->directRows;
+    if (historyRows < 2 || m_gpuFft->directWaterfallSize.width() < 2) {
+        updateSpectrum3dNodes(spectrumRoot, w, h);
+        return;
+    }
+
+    int const traces = qBound(2, qMin(m_spectrum3dTraces, historyRows), 128);
+    int const points = qBound(2, qMin(w, 320), 320);
+    int const verticesPerTrace = points * 2;
+    int childIndex = 1;
+
+    // The perspective grid has only 18 static vertices.  Keeping it as a QSG
+    // colour node avoids an extra shader pass while all spectrum history,
+    // dB conversion and ridge projection remain on the GPU.
+    {
+        int constexpr gridLines = 9;
+        float constexpr shrinkMax = 0.32f;
+        float const nearY = static_cast<float>(h) - 1.0f;
+        float const farY = static_cast<float>(h) * 0.28f;
+        float const farScale = 1.0f - shrinkMax;
+        float const farOffset = static_cast<float>(w) * shrinkMax * 0.5f;
+        if (auto* gridNode = ensureVertexColorNode(spectrumRoot,
+                                                   childIndex,
+                                                   gridLines * 2,
+                                                   QSGGeometry::DrawLines)) {
+            auto* vertices = gridNode->geometry()->vertexDataAsColoredPoint2D();
+            for (int line = 0; line < gridLines; ++line) {
+                float const fx = static_cast<float>(line) / static_cast<float>(gridLines - 1);
+                float const nearX = fx * static_cast<float>(w);
+                float const farX = farOffset + nearX * farScale;
+                vertices[line * 2].set(nearX, nearY, 46, 60, 74, 170);
+                vertices[line * 2 + 1].set(farX, farY, 14, 19, 24, 58);
+            }
+            ++childIndex;
+        }
+    }
+
+    QSGNode* child = sceneGraphChildAt(spectrumRoot, childIndex);
+    auto* node = dynamic_cast<PanadapterSpectrum3dNode*>(child);
+    auto* material = node
+        ? dynamic_cast<PanadapterSpectrum3dMaterial*>(node->sharedMaterial)
+        : nullptr;
+    if (child && (!node || !material)) {
+        removeSceneGraphChildrenFrom(spectrumRoot, child);
+        child = nullptr;
+        node = nullptr;
+        material = nullptr;
+    }
+
+    if (!node) {
+        node = new PanadapterSpectrum3dNode();
+        material = new PanadapterSpectrum3dMaterial();
+        node->sharedMaterial = material;
+        spectrumRoot->appendChildNode(node);
+    }
+
+    if (auto* paletteTexture = dynamic_cast<DecodiumRhiImageTexture*>(material->paletteTexture);
+        paletteTexture && paletteTexture->failed()) {
+        bool const firstFailure = !m_spectrum3dGpuBlocked.exchange(true, std::memory_order_acq_rel);
+        if (firstFailure) {
+            qWarning().noquote()
+                << "[GPUDBG] Panadapter 3D GPU palette texture failed"
+                << "fallback=FFTW_CPU_history_QSG_geometry";
+        }
+        updateSpectrum3dNodes(spectrumRoot, w, h);
+        return;
+    }
+
+    bool const rebuildMesh = node->meshSize != QSize(w, h)
+        || node->meshTraces != traces
+        || node->meshPoints != points;
+    if (rebuildMesh) {
+        while (QSGNode* traceChild = node->firstChild()) {
+            node->removeChildNode(traceChild);
+            delete traceChild;
+        }
+
+        float const denominator = static_cast<float>(qMax(1, points - 1));
+        // Keep each historical surface in its own static node.  A single
+        // triangle strip let overlapping primitives in the same GPU draw
+        // collapse into the outer envelope on Metal, hiding all inner ridges.
+        // Separate ordered draws reproduce the CPU painter order while the
+        // FFT history, normalisation and projection still remain on the GPU.
+        for (int trace = traces - 1; trace >= 0; --trace) {
+            float const depth = traces > 1
+                ? static_cast<float>(trace) / static_cast<float>(traces - 1)
+                : 0.0f;
+
+            auto* traceNode = new QSGGeometryNode();
+            auto* geometry = new QSGGeometry(waterfallTexturedPoint2DAttributes(),
+                                             verticesPerTrace);
+            geometry->setDrawingMode(QSGGeometry::DrawTriangleStrip);
+            geometry->setVertexDataPattern(QSGGeometry::StaticPattern);
+            auto* vertices = geometry->vertexDataAsTexturedPoint2D();
+            for (int point = 0; point < points; ++point) {
+                float const x = static_cast<float>(point) * static_cast<float>(w - 1) / denominator;
+                vertices[point * 2].set(x, 0.0f, depth, 0.0f);
+                vertices[point * 2 + 1].set(x, static_cast<float>(h), depth, 1.0f);
+            }
+
+            traceNode->setGeometry(geometry);
+            traceNode->setFlag(QSGNode::OwnsGeometry);
+            traceNode->setMaterial(material);
+            node->appendChildNode(traceNode);
+        }
+        node->meshSize = QSize(w, h);
+        node->meshTraces = traces;
+        node->meshPoints = points;
+    }
+
+    auto replaceExternalTexture = [](QSGTexture*& slot,
+                                     QRhiTexture* texture,
+                                     QSize const& size) {
+        auto* external = dynamic_cast<DecodiumExternalRhiTexture*>(slot);
+        if (!external || external->rhiTexture() != texture || external->textureSize() != size) {
+            delete slot;
+            slot = new DecodiumExternalRhiTexture(texture, size, false);
+        }
+        slot->setFiltering(QSGTexture::Nearest);
+    };
+    replaceExternalTexture(material->historyTexture,
+                           m_gpuFft->directWaterfallTexture,
+                           m_gpuFft->directWaterfallSize);
+    replaceExternalTexture(material->rowParamsTexture,
+                           m_gpuFft->directRowParamsTexture,
+                           m_gpuFft->directRowParamsSize);
+
+    if (material->paletteGeneration != m_paletteGeneration || !material->paletteTexture) {
+        QImage paletteImage(256, 1, QImage::Format_RGBA8888);
+        uchar* dst = paletteImage.scanLine(0);
+        for (int x = 0; x < 256; ++x) {
+            QColor const color = QColor::fromRgb(m_palette.value(x, qRgb(0, 0, 0)));
+            int const offset = x * 4;
+            dst[offset + 0] = static_cast<uchar>(color.red());
+            dst[offset + 1] = static_cast<uchar>(color.green());
+            dst[offset + 2] = static_cast<uchar>(color.blue());
+            dst[offset + 3] = 255;
+        }
+        material->retireTexture(material->paletteTexture);
+        auto* paletteTexture = new DecodiumRhiImageTexture(false);
+        paletteTexture->setFiltering(QSGTexture::Linear);
+        paletteTexture->uploadFullRgbaImage(paletteImage, false);
+        material->paletteTexture = paletteTexture;
+        material->paletteGeneration = m_paletteGeneration;
+    }
+
+    material->geometryParams[0] = static_cast<float>(w);
+    material->geometryParams[1] = static_cast<float>(h);
+    material->geometryParams[2] = 2.0f;
+    material->geometryParams[3] = 5.0f;
+    material->historyParams[0] = static_cast<float>(m_gpuFft->directWriteRow);
+    material->historyParams[1] = static_cast<float>(historyRows);
+    material->historyParams[2] = static_cast<float>(traces);
+    material->historyParams[3] = m_spectrum3dFloorDepth;
+    material->perspectiveParams[0] = 0.28f;
+    material->perspectiveParams[1] = 0.32f;
+    material->perspectiveParams[2] = 0.55f;
+    material->perspectiveParams[3] = 2.0f;
+
+    PanadapterFreqView const freqView = makePanadapterFreqView(
+        static_cast<float>(m_startFreq),
+        static_cast<float>(m_bandwidth),
+        m_dataFreqMin,
+        m_dataFreqMax,
+        m_zoomFactor,
+        static_cast<float>(m_panHz));
+    material->xParams[0] = freqView.viewRange / freqView.dataRange;
+    material->xParams[1] = (freqView.viewStart - freqView.dataStart) / freqView.dataRange;
+    material->xParams[2] = 1.0f;
+    // The legacy/CPU 3D view normally spans about 80 dB.  The direct 2D GPU
+    // auto-range is intentionally tighter (often 45 dB), but that would hide
+    // most historical ridges if reused unchanged by this shader.
+    material->xParams[3] = 80.0f;
+
+    for (QSGNode* traceChild = node->firstChild(); traceChild; traceChild = traceChild->nextSibling()) {
+        if (auto* traceNode = dynamic_cast<QSGGeometryNode*>(traceChild))
+            traceNode->markDirty(QSGNode::DirtyMaterial);
+    }
+    QSGNode* extra = node->nextSibling();
+    while (extra) {
+        QSGNode* const next = extra->nextSibling();
+        if (!dynamic_cast<PanadapterSpectrumOverlayNode*>(extra)) {
+            spectrumRoot->removeChildNode(extra);
+            delete extra;
+        }
+        extra = next;
+    }
+
+    if (!m_loggedGpuSpectrum3d) {
+        m_loggedGpuSpectrum3d = true;
+        qInfo().noquote()
+            << "[GPUDBG] Panadapter 3D GPU history path active"
+            << "api=" << waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi())
+            << "traces=" << traces
+            << "points=" << points
+            << "ordered_draws=" << traces
+            << "history_texture="
+            << QStringLiteral("%1x%2")
+                   .arg(m_gpuFft->directWaterfallSize.width())
+                   .arg(m_gpuFft->directWaterfallSize.height())
+            << "readback=off"
+            << "fallback=FFTW_CPU_history_QSG_geometry";
+    }
+#else
+    updateSpectrum3dNodes(spectrumRoot, w, h);
+#endif
+}
+
 void PanadapterItem::removeSpectrumGraphNodes(QSGNode* spectrumRoot)
 {
     if (!spectrumRoot)
@@ -4079,6 +4506,8 @@ void PanadapterItem::itemChange(ItemChange change, const ItemChangeData& value)
 {
     if (change == ItemSceneChange) {
         m_sceneGraphApiKey.store(-1, std::memory_order_release);
+        m_spectrum3dGpuBlocked.store(false, std::memory_order_release);
+        m_loggedGpuSpectrum3d = false;
         m_loggedWaterfallApi = -1;
         m_loggedWaterfallPath = -1;
         m_loggedWaterfallReason.clear();
@@ -4098,6 +4527,8 @@ void PanadapterItem::itemChange(ItemChange change, const ItemChangeData& value)
 void PanadapterItem::releaseResources()
 {
     m_sceneGraphApiKey.store(-1, std::memory_order_release);
+    m_spectrum3dGpuBlocked.store(false, std::memory_order_release);
+    m_loggedGpuSpectrum3d = false;
     m_loggedWaterfallApi = -1;
     m_loggedWaterfallPath = -1;
     m_loggedWaterfallReason.clear();
@@ -4140,6 +4571,7 @@ void PanadapterItem::failGpuFft(const QString& reason)
         m_lastGpuFftReadbackMs = 0;
         m_gpuFftUiBinsExpected = 0;
         m_gpuDirectTextureReady = false;
+        m_gpuFftActiveNotified = false;
         m_gpuFftInvalidReadbacks = 0;
         m_gpuFftReadbackTimeouts = 0;
         m_gpuFftSlowReadbacks = 0;
@@ -4155,6 +4587,18 @@ void PanadapterItem::failGpuFft(const QString& reason)
         << "fallback=FFTW_CPU";
     QMetaObject::invokeMethod(this, [this, reason]() {
         emit gpuFftUnavailable(reason);
+    }, Qt::QueuedConnection);
+}
+
+void PanadapterItem::notifyGpuFftActive(const QString& backend)
+{
+    if (m_gpuFftActiveNotified)
+        return;
+    m_gpuFftActiveNotified = true;
+    QPointer<PanadapterItem> guard(this);
+    QMetaObject::invokeMethod(this, [guard, backend]() {
+        if (guard)
+            emit guard->gpuFftActivated(backend);
     }, Qt::QueuedConnection);
 }
 
@@ -4242,6 +4686,10 @@ void PanadapterItem::recordGpuFftCompute()
     }
     if (!rhi || !cb) {
         failGpuFft(QStringLiteral("RHI command buffer unavailable"));
+        return;
+    }
+    if (!rhi->isFeatureSupported(QRhi::Compute)) {
+        failGpuFft(QStringLiteral("RHI backend does not support compute shaders"));
         return;
     }
 
@@ -4647,6 +5095,9 @@ void PanadapterItem::recordGpuFftCompute()
         cb->setShaderResources(m_gpuFft->directSrb);
         cb->dispatch((nBins + 63) / 64, 1, 1);
         cb->endComputePass(debugReadbackBatch);
+        notifyGpuFftActive(QStringLiteral("%1 RHI compute")
+                               .arg(QString::fromLatin1(
+                                   waterfallGraphicsApiName(rif->graphicsApi()))));
 
         {
             QMutexLocker lock(&m_mutex);
@@ -5005,6 +5456,9 @@ void PanadapterItem::recordGpuFftCompute()
     cb->setShaderResources(m_gpuFft->srb);
     cb->dispatch((nBins + 63) / 64, 1, 1);
     cb->endComputePass(readbackBatch);
+    notifyGpuFftActive(QStringLiteral("%1 RHI compute")
+                           .arg(QString::fromLatin1(
+                               waterfallGraphicsApiName(rif->graphicsApi()))));
     m_gpuFft->readbackPending = true;
     m_gpuFft->readbackPendingSinceMs = monotonicMs();
 
@@ -5203,9 +5657,10 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         && m_gpuFft->directWaterfallTexture
         && m_gpuFft->directRowParamsTexture
         && m_gpuFft->directPeakTexture
-        // The direct textures do not retain CPU-visible history.  While 3D is
-        // selected the bridge supplies asynchronous dB frames instead.
-        && !m_spectrum3d;
+        // 3D samples the same history texture directly.  If its shader path
+        // is unavailable this becomes false and the existing CPU producer and
+        // QSG geometry path take over automatically.
+        && (!m_spectrum3d || spectrum3dGpuSupported());
 #else
         false;
 #endif
@@ -5276,6 +5731,9 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             writeRectGeometry(bgNode->geometry()->vertexDataAsPoint2D(), specRect);
         }
 
+        if (m_spectrum3d) {
+            updateSpectrum3dGpuNodes(spectrumRoot, w, specH);
+        } else {
         QSGNode* child = sceneGraphChildAt(spectrumRoot, 1);
         auto* directNode = dynamic_cast<QSGGeometryNode*>(child);
         auto* material = directNode ? dynamic_cast<PanadapterSpectrumMaterial*>(directNode->material()) : nullptr;
@@ -5368,6 +5826,7 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 << "[GPUDBG] Panadapter spectrum GPU direct texture path active"
                 << "api=" << waterfallGraphicsApiName(window()->rendererInterface()->graphicsApi())
                 << "reason= QSG shader samples FFT R32F texture; no CPU vertices/readback";
+        }
         }
 #endif
     } else if (!m_spectrumImage.isNull() || gpuSpectrumGraph) {

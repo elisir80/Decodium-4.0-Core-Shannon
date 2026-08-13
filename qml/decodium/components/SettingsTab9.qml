@@ -146,6 +146,38 @@ ScrollView {
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }
 
+                Text {
+                    visible: Qt.platform.os === "linux"
+                    text: qsTr("OpenGL GPU FFT:")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: advancedStartupGrid.labelWidth
+                    Layout.preferredHeight: visible ? controlHeight : 0
+                }
+                CheckBox {
+                    visible: Qt.platform.os === "linux"
+                    Layout.preferredWidth: advancedStartupGrid.checkWidth
+                    Layout.preferredHeight: visible ? controlHeight : 0
+                    checked: bridge.getSetting("OpenGlGpuPanadapterFft", false)
+                    onToggled: bridge.setSetting("OpenGlGpuPanadapterFft", checked)
+                    ToolTip.visible: hovered
+                    ToolTip.text: qsTr("After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.")
+                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                    contentItem: Text { text: ""; leftPadding: 24 }
+                }
+                Text {
+                    visible: Qt.platform.os === "linux"
+                    text: qsTr("Visual FFT only; restart required; safe CPU fallback remains active.")
+                    color: textSecondary
+                    font.pixelSize: 11
+                    wrapMode: Text.Wrap
+                    Layout.columnSpan: 2
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: visible ? implicitHeight : 0
+                }
+
                 // 1.0.497 — Modalità PC lento (master): un solo interruttore per hardware vecchio
                 Text { text: qsTr("Slow-PC mode:"); color: textSecondary; font.pixelSize: 12; font.bold: true; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }
                 CheckBox {

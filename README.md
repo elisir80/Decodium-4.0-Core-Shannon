@@ -95,6 +95,16 @@ Sono presenti fallback per sistemi problematici:
 - percorsi CPU/fallback quando GPU o shader non sono disponibili;
 - modalita PC lento per ridurre carico grafico e UI.
 
+Su Linux con backend Qt Quick OpenGL, la FFT visuale del panadapter puo essere
+spostata sulla GPU da **Setup > Advanced > OpenGL GPU FFT**. L'opzione e'
+volutamente disattiva di serie per compatibilita con driver OpenGL meno stabili;
+richiede il riavvio di Decodium;
+se il compute shader non e' supportato, fallisce o provoca uno stallo severo,
+Decodium torna automaticamente alla FFTW asincrona sulla CPU. Questa opzione
+accelera la sola FFT grafica del panadapter: il decoder FT rimane sulla CPU.
+Non usare `QT_QUICK_BACKEND=software` o
+`DECODIUM_DISABLE_GPU_PANADAPTER_FFT=1` quando si desidera questo offload.
+
 #### CAT e controllo radio
 
 Decodium supporta piu strade per il controllo radio:
@@ -540,6 +550,16 @@ Fallbacks are available for difficult systems:
 - safe graphics options;
 - CPU fallback paths where GPU or shaders are unavailable;
 - low-performance PC settings to reduce UI and graphics load.
+
+On Linux with the Qt Quick OpenGL backend, the visual panadapter FFT can be
+offloaded to the GPU through **Setup > Advanced > OpenGL GPU FFT**. The option
+is deliberately off by default for compatibility with less stable OpenGL
+drivers and requires a Decodium restart. If compute shaders are unsupported,
+fail, or cause a severe stall,
+Decodium automatically returns to the asynchronous CPU FFTW path. This option
+accelerates only the visual panadapter FFT; FT decoding remains on the CPU. Do
+not use `QT_QUICK_BACKEND=software` or
+`DECODIUM_DISABLE_GPU_PANADAPTER_FFT=1` when this offload is wanted.
 
 #### CAT and Radio Control
 

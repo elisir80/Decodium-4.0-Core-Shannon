@@ -131,6 +131,7 @@ jobs:
             libtool \
             libudev-dev \
             libusb-1.0-0-dev \
+            libvulkan-dev \
             libwayland-dev \
             libx11-dev \
             libx11-xcb-dev \

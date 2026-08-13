@@ -1215,6 +1215,9 @@ Item {
                 waterfallPanel.persistGraphSetting("uiZoomFactor", zoomFactor)
             }
             onMeasuredFloorChanged: waterfallPanel.applyManualContrast()
+            onGpuFftActivated: function(backend) {
+                bridge.setGpuPanadapterFftActive(true, backend)
+            }
             onGpuFftUnavailable: function(reason) {
                 bridge.setGpuPanadapterFftAvailable(false, reason)
             }

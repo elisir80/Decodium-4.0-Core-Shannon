@@ -15,20 +15,28 @@ Rectangle {
     property double signalLevel: 0.0 // legacy S-meter in dB circa 0..90
     property double cpuUsage: bridge ? bridge.processCpuUsage : 0.0    // Decodium process, normalized 0.0..1.0
     property double processGpuUsage: bridge ? bridge.processGpuUsage : -1.0
+    readonly property string processGpuUsageSource: bridge ? String(bridge.processGpuUsageSource) : "unavailable"
     readonly property bool realGpuUsageAvailable: processGpuUsage >= 0.0
+    readonly property string activeRhiBackend: bridge ? String(bridge.activeRhiBackend) : "unknown"
+    readonly property bool softwareRenderer: activeRhiBackend.toLowerCase() === "software"
+    readonly property bool panadapterGpuFftActive: bridge ? bridge.panadapterGpuFftActive : false
+    readonly property string panadapterGpuFftBackend: bridge ? String(bridge.panadapterGpuFftBackend) : "CPU FFTW"
     property int gpuFrameCount: 0
     property int gpuFps: 0
     property double gpuActivity: 0.0
     readonly property double estimatedGpuActivity: Math.max(0.0, Math.min(1.0, gpuActivity))
     readonly property double displayedGpuActivity: realGpuUsageAvailable
         ? Math.max(0.0, Math.min(1.0, processGpuUsage))
-        : estimatedGpuActivity
+        : (softwareRenderer ? 0.0 : estimatedGpuActivity)
     readonly property double gpuLoadPercentValue: displayedGpuActivity * 100.0
     readonly property int gpuLoadPercent: Math.round(gpuLoadPercentValue)
     readonly property string gpuLoadText: realGpuUsageAvailable
         ? (gpuLoadPercentValue < 10.0 ? gpuLoadPercentValue.toFixed(1) + "%" : gpuLoadPercent.toFixed(0) + "%")
-        : gpuLoadPercent.toFixed(0) + "%"
-    readonly property string gpuLabelText: "GPU:"
+        : (softwareRenderer ? "CPU"
+           : (panadapterGpuFftActive ? "FFT"
+              : (gpuFps > 0 ? gpuFps.toFixed(0) + "fps" : "idle")))
+    readonly property string gpuLabelText: realGpuUsageAvailable || panadapterGpuFftActive
+        ? "GPU:" : (softwareRenderer ? "RENDER:" : "GPU ACT:")
     readonly property bool gpuMonitorVisible: Qt.platform.os !== "osx"
     property double rigPowerWatts: bridge ? bridge.rigPowerWatts : 0.0
     property double rigSwr: bridge ? bridge.rigSwr : 0.0
@@ -604,8 +612,9 @@ Rectangle {
                         anchors.margins: 2
                         width: Math.max(0, Math.min(parent.width - 4, (parent.width - 4) * displayedGpuActivity))
                         radius: 1
-                        color: displayedGpuActivity < 0.5 ? secondaryCyan :
-                               displayedGpuActivity < 0.8 ? colorOrange : colorRed
+                        color: !realGpuUsageAvailable ? secondaryCyan
+                               : displayedGpuActivity < 0.5 ? secondaryCyan
+                               : displayedGpuActivity < 0.8 ? colorOrange : colorRed
                     }
                 }
 
@@ -614,7 +623,7 @@ Rectangle {
                     font.family: decodiumMonoFontFamily
                     font.pixelSize: 10
                     color: realGpuUsageAvailable && displayedGpuActivity > 0.8 ? colorRed : textSecondary
-                    Layout.preferredWidth: narrowFooter ? 34 : 38
+                    Layout.preferredWidth: narrowFooter ? 36 : 42
                 }
             }
 
@@ -629,13 +638,21 @@ Rectangle {
                     delay: 500
                     text: realGpuUsageAvailable
                           ? (Qt.platform.os === "linux"
-                             ? "Approximate GPU-engine usage for the Decodium process\n"
+                             ? (processGpuUsageSource === "drm-device"
+                                ? "Overall activity of the GPU used by Decodium\n"
+                                : "Approximate GPU-engine usage for the Decodium process\n")
                              : "Real GPU usage for the Decodium process\n")
                             + gpuLoadText + " from system GPU counters\n"
+                            + "Panadapter FFT: " + panadapterGpuFftBackend + "\n"
                             + gpuFps + " rendered frames/s"
-                          : "Process GPU counter unavailable\n"
-                            + "Estimated rendering activity\n"
-                            + gpuFps + " rendered frames/s"
+                          : (softwareRenderer
+                             ? "Qt Quick renderer: software (CPU)\n"
+                               + "Panadapter FFT: " + panadapterGpuFftBackend + "\n"
+                               + "No GPU utilisation is being reported"
+                             : "Qt Quick renderer: " + activeRhiBackend + "\n"
+                               + "Panadapter FFT: " + panadapterGpuFftBackend + "\n"
+                               + "Per-process GPU utilisation counter unavailable\n"
+                               + gpuFps + " rendered frames/s (activity, not GPU load)")
                 }
             }
         }
