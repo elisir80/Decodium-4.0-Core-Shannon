@@ -311,6 +311,8 @@ Dialog {
                         }
 
                         contentItem: TextInput {
+                            selectByMouse: true
+                            onActiveFocusChanged: if (activeFocus) selectAll()
                             text: serialSpinBox.value.toString().padStart(4, '0')
                             font.family: decodiumMonoFontFamily
                             font.pixelSize: 14

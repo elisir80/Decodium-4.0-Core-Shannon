@@ -894,7 +894,9 @@ ApplicationWindow {
             macroDialogDetached = false; macroDialogMinimized = false
             if (settingsFloatingWindow) {
                 settingsFloatingWindow.hideHostedWindow()
-                resetFloatingWindowGeometry(settingsFloatingWindow, 1500, 900)
+                resetFloatingWindowGeometry(settingsFloatingWindow,
+                                            settingsFloatingWindow.preferredWidth,
+                                            settingsFloatingWindow.preferredHeight)
             }
             if (mamFloatingWindow) mamFloatingWindow.hideHostedWindow()
             if (decometerFloatingWindow) decometerFloatingWindow.hideHostedWindow()
@@ -11098,8 +11100,18 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         id: settingsFloatingWindow
         property int requestedTab: -1
         property bool desktopMoveActive: false
-        width: 1500
-        height: 900
+        // Su un portatile 1366x768 una finestra da 1500x900 non ci sta: usciva
+        // dallo schermo, e con lei la colonna di destra delle impostazioni -
+        // dove vive il campo della porta. Si parte dalla misura voluta, ma
+        // senza mai arrivare a occupare tutto lo schermo.
+        readonly property int availableScreenWidth: Math.min(Screen.width, Screen.desktopAvailableWidth)
+        readonly property int availableScreenHeight: Math.min(Screen.height, Screen.desktopAvailableHeight)
+        readonly property int preferredWidth: Math.max(minimumWidth,
+                                                       Math.min(1500, Math.round(availableScreenWidth * 0.88)))
+        readonly property int preferredHeight: Math.max(minimumHeight,
+                                                        Math.min(900, Math.round(availableScreenHeight * 0.88)))
+        width: preferredWidth
+        height: preferredHeight
         minimumWidth: 800
         minimumHeight: 560
         visible: false

@@ -457,6 +457,8 @@ Dialog {
                         value: tracker ? tracker.rotatorPort : 12000
                         onValueModified: if (tracker) tracker.rotatorPort = value
                         contentItem: TextInput {
+                            selectByMouse: true
+                            onActiveFocusChanged: if (activeFocus) selectAll()
                             z: 2
                             text: rotatorPortSpinBox.textFromValue(
                                       rotatorPortSpinBox.value,

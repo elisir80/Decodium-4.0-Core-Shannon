@@ -312,6 +312,8 @@ Window {
                     Layout.preferredWidth: 100
                     Layout.preferredHeight: 34
                     contentItem: TextInput {
+                        selectByMouse: true
+                        onActiveFocusChanged: if (activeFocus) selectAll()
                         z: 2
                         text: limitSpin.textFromValue(limitSpin.value, limitSpin.locale)
                         color: historyDialog.cText

@@ -53,6 +53,8 @@ Window {
         Layout.preferredWidth: 110
         Layout.preferredHeight: 36
         contentItem: TextInput {
+            selectByMouse: true
+            onActiveFocusChanged: if (activeFocus) selectAll()
             z: 2
             text: control.textFromValue(control.value, control.locale)
             color: callDialog.cText

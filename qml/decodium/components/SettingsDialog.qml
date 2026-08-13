@@ -1431,6 +1431,8 @@ Dialog {
                     Layout.preferredWidth: 140
                     onValueChanged: settingsDialog.fontPickerPointSize = value
                     contentItem: TextInput {
+                        selectByMouse: true
+                        onActiveFocusChanged: if (activeFocus) selectAll()
                         text: fontPointSpin.textFromValue(fontPointSpin.value, fontPointSpin.locale)
                         color: textPrimary
                         font.pixelSize: controlFontSize

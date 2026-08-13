@@ -71,7 +71,7 @@ ScrollView {
                     bridge.txFrequency = value
                 bridge.setSetting("txFrequency", value)
             }
-            contentItem: TextInput { text: txFreqSpin.textFromValue(txFreqSpin.value, txFreqSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txFreqSpin.editable; validator: txFreqSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+            contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txFreqSpin.textFromValue(txFreqSpin.value, txFreqSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txFreqSpin.editable; validator: txFreqSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("TX Slot:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -103,7 +103,7 @@ ScrollView {
             validator: DoubleValidator { bottom: 0.0; top: 0.5; decimals: 1; notation: DoubleValidator.StandardNotation }
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
             onValueChanged: bridge.setSetting("TxDelay", value / 10)
-            contentItem: TextInput { text: txDelaySpin.textFromValue(txDelaySpin.value, txDelaySpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txDelaySpin.editable; validator: txDelaySpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+            contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txDelaySpin.textFromValue(txDelaySpin.value, txDelaySpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txDelaySpin.editable; validator: txDelaySpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Allow TX QSY:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -342,7 +342,7 @@ ScrollView {
                     from: 1; to: 8; editable: true
                     value: bridge ? bridge.ft2SignoffRetryCap : 4
                     onValueChanged: if (bridge && bridge.ft2SignoffRetryCap !== value) bridge.setFt2SignoffRetryCap(value)
-                    contentItem: TextInput { text: ft2SignoffCapSpin.textFromValue(ft2SignoffCapSpin.value, ft2SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2SignoffCapSpin.editable; validator: ft2SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft2SignoffCapSpin.textFromValue(ft2SignoffCapSpin.value, ft2SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2SignoffCapSpin.editable; validator: ft2SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -368,7 +368,7 @@ ScrollView {
                     from: 1; to: 8; editable: true
                     value: bridge ? bridge.ft4SignoffRetryCap : 4
                     onValueChanged: if (bridge && bridge.ft4SignoffRetryCap !== value) bridge.setFt4SignoffRetryCap(value)
-                    contentItem: TextInput { text: ft4SignoffCapSpin.textFromValue(ft4SignoffCapSpin.value, ft4SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft4SignoffCapSpin.editable; validator: ft4SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft4SignoffCapSpin.textFromValue(ft4SignoffCapSpin.value, ft4SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft4SignoffCapSpin.editable; validator: ft4SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -394,7 +394,7 @@ ScrollView {
                     from: 1; to: 8; editable: true
                     value: bridge ? bridge.ft8SignoffRetryCap : 3
                     onValueChanged: if (bridge && bridge.ft8SignoffRetryCap !== value) bridge.setFt8SignoffRetryCap(value)
-                    contentItem: TextInput { text: ft8SignoffCapSpin.textFromValue(ft8SignoffCapSpin.value, ft8SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft8SignoffCapSpin.editable; validator: ft8SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft8SignoffCapSpin.textFromValue(ft8SignoffCapSpin.value, ft8SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft8SignoffCapSpin.editable; validator: ft8SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -444,7 +444,7 @@ ScrollView {
                     enabled: ftxWeakBoostCheck.checked
                     value: bridge ? bridge.ftxWeakSnrThreshold : -15
                     onValueChanged: if (bridge && bridge.ftxWeakSnrThreshold !== value) bridge.setFtxWeakSnrThreshold(value)
-                    contentItem: TextInput { text: ftxWeakSnrSpin.textFromValue(ftxWeakSnrSpin.value, ftxWeakSnrSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakSnrSpin.editable; validator: ftxWeakSnrSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ftxWeakSnrSpin.textFromValue(ftxWeakSnrSpin.value, ftxWeakSnrSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakSnrSpin.editable; validator: ftxWeakSnrSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -470,7 +470,7 @@ ScrollView {
                     enabled: ftxWeakBoostCheck.checked
                     value: bridge ? bridge.ftxWeakSignoffBonus : 3
                     onValueChanged: if (bridge && bridge.ftxWeakSignoffBonus !== value) bridge.setFtxWeakSignoffBonus(value)
-                    contentItem: TextInput { text: ftxWeakBonusSpin.textFromValue(ftxWeakBonusSpin.value, ftxWeakBonusSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakBonusSpin.editable; validator: ftxWeakBonusSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ftxWeakBonusSpin.textFromValue(ftxWeakBonusSpin.value, ftxWeakBonusSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakBonusSpin.editable; validator: ftxWeakBonusSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -520,7 +520,7 @@ ScrollView {
                     enabled: ft2ReengageGuardCheck.checked
                     value: bridge ? bridge.ft2PostLogReengageMax : 1
                     onValueChanged: if (bridge && bridge.ft2PostLogReengageMax !== value) bridge.setFt2PostLogReengageMax(value)
-                    contentItem: TextInput { text: ft2ReengageMaxSpin.textFromValue(ft2ReengageMaxSpin.value, ft2ReengageMaxSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2ReengageMaxSpin.editable; validator: ft2ReengageMaxSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft2ReengageMaxSpin.textFromValue(ft2ReengageMaxSpin.value, ft2ReengageMaxSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2ReengageMaxSpin.editable; validator: ft2ReengageMaxSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -683,7 +683,7 @@ ScrollView {
                     from: 1; to: 99; editable: true
                     value: bridge ? bridge.maxCallerRetries : 10
                     onValueChanged: if (bridge && bridge.maxCallerRetries !== value) bridge.setMaxCallerRetries(value)
-                    contentItem: TextInput { text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     // 1.0.493 — segnale visivo: col watchdog owner (hard cap OFF) questo numero è ignorato
                     opacity: (bridge && bridge.txWatchdogMode !== 0 && !bridge.callerRetriesAlwaysHard) ? 0.5 : 1.0
@@ -1028,7 +1028,7 @@ ScrollView {
                             dialog.scheduleSettingsPersist()
                         }
                     }
-                    contentItem: TextInput { text: mamMaxStreamsSpin.textFromValue(mamMaxStreamsSpin.value, mamMaxStreamsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !mamMaxStreamsSpin.editable; validator: mamMaxStreamsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                    contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: mamMaxStreamsSpin.textFromValue(mamMaxStreamsSpin.value, mamMaxStreamsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !mamMaxStreamsSpin.editable; validator: mamMaxStreamsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
                     ToolTip.visible: hovered
@@ -1163,7 +1163,7 @@ ScrollView {
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
             onValueChanged: if (completed) applyWatchdog()
             Component.onCompleted: completed = true
-            contentItem: TextInput { text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+            contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("TX Watchdog Count:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
@@ -1181,7 +1181,7 @@ ScrollView {
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
             onValueChanged: if (completed) applyWatchdog()
             Component.onCompleted: completed = true
-            contentItem: TextInput { text: txWdCountSpin.textFromValue(txWdCountSpin.value, txWdCountSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdCountSpin.editable; validator: txWdCountSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+            contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txWdCountSpin.textFromValue(txWdCountSpin.value, txWdCountSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdCountSpin.editable; validator: txWdCountSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         // 1.0.446 - P0-3 opt-in: logga il QSO se il watchdog scatta a scambio completato
@@ -1213,7 +1213,7 @@ ScrollView {
                 from: 0; to: 300; value: Number(bridge.getSetting("TuneWatchdogTime", 90)); editable: true; enabled: tuneWdCheck.checked
                 implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
                 onValueChanged: bridge.setSetting("TuneWatchdogTime", value)
-                contentItem: TextInput { text: tuneWdSpin.textFromValue(tuneWdSpin.value, tuneWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !tuneWdSpin.editable; validator: tuneWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: tuneWdSpin.textFromValue(tuneWdSpin.value, tuneWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !tuneWdSpin.editable; validator: tuneWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                 background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
             }
         }
@@ -1235,7 +1235,7 @@ ScrollView {
             from: 0; to: 999; value: Number(bridge.getSetting("IDint", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
             onValueChanged: bridge.setSetting("IDint", value)
-            contentItem: TextInput { text: cwIdIntSpin.textFromValue(cwIdIntSpin.value, cwIdIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cwIdIntSpin.editable; validator: cwIdIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+            contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: cwIdIntSpin.textFromValue(cwIdIntSpin.value, cwIdIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cwIdIntSpin.editable; validator: cwIdIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
 
