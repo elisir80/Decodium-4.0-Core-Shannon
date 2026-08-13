@@ -19684,6 +19684,14 @@ If unsure, use High.</source>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>同じ無線機で Decodium をもう一つ起動する場合: --rig-name を付けて起動し、ここで接続します。シリアルポートは、それを共有している最初のインスタンスが保持します。</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>ポートが指定されていません: アンプのシリアルポート、または付属ソフトを開いたままにする場合はミラーした仮想ポートを入力してください。</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>ポート %1 は別のプログラムが使用しています - 通常はアンプ付属のソフトです。Windows はシリアルポートを一度に一つのプログラムにのみ割り当てます。読み取りでも同じです: そのプログラムを閉じるか、ポートをミラーして Decodium をその複製に向けてください。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

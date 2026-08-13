@@ -19720,6 +19720,14 @@ If unsure, use High.</translation>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

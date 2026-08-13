@@ -1453,8 +1453,17 @@ ScrollView {
                     return qsTr("Reading: %1 W, SWR %2")
                            .arg(bridge.amplifier.watts.toFixed(0))
                            .arg(bridge.amplifier.swr.toFixed(2))
-                if (!bridge.amplifier.connected)
-                    return qsTr("Port not open: %1").arg(bridge.amplifier.status)
+                if (!bridge.amplifier.connected) {
+                    // "Porta non aperta: errore" mandava a cercare un guasto
+                    // dove non c'era. I due casi che capitano davvero hanno
+                    // una risposta, e va data qui.
+                    var st = bridge.amplifier.status
+                    if (st === "noport")
+                        return qsTr("No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.")
+                    if (st === "busy")
+                        return qsTr("Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.").arg(bridge.amplifier.port)
+                    return qsTr("Port not open: %1").arg(st)
+                }
                 return qsTr("Port open, but no valid frame yet.")
             }
         }

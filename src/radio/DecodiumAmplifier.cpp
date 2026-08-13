@@ -43,8 +43,18 @@ QString DecodiumAmplifier::status() const
 {
     if (!m_enabled)
         return QStringLiteral("off");
-    if (!connected())
+    if (!connected()) {
+        // Nessuna porta indicata non e' un errore: e' una configurazione da
+        // finire. Chiamarlo "errore" manda a cercare un guasto che non c'e'.
+        if (m_port.trimmed().isEmpty())
+            return QStringLiteral("noport");
+        // Su Windows la seriale la tiene un solo programma alla volta, anche
+        // in sola lettura. E' il caso tipico: il software del costruttore e'
+        // aperto sulla stessa porta.
+        if (m_lastErrorCode == int(QSerialPort::PermissionError))
+            return QStringLiteral("busy");
         return m_lastError.isEmpty() ? QStringLiteral("error") : m_lastError;
+    }
     return m_responding ? QStringLiteral("reading") : QStringLiteral("silent");
 }
 
@@ -155,6 +165,7 @@ bool DecodiumAmplifier::configure(bool enabled, const QString& port, int baud,
     m_responding = false;
     m_last = Reading{};
     m_lastError.clear();
+    m_lastErrorCode = int(QSerialPort::NoError);
 
     if (!m_enabled || m_port.isEmpty()) {
         if (changed) emit configChanged();
@@ -182,6 +193,7 @@ bool DecodiumAmplifier::configure(bool enabled, const QString& port, int baud,
     QIODevice::OpenMode const mode = m_passive ? QIODevice::ReadOnly : QIODevice::ReadWrite;
     if (!m_serial->open(mode)) {
         m_lastError = m_serial->errorString();
+        m_lastErrorCode = int(m_serial->error());
         qWarning().noquote() << "[AMP] apertura di" << m_port << "fallita:" << m_lastError;
         m_serial->deleteLater();
         m_serial = nullptr;

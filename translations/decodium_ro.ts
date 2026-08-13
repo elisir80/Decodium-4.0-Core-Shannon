@@ -14233,6 +14233,14 @@ Dacă eziți, alege înaltă.</translation>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>Pentru o a doua instanță Decodium pe același radio: porniți-o cu --rig-name și conectați-o aici. Portul serial rămâne la prima, care îl partajează.</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>Niciun port indicat: scrieți portul serial al amplificatorului, sau portul virtual oglindit dacă programul său trebuie să rămână deschis.</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>Portul %1 este ocupat de alt program - de obicei cel al amplificatorului. Windows dă un port serial unui singur program pe rând, inclusiv pentru citire: închideți acel program, sau oglindiți portul și îndreptați Decodium spre copie.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

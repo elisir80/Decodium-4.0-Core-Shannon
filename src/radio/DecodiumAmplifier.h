@@ -121,6 +121,11 @@ private:
     int m_pollMs {500};
     bool m_responding {false};
     QString m_lastError;
+    // Il codice, non solo il testo: "porta occupata" e' il caso piu'
+    // frequente e merita una risposta diversa da un errore generico. Si
+    // tiene come intero per non trascinare QSerialPort in questa
+    // intestazione: qui la classe e' solo dichiarata.
+    int m_lastErrorCode {0};   // QSerialPort::NoError
     Reading m_last;
 };
 

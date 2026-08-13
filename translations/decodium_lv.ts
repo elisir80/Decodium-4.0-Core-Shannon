@@ -19699,6 +19699,14 @@ Noklusējums: IZSL.</translation>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>Otrai Decodium instancei ar to pašu radio: palaidiet to ar --rig-name un savienojiet šeit. Seriālais ports paliek pirmajai, kas to koplieto.</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>Nav norādīts ports: ierakstiet pastiprinātāja seriālo portu vai dublēto virtuālo portu, ja tā programmai jāpaliek atvērtai.</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>Portu %1 aizņem cita programma - parasti paša pastiprinātāja programmatūra. Windows seriālo portu piešķir vienai programmai vienlaikus, arī lasīšanai: aizveriet to programmu vai dublējiet portu un norādiet Decodium uz kopiju.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

@@ -19686,6 +19686,14 @@ En cas de doute, utilisez Élevée.</translation>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>Pour une deuxième instance de Decodium sur la même station : lancez-la avec --rig-name et connectez-la ici. Le port série reste à la première, qui le partage.</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>Aucun port indiqué : saisissez le port série de l'amplificateur, ou le port virtuel dupliqué si son propre logiciel doit rester ouvert.</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>Le port %1 est occupé par un autre programme - en général celui de l'amplificateur. Windows attribue un port série à un seul programme à la fois, même en lecture : fermez ce programme, ou dupliquez le port et pointez Decodium sur la copie.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

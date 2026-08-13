@@ -19684,6 +19684,14 @@ If unsure, use High.</source>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>在同一台電台上執行第二個 Decodium 實例：以 --rig-name 啟動並在此連線。序列埠仍由第一個實例持有並共用。</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>未指定連接埠：請填寫功率放大器的序列埠，若其隨附軟體必須保持開啟，則填寫鏡像的虛擬序列埠。</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>連接埠 %1 已被其他程式占用——通常是功率放大器隨附的軟體。Windows 一次只把序列埠交給一個程式，讀取也一樣：關閉該程式，或鏡像該連接埠並讓 Decodium 指向副本。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

@@ -19554,6 +19554,14 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>Egy második Decodium-példányhoz ugyanazon a rádión: indítsa a --rig-name kapcsolóval, és itt csatlakoztassa. A soros port az elsőnél marad, amely megosztja azt.</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>Nincs megadva port: írja be az erősítő soros portját, vagy a tükrözött virtuális portot, ha a saját szoftverének nyitva kell maradnia.</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>A(z) %1 portot egy másik program tartja - általában az erősítő saját szoftvere. A Windows egyszerre egy programnak adja a soros portot, olvasáshoz is: zárja be azt a programot, vagy tükrözze a portot, és a Decodiumot a másolatra állítsa.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>

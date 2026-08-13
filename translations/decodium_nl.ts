@@ -19696,6 +19696,14 @@ Gebruik Hoog als u het niet zeker weet.</translation>
         <source>For a second instance of Decodium on the same radio: start it with --rig-name and connect it here. The serial port stays with the first one, which shares it.</source>
         <translation>Voor een tweede Decodium-instantie op dezelfde set: start deze met --rig-name en verbind hem hier. De seriële poort blijft bij de eerste, die hem deelt.</translation>
     </message>
+    <message>
+        <source>No port set: type the amplifier's serial port, or the mirrored virtual port if its own software has to stay open.</source>
+        <translation>Geen poort ingesteld: typ de seriële poort van de versterker, of de gespiegelde virtuele poort als de eigen software open moet blijven.</translation>
+    </message>
+    <message>
+        <source>Port %1 is held by another program - usually the amplifier's own software. Windows gives a serial port to one program at a time, reading included: close that program, or mirror the port and point Decodium at the copy.</source>
+        <translation>Poort %1 is in gebruik door een ander programma - meestal de software van de versterker zelf. Windows geeft een seriële poort aan één programma tegelijk, ook om te lezen: sluit dat programma, of spiegel de poort en laat Decodium naar de kopie wijzen.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab10</name>
