@@ -654,23 +654,49 @@ mkdir -p "${verify_dir}"
   APPIMAGE_EXTRACT_AND_RUN=1 "${OUTPUT_DIR}/${APPIMAGE_NAME}" --appimage-extract >/dev/null
 )
 EXTRACTED_APPDIR="${verify_dir}/squashfs-root"
+require_appimage_file() {
+  local relative_path="$1"
+  if [[ ! -f "${EXTRACTED_APPDIR}/${relative_path}" ]]; then
+    echo "error: final AppImage is missing ${relative_path}" >&2
+    exit 1
+  fi
+}
+
 for host_variable in \
   LD_LIBRARY_PATH LD_PRELOAD GIO_EXTRA_MODULES GI_TYPELIB_PATH \
   GSETTINGS_SCHEMA_DIR GTK_PATH XDG_DATA_DIRS; do
-  grep -q "DECODIUM_HOST_${host_variable}" "${EXTRACTED_APPDIR}/AppRun"
+  if ! grep -q "DECODIUM_HOST_${host_variable}" "${EXTRACTED_APPDIR}/AppRun"; then
+    echo "error: final AppImage launcher does not preserve ${host_variable}" >&2
+    exit 1
+  fi
 done
-test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/qmldir"
-test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
-test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
-test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/qmldir"
-test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
-test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/qmldir"
+require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+require_appimage_file "usr/qml/QtQuick/Controls/Material/qmldir"
+require_appimage_file "usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+require_appimage_file "usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
 verify_qml_plugin_dependencies "final AppImage" \
   "${EXTRACTED_APPDIR}/usr/bin/qml" \
   "${EXTRACTED_APPDIR}/usr/lib"
-find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit | grep -q .
-LD_LIBRARY_PATH="${EXTRACTED_APPDIR}/usr/lib:${EXTRACTED_APPDIR}/usr/bin" \
-  ldd "${EXTRACTED_APPDIR}/usr/bin/decodium" | grep -q 'librtlsdr.so'
+rtlsdr_library="$(find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit)"
+if [[ -z "${rtlsdr_library}" ]]; then
+  echo "error: final AppImage does not contain librtlsdr" >&2
+  exit 1
+fi
+
+# Do not pipe ldd directly into grep -q while pipefail is active.  On some
+# architectures grep exits as soon as it finds librtlsdr and ldd then receives
+# SIGPIPE, making a valid payload check fail with no diagnostic.
+decodium_ldd_output="$(
+  LD_LIBRARY_PATH="${EXTRACTED_APPDIR}/usr/lib:${EXTRACTED_APPDIR}/usr/bin" \
+    ldd "${EXTRACTED_APPDIR}/usr/bin/decodium"
+)"
+if ! grep -q 'librtlsdr.so' <<<"${decodium_ldd_output}"; then
+  echo "error: final AppImage executable is not linked to bundled librtlsdr" >&2
+  printf '%s\n' "${decodium_ldd_output}" >&2
+  exit 1
+fi
 rm -rf "${verify_dir}"
 
 log "Done"

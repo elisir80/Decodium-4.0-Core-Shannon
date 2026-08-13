@@ -96,6 +96,8 @@ when 3D is disabled, and every new accelerated path retains a CPU fallback.
 - Passed the focused worked-before and decode-list-model tests.
 - Extended the Linux DRM and secure-settings test coverage for the new GPU
   counters and clean keyring-helper environment.
+- Made the final AppImage payload validator architecture-safe and added clear
+  diagnostics for missing QML, launcher and RTL-SDR runtime components.
 - Release workflows validate the repository layout and declared version before
   producing the Windows installer, macOS DMGs and Linux AppImages.
 
@@ -193,5 +195,8 @@ when 3D is disabled, and every new accelerated path retains a CPU fallback.
   delle righe decodificate.
 - Estesa la copertura dei test Linux DRM e delle impostazioni sicure per i
   nuovi contatori GPU e per l’ambiente pulito del programma di portachiavi.
+- Reso indipendente dall’architettura il controllo finale del contenuto
+  AppImage, con diagnostica esplicita per componenti QML, launcher e runtime
+  RTL-SDR mancanti.
 - I workflow di rilascio verificano layout del repository e versione dichiarata
   prima di produrre installer Windows, DMG macOS e AppImage Linux.
