@@ -18,6 +18,7 @@ RTLSDR_VERSION="${RTLSDR_VERSION:-2.0.2}"
 RTLSDR_PREFIX="${RTLSDR_PREFIX:-${ROOT_DIR}/.ci/cache/librtlsdr-linux-${APPIMAGE_ARCH}-${RTLSDR_VERSION}}"
 LINUXDEPLOY_URL="${LINUXDEPLOY_URL:-https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage}"
 LINUXDEPLOY_QT_PLUGIN_URL="${LINUXDEPLOY_QT_PLUGIN_URL:-https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage}"
+APPIMAGETOOL_URL="${APPIMAGETOOL_URL:-https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${APPIMAGE_ARCH}.AppImage}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 2)}"
 
 VERSION="$("${ROOT_DIR}/scripts/ci/resolve-release-version.sh" "${VERSION}")"
@@ -308,6 +309,7 @@ if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrive
 fi
 LINUXDEPLOY="${TOOLS_DIR}/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage"
 QT_PLUGIN="${TOOLS_DIR}/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage"
+APPIMAGETOOL="${TOOLS_DIR}/appimagetool-${APPIMAGE_ARCH}.AppImage"
 if [[ ! -x "${LINUXDEPLOY}" ]]; then
   curl -fsSL -o "${LINUXDEPLOY}" "${LINUXDEPLOY_URL}"
   chmod +x "${LINUXDEPLOY}"
@@ -315,6 +317,10 @@ fi
 if [[ ! -x "${QT_PLUGIN}" ]]; then
   curl -fsSL -o "${QT_PLUGIN}" "${LINUXDEPLOY_QT_PLUGIN_URL}"
   chmod +x "${QT_PLUGIN}"
+fi
+if [[ "${APPIMAGE_ARCH}" == "aarch64" && ! -x "${APPIMAGETOOL}" ]]; then
+  curl -fsSL -o "${APPIMAGETOOL}" "${APPIMAGETOOL_URL}"
+  chmod +x "${APPIMAGETOOL}"
 fi
 
 resolve_appimage_runner() {
@@ -363,6 +369,10 @@ resolve_appimage_runner() {
 
 LINUXDEPLOY_RUNNER="$(resolve_appimage_runner "${LINUXDEPLOY}" linuxdeploy)"
 QT_PLUGIN_RUNNER="$(resolve_appimage_runner "${QT_PLUGIN}" linuxdeploy-plugin-qt)"
+APPIMAGETOOL_RUNNER=""
+if [[ "${APPIMAGE_ARCH}" == "aarch64" ]]; then
+  APPIMAGETOOL_RUNNER="$(resolve_appimage_runner "${APPIMAGETOOL}" appimagetool)"
+fi
 if [[ "${QT_PLUGIN_RUNNER}" == */linuxdeploy-plugin-qt-extracted/AppRun ]]; then
   mkdir -p "${TOOLS_DIR}/disabled-appimages"
   if [[ -f "${QT_PLUGIN}" && ! -f "${TOOLS_DIR}/disabled-appimages/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage.real" ]]; then
@@ -627,11 +637,23 @@ log "Create AppImage"
 (
   cd "${ROOT_DIR}"
   rm -f ./*.AppImage
-  "${LINUXDEPLOY_RUNNER}" \
-    --appdir "${APPDIR}" \
-    --desktop-file "${APPDIR}/usr/share/applications/decodium.desktop" \
-    --icon-file "${APPDIR}/usr/share/icons/hicolor/256x256/apps/decodium.png" \
-    --output appimage
+  if [[ "${APPIMAGE_ARCH}" == "aarch64" ]]; then
+    # linuxdeploy's aarch64 output plug-in currently replaces a custom AppRun
+    # while packaging.  The AppDir is already fully deployed above, so invoke
+    # appimagetool directly and preserve Decodium's host-environment wrapper.
+    ARCH="${APPIMAGE_ARCH}" \
+      VERSION="${VERSION}" \
+      LINUXDEPLOY_OUTPUT_VERSION="${VERSION}" \
+      "${APPIMAGETOOL_RUNNER}" \
+        "${APPDIR}" \
+        "${ROOT_DIR}/Decodium_4-${VERSION}-${APPIMAGE_ARCH}.AppImage"
+  else
+    "${LINUXDEPLOY_RUNNER}" \
+      --appdir "${APPDIR}" \
+      --desktop-file "${APPDIR}/usr/share/applications/decodium.desktop" \
+      --icon-file "${APPDIR}/usr/share/icons/hicolor/256x256/apps/decodium.png" \
+      --output appimage
+  fi
 )
 
 APPIMAGE_NAME="decodium4-ft2-${VERSION}-linux-${APPIMAGE_OUTPUT_ARCH}.AppImage"
