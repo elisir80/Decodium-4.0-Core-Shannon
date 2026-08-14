@@ -2471,6 +2471,27 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
         m_maxDb = maxDb;
     }
 
+    // Escursione vera dei segnali, per l'altezza delle creste 3D. La
+    // finestra dei colori non serve: con la soglia automatica parte dal
+    // rumore e sale di 80 dB, e un segnale a +10 dB alzerebbe la traccia
+    // dello 0,8% - cioe' niente. Qui si guarda dove arrivano i segnali.
+    {
+        float peak = -1000.0f;
+        for (float value : dbValues) {
+            if (std::isfinite(value) && value > peak)
+                peak = value;
+        }
+        if (peak > -999.0f) {
+            float const floorDb = m_minDb + m_spectrum3dFloorDepth;
+            float const widest = qMax(1.0f, m_maxDb - floorDb);
+            float const target = qBound(18.0f, peak - floorDb, widest);
+            m_spectrum3dSpanDb = m_spectrum3dSpanInit
+                ? 0.10f * target + 0.90f * m_spectrum3dSpanDb
+                : target;
+            m_spectrum3dSpanInit = true;
+        }
+    }
+
     // Peak hold con decay
     if (m_peakHold) {
         if (m_peakBins.size() != dbValues.size()) {
@@ -3019,7 +3040,7 @@ void PanadapterItem::renderSpectrum()
             int const traces = qBound(2, qMin(m_spectrum3dTraces, availableRows), 48);
             int const pointCount = qBound(2, qMin(240, qMax(2, w / 3)), 240);
             float const floorDb = m_minDb + m_spectrum3dFloorDepth;
-            float const floorRange = qMax(1.0f, m_maxDb - floorDb);
+            float const floorRange = qMax(1.0f, m_spectrum3dSpanDb);
             float const nearY = static_cast<float>(h) - 1.0f;
             float const farY = static_cast<float>(h) * 0.28f;
             float const bandH = nearY - farY;
@@ -3478,7 +3499,7 @@ void PanadapterItem::updateSpectrum3dNodes(QSGNode* spectrumRoot, int w, int h)
     // L'altezza della cresta si misura sopra il fondo scelto dall'utente, non
     // sopra il minimo assoluto: cosi' il rumore resta piatto e spiccano i segnali.
     float const floorDb = m_minDb + m_spectrum3dFloorDepth;
-    float floorRange = m_maxDb - floorDb;
+    float floorRange = m_spectrum3dSpanDb;
     if (floorRange < 1.f)
         floorRange = 1.f;
 
@@ -3815,7 +3836,7 @@ void PanadapterItem::updateSpectrum3dGpuNodes(QSGNode* spectrumRoot, int w, int 
     // The legacy/CPU 3D view normally spans about 80 dB.  The direct 2D GPU
     // auto-range is intentionally tighter (often 45 dB), but that would hide
     // most historical ridges if reused unchanged by this shader.
-    material->xParams[3] = 80.0f;
+    material->xParams[3] = qMax(1.0f, m_spectrum3dSpanDb);
 
     for (QSGNode* traceChild = node->firstChild(); traceChild; traceChild = traceChild->nextSibling()) {
         if (auto* traceNode = dynamic_cast<QSGGeometryNode*>(traceChild))

@@ -388,6 +388,14 @@ private:
     bool  m_spectrum3d   = false;   // opt-in: costa vertici, non si accende da sola
     int   m_spectrum3dTraces = 28;  // tracce di storia disegnate
     float m_spectrum3dFloorDepth = 6.0f; // dB sopra il minimo sotto cui la traccia e' piatta
+    // Su quanti dB si misura l'altezza della cresta. NON e' l'ampiezza
+    // della finestra dei colori: con la soglia di rumore automatica quella
+    // si ancora al rumore e sale di 80 dB, dove non c'e' nulla, e i segnali
+    // veri - che stanno nei primi venti - restavano schiacciati al suolo.
+    // Qui si misura l'escursione che c'e' davvero, smorzata nel tempo:
+    // una scala che insegue ogni fotogramma fa respirare la superficie.
+    float m_spectrum3dSpanDb = 35.0f;
+    bool  m_spectrum3dSpanInit = false;
     float m_peakDecay    = 0.97f;
     int   m_avgFrames    = 1;
     int   m_spectrumH    = 150;

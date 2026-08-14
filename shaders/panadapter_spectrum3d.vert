@@ -53,15 +53,12 @@ void main()
     float db = median3(db0, db1, db2);
 
     float rowMinDb = texture(rowParamsTexture, vec2(0.25, rowY)).r;
-    float rowInvRange = max(texture(rowParamsTexture, vec2(0.75, rowY)).r, 0.000001);
-    float rowMaxDb = rowMinDb + 1.0 / rowInvRange;
-    // GPU-direct auto-range can deliberately use a narrow window (typically
-    // 45 dB) for the ordinary 2D graph.  Reusing that window for stacked 3D
-    // erased most of the historical surface.  Preserve the 2D range and only
-    // widen the 3D normalisation to the same useful span as the CPU renderer.
-    float visualRange = max(rowMaxDb - rowMinDb, max(xParams.w, 1.0));
-    float floorDb = rowMaxDb - visualRange + historyParams.w;
-    float floorRange = max(rowMaxDb - floorDb, 1.0);
+    // L'altezza si misura sopra il fondo della riga, su quanti dB i segnali
+    // occupano davvero (xParams.w, misurato dalla CPU). Normalizzare
+    // sull'intera finestra dei colori appiattiva tutto quando la soglia di
+    // rumore automatica la ancora al rumore e la porta 80 dB piu' su.
+    float floorDb = rowMinDb + historyParams.w;
+    float floorRange = max(xParams.w, 1.0);
     float rawNorm = outside ? 0.0 : clamp((db - floorDb) / floorRange, 0.0, 1.0);
     float norm = rawNorm * rawNorm * (3.0 - 2.0 * rawNorm);
 
