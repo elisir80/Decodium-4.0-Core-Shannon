@@ -121,6 +121,179 @@ bool isDirectedCqModifierToken(QString const& token)
 }
 
 
+bool isStrictAmateurCallsignToken(QString const& token)
+
+{
+
+    QString t = normalizeCallToken(token).trimmed().toUpper();
+
+    if (t.isEmpty()) {
+
+        return false;
+
+    }
+
+    int const slashIdx = t.indexOf(QLatin1Char('/'));
+
+    if (slashIdx > 0) {
+
+        QString const suffix = t.mid(slashIdx + 1);
+
+        QString const prefix = t.left(slashIdx);
+
+        static const QSet<QString> portableSuffixes {
+
+            QStringLiteral("P"), QStringLiteral("M"), QStringLiteral("MM"),
+
+            QStringLiteral("AM"), QStringLiteral("A"), QStringLiteral("R"),
+
+            QStringLiteral("QRP"), QStringLiteral("PM"), QStringLiteral("MA"),
+
+            QStringLiteral("0"), QStringLiteral("1"), QStringLiteral("2"),
+
+            QStringLiteral("3"), QStringLiteral("4"), QStringLiteral("5"),
+
+            QStringLiteral("6"), QStringLiteral("7"), QStringLiteral("8"),
+
+            QStringLiteral("9")
+
+        };
+
+        if (portableSuffixes.contains(suffix)) {
+
+            t = prefix;
+
+        } else if (portableSuffixes.contains(prefix)
+
+                   || (prefix.size() <= 3
+
+                       && !prefix.contains(QRegularExpression(QStringLiteral(R"([0-9])"))))) {
+
+            t = suffix;
+
+        }
+
+    }
+
+    if (t.size() < 3 || t.size() > 7) {
+
+        return false;
+
+    }
+
+    static const QRegularExpression pattern {
+
+        QStringLiteral(R"(^(?:[A-Z]{1,2}|[A-Z][0-9]|[2-9][A-Z])[0-9][A-Z]{1,4}$)")
+
+    };
+
+    return pattern.match(t).hasMatch();
+
+}
+
+
+bool isSpecialEventStyleCallsignToken(QString const& token)
+
+{
+
+    QString const t = normalizeCallToken(token).trimmed().toUpper();
+
+    if (t.isEmpty() || isPlaceholderCallToken(t)) {
+
+        return false;
+
+    }
+
+    QString const base = Radio::base_callsign(t).trimmed().toUpper();
+
+    if (base.size() < 4 || base.size() > 10) {
+
+        return false;
+
+    }
+
+    bool hasLetter = false;
+
+    bool hasDigit = false;
+
+    bool digitSeen = false;
+
+    bool hasLetterBeforeDigit = false;
+
+    bool hasLetterAfterDigit = false;
+
+    bool allHex = true;
+
+    int digitCount = 0;
+
+    for (QChar const& ch : base) {
+
+        if (ch.isLetter()) {
+
+            hasLetter = true;
+
+            hasLetterBeforeDigit = hasLetterBeforeDigit || !digitSeen;
+
+            hasLetterAfterDigit = hasLetterAfterDigit || digitSeen;
+
+            if (ch < QLatin1Char('A') || ch > QLatin1Char('F')) {
+
+                allHex = false;
+
+            }
+
+        } else if (ch.isDigit()) {
+
+            hasDigit = true;
+
+            digitSeen = true;
+
+            ++digitCount;
+
+        } else {
+
+            return false;
+
+        }
+
+    }
+
+    if (!hasLetter || !hasDigit || digitCount < 2
+
+        || !hasLetterBeforeDigit || !hasLetterAfterDigit) {
+
+        return false;
+
+    }
+
+    // Seven-character all-hex strings are ambiguous with telemetry, but they
+
+    // can also be valid allocated calls (for example Indonesian 8B/8D special
+
+    // events). The strict amateur-call pattern remains authoritative here.
+
+    if (allHex && base.size() >= 7 && !isStrictAmateurCallsignToken(t)) {
+
+        return false;
+
+    }
+
+    return Radio::is_callsign(base);
+
+}
+
+
+bool isPlausibleDecodedCallsignToken(QString const& token)
+
+{
+
+    return isStrictAmateurCallsignToken(token)
+
+        || isSpecialEventStyleCallsignToken(token);
+
+}
+
+
 QString normalizedUsableCallToken(QString const& token)
 
 {
@@ -295,6 +468,85 @@ QStringList normalizedMessageTokens(QString const& message)
     }
 
     return normalized;
+
+}
+
+
+QString decodedDxCallToken(QString const& message)
+
+{
+
+    QStringList const tokens = normalizedMessageTokens(message);
+
+    if (tokens.isEmpty()) {
+
+        return {};
+
+    }
+
+    QString const firstToken = tokens.constFirst();
+
+    if (firstToken == QStringLiteral("CQ")
+
+        || firstToken == QStringLiteral("QRZ")
+
+        || firstToken == QStringLiteral("DE")) {
+
+        for (int i = 1; i < tokens.size(); ++i) {
+
+            QString const token = tokens.at(i);
+
+            if (isDirectedCqModifierToken(token) || isGridTokenStrict(token)) {
+
+                continue;
+
+            }
+
+            QString const call = normalizedUsableCallToken(token);
+
+            if (!call.isEmpty()) {
+
+                return call;
+
+            }
+
+        }
+
+        return {};
+
+    }
+
+    QString const firstCall = normalizedUsableCallToken(firstToken);
+
+    if (tokens.size() == 1) {
+
+        return firstCall;
+
+    }
+
+    QString const secondToken = tokens.at(1);
+
+    QString const secondCall = normalizedUsableCallToken(secondToken);
+
+    if (!secondCall.isEmpty()) {
+
+        return secondCall;
+
+    }
+
+    // Single-station payloads such as WSPR use CALL GRID POWER. Preserve that
+
+    // case, but never substitute the left-hand station when a directed row's
+
+    // right-hand callsign is unrecognised.
+
+    if (!firstCall.isEmpty() && isGridTokenStrict(secondToken)) {
+
+        return firstCall;
+
+    }
+
+    return {};
 
 }
 

@@ -22,6 +22,12 @@ bool isPlaceholderCallToken(QString const& token);
 
 bool isDirectedCqModifierToken(QString const& token);
 
+bool isStrictAmateurCallsignToken(QString const& token);
+
+bool isSpecialEventStyleCallsignToken(QString const& token);
+
+bool isPlausibleDecodedCallsignToken(QString const& token);
+
 QString normalizedUsableCallToken(QString const& token);
 
 QString normalizedBaseCall(QString token);
@@ -33,6 +39,8 @@ bool tokenMatchesCall(QString const& token,
                              QString const& baseCall);
 
 QStringList normalizedMessageTokens(QString const& message);
+
+QString decodedDxCallToken(QString const& message);
 
 bool messageContainsCallToken(QString const& message,
 
