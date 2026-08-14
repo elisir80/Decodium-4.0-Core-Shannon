@@ -23451,6 +23451,18 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
         <translation>Один переключатель для старых или медленных компьютеров. Включает: осторожную графику D3D11 в Windows (требуется перезапуск), режим пониженной нагрузки на процессор, не более 4 потоков FT, обычный приоритет процесса, профиль декодирования на процессоре, и скрывает Live Map и Full Spectrum. По умолчанию: выключено.</translation>
     </message>
+    <message>
+        <source>OpenGL GPU FFT:</source>
+        <translation>FFT на GPU OpenGL:</translation>
+    </message>
+    <message>
+        <source>After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.</source>
+        <translation>После перезапуска переносит визуальное БПФ панадаптера на вычисления OpenGL — на тех драйверах Linux, которые это поддерживают. Декодирование FT на GPU не переносится. Если путь через GPU не удался или завис, происходит автоматический возврат к асинхронному БПФ на процессоре. По умолчанию: выключено.</translation>
+    </message>
+    <message>
+        <source>Visual FFT only; restart required; safe CPU fallback remains active.</source>
+        <translation>Только визуальное БПФ; требуется перезапуск; безопасный возврат на процессор остаётся активным.</translation>
+    </message>
 </context>
 <context>
     <name>SignalRxPanel</name>

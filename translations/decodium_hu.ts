@@ -23307,6 +23307,18 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
         <translation>Egyetlen kapcsoló régi vagy lassú gépekhez. Bekapcsolja: az óvatos D3D11 grafikát Windowson (újraindítás szükséges), az alacsony CPU módot, legfeljebb 4 FT szálat, a normál folyamatprioritást, a CPU dekódolási profilt, és elrejti a Live Map és a Full Spectrum panelt. Alapértelmezés: ki.</translation>
     </message>
+    <message>
+        <source>OpenGL GPU FFT:</source>
+        <translation>OpenGL GPU-FFT:</translation>
+    </message>
+    <message>
+        <source>After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.</source>
+        <translation>Újraindítás után a panadapter vizuális FFT-jét az OpenGL-számításra helyezi át, azokon a Linux-illesztőprogramokon, amelyek ezt támogatják. Az FT-dekódolást nem viszi a GPU-ra. Ha a GPU-út elakad vagy hibázik, magától visszatér az aszinkron CPU-FFT-hez. Alapértelmezés: ki.</translation>
+    </message>
+    <message>
+        <source>Visual FFT only; restart required; safe CPU fallback remains active.</source>
+        <translation>Csak a vizuális FFT; újraindítás szükséges; a biztonságos CPU-tartalék aktív marad.</translation>
+    </message>
 </context>
 <context>
     <name>SignalRxPanel</name>

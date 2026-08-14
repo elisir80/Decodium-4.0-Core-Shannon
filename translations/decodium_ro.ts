@@ -17981,6 +17981,18 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
         <translation>Un singur comutator pentru calculatoare vechi sau lente. Activează: grafica prudentă D3D11 pe Windows (cere repornire), modul cu procesor redus, cel mult 4 fire FT, prioritate normală de proces, profil de decodificare pe procesor și ascunde implicit harta în direct și spectrul complet. Implicit: oprit.</translation>
     </message>
+    <message>
+        <source>OpenGL GPU FFT:</source>
+        <translation>FFT pe GPU OpenGL:</translation>
+    </message>
+    <message>
+        <source>After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.</source>
+        <translation>După repornire mută FFT-ul vizual al panadapterului pe calculul OpenGL, pe driverele Linux care îl acceptă. Nu mută pe GPU decodarea FT. Dacă drumul GPU eșuează sau se blochează, se revine singur la FFT pe CPU asincron. Implicit: dezactivat.</translation>
+    </message>
+    <message>
+        <source>Visual FFT only; restart required; safe CPU fallback remains active.</source>
+        <translation>Doar FFT-ul vizual; este necesară repornirea; rezerva sigură pe CPU rămâne activă.</translation>
+    </message>
 </context>
 <context>
     <name>SignalRxPanel</name>

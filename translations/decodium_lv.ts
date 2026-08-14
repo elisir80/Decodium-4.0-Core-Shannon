@@ -23452,6 +23452,18 @@ QSO laikā tērē papildu CPU. Noklusējums: IZSL.</translation>
         <source>One switch for old/slow PCs. Enables: conservative D3D11 graphics on Windows (needs restart), Low CPU mode, max 4 FT threads, normal process priority, CPU decode profile, and hides Live Map / Full Spectrum by default. Default: OFF.</source>
         <translation>Viens slēdzis veciem vai lēniem datoriem. Ieslēdz: konservatīvu D3D11 grafiku operētājsistēmā Windows (nepieciešama restartēšana), zema procesora noslogojuma režīmu, ne vairāk kā 4 FT pavedienus, normālu procesa prioritāti, procesora dekodēšanas profilu, un paslēpj Live Map un Full Spectrum. Noklusējums: izslēgts.</translation>
     </message>
+    <message>
+        <source>OpenGL GPU FFT:</source>
+        <translation>OpenGL GPU FFT:</translation>
+    </message>
+    <message>
+        <source>After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.</source>
+        <translation>Pēc restartēšanas panadaptera vizuālo FFT pārceļ uz OpenGL aprēķinu tajos Linux draiveros, kas to atbalsta. FT dekodēšanu uz GPU nepārceļ. Ja GPU ceļš neizdodas vai iestrēgst, automātiski atgriežas pie asinhronās CPU FFT. Noklusējums: izslēgts.</translation>
+    </message>
+    <message>
+        <source>Visual FFT only; restart required; safe CPU fallback remains active.</source>
+        <translation>Tikai vizuālais FFT; nepieciešama restartēšana; drošā CPU rezerve paliek aktīva.</translation>
+    </message>
 </context>
 <context>
     <name>SignalRxPanel</name>
