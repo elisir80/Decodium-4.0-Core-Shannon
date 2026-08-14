@@ -85,6 +85,10 @@ add_executable (test_qmx_telemetry test_qmx_telemetry.cpp)
 target_link_libraries (test_qmx_telemetry Qt6::Test Qt6::Core)
 add_test (NAME test_qmx_telemetry COMMAND $<TARGET_FILE:test_qmx_telemetry>)
 
+add_executable (test_cat_telemetry_settings test_cat_telemetry_settings.cpp)
+target_link_libraries (test_cat_telemetry_settings Qt6::Test Qt6::Core)
+add_test (NAME test_cat_telemetry_settings COMMAND $<TARGET_FILE:test_cat_telemetry_settings>)
+
 add_executable (test_decodium_update_support test_decodium_update_support.cpp)
 target_link_libraries (test_decodium_update_support Qt6::Test Qt6::Core)
 add_test (NAME test_decodium_update_support COMMAND $<TARGET_FILE:test_decodium_update_support>)

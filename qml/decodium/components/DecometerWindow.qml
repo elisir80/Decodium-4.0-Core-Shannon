@@ -151,7 +151,7 @@ Dialog {
         telemetryEnableDeferred = false
         // Abilita soltanto la lettura dei meter. CheckSWR resta una scelta
         // esplicita dell'operatore e non viene attivato aprendo lo strumento.
-        bridge.setSetting("PWRandSWR", true)
+        bridge.setCatTelemetrySettings(true, !!bridge.getSetting("CheckSWR", false))
     }
 
     readonly property string statusLine: {

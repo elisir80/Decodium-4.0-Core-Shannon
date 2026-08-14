@@ -18,6 +18,7 @@
 #include "MapIntelligenceService.h"
 #include "CallsignIntelligenceService.h"
 #include "MapLayerModel.h"
+#include "src/radio/DecodiumCatTelemetrySettings.h"
 #include "DecodiumProfileSettings.h"
 #include "Sequencer/QsoSequencerRules.hpp"
 #include "Sequencer/MessageTokenRules.hpp"
@@ -27152,6 +27153,76 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
     return value.isValid() ? value : effectiveDefault;
 }
 
+void DecodiumBridge::setCatTelemetrySettings(bool powerAndSwrEnabled,
+                                             bool checkSwrEnabled)
+{
+    auto const requested = decodium::normalizedCatTelemetrySettings(
+        powerAndSwrEnabled, checkSwrEnabled);
+    bool const previousPowerAndSwr =
+        getSetting(QStringLiteral("PWRandSWR"), false).toBool();
+    bool const previousCheckSwr =
+        getSetting(QStringLiteral("CheckSWR"), false).toBool();
+    bool const powerChanged = previousPowerAndSwr != requested.powerAndSwr;
+    bool const checkChanged = previousCheckSwr != requested.checkSwr;
+
+    qInfo().noquote()
+        << "[CATDBG] CAT telemetry setting request"
+        << "power=" << requested.powerAndSwr
+        << "checkSwr=" << requested.checkSwr
+        << "previousPower=" << previousPowerAndSwr
+        << "previousCheckSwr=" << previousCheckSwr
+        << "changed=" << (powerChanged || checkChanged)
+        << "backend=" << m_catBackend
+        << "connected=" << (m_hamlibCat && m_hamlibCat->connected());
+
+    if (!powerChanged && !checkChanged) {
+        return;
+    }
+
+    // Keep the modern QML store and the legacy INI consistent at the moment
+    // of the user action. Hamlib reads the modern profile when its
+    // ParameterPack is rebuilt.
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("PWRandSWR"), requested.powerAndSwr);
+    settings.setValue(QStringLiteral("CheckSWR"), requested.checkSwr);
+    settings.sync();
+    syncSettingToLegacyIni(QStringLiteral("PWRandSWR"), requested.powerAndSwr);
+    syncSettingToLegacyIni(QStringLiteral("CheckSWR"), requested.checkSwr);
+
+    if (powerChanged) {
+        emit settingValueChanged(QStringLiteral("PWRandSWR"), requested.powerAndSwr);
+    }
+    if (checkChanged) {
+        emit settingValueChanged(QStringLiteral("CheckSWR"), requested.checkSwr);
+    }
+    if (requested.checkSwr && checkChanged) {
+        enforceSwrTransmissionLimit(QStringLiteral("setting-change"));
+    }
+
+    // The do__pwr bit is part of the Hamlib construction parameters, so a
+    // live connection must be rebuilt.  The transaction above changes both
+    // switches before this single reconnect is queued.
+    if (isHamlibFamilyBackend(m_catBackend)
+        && m_hamlibCat
+        && m_hamlibCat->connected()
+        && !m_catTelemetryReconnectPending) {
+        m_catTelemetryReconnectPending = true;
+        emit statusMessage(QStringLiteral("PWR/SWR: riconnessione CAT per applicare il polling"));
+        QTimer::singleShot(0, this, [this]() {
+            m_catTelemetryReconnectPending = false;
+            if (m_shuttingDown
+                || !isHamlibFamilyBackend(m_catBackend)
+                || !m_hamlibCat
+                || !m_hamlibCat->connected()) {
+                return;
+            }
+            retryRigConnection();
+        });
+    }
+}
+
 void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
 {
     if (key == QStringLiteral("b4Strikethrough")) {
@@ -27169,10 +27240,17 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         return;
     }
 
-    bool const isCatTelemetrySetting =
-        key == QStringLiteral("PWRandSWR") || key == QStringLiteral("CheckSWR");
-    bool const catTelemetrySettingChanged =
-        isCatTelemetrySetting && getSetting(key, false).toBool() != value.toBool();
+    if (key == QStringLiteral("PWRandSWR") || key == QStringLiteral("CheckSWR")) {
+        decodium::CatTelemetrySettings current {
+            getSetting(QStringLiteral("PWRandSWR"), false).toBool(),
+            getSetting(QStringLiteral("CheckSWR"), false).toBool()
+        };
+        auto const updated = key == QStringLiteral("PWRandSWR")
+            ? decodium::catTelemetrySettingsAfterPowerChange(current, value.toBool())
+            : decodium::catTelemetrySettingsAfterProtectionChange(current, value.toBool());
+        setCatTelemetrySettings(updated.powerAndSwr, updated.checkSwr);
+        return;
+    }
 
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
     decodium::beginActiveSettingsProfile(s);
@@ -27323,9 +27401,6 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
             s.setValue(QStringLiteral("WebAppWsPort"), wsPort);
         }
     }
-    if (key == QStringLiteral("CheckSWR") && value.toBool()) {
-        s.setValue(QStringLiteral("PWRandSWR"), true);
-    }
     if (legacyKey == QStringLiteral("HighDPI")) {
         if (value.toBool()) {
             QFile::remove(QStringLiteral("DisableHighDpiScaling"));
@@ -27422,10 +27497,6 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         if (exclusiveLegacyKey != exclusiveLoggingKey) {
             emit settingValueChanged(exclusiveLegacyKey, false);
         }
-    }
-    if (key == QStringLiteral("CheckSWR") && value.toBool()) {
-        emit settingValueChanged(QStringLiteral("PWRandSWR"), true);
-        enforceSwrTransmissionLimit(QStringLiteral("setting-change"));
     }
     // Aggiorna il timer spectrum se cambia l'intervallo
     if (key == "spectrumInterval" && m_spectrumTimer) {
@@ -27540,24 +27611,6 @@ void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
         && m_hamlibCat->connected()) {
         emit statusMessage(QStringLiteral("TX Audio Src: riconnessione CAT per applicare la sorgente audio"));
         QTimer::singleShot(0, this, [this]() { retryRigConnection(); });
-    }
-    if (catTelemetrySettingChanged
-        && isHamlibFamilyBackend(m_catBackend)
-        && m_hamlibCat
-        && m_hamlibCat->connected()
-        && !m_catTelemetryReconnectPending) {
-        m_catTelemetryReconnectPending = true;
-        emit statusMessage(QStringLiteral("PWR/SWR: riconnessione CAT per applicare il polling"));
-        QTimer::singleShot(0, this, [this]() {
-            m_catTelemetryReconnectPending = false;
-            if (m_shuttingDown
-                || !isHamlibFamilyBackend(m_catBackend)
-                || !m_hamlibCat
-                || !m_hamlibCat->connected()) {
-                return;
-            }
-            retryRigConnection();
-        });
     }
 }
 
