@@ -309,6 +309,11 @@ jobs:
           echo "DYLD_FALLBACK_LIBRARY_PATH=${RTLSDR_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
 
       - name: Build release assets
+        env:
+          # Boost 1.85 triggers deprecated-copy diagnostics with the newer
+          # AppleClang installed on macos-15-intel. Keep project warnings as
+          # errors while treating this third-party-header warning normally.
+          CXXFLAGS: -Wno-error=deprecated-copy
         run: |
           scripts/release-macos.sh "${VERSION}" \
             --compat-macos "${{ matrix.compat_macos }}" \
