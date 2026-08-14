@@ -85,6 +85,28 @@ private slots:
         QCOMPARE(totalNs, 1500000000ULL);
     }
 
+    void unchangedCounterBecomesStaleAfterThreshold()
+    {
+        int unchangedSamples = 0;
+        unchangedSamples = decodium::gpu_usage::nextLinuxDrmUnchangedSampleCount(
+            1000ULL, 1000ULL, unchangedSamples);
+        QVERIFY(!decodium::gpu_usage::linuxDrmCounterIsStale(unchangedSamples));
+        unchangedSamples = decodium::gpu_usage::nextLinuxDrmUnchangedSampleCount(
+            1000ULL, 1000ULL, unchangedSamples);
+        QVERIFY(!decodium::gpu_usage::linuxDrmCounterIsStale(unchangedSamples));
+        unchangedSamples = decodium::gpu_usage::nextLinuxDrmUnchangedSampleCount(
+            1000ULL, 1000ULL, unchangedSamples);
+        QVERIFY(decodium::gpu_usage::linuxDrmCounterIsStale(unchangedSamples));
+    }
+
+    void advancingCounterClearsStaleState()
+    {
+        int const unchangedSamples = decodium::gpu_usage::nextLinuxDrmUnchangedSampleCount(
+            1000ULL, 1001ULL, 9);
+        QCOMPARE(unchangedSamples, 0);
+        QVERIFY(!decodium::gpu_usage::linuxDrmCounterIsStale(unchangedSamples));
+    }
+
     void xeCycleCountersCollapseDuplicateDescriptors()
     {
         QString const snapshot = QStringLiteral("drm-driver:\txe\n"

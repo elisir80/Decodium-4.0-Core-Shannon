@@ -4,11 +4,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -20,6 +21,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -49,7 +55,7 @@ ScrollView {
 
     GridLayout {
         width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -58,18 +64,18 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Avvio ──
-        Text { text: qsTr("STARTUP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("STARTUP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             implicitHeight: advancedStartupGrid.implicitHeight
 
             GridLayout {
                 id: advancedStartupGrid
                 width: parent.width
-                columns: 4
+                columns: pageColumns
                 columnSpacing: 14
                 rowSpacing: 10
                 property int checkWidth: 34
@@ -218,8 +224,8 @@ ScrollView {
         }
 
         // ── Aggiornamenti dati ──
-        Text { text: qsTr("DATA UPDATES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("DATA UPDATES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("LotW Users:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: 120; Layout.preferredHeight: controlHeight }
         Text {
@@ -235,12 +241,50 @@ ScrollView {
         }
         Button {
             id: forceLotwUpdateButton
-            text: qsTr("Force Update")
-            enabled: !bridge.lotwUpdating
+            readonly property bool busy: bridge ? bridge.lotwUpdating : false
+            text: busy ? qsTr("Updating...") : qsTr("Force Update")
             implicitHeight: controlHeight
             Layout.minimumWidth: 170
             Layout.preferredWidth: Math.max(170, implicitWidth + 12)
-            onClicked: bridge.forceUpdateLotwUsers()
+            onClicked: {
+                if (!busy)
+                    bridge.forceUpdateLotwUsers()
+            }
+            background: Rectangle {
+                radius: 4
+                color: forceLotwUpdateButton.busy
+                       ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.18)
+                       : (forceLotwUpdateButton.down || forceLotwUpdateButton.hovered
+                          ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.24)
+                          : bgMedium)
+                border.color: forceLotwUpdateButton.busy ? secondaryCyan : glassBorder
+            }
+            contentItem: Item {
+                implicitWidth: lotwUpdateContent.implicitWidth
+                implicitHeight: controlHeight
+
+                Row {
+                    id: lotwUpdateContent
+                    anchors.centerIn: parent
+                    spacing: 7
+
+                    BusyIndicator {
+                        visible: forceLotwUpdateButton.busy
+                        running: visible
+                        width: 16
+                        height: 16
+                        Material.accent: secondaryCyan
+                    }
+                    Text {
+                        height: 16
+                        text: forceLotwUpdateButton.text
+                        color: forceLotwUpdateButton.busy ? secondaryCyan : textPrimary
+                        font.pixelSize: controlFontSize
+                        font.bold: forceLotwUpdateButton.busy
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+            }
         }
         Item { Layout.fillWidth: true; Layout.preferredHeight: controlHeight }
 
@@ -258,28 +302,66 @@ ScrollView {
         }
         Button {
             id: forceUsStateUpdateButton
-            text: qsTr("Force Update")
-            enabled: !bridge.usStateDataUpdating
+            readonly property bool busy: bridge ? bridge.usStateDataUpdating : false
+            text: busy ? qsTr("Updating...") : qsTr("Force Update")
             implicitHeight: controlHeight
             Layout.minimumWidth: 170
             Layout.preferredWidth: Math.max(170, implicitWidth + 12)
-            onClicked: bridge.updateUsStateData()
+            onClicked: {
+                if (!busy)
+                    bridge.updateUsStateData()
+            }
+            background: Rectangle {
+                radius: 4
+                color: forceUsStateUpdateButton.busy
+                       ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.18)
+                       : (forceUsStateUpdateButton.down || forceUsStateUpdateButton.hovered
+                          ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.24)
+                          : bgMedium)
+                border.color: forceUsStateUpdateButton.busy ? secondaryCyan : glassBorder
+            }
+            contentItem: Item {
+                implicitWidth: usStateUpdateContent.implicitWidth
+                implicitHeight: controlHeight
+
+                Row {
+                    id: usStateUpdateContent
+                    anchors.centerIn: parent
+                    spacing: 7
+
+                    BusyIndicator {
+                        visible: forceUsStateUpdateButton.busy
+                        running: visible
+                        width: 16
+                        height: 16
+                        Material.accent: secondaryCyan
+                    }
+                    Text {
+                        height: 16
+                        text: forceUsStateUpdateButton.text
+                        color: forceUsStateUpdateButton.busy ? secondaryCyan : textPrimary
+                        font.pixelSize: controlFontSize
+                        font.bold: forceUsStateUpdateButton.busy
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+            }
         }
         Item { Layout.fillWidth: true; Layout.preferredHeight: controlHeight }
 
         // ── Comportamento ──
-        Text { text: qsTr("BEHAVIOR"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("BEHAVIOR"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             implicitHeight: advancedBehaviorGrid.implicitHeight
 
             GridLayout {
                 id: advancedBehaviorGrid
                 width: parent.width
-                columns: 4
+                columns: pageColumns
                 columnSpacing: 14
                 rowSpacing: 10
                 property int checkWidth: 34
@@ -377,18 +459,18 @@ ScrollView {
         }
 
         // ── Modo Operativo ──
-        Text { text: qsTr("OPERATING MODE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("OPERATING MODE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             implicitHeight: advancedOperatingGrid.implicitHeight
 
             GridLayout {
                 id: advancedOperatingGrid
                 width: parent.width
-                columns: 4
+                columns: pageColumns
                 columnSpacing: 14
                 rowSpacing: 10
                 property int checkWidth: 34
@@ -436,8 +518,8 @@ ScrollView {
         }
 
         // ── Contest ──
-        Text { text: qsTr("CONTEST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("CONTEST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Activity:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoComboBox {
@@ -495,8 +577,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── NTP Time Sync ──
-        Text { text: qsTr("NTP TIME SYNC"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("NTP TIME SYNC"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enable NTP:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -560,7 +642,7 @@ ScrollView {
             color: textSecondary
             font.pixelSize: 11
             wrapMode: Text.WordWrap
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
         }
         Text { text: qsTr("RF self-calibration:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -580,8 +662,8 @@ ScrollView {
         }
 
         // ── ADV Decoding ──
-        Text { text: qsTr("ADV DECODING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("ADV DECODING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Auto Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         ColumnLayout {
@@ -697,8 +779,8 @@ ScrollView {
         }
 
         // ── OTP ──
-        Text { text: qsTr("OTP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("OTP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("OTP Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -731,6 +813,6 @@ ScrollView {
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: bridge.setSetting("OTPUrl", text)
         }
-        Item { Layout.fillWidth: true; Layout.columnSpan: 4; Layout.preferredHeight: 80 }
+        Item { Layout.fillWidth: true; Layout.columnSpan: pageColumns; Layout.preferredHeight: 80 }
     }
 }

@@ -4,11 +4,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -20,6 +21,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -49,7 +55,7 @@ ScrollView {
 
     GridLayout {
         width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -58,8 +64,8 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Blacklist ──
-        Text { text: qsTr("BLACKLIST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("BLACKLIST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -114,8 +120,8 @@ ScrollView {
             onTextChanged: bridge.setSetting("Blacklist12", text.toUpperCase()) }
 
         // ── Whitelist ──
-        Text { text: qsTr("WHITELIST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("WHITELIST"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -169,8 +175,8 @@ ScrollView {
             onTextChanged: bridge.setSetting("Whitelist12", text.toUpperCase()) }
 
         // ── Always Pass ──
-        Text { text: qsTr("ALWAYS PASS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("ALWAYS PASS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -224,8 +230,8 @@ ScrollView {
             onTextChanged: bridge.setSetting("Pass12", text.toUpperCase()) }
 
         // ── Territory ──
-        Text { text: qsTr("EXCLUDE TERRITORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("EXCLUDE TERRITORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Europe:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 120 }
         CheckBox {
@@ -279,10 +285,10 @@ ScrollView {
         }
 
         // ── Opzioni Filtro ──
-        Text { text: qsTr("FILTER OPTIONS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("FILTER OPTIONS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
-        Text { text: qsTr("Worked on Band:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        Text { text: qsTr("Hide") + " " + qsTr("Worked on Band:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140 }
         CheckBox {
             checked: dialog.boolSetting("FiltersHideWorkedBand", false)
             onToggled: dialog.setBoolSettingIfChanged("FiltersHideWorkedBand", checked, false)
@@ -294,7 +300,7 @@ ScrollView {
             ToolTip.text: qsTr("Hide stations already worked on the current band.")
         }
 
-        Text { text: qsTr("Worked Today:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        Text { text: qsTr("Hide") + " " + qsTr("Worked Today:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140 }
         CheckBox {
             checked: dialog.boolSetting("FiltersHideWorkedToday", false)
             onToggled: dialog.setBoolSettingIfChanged("FiltersHideWorkedToday", checked, false)

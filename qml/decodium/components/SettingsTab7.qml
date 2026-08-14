@@ -4,11 +4,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -20,6 +21,10 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -47,14 +52,17 @@ ScrollView {
     id: frequenciesScrollView
     clip: true
     readonly property int pageContentWidth: dialog.frequencyPageMinWidth
-    contentWidth: dialog.frequencyPageMinWidth + dialog.scrollLeftMargin + dialog.scrollRightMargin
-    contentHeight: frequenciesContent.implicitHeight + 20
+    minimumContentWidth: pageContentWidth + dialog.scrollLeftMargin + dialog.scrollRightMargin
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
     ColumnLayout {
         id: frequenciesContent
-        width: dialog.frequencyPageMinWidth
-        anchors { left: parent.left; top: parent.top; margins: 10 }
+        width: Math.max(dialog.frequencyPageMinWidth,
+                        parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.leftMargin: dialog.scrollLeftMargin
+        anchors.topMargin: dialog.scrollTopMargin
         spacing: 10
 
         RowLayout {
@@ -90,7 +98,7 @@ ScrollView {
 
         GridLayout {
             Layout.fillWidth: true
-            columns: 6
+            columns: compactSettingsLayout ? 3 : 6
             columnSpacing: 10
             rowSpacing: 8
 

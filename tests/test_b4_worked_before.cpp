@@ -2,6 +2,8 @@
 #include <QString>
 #include <QtTest>
 
+#include "src/bridge/DecodeUiFilterPolicy.h"
+
 namespace {
 
 QString readSource(const QString& relativePath)
@@ -32,6 +34,8 @@ private slots:
     void modernDecodePanelsRenderStrikethrough();
     void settingPersistsOnlyOnUserToggle();
     void successfulLogPathsRefreshWorkedBeforeRows();
+    void cqOnlyPreservesWorkedCqRows();
+    void cqOnlyPolicyIsWiredIntoDisplayPipelines();
 };
 
 void TestB4WorkedBefore::modernDecodePanelsRenderStrikethrough()
@@ -106,6 +110,49 @@ void TestB4WorkedBefore::successfulLogPathsRefreshWorkedBeforeRows()
         QStringLiteral("refreshWorkedBeforeDecodeEntriesForCall(dxCall)"));
     QVERIFY(nativeAppend >= 0);
     QVERIFY(nativeRefresh > nativeAppend);
+}
+
+void TestB4WorkedBefore::cqOnlyPreservesWorkedCqRows()
+{
+    QVariantMap workedCq;
+    workedCq.insert(QStringLiteral("isCQ"), true);
+    workedCq.insert(QStringLiteral("isB4"), true);
+    workedCq.insert(QStringLiteral("dxIsWorked"), true);
+    workedCq.insert(QStringLiteral("dxIsWorkedBand"), true);
+    workedCq.insert(QStringLiteral("dxIsWorkedToday"), true);
+
+    QVERIFY(!decodium::decode_ui::isHiddenByWorkedFilters(
+        workedCq, true, true, true));
+    QVERIFY(decodium::decode_ui::isHiddenByWorkedFilters(
+        workedCq, true, true, false));
+
+    QVariantMap workedNonCq = workedCq;
+    workedNonCq.insert(QStringLiteral("isCQ"), false);
+    QVERIFY(decodium::decode_ui::isHiddenByWorkedFilters(
+        workedNonCq, true, true, true));
+
+    QVariantMap unworkedCq;
+    unworkedCq.insert(QStringLiteral("isCQ"), true);
+    QVERIFY(!decodium::decode_ui::isHiddenByWorkedFilters(
+        unworkedCq, true, true, true));
+}
+
+void TestB4WorkedBefore::cqOnlyPolicyIsWiredIntoDisplayPipelines()
+{
+    const QString cpp = readSource(QStringLiteral("src/bridge/DecodiumBridge.cpp"));
+    QVERIFY(!cpp.isEmpty());
+    QVERIFY(cpp.contains(QStringLiteral(
+        "job.preserveWorkedCq = !m_filtersBypassed && m_filterCqOnly")));
+    QCOMPARE(cpp.count(QStringLiteral(
+        "decodium::decode_ui::isHiddenByWorkedFilters(")), 2);
+
+    const QString qml = readSource(
+        QStringLiteral("qml/decodium/components/SettingsTab11.qml"));
+    QVERIFY(!qml.isEmpty());
+    QVERIFY(qml.contains(QStringLiteral(
+        "qsTr(\"Hide\") + \" \" + qsTr(\"Worked on Band:\")")));
+    QVERIFY(qml.contains(QStringLiteral(
+        "qsTr(\"Hide\") + \" \" + qsTr(\"Worked Today:\")")));
 }
 
 QTEST_MAIN(TestB4WorkedBefore)

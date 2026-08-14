@@ -11104,8 +11104,12 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         // dallo schermo, e con lei la colonna di destra delle impostazioni -
         // dove vive il campo della porta. Si parte dalla misura voluta, ma
         // senza mai arrivare a occupare tutto lo schermo.
-        readonly property int availableScreenWidth: Math.min(Screen.width, Screen.desktopAvailableWidth)
-        readonly property int availableScreenHeight: Math.min(Screen.height, Screen.desktopAvailableHeight)
+        readonly property int availableScreenWidth: Screen.desktopAvailableWidth > 0
+                                                    ? Screen.desktopAvailableWidth
+                                                    : Screen.width
+        readonly property int availableScreenHeight: Screen.desktopAvailableHeight > 0
+                                                     ? Screen.desktopAvailableHeight
+                                                     : Screen.height
         readonly property int preferredWidth: Math.max(minimumWidth,
                                                        Math.min(1500, Math.round(availableScreenWidth * 0.88)))
         readonly property int preferredHeight: Math.max(minimumHeight,
@@ -11115,7 +11119,12 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         minimumWidth: 800
         minimumHeight: 560
         visible: false
-        flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+        // Setup must stay above the Decodium main window, but it must not stay
+        // above unrelated desktop applications (for example XFCE's screenshot
+        // tool).  The transient relationship gives the required application
+        // stacking without a global always-on-top window flag.
+        transientParent: mainWindow
+        flags: Qt.Dialog | Qt.FramelessWindowHint
         title: qsTr("Settings - Decodium")
         color: "transparent"
 
@@ -11137,14 +11146,36 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             mainWindow.endFloatingGeometryInteraction()
         }
 
+        function fitToCurrentScreen() {
+            var target = mainWindow.geometryForWindowScreen(settingsFloatingWindow)
+            if (!target)
+                return
+
+            mainWindow.fitWindowSizeToGeometry(settingsFloatingWindow, target)
+            if (target.screen && settingsFloatingWindow.screen !== target.screen)
+                settingsFloatingWindow.screen = target.screen
+            settingsFloatingWindow.x = Math.max(
+                        target.x,
+                        Math.min(settingsFloatingWindow.x,
+                                 target.x + Math.max(0, target.width - settingsFloatingWindow.width)))
+            settingsFloatingWindow.y = Math.max(
+                        target.y,
+                        Math.min(settingsFloatingWindow.y,
+                                 target.y + Math.max(0, target.height - settingsFloatingWindow.height)))
+        }
+
         function showHostedWindow(tabIndex) {
             requestedTab = Number(tabIndex)
             if (!isFinite(requestedTab))
                 requestedTab = -1
             settingsDialogLoader.active = true
+            fitToCurrentScreen()
             show()
             raise()
             requestActivate()
+            // Some window managers update Window.screen only after mapping the
+            // native window. Re-apply the clamp on the next event-loop turn.
+            Qt.callLater(settingsFloatingWindow.fitToCurrentScreen)
             if (settingsDialogLoader.item) {
                 settingsDialogLoader.item.nativeHostWindow = settingsFloatingWindow
                 if (requestedTab >= 0)
@@ -11177,6 +11208,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         onYChanged: mainWindow.scheduleWindowStateSave()
         onWidthChanged: mainWindow.scheduleWindowStateSave()
         onHeightChanged: mainWindow.scheduleWindowStateSave()
+        onScreenChanged: Qt.callLater(settingsFloatingWindow.fitToCurrentScreen)
         onClosing: function(close) {
             if (!mainWindow.applicationClosing) {
                 close.accepted = false

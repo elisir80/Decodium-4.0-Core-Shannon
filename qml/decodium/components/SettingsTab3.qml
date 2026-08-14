@@ -4,11 +4,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -20,6 +21,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -49,7 +55,7 @@ ScrollView {
 
     GridLayout {
         width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -58,8 +64,8 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Frequenza e Timing ──
-        Text { text: qsTr("FREQUENCY AND TIMING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("FREQUENCY AND TIMING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("TX Frequency:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         SpinBox {
@@ -117,10 +123,10 @@ ScrollView {
         // ── Ready profiles (1.0.384) ──
         // Apply a coherent set of FT2/decode toggles as a group.
         // Selettore rapido equivalente anche in toolbar (accanto a Setup).
-        Text { text: qsTr("READY PROFILES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("READY PROFILES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             implicitHeight: readyProfilesColumn.implicitHeight
             ColumnLayout {
@@ -175,11 +181,11 @@ ScrollView {
         }
 
         // ── Sequenza Automatica ──
-        Text { text: qsTr("AUTO SEQUENCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("AUTO SEQUENCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             implicitHeight: autoSequenceGrid.implicitHeight
 
@@ -699,7 +705,7 @@ ScrollView {
                     color: "#e6a23c"
                     font.pixelSize: 11
                     wrapMode: Text.WordWrap
-                    Layout.columnSpan: 4
+                    Layout.columnSpan: pageColumns
                     Layout.fillWidth: true
                 }
 
@@ -1122,8 +1128,8 @@ ScrollView {
         }
 
         // ── Watchdog ──
-        Text { text: qsTr("WATCHDOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("WATCHDOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("TX Watchdog Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoComboBox {
@@ -1219,8 +1225,8 @@ ScrollView {
         }
 
         // ── CW ID ──
-        Text { text: qsTr("CW ID"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("CW ID"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("CW ID after 73:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -1240,8 +1246,8 @@ ScrollView {
         }
 
         // ── Tone Spacing ──
-        Text { text: qsTr("TONE SPACING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("TONE SPACING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("2x Tone Spacing:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {

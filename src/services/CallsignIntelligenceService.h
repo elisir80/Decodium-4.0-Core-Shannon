@@ -90,7 +90,8 @@ public:
     Q_INVOKABLE bool importDatabase(const QString& provider, const QString& path);
     Q_INVOKABLE void refreshDatabase(const QString& provider);
     Q_INVOKABLE void clearCache(const QString& callsign = QString());
-    Q_INVOKABLE void openProviderLookup(const QString& provider = QString()) const;
+    Q_INVOKABLE bool openProviderLookup(const QString& provider = QString(),
+                                        const QString& callsign = QString());
     Q_INVOKABLE QVariantMap lookupForFields(const QString& callsign) const;
 
     // DXCC cty.dat is loaded by DxccLookup rather than callsign_records.
@@ -121,6 +122,7 @@ signals:
     void offlineModeChanged();
     void databaseUpdatePendingChanged();
     void confirmedAdifDownloaded(const QString& provider, const QString& path);
+    void externalLookupRequested(const QString& url);
 
 private:
     struct ProviderSpec {

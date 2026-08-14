@@ -2403,17 +2403,65 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
     // Il noise floor è stimato dalla media dei bin più bassi (10° percentile)
     // Il ceiling = floor + 80dB → rumore = NERO, segnali = colorati
     if (m_autoRange) {
-        QVector<float> s = dbValues;
+        // Ignore the hidden high-frequency roll-off when estimating the
+        // on-screen noise floor on CPU FFT paths.
+        PanadapterFreqView const freqView = makePanadapterFreqView(
+            static_cast<float>(m_startFreq),
+            static_cast<float>(m_bandwidth),
+            m_dataFreqMin,
+            m_dataFreqMax,
+            m_zoomFactor,
+            static_cast<float>(m_panHz));
+        int const nBins = dbValues.size();
+        float const visibleStart = qMax(freqView.viewStart, m_dataFreqMin);
+        float const visibleEnd = qMin(freqView.viewStart + freqView.viewRange, m_dataFreqMax);
+        int const firstBin = qBound(0,
+            static_cast<int>(std::floor((visibleStart - m_dataFreqMin)
+                                        / freqView.dataRange * nBins)),
+            qMax(0, nBins - 1));
+        int const endBin = qBound(firstBin + 1,
+            static_cast<int>(std::ceil((visibleEnd - m_dataFreqMin)
+                                       / freqView.dataRange * nBins)),
+            nBins);
+        QVector<float> s;
+        s.reserve(endBin - firstBin);
+        for (int i = firstBin; i < endBin; ++i) {
+            if (std::isfinite(dbValues.at(i)))
+                s.append(dbValues.at(i));
+        }
+        if (s.isEmpty()) {
+            for (float value : dbValues) {
+                if (std::isfinite(value))
+                    s.append(value);
+            }
+        }
+        if (s.isEmpty())
+            return;
         std::sort(s.begin(), s.end());
-        int n = s.size();
-        // Stima noise floor dal 10° percentile (più robusto del 5°)
-        float fl = s[qBound(0, n*10/100, n-1)];
-        // IIR smooth lento per stabilità visiva
-        m_measuredFloor = 0.03f*fl + 0.97f*m_measuredFloor;
-        // Range fisso 80dB sopra il noise floor — solo i segnali veri appaiono colorati
-        m_measuredPeak  = m_measuredFloor + 80.0f;
+        int const n = s.size();
+        float const fl = s[qBound(0, n * 25 / 100, n - 1)];
+        bool const resetFloor = !std::isfinite(m_measuredFloor)
+            || m_measuredFloor < -120.0f
+            || std::abs(m_measuredFloor - fl) > 35.0f;
+        m_measuredFloor = resetFloor
+            ? fl
+            : (0.08f * fl + 0.92f * m_measuredFloor);
+        m_measuredPeak = m_measuredFloor + 80.0f;
         m_minDb = m_measuredFloor;
         m_maxDb = m_measuredPeak;
+        static std::atomic_bool loggedCpuAutoRange {false};
+        if (!loggedCpuAutoRange.exchange(true, std::memory_order_relaxed)) {
+            qInfo().noquote()
+                << "[PANDBG] Panadapter CPU auto-range visible passband"
+                << "full_bins=" << dbValues.size()
+                << "visible_bins=" << s.size()
+                << "visible_hz=" << QStringLiteral("%1..%2")
+                                      .arg(visibleStart, 0, 'f', 1)
+                                      .arg(visibleEnd, 0, 'f', 1)
+                << "floor_p25_db=" << fl
+                << "reset=" << resetFloor
+                << "span_db=80";
+        }
         emit measuredFloorChanged();
         emit measuredPeakChanged();
     } else if (maxDb > minDb) {
@@ -2472,6 +2520,44 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
     bool const shouldEmitUpdate = consumeUpdateBudgetLocked();
     lock.unlock();
     if (shouldEmitUpdate) update();
+}
+
+void PanadapterItem::activateCpuSpectrumFallback()
+{
+    bool switched = false;
+    {
+        QMutexLocker lock(&m_mutex);
+        switched = m_gpuDirectTextureReady
+            || m_gpuFftUiBinsExpected > 0
+            || m_hasPendingPcmFrame;
+        m_gpuDirectTextureReady = false;
+        m_gpuFftUiBinsExpected = 0;
+        m_hasPendingPcmFrame = false;
+        m_gpuFftActiveNotified = false;
+        ++m_gpuFftFallbackGeneration;
+        m_loggedLegacySpectrumSuppressed = false;
+        m_loggedMismatchedSpectrumSuppressed = false;
+        m_spectrumDirty = true;
+        m_spectrumOverlayDirty = true;
+    }
+
+    if (!switched)
+        return;
+
+    qInfo().noquote()
+        << "[PANDBG] Panadapter direct GPU texture released"
+        << "reason=CPU_FFT_fallback"
+        << "fallback=QSG_CPU_spectrum_and_waterfall";
+    update();
+}
+
+void PanadapterItem::prepareGpuSpectrumRetry()
+{
+    QMutexLocker lock(&m_mutex);
+    m_gpuFftActiveNotified = false;
+    m_gpuFftFailed = false;
+    m_gpuFftFailureReason.clear();
+    m_hasPendingPcmFrame = false;
 }
 
 // Compatibilità: riceve valori 0-1 normalizzati e li converte in dB
@@ -2922,7 +3008,112 @@ void PanadapterItem::renderSpectrum()
     if (pRight > w) pRight = w;
     if (pRight > pLeft) { p.fillRect(pLeft, 0, pRight - pLeft, h, QColor(80, 110, 120, 22)); }
 
-    if (!gpuSpectrumGraph) {
+    if (m_spectrum3d && !gpuSpectrumGraph) {
+        // The Qt software scene graph cannot reliably render the colored
+        // geometry used by the normal 3D path. Rasterize the same history into
+        // the spectrum image instead; D3D/OpenGL continue to use QSG nodes.
+        int const histBins = m_waterfallRawBinsWidth;
+        int const histRows = histBins > 0 ? m_waterfallDbRows.size() / histBins : 0;
+        int const availableRows = qMin(m_wfWriteRow, histRows);
+        if (histBins > 1 && availableRows >= 2 && !freqView.clipsData) {
+            int const traces = qBound(2, qMin(m_spectrum3dTraces, availableRows), 48);
+            int const pointCount = qBound(2, qMin(240, qMax(2, w / 3)), 240);
+            float const floorDb = m_minDb + m_spectrum3dFloorDepth;
+            float const floorRange = qMax(1.0f, m_maxDb - floorDb);
+            float const nearY = static_cast<float>(h) - 1.0f;
+            float const farY = static_cast<float>(h) * 0.28f;
+            float const bandH = nearY - farY;
+            float const shrinkMax = 0.32f;
+            float const ridgeMax = bandH * 0.55f;
+
+            p.setPen(QPen(QColor(35, 48, 60, 115), 1.0));
+            float const farScale = 1.0f - shrinkMax;
+            float const farOffset = static_cast<float>(w) * shrinkMax * 0.5f;
+            for (int g = 0; g < 9; ++g) {
+                float const fx = static_cast<float>(g) / 8.0f;
+                p.drawLine(QPointF(fx * static_cast<float>(w), nearY),
+                           QPointF(farOffset + fx * static_cast<float>(w) * farScale, farY));
+            }
+
+            QVector<QPointF> ridgePoints(pointCount);
+            QVector<float> ridgeLevels(pointCount);
+            for (int t = traces - 1; t >= 0; --t) {
+                float const depth = traces > 1
+                    ? static_cast<float>(t) / static_cast<float>(traces - 1)
+                    : 0.0f;
+                float const perspective = 1.0f - std::pow(1.0f - depth, 2.0f);
+                float const scaleX = 1.0f - shrinkMax * perspective;
+                float const offsetX = static_cast<float>(w) * shrinkMax * perspective * 0.5f;
+                float const baseY = nearY - perspective * bandH;
+                float const ridgeHeight = ridgeMax * (1.0f - 0.55f * perspective);
+
+                int row = (m_wfWriteRow - 1 - t) % histRows;
+                if (row < 0)
+                    row += histRows;
+                int rowPrev = (row - 1 + histRows) % histRows;
+                int const rowNext = (row + 1) % histRows;
+                float const* src = m_waterfallDbRows.constData()
+                    + static_cast<qsizetype>(row) * histBins;
+                float const* srcPrev = m_waterfallDbRows.constData()
+                    + static_cast<qsizetype>(rowPrev) * histBins;
+                float const* srcNext = m_waterfallDbRows.constData()
+                    + static_cast<qsizetype>(rowNext) * histBins;
+
+                float maxLevel = 0.0f;
+                for (int i = 0; i < pointCount; ++i) {
+                    int const x = i * (w - 1) / qMax(1, pointCount - 1);
+                    float const pixFreq = freqView.viewStart
+                        + static_cast<float>(x) * freqView.viewRange / static_cast<float>(w);
+                    int bin = static_cast<int>((pixFreq - m_dataFreqMin) / freqView.dataRange
+                                               * static_cast<float>(histBins));
+                    bin = qBound(0, bin, histBins - 1);
+                    float const a0 = src[bin];
+                    float const a1 = srcPrev[bin];
+                    float const a2 = srcNext[bin];
+                    float const db = qMax(qMin(a0, a1), qMin(qMax(a0, a1), a2));
+                    float const raw = qBound(0.0f, (db - floorDb) / floorRange, 1.0f);
+                    float const level = raw * raw * (3.0f - 2.0f * raw);
+                    ridgeLevels[i] = level;
+                    maxLevel = qMax(maxLevel, level);
+                    ridgePoints[i] = QPointF(offsetX + static_cast<float>(x) * scaleX,
+                                             baseY - level * ridgeHeight);
+                }
+
+                QPainterPath fillPath;
+                fillPath.moveTo(ridgePoints.constFirst());
+                for (int i = 1; i < pointCount; ++i)
+                    fillPath.lineTo(ridgePoints.at(i));
+                fillPath.lineTo(ridgePoints.constLast().x(), static_cast<float>(h));
+                fillPath.lineTo(ridgePoints.constFirst().x(), static_cast<float>(h));
+                fillPath.closeSubpath();
+                QColor topColor = QColor::fromRgb(wfColor(qMax(0.18f, maxLevel * 0.72f))).darker(180);
+                QColor bottomColor = topColor.darker(420);
+                QLinearGradient fillGradient(0.0, baseY - ridgeHeight, 0.0, static_cast<float>(h));
+                fillGradient.setColorAt(0.0, topColor);
+                fillGradient.setColorAt(1.0, bottomColor);
+                p.fillPath(fillPath, fillGradient);
+
+                constexpr int colorBuckets = 8;
+                QVector<QPainterPath> ridgePaths(colorBuckets);
+                for (int i = 1; i < pointCount; ++i) {
+                    float const level = 0.5f * (ridgeLevels.at(i - 1) + ridgeLevels.at(i));
+                    int const bucket = qBound(0, static_cast<int>(level * colorBuckets), colorBuckets - 1);
+                    ridgePaths[bucket].moveTo(ridgePoints.at(i - 1));
+                    ridgePaths[bucket].lineTo(ridgePoints.at(i));
+                }
+                for (int bucket = 0; bucket < colorBuckets; ++bucket) {
+                    if (ridgePaths.at(bucket).isEmpty())
+                        continue;
+                    float const level = (static_cast<float>(bucket) + 0.5f)
+                        / static_cast<float>(colorBuckets);
+                    QColor color = QColor::fromRgb(wfColor(level));
+                    color.setAlphaF(1.0f - 0.70f * perspective);
+                    p.setPen(QPen(color, t == 0 ? 2.0 : 1.0));
+                    p.drawPath(ridgePaths.at(bucket));
+                }
+            }
+        }
+    } else if (!gpuSpectrumGraph) {
         // ── Path spettro ───────────────────────────────────────────────────────
         QPainterPath fillPath, linePath;
         bool inSegment = false;
@@ -4062,17 +4253,33 @@ void PanadapterItem::updateSpectrumOverlayNode(QSGNode* spectrumRoot,
 
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
     qint64 const textureStartUs = monotonicUs();
-    auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(overlay->texture());
     bool uploadTexture = needsUpload;
-    if (!tex || tex->textureSize() != m_spectrumOverlayImage.size()
-        || !tex->hasAlphaChannel() || tex->failed()) {
-        tex = new DecodiumRhiImageTexture(true);
-        tex->setFiltering(QSGTexture::Nearest);
-        overlay->setTexture(tex);
-        uploadTexture = true;
+    bool const softwareTexture =
+        static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey())
+        == QSGRendererInterface::Software;
+    if (softwareTexture) {
+        if (uploadTexture || !overlay->texture()) {
+            auto* tex = window()->createTextureFromImage(
+                m_spectrumOverlayImage,
+                QQuickWindow::CreateTextureOptions(QQuickWindow::TextureHasAlphaChannel));
+            if (tex) {
+                tex->setFiltering(QSGTexture::Nearest);
+                overlay->setTexture(tex);
+            }
+        }
+    } else {
+        auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(overlay->texture());
+        if (!tex || tex->textureSize() != m_spectrumOverlayImage.size()
+            || !tex->hasAlphaChannel() || tex->failed()) {
+            tex = new DecodiumRhiImageTexture(true);
+            tex->setFiltering(QSGTexture::Nearest);
+            overlay->setTexture(tex);
+            uploadTexture = true;
+        }
+        if (uploadTexture)
+            tex->uploadFullImage(m_spectrumOverlayImage, true);
+        overlay->setFiltering(QSGTexture::Nearest);
     }
-    if (uploadTexture)
-        tex->uploadFullImage(m_spectrumOverlayImage, true);
     overlay->setFiltering(QSGTexture::Nearest);
     overlayTextureUs += monotonicUs() - textureStartUs;
 #else
@@ -4592,9 +4799,12 @@ void PanadapterItem::failGpuFft(const QString& reason)
 
 void PanadapterItem::notifyGpuFftActive(const QString& backend)
 {
-    if (m_gpuFftActiveNotified)
-        return;
-    m_gpuFftActiveNotified = true;
+    {
+        QMutexLocker lock(&m_mutex);
+        if (m_gpuFftActiveNotified)
+            return;
+        m_gpuFftActiveNotified = true;
+    }
     QPointer<PanadapterItem> guard(this);
     QMetaObject::invokeMethod(this, [guard, backend]() {
         if (guard)
@@ -4609,6 +4819,7 @@ void PanadapterItem::recordGpuFftCompute()
     bool resetTimeout = false;
     qint64 timeoutAgeMs = 0;
     bool disableGpuFft = false;
+    quint64 fallbackGeneration = 0;
     QString disableReason;
     {
         QMutexLocker lock(&m_mutex);
@@ -4651,6 +4862,7 @@ void PanadapterItem::recordGpuFftCompute()
         } else {
             frame = m_pendingPcmFrame;
             m_hasPendingPcmFrame = false;
+            fallbackGeneration = m_gpuFftFallbackGeneration;
         }
     }
     if (disableGpuFft) {
@@ -5095,13 +5307,11 @@ void PanadapterItem::recordGpuFftCompute()
         cb->setShaderResources(m_gpuFft->directSrb);
         cb->dispatch((nBins + 63) / 64, 1, 1);
         cb->endComputePass(debugReadbackBatch);
-        notifyGpuFftActive(QStringLiteral("%1 RHI compute")
-                               .arg(QString::fromLatin1(
-                                   waterfallGraphicsApiName(rif->graphicsApi()))));
 
         {
             QMutexLocker lock(&m_mutex);
-            if (m_externalSpectrumActive) {
+            if (m_externalSpectrumActive
+                || fallbackGeneration != m_gpuFftFallbackGeneration) {
                 m_gpuDirectTextureReady = false;
                 m_gpuFftUiBinsExpected = 0;
                 return;
@@ -5123,6 +5333,9 @@ void PanadapterItem::recordGpuFftCompute()
             m_gpuFft->readbackPending = debugReadbackEnabled;
             m_gpuFft->readbackPendingSinceMs = debugReadbackEnabled ? monotonicMs() : 0;
         }
+        notifyGpuFftActive(QStringLiteral("%1 RHI compute")
+                               .arg(QString::fromLatin1(
+                                   waterfallGraphicsApiName(rif->graphicsApi()))));
 
         if (!m_gpuFft->loggedDirectActive) {
             qInfo().noquote()
@@ -5850,14 +6063,28 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
                 spectrumRoot->appendChildNode(sn);
             }
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
-            auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(sn->texture());
-            if (!tex || tex->textureSize() != m_spectrumImage.size()
-                || !tex->hasAlphaChannel() || tex->failed()) {
-                tex = new DecodiumRhiImageTexture(true);
-                tex->setFiltering(QSGTexture::Linear);
-                sn->setTexture(tex);
+            bool const softwareTexture =
+                static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey())
+                == QSGRendererInterface::Software;
+            if (softwareTexture) {
+                auto* tex = window()->createTextureFromImage(
+                    m_spectrumImage,
+                    QQuickWindow::CreateTextureOptions(QQuickWindow::TextureHasAlphaChannel));
+                if (tex) {
+                    tex->setFiltering(QSGTexture::Linear);
+                    sn->setTexture(tex);
+                }
+            } else {
+                auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(sn->texture());
+                if (!tex || tex->textureSize() != m_spectrumImage.size()
+                    || !tex->hasAlphaChannel() || tex->failed()) {
+                    tex = new DecodiumRhiImageTexture(true);
+                    tex->setFiltering(QSGTexture::Linear);
+                    sn->setTexture(tex);
+                }
+                tex->uploadFullImage(m_spectrumImage, true);
+                sn->setFiltering(QSGTexture::Linear);
             }
-            tex->uploadFullImage(m_spectrumImage, true);
             sn->setFiltering(QSGTexture::Linear);
 #else
             auto* tex = window()->createTextureFromImage(m_spectrumImage,
@@ -6379,15 +6606,30 @@ QSGNode* PanadapterItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 #ifdef DECODIUM_QT_RHI_TEXTURE_UPLOAD
         qint64 const textureStartUs = monotonicUs();
         bool createdTexture = false;
-        auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(wn->texture());
-        if (!tex || tex->textureSize() != m_waterfallDisplayImage.size()
-            || tex->hasAlphaChannel() || tex->failed()) {
-            tex = new DecodiumRhiImageTexture(false);
-            tex->setFiltering(QSGTexture::Nearest);
-            wn->setTexture(tex);
-            createdTexture = true;
+        bool const softwareTexture =
+            static_cast<QSGRendererInterface::GraphicsApi>(sceneGraphApiKey())
+            == QSGRendererInterface::Software;
+        if (softwareTexture) {
+            auto* tex = window()->createTextureFromImage(
+                m_waterfallDisplayImage,
+                QQuickWindow::CreateTextureOptions(QQuickWindow::TextureIsOpaque));
+            if (tex) {
+                tex->setFiltering(QSGTexture::Nearest);
+                wn->setTexture(tex);
+                createdTexture = true;
+            }
+        } else {
+            auto* tex = dynamic_cast<DecodiumRhiImageTexture*>(wn->texture());
+            if (!tex || tex->textureSize() != m_waterfallDisplayImage.size()
+                || tex->hasAlphaChannel() || tex->failed()) {
+                tex = new DecodiumRhiImageTexture(false);
+                tex->setFiltering(QSGTexture::Nearest);
+                wn->setTexture(tex);
+                createdTexture = true;
+            }
+            tex->uploadFullImage(m_waterfallDisplayImage, false);
+            wn->setFiltering(QSGTexture::Nearest);
         }
-        tex->uploadFullImage(m_waterfallDisplayImage, false);
         wn->setFiltering(QSGTexture::Nearest);
         paintWaterfallTextureUs += monotonicUs() - textureStartUs;
         if (createdTexture)

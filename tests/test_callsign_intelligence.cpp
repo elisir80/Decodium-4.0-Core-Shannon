@@ -159,6 +159,37 @@ private slots:
         service.setAutoCloseAfterLogging(originalAutoClose);
     }
 
+    void externalLookupsEmitCanonicalUrlsEvenInOfflineMode()
+    {
+        CallsignIntelligenceService service;
+        service.setOfflineMode(true);
+        QSignalSpy lookupSpy(
+            &service,
+            &CallsignIntelligenceService::externalLookupRequested);
+
+        const QList<QPair<QString, QString>> cases {
+            {QStringLiteral("qrz"),
+             QStringLiteral("https://www.qrz.com/db/IU3VGK")},
+            {QStringLiteral("fcc_uls"),
+             QStringLiteral("https://wireless2.fcc.gov/UlsApp/UlsSearch/searchLicense.jsp?callSign=IU3VGK")},
+            {QStringLiteral("eqsl"),
+             QStringLiteral("https://www.eqsl.cc/Member.cfm?IU3VGK")},
+            {QStringLiteral("clublog"),
+             QStringLiteral("https://clublog.org/logsearch/IU3VGK")}
+        };
+
+        for (const auto& testCase : cases) {
+            QVERIFY(service.openProviderLookup(testCase.first,
+                                               QStringLiteral("iu3vgk")));
+            QCOMPARE(lookupSpy.count(), 1);
+            QCOMPARE(lookupSpy.takeFirst().at(0).toString(), testCase.second);
+        }
+
+        QVERIFY(!service.openProviderLookup(QStringLiteral("qrz"),
+                                            QStringLiteral("invalid!")));
+        QCOMPARE(lookupSpy.count(), 0);
+    }
+
     void importsClubLogOqrsAndEmitsEnrichment()
     {
         QTemporaryDir directory;

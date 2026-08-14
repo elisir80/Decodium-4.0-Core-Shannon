@@ -25,6 +25,24 @@ struct LinuxDrmCycleSample
     quint64 totalCycles {0};
 };
 
+// Some Linux DRM drivers expose a per-process counter but stop advancing it
+// even while Qt Quick is still presenting frames.  Keep this decision logic
+// independent from the bridge so it can be covered by a small unit test.
+inline int nextLinuxDrmUnchangedSampleCount(quint64 previousValue,
+                                            quint64 currentValue,
+                                            int previousCount)
+{
+    if (currentValue != previousValue)
+        return 0;
+    return qMin(qMax(0, previousCount) + 1, 1000);
+}
+
+inline bool linuxDrmCounterIsStale(int unchangedSampleCount,
+                                   int threshold = 3)
+{
+    return unchangedSampleCount >= qMax(1, threshold);
+}
+
 // Pick the DRM PCI device that owns the most active memory. This identifies
 // the Qt Quick rendering GPU on hybrid systems even when an application has
 // descriptors open on more than one adapter. Older drivers without active

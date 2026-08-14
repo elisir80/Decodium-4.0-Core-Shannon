@@ -1,10 +1,10 @@
 #include "SecureSettings.hpp"
+#include "src/core/HostProcessEnvironment.h"
 
 #include <QFileInfo>
 #include <QDebug>
 #include <QObject>
 #include <QProcess>
-#include <QProcessEnvironment>
 #include <QRegularExpression>
 #include <QSet>
 #include <QSettings>
@@ -18,63 +18,10 @@
 namespace
 {
 #if defined (Q_OS_LINUX)
-  // System helpers such as /usr/bin/secret-tool must load the host GLib,
-  // libsecret and GIO modules.  AppImage launchers intentionally prepend the
-  // bundle to these variables for Decodium itself; passing that environment
-  // unchanged to a host executable mixes two incompatible userspaces.
-  void restore_host_environment_variable (QProcessEnvironment& environment,
-                                          QString const& variable)
-  {
-    auto const backup = QStringLiteral ("DECODIUM_HOST_") + variable;
-    if (environment.contains (backup))
-      {
-        auto const host_value = environment.value (backup);
-        if (host_value.isEmpty ())
-          {
-            environment.remove (variable);
-          }
-        else
-          {
-            environment.insert (variable, host_value);
-          }
-        environment.remove (backup);
-        return;
-      }
-
-    // Also protect extracted/third-party AppImage launchers which do not yet
-    // provide the DECODIUM_HOST_* snapshots.
-    if (environment.contains (QStringLiteral ("APPIMAGE"))
-        || environment.contains (QStringLiteral ("APPDIR")))
-      {
-        environment.remove (variable);
-      }
-  }
-
-  QProcessEnvironment secret_tool_process_environment ()
-  {
-    auto environment = QProcessEnvironment::systemEnvironment ();
-    for (auto const& variable : {
-           QStringLiteral ("LD_LIBRARY_PATH"),
-           QStringLiteral ("LD_PRELOAD"),
-           QStringLiteral ("GIO_EXTRA_MODULES"),
-           QStringLiteral ("GI_TYPELIB_PATH"),
-           QStringLiteral ("GSETTINGS_SCHEMA_DIR"),
-           QStringLiteral ("GTK_PATH"),
-           QStringLiteral ("XDG_DATA_DIRS")
-         })
-      {
-        restore_host_environment_variable (environment, variable);
-      }
-
-    // Deliberately retain DBUS_SESSION_BUS_ADDRESS, XDG_RUNTIME_DIR, DISPLAY,
-    // WAYLAND_DISPLAY, HOME and PATH: secret-tool needs the user's live desktop
-    // session to reach the unlocked Secret Service collection.
-    return environment;
-  }
-
   void prepare_secret_tool_process (QProcess& process)
   {
-    process.setProcessEnvironment (secret_tool_process_environment ());
+    process.setProcessEnvironment (
+      decodium::host_process::sanitizedSystemEnvironment ());
   }
 #endif
 

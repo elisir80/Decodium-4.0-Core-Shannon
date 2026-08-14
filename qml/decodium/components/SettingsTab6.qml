@@ -4,12 +4,13 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     id: root
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -21,6 +22,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -79,7 +85,7 @@ ScrollView {
 
     GridLayout {
         width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -88,8 +94,8 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Servizi di Rete ──
-        Text { text: qsTr("NETWORK SERVICES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("NETWORK SERVICES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("PSK Reporter:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -125,8 +131,8 @@ ScrollView {
         }
 
         // ── DX Cluster ──
-        Text { text: qsTr("DX CLUSTER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("DX CLUSTER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
@@ -217,8 +223,8 @@ ScrollView {
         }
 
         // ── Cloudlog ──
-        Text { text: qsTr("CLOUDLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("CLOUDLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -266,8 +272,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── QRZ Logbook ──
-        Text { text: qsTr("QRZ LOGBOOK"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("QRZ LOGBOOK"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -344,8 +350,8 @@ ScrollView {
         }
 
         // ── LotW ──
-        Text { text: qsTr("LOTW"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("LOTW"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("LotW Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -383,8 +389,8 @@ ScrollView {
         }
 
         // ── Logging ──
-        Text { text: qsTr("LOGGING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("LOGGING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Prompt to Log:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -460,8 +466,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── Registrazione ──
-        Text { text: qsTr("RECORDING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("RECORDING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Record RX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -497,8 +503,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── Remote Web Dashboard ──
-        Text { text: qsTr("REMOTE WEB DASHBOARD (LAN)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("REMOTE WEB DASHBOARD (LAN)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -559,12 +565,12 @@ ScrollView {
             color: textSecondary
             font.pixelSize: 11
             wrapMode: Text.Wrap
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
         }
 
         // ── UDP Server ──
-        Text { text: qsTr("UDP SERVER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("UDP SERVER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Client ID:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
@@ -903,15 +909,15 @@ ScrollView {
         }
 
         // ── N1MM Logger+ / HRD Logbook / EasyLog (ADIF UDP) ──
-        Text { text: qsTr("N1MM / HRD LOGBOOK / EASYLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("N1MM / HRD LOGBOOK / EASYLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text {
             text: qsTr("Use this ADIF UDP output for N1MM Logger+ or HRD Logbook QSO Forwarding. HRD normally listens on 127.0.0.1:2333; this is different from the primary WSJT-X UDP Server above.")
             color: textSecondary
             font.pixelSize: 11
             wrapMode: Text.Wrap
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
         }
 
@@ -983,7 +989,7 @@ ScrollView {
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: bridge.setSetting("N1MMServer", text)
         }
-        Item { Layout.fillWidth: true; Layout.columnSpan: 4; Layout.preferredHeight: 6 }
+        Item { Layout.fillWidth: true; Layout.columnSpan: pageColumns; Layout.preferredHeight: 6 }
 
         Text { text: qsTr("Accept UDP:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -1013,8 +1019,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── ADIF TCP ──
-        Text { text: qsTr("ADIF TCP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("ADIF TCP"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Enable TCP ADIF:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         CheckBox {
@@ -1047,7 +1053,7 @@ ScrollView {
         }
 
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             Layout.preferredHeight: 96
         }

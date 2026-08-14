@@ -4,11 +4,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -20,6 +21,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -47,13 +53,11 @@ ScrollView {
     id: displaySettingsScroll
     clip: true
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
-    contentWidth: availableWidth
-    contentHeight: displaySettingsGrid.implicitHeight + 28
 
     GridLayout {
         id: displaySettingsGrid
-        width: Math.max(0, displaySettingsScroll.availableWidth - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -62,8 +66,8 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Aspetto / Tema ──
-        Text { text: qsTr("ASPETTO / TEMA"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("ASPETTO / TEMA"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Theme:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoComboBox {
@@ -169,7 +173,7 @@ ScrollView {
         // DX-Pedition Fase 2a — opt-in 3-column tactical workspace toggle.
         CheckBox {
             id: dxPeditionWorkspaceCheck
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             text: qsTr("DX-Pedition Workspace (3-column tactical layout)")
             checked: mainWindow.dxPeditionMode
@@ -229,15 +233,15 @@ ScrollView {
         }
 
         // ── Bande Operative (#4) — quali bande mostrare nel selettore ──
-        Text { text: qsTr("OPERATING BANDS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("OPERATING BANDS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
         Text {
             text: qsTr("Click to show/hide bands in the selector. Deselected bands disappear from the HF / V-U / SHF bar.")
             color: textSecondary; font.pixelSize: 10; wrapMode: Text.WordWrap
-            Layout.columnSpan: 4; Layout.fillWidth: true; Layout.bottomMargin: 2
+            Layout.columnSpan: pageColumns; Layout.fillWidth: true; Layout.bottomMargin: 2
         }
         Flow {
-            Layout.columnSpan: 4; Layout.fillWidth: true
+            Layout.columnSpan: pageColumns; Layout.fillWidth: true
             spacing: 6
             Repeater {
                 model: dialog.allBandsForConfig
@@ -270,8 +274,8 @@ ScrollView {
         // 1.0.189 — Riorganizzato in 2 sub-section per UX migliore:
         // PERFORMANCE (gates anti-stall) + STYLE (estetica).
         // ── UI — PERFORMANCE ──
-        Text { text: qsTr("UI — PERFORMANCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("UI — PERFORMANCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         // 1.0.180 — Quality preset: gate per effetti visivi pesanti.
         Text { text: qsTr("UI Quality preset:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140; Layout.columnSpan: 1 }
@@ -462,8 +466,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── Font ──
-        Text { text: qsTr("FONT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("FONT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Font:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         RowLayout {
@@ -539,8 +543,8 @@ ScrollView {
         }
 
         // ── Decodifiche ──
-        Text { text: qsTr("DECODES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("DECODES"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Show DXCC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -651,8 +655,8 @@ ScrollView {
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
 
         // ── Mappa e Distanza ──
-        Text { text: qsTr("MAP AND DISTANCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("MAP AND DISTANCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Miles:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -686,8 +690,8 @@ ScrollView {
         }
 
         // ── Allineamento ──
-        Text { text: qsTr("ALIGNMENT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("ALIGNMENT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Align:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -716,6 +720,6 @@ ScrollView {
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         Item { Layout.fillWidth: true; Layout.columnSpan: 2 }
-        Item { Layout.fillWidth: true; Layout.columnSpan: 4; Layout.preferredHeight: 18 }
+        Item { Layout.fillWidth: true; Layout.columnSpan: pageColumns; Layout.preferredHeight: 18 }
     }
 }

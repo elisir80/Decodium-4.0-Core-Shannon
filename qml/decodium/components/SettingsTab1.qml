@@ -4,7 +4,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
 
@@ -28,6 +28,7 @@ ScrollView {
     }
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -39,6 +40,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -135,7 +141,7 @@ ScrollView {
 
     GridLayout {
         width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -144,8 +150,8 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Backend CAT ──
-        Text { text: qsTr("BACKEND CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("BACKEND CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Backend:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Row {
@@ -270,7 +276,7 @@ ScrollView {
 
         // Banner: porta seriale occupata da altro software
         Item {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             visible: bridge.lastCatError.indexOf("occupata") !== -1
             implicitHeight: visible ? (settingsBannerText.implicitHeight + 16) : 0
@@ -320,8 +326,8 @@ ScrollView {
         }
 
         // ── Controllo CAT ──
-        Text { text: qsTr("CAT CONTROL"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("CAT CONTROL"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         // Rilevamento automatico: legge solo cio' che il sistema
         // gia' sa, non apre porte e non invia comandi.
@@ -1067,13 +1073,13 @@ ScrollView {
             color: secondaryCyan
             font.pixelSize: 12
             font.bold: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.topMargin: 10
         }
         Rectangle {
             visible: dialog.usesSerialControls()
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             height: 1
             color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3)
         }
@@ -1186,8 +1192,8 @@ ScrollView {
         }
 
         // ── Operazione Split ──
-        Text { text: qsTr("SPLIT OPERATION"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("SPLIT OPERATION"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Split:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoComboBox {
@@ -1257,8 +1263,8 @@ ScrollView {
         // ── CAT condivisa ──
         // Decodium tiene la seriale e la rivende in rete con il protocollo
         // rigctld: gli altri programmi si collegano come "Hamlib NET rigctl".
-        Text { text: qsTr("SHARED CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("SHARED CAT"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Share CAT:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -1301,7 +1307,7 @@ ScrollView {
         }
 
         Text {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             font.pixelSize: 11
@@ -1383,7 +1389,7 @@ ScrollView {
         }
 
         Text {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             font.pixelSize: 11
@@ -1453,7 +1459,7 @@ ScrollView {
             id: secondInstanceResult
             property string problem: ""
             property bool opened: false
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             font.pixelSize: 11
@@ -1470,8 +1476,8 @@ ScrollView {
         // ── Amplificatore ──
         // Sorgente di misura indipendente dalla radio: il DECOMETER puo
         // mostrare i watt del PA invece di quelli dell'eccitatrice.
-        Text { text: qsTr("AMPLIFIER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("AMPLIFIER"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Read amplifier:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -1515,7 +1521,7 @@ ScrollView {
         }
 
         Text {
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             font.pixelSize: 11
@@ -1544,8 +1550,8 @@ ScrollView {
             }
         }
         // ── Diagnostica ──
-        Text { text: qsTr("DIAGNOSTICS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("DIAGNOSTICS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Check SWR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -1645,12 +1651,12 @@ ScrollView {
             color: secondaryCyan
             font.pixelSize: 12
             font.bold: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.topMargin: 10
         }
         Rectangle {
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             height: 1
             color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.3)
         }
@@ -1740,7 +1746,7 @@ ScrollView {
         // 1.0.325 — status label ALC: riga dedicata a tutta larghezza
         RowLayout {
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.minimumHeight: bridge.alcCalibrationStatus !== "" ? controlHeight : 0
             visible: bridge.alcCalibrationStatus !== ""
             spacing: 0
@@ -1758,7 +1764,7 @@ ScrollView {
         }
         Item {
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.preferredHeight: dialog.scrollBottomMargin
         }
     }

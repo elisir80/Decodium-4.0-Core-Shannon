@@ -199,6 +199,8 @@ public:
                         float freqMinHz,
                         float freqMaxHz,
                         quint64 serial);
+    void activateCpuSpectrumFallback();
+    void prepareGpuSpectrumRetry();
 
     Q_INVOKABLE void resetPeakHold()  { m_peakBins.clear(); markDirty(); }
     Q_INVOKABLE void resetWaterfall();
@@ -442,6 +444,7 @@ private:
     bool  m_gpuFftFailed = false;
     QString m_gpuFftFailureReason;
     bool  m_gpuFftActiveNotified = false;
+    quint64 m_gpuFftFallbackGeneration = 0;
     bool  m_bridgePcmFrameFeedRegistered = false;
     bool  m_loggedGpuFftRejected = false;
     bool  m_loggedGpuFftAccepted = false;

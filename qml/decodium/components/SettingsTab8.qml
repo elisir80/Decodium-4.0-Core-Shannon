@@ -4,11 +4,12 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -20,6 +21,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -47,13 +53,11 @@ ScrollView {
     id: colorsSettingsScroll
     clip: true
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
-    contentWidth: availableWidth
-    contentHeight: colorsSettingsGrid.implicitHeight + 34
 
     GridLayout {
         id: colorsSettingsGrid
-        width: Math.max(0, colorsSettingsScroll.availableWidth - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -62,14 +66,14 @@ ScrollView {
         anchors.topMargin: dialog.scrollTopMargin
 
         // ── Colori Decodifica ──
-        Text { text: qsTr("DECODE COLORS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 4 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("DECODE COLORS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Repeater {
             model: dialog.decodeColorModel
             delegate: RowLayout {
                 id: decodeColorRow
-                Layout.columnSpan: 4
+                Layout.columnSpan: pageColumns
                 Layout.fillWidth: true
                 spacing: 10
                 property string targetProp: modelData.prop
@@ -362,13 +366,13 @@ ScrollView {
             text: qsTr("Visual contrast only; it does not change decoder sensitivity.")
             color: textDim
             font.pixelSize: 10
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.leftMargin: 110
         }
 
 	                        // ── Highlighting ──
-	                        Text { text: qsTr("HIGHLIGHTING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+	                        Text { text: qsTr("HIGHLIGHTING"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Highlight 73:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
@@ -410,11 +414,11 @@ ScrollView {
         }
 
         // ── Colori Interfaccia (sfondo + testo) — #6, stile v3 ──
-        Text { text: qsTr("COLORI INTERFACCIA (sfondo + testo)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("COLORI INTERFACCIA (sfondo + testo)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         RowLayout {
-            Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
+            Layout.columnSpan: pageColumns; Layout.fillWidth: true; spacing: 10
             Text { text: qsTr("Usa colori personalizzati:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
             CheckBox {
                 checked: bridge.themeManager.customColorsEnabled
@@ -426,7 +430,7 @@ ScrollView {
         }
 
         RowLayout {
-            Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
+            Layout.columnSpan: pageColumns; Layout.fillWidth: true; spacing: 10
             enabled: bridge.themeManager.customColorsEnabled
             opacity: enabled ? 1.0 : 0.4
             Text { text: qsTr("Background:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
@@ -446,7 +450,7 @@ ScrollView {
         }
 
         RowLayout {
-            Layout.columnSpan: 4; Layout.fillWidth: true; spacing: 10
+            Layout.columnSpan: pageColumns; Layout.fillWidth: true; spacing: 10
             enabled: bridge.themeManager.customColorsEnabled
             opacity: enabled ? 1.0 : 0.4
             Text { text: qsTr("Text:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 210; elide: Text.ElideRight }
@@ -466,8 +470,8 @@ ScrollView {
         }
 
         // ── Spettro ──
-        Text { text: qsTr("SPECTRUM"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("SPECTRUM"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Palette:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoComboBox {

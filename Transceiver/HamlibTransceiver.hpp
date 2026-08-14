@@ -2,8 +2,10 @@
 #define HAMLIB_TRANSCEIVER_HPP_
 
 #include <QString>
+#include <QElapsedTimer>
 #include <hamlib/rig.h>
 
+#include "QmxTelemetry.hpp"
 #include "TransceiverFactory.hpp"
 #include "PollingTransceiver.hpp"
 #include "pimpl_h.hpp"
@@ -39,7 +41,10 @@ private:
   void do_tune (bool) override;
 
   void do_poll () override;
-  void poll_transmit_telemetry (bool force_signal = false);
+  void poll_transmit_telemetry (bool force_signal = false,
+                                bool ignore_qmx_swr_sample = false,
+                                int scheduled_delay_ms = -1);
+  void reset_qmx_swr_filter (bool tx_active, QString const& reason);
   void start_cat_keep_alive_timer ();
   void stop_cat_keep_alive_timer ();
   void poll_cat_keep_alive ();
@@ -81,6 +86,11 @@ private:
   bool qmx_raw_swr_ = false;
   int qmx_raw_power_failures_ = 0;
   int qmx_raw_swr_failures_ = 0;
+  decodium::qmx_telemetry::SwrSafetyFilter qmx_swr_filter_;
+  QElapsedTimer qmx_swr_transition_clock_;
+  bool qmx_swr_filter_tx_active_ = false;
+  unsigned int qmx_swr_threshold_hundredths_ = 250;
+  quint64 qmx_swr_transition_serial_ = 0;
 
   // 1.0.204 — throttle telemetry polling: SWR/PWR add ~300ms per poll on slow
   // rigs (FT-991 38400 baud). Polling at full 1Hz blocks the worker thread

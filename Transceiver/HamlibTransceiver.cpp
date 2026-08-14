@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <hamlib/rig.h>
 #include "QmxTelemetry.hpp"
+#include "src/radio/DecodiumProfileSettings.h"
 #include "pimpl_impl.hpp"
 #include "moc_HamlibTransceiver.cpp"
 
@@ -24,6 +25,16 @@
 
 namespace
 {
+  unsigned int configured_qmx_swr_threshold_hundredths ()
+  {
+    double const threshold = qBound (
+        1.5,
+        decodium::profiledSettingsValue (
+            QString {}, QStringLiteral ("SWRStopThreshold"), 2.5).toDouble (),
+        5.0);
+    return static_cast<unsigned int> (std::lround (threshold * 100.0));
+  }
+
 #if defined (WIN32)
   QString hamlib_windows_port_path (QString const& port)
   {
@@ -830,6 +841,11 @@ int HamlibTransceiver::do_start ()
 #endif
   qmx_raw_power_failures_ = 0;
   qmx_raw_swr_failures_ = 0;
+  qmx_swr_filter_.reset ();
+  qmx_swr_filter_tx_active_ = false;
+  qmx_swr_transition_clock_.invalidate ();
+  qmx_swr_threshold_hundredths_ = configured_qmx_swr_threshold_hundredths ();
+  qmx_swr_transition_serial_ = 0;
 
   do_pwr_ = requestedPowerTelemetry && (hasRfPowerMeterWatts || qmx_raw_power_);
   do_pwr2_ = requestedPowerTelemetry && !do_pwr_ && hasRfPower;
@@ -1885,7 +1901,29 @@ void HamlibTransceiver::poll_cat_keep_alive ()
     }
 }
 
-void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
+void HamlibTransceiver::reset_qmx_swr_filter (bool tx_active, QString const& reason)
+{
+  if (!qmx_raw_swr_)
+    {
+      return;
+    }
+
+  qmx_swr_filter_.reset ();
+  qmx_swr_filter_tx_active_ = tx_active;
+  ++qmx_swr_transition_serial_;
+  qmx_swr_threshold_hundredths_ = configured_qmx_swr_threshold_hundredths ();
+  qmx_swr_transition_clock_.restart ();
+  update_swr (0);
+  qInfo ().noquote ()
+    << "[QMX-SWR] filter reset"
+    << "state=" << (tx_active ? QStringLiteral ("TX") : QStringLiteral ("RX"))
+    << "threshold=" << QString::number (qmx_swr_threshold_hundredths_ / 100.0, 'f', 2)
+    << "reason=" << reason;
+}
+
+void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
+                                                 bool ignore_qmx_swr_sample,
+                                                 int scheduled_delay_ms)
 {
   auto * rig = m_->rig_.data ();
   if (!rig || !rig->caps)
@@ -1894,6 +1932,10 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
     }
 
   bool const tx_active = ptt_on_ || state ().ptt ();
+  if (qmx_raw_swr_ && tx_active != qmx_swr_filter_tx_active_)
+    {
+      reset_qmx_swr_filter (tx_active, QStringLiteral ("telemetry-state-transition"));
+    }
   if (!tx_active)
     {
       update_power (0);
@@ -1924,13 +1966,46 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal)
           if (rc >= 0 && decodium::qmx_telemetry::parse_swr_hundredths (frame, &swrHundredths))
             {
               qmx_raw_swr_failures_ = 0;
-              update_swr (swrHundredths >= 100 ? swrHundredths : 0);
+              qint64 const transition_ms = qmx_swr_transition_clock_.isValid ()
+                  ? qmx_swr_transition_clock_.elapsed () : -1;
+              bool const settling_sample = ignore_qmx_swr_sample
+                  || (transition_ms >= 0 && transition_ms < 200);
+              auto const filtered = qmx_swr_filter_.process (
+                  swrHundredths,
+                  qmx_swr_threshold_hundredths_,
+                  settling_sample);
+              update_swr (filtered.published_hundredths);
+              qInfo ().noquote ()
+                << "[QMX-SWR] sample"
+                << "raw=" << QString::number (filtered.raw_hundredths / 100.0, 'f', 2)
+                << "filtered=" << QString::number (filtered.filtered_hundredths / 100.0, 'f', 2)
+                << "published=" << QString::number (filtered.published_hundredths / 100.0, 'f', 2)
+                << "threshold=" << QString::number (qmx_swr_threshold_hundredths_ / 100.0, 'f', 2)
+                << "samples=" << filtered.samples
+                << "consecutive_high=" << filtered.consecutive_high
+                << "transition_ms=" << transition_ms
+                << "scheduled_ms=" << scheduled_delay_ms
+                << "stop=" << filtered.stop_eligible
+                << "reason=" << decodium::qmx_telemetry::swr_filter_decision_name (filtered.decision);
             }
           else
             {
               ++qmx_raw_swr_failures_;
               CAT_TRACE ("QMX raw SW telemetry failed rc=" << rc << " reply=" << frame);
-              update_swr (0);
+              auto const filtered = qmx_swr_filter_.process (
+                  0, qmx_swr_threshold_hundredths_, false);
+              update_swr (filtered.published_hundredths);
+              qInfo ().noquote ()
+                << "[QMX-SWR] sample"
+                << "raw=invalid"
+                << "filtered=0.00"
+                << "published=0.00"
+                << "threshold=" << QString::number (qmx_swr_threshold_hundredths_ / 100.0, 'f', 2)
+                << "samples=" << filtered.samples
+                << "consecutive_high=" << filtered.consecutive_high
+                << "scheduled_ms=" << scheduled_delay_ms
+                << "stop=0"
+                << "reason=" << decodium::qmx_telemetry::swr_filter_decision_name (filtered.decision);
               if (qmx_raw_swr_failures_ >= kQmxRawTelemetryMaxFailures_)
                 {
                   do_swr_ = false;
@@ -2095,13 +2170,23 @@ void HamlibTransceiver::schedule_transmit_telemetry_burst ()
       return;
     }
 
-  static constexpr int delays_ms[] {120, 350, 700, 1100};
-  for (int const delay_ms : delays_ms)
+  quint64 const qmx_transition_serial = qmx_swr_transition_serial_;
+  auto schedule_poll = [this, qmx_transition_serial] (int delay_ms)
     {
-      QTimer::singleShot (delay_ms, this, [this] {
+      QTimer::singleShot (delay_ms, this, [this, delay_ms, qmx_transition_serial] {
+        if (qmx_raw_swr_ && qmx_transition_serial != qmx_swr_transition_serial_)
+          {
+            qInfo ().noquote ()
+              << "[QMX-SWR] scheduled sample cancelled"
+              << "scheduled_ms=" << delay_ms
+              << "reason=PTT-transition-changed";
+            return;
+          }
         try
           {
-            poll_transmit_telemetry (true);
+            bool const ignore_qmx_sample = qmx_raw_swr_
+                && decodium::qmx_telemetry::ignore_scheduled_swr_sample (delay_ms);
+            poll_transmit_telemetry (true, ignore_qmx_sample, delay_ms);
           }
         catch (std::exception const& e)
           {
@@ -2112,6 +2197,22 @@ void HamlibTransceiver::schedule_transmit_telemetry_burst ()
             CAT_TRACE ("early PWR/SWR poll failed unexpectedly, ignoring");
           }
       });
+    };
+
+  if (qmx_raw_swr_)
+    {
+      for (int const delay_ms : decodium::qmx_telemetry::swr_poll_delays_ms)
+        {
+          schedule_poll (delay_ms);
+        }
+    }
+  else
+    {
+      static constexpr int delays_ms[] {120, 350, 700, 1100};
+      for (int const delay_ms : delays_ms)
+        {
+          schedule_poll (delay_ms);
+        }
     }
 }
 
@@ -2184,6 +2285,12 @@ void HamlibTransceiver::do_ptt (bool on)
   // requested value only when there is no PTT port (RIG_PTT_NONE / VOX).
   bool const effective_ptt =
       (RIG_PTT_NONE != m_->rig_->state.pttport.type.ptt) ? ptt_on_ : on;
+  if (qmx_raw_swr_ && effective_ptt != qmx_swr_filter_tx_active_)
+    {
+      reset_qmx_swr_filter (
+          effective_ptt,
+          effective_ptt ? QStringLiteral ("RX-to-TX") : QStringLiteral ("TX-to-RX"));
+    }
   update_PTT (effective_ptt);
   if (on)
     {

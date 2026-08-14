@@ -67,6 +67,17 @@ Dialog {
     readonly property int scrollTopMargin: 10
     readonly property int scrollRightMargin: 12
     readonly property int scrollBottomMargin: 96
+
+    function settingsPageMinimumContentWidth(columnCount) {
+        var margins = scrollLeftMargin + scrollRightMargin
+        var spacing = 10
+        if (Number(columnCount) <= 2) {
+            return margins + labelWidth
+                    + Math.max(fieldMinWidth, wideFieldMinWidth, comboFieldMinWidth)
+                    + spacing
+        }
+        return margins + 2 * labelWidth + 2 * fieldMinWidth + 3 * spacing
+    }
     property string uiFontLabel: bridge.fontSettingLabel("Font", "", 0)
     property string decodedFontLabel: bridge.fontSettingLabel("DecodedTextFont", "Courier", 10)
     property string fontPickerKey: ""
@@ -1672,22 +1683,39 @@ Dialog {
                 Layout.fillHeight: true
                 color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
 
-                Column {
+                Flickable {
+                    id: settingsTabScroll
                     anchors.fill: parent
-                    anchors.topMargin: 8
-                    anchors.bottomMargin: 8
-                    anchors.leftMargin: 6
-                    anchors.rightMargin: 6
-                    spacing: 2
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickableDirection: Flickable.VerticalFlick
+                    contentWidth: width
+                    contentHeight: Math.max(height, settingsTabColumn.implicitHeight + 16)
+                    ScrollBar.horizontal: ScrollBar {
+                        policy: ScrollBar.AlwaysOff
+                    }
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        interactive: true
+                        active: hovered || pressed
+                    }
 
-                    Repeater {
-                        model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("UI Buttons"), qsTr("Callsign")]
-                        delegate: Rectangle {
-                            width: parent.width; height: 36; radius: 6
-                            color: tabStack.currentIndex === index ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.25) : (tabMA.containsMouse ? Qt.rgba(1,1,1,0.05) : "transparent")
-                            border.color: tabStack.currentIndex === index ? primaryBlue : "transparent"
-                            Text { anchors.centerIn: parent; text: modelData; color: tabStack.currentIndex === index ? primaryBlue : textSecondary; font.pixelSize: 12 }
-                            MouseArea { id: tabMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: settingsDialog.currentTab = index }
+                    Column {
+                        id: settingsTabColumn
+                        x: 6
+                        y: 8
+                        width: Math.max(0, parent.width - 12)
+                        spacing: 2
+
+                        Repeater {
+                            model: [qsTr("Station"), qsTr("Radio"), qsTr("Audio"), qsTr("TX"), qsTr("Display"), qsTr("Decode"), qsTr("Reporting"), qsTr("Frequencies"), qsTr("Colors"), qsTr("Advanced"), qsTr("Alerts"), qsTr("Filters"), qsTr("UI Buttons"), qsTr("Callsign")]
+                            delegate: Rectangle {
+                                width: settingsTabColumn.width; height: 36; radius: 6
+                                color: tabStack.currentIndex === index ? Qt.rgba(primaryBlue.r,primaryBlue.g,primaryBlue.b,0.25) : (tabMA.containsMouse ? Qt.rgba(1,1,1,0.05) : "transparent")
+                                border.color: tabStack.currentIndex === index ? primaryBlue : "transparent"
+                                Text { anchors.centerIn: parent; text: modelData; color: tabStack.currentIndex === index ? primaryBlue : textSecondary; font.pixelSize: 12 }
+                                MouseArea { id: tabMA; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: settingsDialog.currentTab = index }
+                            }
                         }
                     }
                 }

@@ -4,13 +4,14 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
 
-ScrollView {
+SettingsPageScroll {
     id: settingsTab2
 
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
+    readonly property int pageColumns: compactSettingsLayout ? 2 : 4
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
@@ -22,6 +23,11 @@ ScrollView {
     readonly property int scrollTopMargin: dialog ? dialog.scrollTopMargin : 10
     readonly property int scrollRightMargin: dialog ? dialog.scrollRightMargin : 12
     readonly property int scrollBottomMargin: dialog ? dialog.scrollBottomMargin : 96
+    pageLeftMargin: scrollLeftMargin
+    pageTopMargin: scrollTopMargin
+    pageRightMargin: scrollRightMargin
+    pageBottomMargin: scrollBottomMargin
+    minimumContentWidth: dialog ? dialog.settingsPageMinimumContentWidth(pageColumns) : 0
     readonly property color bgDeep: dialog ? dialog.bgDeep : "#080b12"
     readonly property color bgMedium: dialog ? dialog.bgMedium : "#101722"
     readonly property color bgLight: dialog ? dialog.bgLight : "#1a2433"
@@ -100,7 +106,7 @@ ScrollView {
 
     GridLayout {
         width: Math.max(0, parent.width - dialog.scrollLeftMargin - dialog.scrollRightMargin)
-        columns: 4; columnSpacing: 10; rowSpacing: 8
+        columns: pageColumns; columnSpacing: 10; rowSpacing: 8
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -133,7 +139,7 @@ ScrollView {
                 onClicked: dialog.refreshAudioDevices()
             }
         }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Input Device:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoComboBox {
@@ -234,7 +240,7 @@ ScrollView {
                 onClicked: bridge.refreshRtlSdrDevices()
             }
         }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Use RTL-SDR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         RtlCheckBox {
@@ -338,7 +344,7 @@ ScrollView {
             font.pixelSize: 11
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
         }
         Text { text: qsTr("Demodulator:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoComboBox {
@@ -393,7 +399,7 @@ ScrollView {
         // to wrap independently on wide displays.
         Item {
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             implicitHeight: rtlIfSettingsGrid.implicitHeight
 
             GridLayout {
@@ -625,7 +631,7 @@ ScrollView {
             font.pixelSize: 11
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
         }
         Text { text: qsTr("PPM correction:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: compactSettingsLayout ? 132 : 172; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoTextField {
@@ -853,7 +859,7 @@ ScrollView {
             font.pixelSize: 11
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
         }
 
         Text {
@@ -862,13 +868,13 @@ ScrollView {
             font.pixelSize: 11
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
-            Layout.columnSpan: 4
+            Layout.columnSpan: pageColumns
             Layout.topMargin: 2
         }
 
         // ── Livelli ──
-        Text { text: qsTr("LEVELS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("LEVELS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("RX Input Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
 	                        RowLayout {
@@ -949,8 +955,8 @@ ScrollView {
         }
 
         // ── Directory ──
-        Text { text: qsTr("DIRECTORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("DIRECTORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Save Directory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoTextField {
@@ -985,8 +991,8 @@ ScrollView {
         }
 
         // ── Power Memory ──
-        Text { text: qsTr("POWER MEMORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: 4; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: 4; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+        Text { text: qsTr("POWER MEMORY"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
         Text { text: qsTr("Band TX Memory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {

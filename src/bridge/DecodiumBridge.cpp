@@ -1,4 +1,6 @@
 #include "DecodiumBridge.h"
+#include "DecodeUiFilterPolicy.h"
+#include "src/core/HostProcessEnvironment.h"
 #include "Ft2LinkSatelliteHalfDuplex.h"
 #include "LinuxDrmGpuUsage.h"
 #include "DecodeListModel.h"
@@ -6342,6 +6344,7 @@ struct DecodeUiSnapshotJob
     bool includeBandSourceInRx {false};
     bool hideWorkedBand {false};
     bool hideWorkedToday {false};
+    bool preserveWorkedCq {false};
     bool hideTelemetry {true};
     bool showTxMessagesInRx {true};
     bool newestFirst {false};
@@ -6386,15 +6389,11 @@ static bool decodeUiEntryPassesBandFilters(QVariantMap const& entry,
     bool const isTxEntry = entry.value(QStringLiteral("isTx")).toBool()
         || entry.value(QStringLiteral("db")).toString().trimmed()
                .compare(QStringLiteral("TX"), Qt::CaseInsensitive) == 0;
-    if (!isTxEntry) {
-        if (job.hideWorkedBand
-            && entry.value(QStringLiteral("dxIsWorkedBand")).toBool()) {
-            return false;
-        }
-        if (job.hideWorkedToday
-            && entry.value(QStringLiteral("dxIsWorkedToday")).toBool()) {
-            return false;
-        }
+    if (!isTxEntry
+        && decodium::decode_ui::isHiddenByWorkedFilters(
+            entry, job.hideWorkedBand, job.hideWorkedToday,
+            job.preserveWorkedCq)) {
+        return false;
     }
     if (!job.hideTelemetry) return true;
     QString const display = entry.value(QStringLiteral("displayMessage")).toString();
@@ -6617,13 +6616,11 @@ bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry,
     if (m_hideGhostDecodes && looksLikeGhostDecode(entry)) return false;
     bool const isTxEntry = entry.value(QStringLiteral("isTx")).toBool()
         || entry.value(QStringLiteral("db")).toString().trimmed().compare(QStringLiteral("TX"), Qt::CaseInsensitive) == 0;
-    if (!isTxEntry) {
-        if (hideWorkedBand && entry.value(QStringLiteral("dxIsWorkedBand")).toBool()) {
-            return false;
-        }
-        if (hideWorkedToday && entry.value(QStringLiteral("dxIsWorkedToday")).toBool()) {
-            return false;
-        }
+    bool const preserveWorkedCq = !m_filtersBypassed && m_filterCqOnly;
+    if (!isTxEntry
+        && decodium::decode_ui::isHiddenByWorkedFilters(
+            entry, hideWorkedBand, hideWorkedToday, preserveWorkedCq)) {
+        return false;
     }
     if (!m_hideTelemetryOnlyDecodes) return true;
     QString const msg = entry.value(QStringLiteral("displayMessage")).toString();
@@ -8917,6 +8914,7 @@ void DecodiumBridge::startDecodeUiSnapshotRefresh()
         && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
     job.hideWorkedToday = !m_filtersBypassed
         && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    job.preserveWorkedCq = !m_filtersBypassed && m_filterCqOnly;
     job.hideTelemetry = m_hideTelemetryOnlyDecodes;
     job.showTxMessagesInRx =
         getSetting(QStringLiteral("TXMessagesToRX"), true).toBool();
@@ -10286,6 +10284,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     connect(m_callsignIntelligence, &CallsignIntelligenceService::confirmedAdifDownloaded,
             this, [this](const QString& provider, const QString& path) {
                 importConfirmedAdifIntoLogbookAsync(provider, path);
+            });
+    connect(m_callsignIntelligence, &CallsignIntelligenceService::externalLookupRequested,
+            this, [this](const QString& url) {
+                openExternalUrl(url);
             });
     bridgeLog(QStringLiteral("DXCC: load deferred until Main.qml ready"));
     m_usStateData = new UsStateDataManager(this);
@@ -19577,48 +19579,81 @@ void DecodiumBridge::updateProcessGpuUsage()
     qint64 const wallNs = m_processGpuSampleClock.isValid()
         ? m_processGpuSampleClock.nsecsElapsed()
         : 0;
-    if (hasEngineTime) {
+    double cycleUsage = -1.0;
+    bool cycleUsageAvailable = false;
+    if (hasCycleSample) {
+        bool const resetCycleSample =
+            !m_processGpuCycleSampleInitialized
+            || cycleSample.busyCycles < m_lastProcessGpuBusyCycles
+            || cycleSample.totalCycles <= m_lastProcessGpuTotalCycles;
+        if (!resetCycleSample) {
+            quint64 const busyDelta = cycleSample.busyCycles - m_lastProcessGpuBusyCycles;
+            quint64 const totalDelta = cycleSample.totalCycles - m_lastProcessGpuTotalCycles;
+            if (totalDelta > 0) {
+                cycleUsage = static_cast<double>(busyDelta) / static_cast<double>(totalDelta);
+                cycleUsageAvailable = true;
+            }
+        }
+        m_lastProcessGpuBusyCycles = cycleSample.busyCycles;
+        m_lastProcessGpuTotalCycles = cycleSample.totalCycles;
+        m_processGpuCycleSampleInitialized = true;
+    } else {
         m_processGpuCycleSampleInitialized = false;
+    }
+    if (hasEngineTime) {
         usageSource = QStringLiteral("drm-process");
         if (!m_processGpuSampleInitialized
             || wallNs <= 0
             || currentGpuTimeNs < m_lastProcessGpuTimeNs) {
             m_lastProcessGpuTimeNs = currentGpuTimeNs;
+            m_processGpuZeroSampleCount = 0;
             m_processGpuSampleClock.restart();
             m_processGpuSampleInitialized = true;
             return;
         }
 
         quint64 const gpuDeltaNs = currentGpuTimeNs - m_lastProcessGpuTimeNs;
-        usage = static_cast<double>(gpuDeltaNs) / static_cast<double>(wallNs);
+        m_processGpuZeroSampleCount = decodium::gpu_usage::nextLinuxDrmUnchangedSampleCount(
+            m_lastProcessGpuTimeNs,
+            currentGpuTimeNs,
+            m_processGpuZeroSampleCount);
+        if (decodium::gpu_usage::linuxDrmCounterIsStale(m_processGpuZeroSampleCount)) {
+            if (cycleUsageAvailable) {
+                usage = cycleUsage;
+                usageSource = QStringLiteral("drm-process-cycles");
+            } else {
+                LinuxDrmDeviceUsageSample deviceSample;
+                if (decodiumCurrentLinuxGpuDeviceUsage(pciDevice, &deviceSample)
+                    && deviceSample.immediateUsage >= 0.0) {
+                    usage = deviceSample.immediateUsage;
+                    usageSource = QStringLiteral("drm-device");
+                } else {
+                    // Do not advertise a permanently frozen counter as a
+                    // genuine 0% load. QML can now fall back to measured
+                    // render activity.
+                    usage = -1.0;
+                    usageSource = QStringLiteral("drm-process-stale");
+                }
+            }
+        } else {
+            usage = static_cast<double>(gpuDeltaNs) / static_cast<double>(wallNs);
+        }
         m_lastProcessGpuTimeNs = currentGpuTimeNs;
         m_processGpuSampleClock.restart();
     } else if (hasCycleSample) {
         m_processGpuSampleInitialized = false;
-        usageSource = QStringLiteral("drm-process");
-        bool const resetSample =
-            !m_processGpuCycleSampleInitialized
-            || cycleSample.busyCycles < m_lastProcessGpuBusyCycles
-            || cycleSample.totalCycles <= m_lastProcessGpuTotalCycles;
-        if (resetSample) {
-            m_lastProcessGpuBusyCycles = cycleSample.busyCycles;
-            m_lastProcessGpuTotalCycles = cycleSample.totalCycles;
-            m_processGpuCycleSampleInitialized = true;
+        m_processGpuZeroSampleCount = 0;
+        usageSource = QStringLiteral("drm-process-cycles");
+        if (!cycleUsageAvailable) {
             m_processGpuSampleClock.restart();
             return;
         }
-
-        quint64 const busyDelta = cycleSample.busyCycles - m_lastProcessGpuBusyCycles;
-        quint64 const totalDelta = cycleSample.totalCycles - m_lastProcessGpuTotalCycles;
-        usage = totalDelta > 0
-            ? static_cast<double>(busyDelta) / static_cast<double>(totalDelta)
-            : -1.0;
-        m_lastProcessGpuBusyCycles = cycleSample.busyCycles;
-        m_lastProcessGpuTotalCycles = cycleSample.totalCycles;
+        usage = cycleUsage;
         m_processGpuSampleClock.restart();
     } else {
         m_processGpuSampleInitialized = false;
         m_processGpuCycleSampleInitialized = false;
+        m_processGpuZeroSampleCount = 0;
         LinuxDrmDeviceUsageSample deviceSample;
         if (decodiumCurrentLinuxGpuDeviceUsage(pciDevice, &deviceSample)
             && deviceSample.immediateUsage >= 0.0) {
@@ -38377,10 +38412,17 @@ void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
         && deltaMs >= kGpuPanadapterPauseThresholdMs
         && !m_gpuPanadapterFftStallGuard.exchange(true)) {
         m_lastGpuPanadapterProbeMs = nowMs;
+        m_gpuPanadapterStableSinceMs = 0;
+        m_gpuPanadapterStallRetryCount = qMin(m_gpuPanadapterStallRetryCount + 1, 4);
+        qint64 const retryDelayMs = qMin<qint64>(
+            30000,
+            5000LL << (m_gpuPanadapterStallRetryCount - 1));
+        m_gpuPanadapterRetryNotBeforeMs = nowMs + retryDelayMs;
         setGpuPanadapterFftAvailable(false,
             QStringLiteral("severe main-thread stall (%1 ms)").arg(deltaMs));
-        bridgeLog(QStringLiteral("Panadapter GPU FFT paused after severe main-thread stall (%1 ms); async CPU fallback remains active")
-                      .arg(deltaMs));
+        bridgeLog(QStringLiteral("Panadapter GPU FFT paused after severe main-thread stall (%1 ms); async CPU fallback active, GPU retry in %2 ms")
+                      .arg(deltaMs)
+                      .arg(retryDelayMs));
     }
     if (activated) {
         if (legacyBackendAvailable()) {
@@ -38418,6 +38460,7 @@ void DecodiumBridge::noteFt8AdaptivePeriod(qint64 periodId)
         // Do not blindly re-enable the GPU path: make it eligible for the
         // normal probe after the FT8 guard has observed clean periods.
         m_lastGpuPanadapterProbeMs = 0;
+        m_gpuPanadapterRetryNotBeforeMs = 0;
         bridgeLog(QStringLiteral("Panadapter GPU FFT retry eligible after FT8 micro-stall guard restored"));
     }
     bridgeLog(QStringLiteral("FT8 micro-stall guard restored: %1 clean periods, normal DEEP thread budget active")
@@ -45165,6 +45208,25 @@ void DecodiumBridge::onSpectrumTimer()
             int const fpsCap = qBound(15, m_spectrumFpsCap, 30);
             qint64 const cappedIntervalMs = 1000 / fpsCap;
             bool const deepDecodeVisualLoad = nowMs < m_deepDecodeVisualThrottleUntilMs;
+            if (m_gpuPanadapterFftStallGuard.load()
+                && m_gpuPanadapterRetryNotBeforeMs > 0
+                && nowMs >= m_gpuPanadapterRetryNotBeforeMs
+                && m_gpuPanadapterFftStallGuard.exchange(false)) {
+                m_lastGpuPanadapterProbeMs = 0;
+                qInfo().noquote()
+                    << "[PANDBG] Panadapter GPU stall recovery probe eligible"
+                    << "attempt=" << m_gpuPanadapterStallRetryCount
+                    << "fallback_remains=FFTW_CPU_until_gpu_frame";
+            }
+            if (!m_gpuPanadapterFftStallGuard.load()
+                && m_gpuPanadapterStableSinceMs > 0
+                && m_gpuPanadapterFftAvailable.load()
+                && m_panadapterGpuFftActive
+                && nowMs - m_gpuPanadapterStableSinceMs >= 30000) {
+                m_gpuPanadapterStallRetryCount = 0;
+                m_gpuPanadapterRetryNotBeforeMs = 0;
+                m_gpuPanadapterStableSinceMs = 0;
+            }
             bool const acceleratedLegacyVisual =
                 !directVisualFastFeed
                 && m_legacyPcmSpectrumFeed
@@ -45255,12 +45317,26 @@ void DecodiumBridge::onSpectrumTimer()
                 && forceGpuPanadapterFft
                 && !panadapterNeedsCpuSpectrumHistory
                 && nowMs - m_lastGpuPanadapterProbeMs > 30000) {
+                bool const recoveringFromStall = m_gpuPanadapterRetryNotBeforeMs > 0;
                 m_lastGpuPanadapterProbeMs = nowMs;
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
+                m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+                for (const QPointer<PanadapterItem>& ref : std::as_const(m_panadapterItems)) {
+                    if (PanadapterItem* item = ref.data())
+                        item->prepareGpuSpectrumRetry();
+                }
+#endif
                 gpuPanadapterFftAvailable = true;
                 m_gpuPanadapterFftAvailable.store(true);
+                if (recoveringFromStall) {
+                    m_gpuPanadapterStableSinceMs = nowMs;
+                    m_gpuPanadapterRetryNotBeforeMs = 0;
+                }
                 qInfo().noquote()
                     << "[PANDBG] Panadapter visual FFT GPU retry probe"
-                    << "reason=force_gpu_first_reprobe"
+                    << "reason=" << (recoveringFromStall
+                                             ? QStringLiteral("stall_recovery_reprobe")
+                                             : QStringLiteral("force_gpu_first_reprobe"))
                     << "fallback=FFTW_CPU_on_failure";
             }
             bool const gpuPanadapterFft =
@@ -49268,8 +49344,11 @@ DecodiumBridge::PanadapterFrameResult DecodiumBridge::computePanadapterFrame(con
             << "post=power_db_no_sqrt";
     }
 
+    // Normalize raw int16 samples before the FFT. The display calibration
+    // below then keeps CPU backends on Decodium's established panadapter scale.
+    constexpr float pcmFullScale = 1.0f / 32768.0f;
     for (int i = 0; i < N; ++i)
-        fft.in[i] = static_cast<float>(samples[i]) * blackmanHarrisWindow[i];
+        fft.in[i] = static_cast<float>(samples[i]) * pcmFullScale * blackmanHarrisWindow[i];
 
     fftwf_execute(fft.plan);
 
@@ -49282,6 +49361,7 @@ DecodiumBridge::PanadapterFrameResult DecodiumBridge::computePanadapterFrame(con
     QVector<float> result(nBins);
     float minDb =  200.f, maxDb = -200.f;
     constexpr float powerFloor = 1e-24f;
+    constexpr float displayCalibrationDb = -40.0f;
     float const fftNorm = N / 2.0f;
     float const inverseNormSquared = 1.0f / (fftNorm * fftNorm);
     for (int b = binStart; b < binEnd; ++b) {
@@ -49289,7 +49369,7 @@ DecodiumBridge::PanadapterFrameResult DecodiumBridge::computePanadapterFrame(con
         float const im = fft.out[b][1];
         float const normalizedPower = (re * re + im * im) * inverseNormSquared;
         float const db = (normalizedPower > powerFloor)
-            ? 10.0f * std::log10(normalizedPower)
+            ? 10.0f * std::log10(normalizedPower) + displayCalibrationDb
             : -200.0f;
         result[b - binStart] = db;
         if (db > -190.f) { minDb = qMin(minDb, db); maxDb = qMax(maxDb, db); }
@@ -49308,8 +49388,10 @@ DecodiumBridge::PanadapterFrameResult DecodiumBridge::computePanadapterFrame(con
     }
 
     std::vector<std::complex<float>> fftBuf(N);
+    constexpr float pcmFullScale = 1.0f / 32768.0f;
     for (int i = 0; i < N; ++i)
-        fftBuf[i] = std::complex<float>(static_cast<float>(samples[i]) * blackmanHarrisWindow[i], 0.f);
+        fftBuf[i] = std::complex<float>(
+            static_cast<float>(samples[i]) * pcmFullScale * blackmanHarrisWindow[i], 0.f);
 
     fft_inplace(fftBuf);
     const float freqPerBin = (float)SAMPLE_RATE / N;
@@ -49320,12 +49402,13 @@ DecodiumBridge::PanadapterFrameResult DecodiumBridge::computePanadapterFrame(con
     QVector<float> result(nBins);
     float minDb = 200.f, maxDb = -200.f;
     constexpr float powerFloor = 1e-24f;
+    constexpr float displayCalibrationDb = -40.0f;
     float const fftNorm = N / 2.0f;
     float const inverseNormSquared = 1.0f / (fftNorm * fftNorm);
     for (int b = binStart; b < binEnd; ++b) {
         float const normalizedPower = std::norm(fftBuf[b]) * inverseNormSquared;
         float const db = (normalizedPower > powerFloor)
-            ? 10.0f * std::log10(normalizedPower)
+            ? 10.0f * std::log10(normalizedPower) + displayCalibrationDb
             : -200.0f;
         result[b - binStart] = db;
         if (db > -190.f) { minDb = qMin(minDb, db); maxDb = qMax(maxDb, db); }
@@ -51227,9 +51310,63 @@ bool DecodiumBridge::openExternalUrl(const QString& url)
         return false;
     }
 
-    bool const ok = QDesktopServices::openUrl(target);
+    bool ok = false;
+#if defined(Q_OS_LINUX)
+    const bool appImageRuntime = qEnvironmentVariableIsSet("APPIMAGE")
+        || qEnvironmentVariableIsSet("APPDIR");
+    if (appImageRuntime) {
+        QString opener;
+        QStringList arguments;
+        const QString systemXdgOpen = QStringLiteral("/usr/bin/xdg-open");
+        const QString systemGio = QStringLiteral("/usr/bin/gio");
+        if (QFileInfo(systemXdgOpen).isExecutable()) {
+            opener = systemXdgOpen;
+        } else if (QFileInfo(systemGio).isExecutable()) {
+            opener = systemGio;
+            arguments.append(QStringLiteral("open"));
+        } else {
+            opener = QStandardPaths::findExecutable(QStringLiteral("xdg-open"));
+        }
+
+        if (!opener.isEmpty()) {
+            arguments.append(target.toString(QUrl::FullyEncoded));
+            QProcess process;
+            process.setProcessEnvironment(
+                decodium::host_process::sanitizedSystemEnvironment());
+            process.setProgram(opener);
+            process.setArguments(arguments);
+            qint64 pid = 0;
+            ok = process.startDetached(&pid);
+            if (ok) {
+                qInfo().noquote()
+                    << "[EXTERNAL-URL] opened with host helper"
+                    << "helper=" << QFileInfo(opener).fileName()
+                    << "pid=" << pid
+                    << "scheme=" << scheme
+                    << "host=" << target.host();
+            } else {
+                qWarning().noquote()
+                    << "[EXTERNAL-URL] host helper failed; trying Qt desktop services"
+                    << "helper=" << opener
+                    << "scheme=" << scheme
+                    << "host=" << target.host();
+            }
+        }
+    }
+#endif
+    if (!ok) {
+        ok = QDesktopServices::openUrl(target);
+        qInfo().noquote()
+            << "[EXTERNAL-URL] Qt desktop services result"
+            << "ok=" << ok
+            << "scheme=" << scheme
+            << "host=" << target.host();
+    }
     if (!ok) {
         emit errorMessage(QStringLiteral("Impossibile aprire URL: %1").arg(clean));
+    } else {
+        emit statusMessage(QStringLiteral("URL aperto nel browser di sistema: %1")
+                               .arg(target.host().isEmpty() ? scheme : target.host()));
     }
     return ok;
 }
@@ -52362,6 +52499,13 @@ void DecodiumBridge::setGpuPanadapterFftAvailable(bool available, const QString&
     if (!available) {
         if (reason.startsWith(QStringLiteral("OpenGL GPU FFT disabled")))
             m_forceGpuPanadapterFft.store(false);
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
+        m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
+        for (const QPointer<PanadapterItem>& ref : std::as_const(m_panadapterItems)) {
+            if (PanadapterItem* item = ref.data())
+                item->activateCpuSpectrumFallback();
+        }
+#endif
         setGpuPanadapterFftActive(false, QStringLiteral("CPU FFTW"));
     }
     if (previous == available)
@@ -52381,6 +52525,11 @@ void DecodiumBridge::setGpuPanadapterFftAvailable(bool available, const QString&
 
 void DecodiumBridge::setGpuPanadapterFftActive(bool active, const QString& backend)
 {
+    if (active
+        && (!m_gpuPanadapterFftAvailable.load()
+            || m_gpuPanadapterFftStallGuard.load())) {
+        return;
+    }
     QString const resolvedBackend = active
         ? (backend.trimmed().isEmpty() ? QStringLiteral("GPU RHI") : backend.trimmed())
         : QStringLiteral("CPU FFTW");

@@ -3453,6 +3453,9 @@ private:
     bool m_panadapterGpuFftActive {false};
     QString m_panadapterGpuFftBackend {QStringLiteral("CPU FFTW")};
     qint64 m_lastGpuPanadapterProbeMs {0};
+    qint64 m_gpuPanadapterRetryNotBeforeMs {0};
+    qint64 m_gpuPanadapterStableSinceMs {0};
+    int m_gpuPanadapterStallRetryCount {0};
     QList<QPointer<PanadapterItem>> m_panadapterItems;
 
     // The IQ ring stores interleaved signed samples.  It is written in the

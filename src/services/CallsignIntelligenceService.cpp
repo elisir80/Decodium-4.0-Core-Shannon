@@ -7,7 +7,6 @@
 #include "SecureSettings.hpp"
 
 #include <QDateTime>
-#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -1782,12 +1781,41 @@ QString CallsignIntelligenceService::externalUrl(const QString& provider, const 
     return QStringLiteral("https://www.google.com/search?q=%1+amateur+radio").arg(call);
 }
 
-void CallsignIntelligenceService::openProviderLookup(const QString& provider) const
+bool CallsignIntelligenceService::openProviderLookup(const QString& provider,
+                                                     const QString& callsign)
 {
-    if (m_offlineMode) return;
-    const QString cleanProvider = provider.trimmed().toLower().isEmpty() ? QStringLiteral("qrz") : provider.trimmed().toLower();
-    if (m_currentCall.isEmpty()) return;
-    QDesktopServices::openUrl(QUrl(externalUrl(cleanProvider, m_currentCall)));
+    const QString cleanProvider = provider.trimmed().toLower().isEmpty()
+        ? QStringLiteral("qrz") : provider.trimmed().toLower();
+    const QString call = normalizeCall(callsign.trimmed().isEmpty()
+                                           ? m_currentCall : callsign);
+    if (call.isEmpty()) {
+        setStatus(tr("Impossibile aprire il lookup esterno: callsign non valido"));
+        qWarning().noquote()
+            << "[CALLLOOKUP] external lookup rejected: invalid callsign"
+            << "provider=" << cleanProvider;
+        return false;
+    }
+
+    const QString url = externalUrl(cleanProvider, call);
+    if (url.isEmpty()) {
+        setStatus(tr("Impossibile creare l'URL del provider esterno"));
+        qWarning().noquote()
+            << "[CALLLOOKUP] external lookup rejected: empty URL"
+            << "provider=" << cleanProvider
+            << "call=" << call;
+        return false;
+    }
+
+    // Offline mode controls Decodium's own network requests. An explicit user
+    // click is still allowed to hand the URL to the system browser.
+    setStatus(tr("Apertura %1 per %2 nel browser di sistema...")
+                  .arg(cleanProvider.toUpper(), call));
+    qInfo().noquote()
+        << "[CALLLOOKUP] external lookup requested"
+        << "provider=" << cleanProvider
+        << "call=" << call;
+    emit externalLookupRequested(url);
+    return true;
 }
 
 void CallsignIntelligenceService::clearCache(const QString& callsign)

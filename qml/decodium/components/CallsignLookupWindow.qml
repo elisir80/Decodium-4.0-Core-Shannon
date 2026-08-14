@@ -30,6 +30,12 @@ Dialog {
         return service && service.result ? String(service.result[key] || "") : ""
     }
 
+    function openExternalProvider(provider) {
+        var call = callField.text.trim()
+        if (service && call.length > 0)
+            service.openProviderLookup(provider, call)
+    }
+
     background: Rectangle {
         color: bgDeep
         border.color: secondaryCyan
@@ -136,19 +142,29 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
-            Repeater {
-                model: [
-                    { id: "qrz", label: "QRZ" },
-                    { id: "fcc_uls", label: "FCC" },
-                    { id: "eqsl", label: "eQSL" },
-                    { id: "clublog", label: qsTr("Club Log") }
-                ]
-                delegate: Button {
-                    text: modelData.label
-                    Layout.fillWidth: true
-                    enabled: lookupDialog.service && lookupDialog.requestedCall.length > 0
-                    onClicked: lookupDialog.service.openProviderLookup(modelData.id)
-                }
+            Button {
+                text: "QRZ"
+                Layout.fillWidth: true
+                enabled: lookupDialog.service && callField.text.trim().length > 0
+                onClicked: lookupDialog.openExternalProvider("qrz")
+            }
+            Button {
+                text: "FCC"
+                Layout.fillWidth: true
+                enabled: lookupDialog.service && callField.text.trim().length > 0
+                onClicked: lookupDialog.openExternalProvider("fcc_uls")
+            }
+            Button {
+                text: "eQSL"
+                Layout.fillWidth: true
+                enabled: lookupDialog.service && callField.text.trim().length > 0
+                onClicked: lookupDialog.openExternalProvider("eqsl")
+            }
+            Button {
+                text: qsTr("Club Log")
+                Layout.fillWidth: true
+                enabled: lookupDialog.service && callField.text.trim().length > 0
+                onClicked: lookupDialog.openExternalProvider("clublog")
             }
         }
 
