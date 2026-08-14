@@ -322,10 +322,10 @@ ScrollView {
         Text { text: qsTr("B4 Strikethrough:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.b4Strikethrough
-            onCheckedChanged: {
-                bridge.b4Strikethrough = checked
-                bridge.setSetting("b4Strikethrough", checked)
-            }
+            // Persist only a real user action. onCheckedChanged also fires
+            // while the binding is initialised and used to perform a second,
+            // potentially stale write through the generic settings path.
+            onToggled: bridge.b4Strikethrough = checked
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }

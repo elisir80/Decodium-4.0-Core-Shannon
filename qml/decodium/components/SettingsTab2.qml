@@ -50,36 +50,41 @@ ScrollView {
     component RtlCheckBox: CheckBox {
         id: rtlCheckControl
         required property var theme
-        implicitWidth: 24
+        implicitWidth: 26
         implicitHeight: theme.controlHeight
         hoverEnabled: true
+        opacity: 1.0
 
         indicator: Rectangle {
-            implicitWidth: 20
-            implicitHeight: 20
+            implicitWidth: 22
+            implicitHeight: 22
             x: 2
             y: (rtlCheckControl.height - height) / 2
             radius: 4
+            opacity: 1.0
             color: rtlCheckControl.checked
                    ? (rtlCheckControl.enabled
                       ? rtlCheckControl.theme.primaryBlue
-                      : Qt.alpha(rtlCheckControl.theme.primaryBlue, 0.48))
+                      : Qt.darker(rtlCheckControl.theme.primaryBlue, 1.45))
                    : (rtlCheckControl.hovered && rtlCheckControl.enabled
-                      ? rtlCheckControl.theme.bgLight : rtlCheckControl.theme.bgMedium)
+                      ? Qt.lighter(rtlCheckControl.theme.bgLight, 1.65)
+                      : (rtlCheckControl.enabled
+                         ? Qt.lighter(rtlCheckControl.theme.bgMedium, 1.55)
+                         : Qt.lighter(rtlCheckControl.theme.bgMedium, 1.25)))
             border.width: 2
             border.color: !rtlCheckControl.enabled
-                          ? Qt.alpha(rtlCheckControl.theme.textSecondary, 0.48)
+                          ? Qt.lighter(rtlCheckControl.theme.glassBorder, 1.45)
                           : (rtlCheckControl.checked
                              ? rtlCheckControl.theme.secondaryCyan
-                             : Qt.alpha(rtlCheckControl.theme.textSecondary, 0.82))
+                             : Qt.lighter(rtlCheckControl.theme.glassBorder, 1.9))
 
             Text {
                 anchors.centerIn: parent
                 text: rtlCheckControl.checked ? "✓" : ""
                 color: rtlCheckControl.enabled
                        ? rtlCheckControl.theme.textPrimary
-                       : Qt.alpha(rtlCheckControl.theme.textPrimary, 0.68)
-                font.pixelSize: 14
+                       : rtlCheckControl.theme.textSecondary
+                font.pixelSize: 15
                 font.bold: true
             }
         }

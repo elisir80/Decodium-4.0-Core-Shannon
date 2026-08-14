@@ -18,6 +18,7 @@ RTLSDR_VERSION="${RTLSDR_VERSION:-2.0.2}"
 RTLSDR_PREFIX="${RTLSDR_PREFIX:-${ROOT_DIR}/.ci/cache/librtlsdr-linux-${APPIMAGE_ARCH}-${RTLSDR_VERSION}}"
 LINUXDEPLOY_URL="${LINUXDEPLOY_URL:-https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage}"
 LINUXDEPLOY_QT_PLUGIN_URL="${LINUXDEPLOY_QT_PLUGIN_URL:-https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage}"
+APPIMAGETOOL_URL="${APPIMAGETOOL_URL:-https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${APPIMAGE_ARCH}.AppImage}"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 2)}"
 
 VERSION="$("${ROOT_DIR}/scripts/ci/resolve-release-version.sh" "${VERSION}")"
@@ -308,6 +309,7 @@ if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrive
 fi
 LINUXDEPLOY="${TOOLS_DIR}/linuxdeploy-${LINUXDEPLOY_ARCH}.AppImage"
 QT_PLUGIN="${TOOLS_DIR}/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage"
+APPIMAGETOOL="${TOOLS_DIR}/appimagetool-${APPIMAGE_ARCH}.AppImage"
 if [[ ! -x "${LINUXDEPLOY}" ]]; then
   curl -fsSL -o "${LINUXDEPLOY}" "${LINUXDEPLOY_URL}"
   chmod +x "${LINUXDEPLOY}"
@@ -315,6 +317,10 @@ fi
 if [[ ! -x "${QT_PLUGIN}" ]]; then
   curl -fsSL -o "${QT_PLUGIN}" "${LINUXDEPLOY_QT_PLUGIN_URL}"
   chmod +x "${QT_PLUGIN}"
+fi
+if [[ "${APPIMAGE_ARCH}" == "aarch64" && ! -x "${APPIMAGETOOL}" ]]; then
+  curl -fsSL -o "${APPIMAGETOOL}" "${APPIMAGETOOL_URL}"
+  chmod +x "${APPIMAGETOOL}"
 fi
 
 resolve_appimage_runner() {
@@ -363,6 +369,10 @@ resolve_appimage_runner() {
 
 LINUXDEPLOY_RUNNER="$(resolve_appimage_runner "${LINUXDEPLOY}" linuxdeploy)"
 QT_PLUGIN_RUNNER="$(resolve_appimage_runner "${QT_PLUGIN}" linuxdeploy-plugin-qt)"
+APPIMAGETOOL_RUNNER=""
+if [[ "${APPIMAGE_ARCH}" == "aarch64" ]]; then
+  APPIMAGETOOL_RUNNER="$(resolve_appimage_runner "${APPIMAGETOOL}" appimagetool)"
+fi
 if [[ "${QT_PLUGIN_RUNNER}" == */linuxdeploy-plugin-qt-extracted/AppRun ]]; then
   mkdir -p "${TOOLS_DIR}/disabled-appimages"
   if [[ -f "${QT_PLUGIN}" && ! -f "${TOOLS_DIR}/disabled-appimages/linuxdeploy-plugin-qt-${LINUXDEPLOY_ARCH}.AppImage.real" ]]; then
@@ -593,6 +603,17 @@ if [[ -L "${APPDIR}/AppRun" || -f "${APPDIR}/AppRun" ]]; then
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "$0")")"
 
+# Preserve the host values before linuxdeploy's AppRun and this wrapper add
+# bundle paths.  Decodium restores these snapshots only for host helpers such
+# as secret-tool; the application itself keeps using the bundled libraries.
+export DECODIUM_HOST_LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
+export DECODIUM_HOST_LD_PRELOAD="${LD_PRELOAD:-}"
+export DECODIUM_HOST_GIO_EXTRA_MODULES="${GIO_EXTRA_MODULES:-}"
+export DECODIUM_HOST_GI_TYPELIB_PATH="${GI_TYPELIB_PATH:-}"
+export DECODIUM_HOST_GSETTINGS_SCHEMA_DIR="${GSETTINGS_SCHEMA_DIR:-}"
+export DECODIUM_HOST_GTK_PATH="${GTK_PATH:-}"
+export DECODIUM_HOST_XDG_DATA_DIRS="${XDG_DATA_DIRS:-}"
+
 # The Qt 6.11 Wayland platform plugin can be present but unusable on some
 # Ubuntu/AppImage combinations because part of the compositor stack is supplied
 # by the host. Prefer XCB unless the user explicitly overrides it.
@@ -616,11 +637,23 @@ log "Create AppImage"
 (
   cd "${ROOT_DIR}"
   rm -f ./*.AppImage
-  "${LINUXDEPLOY_RUNNER}" \
-    --appdir "${APPDIR}" \
-    --desktop-file "${APPDIR}/usr/share/applications/decodium.desktop" \
-    --icon-file "${APPDIR}/usr/share/icons/hicolor/256x256/apps/decodium.png" \
-    --output appimage
+  if [[ "${APPIMAGE_ARCH}" == "aarch64" ]]; then
+    # linuxdeploy's aarch64 output plug-in currently replaces a custom AppRun
+    # while packaging.  The AppDir is already fully deployed above, so invoke
+    # appimagetool directly and preserve Decodium's host-environment wrapper.
+    ARCH="${APPIMAGE_ARCH}" \
+      VERSION="${VERSION}" \
+      LINUXDEPLOY_OUTPUT_VERSION="${VERSION}" \
+      "${APPIMAGETOOL_RUNNER}" \
+        "${APPDIR}" \
+        "${ROOT_DIR}/Decodium_4-${VERSION}-${APPIMAGE_ARCH}.AppImage"
+  else
+    "${LINUXDEPLOY_RUNNER}" \
+      --appdir "${APPDIR}" \
+      --desktop-file "${APPDIR}/usr/share/applications/decodium.desktop" \
+      --icon-file "${APPDIR}/usr/share/icons/hicolor/256x256/apps/decodium.png" \
+      --output appimage
+  fi
 )
 
 APPIMAGE_NAME="decodium4-ft2-${VERSION}-linux-${APPIMAGE_OUTPUT_ARCH}.AppImage"
@@ -643,18 +676,49 @@ mkdir -p "${verify_dir}"
   APPIMAGE_EXTRACT_AND_RUN=1 "${OUTPUT_DIR}/${APPIMAGE_NAME}" --appimage-extract >/dev/null
 )
 EXTRACTED_APPDIR="${verify_dir}/squashfs-root"
-test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/qmldir"
-test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
-test -f "${EXTRACTED_APPDIR}/usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
-test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/qmldir"
-test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
-test -f "${EXTRACTED_APPDIR}/usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+require_appimage_file() {
+  local relative_path="$1"
+  if [[ ! -f "${EXTRACTED_APPDIR}/${relative_path}" ]]; then
+    echo "error: final AppImage is missing ${relative_path}" >&2
+    exit 1
+  fi
+}
+
+for host_variable in \
+  LD_LIBRARY_PATH LD_PRELOAD GIO_EXTRA_MODULES GI_TYPELIB_PATH \
+  GSETTINGS_SCHEMA_DIR GTK_PATH XDG_DATA_DIRS; do
+  if ! grep -q "DECODIUM_HOST_${host_variable}" "${EXTRACTED_APPDIR}/AppRun"; then
+    echo "error: final AppImage launcher does not preserve ${host_variable}" >&2
+    exit 1
+  fi
+done
+require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/qmldir"
+require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+require_appimage_file "usr/qml/QtQuick/Controls/Material/qmldir"
+require_appimage_file "usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
+require_appimage_file "usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
 verify_qml_plugin_dependencies "final AppImage" \
   "${EXTRACTED_APPDIR}/usr/bin/qml" \
   "${EXTRACTED_APPDIR}/usr/lib"
-find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit | grep -q .
-LD_LIBRARY_PATH="${EXTRACTED_APPDIR}/usr/lib:${EXTRACTED_APPDIR}/usr/bin" \
-  ldd "${EXTRACTED_APPDIR}/usr/bin/decodium" | grep -q 'librtlsdr.so'
+rtlsdr_library="$(find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit)"
+if [[ -z "${rtlsdr_library}" ]]; then
+  echo "error: final AppImage does not contain librtlsdr" >&2
+  exit 1
+fi
+
+# Do not pipe ldd directly into grep -q while pipefail is active.  On some
+# architectures grep exits as soon as it finds librtlsdr and ldd then receives
+# SIGPIPE, making a valid payload check fail with no diagnostic.
+decodium_ldd_output="$(
+  LD_LIBRARY_PATH="${EXTRACTED_APPDIR}/usr/lib:${EXTRACTED_APPDIR}/usr/bin" \
+    ldd "${EXTRACTED_APPDIR}/usr/bin/decodium"
+)"
+if ! grep -q 'librtlsdr.so' <<<"${decodium_ldd_output}"; then
+  echo "error: final AppImage executable is not linked to bundled librtlsdr" >&2
+  printf '%s\n' "${decodium_ldd_output}" >&2
+  exit 1
+fi
 rm -rf "${verify_dir}"
 
 log "Done"

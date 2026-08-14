@@ -113,6 +113,7 @@ jobs:
             libxcb-xfixes0-dev \
             libxkbcommon-dev \
             libxkbcommon-x11-dev \
+            libvulkan-dev \
             libasound2-dev \
             libpulse-dev
           sudo apt-get install -y -qq libfuse2t64 || sudo apt-get install -y -qq libfuse2

@@ -2082,6 +2082,17 @@ if (Qt6ShaderTools_FOUND)
       shaders/panadapter_spectrum.vert
       shaders/panadapter_spectrum.frag
   )
+	  qt_add_shaders(decodium_qml decodium_panadapter_spectrum3d_shader
+	    PREFIX
+	      "/shaders"
+	    BASE
+	      "shaders"
+	    GLSL
+	      "120,150,310 es,330,440"
+    FILES
+      shaders/panadapter_spectrum3d.vert
+      shaders/panadapter_spectrum3d.frag
+  )
 	  qt_add_shaders(decodium_qml decodium_livemap_greyline_shader
 	    PREFIX
 	      "/shaders"
@@ -2129,6 +2140,7 @@ if (Qt6ShaderTools_FOUND)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_WATERFALL_SHADER_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_FFT_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_SPECTRUM_QSB=1)
+  target_compile_definitions(decodium_qml PRIVATE DECODIUM_GPU_PANADAPTER_SPECTRUM_3D_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_GREYLINE_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_MARKER_QSB=1)
   target_compile_definitions(decodium_qml PRIVATE DECODIUM_LIVEMAP_PATH_QSB=1)

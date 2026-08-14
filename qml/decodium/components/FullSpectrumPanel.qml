@@ -421,6 +421,10 @@ Item {
                     color: root.decodeMessageColor(del.entry)
                     font.pixelSize: root.fSize; font.family: decodiumMonoFontFamily
                     font.bold: root.decodeMessageBold(del.entry)
+                    font.strikeout: !!modelData
+                                        && (del.entry.isB4 === true || del.entry.dxIsWorked === true)
+                                        && !!root.bridge
+                                        && root.bridge.b4Strikethrough
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
