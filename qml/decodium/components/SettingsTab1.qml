@@ -5,11 +5,8 @@ import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 SettingsPageScroll {
-    id: radioSettingsPage
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
-    property bool pwrAndSwrSetting: bridge ? !!bridge.getSetting("PWRandSWR", false) : false
-    property bool checkSwrSetting: bridge ? !!bridge.getSetting("CheckSWR", false) : false
 
     // Applica in un colpo solo lo stato dei quattro comandi della CAT
     // condivisa: il server apre o chiude la porta di conseguenza.
@@ -129,16 +126,6 @@ SettingsPageScroll {
         if (bridge.loadCatProfile(name)) {
             catProfileNameField.text = String(bridge.activeCatProfile || name)
             dialog.refreshCatPorts()
-        }
-    }
-
-    Connections {
-        target: radioSettingsPage.bridge
-        function onSettingValueChanged(key, value) {
-            if (key === "PWRandSWR")
-                radioSettingsPage.pwrAndSwrSetting = !!value
-            else if (key === "CheckSWR")
-                radioSettingsPage.checkSwrSetting = !!value
         }
     }
 
@@ -1568,24 +1555,25 @@ SettingsPageScroll {
 
         Text { text: qsTr("Check SWR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            id: checkSwrToggle
-            checked: dialog.supportsSwrTelemetry() ? radioSettingsPage.checkSwrSetting : false
+            checked: dialog.supportsSwrTelemetry() ? bridge.getSetting("CheckSWR", false) : false
             enabled: dialog.supportsSwrTelemetry()
-            // clicked is emitted only for a real user action.  Apply the two
-            // related values atomically so enabling protection causes one CAT
-            // rebuild and cannot leave telemetry disabled.
-            onClicked: if (enabled)
-                bridge.setCatTelemetrySettings(pwrAndSwrToggle.checked || checked, checked)
+            // Only a user gesture may change CAT telemetry settings.  A
+            // checked binding is evaluated while this lazy page is created;
+            // onCheckedChanged used to treat that initial value as an edit
+            // and unnecessarily reconnect Hamlib whenever Setup was opened.
+            onToggled: if (enabled) {
+                bridge.setSetting("CheckSWR", checked)
+                if (checked && !bridge.getSetting("PWRandSWR", false))
+                    bridge.setSetting("PWRandSWR", true)
+            }
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
         Text { text: qsTr("PWR and SWR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            id: pwrAndSwrToggle
-            checked: dialog.supportsSwrTelemetry() ? radioSettingsPage.pwrAndSwrSetting : false
+            checked: dialog.supportsSwrTelemetry() ? bridge.getSetting("PWRandSWR", false) : false
             enabled: dialog.supportsSwrTelemetry()
-            onClicked: if (enabled)
-                bridge.setCatTelemetrySettings(checked, checked ? checkSwrToggle.checked : false)
+            onToggled: if (enabled) bridge.setSetting("PWRandSWR", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }

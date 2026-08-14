@@ -4,7 +4,6 @@
 #include "DecodiumTransceiverManager.h"
 
 #include "DecodiumLogging.hpp"
-#include "DecodiumCatTelemetrySettings.h"
 #include "DecodiumProfileSettings.h"
 #include "Transceiver/TransceiverFactory.hpp"
 #include "Transceiver/Transceiver.hpp"
@@ -1525,13 +1524,10 @@ static TransceiverFactory::TXAudioSource configuredTxAudioSource()
     return TransceiverFactory::TX_audio_source_rear;
 }
 
-static decodium::CatTelemetrySettings configuredCatTelemetrySettings()
+static bool configuredPwrAndSwrEnabled()
 {
-    return decodium::normalizedCatTelemetrySettings(
-        decodium::profiledSettingsValue(
-            QString {}, QStringLiteral("PWRandSWR"), false).toBool(),
-        decodium::profiledSettingsValue(
-            QString {}, QStringLiteral("CheckSWR"), false).toBool());
+    return decodium::profiledSettingsValue(QString {}, QStringLiteral("PWRandSWR"), false).toBool()
+        || decodium::profiledSettingsValue(QString {}, QStringLiteral("CheckSWR"), false).toBool();
 }
 
 static TransceiverFactory::Handshake parseHandshake(const QString& s)
@@ -1622,8 +1618,7 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
     bool const autoDtrLow = false;
     bool const autoRtsLow = false;
 #endif
-    auto const telemetrySettings = configuredCatTelemetrySettings();
-    bool const pwrAndSwrEnabled = telemetrySettings.powerAndSwr;
+    bool const pwrAndSwrEnabled = configuredPwrAndSwrEnabled();
     int const requestedPollInterval = qBound(1, m->pollInterval(), 99);
     int const basePollInterval = qMax(serialCat ? 2 : 1, requestedPollInterval);
     p.rig_name      = m->rigName();
@@ -1701,9 +1696,6 @@ static TransceiverFactory::ParameterPack buildParams(const DecodiumTransceiverMa
 #endif
         << "split=" << splitModeName(p.split_mode)
         << "catKeepAlive=" << p.cat_keep_alive
-        << "pwrSetting=" << telemetrySettings.powerAndSwr
-        << "checkSwrSetting=" << telemetrySettings.checkSwr
-        << "pwrPollEncoded=" << ((p.poll_interval & do__pwr) == do__pwr)
         << "poll=" << (p.poll_interval & 0xffff);
     return p;
 }

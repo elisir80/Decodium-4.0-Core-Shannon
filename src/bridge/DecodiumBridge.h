@@ -1353,10 +1353,6 @@ public:
     Q_INVOKABLE void loadSettings();
     Q_INVOKABLE QVariant getSetting(const QString& key, const QVariant& defaultValue = {}) const;
     Q_INVOKABLE void setSetting(const QString& key, const QVariant& value);
-    // Apply both CAT meter switches as one transaction. This avoids a pair of
-    // reconnects when enabling SWR protection (which also requires telemetry).
-    Q_INVOKABLE void setCatTelemetrySettings(bool powerAndSwrEnabled,
-                                             bool checkSwrEnabled);
     Q_INVOKABLE QString suggestedCatProfileName() const;
     Q_INVOKABLE bool saveCatProfile(const QString& name);
     Q_INVOKABLE bool loadCatProfile(const QString& name);
