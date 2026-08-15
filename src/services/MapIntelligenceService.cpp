@@ -51,7 +51,7 @@ constexpr qint64 kMaxAdifBytes = 64 * 1024 * 1024;
 constexpr int kMaxAdifRecords = 500000;
 // Changing this invalidates the derived map_qso cache once.  The source ADI
 // itself remains untouched; only metadata derived from it is rebuilt.
-constexpr int kAdifImportFormatVersion = 3;
+constexpr int kAdifImportFormatVersion = 4;
 constexpr int kMaxPendingLiveSpots = 512;
 constexpr int kRosterLimit = 100;
 constexpr int kRosterCandidateLimit = 500;
@@ -148,7 +148,29 @@ QString normalizedGrid(QString value)
         || !square.at(2).isDigit() || !square.at(3).isDigit()) {
         return {};
     }
-    return value.left(qMin(6, value.size()));
+    if (value.size() == 4) {
+        return square;
+    }
+    if (value.size() < 6
+        || value.at(4) < QLatin1Char('A') || value.at(4) > QLatin1Char('X')
+        || value.at(5) < QLatin1Char('A') || value.at(5) > QLatin1Char('X')) {
+        return {};
+    }
+    return value.left(6);
+}
+
+QStringList normalizedVuccGrids(const QString& value)
+{
+    QStringList grids;
+    QSet<QString> seen;
+    for (QString const& token : value.split(QLatin1Char(','), Qt::SkipEmptyParts)) {
+        QString const grid = normalizedGrid(token);
+        if (!grid.isEmpty() && !seen.contains(grid)) {
+            seen.insert(grid);
+            grids.append(grid);
+        }
+    }
+    return grids;
 }
 
 QString normalizedMode(QString mode, QString submode = {})
@@ -1140,6 +1162,7 @@ bool openMapDatabase(const QString& path,
     execSql(db, QStringLiteral("PRAGMA synchronous=NORMAL"), nullptr);
     execSql(db, QStringLiteral("PRAGMA busy_timeout=5000"), nullptr);
     execSql(db, QStringLiteral("PRAGMA temp_store=MEMORY"), nullptr);
+    execSql(db, QStringLiteral("PRAGMA foreign_keys=ON"), nullptr);
 
     static const QStringList schema {
         QStringLiteral(
@@ -1165,6 +1188,15 @@ bool openMapDatabase(const QString& path,
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid4 ON map_qso(grid4)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_band_mode ON map_qso(band, mode)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_confirmed ON map_qso(confirmed)"),
+        QStringLiteral(
+            "CREATE TABLE IF NOT EXISTS map_qso_grid ("
+            " qso_id INTEGER NOT NULL,"
+            " grid TEXT NOT NULL,"
+            " grid4 TEXT NOT NULL,"
+            " grid6 TEXT,"
+            " is_primary INTEGER NOT NULL DEFAULT 0,"
+            " PRIMARY KEY(qso_id, grid),"
+            " FOREIGN KEY(qso_id) REFERENCES map_qso(id) ON DELETE CASCADE)"),
         QStringLiteral(
             "CREATE TABLE IF NOT EXISTS map_spot ("
             " id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -1326,6 +1358,9 @@ bool openMapDatabase(const QString& path,
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_wpx ON map_qso(wpx, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_county ON map_qso(county, confirmed)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_satellite ON map_qso(satellite, confirmed)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid_qso ON map_qso_grid(qso_id, is_primary)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid_grid4 ON map_qso_grid(grid4, qso_id)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_qso_grid_grid6 ON map_qso_grid(grid6, qso_id)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_geo ON map_spot(continent, dxcc, cq_zone)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_source_cq ON map_spot(source, is_cq)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_map_spot_call_time ON map_spot(call, observed_ms DESC)"),
@@ -1355,6 +1390,12 @@ bool openMapDatabase(const QString& path,
                     QStringLiteral(
                         "UPDATE map_spot SET grid6=upper(substr(grid,1,6))"
                         " WHERE (grid6 IS NULL OR grid6='') AND length(grid)>=6"),
+                    error)
+        || !execSql(db,
+                    QStringLiteral(
+                        "INSERT OR IGNORE INTO map_qso_grid(qso_id, grid, grid4, grid6, is_primary)"
+                        " SELECT id, upper(grid), upper(grid4), nullif(upper(grid6), ''), 1"
+                        " FROM map_qso WHERE COALESCE(grid4, '')<>''"),
                     error)
         || !execSql(db,
                     QStringLiteral(
@@ -4110,6 +4151,14 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
             QsoRecord record;
             record.call = recordFields.value(QStringLiteral("CALL")).trimmed().toUpper();
             record.grid = normalizedGrid(recordFields.value(QStringLiteral("GRIDSQUARE")));
+            record.vuccGrids = normalizedVuccGrids(
+                recordFields.value(QStringLiteral("VUCC_GRIDS")));
+            if (record.grid.isEmpty() && !record.vuccGrids.isEmpty()) {
+                record.grid = record.vuccGrids.takeFirst();
+            } else if (!record.grid.isEmpty()) {
+                record.vuccGrids.removeAll(record.grid);
+                record.vuccGrids.removeAll(record.grid.left(4));
+            }
             record.grid4 = record.grid.left(4);
             record.grid6 = record.grid.size() >= 6 ? record.grid.left(6) : QString();
             bool frequencyOk = false;
@@ -4201,6 +4250,7 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
         }
         static const QSet<QString> wanted {
             QStringLiteral("CALL"), QStringLiteral("GRIDSQUARE"),
+            QStringLiteral("VUCC_GRIDS"),
             QStringLiteral("BAND"), QStringLiteral("FREQ"),
             QStringLiteral("MODE"), QStringLiteral("SUBMODE"),
             QStringLiteral("PROP_MODE"),
@@ -4228,6 +4278,14 @@ MapIntelligenceService::parseAdif(const QByteArray& data)
         QsoRecord record;
         record.call = fields.value(QStringLiteral("CALL")).trimmed().toUpper();
         record.grid = normalizedGrid(fields.value(QStringLiteral("GRIDSQUARE")));
+        record.vuccGrids = normalizedVuccGrids(
+            fields.value(QStringLiteral("VUCC_GRIDS")));
+        if (record.grid.isEmpty() && !record.vuccGrids.isEmpty()) {
+            record.grid = record.vuccGrids.takeFirst();
+        } else if (!record.grid.isEmpty()) {
+            record.vuccGrids.removeAll(record.grid);
+            record.vuccGrids.removeAll(record.grid.left(4));
+        }
         record.grid4 = record.grid.left(4);
         record.grid6 = record.grid.size() >= 6 ? record.grid.left(6) : QString();
         bool ok = false;
@@ -4503,8 +4561,8 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             240) * 60LL * 1000LL);
     QString const qsoGridExpression = options.gridPrecision == 6
         ? QStringLiteral(
-              "CASE WHEN length(grid6)=6 THEN upper(grid6) ELSE upper(grid4) END")
-        : QStringLiteral("upper(grid4)");
+              "CASE WHEN length(g.grid6)=6 THEN upper(g.grid6) ELSE upper(g.grid4) END")
+        : QStringLiteral("upper(g.grid4)");
     QString const spotGridExpression = options.gridPrecision == 6
         ? QStringLiteral(
               "CASE WHEN length(grid6)=6 THEN upper(grid6) ELSE upper(grid4) END")
@@ -4707,8 +4765,10 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
     {
         QSqlQuery query(db);
         query.prepare(QStringLiteral(
-            "SELECT %1 AS coverage_grid, COUNT(*), SUM(confirmed) FROM map_qso"
-            " WHERE grid4 <> ''").arg(qsoGridExpression) + qsoFilter
+            "SELECT %1 AS coverage_grid, COUNT(DISTINCT q.id),"
+            " COUNT(DISTINCT CASE WHEN q.confirmed<>0 THEN q.id END)"
+            " FROM map_qso_grid g JOIN map_qso q ON q.id=g.qso_id"
+            " WHERE g.grid4 <> ''").arg(qsoGridExpression) + qsoFilter
             + QStringLiteral(" GROUP BY coverage_grid ORDER BY coverage_grid"));
         bindCommon(query, false);
         if (query.exec()) {
@@ -4864,10 +4924,12 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             "   WHERE upper(q.call)=upper(s.call) AND q.confirmed=1") + historyScope
             + QStringLiteral(" LIMIT 1),"
             " EXISTS(SELECT 1 FROM map_qso q"
-            "   WHERE s.grid4<>'' AND q.grid4=s.grid4") + historyScope
+            "   JOIN map_qso_grid qg ON qg.qso_id=q.id"
+            "   WHERE s.grid4<>'' AND qg.grid4=s.grid4") + historyScope
             + QStringLiteral(" LIMIT 1),"
             " EXISTS(SELECT 1 FROM map_qso q"
-            "   WHERE s.grid4<>'' AND q.grid4=s.grid4 AND q.confirmed=1") + historyScope
+            "   JOIN map_qso_grid qg ON qg.qso_id=q.id"
+            "   WHERE s.grid4<>'' AND qg.grid4=s.grid4 AND q.confirmed=1") + historyScope
             + QStringLiteral(" LIMIT 1),"
             " EXISTS(SELECT 1 FROM map_qso q"
             "   WHERE s.dxcc<>'' AND lower(q.dxcc)=lower(s.dxcc)") + historyScope
@@ -4931,7 +4993,25 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             "   WHERE s.wpx<>'' AND upper(q.wpx)=upper(s.wpx)"
             "     AND q.confirmed=1") + historyScope
             + QStringLiteral(" LIMIT 1), s.dxcc_number, s.propagation_mode,"
-                             " COALESCE(s.grid_origin, 'UNKNOWN') AS grid_origin")
+                             " COALESCE(s.grid_origin, 'UNKNOWN') AS grid_origin,"
+            " COALESCE((SELECT GROUP_CONCAT(DISTINCT CASE"
+            "   WHEN lower(e.source)='decoder' THEN 'Local decode'"
+            "   WHEN COALESCE(trim(e.provider),'')<>'' THEN trim(e.provider)"
+            "   WHEN lower(e.source)='psk' THEN 'PSK Reporter'"
+            "   WHEN lower(e.source)='oams' THEN 'OAMS'"
+            "   ELSE upper(e.source) END) FROM map_spot_event e"
+            "   WHERE upper(e.call)=upper(s.call)"
+            "     AND (s.grid4='' OR e.grid='' OR upper(substr(e.grid,1,4))=upper(s.grid4))"
+            "     AND (s.band='' OR lower(e.band)=lower(s.band))"
+            "     AND (s.mode='' OR upper(e.mode)=upper(s.mode))"
+            "     AND abs(e.observed_ms-s.observed_ms)<=300000), s.source) AS source_summary,"
+            " MAX(1, COALESCE((SELECT COUNT(DISTINCT lower(e.source) || '|' ||"
+            "   lower(COALESCE(e.provider,''))) FROM map_spot_event e"
+            "   WHERE upper(e.call)=upper(s.call)"
+            "     AND (s.grid4='' OR e.grid='' OR upper(substr(e.grid,1,4))=upper(s.grid4))"
+            "     AND (s.band='' OR lower(e.band)=lower(s.band))"
+            "     AND (s.mode='' OR upper(e.mode)=upper(s.mode))"
+            "     AND abs(e.observed_ms-s.observed_ms)<=300000), 0)) AS source_count")
             + QStringLiteral(
             " FROM map_spot s"
             " LEFT JOIN map_roster_preference p ON upper(p.call)=upper(s.call)"
@@ -5009,6 +5089,10 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
         if (query.exec()) {
             int const rosterDxccNumberIndex = query.record().indexOf(QStringLiteral("dxcc_number"));
             int const rosterGridOriginIndex = query.record().indexOf(QStringLiteral("grid_origin"));
+            int const rosterSourceSummaryIndex =
+                query.record().indexOf(QStringLiteral("source_summary"));
+            int const rosterSourceCountIndex =
+                query.record().indexOf(QStringLiteral("source_count"));
             QSqlQuery profileQuery(db);
             profileQuery.prepare(QStringLiteral(
                 "SELECT COALESCE(MAX(county), ''), COALESCE(MAX(pota_ref), ''),"
@@ -5073,6 +5157,12 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 int const lotwAgeDays = ageDays(lotwEpoch);
                 int const eqslAgeDays = ageDays(eqslEpoch);
                 int const lastQsoAgeDays = ageDays(lastQsoEpoch);
+                QString sourceSummary = rosterSourceSummaryIndex >= 0
+                    ? query.value(rosterSourceSummaryIndex).toString()
+                    : query.value(7).toString();
+                sourceSummary.replace(QLatin1Char(','), QStringLiteral(" · "));
+                int const sourceCount = rosterSourceCountIndex >= 0
+                    ? qMax(1, query.value(rosterSourceCountIndex).toInt()) : 1;
                 int const providerFilters = (options.rosterUsesLoTW ? 1 : 0)
                     + (options.rosterUsesEQSL ? 1 : 0)
                     + (options.rosterUsesOQRS ? 1 : 0);
@@ -5096,14 +5186,15 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 if (!rosterNeedle.isEmpty()
                     && rosterMode != QStringLiteral("no filter")) {
                     QString const searchable =
-                        QStringLiteral("%1 %2 %3 %4 %5 %6 %7")
+                        QStringLiteral("%1 %2 %3 %4 %5 %6 %7 %8")
                             .arg(query.value(0).toString(),
                                  query.value(1).toString(),
                                  query.value(8).toString(),
                                  query.value(9).toString(),
                                  query.value(10).toString(),
                                  query.value(13).toString(),
-                                 query.value(15).toString());
+                                 query.value(15).toString(),
+                                 sourceSummary);
                     bool matches = false;
                     if (rosterMode == QStringLiteral("regex")) {
                         QRegularExpression const expression(
@@ -5378,6 +5469,13 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                 row.insert(QStringLiteral("frequencyHz"), query.value(5).toLongLong());
                 row.insert(QStringLiteral("observedUtc"), query.value(6).toString());
                 row.insert(QStringLiteral("source"), query.value(7).toString());
+                row.insert(QStringLiteral("sourceSummary"), sourceSummary);
+                row.insert(QStringLiteral("sourceCount"), sourceCount);
+                row.insert(QStringLiteral("corroborationLevel"),
+                           sourceCount >= 3 ? QStringLiteral("Strongly corroborated")
+                                            : (sourceCount == 2
+                                                   ? QStringLiteral("Corroborated")
+                                                   : QStringLiteral("Single source")));
                 row.insert(QStringLiteral("message"), query.value(8).toString());
                 row.insert(QStringLiteral("dxcc"), query.value(9).toString());
                 row.insert(QStringLiteral("continent"), query.value(10).toString());
@@ -5872,6 +5970,14 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                                       total.value(6).toLongLong());
                 }
             }
+            QSqlQuery totalGridQuery(db);
+            if (totalGridQuery.exec(QStringLiteral(
+                    "SELECT COUNT(DISTINCT upper(grid4))"
+                    " FROM map_qso_grid WHERE grid4<>''"))
+                && totalGridQuery.next()) {
+                statistics.insert(QStringLiteral("totalGrids"),
+                                  totalGridQuery.value(0).toInt());
+            }
         }
         QSqlQuery query(db);
         query.prepare(QStringLiteral(
@@ -5890,6 +5996,16 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             statistics.insert(QStringLiteral("grids"), query.value(4).toInt());
             statistics.insert(QStringLiteral("firstEpoch"), query.value(5).toLongLong());
             statistics.insert(QStringLiteral("lastEpoch"), query.value(6).toLongLong());
+        }
+        QSqlQuery filteredGridQuery(db);
+        filteredGridQuery.prepare(QStringLiteral(
+            "SELECT COUNT(DISTINCT upper(g.grid4))"
+            " FROM map_qso_grid g JOIN map_qso q ON q.id=g.qso_id"
+            " WHERE g.grid4<>''") + qsoFilter);
+        bindCommon(filteredGridQuery, false);
+        if (filteredGridQuery.exec() && filteredGridQuery.next()) {
+            statistics.insert(QStringLiteral("grids"),
+                              filteredGridQuery.value(0).toInt());
         }
 
         auto groupedRows = [&db, &bindCommon, &qsoFilter](QString const& column) {
@@ -6112,6 +6228,23 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
             qWarning().noquote() << "[MAPINT] award aggregate failed:" << query.lastError().text();
         }
         if (awardQueryOk && query.next()) {
+            int maidenheadWorked = query.value(2).toInt();
+            int maidenheadConfirmed = query.value(3).toInt();
+            QSqlQuery gridAwardQuery(db);
+            QString gridAwardSql = QStringLiteral(
+                "SELECT COUNT(DISTINCT g.grid4),"
+                " COUNT(DISTINCT CASE WHEN q.confirmed=1 THEN g.grid4 END)"
+                " FROM map_qso_grid g JOIN map_qso q ON q.id=g.qso_id"
+                " WHERE g.grid4<>''");
+            gridAwardSql.replace(QStringLiteral("q.confirmed=1"),
+                                 QStringLiteral("q.%1=1").arg(awardConfirmedColumn));
+            gridAwardQuery.prepare(gridAwardSql + awardQsoFilter);
+            bindCommon(gridAwardQuery, false);
+            bindAward(gridAwardQuery);
+            if (gridAwardQuery.exec() && gridAwardQuery.next()) {
+                maidenheadWorked = gridAwardQuery.value(0).toInt();
+                maidenheadConfirmed = gridAwardQuery.value(1).toInt();
+            }
             bool const confirmedGoal =
                 options.awardGoal.compare(QStringLiteral("Confirmed"),
                                           Qt::CaseInsensitive) == 0;
@@ -6157,7 +6290,7 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                      query.value(0).toInt(), query.value(1).toInt(), 100,
                      QStringLiteral("Base DXCC: 100 distinct entities"));
             addAward(QStringLiteral("grid"), QStringLiteral("Maidenhead"),
-                     query.value(2).toInt(), query.value(3).toInt(), 100,
+                     maidenheadWorked, maidenheadConfirmed, 100,
                      QStringLiteral("Base grid target: 100 distinct 4-character grids"));
             addAward(QStringLiteral("waz"), QStringLiteral("WAZ"),
                      query.value(4).toInt(), query.value(5).toInt(), 40,
@@ -6192,13 +6325,24 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                     externalAwardForLabel(options.activeAwardProgram)) {
                 if (!externalAwardEntityExpression(*external).isEmpty()) {
                     QSqlQuery externalQuery(db);
-                    externalQuery.prepare(QStringLiteral(
-                        "SELECT call, grid4, band, mode, dxcc, cq_zone, state, continent,"
-                        " county, iota, wpx, dxcc_number, confirmed, lotw_confirmed,"
-                        " eqsl_confirmed, oqrs FROM map_qso WHERE 1=1")
-                                              + awardQsoFilter
-                                              + externalAwardScopeFilter(
-                                                    *external, options.awardEndorsement));
+                    bool const usesGridTable = external->type == QStringLiteral("grids");
+                    QString externalScope = externalAwardScopeFilter(
+                        *external, options.awardEndorsement);
+                    if (usesGridTable) {
+                        externalScope.replace(QStringLiteral("grid4"),
+                                              QStringLiteral("g.grid4"));
+                    }
+                    QString const externalSql = usesGridTable
+                        ? QStringLiteral(
+                              "SELECT call, g.grid4, band, mode, dxcc, cq_zone, state, continent,"
+                              " county, iota, wpx, dxcc_number, confirmed, lotw_confirmed,"
+                              " eqsl_confirmed, oqrs FROM map_qso q"
+                              " JOIN map_qso_grid g ON g.qso_id=q.id WHERE 1=1")
+                        : QStringLiteral(
+                              "SELECT call, grid4, band, mode, dxcc, cq_zone, state, continent,"
+                              " county, iota, wpx, dxcc_number, confirmed, lotw_confirmed,"
+                              " eqsl_confirmed, oqrs FROM map_qso WHERE 1=1");
+                    externalQuery.prepare(externalSql + awardQsoFilter + externalScope);
                     bindCommon(externalQuery, false);
                     bindAward(externalQuery);
                     if (externalQuery.exec()) {
@@ -6341,13 +6485,29 @@ MapIntelligenceService::queryDatabase(const QString& databasePath,
                     if (active == QStringLiteral("wpx")) return wpx.trimmed().toUpper();
                     return call.trimmed().toUpper();
                 };
-                QString detailSql = QStringLiteral(
-                    "SELECT call, grid4, band, mode, dxcc, dxcc_number, cq_zone, itu_zone, state,"
-                    " continent, county, iota, wpx, pota_ref, confirmed, lotw_confirmed,"
-                    " eqsl_confirmed, oqrs FROM map_qso WHERE 1=1") + awardQsoFilter;
+                bool const detailUsesGridTable =
+                    active == QStringLiteral("maidenhead")
+                    || (selectedExternal
+                        && selectedExternal->type == QStringLiteral("grids"));
+                QString detailSql = detailUsesGridTable
+                    ? QStringLiteral(
+                          "SELECT call, g.grid4, band, mode, dxcc, dxcc_number, cq_zone, itu_zone, state,"
+                          " continent, county, iota, wpx, pota_ref, confirmed, lotw_confirmed,"
+                          " eqsl_confirmed, oqrs FROM map_qso q"
+                          " JOIN map_qso_grid g ON g.qso_id=q.id WHERE 1=1")
+                    : QStringLiteral(
+                          "SELECT call, grid4, band, mode, dxcc, dxcc_number, cq_zone, itu_zone, state,"
+                          " continent, county, iota, wpx, pota_ref, confirmed, lotw_confirmed,"
+                          " eqsl_confirmed, oqrs FROM map_qso WHERE 1=1");
+                detailSql += awardQsoFilter;
                 if (selectedExternal) {
-                    detailSql += externalAwardScopeFilter(*selectedExternal,
-                                                           options.awardEndorsement);
+                    QString detailScope = externalAwardScopeFilter(
+                        *selectedExternal, options.awardEndorsement);
+                    if (detailUsesGridTable) {
+                        detailScope.replace(QStringLiteral("grid4"),
+                                            QStringLiteral("g.grid4"));
+                    }
+                    detailSql += detailScope;
                 }
                 QSqlQuery detailQuery(db);
                 detailQuery.prepare(detailSql);
@@ -6531,9 +6691,11 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
     {
         QSqlQuery query(db);
         query.prepare(QStringLiteral(
-            "SELECT COUNT(*), COALESCE(SUM(confirmed), 0),"
-            " COUNT(DISTINCT upper(call))"
-            " FROM map_qso WHERE upper(%1)=upper(:grid)").arg(gridColumn));
+            "SELECT COUNT(DISTINCT q.id),"
+            " COUNT(DISTINCT CASE WHEN q.confirmed<>0 THEN q.id END),"
+            " COUNT(DISTINCT upper(q.call))"
+            " FROM map_qso q JOIN map_qso_grid g ON g.qso_id=q.id"
+            " WHERE upper(g.%1)=upper(:grid)").arg(gridColumn));
         query.bindValue(QStringLiteral(":grid"), normalized);
         if (query.exec() && query.next()) {
             workedCount = query.value(0).toInt();
@@ -6581,16 +6743,34 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
     {
         QSqlQuery query(db);
         query.prepare(QStringLiteral(
-            "SELECT call, grid, band, mode, message, observed_utc, observed_ms,"
-            " frequency_hz, snr, source, hits, dxcc, continent, state, is_cq,"
-            " target_call, distance_km, activity_type"
-            " FROM map_spot"
-            " WHERE id IN ("
-            "   SELECT MAX(id) FROM map_spot"
-            "   WHERE upper(%1)=upper(:grid) AND observed_ms>=:cutoff"
-            "   GROUP BY upper(call)"
+            "SELECT s.call, s.grid, s.band, s.mode, s.message, s.observed_utc, s.observed_ms,"
+            " s.frequency_hz, s.snr, s.source, s.hits, s.dxcc, s.continent, s.state, s.is_cq,"
+            " s.target_call, s.distance_km, s.activity_type,"
+            " COALESCE((SELECT GROUP_CONCAT(DISTINCT CASE"
+            "   WHEN lower(e.source)='decoder' THEN 'Local decode'"
+            "   WHEN COALESCE(trim(e.provider),'')<>'' THEN trim(e.provider)"
+            "   WHEN lower(e.source)='psk' THEN 'PSK Reporter'"
+            "   WHEN lower(e.source)='oams' THEN 'OAMS'"
+            "   ELSE upper(e.source) END) FROM map_spot_event e"
+            "   WHERE upper(e.call)=upper(s.call)"
+            "     AND (s.grid4='' OR e.grid='' OR upper(substr(e.grid,1,4))=upper(s.grid4))"
+            "     AND (s.band='' OR lower(e.band)=lower(s.band))"
+            "     AND (s.mode='' OR upper(e.mode)=upper(s.mode))"
+            "     AND abs(e.observed_ms-s.observed_ms)<=300000), s.source),"
+            " MAX(1, COALESCE((SELECT COUNT(DISTINCT lower(e.source) || '|' ||"
+            "   lower(COALESCE(e.provider,''))) FROM map_spot_event e"
+            "   WHERE upper(e.call)=upper(s.call)"
+            "     AND (s.grid4='' OR e.grid='' OR upper(substr(e.grid,1,4))=upper(s.grid4))"
+            "     AND (s.band='' OR lower(e.band)=lower(s.band))"
+            "     AND (s.mode='' OR upper(e.mode)=upper(s.mode))"
+            "     AND abs(e.observed_ms-s.observed_ms)<=300000), 0))"
+            " FROM map_spot s"
+            " WHERE s.id IN ("
+            "   SELECT MAX(recent.id) FROM map_spot recent"
+            "   WHERE upper(recent.%1)=upper(:grid) AND recent.observed_ms>=:cutoff"
+            "   GROUP BY upper(recent.call)"
             " )"
-            " ORDER BY observed_ms DESC LIMIT 100").arg(gridColumn));
+            " ORDER BY s.observed_ms DESC LIMIT 100").arg(gridColumn));
         query.bindValue(QStringLiteral(":grid"), normalized);
         query.bindValue(QStringLiteral(":cutoff"), liveCutoff);
         if (query.exec()) {
@@ -6614,6 +6794,16 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
                 row.insert(QStringLiteral("targetCall"), query.value(15).toString());
                 row.insert(QStringLiteral("distanceKm"), query.value(16).toDouble());
                 row.insert(QStringLiteral("activityType"), query.value(17).toString());
+                QString sourceSummary = query.value(18).toString();
+                sourceSummary.replace(QLatin1Char(','), QStringLiteral(" · "));
+                int const sourceCount = qMax(1, query.value(19).toInt());
+                row.insert(QStringLiteral("sourceSummary"), sourceSummary);
+                row.insert(QStringLiteral("sourceCount"), sourceCount);
+                row.insert(QStringLiteral("corroborationLevel"),
+                           sourceCount >= 3 ? QStringLiteral("Strongly corroborated")
+                                            : (sourceCount == 2
+                                                   ? QStringLiteral("Corroborated")
+                                                   : QStringLiteral("Single source")));
                 QString const source = query.value(9).toString().trimmed().toLower();
                 row.insert(QStringLiteral("gridEvidence"),
                            (source == QStringLiteral("psk") || source == QStringLiteral("oams"))
@@ -6630,8 +6820,17 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
         QSqlQuery query(db);
         query.prepare(QStringLiteral(
             "SELECT call, grid, band, mode, qso_date, time_on, frequency_mhz,"
-            " satellite, sat_mode, freq_rx_mhz, confirmed, source, dxcc, continent, state, qso_epoch"
-            " FROM map_qso WHERE upper(%1)=upper(:grid)"
+            " satellite, sat_mode, freq_rx_mhz, confirmed, source, dxcc, continent, state, qso_epoch,"
+            " (SELECT matched.grid FROM map_qso_grid matched"
+            "   WHERE matched.qso_id=q.id AND upper(matched.%1)=upper(:grid)"
+            "   ORDER BY matched.is_primary DESC, matched.grid LIMIT 1),"
+            " (SELECT matched.is_primary FROM map_qso_grid matched"
+            "   WHERE matched.qso_id=q.id AND upper(matched.%1)=upper(:grid)"
+            "   ORDER BY matched.is_primary DESC, matched.grid LIMIT 1),"
+            " COALESCE((SELECT GROUP_CONCAT(extra.grid, ', ') FROM map_qso_grid extra"
+            "   WHERE extra.qso_id=q.id AND extra.is_primary=0), '')"
+            " FROM map_qso q WHERE EXISTS(SELECT 1 FROM map_qso_grid matched"
+            "   WHERE matched.qso_id=q.id AND upper(matched.%1)=upper(:grid))"
             " ORDER BY qso_epoch DESC, qso_date DESC, time_on DESC LIMIT 100")
                           .arg(gridColumn));
         query.bindValue(QStringLiteral(":grid"), normalized);
@@ -6654,6 +6853,19 @@ MapIntelligenceService::queryGridDetails(const QString& databasePath,
                 row.insert(QStringLiteral("continent"), query.value(13).toString());
                 row.insert(QStringLiteral("state"), query.value(14).toString());
                 row.insert(QStringLiteral("qsoEpoch"), query.value(15).toLongLong());
+                row.insert(QStringLiteral("matchedGrid"), query.value(16).toString());
+                row.insert(QStringLiteral("matchedGridIsPrimary"), query.value(17).toBool());
+                QStringList const vuccGrids = query.value(18).toString()
+                                                  .split(QStringLiteral(", "),
+                                                         Qt::SkipEmptyParts);
+                row.insert(QStringLiteral("vuccGrids"), vuccGrids);
+                QStringList allGrids;
+                if (!query.value(1).toString().isEmpty()) {
+                    allGrids.append(query.value(1).toString());
+                }
+                allGrids.append(vuccGrids);
+                allGrids.removeDuplicates();
+                row.insert(QStringLiteral("allGrids"), allGrids);
                 details.qsos.append(row);
             }
         } else if (details.error.isEmpty()) {
@@ -6701,7 +6913,8 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
         if (error) *error = db.lastError().text();
         return false;
     }
-    if (!execSql(db, QStringLiteral("DELETE FROM map_qso"), error)) {
+    if (!execSql(db, QStringLiteral("DELETE FROM map_qso_grid"), error)
+        || !execSql(db, QStringLiteral("DELETE FROM map_qso"), error)) {
         db.rollback();
         return false;
     }
@@ -6721,6 +6934,38 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
         db.rollback();
         return false;
     }
+    QSqlQuery insertGrid(db);
+    if (!insertGrid.prepare(QStringLiteral(
+            "INSERT OR IGNORE INTO map_qso_grid"
+            " (qso_id, grid, grid4, grid6, is_primary)"
+            " VALUES (:qso_id, :grid, :grid4, :grid6, :is_primary)"))) {
+        if (error) *error = insertGrid.lastError().text();
+        db.rollback();
+        return false;
+    }
+    auto storeGrids = [&insertGrid, error](qint64 qsoId, QsoRecord const& record) {
+        QStringList grids;
+        if (!record.grid.isEmpty()) grids.append(record.grid);
+        grids.append(record.vuccGrids);
+        QSet<QString> stored;
+        for (QString const& rawGrid : std::as_const(grids)) {
+            QString const grid = normalizedGrid(rawGrid);
+            if (grid.isEmpty() || stored.contains(grid)) continue;
+            stored.insert(grid);
+            insertGrid.bindValue(QStringLiteral(":qso_id"), qsoId);
+            insertGrid.bindValue(QStringLiteral(":grid"), grid);
+            insertGrid.bindValue(QStringLiteral(":grid4"), grid.left(4));
+            insertGrid.bindValue(QStringLiteral(":grid6"),
+                                 grid.size() >= 6 ? grid.left(6) : QString());
+            insertGrid.bindValue(QStringLiteral(":is_primary"),
+                                 grid == record.grid ? 1 : 0);
+            if (!insertGrid.exec()) {
+                if (error) *error = insertGrid.lastError().text();
+                return false;
+            }
+        }
+        return true;
+    };
     for (QsoRecord const& record : records) {
         insert.bindValue(QStringLiteral(":key"), record.sourceKey);
         insert.bindValue(QStringLiteral(":call"), record.call);
@@ -6757,6 +7002,12 @@ bool MapIntelligenceService::importAdifIntoDatabase(const QString& databasePath,
         insert.bindValue(QStringLiteral(":wpx"), record.wpxPrefix);
         if (!insert.exec()) {
             if (error) *error = insert.lastError().text();
+            db.rollback();
+            return false;
+        }
+        qint64 const qsoId = insert.lastInsertId().toLongLong();
+        if (qsoId <= 0 || !storeGrids(qsoId, record)) {
+            if (error && error->isEmpty()) *error = QStringLiteral("Cannot store QSO grids");
             db.rollback();
             return false;
         }
@@ -6807,6 +7058,17 @@ bool MapIntelligenceService::appendQsoRecords(const QString& databasePath,
         db.rollback();
         return false;
     }
+    QSqlQuery deleteGrids(db);
+    deleteGrids.prepare(QStringLiteral("DELETE FROM map_qso_grid WHERE qso_id=:qso_id"));
+    QSqlQuery insertGrid(db);
+    if (!insertGrid.prepare(QStringLiteral(
+            "INSERT OR IGNORE INTO map_qso_grid"
+            " (qso_id, grid, grid4, grid6, is_primary)"
+            " VALUES (:qso_id, :grid, :grid4, :grid6, :is_primary)"))) {
+        if (error) *error = insertGrid.lastError().text();
+        db.rollback();
+        return false;
+    }
     for (QsoRecord const& record : records) {
         insert.bindValue(QStringLiteral(":key"), record.sourceKey);
         insert.bindValue(QStringLiteral(":call"), record.call);
@@ -6843,6 +7105,39 @@ bool MapIntelligenceService::appendQsoRecords(const QString& databasePath,
             if (error) *error = insert.lastError().text();
             db.rollback();
             return false;
+        }
+        qint64 const qsoId = insert.lastInsertId().toLongLong();
+        if (qsoId <= 0) {
+            if (error) *error = QStringLiteral("Cannot resolve stored QSO id");
+            db.rollback();
+            return false;
+        }
+        deleteGrids.bindValue(QStringLiteral(":qso_id"), qsoId);
+        if (!deleteGrids.exec()) {
+            if (error) *error = deleteGrids.lastError().text();
+            db.rollback();
+            return false;
+        }
+        QStringList grids;
+        if (!record.grid.isEmpty()) grids.append(record.grid);
+        grids.append(record.vuccGrids);
+        QSet<QString> stored;
+        for (QString const& rawGrid : std::as_const(grids)) {
+            QString const grid = normalizedGrid(rawGrid);
+            if (grid.isEmpty() || stored.contains(grid)) continue;
+            stored.insert(grid);
+            insertGrid.bindValue(QStringLiteral(":qso_id"), qsoId);
+            insertGrid.bindValue(QStringLiteral(":grid"), grid);
+            insertGrid.bindValue(QStringLiteral(":grid4"), grid.left(4));
+            insertGrid.bindValue(QStringLiteral(":grid6"),
+                                 grid.size() >= 6 ? grid.left(6) : QString());
+            insertGrid.bindValue(QStringLiteral(":is_primary"),
+                                 grid == record.grid ? 1 : 0);
+            if (!insertGrid.exec()) {
+                if (error) *error = insertGrid.lastError().text();
+                db.rollback();
+                return false;
+            }
         }
     }
     return db.commit();
@@ -6902,10 +7197,14 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
     }
     QSqlQuery correlated(db);
     correlated.prepare(QStringLiteral(
-        "SELECT COUNT(DISTINCT lower(source)) FROM map_spot"
+        "SELECT COUNT(DISTINCT lower(source) || '|' || lower(COALESCE(provider,'')))"
+        " FROM map_spot"
         " WHERE upper(call)=upper(:call)"
         " AND (:grid='' OR upper(grid4)=upper(:grid))"
-        " AND lower(source)<>lower(:source)"
+        " AND (:band='' OR lower(band)=lower(:band))"
+        " AND (:mode='' OR upper(mode)=upper(:mode))"
+        " AND NOT (lower(source)=lower(:source)"
+        "          AND lower(COALESCE(provider,''))=lower(:provider))"
         " AND last_observed_ms>=:cutoff"));
     QSqlQuery event(db);
     if (!event.prepare(QStringLiteral(
@@ -6931,7 +7230,10 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
         if (visibleSpot) {
             correlated.bindValue(QStringLiteral(":call"), spot.call);
             correlated.bindValue(QStringLiteral(":grid"), spot.grid4);
+            correlated.bindValue(QStringLiteral(":band"), spot.band);
+            correlated.bindValue(QStringLiteral(":mode"), spot.mode);
             correlated.bindValue(QStringLiteral(":source"), spot.source);
+            correlated.bindValue(QStringLiteral(":provider"), spot.provider);
             correlated.bindValue(QStringLiteral(":cutoff"),
                                  spot.observedMs - 5 * 60 * 1000LL);
             if (correlated.exec() && correlated.next()) {
@@ -7027,7 +7329,7 @@ bool MapIntelligenceService::appendLiveSpots(const QString& databasePath,
         if (rules.newGridEnabled && !spot.grid4.isEmpty()) {
             QSqlQuery knownGrid(db);
             knownGrid.prepare(QStringLiteral(
-                "SELECT 1 FROM map_qso WHERE grid4=:grid LIMIT 1"));
+                "SELECT 1 FROM map_qso_grid WHERE grid4=:grid LIMIT 1"));
             knownGrid.bindValue(QStringLiteral(":grid"), spot.grid4);
             if (knownGrid.exec() && !knownGrid.next()) {
                 addAlert(QStringLiteral("new_grid"),

@@ -10477,6 +10477,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 }
             }
         });
+        connect(mgr, &std::remove_pointer_t<decltype(mgr)>::pttActiveChanged,
+                this, [this, backend, catProp]() {
+            if (m_shuttingDown || !catSignalMatchesBackend(m_catBackend, backend)) return;
+            handleActivePttFeedback(catProp("pttActive").toBool(), backend);
+        });
         connect(mgr, &std::remove_pointer_t<decltype(mgr)>::errorOccurred, this, [this, backend](const QString& msg) {
             if (m_shuttingDown) return;
             if (useLegacyRigControlFallback(m_legacyBackend, m_catBackend) && backend == QStringLiteral("hamlib")) return;
@@ -11595,6 +11600,109 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                   .arg(m_catBackend)
                                   .arg(m_catConnected ? 1 : 0));
 #if defined(Q_OS_MAC)
+                    bool const bridgeManagedAudio = shouldUseBridgeAudioForLegacyDigitalTx();
+                    if (bridgeManagedAudio) {
+                        if (!enabled) {
+                            cancelPendingLegacyBridgeAudioStart(QStringLiteral("legacy-ptt-off"));
+                            if (m_bridgeAudioLegacyTxActive) {
+                                qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+                                if (m_txPlaybackHoldUntilMs > nowMs || m_txAudioRestartPending) {
+                                    bridgeLog(QStringLiteral("legacyPttRequested: ignored early legacy PTT off while bridge audio is playing hold_ms=%1 restart_pending=%2")
+                                                  .arg(qMax<qint64>(0, m_txPlaybackHoldUntilMs - nowMs))
+                                                  .arg(m_txAudioRestartPending ? 1 : 0));
+                                    return;
+                                }
+                            }
+                            requestLegacyPttOffOnce(QStringLiteral("legacy-ptt-off"));
+                            if (m_bridgeAudioLegacyTxActive) {
+                                stopBridgeAudioForLegacyDigitalTx(QStringLiteral("legacy-ptt-off"));
+                            }
+                            clearLegacyPttTransition(QStringLiteral("legacy-ptt-off"));
+                            if (usingLegacyBackendForTx() && !useModernSpectrumFeedWithLegacy()) {
+                                QTimer::singleShot(0, this, [this]() {
+                                    resumeRxAudioAfterTx(QStringLiteral("legacy-ptt-off"));
+                                    scheduleLegacyPcmSpectrumRearm(QStringLiteral("legacy-ptt-off"));
+                                });
+                            }
+                            return;
+                        }
+
+                        clearLegacyPttTransition(QStringLiteral("new-legacy-ptt-on"));
+                        if (!preflightLegacyBridgeTxBeforePtt(QStringLiteral("legacy-ptt-on"))) {
+                            abortLegacyBridgeTxRequest(QStringLiteral("legacy-ptt-on-preflight"));
+                            return;
+                        }
+
+                        auto startConfirmedBridgeAudio = [this]() -> bool {
+                            syncLegacyBackendState();
+                            bool const started = startBridgeAudioForLegacyDigitalTx(
+                                QStringLiteral("legacy-ptt-confirmed"));
+                            if (!started) {
+                                bridgeLog(QStringLiteral("legacyPttRequested: bridge TX audio failed after PTT confirmation"));
+                            }
+                            return started;
+                        };
+
+                        bool const canPtt = activeCatCanPtt(
+                            m_nativeCat, m_hamlibCat, m_catBackend,
+                            m_omniRigCat, m_legacyBackend);
+                        bool const voxPtt = activeCatUsesVoxPtt(
+                            m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat);
+                        bool const audioOnly = voxPtt || catSuppressedByEnvironment();
+                        decodium::tx::PttConfirmationMode const confirmationMode = audioOnly
+                            ? decodium::tx::PttConfirmationMode::AudioActivity
+                            : decodium::tx::pttConfirmationMode(activePttMethod(), canPtt);
+                        beginLegacyPttTransition(QStringLiteral("legacy-ptt-on"),
+                                                 confirmationMode,
+                                                 startConfirmedBridgeAudio);
+
+                        auto dispatchPttOn = [this]() {
+                            QElapsedTimer pttTimer;
+                            pttTimer.start();
+                            QElapsedTimer syncTimer;
+                            syncTimer.start();
+                            syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-on"));
+                            qint64 const syncMs = syncTimer.elapsed();
+                            double const txDialHz = catSplitTxDialFrequencyHz();
+                            QElapsedTimer catTimer;
+                            catTimer.start();
+                            m_pttOnDispatched = true;
+                            bool const asyncPtt = activeCatSetTxPttAsync(
+                                m_nativeCat, m_hamlibCat, m_catBackend,
+                                true, txDialHz, m_omniRigCat, m_legacyBackend);
+                            if (!asyncPtt) {
+                                activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                                                  true, txDialHz,
+                                                  m_omniRigCat, m_legacyBackend);
+                            }
+                            txTimelineLog(QStringLiteral("[TX-TL] legacy_ptt_dispatch on=1 total_ms=%1 sync_ms=%2 cat_ms=%3 backend=%4 method=%5 txDialHz=%6 async=%7")
+                                              .arg(pttTimer.elapsed())
+                                              .arg(syncMs)
+                                              .arg(catTimer.elapsed())
+                                              .arg(m_catBackend, activePttMethod())
+                                              .arg(txDialHz, 0, 'f', 0)
+                                              .arg(asyncPtt ? 1 : 0));
+                        };
+
+                        if (audioOnly) {
+                            bridgeLog(voxPtt
+                                ? QStringLiteral("legacyPttRequested: VOX path, confirmation follows audio dispatch")
+                                : QStringLiteral("legacyPttRequested: CAT disabled, bridge audio-only TX"));
+                            return;
+                        }
+                        if (canPtt) {
+                            dispatchPttOn();
+                            return;
+                        }
+
+                        // Do not reconnect a serial/CAT backend from the TX
+                        // path.  The 650 ms transition timer will cancel and
+                        // requeue this message; normal CAT recovery remains
+                        // independent and cannot stall the scene graph.
+                        bridgeLog(QStringLiteral("legacyPttRequested: CAT PTT unavailable; waiting for asynchronous timeout"));
+                        return;
+                    }
+
                     if (!enabled) {
                         cancelPendingLegacyBridgeAudioStart(QStringLiteral("legacy-ptt-off"));
                     }
@@ -12331,8 +12439,12 @@ void DecodiumBridge::syncLegacyBackendState()
         m_bridgeAudioLegacyTxActive
         || m_ft2LinkTxActive
         || m_cwTxActive;
+    bool const bridgeManagedLegacyAudio = shouldUseBridgeAudioForLegacyDigitalTx();
+    bool const authoritativeLegacyTransmitting =
+        decodium::tx::legacyReportedTxIsAuthoritative(bridgeManagedLegacyAudio)
+        && legacyTransmittingNow;
     bool const effectiveLegacyTransmitting =
-        legacyTransmittingNow
+        authoritativeLegacyTransmitting
         || bridgeOwnedCustomTxActive
         || bridgeAudioPlaybackTxActive;
     updateBool(m_transmitting, effectiveLegacyTransmitting, [this]() { emit transmittingChanged(); });
@@ -17141,6 +17253,194 @@ QVariantList DecodiumBridge::runSelfCheck()
 bool DecodiumBridge::transmitting() const { return m_transmitting; }
 bool DecodiumBridge::decoding() const { return m_decoding; }
 
+QString DecodiumBridge::activePttMethod() const
+{
+    QObject const* const manager = catManagerObj();
+    QString const method = manager
+        ? manager->property("pttMethod").toString().trimmed().toUpper()
+        : QString();
+    return method.isEmpty() ? QStringLiteral("CAT") : method;
+}
+
+bool DecodiumBridge::activeCatReportsPttActive() const
+{
+    if (m_catBackend == QStringLiteral("native")) {
+        return m_nativeCat && m_nativeCat->pttActive();
+    }
+    if (m_catBackend == QStringLiteral("cat4om")) {
+        return m_cat4OmCat && m_cat4OmCat->pttActive();
+    }
+    if (m_catBackend == QStringLiteral("omnirig")) {
+        return m_omniRigCat && m_omniRigCat->pttActive();
+    }
+    return m_hamlibCat && m_hamlibCat->pttActive();
+}
+
+void DecodiumBridge::setTxRequestedState(bool requested)
+{
+    if (m_txRequested == requested) return;
+    m_txRequested = requested;
+    emit txRequestedChanged();
+}
+
+void DecodiumBridge::setPttPendingState(bool pending)
+{
+    if (m_pttPending == pending) return;
+    m_pttPending = pending;
+    emit pttPendingChanged();
+}
+
+void DecodiumBridge::setPttConfirmedState(bool confirmed)
+{
+    if (m_pttConfirmed == confirmed) return;
+    m_pttConfirmed = confirmed;
+    emit pttConfirmedChanged();
+}
+
+void DecodiumBridge::beginLegacyPttTransition(
+    const QString& reason,
+    decodium::tx::PttConfirmationMode confirmationMode,
+    std::function<bool()> confirmedAction)
+{
+    quint64 const serial = ++m_pttTransitionSerial;
+    m_pttTransitionReason = reason;
+    m_pttConfirmedAction = std::move(confirmedAction);
+    m_pttOnDispatched = false;
+    m_pttOffSentForTransition = false;
+    setTxRequestedState(true);
+    setPttConfirmedState(false);
+    setPttPendingState(true);
+
+    QString const modeName = confirmationMode == decodium::tx::PttConfirmationMode::RigFeedback
+        ? QStringLiteral("rig-feedback")
+        : (confirmationMode == decodium::tx::PttConfirmationMode::CommandDispatch
+               ? QStringLiteral("command-dispatch")
+               : QStringLiteral("audio-activity"));
+    txTimelineLog(QStringLiteral("[TX-TL] ptt_pending serial=%1 reason=%2 mode=%3 backend=%4 method=%5")
+                      .arg(serial)
+                      .arg(reason, modeName, m_catBackend, activePttMethod()));
+    emit statusMessage(QStringLiteral("PTT in attesa (%1)").arg(m_catBackend));
+
+    if (confirmationMode != decodium::tx::PttConfirmationMode::RigFeedback) {
+        QTimer::singleShot(0, this, [this, serial, modeName]() {
+            if (serial != m_pttTransitionSerial || !m_pttPending) return;
+            confirmLegacyPttTransition(modeName);
+        });
+        return;
+    }
+
+    if (activeCatReportsPttActive()) {
+        QTimer::singleShot(0, this, [this, serial]() {
+            if (serial != m_pttTransitionSerial || !m_pttPending) return;
+            confirmLegacyPttTransition(QStringLiteral("already-active"));
+        });
+    }
+    QTimer::singleShot(decodium::tx::pttFeedbackTimeoutMs(), this, [this, serial]() {
+        if (serial != m_pttTransitionSerial || !m_pttPending) return;
+        failLegacyPttTransition(QStringLiteral("PTT non confermato entro %1 ms")
+                                    .arg(decodium::tx::pttFeedbackTimeoutMs()),
+                                true);
+    });
+}
+
+void DecodiumBridge::confirmLegacyPttTransition(const QString& source)
+{
+    if (!m_txRequested || !m_pttPending) return;
+    quint64 const serial = m_pttTransitionSerial;
+    setPttPendingState(false);
+    setPttConfirmedState(true);
+    txTimelineLog(QStringLiteral("[TX-TL] ptt_confirmed serial=%1 reason=%2 source=%3 backend=%4")
+                      .arg(serial)
+                      .arg(m_pttTransitionReason, source, m_catBackend));
+
+    std::function<bool()> action = std::move(m_pttConfirmedAction);
+    m_pttConfirmedAction = {};
+    QTimer::singleShot(0, this, [this, serial, action]() mutable {
+        if (serial != m_pttTransitionSerial || !m_txRequested || !m_pttConfirmed) return;
+        if (action && !action()) {
+            failLegacyPttTransition(QStringLiteral("Audio TX non avviato dopo la conferma PTT"), true);
+        }
+    });
+}
+
+void DecodiumBridge::failLegacyPttTransition(const QString& reason, bool reschedule)
+{
+    if (!m_txRequested && !m_pttPending && !m_pttConfirmed) return;
+    txTimelineLog(QStringLiteral("[TX-TL] ptt_failed serial=%1 reason=%2 backend=%3 dispatched=%4")
+                      .arg(m_pttTransitionSerial)
+                      .arg(reason, m_catBackend)
+                      .arg(m_pttOnDispatched ? 1 : 0));
+
+    ++m_pttTransitionSerial;
+    m_pttConfirmedAction = {};
+    setPttPendingState(false);
+    setPttConfirmedState(false);
+    setTxRequestedState(false);
+    abortLegacyBridgeTxRequest(QStringLiteral("ptt-failed"));
+
+    if (reschedule && usesDeferredManualSyncTx() && m_monitoring && !m_manualTxHold) {
+        if (!m_autoCqRepeat) m_deferredManualSyncTx = true;
+        scheduleSyncTxAtNextValidSlot(QStringLiteral("ptt-confirmation-timeout"), -1, 0);
+        emit errorMessage(reason + QStringLiteral(". TX riprogrammato nel prossimo slot valido."));
+    } else {
+        emit errorMessage(reason);
+    }
+}
+
+void DecodiumBridge::clearLegacyPttTransition(const QString& reason)
+{
+    bool const hadState = m_txRequested || m_pttPending || m_pttConfirmed
+        || m_pttOnDispatched || static_cast<bool>(m_pttConfirmedAction);
+    ++m_pttTransitionSerial;
+    m_pttConfirmedAction = {};
+    setPttPendingState(false);
+    setPttConfirmedState(false);
+    setTxRequestedState(false);
+    m_pttOnDispatched = false;
+    // Keep the OFF latch set until the next ON transition begins.  Hamlib and
+    // the legacy backend may report their respective TX-end events in either
+    // order; clearing it here would allow the later event to enqueue a second
+    // setRigPtt:off command.
+    m_pttTransitionReason.clear();
+    if (hadState) {
+        txTimelineLog(QStringLiteral("[TX-TL] ptt_state_cleared reason=%1").arg(reason));
+    }
+}
+
+void DecodiumBridge::requestLegacyPttOffOnce(const QString& reason)
+{
+    bool const rigStillReportsPtt = activeCatReportsPttActive();
+    if (m_pttOffSentForTransition) {
+        bridgeLog(QStringLiteral("PTT OFF deduplicated (%1)").arg(reason));
+        return;
+    }
+    if (!m_pttOnDispatched && !rigStillReportsPtt) {
+        bridgeLog(QStringLiteral("PTT OFF skipped (%1): no PTT ON was dispatched").arg(reason));
+        return;
+    }
+    m_pttOffSentForTransition = true;
+    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                        m_omniRigCat, m_legacyBackend)) {
+        activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false,
+                        m_omniRigCat, m_legacyBackend);
+        txTimelineLog(QStringLiteral("[TX-TL] ptt_off_once reason=%1 backend=%2")
+                          .arg(reason, m_catBackend));
+    }
+}
+
+void DecodiumBridge::handleActivePttFeedback(bool active, const QString& backend)
+{
+    if (!catSignalMatchesBackend(m_catBackend, backend)) return;
+    txTimelineLog(QStringLiteral("[TX-TL] ptt_feedback active=%1 backend=%2 pending=%3 confirmed=%4")
+                      .arg(active ? 1 : 0)
+                      .arg(backend)
+                      .arg(m_pttPending ? 1 : 0)
+                      .arg(m_pttConfirmed ? 1 : 0));
+    if (active && m_pttPending) {
+        confirmLegacyPttTransition(QStringLiteral("%1-signal").arg(backend));
+    }
+}
+
 void DecodiumBridge::setRxFrequency(int f)
 {
     f = qBound(0, f, 5000);
@@ -20051,15 +20351,17 @@ void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
                   .arg(m_bridgeAudioLegacyTxActive ? 1 : 0)
                   .arg(m_transmitting ? 1 : 0));
 
+    // Release the physical PTT before asking the legacy backend to stop.  The
+    // latter emits rigPttRequested(false), so the per-transition guard below
+    // makes both paths converge on one and only one CAT PTT-OFF command.
+    requestLegacyPttOffOnce(QStringLiteral("abort:%1").arg(reason));
     if (m_legacyBackend && m_legacyBackend->transmitting()) {
         m_legacyBackend->stopTransmission();
-    }
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
-        activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
     }
 
     if (m_bridgeAudioLegacyTxActive) {
         stopBridgeAudioForLegacyDigitalTx(reason);
+        clearLegacyPttTransition(QStringLiteral("abort:%1").arg(reason));
         return;
     }
 
@@ -20079,6 +20381,7 @@ void DecodiumBridge::abortLegacyBridgeTxRequest(const QString& reason)
         m_transmitting = false;
         emit transmittingChanged();
     }
+    clearLegacyPttTransition(QStringLiteral("abort:%1").arg(reason));
     resumeRxAudioAfterTx(reason);
     resumeNonAudioTxWork(reason);
 #else
@@ -20167,6 +20470,11 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
         bridgeLog(QStringLiteral("legacyBridgeTxAudio start skipped (%1): mode=%2 legacy=%3")
                       .arg(reason, m_mode)
                       .arg(usingLegacyBackendForTx() ? 1 : 0));
+        return false;
+    }
+    if (!m_pttConfirmed) {
+        bridgeLog(QStringLiteral("legacyBridgeTxAudio start blocked (%1): PTT is not confirmed")
+                      .arg(reason));
         return false;
     }
     if (m_bridgeAudioLegacyTxActive) {
@@ -21109,7 +21417,11 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     m_bridgeAudioLegacyTxActive = false;
 
     QElapsedTimer phaseTimer;
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+    if (wasBridgeLegacyTx) {
+        phaseTimer.start();
+        requestLegacyPttOffOnce(QStringLiteral("finish:%1").arg(reason));
+        pttOffMs = phaseTimer.elapsed();
+    } else if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
         phaseTimer.start();
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
         pttOffMs = phaseTimer.elapsed();
@@ -21163,6 +21475,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
                       .arg(cleanupMs)
                       .arg(resumeMs)
                       .arg(wasTransmitting ? 1 : 0));
+        if (wasBridgeLegacyTx) clearLegacyPttTransition(QStringLiteral("finish-ft2link"));
         return;
     }
     noteTxPlaybackFinished(reason, false);
@@ -21197,6 +21510,7 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     if (wasTransmitting && !appliedDeferredAutoSeqAfterActiveTx) {
         armFt2AutoCqOneShotAfterCompletedTx(finishedTx, reason);
     }
+    if (wasBridgeLegacyTx) clearLegacyPttTransition(QStringLiteral("finish:%1").arg(reason));
 }
 
 // ===========================================================================
@@ -23112,7 +23426,10 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         emit transmittingChanged();
     }
 
-    if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
+    if (wasBridgeLegacyTx) {
+        requestLegacyPttOffOnce(QStringLiteral("complete:%1").arg(reason));
+        clearLegacyPttTransition(QStringLiteral("complete:%1").arg(reason));
+    } else if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
     }
     if (usingTciAudioInput()) {
@@ -51246,27 +51563,93 @@ bool DecodiumBridge::openExternalUrl(const QString& url)
 
         if (!opener.isEmpty()) {
             arguments.append(target.toString(QUrl::FullyEncoded));
-            QProcess process;
-            process.setProcessEnvironment(
+            auto* process = new QProcess(this);
+            process->setProcessEnvironment(
                 decodium::host_process::sanitizedSystemEnvironment());
-            process.setProgram(opener);
-            process.setArguments(arguments);
-            qint64 pid = 0;
-            ok = process.startDetached(&pid);
-            if (ok) {
-                qInfo().noquote()
-                    << "[EXTERNAL-URL] opened with host helper"
-                    << "helper=" << QFileInfo(opener).fileName()
-                    << "pid=" << pid
-                    << "scheme=" << scheme
-                    << "host=" << target.host();
-            } else {
+            process->setProgram(opener);
+            process->setArguments(arguments);
+            process->setProcessChannelMode(QProcess::MergedChannels);
+            process->setProperty("decodiumExternalUrlHandled", false);
+
+            auto const fallbackToQt = [this, process, target, clean, scheme, opener]
+                (QString const& reason) {
+                if (process->property("decodiumExternalUrlHandled").toBool()) {
+                    return;
+                }
+                process->setProperty("decodiumExternalUrlHandled", true);
+                QString const helperOutput = QString::fromLocal8Bit(
+                    process->readAll()).trimmed();
                 qWarning().noquote()
                     << "[EXTERNAL-URL] host helper failed; trying Qt desktop services"
-                    << "helper=" << opener
+                    << "helper=" << QFileInfo(opener).fileName()
+                    << "reason=" << reason
+                    << "output=" << (helperOutput.isEmpty()
+                                            ? QStringLiteral("<empty>")
+                                            : helperOutput)
                     << "scheme=" << scheme
                     << "host=" << target.host();
-            }
+
+                bool const fallbackOk = QDesktopServices::openUrl(target);
+                qInfo().noquote()
+                    << "[EXTERNAL-URL] Qt desktop services fallback result"
+                    << "ok=" << fallbackOk
+                    << "scheme=" << scheme
+                    << "host=" << target.host();
+                if (fallbackOk) {
+                    emit statusMessage(
+                        QStringLiteral("URL aperto nel browser di sistema: %1")
+                            .arg(target.host().isEmpty() ? scheme : target.host()));
+                } else {
+                    emit errorMessage(QStringLiteral("Impossibile aprire URL: %1").arg(clean));
+                }
+                process->deleteLater();
+            };
+
+            connect(process, &QProcess::started, this,
+                    [process, opener, scheme, target] {
+                qInfo().noquote()
+                    << "[EXTERNAL-URL] host helper started"
+                    << "helper=" << QFileInfo(opener).fileName()
+                    << "pid=" << process->processId()
+                    << "scheme=" << scheme
+                    << "host=" << target.host();
+            });
+            connect(process, &QProcess::errorOccurred, this,
+                    [fallbackToQt](QProcess::ProcessError error) {
+                fallbackToQt(QStringLiteral("process error %1").arg(int(error)));
+            });
+            connect(process,
+                    qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
+                    this,
+                    [this, process, target, scheme, opener, fallbackToQt]
+                    (int exitCode, QProcess::ExitStatus exitStatus) {
+                if (process->property("decodiumExternalUrlHandled").toBool()) {
+                    return;
+                }
+                if (exitStatus != QProcess::NormalExit || exitCode != 0) {
+                    fallbackToQt(
+                        QStringLiteral("exit status %1, code %2")
+                            .arg(int(exitStatus))
+                            .arg(exitCode));
+                    return;
+                }
+
+                process->setProperty("decodiumExternalUrlHandled", true);
+                qInfo().noquote()
+                    << "[EXTERNAL-URL] host helper completed successfully"
+                    << "helper=" << QFileInfo(opener).fileName()
+                    << "scheme=" << scheme
+                    << "host=" << target.host();
+                emit statusMessage(
+                    QStringLiteral("URL aperto nel browser di sistema: %1")
+                        .arg(target.host().isEmpty() ? scheme : target.host()));
+                process->deleteLater();
+            });
+            process->start();
+
+            // The helper is monitored asynchronously.  A non-zero immediate
+            // exit is no longer mistaken for a successful browser launch.
+            return true;
         }
     }
 #endif

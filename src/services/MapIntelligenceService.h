@@ -459,6 +459,7 @@ private:
         QString grid;
         QString grid4;
         QString grid6;
+        QStringList vuccGrids;
         QString band;
         QString mode;
         QString propagationMode;

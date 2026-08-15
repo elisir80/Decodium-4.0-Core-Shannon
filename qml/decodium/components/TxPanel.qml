@@ -39,6 +39,7 @@ Item {
         }
     }
     readonly property bool txVisualActive: !!(engine && (engine.transmitting || engine.tuning))
+    readonly property bool txPttPending: !!(engine && engine.pttPending && !engine.pttConfirmed)
     property string logPreviewCall: ""
     property string logPreviewGrid: ""
     property string logPreviewSent: ""
@@ -537,8 +538,9 @@ Item {
         id: panelFrame
         anchors.fill: parent
         color: glassBg
-        border.color: txPanel.txVisualActive ? errorRed : glassBorder
-        border.width: txPanel.txVisualActive ? 2 : 1
+        border.color: txPanel.txVisualActive ? errorRed
+                      : (txPanel.txPttPending ? warningOrange : glassBorder)
+        border.width: (txPanel.txVisualActive || txPanel.txPttPending) ? 2 : 1
         radius: 12
 
         ColumnLayout {
@@ -1899,6 +1901,16 @@ Item {
                 onRunningChanged: if (!running) txPulseOverlay.opacity = 0
             }
         }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            radius: 12
+            border.color: warningOrange
+            border.width: 3
+            visible: txPanel.txPttPending
+            opacity: 0.82
+        }
     }
 
     Popup {
@@ -2253,6 +2265,147 @@ Item {
                         color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
                         border.color: logCommentField.activeFocus ? accentGreen : glassBorder
                         border.width: 1
+                    }
+
+                    // TextInput already supports the standard keyboard
+                    // shortcuts.  Expose the same editing operations through
+                    // a secondary-click menu without intercepting left-click
+                    // selection or normal text editing.
+                    TapHandler {
+                        acceptedButtons: Qt.RightButton
+                        onTapped: {
+                            logCommentField.forceActiveFocus()
+                            logCommentContextMenu.popup()
+                        }
+                    }
+
+                    Menu {
+                        id: logCommentContextMenu
+                        implicitWidth: 170
+                        padding: 4
+
+                        MenuItem {
+                            id: logCommentCutItem
+                            text: qsTr("Cut")
+                            height: 36
+                            enabled: !logCommentField.readOnly
+                                     && logCommentField.selectedText.length > 0
+                            onTriggered: logCommentField.cut()
+                            contentItem: Text {
+                                text: logCommentCutItem.text
+                                color: logCommentCutItem.enabled
+                                       ? txPanel.textPrimary
+                                       : Qt.rgba(txPanel.textPrimary.r,
+                                                 txPanel.textPrimary.g,
+                                                 txPanel.textPrimary.b, 0.45)
+                                font.pixelSize: 13
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: logCommentCutItem.highlighted
+                                       ? Qt.rgba(txPanel.secondaryCyan.r,
+                                                 txPanel.secondaryCyan.g,
+                                                 txPanel.secondaryCyan.b, 0.22)
+                                       : "transparent"
+                                radius: 4
+                            }
+                        }
+                        MenuItem {
+                            id: logCommentCopyItem
+                            text: qsTr("Copy")
+                            height: 36
+                            enabled: logCommentField.selectedText.length > 0
+                            onTriggered: logCommentField.copy()
+                            contentItem: Text {
+                                text: logCommentCopyItem.text
+                                color: logCommentCopyItem.enabled
+                                       ? txPanel.textPrimary
+                                       : Qt.rgba(txPanel.textPrimary.r,
+                                                 txPanel.textPrimary.g,
+                                                 txPanel.textPrimary.b, 0.45)
+                                font.pixelSize: 13
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: logCommentCopyItem.highlighted
+                                       ? Qt.rgba(txPanel.secondaryCyan.r,
+                                                 txPanel.secondaryCyan.g,
+                                                 txPanel.secondaryCyan.b, 0.22)
+                                       : "transparent"
+                                radius: 4
+                            }
+                        }
+                        MenuItem {
+                            id: logCommentPasteItem
+                            text: qsTr("Paste")
+                            height: 36
+                            enabled: !logCommentField.readOnly
+                            onTriggered: logCommentField.paste()
+                            contentItem: Text {
+                                text: logCommentPasteItem.text
+                                color: logCommentPasteItem.enabled
+                                       ? txPanel.textPrimary
+                                       : Qt.rgba(txPanel.textPrimary.r,
+                                                 txPanel.textPrimary.g,
+                                                 txPanel.textPrimary.b, 0.45)
+                                font.pixelSize: 13
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: logCommentPasteItem.highlighted
+                                       ? Qt.rgba(txPanel.secondaryCyan.r,
+                                                 txPanel.secondaryCyan.g,
+                                                 txPanel.secondaryCyan.b, 0.22)
+                                       : "transparent"
+                                radius: 4
+                            }
+                        }
+                        MenuSeparator {
+                            height: 9
+                            contentItem: Rectangle {
+                                y: 4
+                                height: 1
+                                color: txPanel.glassBorder
+                            }
+                        }
+                        MenuItem {
+                            id: logCommentSelectAllItem
+                            text: qsTr("Select All")
+                            height: 36
+                            enabled: logCommentField.text.length > 0
+                            onTriggered: logCommentField.selectAll()
+                            contentItem: Text {
+                                text: logCommentSelectAllItem.text
+                                color: logCommentSelectAllItem.enabled
+                                       ? txPanel.textPrimary
+                                       : Qt.rgba(txPanel.textPrimary.r,
+                                                 txPanel.textPrimary.g,
+                                                 txPanel.textPrimary.b, 0.45)
+                                font.pixelSize: 13
+                                leftPadding: 10
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: logCommentSelectAllItem.highlighted
+                                       ? Qt.rgba(txPanel.secondaryCyan.r,
+                                                 txPanel.secondaryCyan.g,
+                                                 txPanel.secondaryCyan.b, 0.22)
+                                       : "transparent"
+                                radius: 4
+                            }
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: 170
+                            color: Qt.rgba(txPanel.bgDeep.r, txPanel.bgDeep.g,
+                                           txPanel.bgDeep.b, 0.98)
+                            border.color: txPanel.secondaryCyan
+                            border.width: 1
+                            radius: 6
+                        }
                     }
                 }
 

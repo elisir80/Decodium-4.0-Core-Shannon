@@ -305,10 +305,24 @@ private:
       "  printf 'GSETTINGS_SCHEMA_DIR=%s\\n' \"${GSETTINGS_SCHEMA_DIR-<unset>}\"\n"
       "  printf 'GTK_PATH=%s\\n' \"${GTK_PATH-<unset>}\"\n"
       "  printf 'XDG_DATA_DIRS=%s\\n' \"${XDG_DATA_DIRS-<unset>}\"\n"
+      "  printf 'QT_PLUGIN_PATH=%s\\n' \"${QT_PLUGIN_PATH-<unset>}\"\n"
+      "  printf 'QML_IMPORT_PATH=%s\\n' \"${QML_IMPORT_PATH-<unset>}\"\n"
+      "  printf 'QT_QPA_PLATFORM=%s\\n' \"${QT_QPA_PLATFORM-<unset>}\"\n"
       "  printf 'DBUS_SESSION_BUS_ADDRESS=%s\\n' \"${DBUS_SESSION_BUS_ADDRESS-<unset>}\"\n"
       "  printf 'XDG_RUNTIME_DIR=%s\\n' \"${XDG_RUNTIME_DIR-<unset>}\"\n"
+      "  printf 'PATH=%s\\n' \"${PATH-<unset>}\"\n"
       "  printf 'DISPLAY=%s\\n' \"${DISPLAY-<unset>}\"\n"
+      "  printf 'XAUTHORITY=%s\\n' \"${XAUTHORITY-<unset>}\"\n"
       "  printf 'WAYLAND_DISPLAY=%s\\n' \"${WAYLAND_DISPLAY-<unset>}\"\n"
+      "  printf 'XDG_CURRENT_DESKTOP=%s\\n' \"${XDG_CURRENT_DESKTOP-<unset>}\"\n"
+      "  printf 'XDG_SESSION_DESKTOP=%s\\n' \"${XDG_SESSION_DESKTOP-<unset>}\"\n"
+      "  printf 'XDG_SESSION_TYPE=%s\\n' \"${XDG_SESSION_TYPE-<unset>}\"\n"
+      "  printf 'DESKTOP_SESSION=%s\\n' \"${DESKTOP_SESSION-<unset>}\"\n"
+      "  printf 'KDE_FULL_SESSION=%s\\n' \"${KDE_FULL_SESSION-<unset>}\"\n"
+      "  printf 'KDE_SESSION_VERSION=%s\\n' \"${KDE_SESSION_VERSION-<unset>}\"\n"
+      "  printf 'BROWSER=%s\\n' \"${BROWSER-<unset>}\"\n"
+      "  printf 'APPIMAGE=%s\\n' \"${APPIMAGE-<unset>}\"\n"
+      "  printf 'APPDIR=%s\\n' \"${APPDIR-<unset>}\"\n"
       "} > \"$capture\"\n"
       "case \"$action\" in\n"
       "  lookup) printf 'fake-keyring-secret\\n' ;;\n"
@@ -338,6 +352,9 @@ private:
     environment.set ("GSETTINGS_SCHEMA_DIR", "/tmp/.mount_decodium/usr/share/glib-2.0/schemas");
     environment.set ("GTK_PATH", "/tmp/.mount_decodium/usr/lib/gtk-3.0");
     environment.set ("XDG_DATA_DIRS", "/tmp/.mount_decodium/usr/share");
+    environment.set ("QT_PLUGIN_PATH", "/tmp/.mount_decodium/usr/plugins");
+    environment.set ("QML_IMPORT_PATH", "/tmp/.mount_decodium/usr/qml");
+    environment.set ("QT_QPA_PLATFORM", "xcb");
 
     environment.set ("DECODIUM_HOST_LD_LIBRARY_PATH", "/host/lib");
     environment.set ("DECODIUM_HOST_LD_PRELOAD", "");
@@ -346,11 +363,36 @@ private:
     environment.set ("DECODIUM_HOST_GSETTINGS_SCHEMA_DIR", "/host/glib/schemas");
     environment.set ("DECODIUM_HOST_GTK_PATH", "");
     environment.set ("DECODIUM_HOST_XDG_DATA_DIRS", "/usr/local/share:/usr/share");
+    environment.set ("DECODIUM_HOST_QT_PLUGIN_PATH", "");
+    environment.set ("DECODIUM_HOST_QML_IMPORT_PATH", "");
+    environment.set ("DECODIUM_HOST_QT_QPA_PLATFORM", "wayland");
 
-    environment.set ("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/1000/bus");
-    environment.set ("XDG_RUNTIME_DIR", "/run/user/1000");
-    environment.set ("DISPLAY", ":77");
-    environment.set ("WAYLAND_DISPLAY", "wayland-test");
+    environment.set ("DECODIUM_HOST_DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/1000/bus");
+    environment.set ("DECODIUM_HOST_XDG_RUNTIME_DIR", "/run/user/1000");
+    environment.set ("DECODIUM_HOST_PATH", "/usr/local/bin:/usr/bin:/bin");
+    environment.set ("DECODIUM_HOST_DISPLAY", ":77");
+    environment.set ("DECODIUM_HOST_XAUTHORITY", "/run/user/1000/xauth");
+    environment.set ("DECODIUM_HOST_WAYLAND_DISPLAY", "wayland-test");
+    environment.set ("DECODIUM_HOST_XDG_CURRENT_DESKTOP", "KDE");
+    environment.set ("DECODIUM_HOST_XDG_SESSION_DESKTOP", "KDE");
+    environment.set ("DECODIUM_HOST_XDG_SESSION_TYPE", "wayland");
+    environment.set ("DECODIUM_HOST_DESKTOP_SESSION", "plasmawayland");
+    environment.set ("DECODIUM_HOST_KDE_FULL_SESSION", "true");
+    environment.set ("DECODIUM_HOST_KDE_SESSION_VERSION", "6");
+    environment.set ("DECODIUM_HOST_BROWSER", "librewolf");
+
+    environment.set ("DBUS_SESSION_BUS_ADDRESS", "bundle-bus");
+    environment.set ("XDG_RUNTIME_DIR", "/tmp/.mount_decodium/runtime");
+    environment.set ("DISPLAY", ":99");
+    environment.set ("XAUTHORITY", "/tmp/.mount_decodium/xauth");
+    environment.set ("WAYLAND_DISPLAY", "bundle-wayland");
+    environment.set ("XDG_CURRENT_DESKTOP", "bundle-desktop");
+    environment.set ("XDG_SESSION_DESKTOP", "bundle-desktop");
+    environment.set ("XDG_SESSION_TYPE", "bundle-session");
+    environment.set ("DESKTOP_SESSION", "bundle-session");
+    environment.set ("KDE_FULL_SESSION", "false");
+    environment.set ("KDE_SESSION_VERSION", "0");
+    environment.set ("BROWSER", "/tmp/.mount_decodium/browser");
 
     auto const& backend = secure_settings::default_backend ();
     QVERIFY (backend.available ());
@@ -397,10 +439,24 @@ private:
         QVERIFY (captured.contains (QStringLiteral ("GSETTINGS_SCHEMA_DIR=/host/glib/schemas\n")));
         QVERIFY (captured.contains (QStringLiteral ("GTK_PATH=<unset>\n")));
         QVERIFY (captured.contains (QStringLiteral ("XDG_DATA_DIRS=/usr/local/share:/usr/share\n")));
+        QVERIFY (captured.contains (QStringLiteral ("QT_PLUGIN_PATH=<unset>\n")));
+        QVERIFY (captured.contains (QStringLiteral ("QML_IMPORT_PATH=<unset>\n")));
+        QVERIFY (captured.contains (QStringLiteral ("QT_QPA_PLATFORM=wayland\n")));
         QVERIFY (captured.contains (QStringLiteral ("DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus\n")));
         QVERIFY (captured.contains (QStringLiteral ("XDG_RUNTIME_DIR=/run/user/1000\n")));
+        QVERIFY (captured.contains (QStringLiteral ("PATH=/usr/local/bin:/usr/bin:/bin\n")));
         QVERIFY (captured.contains (QStringLiteral ("DISPLAY=:77\n")));
+        QVERIFY (captured.contains (QStringLiteral ("XAUTHORITY=/run/user/1000/xauth\n")));
         QVERIFY (captured.contains (QStringLiteral ("WAYLAND_DISPLAY=wayland-test\n")));
+        QVERIFY (captured.contains (QStringLiteral ("XDG_CURRENT_DESKTOP=KDE\n")));
+        QVERIFY (captured.contains (QStringLiteral ("XDG_SESSION_DESKTOP=KDE\n")));
+        QVERIFY (captured.contains (QStringLiteral ("XDG_SESSION_TYPE=wayland\n")));
+        QVERIFY (captured.contains (QStringLiteral ("DESKTOP_SESSION=plasmawayland\n")));
+        QVERIFY (captured.contains (QStringLiteral ("KDE_FULL_SESSION=true\n")));
+        QVERIFY (captured.contains (QStringLiteral ("KDE_SESSION_VERSION=6\n")));
+        QVERIFY (captured.contains (QStringLiteral ("BROWSER=librewolf\n")));
+        QVERIFY (captured.contains (QStringLiteral ("APPIMAGE=<unset>\n")));
+        QVERIFY (captured.contains (QStringLiteral ("APPDIR=<unset>\n")));
       }
 
     QFile stored_input {capture_prefix + QStringLiteral (".store.stdin")};

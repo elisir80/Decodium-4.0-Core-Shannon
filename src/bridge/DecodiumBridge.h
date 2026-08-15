@@ -35,6 +35,7 @@
 #include "DecodeListModel.h"
 #include "Network/DecoSyncTime.hpp"
 #include "FtRuntimeAdaptivePolicy.hpp"
+#include "PttTransitionPolicy.h"
 
 class ActiveStationsModel;
 class DecodiumAlertManager;
@@ -107,6 +108,9 @@ class DecodiumBridge : public QObject
     // === RX/TX STATE ===
     Q_PROPERTY(bool monitoring READ monitoring WRITE setMonitoring NOTIFY monitoringChanged)
     Q_PROPERTY(bool transmitting READ transmitting NOTIFY transmittingChanged)
+    Q_PROPERTY(bool txRequested READ txRequested NOTIFY txRequestedChanged)
+    Q_PROPERTY(bool pttPending READ pttPending NOTIFY pttPendingChanged)
+    Q_PROPERTY(bool pttConfirmed READ pttConfirmed NOTIFY pttConfirmedChanged)
     Q_PROPERTY(bool tuning READ tuning NOTIFY tuningChanged)
     Q_PROPERTY(bool decoding READ decoding NOTIFY decodingChanged)
 
@@ -593,6 +597,9 @@ public:
     bool monitoring() const;
     void setMonitoring(bool);
     bool transmitting() const;
+    bool txRequested() const { return m_txRequested; }
+    bool pttPending() const { return m_pttPending; }
+    bool pttConfirmed() const { return m_pttConfirmed; }
     bool tuning() const { return m_tuning; }
     bool decoding() const;
 
@@ -1601,6 +1608,9 @@ signals:
     void ft2LinkAccessChanged();
     void monitoringChanged();
     void transmittingChanged();
+    void txRequestedChanged();
+    void pttPendingChanged();
+    void pttConfirmedChanged();
     void tuningChanged();
     void decodingChanged();
     void rxFrequencyChanged();
@@ -2238,6 +2248,14 @@ private:
     QDateTime m_monitoringSince;  // IU8LMC: inizio ascolto (autodiagnosi banda morta)
     bool m_monitorRequested {false};
     bool m_transmitting {false};
+    bool m_txRequested {false};
+    bool m_pttPending {false};
+    bool m_pttConfirmed {false};
+    bool m_pttOnDispatched {false};
+    bool m_pttOffSentForTransition {false};
+    quint64 m_pttTransitionSerial {0};
+    QString m_pttTransitionReason;
+    std::function<bool()> m_pttConfirmedAction;
     bool m_tuning {false};
     bool m_bridgeAudioTuneActive {false};
     bool m_bridgeAudioLegacyTxActive {false};
@@ -3906,6 +3924,19 @@ private:
     bool legacyBridgeAudioTxInFlight() const;
     void mirrorLegacyLoggedAdif(QByteArray const& adif);
     bool preflightLegacyBridgeTxBeforePtt(const QString& reason);
+    QString activePttMethod() const;
+    bool activeCatReportsPttActive() const;
+    void setTxRequestedState(bool requested);
+    void setPttPendingState(bool pending);
+    void setPttConfirmedState(bool confirmed);
+    void beginLegacyPttTransition(const QString& reason,
+                                  decodium::tx::PttConfirmationMode confirmationMode,
+                                  std::function<bool()> confirmedAction);
+    void confirmLegacyPttTransition(const QString& source);
+    void failLegacyPttTransition(const QString& reason, bool reschedule);
+    void clearLegacyPttTransition(const QString& reason);
+    void requestLegacyPttOffOnce(const QString& reason);
+    void handleActivePttFeedback(bool active, const QString& backend);
     void abortLegacyBridgeTxRequest(const QString& reason);
     quint64 armPendingLegacyBridgeAudioStart(const QString& reason);
     bool consumePendingLegacyBridgeAudioStart(quint64 serial, const QString& reason);

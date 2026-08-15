@@ -242,7 +242,22 @@ ColumnLayout {
                     font.bold: true
                     elide: Text.ElideRight
                 }
-                Text { Layout.preferredWidth: 50; text: modelData.grid || ""; color: root.mutedColor; font.pixelSize: 8; elide: Text.ElideRight }
+                Text {
+                    Layout.preferredWidth: 50
+                    text: (modelData.grid || "")
+                          + (modelData.vuccGrids && modelData.vuccGrids.length > 0
+                             ? " +" + modelData.vuccGrids.length : "")
+                    color: root.mutedColor
+                    font.pixelSize: 8
+                    elide: Text.ElideRight
+                    ToolTip.visible: gridHover.hovered
+                    ToolTip.text: modelData.vuccGrids && modelData.vuccGrids.length > 0
+                        ? qsTr("Primary: %1\nVUCC: %2")
+                              .arg(modelData.grid || "-")
+                              .arg(modelData.vuccGrids.join(", "))
+                        : (modelData.grid || "")
+                    HoverHandler { id: gridHover }
+                }
                 Text { Layout.preferredWidth: 42; text: modelData.band || ""; color: root.mutedColor; font.pixelSize: 8 }
                 Text { Layout.preferredWidth: 46; text: modelData.mode || ""; color: root.mutedColor; font.pixelSize: 8 }
                 Text {

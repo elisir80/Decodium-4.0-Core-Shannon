@@ -196,9 +196,11 @@ SqlFilter buildFilter(const QString& search, const QString& band,
     if (!text.isEmpty()) {
         clauses << QStringLiteral(
             "(call LIKE ? OR operator_call LIKE ? OR grid LIKE ? OR dxcc LIKE ? OR state LIKE ?"
-            " OR pota_ref LIKE ? OR iota LIKE ? OR wpx LIKE ?)");
+            " OR pota_ref LIKE ? OR iota LIKE ? OR wpx LIKE ?"
+            " OR EXISTS(SELECT 1 FROM map_qso_grid qg"
+            "           WHERE qg.qso_id=map_qso.id AND qg.grid LIKE ?))");
         QString const pattern = QStringLiteral("%%1%").arg(text);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 9; ++i) {
             binds << pattern;
         }
     }
@@ -245,6 +247,9 @@ QVariantMap rowToMap(QSqlQuery& query)
     row.insert(QStringLiteral("iota"), query.value(17).toString());
     row.insert(QStringLiteral("wpx"), query.value(18).toString());
     row.insert(QStringLiteral("source"), query.value(19).toString());
+    row.insert(QStringLiteral("vuccGrids"), query.value(20).toString()
+                                                  .split(QStringLiteral(", "),
+                                                         Qt::SkipEmptyParts));
     return row;
 }
 
@@ -1774,7 +1779,9 @@ MapOperationsService::queryLogbookDatabase(
 
     QString const selectSql = QStringLiteral(
         "SELECT source_key,call,grid,band,mode,qso_date,time_on,qso_epoch,"
-        " frequency_mhz,satellite,sat_mode,freq_rx_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source"
+        " frequency_mhz,satellite,sat_mode,freq_rx_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source,"
+        " COALESCE((SELECT GROUP_CONCAT(g.grid, ', ') FROM map_qso_grid g"
+        "           WHERE g.qso_id=map_qso.id AND g.is_primary=0), '')"
         " FROM map_qso WHERE %1 ORDER BY %2 %3 LIMIT %4")
         .arg(filter.where, sortableColumn(sort),
              descending ? QStringLiteral("DESC") : QStringLiteral("ASC"))
@@ -1810,6 +1817,17 @@ MapOperationsService::queryLogbookDatabase(
             {QStringLiteral("wpx"), scoreQuery.value(7).toInt()},
             {QStringLiteral("satellites"), scoreQuery.value(8).toInt()}
         };
+    }
+    QSqlQuery gridScoreQuery(db);
+    if (prepareAndBind(&gridScoreQuery,
+                       QStringLiteral(
+                           "SELECT COUNT(DISTINCT upper(grid4)) FROM map_qso_grid"
+                           " WHERE qso_id IN (SELECT id FROM map_qso WHERE %1)")
+                           .arg(filter.where),
+                       filter.binds, nullptr)
+        && gridScoreQuery.next()) {
+        snapshot.scorecard.insert(QStringLiteral("grids"),
+                                  gridScoreQuery.value(0).toInt());
     }
 
     auto appendChart = [&](QString const& group, QString const& column) {
@@ -2567,7 +2585,9 @@ MapOperationsService::exportLogbookDatabase(
     SqlFilter const filter = buildFilter(search, band, mode, period);
     QString const selectSql = QStringLiteral(
         "SELECT source_key,call,grid,band,mode,qso_date,time_on,qso_epoch,"
-        " frequency_mhz,satellite,sat_mode,freq_rx_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source"
+        " frequency_mhz,satellite,sat_mode,freq_rx_mhz,confirmed,dxcc,continent,state,pota_ref,iota,wpx,source,"
+        " COALESCE((SELECT GROUP_CONCAT(g.grid, ', ') FROM map_qso_grid g"
+        "           WHERE g.qso_id=map_qso.id AND g.is_primary=0), '')"
         " FROM map_qso WHERE %1 ORDER BY %2 %3")
         .arg(filter.where, sortableColumn(sort),
              descending ? QStringLiteral("DESC") : QStringLiteral("ASC"));
@@ -2589,7 +2609,7 @@ MapOperationsService::exportLogbookDatabase(
     if (adif) {
         stream << "<ADIF_VER:5>3.1.4 <PROGRAMID:9>Decodium4 <EOH>\n";
     } else {
-        stream << "Date,Time,Call,Grid,Band,Mode,Frequency MHz,Receive Frequency MHz,Satellite,Sat Mode,Confirmed,DXCC,"
+        stream << "Date,Time,Call,Grid,VUCC Grids,Band,Mode,Frequency MHz,Receive Frequency MHz,Satellite,Sat Mode,Confirmed,DXCC,"
                   "Continent,State,POTA,IOTA,WPX,Source\n";
     }
 
@@ -2597,7 +2617,9 @@ MapOperationsService::exportLogbookDatabase(
         QVariantMap const row = rowToMap(query);
         if (adif) {
             auto field = [&](QString const& key, QString const& name) {
-                QString const text = row.value(key).toString();
+                QString const text = key == QStringLiteral("vuccGrids")
+                    ? row.value(key).toStringList().join(QLatin1Char(','))
+                    : row.value(key).toString();
                 if (!text.isEmpty()) {
                     stream << '<' << name << ':' << text.toUtf8().size()
                            << '>' << text << ' ';
@@ -2605,6 +2627,7 @@ MapOperationsService::exportLogbookDatabase(
             };
             field(QStringLiteral("call"), QStringLiteral("CALL"));
             field(QStringLiteral("grid"), QStringLiteral("GRIDSQUARE"));
+            field(QStringLiteral("vuccGrids"), QStringLiteral("VUCC_GRIDS"));
             field(QStringLiteral("band"), QStringLiteral("BAND"));
             field(QStringLiteral("mode"), QStringLiteral("MODE"));
             field(QStringLiteral("frequencyMhz"), QStringLiteral("FREQ"));
@@ -2622,6 +2645,8 @@ MapOperationsService::exportLogbookDatabase(
                 row.value(QStringLiteral("time")).toString(),
                 row.value(QStringLiteral("call")).toString(),
                 row.value(QStringLiteral("grid")).toString(),
+                row.value(QStringLiteral("vuccGrids")).toStringList()
+                    .join(QLatin1Char(',')),
                 row.value(QStringLiteral("band")).toString(),
                 row.value(QStringLiteral("mode")).toString(),
                 QString::number(
