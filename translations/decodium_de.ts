@@ -6330,6 +6330,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Bestätigt</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Passender VUCC-Locator: %1 · Primär: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>VUCC-Locatoren: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24399,6 +24411,22 @@ Langes Drücken: Nachricht bearbeiten</translation>
         <source>Satellite:</source>
         <translation>Satellit:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopieren</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Ausschneiden</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Einfügen</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Alles auswählen</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24650,6 +24678,14 @@ MONITOR klicken zum Starten</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Schnitt:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>Wie viel vom Spektrum die automatische Schwelle als Rauschen ansieht und abschneidet. 10 ist die historische Einstellung: erhöhen Sie sie, um ein leeres Band aufzuräumen, senken Sie sie, wenn schwache Signale verschwinden.</translation>
     </message>
 </context>
 <context>
@@ -27728,6 +27764,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Sortierfeld</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Primär: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

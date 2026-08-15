@@ -6329,6 +6329,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Confirmat</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Locator VUCC coincident: %1 · Principal: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>Locators VUCC: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24400,6 +24412,22 @@ Premut llarg: edita el missatge</translation>
         <source>Satellite:</source>
         <translation>Satèl·lit:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copia</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Retalla</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Enganxa</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Selecciona-ho tot</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24651,6 +24679,14 @@ Feu clic a MONITOR per començar</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Tall:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>Quina part de l'espectre considera soroll el llindar automàtic i retalla. 10 és l'ajust històric: pugeu-lo per netejar una banda buida, baixeu-lo si desapareixen els senyals febles.</translation>
     </message>
 </context>
 <context>
@@ -27730,6 +27766,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Camp d&apos;ordenació</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Principal: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

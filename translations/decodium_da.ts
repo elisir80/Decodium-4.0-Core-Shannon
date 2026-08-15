@@ -6328,6 +6328,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Bekræftet</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Matchende VUCC-lokator: %1 · Primær: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>VUCC-lokatorer: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24398,6 +24410,22 @@ Langt tryk: rediger besked</translation>
         <source>Satellite:</source>
         <translation>Satellit:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopiér</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Klip</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Sæt ind</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Markér alt</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24649,6 +24677,14 @@ Klik på MONITOR for at starte</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Klip:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>Hvor stor en del af spektret den automatiske tærskel regner for støj og skærer væk. 10 er den historiske indstilling: hæv den for at rydde op i et tomt bånd, sænk den hvis svage signaler forsvinder.</translation>
     </message>
 </context>
 <context>
@@ -27728,6 +27764,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Sorteringsfelt</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Primær: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

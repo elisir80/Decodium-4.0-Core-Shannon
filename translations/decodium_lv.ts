@@ -6341,6 +6341,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Apstiprināts</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Atbilstošs VUCC lauciņš: %1 · Galvenais: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>VUCC lauciņi: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24412,6 +24424,22 @@ Ilgs nospiediens: rediģēt ziņojumu</translation>
         <source>Satellite:</source>
         <translation>Pavadonis:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopēt</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Izgriezt</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Ielīmēt</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Atlasīt visu</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24663,6 +24691,14 @@ Noklikšķiniet MONITOR, lai sāktu</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Nogriešana:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>Cik lielu spektra daļu automātiskais slieksnis uzskata par troksni un nogriež. 10 ir vēsturiskais iestatījums: paaugstiniet, lai sakoptu tukšu joslu, pazeminiet, ja pazūd vājie signāli.</translation>
     </message>
 </context>
 <context>
@@ -27742,6 +27778,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Kārtošanas lauks</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Galvenais: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

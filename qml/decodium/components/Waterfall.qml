@@ -180,6 +180,8 @@ Item {
         floor3dSlider.value = bridge.getSetting("uiSpectrum3dFloorDepth", 6)
         waterfallDisplay.spectrum3dTraces = traces3dSlider.value
         waterfallDisplay.spectrum3dFloorDepth = floor3dSlider.value
+        noiseCutSlider.value = bridge.getSetting("uiNoiseFloorPercentile", 10)
+        waterfallDisplay.noiseFloorPercentile = noiseCutSlider.value
 
         // In light theme la palette è forzata a 11 (mockup pastello). Non sovrascrivere col valore Settings.
         waterfallDisplay.autoRange = autoRangeCheck.checked
@@ -753,6 +755,36 @@ Item {
                     }
                 }
                 Text { text: "Auto"; color: autoRangeCheck.checked ? accentGreen : textSec; font.pixelSize: 10 }
+
+                // Quanto taglia la soglia automatica. Compare solo quando la
+                // soglia e' accesa: a filtro spento non regola nulla.
+                Text {
+                    text: qsTr("Cut:"); color: accentGreen; font.pixelSize: 10
+                    visible: autoRangeCheck.checked
+                }
+                Slider {
+                    id: noiseCutSlider
+                    visible: autoRangeCheck.checked
+                    from: 5; to: 40; stepSize: 1
+                    width: 70; height: 18
+                    value: 10
+                    onMoved: {
+                        waterfallDisplay.noiseFloorPercentile = value
+                        if (!waterfallPanel.restoringSettings) {
+                            waterfallPanel.persistGraphSetting("uiNoiseFloorPercentile", value)
+                        }
+                    }
+                    ToolTip.text: qsTr("How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.")
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    background: Rectangle { x:noiseCutSlider.leftPadding;y:noiseCutSlider.topPadding+noiseCutSlider.availableHeight/2-2;width:noiseCutSlider.availableWidth;height:4;radius:2;color:wfTrack }
+                    handle: Rectangle { x:noiseCutSlider.leftPadding+noiseCutSlider.visualPosition*(noiseCutSlider.availableWidth-width);y:noiseCutSlider.topPadding+noiseCutSlider.availableHeight/2-height/2;width:10;height:10;radius:5;color:accentGreen }
+                }
+                Text {
+                    text: noiseCutSlider.value.toFixed(0) + "%"
+                    color: accentGreen; font.pixelSize: 10; width: 26
+                    visible: autoRangeCheck.checked
+                }
 
                 // Spettro 3D a tracce impilate. La cascata sotto resta invariata:
                 // cambia solo come viene disegnato lo spettro sopra di essa.

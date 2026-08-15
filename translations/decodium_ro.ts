@@ -5654,6 +5654,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Confirmat</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Locator VUCC corespunzător: %1 · Principal: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>Locatoare VUCC: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -18924,6 +18936,22 @@ Apăsare lungă: modifică mesajul</translation>
         <source>Satellite:</source>
         <translation>Satelit:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copiază</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Taie</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Lipește</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Selectează tot</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -19175,6 +19203,14 @@ Apasă MONITOR pentru a începe</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Tăiere:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>Ce parte din spectru consideră zgomot pragul automat și taie. 10 este reglajul istoric: ridicați-l pentru a curăța o bandă goală, coborâți-l dacă dispar semnalele slabe.</translation>
     </message>
 </context>
 <context>
@@ -20008,6 +20044,12 @@ DXCC %4 · Locator %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Câmp de sortare</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Principal: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

@@ -36,6 +36,9 @@ class PanadapterItem : public QQuickItem
     Q_PROPERTY(bool  spectrum3d           READ spectrum3d           WRITE setSpectrum3d           NOTIFY spectrum3dChanged)
     Q_PROPERTY(int   spectrum3dTraces     READ spectrum3dTraces     WRITE setSpectrum3dTraces     NOTIFY spectrum3dTracesChanged)
     Q_PROPERTY(float spectrum3dFloorDepth READ spectrum3dFloorDepth WRITE setSpectrum3dFloorDepth NOTIFY spectrum3dFloorDepthChanged)
+    // Quanta parte dello spettro la soglia automatica dichiara rumore.
+    // Percentile: 10 e' la taratura storica (1.0.495), alzarlo taglia di piu'.
+    Q_PROPERTY(int noiseFloorPercentile READ noiseFloorPercentile WRITE setNoiseFloorPercentile NOTIFY noiseFloorPercentileChanged)
     Q_PROPERTY(float peakDecay   READ peakDecay   WRITE setPeakDecay   NOTIFY peakDecayChanged)
     Q_PROPERTY(int   avgFrames   READ avgFrames   WRITE setAvgFrames   NOTIFY avgFramesChanged)
     Q_PROPERTY(int   spectrumHeight READ spectrumHeight WRITE setSpectrumHeight NOTIFY spectrumHeightChanged)
@@ -101,6 +104,7 @@ public:
     bool  requiresCpuSpectrumHistory() const;
     int   spectrum3dTraces()     const { return m_spectrum3dTraces; }
     float spectrum3dFloorDepth() const { return m_spectrum3dFloorDepth; }
+    int   noiseFloorPercentile() const { return m_noiseFloorPercentile; }
     float peakDecay()      const { return m_peakDecay; }
     int   avgFrames()      const { return m_avgFrames; }
     int   spectrumHeight() const { return m_spectrumH; }
@@ -148,6 +152,15 @@ public:
     void setSpectrum3dFloorDepth(float v) {
         float const clamped = qBound(0.0f, v, 40.0f);
         if (!qFuzzyCompare(m_spectrum3dFloorDepth, clamped)){m_spectrum3dFloorDepth=clamped;emit spectrum3dFloorDepthChanged();update();}
+    }
+    void setNoiseFloorPercentile(int v)
+    {
+        int const clamped = qBound(5, v, 40);
+        if (m_noiseFloorPercentile != clamped) {
+            m_noiseFloorPercentile = clamped;
+            emit noiseFloorPercentileChanged();
+            update();
+        }
     }
     void setPeakDecay(float v)     { if (m_peakDecay!=v){m_peakDecay=v;emit peakDecayChanged();} }
     void setAvgFrames(int v)       { if (m_avgFrames!=v){m_avgFrames=qBound(1,v,32);emit avgFramesChanged();} }
@@ -217,6 +230,7 @@ signals:
     void spectrum3dChanged();
     void spectrum3dTracesChanged();
     void spectrum3dFloorDepthChanged();
+    void noiseFloorPercentileChanged();
     void peakDecayChanged();
     void avgFramesChanged();
     void spectrumHeightChanged();
@@ -388,6 +402,7 @@ private:
     bool  m_spectrum3d   = false;   // opt-in: costa vertici, non si accende da sola
     int   m_spectrum3dTraces = 28;  // tracce di storia disegnate
     float m_spectrum3dFloorDepth = 6.0f; // dB sopra il minimo sotto cui la traccia e' piatta
+    int   m_noiseFloorPercentile = 10;   // taratura della 1.0.495
     // Su quanti dB si misura l'altezza della cresta. NON e' l'ampiezza
     // della finestra dei colori: con la soglia di rumore automatica quella
     // si ancora al rumore e sale di 80 dB, dove non c'e' nulla, e i segnali

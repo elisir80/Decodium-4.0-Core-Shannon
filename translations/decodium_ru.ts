@@ -6329,6 +6329,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Подтверждено</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Совпавший квадрат VUCC: %1 · Основной: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>Квадраты VUCC: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24411,6 +24423,22 @@ Long-press: edit message</source>
         <source>Satellite:</source>
         <translation>Спутник:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Вырезать</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Вставить</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Выделить всё</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24662,6 +24690,14 @@ Click MONITOR to start</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Срез:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>Какую часть спектра автоматический порог считает шумом и срезает. 10 — историческая настройка: поднимите, чтобы очистить пустой диапазон, опустите, если пропадают слабые сигналы.</translation>
     </message>
 </context>
 <context>
@@ -27761,6 +27797,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Поле сортировки</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Основной: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

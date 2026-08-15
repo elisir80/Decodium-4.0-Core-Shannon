@@ -2442,7 +2442,7 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
         // Decimo percentile e smorzamento lento, come dalla 1.0.495: col
         // venticinquesimo un quarto dello spettro veniva dichiarato rumore
         // e tagliato, e il filtro interveniva in modo drastico.
-        float const fl = s[qBound(0, n * 10 / 100, n - 1)];
+        float const fl = s[qBound(0, n * m_noiseFloorPercentile / 100, n - 1)];
         bool const resetFloor = !std::isfinite(m_measuredFloor)
             || m_measuredFloor < -120.0f
             || std::abs(m_measuredFloor - fl) > 35.0f;

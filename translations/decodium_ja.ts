@@ -6327,6 +6327,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>確認済み</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>一致した VUCC グリッド: %1 · 主: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>VUCC グリッド: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24398,6 +24410,22 @@ Long-press: edit message</source>
         <source>Satellite:</source>
         <translation>衛星:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>コピー</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>切り取り</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>貼り付け</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>すべて選択</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24649,6 +24677,14 @@ MONITOR をクリックして開始</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>カット:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>自動しきい値がノイズとみなして切り捨てるスペクトルの割合です。10 が従来の設定です。空いたバンドを整理するには上げ、弱い信号が消えるようなら下げてください。</translation>
     </message>
 </context>
 <context>
@@ -27727,6 +27763,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>並び替えの項目</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>主: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>

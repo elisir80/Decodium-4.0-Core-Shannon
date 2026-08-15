@@ -6326,6 +6326,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>已确认</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>匹配的 VUCC 网格：%1 · 主要：%2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>VUCC 网格：%1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24397,6 +24409,22 @@ Long-press: edit message</source>
         <source>Satellite:</source>
         <translation>卫星：</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>复制</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>剪切</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>粘贴</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>全选</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24648,6 +24676,14 @@ Click MONITOR to start</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>裁切：</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>自动门限把多大比例的频谱当作噪声并裁掉。10 是历史设置：波段空旷时调高以清理画面，弱信号消失时调低。</translation>
     </message>
 </context>
 <context>
@@ -27727,6 +27763,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>排序字段</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>主要：%1
+VUCC：%2</translation>
     </message>
 </context>
 <context>

@@ -6327,6 +6327,18 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>Es</source>
         <translation>Es</translation>
     </message>
+    <message>
+        <source>Corroborated</source>
+        <translation>Megerősítve</translation>
+    </message>
+    <message>
+        <source>Matched VUCC grid: %1 · Primary: %2</source>
+        <translation>Egyező VUCC-lokátor: %1 · Elsődleges: %2</translation>
+    </message>
+    <message>
+        <source>VUCC grids: %1</source>
+        <translation>VUCC-lokátorok: %1</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -24267,6 +24279,22 @@ Hosszú nyomás: üzenet szerkesztése</translation>
         <source>Satellite:</source>
         <translation>Műhold:</translation>
     </message>
+    <message>
+        <source>Copy</source>
+        <translation>Másolás</translation>
+    </message>
+    <message>
+        <source>Cut</source>
+        <translation>Kivágás</translation>
+    </message>
+    <message>
+        <source>Paste</source>
+        <translation>Beillesztés</translation>
+    </message>
+    <message>
+        <source>Select All</source>
+        <translation>Összes kijelölése</translation>
+    </message>
 </context>
 <context>
     <name>UpdateDialog</name>
@@ -24518,6 +24546,14 @@ Kattintson a MONITOR gombra a kezdéshez</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/Waterfall.qml" line="2033"/>
         <source>⠿</source>
         <translation>⠿</translation>
+    </message>
+    <message>
+        <source>Cut:</source>
+        <translation>Vágás:</translation>
+    </message>
+    <message>
+        <source>How much of the spectrum the automatic threshold calls noise and cuts away. 10 is the historical setting: raise it to clean up an empty band, lower it if weak signals disappear.</source>
+        <translation>A spektrum mekkora részét tekinti zajnak az automatikus küszöb, és vágja le. A 10 a régi beállítás: emelje, ha üres sávot akar tisztítani, csökkentse, ha eltűnnek a gyenge jelek.</translation>
     </message>
 </context>
 <context>
@@ -27593,6 +27629,12 @@ DXCC %4 · Grid %5 · WPX %6</translation>
     <message>
         <source>Sort field</source>
         <translation>Rendezési mező</translation>
+    </message>
+    <message>
+        <source>Primary: %1
+VUCC: %2</source>
+        <translation>Elsődleges: %1
+VUCC: %2</translation>
     </message>
 </context>
 <context>
