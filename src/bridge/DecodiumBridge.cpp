@@ -17410,7 +17410,10 @@ void DecodiumBridge::clearLegacyPttTransition(const QString& reason)
 void DecodiumBridge::requestLegacyPttOffOnce(const QString& reason)
 {
     bool const rigStillReportsPtt = activeCatReportsPttActive();
-    if (m_pttOffSentForTransition) {
+    // Un comando di sgancio in piu' non costa nulla; una radio che resta in
+    // aria costa moltissimo. Il doppione si scarta solo finche' non c'e'
+    // dubbio: se la radio dice ancora di trasmettere, si sgancia e basta.
+    if (m_pttOffSentForTransition && !rigStillReportsPtt) {
         bridgeLog(QStringLiteral("PTT OFF deduplicated (%1)").arg(reason));
         return;
     }
@@ -20636,6 +20639,13 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     phaseTimer.restart();
     syncActiveCatTxSplitFrequency(QStringLiteral("legacyBridgeTxAudio"));
     syncMs = phaseTimer.elapsed();
+
+    // Il blocco anti-duplicato dello sgancio vale per UNA trasmissione.
+    // Azzerarlo nella sola beginLegacyPttTransition, che e' compilata
+    // soltanto su macOS, lasciava la radio in aria dalla seconda
+    // trasmissione in poi: ogni PTT OFF successivo veniva scartato come
+    // doppione e nessuno comandava piu' lo sgancio.
+    m_pttOffSentForTransition = false;
 
     if (!m_transmitting) {
         m_transmitting = true;
