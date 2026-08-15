@@ -580,7 +580,12 @@ Rectangle {
         if (column === "eQSL age") return row.eqslAgeDays >= 0 ? "eQSL " + row.eqslAgeDays + "d" : ""
         if (column === "OQRS") return row.oqrs ? "OQRS" : ""
         if (column === "Age") return row.ageMinutes >= 0 ? row.ageMinutes + "m" : ""
-        if (column === "Source") return row.source || ""
+        if (column === "Source") {
+            var sourceText = row.sourceSummary || row.source || ""
+            return Number(row.sourceCount || 1) > 1
+                ? (row.corroborationLevel || qsTr("Corroborated")) + ": " + sourceText
+                : sourceText
+        }
         return ""
     }
 
@@ -599,6 +604,10 @@ Rectangle {
             var value = rosterColumnValue(row, columns[index])
             if (value.length > 0)
                 values.push(value)
+        }
+        if (Number(row.sourceCount || 1) > 1
+                && columns.indexOf("Source") < 0) {
+            values.push("✓ " + (row.sourceSummary || row.source || ""))
         }
         return values.join("  ·  ")
     }
@@ -1901,7 +1910,13 @@ Rectangle {
                                                     .arg(modelData.band || "-")
                                                     .arg(modelData.mode || "-")
                                                     .arg(modelData.snr)
-                                                    .arg(modelData.source || "")
+                                                    .arg(Number(modelData.sourceCount || 1) > 1
+                                                         ? (modelData.corroborationLevel
+                                                            || qsTr("Corroborated")) + ": "
+                                                           + (modelData.sourceSummary
+                                                              || modelData.source || "")
+                                                         : (modelData.sourceSummary
+                                                            || modelData.source || ""))
                                                     .arg(modelData.gridEvidence || qsTr("Station locator"))
                                                 color: root.textSecondary
                                                 font.pixelSize: 9
@@ -1970,7 +1985,8 @@ Rectangle {
                                     required property var modelData
                                     required property int index
                                     width: gridHistoryList.width
-                                    height: 56
+                                    height: modelData.vuccGrids
+                                            && modelData.vuccGrids.length > 0 ? 70 : 56
                                     radius: 3
                                     color: modelData.confirmed
                                         ? "#142a22"
@@ -2007,6 +2023,20 @@ Rectangle {
                                                     .arg(modelData.source || "")
                                                 color: root.textSecondary
                                                 font.pixelSize: 9
+                                                elide: Text.ElideRight
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                visible: modelData.vuccGrids
+                                                         && modelData.vuccGrids.length > 0
+                                                text: modelData.matchedGridIsPrimary
+                                                    ? qsTr("VUCC grids: %1")
+                                                          .arg(modelData.vuccGrids.join(", "))
+                                                    : qsTr("Matched VUCC grid: %1 · Primary: %2")
+                                                          .arg(modelData.matchedGrid || "-")
+                                                          .arg(modelData.grid || "-")
+                                                color: root.secondaryCyan
+                                                font.pixelSize: 8
                                                 elide: Text.ElideRight
                                             }
                                         }

@@ -34,6 +34,7 @@ ApplicationWindow {
     property int floatingGeometryInteractionDepth: 0
     property bool deferredWindowStateSave: false
     readonly property bool txVisualActive: !!(bridge && (bridge.transmitting || bridge.tuning))
+    readonly property bool txPttPending: !!(bridge && bridge.pttPending && !bridge.pttConfirmed)
     // Build the expensive visual surfaces after the first interactive frame on
     // every platform.  The Waterfall loader also owns PanadapterItem, so this
     // defers palette/scene-graph setup together with the visual itself.
@@ -4335,8 +4336,10 @@ ApplicationWindow {
                     width: bridge.catConnected ? 340 : 290
                     height: 74
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
-                    border.color: bridge.catConnected ? accentGreen : glassBorder
-                    border.width: bridge.catConnected ? 2 : 1
+                    border.color: mainWindow.txVisualActive ? bridge.themeManager.ledRed
+                                  : (mainWindow.txPttPending ? bridge.themeManager.warningColor
+                                     : (bridge.catConnected ? accentGreen : glassBorder))
+                    border.width: (mainWindow.txVisualActive || mainWindow.txPttPending || bridge.catConnected) ? 2 : 1
                     radius: 6
 
                     Behavior on width { NumberAnimation { duration: 200 } }
@@ -4383,7 +4386,9 @@ ApplicationWindow {
                                         required property var modelData
                                         readonly property bool digitCell: !!modelData.digit
                                         readonly property int stepHz: Number(modelData.stepHz || 0)
-                                        readonly property color baseDigitColor: mainWindow.txVisualActive ? "#ff6b6b" : accentGreen
+                                        readonly property color baseDigitColor: mainWindow.txVisualActive ? "#ff6b6b"
+                                                                           : (mainWindow.txPttPending ? bridge.themeManager.warningColor
+                                                                                                      : accentGreen)
                                         width: digitCell ? Math.round(16 * fs) : Math.round(8 * fs)
                                         height: frequencyDisplay.digitHeight
                                         radius: 2
@@ -4487,7 +4492,8 @@ ApplicationWindow {
                                 text: "TX:"
                                 font.pixelSize: 10
                                 font.bold: true
-                                color: mainWindow.txVisualActive ? bridge.themeManager.ledRed : textSecondary
+                                color: mainWindow.txVisualActive ? bridge.themeManager.ledRed
+                                       : (mainWindow.txPttPending ? bridge.themeManager.warningColor : textSecondary)
                             }
                             // TX frequency - click to edit
                             Rectangle {
@@ -4737,6 +4743,17 @@ ApplicationWindow {
                             OpacityAnimator { to: 1.0; duration: 250 }
                             OpacityAnimator { to: 0.3; duration: 250 }
                         }
+                    }
+
+                    // PTT command sent, waiting for positive rig feedback.
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 6
+                        color: "transparent"
+                        border.color: bridge.themeManager.warningColor
+                        border.width: 2
+                        visible: mainWindow.txPttPending
+                        opacity: 0.85
                     }
                 }
 
@@ -10585,6 +10602,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             signalLevel: bridge ? bridge.sMeter : 0.0
             monitoring: bridge ? bridge.monitoring : false
             transmitting: bridge ? bridge.transmitting : false
+            pttPending: bridge ? (bridge.pttPending && !bridge.pttConfirmed) : false
             tuning: bridge ? bridge.tuning : false
             decoding: bridge ? bridge.decoding : false
             catStatus: bridge && bridge.catConnected ? "Connected" : "Disconnected"

@@ -150,6 +150,128 @@ private slots:
         QSqlDatabase::removeDatabase(connectionName);
     }
 
+    void importsVuccGridsIntoCoverageAwardsHistoryAndSearch()
+    {
+        QTemporaryDir tempDir;
+        QVERIFY(tempDir.isValid());
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, tempDir.path());
+        QString const adifPath = tempDir.filePath(QStringLiteral("vucc.adi"));
+        QString const databasePath = tempDir.filePath(QStringLiteral("vucc.sqlite"));
+        QFile file(adifPath);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("Decodium ADIF\n<EOH>\n");
+        file.write(field("CALL", "VUCC1")
+                   + field("GRIDSQUARE", "FN20aa")
+                   + field("VUCC_GRIDS", "FN20,FN21aa,FN22,INVALID,FN21aa")
+                   + field("QSO_DATE", "20260728")
+                   + field("TIME_ON", "120000")
+                   + field("BAND", "6m")
+                   + field("MODE", "FT8")
+                   + field("QSL_RCVD", "Y")
+                   + "<EOR>\n");
+        file.write(field("CALL", "VUCC2")
+                   + field("VUCC_GRIDS", "JN70,JN71aa")
+                   + field("QSO_DATE", "20260728")
+                   + field("TIME_ON", "120100")
+                   + field("BAND", "2m")
+                   + field("MODE", "FT8")
+                   + "<EOR>\n");
+        file.close();
+
+        MapIntelligenceService service(nullptr, databasePath);
+        service.reloadFromAdif(adifPath);
+        QTRY_COMPARE_WITH_TIMEOUT(service.qsoCount(), 2, 5000);
+        QTRY_COMPARE_WITH_TIMEOUT(
+            service.statistics().value(QStringLiteral("grids")).toInt(), 5, 5000);
+
+        QSet<QString> coverageGrids;
+        for (QVariant const& value : service.coverageCells()) {
+            coverageGrids.insert(value.toMap().value(QStringLiteral("grid")).toString());
+        }
+        for (QString const& grid : {QStringLiteral("FN20"), QStringLiteral("FN21"),
+                                    QStringLiteral("FN22"), QStringLiteral("JN70"),
+                                    QStringLiteral("JN71")}) {
+            QVERIFY2(coverageGrids.contains(grid), qPrintable(grid));
+        }
+
+        auto awardByLabel = [&service](QString const& label) {
+            for (QVariant const& value : service.awards()) {
+                QVariantMap const award = value.toMap();
+                if (award.value(QStringLiteral("label")).toString() == label) {
+                    return award;
+                }
+            }
+            return QVariantMap {};
+        };
+        QTRY_COMPARE_WITH_TIMEOUT(
+            awardByLabel(QStringLiteral("Maidenhead"))
+                .value(QStringLiteral("worked")).toInt(), 5, 5000);
+        QCOMPARE(awardByLabel(QStringLiteral("Maidenhead"))
+                     .value(QStringLiteral("confirmed")).toInt(), 3);
+
+        QString vucc6mProgram;
+        for (QString const& program : service.availableAwardPrograms()) {
+            if (program.contains(QStringLiteral("Century Club 6m"),
+                                 Qt::CaseInsensitive)) {
+                vucc6mProgram = program;
+                break;
+            }
+        }
+        QVERIFY(!vucc6mProgram.isEmpty());
+        service.setActiveAwardProgram(vucc6mProgram);
+        QTRY_COMPARE_WITH_TIMEOUT(
+            awardByLabel(vucc6mProgram).value(QStringLiteral("worked")).toInt(),
+            3, 5000);
+
+        service.selectGrid(QStringLiteral("FN21"));
+        QTRY_VERIFY_WITH_TIMEOUT(!service.gridDetailsLoading(), 5000);
+        QCOMPARE(service.selectedGridQsos().size(), 1);
+        QVariantMap const history = service.selectedGridQsos().first().toMap();
+        QCOMPARE(history.value(QStringLiteral("grid")).toString(),
+                 QStringLiteral("FN20AA"));
+        QCOMPARE(history.value(QStringLiteral("matchedGrid")).toString(),
+                 QStringLiteral("FN21AA"));
+        QVERIFY(!history.value(QStringLiteral("matchedGridIsPrimary")).toBool());
+        QVERIFY(history.value(QStringLiteral("vuccGrids")).toStringList()
+                    .contains(QStringLiteral("FN22")));
+
+        service.selectGrid(QStringLiteral("JN70"));
+        QTRY_VERIFY_WITH_TIMEOUT(!service.gridDetailsLoading(), 5000);
+        QCOMPARE(service.selectedGridQsos().first().toMap()
+                     .value(QStringLiteral("grid")).toString(),
+                 QStringLiteral("JN70"));
+
+        auto* operations =
+            qobject_cast<MapOperationsService*>(service.operationsService());
+        QVERIFY(operations);
+        QTRY_COMPARE_WITH_TIMEOUT(
+            operations->scorecard().value(QStringLiteral("grids")).toInt(), 5, 5000);
+        operations->setLogbookSearch(QStringLiteral("JN71AA"));
+        QTRY_COMPARE_WITH_TIMEOUT(operations->logbookTotal(), 1, 5000);
+        QVariantMap const searchRow = operations->logbookRows().first().toMap();
+        QCOMPARE(searchRow.value(QStringLiteral("grid")).toString(),
+                 QStringLiteral("JN70"));
+        QVERIFY(searchRow.value(QStringLiteral("vuccGrids")).toStringList()
+                    .contains(QStringLiteral("JN71AA")));
+
+        QVERIFY(databaseHasIndex(databasePath,
+                                 QStringLiteral("idx_map_qso_grid_grid4")));
+        QString const connectionName = QStringLiteral("vucc_grid_count_%1")
+            .arg(QUuid::createUuid().toString(QUuid::WithoutBraces));
+        {
+            QSqlDatabase database = QSqlDatabase::addDatabase(
+                QStringLiteral("QSQLITE"), connectionName);
+            database.setDatabaseName(databasePath);
+            QVERIFY(database.open());
+            QSqlQuery count(database);
+            QVERIFY(count.exec(QStringLiteral("SELECT COUNT(*) FROM map_qso_grid")));
+            QVERIFY(count.next());
+            QCOMPARE(count.value(0).toInt(), 5);
+            database.close();
+        }
+        QSqlDatabase::removeDatabase(connectionName);
+    }
+
     void persistsIndexesFiltersAndLiveRoster()
     {
         QTemporaryDir tempDir;
@@ -1857,6 +1979,24 @@ private slots:
         service.setSpotCorrelationFilter(QStringLiteral("Correlated"));
         QTRY_VERIFY_WITH_TIMEOUT(service.liveSpotCount() >= 1, 5000);
         service.setSpotCorrelationFilter(QStringLiteral("All"));
+
+        auto corroboratedRosterRow = [&service]() {
+            for (QVariant const& value : service.roster()) {
+                QVariantMap const row = value.toMap();
+                if (row.value(QStringLiteral("call")).toString()
+                    == QStringLiteral("MQTT1")) {
+                    return row;
+                }
+            }
+            return QVariantMap {};
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(
+            corroboratedRosterRow().value(QStringLiteral("sourceCount")).toInt() >= 2,
+            5000);
+        QVERIFY(corroboratedRosterRow().value(QStringLiteral("sourceSummary"))
+                    .toString().contains(QStringLiteral("Local decode")));
+        QCOMPARE(corroboratedRosterRow().value(QStringLiteral("corroborationLevel"))
+                     .toString(), QStringLiteral("Corroborated"));
 
         service.setRosterRule(QStringLiteral("CALL"), QStringLiteral("MQTT1"),
                               QStringLiteral("WATCH"), QStringLiteral("20m"),

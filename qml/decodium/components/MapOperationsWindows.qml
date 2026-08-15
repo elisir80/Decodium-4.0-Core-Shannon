@@ -114,11 +114,15 @@ Item {
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: qsTr("%1  %2  %3 dB  %4")
+                            text: qsTr("%1  %2  %3 dB  %4  %5")
                                 .arg(modelData.band || "—")
                                 .arg(modelData.mode || "—")
                                 .arg(modelData.snr || 0)
                                 .arg(modelData.dxcc || "")
+                                .arg(Number(modelData.sourceCount || 1) > 1
+                                     ? "✓ " + (modelData.sourceSummary || "")
+                                     : (modelData.sourceSummary
+                                        || modelData.source || ""))
                             color: root.mutedColor
                             font.pixelSize: 9
                             elide: Text.ElideRight

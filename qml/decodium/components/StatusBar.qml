@@ -78,6 +78,7 @@ Rectangle {
             : 0.0)
     property bool monitoring: false
     property bool transmitting: false
+    property bool pttPending: false
     property bool tuning: false
     property bool decoding: false
     readonly property bool txVisualActive: transmitting || tuning
@@ -254,18 +255,21 @@ Rectangle {
 
             // TX indicator
             Rectangle {
-                width: 30
+                width: pttPending ? 34 : 30
                 height: 18
                 radius: 9
-                color: txVisualActive ? Qt.rgba(244/255, 67/255, 54/255, 0.4) : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
-                border.color: txVisualActive ? colorRed : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2)
+                color: txVisualActive ? Qt.rgba(244/255, 67/255, 54/255, 0.4)
+                       : (pttPending ? Qt.rgba(colorOrange.r, colorOrange.g, colorOrange.b, 0.28)
+                                     : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1))
+                border.color: txVisualActive ? colorRed
+                              : (pttPending ? colorOrange : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.2))
 
                 Text {
                     anchors.centerIn: parent
-                    text: "TX"
+                    text: pttPending ? "PTT" : "TX"
                     font.pixelSize: 9
                     font.bold: true
-                    color: txVisualActive ? colorRed : textSecondary
+                    color: txVisualActive ? colorRed : (pttPending ? colorOrange : textSecondary)
                 }
             }
 

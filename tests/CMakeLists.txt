@@ -68,6 +68,10 @@ add_executable (test_tx_pipeline test_tx_pipeline.cpp)
 target_link_libraries (test_tx_pipeline wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_tx_pipeline COMMAND $<TARGET_FILE:test_tx_pipeline>)
 
+add_executable (test_ptt_transition_policy test_ptt_transition_policy.cpp)
+target_link_libraries (test_ptt_transition_policy Qt6::Test Qt6::Core)
+add_test (NAME test_ptt_transition_policy COMMAND $<TARGET_FILE:test_ptt_transition_policy>)
+
 add_executable (test_audio_sink_tx_gate
   test_audio_sink_tx_gate.cpp
   ../Audio/AudioDevice.cpp
