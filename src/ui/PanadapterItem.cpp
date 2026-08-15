@@ -2439,13 +2439,16 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
             return;
         std::sort(s.begin(), s.end());
         int const n = s.size();
-        float const fl = s[qBound(0, n * 25 / 100, n - 1)];
+        // Decimo percentile e smorzamento lento, come dalla 1.0.495: col
+        // venticinquesimo un quarto dello spettro veniva dichiarato rumore
+        // e tagliato, e il filtro interveniva in modo drastico.
+        float const fl = s[qBound(0, n * 10 / 100, n - 1)];
         bool const resetFloor = !std::isfinite(m_measuredFloor)
             || m_measuredFloor < -120.0f
             || std::abs(m_measuredFloor - fl) > 35.0f;
         m_measuredFloor = resetFloor
             ? fl
-            : (0.08f * fl + 0.92f * m_measuredFloor);
+            : (0.03f * fl + 0.97f * m_measuredFloor);
         m_measuredPeak = m_measuredFloor + 80.0f;
         m_minDb = m_measuredFloor;
         m_maxDb = m_measuredPeak;
