@@ -107,7 +107,7 @@ SettingsPageScroll {
             color: bridge.webServerRunning() ? accentGreen : textSecondary
             font.pixelSize: 12
             font.family: decodiumMonoFontFamily
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.fillWidth: true
         }
 
@@ -116,7 +116,7 @@ SettingsPageScroll {
             // PWA remote: apre l'URL locale autenticato in browser.
             text: qsTr("📱 Open Remote for iPad")
             enabled: bridge.webServerRunning()
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             onClicked: {
                 var url = bridge.webServerQrUrl()
                 if (url) Qt.openUrlExternally(url)

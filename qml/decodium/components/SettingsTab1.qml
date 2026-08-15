@@ -155,7 +155,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Backend:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Row {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 6
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 6
             Repeater {
                 model: [["native",qsTr("Native (15 radios)")],["hamlib",qsTr("Hamlib (300+ radios)")],["tci","TCI"],["omnirig","OmniRig"],["cat4om","Cat4OM"]]
                 delegate: Rectangle {
@@ -181,7 +181,7 @@ SettingsPageScroll {
         Text { text: qsTr("Profile:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         RowLayout {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 6
 
             DecoComboBox {
@@ -301,7 +301,7 @@ SettingsPageScroll {
         // ── Stato connessione ──
         Text { text: qsTr("Status:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Row {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 8
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 8
             Rectangle { width: 12; height: 12; radius: 6; color: bridge.catConnected ? accentGreen : "#f44336"; anchors.verticalCenter: parent.verticalCenter }
             Text { text: bridge.catConnected ? qsTr("Connected") + " — " + bridge.catRigName + " — " + bridge.catMode : qsTr("Disconnected"); color: bridge.catConnected ? accentGreen : "#f44336"; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
             Item { width: 20; height: 1 }
@@ -337,7 +337,7 @@ SettingsPageScroll {
         Button {
             id: detectRigButton
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             implicitHeight: controlHeight
             text: "🔍  " + qsTr("Detect my radio")
             ToolTip.visible: hovered
@@ -368,7 +368,7 @@ SettingsPageScroll {
         DecoComboBox {
             id: rigCombo
             visible: !dialog.usesCat4OmControls()
-            model: bridge.catBackend === "tci" ? ["TCI Client RX1", "TCI Client RX2"] : (bridge.catManager ? bridge.catManager.rigList : []); Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
+            model: bridge.catBackend === "tci" ? ["TCI Client RX1", "TCI Client RX2"] : (bridge.catManager ? bridge.catManager.rigList : []); Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             property string filterText: ""
             property var filteredRigList: {
@@ -523,7 +523,7 @@ SettingsPageScroll {
         DecoTextField {
             visible: dialog.usesCat4OmControls()
             text: dialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.managementEndpoint : ""
-            Layout.fillWidth: true; Layout.columnSpan: 3
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth; implicitHeight: controlHeight
             placeholderText: "127.0.0.1:5000"
             color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
@@ -543,7 +543,7 @@ SettingsPageScroll {
         DecoTextField {
             visible: dialog.usesCat4OmControls()
             text: dialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.controlEndpoint : ""
-            Layout.fillWidth: true; Layout.columnSpan: 3
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth; implicitHeight: controlHeight
             placeholderText: "127.0.0.1:5001"
             color: textPrimary; font.pixelSize: controlFontSize; leftPadding: 8
@@ -564,7 +564,7 @@ SettingsPageScroll {
             id: cat4OmGroupCombo
             visible: dialog.usesCat4OmControls()
             model: dialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.groupList : []
-            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); implicitHeight: controlHeight
             currentIndex: dialog.usesCat4OmControls() && bridge.catManager ? find(bridge.catManager.groupId) : -1
             onActivated: {
                 if (bridge.catManager) bridge.catManager.groupId = currentText
@@ -590,7 +590,7 @@ SettingsPageScroll {
             id: cat4OmRadioCombo
             visible: dialog.usesCat4OmControls()
             model: dialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.radioList : []
-            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); implicitHeight: controlHeight
             currentIndex: dialog.usesCat4OmControls() && bridge.catManager ? find(bridge.catManager.radioId) : -1
             onActivated: {
                 if (bridge.catManager) bridge.catManager.radioId = currentText
@@ -614,7 +614,7 @@ SettingsPageScroll {
         }
         RowLayout {
             visible: dialog.usesCat4OmControls()
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 12
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 12
             CheckBox {
                 checked: dialog.usesCat4OmControls() && bridge.catManager ? bridge.catManager.autoRequestOwnership : true
                 text: qsTr("Request control automatically")
@@ -751,7 +751,7 @@ SettingsPageScroll {
             id: civAddrField
             visible: dialog.usesSerialControls() && dialog.rigIsIcom()
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             property bool invalidAddress: false
@@ -809,7 +809,7 @@ SettingsPageScroll {
             visible: dialog.usesNetworkControls()
             text: bridge.catManager ? bridge.catManager.networkPort : ""
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             leftPadding: 8
@@ -837,7 +837,7 @@ SettingsPageScroll {
             checked: bridge.catManager ? bridge.catManager.hrdStrictRadioMatch : true
             text: qsTr("Strict match (abort if configured radio is not current in HRD)")
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             onCheckedChanged: {
                 if (bridge.catManager && bridge.catManager.hrdStrictRadioMatch !== checked) {
                     bridge.catManager.hrdStrictRadioMatch = checked
@@ -864,7 +864,7 @@ SettingsPageScroll {
             visible: dialog.usesTciControls()
             text: bridge.catManager ? bridge.catManager.tciPort : ""
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             leftPadding: 8
@@ -891,7 +891,7 @@ SettingsPageScroll {
             checked: bridge.catManager ? bridge.catManager.tciAudioEnabled : true
             text: qsTr("RX/TX via TCI")
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             onCheckedChanged: {
                 if (bridge.catManager) bridge.catManager.tciAudioEnabled = checked
                 dialog.scheduleCatPersist()
@@ -919,7 +919,7 @@ SettingsPageScroll {
         RowLayout {
             visible: dialog.usesTciControls()
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 8
             Slider {
                 id: tciRxGainSlider
@@ -1029,7 +1029,7 @@ SettingsPageScroll {
             id: pollSpin
             visible: !dialog.usesCat4OmControls()
             from: 1; to: 99; value: bridge.catManager ? bridge.catManager.pollInterval : 3; editable: true
-            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.columnSpan: 3
+            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             onValueChanged: {
                 if (bridge.catManager) bridge.catManager.pollInterval = value
                 dialog.scheduleCatPersist()
@@ -1050,7 +1050,7 @@ SettingsPageScroll {
             checked: bridge.catManager ? bridge.catManager.catKeepAlive : false
             text: qsTr("Light polling for interface activity LEDs")
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             onCheckedChanged: {
                 if (bridge.catManager && bridge.catManager.catKeepAlive !== checked)
                     bridge.catManager.catKeepAlive = checked
@@ -1428,7 +1428,7 @@ SettingsPageScroll {
         Item { Layout.preferredWidth: 100 }
         Rectangle {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             implicitHeight: controlHeight
             radius: 6
             color: secondInstanceMA.containsMouse ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.25) : bgMedium
@@ -1584,7 +1584,7 @@ SettingsPageScroll {
         DecoComboBox {
             enabled: dialog.supportsSwrTelemetry()
             model: ["2.0","2.5","3.0","3.5","4.0"]
-            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); implicitHeight: controlHeight
             currentIndex: Math.max(0, model.indexOf(Number(bridge.getSetting("SWRStopThreshold", 2.5)).toFixed(1)))
             onActivated: bridge.setSetting("SWRStopThreshold", Number(currentText))
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
@@ -1593,7 +1593,7 @@ SettingsPageScroll {
 
         Text { text: ""; Layout.preferredWidth: 100 }
         RowLayout {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 10
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 10
             Rectangle {
                 property bool catBusy: dialog.catConnectionInProgress()
                 width: 100; height: controlHeight; radius: 4
@@ -1621,7 +1621,7 @@ SettingsPageScroll {
         RowLayout {
             visible: bridge.catBackend === "hamlib"
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 10
             Rectangle {
                 width: 180; height: controlHeight; radius: 4
@@ -1705,7 +1705,7 @@ SettingsPageScroll {
         Text { text: ""; Layout.preferredWidth: 100 }
         RowLayout {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 10
 
             Rectangle {

@@ -343,7 +343,7 @@ SettingsPageScroll {
         }
         RowLayout {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 10
             Slider {
                 id: decodeColorBoostSlider
@@ -476,7 +476,7 @@ SettingsPageScroll {
         Text { text: qsTr("Palette:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoComboBox {
             id: paletteCombo
-            model: ["SDR Classic","Raptor Green","Grayscale","SmartSDR","Hot (SDR#)","deskHPSDR","Aether Default","Aether BlueGreen","Aether Fire","Aether Plasma","FlexRadio"]; Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
+            model: ["SDR Classic","Raptor Green","Grayscale","SmartSDR","Hot (SDR#)","deskHPSDR","Aether Default","Aether BlueGreen","Aether Fire","Aether Plasma","FlexRadio"]; Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: Math.max(1, pageColumns - 1)
             currentIndex: Math.max(0, bridge.uiPaletteIndex)
             onActivated: {
                 bridge.uiPaletteIndex = currentIndex
@@ -491,19 +491,19 @@ SettingsPageScroll {
 
         Text { text: qsTr("Black Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Slider {
-            from: 0; to: 100; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallBlackLevel", 15)); Layout.fillWidth: true; Layout.columnSpan: 3
+            from: 0; to: 100; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallBlackLevel", 15)); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             onValueChanged: bridge.setSetting("uiWaterfallBlackLevel", value)
         }
 
         Text { text: qsTr("Color Gain:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Slider {
-            from: 0; to: 100; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallColorGain", 50)); Layout.fillWidth: true; Layout.columnSpan: 3
+            from: 0; to: 100; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallColorGain", 50)); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             onValueChanged: bridge.setSetting("uiWaterfallColorGain", value)
         }
 
         Text { text: qsTr("Contrast:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Slider {
-            from: 10; to: 150; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallContrast", 80)); Layout.fillWidth: true; Layout.columnSpan: 3
+            from: 10; to: 150; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallContrast", 80)); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             onValueChanged: bridge.setSetting("uiWaterfallContrast", value)
         }
 

@@ -105,7 +105,7 @@ SettingsPageScroll {
         }
         RowLayout {
             id: dxpAccentRow
-            Layout.columnSpan: 3; Layout.fillWidth: true
+            Layout.columnSpan: Math.max(1, pageColumns - 1); Layout.fillWidth: true
             spacing: 8
             visible: bridge.themeManager.currentTheme === "Darkcodium"
             readonly property var accents: [
@@ -142,7 +142,7 @@ SettingsPageScroll {
         }
         RowLayout {
             id: dxpDensityRow
-            Layout.columnSpan: 3; Layout.fillWidth: true
+            Layout.columnSpan: Math.max(1, pageColumns - 1); Layout.fillWidth: true
             spacing: 0
             visible: bridge.themeManager.currentTheme === "Darkcodium"
             readonly property var densities: ["compact", "regular", "comfy"]

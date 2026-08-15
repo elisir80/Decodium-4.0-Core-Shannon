@@ -146,7 +146,7 @@ SettingsPageScroll {
             id: audioInDevCombo
             model: bridge.audioInputDevices
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             currentIndex: dialog.stringListIndexOf(bridge.audioInputDevices, bridge.audioInputDevice)
@@ -188,7 +188,7 @@ SettingsPageScroll {
             id: audioOutDevCombo
             model: bridge.audioOutputDevices
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             currentIndex: dialog.stringListIndexOf(bridge.audioOutputDevices, bridge.audioOutputDevice)
@@ -275,7 +275,7 @@ SettingsPageScroll {
             model: bridge.rtlSdrDevices
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             currentIndex: Math.max(0, Math.min(bridge.rtlSdrDevices.length - 1, bridge.getSetting("RtlSdrDeviceIndex", 0)))
@@ -551,7 +551,7 @@ SettingsPageScroll {
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
                      && rtlDemodCombo.currentIndex !== 0
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             Layout.minimumWidth: wideFieldMinWidth
             implicitHeight: controlHeight
             currentIndex: {
@@ -586,7 +586,7 @@ SettingsPageScroll {
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && !rtlFollowDialCheck.checked
             Layout.fillWidth: true
             implicitHeight: controlHeight
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             validator: IntValidator {
                 bottom: rtlModeCombo.currentIndex === 1 ? 500000 : 100000
                 top: rtlModeCombo.currentIndex === 1 ? 24000000 : 1766000000
@@ -738,7 +738,7 @@ SettingsPageScroll {
             model: ["1.8 kHz", "2.4 kHz", "3.0 kHz", "3.5 kHz", "4.0 kHz"]
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             implicitHeight: controlHeight
             currentIndex: Math.max(0, bandwidthValues.indexOf(
                 Number(bridge.getSetting("RtlSdrSsbVoiceBandwidthHz", 3500))))
@@ -771,7 +771,7 @@ SettingsPageScroll {
             model: [qsTr("Off"), qsTr("Slow"), qsTr("Medium")]
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             implicitHeight: controlHeight
             currentIndex: Math.max(0, agcValues.indexOf(
                 String(bridge.getSetting("RtlSdrSsbAgcMode", "slow")).toLowerCase()))
@@ -804,7 +804,7 @@ SettingsPageScroll {
             placeholderText: qsTr("0 = Off")
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             implicitHeight: controlHeight
             validator: IntValidator { bottom: 0; top: 4800 }
             color: textPrimary
@@ -835,7 +835,7 @@ SettingsPageScroll {
             model: [qsTr("Off"), qsTr("Light"), qsTr("Medium")]
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.ssbMode
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             implicitHeight: controlHeight
             currentIndex: Math.max(0, reductionValues.indexOf(
                 String(bridge.getSetting("RtlSdrSsbNoiseReduction", "off")).toLowerCase()))
@@ -879,7 +879,7 @@ SettingsPageScroll {
         Text { text: qsTr("RX Input Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
 	                        RowLayout {
 	                            Layout.fillWidth: true
-	                            Layout.columnSpan: 3
+	                            Layout.columnSpan: Math.max(1, pageColumns - 1)
 	                            spacing: 8
 	                            Slider {
 	                                id: setupRxInputLevelSlider
@@ -940,7 +940,7 @@ SettingsPageScroll {
         Slider {
             id: setupTxOutputLevelSlider
             from: 450; to: 0; live: true; stepSize: 1
-            Layout.fillWidth: true; Layout.columnSpan: 3
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             Binding on value { value: bridge.txOutputLevel; when: !setupTxOutputLevelSlider.pressed }
 	                            onMoved: {
 	                                bridge.txOutputLevel = value
@@ -961,7 +961,7 @@ SettingsPageScroll {
         Text { text: qsTr("Save Directory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoTextField {
             id: saveDirectoryField
-            text: bridge.getSetting("SaveDirectory", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
+            text: bridge.getSetting("SaveDirectory", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: Math.max(1, pageColumns - 1)
             color: textPrimary; font.pixelSize: controlFontSize
             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
             readOnly: true
@@ -977,7 +977,7 @@ SettingsPageScroll {
         Text { text: qsTr("AzEl Directory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         DecoTextField {
             id: azElDirectoryField
-            text: bridge.getSetting("AzElDirectory", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
+            text: bridge.getSetting("AzElDirectory", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: Math.max(1, pageColumns - 1)
             color: textPrimary; font.pixelSize: controlFontSize
             topPadding: controlVerticalPadding; bottomPadding: controlVerticalPadding; verticalAlignment: TextInput.AlignVCenter
             readOnly: true

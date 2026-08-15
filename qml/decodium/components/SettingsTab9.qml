@@ -524,7 +524,7 @@ SettingsPageScroll {
         Text { text: qsTr("Activity:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoComboBox {
             id: contestCombo
-            model: [qsTr("None"),"NA VHF","EU VHF",qsTr("Field Day"),"RTTY Roundup","WW DIGI",qsTr("Fox"),qsTr("Hound"),"ARRL Digi","Q65 Pileup"]; Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: 3
+            model: [qsTr("None"),"NA VHF","EU VHF",qsTr("Field Day"),"RTTY Roundup","WW DIGI",qsTr("Fox"),qsTr("Hound"),"ARRL Digi","Q65 Pileup"]; Layout.fillWidth: true; implicitHeight: controlHeight; Layout.columnSpan: Math.max(1, pageColumns - 1)
             currentIndex: Math.max(0, Math.min(model.length - 1, bridge.specialOperationActivity))
             onActivated: {
                 bridge.specialOperationActivity = currentIndex
@@ -667,7 +667,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Auto Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         ColumnLayout {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 2
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 2
             Switch {
                 text: qsTr("AUTO - enable the 3 technologies when needed")
                 checked: bridge.advAutoModeEnabled
@@ -702,7 +702,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Coherent Avg:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; opacity: bridge.advAutoModeEnabled ? 0.5 : 1.0 }
         ColumnLayout {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 2
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 2
             opacity: bridge.advAutoModeEnabled ? 0.5 : 1.0
             Switch {
                 text: qsTr("Coherent Average (Q65/JT65)")
@@ -728,7 +728,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Neural Sync:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; opacity: bridge.advAutoModeEnabled ? 0.5 : 1.0 }
         ColumnLayout {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 2
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 2
             opacity: bridge.advAutoModeEnabled ? 0.5 : 1.0
             Switch {
                 text: qsTr("Neural Sync (FT8 OSD decoder)")
@@ -754,7 +754,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Turbo Feedback:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; opacity: bridge.advAutoModeEnabled ? 0.5 : 1.0 }
         ColumnLayout {
-            Layout.fillWidth: true; Layout.columnSpan: 3; spacing: 2
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); spacing: 2
             opacity: bridge.advAutoModeEnabled ? 0.5 : 1.0
             Switch {
                 text: qsTr("Turbo Feedback (extended LDPC iterations)")

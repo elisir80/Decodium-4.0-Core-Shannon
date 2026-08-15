@@ -37,6 +37,10 @@ Flickable {
     readonly property Item measuredItem: pageCanvas.children.length > 0
                                          ? pageCanvas.children[0]
                                          : null
+    readonly property real measuredImplicitWidth: measuredItem
+                                                   ? Math.max(0,
+                                                              measuredItem.implicitWidth)
+                                                   : 0
     readonly property real measuredImplicitHeight: measuredItem
                                                     ? Math.max(0,
                                                                measuredItem.implicitHeight,
@@ -45,12 +49,68 @@ Flickable {
                                                     : 0
 
     clip: true
+    interactive: true
     boundsBehavior: Flickable.StopAtBounds
-    flickableDirection: Flickable.AutoFlickIfNeeded
+    // Do not leave direction detection to the platform style.  In particular,
+    // some Linux QPA/style combinations do not enable wheel scrolling when a
+    // layout starts with a horizontal overflow and the vertical range is
+    // calculated a frame later.
+    flickableDirection: Flickable.HorizontalAndVerticalFlick
     contentWidth: Math.max(width,
-                           minimumContentWidth)
+                           minimumContentWidth,
+                           measuredImplicitWidth + pageLeftMargin + pageRightMargin)
     contentHeight: Math.max(height,
                             measuredImplicitHeight + pageTopMargin + pageBottomMargin)
+
+    // QQuick Flickable normally consumes wheel events itself.  A number of
+    // Linux desktop combinations route the wheel to the focused TextField or
+    // ComboBox instead, however, leaving a clipped Settings page apparently
+    // frozen.  This button-less MouseArea is deliberately only a wheel bridge:
+    // it does not take mouse clicks away from controls or the scroll bars.
+    MouseArea {
+        id: wheelBridge
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
+        z: 900
+
+        onWheel: function(wheel) {
+            var pixelDelta = wheel.pixelDelta ? wheel.pixelDelta : Qt.point(0, 0)
+            var angleDelta = wheel.angleDelta ? wheel.angleDelta : Qt.point(0, 0)
+            var pixelX = Number(pixelDelta.x || 0)
+            var pixelY = Number(pixelDelta.y || 0)
+            var angleX = Number(angleDelta.x || 0)
+            var angleY = Number(angleDelta.y || 0)
+            var deltaX = pixelX !== 0 ? pixelX : angleX / 120 * 48
+            var deltaY = pixelY !== 0 ? pixelY : angleY / 120 * 48
+            var shiftPressed = wheel.modifiers !== undefined
+                    && (wheel.modifiers & Qt.ShiftModifier) !== 0
+            var maxX = Math.max(0, root.contentWidth - root.width)
+            var maxY = Math.max(0, root.contentHeight - root.height)
+            var changed = false
+
+            // Shift+wheel is the portable horizontal-wheel gesture.  Native
+            // horizontal deltas remain supported for trackpads and mice that
+            // expose a horizontal wheel axis.
+            if ((shiftPressed || deltaX !== 0) && maxX > 0) {
+                var nextX = Math.max(0, Math.min(maxX, root.contentX - (shiftPressed && deltaX === 0 ? deltaY : deltaX)))
+                changed = Math.abs(nextX - root.contentX) > 0.01
+                root.contentX = nextX
+                if (shiftPressed)
+                    deltaY = 0
+            }
+
+            if (deltaY !== 0 && maxY > 0) {
+                var nextY = Math.max(0, Math.min(maxY, root.contentY - deltaY))
+                changed = Math.abs(nextY - root.contentY) > 0.01 || changed
+                root.contentY = nextY
+            }
+
+            // A wheel event at an edge is still consumed when this page has a
+            // scroll range.  This prevents a nested control from scrolling a
+            // different parent window on Linux.
+            wheel.accepted = changed || maxX > 0 || maxY > 0
+        }
+    }
 
     ScrollBar.horizontal: ScrollBar {
         policy: ScrollBar.AsNeeded

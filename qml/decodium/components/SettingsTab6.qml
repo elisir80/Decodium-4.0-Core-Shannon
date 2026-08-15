@@ -120,7 +120,7 @@ SettingsPageScroll {
             model: ["5 min", "10 min", "15 min", "20 min", "25 min", "30 min",
                     "35 min", "40 min", "45 min", "50 min", "55 min", "60 min"]
             currentIndex: Math.max(0, Math.min(11, Math.round(bridge.pskReporterTimeSpanMinutes / 5) - 1))
-            Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight
+            Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); implicitHeight: controlHeight
             onActivated: {
                 bridge.pskReporterTimeSpanMinutes = (currentIndex + 1) * 5
                 dialog.scheduleSettingsPersist()
@@ -168,7 +168,7 @@ SettingsPageScroll {
         Text { text: qsTr("Status:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         RowLayout {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 10
 
             Text {
@@ -219,7 +219,7 @@ SettingsPageScroll {
             font.pixelSize: 12
             wrapMode: Text.Wrap
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
         }
 
         // ── Cloudlog ──
@@ -240,7 +240,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("API URL:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
-            text: bridge.cloudlogUrl; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
+            text: bridge.cloudlogUrl; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: Math.max(1, pageColumns - 1)
             color: textPrimary; font.pixelSize: controlFontSize
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: {
@@ -251,7 +251,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("API Key:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
-            text: bridge.cloudlogApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
+            text: bridge.cloudlogApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: Math.max(1, pageColumns - 1)
             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: {
@@ -299,7 +299,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("API Key:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
-            text: bridge.qrzLogbookApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: 3
+            text: bridge.qrzLogbookApiKey; Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8; Layout.columnSpan: Math.max(1, pageColumns - 1)
             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: {
@@ -553,7 +553,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Access token:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
-            text: bridge.getSetting("RemoteToken", ""); Layout.fillWidth: true; Layout.columnSpan: 3; implicitHeight: controlHeight; leftPadding: 8
+            text: bridge.getSetting("RemoteToken", ""); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); implicitHeight: controlHeight; leftPadding: 8
             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
             placeholderText: qsTr("Required for LAN/WAN")
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -670,7 +670,7 @@ SettingsPageScroll {
         Text { text: qsTr("Primary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         Flow {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 16
             UdpTrafficCheck { settingsHost: root; text: qsTr("Decode"); settingKey: "UDPPrimarySendDecode" }
             UdpTrafficCheck { settingsHost: root; text: qsTr("Status"); settingKey: "UDPPrimarySendStatus" }
@@ -778,7 +778,7 @@ SettingsPageScroll {
         Text { text: qsTr("Secondary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         Flow {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 16
             UdpTrafficCheck { settingsHost: root; text: qsTr("Decode"); settingKey: "UDPSecondarySendDecode"; enabled: udpSecondaryCheck.checked }
             UdpTrafficCheck { settingsHost: root; text: qsTr("Status"); settingKey: "UDPSecondarySendStatus"; enabled: udpSecondaryCheck.checked }
@@ -896,7 +896,7 @@ SettingsPageScroll {
         Text { text: qsTr("Tertiary traffic:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         Flow {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             spacing: 16
             UdpTrafficCheck { settingsHost: root; text: qsTr("Decode"); settingKey: "UDPTertiarySendDecode"; enabled: udpTertiaryCheck.checked }
             UdpTrafficCheck { settingsHost: root; text: qsTr("Status"); settingKey: "UDPTertiarySendStatus"; enabled: udpTertiaryCheck.checked }
@@ -927,7 +927,7 @@ SettingsPageScroll {
             text: qsTr("Use HRD Logbook preset")
             implicitHeight: controlHeight
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
             onClicked: {
                 // HRD's QSO Forwarding receives the same ADIF-over-UDP
                 // stream configured as "N1MM Logger+ Broadcasts" in WSJT-X.
@@ -982,7 +982,7 @@ SettingsPageScroll {
         Text { text: qsTr("UDP Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
             id: n1mmServerField
-            text: bridge.getSetting("N1MMServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: 3; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
+            text: bridge.getSetting("N1MMServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
             enabled: n1mmEnableCheck.checked
             opacity: enabled ? 1.0 : 0.5
             color: textPrimary; font.pixelSize: controlFontSize
@@ -1044,7 +1044,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("TCP Server:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoTextField {
-            text: bridge.getSetting("ADIFTcpServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: 3; Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
+            text: bridge.getSetting("ADIFTcpServer", "127.0.0.1"); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1); Layout.minimumWidth: fieldMinWidth; implicitHeight: controlHeight; leftPadding: 8
             enabled: adifTcpCheck.checked
             opacity: enabled ? 1.0 : 0.5
             color: textPrimary; font.pixelSize: controlFontSize
