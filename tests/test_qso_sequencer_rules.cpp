@@ -177,6 +177,32 @@ private slots:
               QString ("IK8OLM"));
   }
 
+  void uncommonAndPortableCallsignParsing ()
+  {
+    using decodium::seq::decodedDxCallToken;
+    using decodium::seq::isPlausibleDecodedCallsignToken;
+
+    QVERIFY (isPlausibleDecodedCallsignToken ("8B8FTDM"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("8D8DADA"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("8A3B"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("IZ1ABC/0"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("IZ1ABC/1"));
+    QVERIFY (!isPlausibleDecodedCallsignToken ("ABCDEF12"));
+
+    QCOMPARE (decodedDxCallToken ("CQ 8B8FTDM OI33"), QString ("8B8FTDM"));
+    QCOMPARE (decodedDxCallToken ("CQ 8D8DADA OI33"), QString ("8D8DADA"));
+    QCOMPARE (decodedDxCallToken ("CQ 8A3B OI62"), QString ("8A3B"));
+    QCOMPARE (decodedDxCallToken ("IU8LMC IZ1ABC/0 -10"), QString ("IZ1ABC/0"));
+    QCOMPARE (decodedDxCallToken ("IU8LMC IZ1ABC/1 RR73"), QString ("IZ1ABC/1"));
+    QCOMPARE (decodedDxCallToken ("BG5JGG RU6AGR RR73"), QString ("RU6AGR"));
+    QCOMPARE (decodedDxCallToken ("IZ1JIZ VU33IN RR73"), QString ("VU33IN"));
+
+    // If the station on the right is unknown, never display the left-hand
+    // station as its DXCC identity.
+    QVERIFY (decodedDxCallToken ("IU8LMC BADTOKEN RR73").isEmpty ());
+    QVERIFY (decodedDxCallToken ("IU8LMC <...> -10").isEmpty ());
+  }
+
   // ---- Step C: seam ISequencerSink + QsoSequencer (contratto) ----
 
   void sequencerStateDefaults ()

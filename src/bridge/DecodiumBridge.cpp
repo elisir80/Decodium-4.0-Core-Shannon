@@ -3484,6 +3484,10 @@ using decodium::seq::isGridTokenStrict;
 using decodium::seq::normalizeCallToken;
 using decodium::seq::isPlaceholderCallToken;
 using decodium::seq::isDirectedCqModifierToken;
+using decodium::seq::isStrictAmateurCallsignToken;
+using decodium::seq::isSpecialEventStyleCallsignToken;
+using decodium::seq::isPlausibleDecodedCallsignToken;
+using decodium::seq::decodedDxCallToken;
 using decodium::seq::normalizedUsableCallToken;
 using decodium::seq::normalizedBaseCall;
 using decodium::seq::tokenMatchesCall;
@@ -3865,86 +3869,9 @@ static bool hasPortableOperatingDesignator(QString const& token)
 // + cifra (0-9) + suffisso (1-4 lettere). Esempi rifiutati: 0Z4SYH, 0L0MYK,
 // L74PVK, 6H9IV5Y0. Esempi accettati: IU8LMC, K1JT, 9A3A, EA5JMN, A29TTX/P.
 // Strippa suffissi portatili comuni (/P /M /MM /AM /A /R /QRP) prima del check.
-static bool isStrictAmateurCallsign(QString const& token)
-{
-    QString t = token.trimmed().toUpper();
-    if (t.isEmpty()) return false;
-    // Rimuovi suffisso portatile
-    int const slashIdx = t.indexOf('/');
-    if (slashIdx > 0) {
-        QString const suffix = t.mid(slashIdx + 1);
-        QString const prefix = t.left(slashIdx);
-        // Suffix portatile: P/M/MM/AM/A/R/QRP — nessun digit
-        // Prefix portatile country: es. F/IK8XYZ → tieni IK8XYZ
-        static const QSet<QString> portableSuffixes {
-            "P", "M", "MM", "AM", "A", "R", "QRP", "PM", "MA"
-        };
-        if (portableSuffixes.contains(suffix)) {
-            t = prefix;
-        } else if (portableSuffixes.contains(prefix) || (prefix.size() <= 3 && !prefix.contains(QRegularExpression(R"([0-9])")))) {
-            t = suffix;
-        }
-    }
-    if (t.size() < 3 || t.size() > 7) return false;
-    static const QRegularExpression re(
-        R"(^(?:[A-Z]{1,2}|[A-Z][0-9]|[2-9][A-Z])[0-9][A-Z]{1,4}$)"
-    );
-    return re.match(t).hasMatch();
-}
-
-static bool isSpecialEventStyleCallsign(QString const& token)
-{
-    QString t = normalizeCallToken(token).trimmed().toUpper();
-    if (t.isEmpty() || isPlaceholderCallToken(t)) {
-        return false;
-    }
-
-    QString const base = Radio::base_callsign(t).trimmed().toUpper();
-    if (base.size() < 4 || base.size() > 10) {
-        return false;
-    }
-
-    bool hasLetter = false;
-    bool hasDigit = false;
-    bool digitSeen = false;
-    bool hasLetterBeforeDigit = false;
-    bool hasLetterAfterDigit = false;
-    bool allHex = true;
-    int digitCount = 0;
-    for (QChar const& ch : base) {
-        if (ch.isLetter()) {
-            hasLetter = true;
-            if (!digitSeen) {
-                hasLetterBeforeDigit = true;
-            } else {
-                hasLetterAfterDigit = true;
-            }
-            if (ch < QLatin1Char('A') || ch > QLatin1Char('F')) {
-                allHex = false;
-            }
-        } else if (ch.isDigit()) {
-            hasDigit = true;
-            digitSeen = true;
-            ++digitCount;
-        } else {
-            return false;
-        }
-    }
-
-    if (!hasLetter || !hasDigit || digitCount < 2
-        || !hasLetterBeforeDigit || !hasLetterAfterDigit) {
-        return false;
-    }
-    if (allHex && base.size() >= 7) {
-        return false;
-    }
-    return Radio::is_callsign(base);
-}
-
 static bool isPlausibleDecodedCallsign(QString const& token)
 {
-    return isStrictAmateurCallsign(token)
-        || isSpecialEventStyleCallsign(token);
+    return isPlausibleDecodedCallsignToken(token);
 }
 
 static QString customCqPrefixFromMessage(QString const& message, QString const& myCall)
@@ -4003,10 +3930,10 @@ static int digitRunCount(QString const& token)
 
 static bool isPlausibleFt2CqCallsign(QString const& token)
 {
-    if (isStrictAmateurCallsign(token)) {
+    if (isStrictAmateurCallsignToken(token)) {
         return true;
     }
-    if (!isSpecialEventStyleCallsign(token)) {
+    if (!isSpecialEventStyleCallsignToken(token)) {
         return false;
     }
 
@@ -6319,7 +6246,9 @@ bool decodeListModel_isTelemetryOnlyMessage(QString const& message)
 {
     QStringList const parts = message.simplified().split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (parts.size() != 1) return false;
-    return decodeListModel_isTelemetryHexToken(parts.first());
+    QString const token = normalizeCallToken(parts.first());
+    return decodeListModel_isTelemetryHexToken(token)
+        && !isPlausibleDecodedCallsignToken(token);
 }
 
 constexpr int kDecodeUiRefreshBand = 0x01;
@@ -40171,7 +40100,9 @@ bool isTelemetryHexToken(const QString& token)
 bool looksLikeCallsignToken(const QString& token)
 {
     QString const normalized = normalizedUsableCallToken(token);
-    return !normalized.isEmpty() && !isTelemetryHexToken(normalized);
+    return !normalized.isEmpty()
+        && (!isTelemetryHexToken(normalized)
+            || isPlausibleDecodedCallsignToken(normalized));
 }
 
 static bool messageIsUnresolvedGridOnlyDecode(const QString& message,
@@ -40274,24 +40205,7 @@ static bool isFst4wUnresolvedHashDecode(QString const& mode, QString const& mess
 // "9H1SR IU8LMC R-05" → IU8LMC (secondo call)
 static QString extractRightCallsign(const QString& msg)
 {
-    QStringList parts = msg.toUpper().split(' ', Qt::SkipEmptyParts);
-    if (parts.isEmpty()) return {};
-
-    // Raccogli tutti i token che sembrano callsign
-    QStringList calls;
-    for (const QString& p : parts) {
-        if (p == "CQ" || p == "QRZ" || p == "DE" || isDirectedCqModifierToken(p)) continue;
-        if (isGridToken(p)) continue;
-        if (looksLikeCallsignToken(p))
-            calls.append(p);
-    }
-
-    // Ritorna l'ultimo callsign trovato (il più a destra)
-    if (calls.size() >= 2)
-        return calls[1];   // secondo call = destra
-    if (calls.size() == 1)
-        return calls[0];   // CQ con un solo call
-    return {};
+    return decodedDxCallToken(msg);
 }
 
 QString DecodiumBridge::extractDecodedCallsign(const QString& msg, bool isCQ) const
@@ -42314,12 +42228,14 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry, bool countAsReceived)
     if (unresolvedPeerPlaceholder && sameBaseCall(rightCall)) {
         rightCall.clear();
     }
-    if (rightCall.isEmpty() && !unresolvedNonOperationalDecode) rightCall = fromCall;
+    // Never substitute the left-hand station when the semantic DX token on
+    // the right is unknown. A blank DXCC is correct; showing the sender's
+    // entity would attribute the row to the wrong country.
 
     // Keep worked-before/LotW state aligned with the DX call shown in the row.
     // For third-party traffic like "YC1FMV 7Q9PTP RR73", fromCall may be the
     // addressee/other station while dxCallsign/rightCall is the visible DX.
-    QString const dxStatusCall = (!rightCall.isEmpty() ? rightCall : fromCall).trimmed().toUpper();
+    QString const dxStatusCall = rightCall.trimmed().toUpper();
     bool const isWorkedEver = !dxStatusCall.isEmpty() && m_workedCalls.contains(dxStatusCall);
     bool isLotw = m_lotwEnabled && !dxStatusCall.isEmpty() && m_lotwUsers.contains(dxStatusCall);
 

@@ -298,7 +298,8 @@ QString DxccLookup::effectiveCall(const QString& callsign)
     // suffixes (/P, /M, /QRP, /R, /A, /B) are ignored — return
     // the native call in that case.
     static const QStringList nonPrefixSuffix = {
-        "P", "M", "QRP", "R", "A", "B", "MM", "AM"
+        "P", "M", "QRP", "R", "A", "B", "MM", "AM",
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
     };
 
     int rightSize = call.size() - slash - 1;
