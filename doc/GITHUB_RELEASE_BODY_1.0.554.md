@@ -95,3 +95,44 @@ Questa release rende veritiero e sicuro lo stato di trasmissione, estende logboo
 - Superati i test mirati della pipeline TX, della transizione PTT, della mappa multi-locator e delle impostazioni sicure Linux.
 - Controllato il diff della release per errori di spaziatura e validato il contratto di packaging del repository.
 - Questa release non modifica DSP di decodifica, elaborazione audio, rendering normale del waterfall o rendering normale del panadapter.
+
+---
+
+## In this fork (iu8lmc)
+
+### The automatic noise threshold, and what it does to the 3D spectrum
+
+Reported by an operator: with the automatic threshold on, the 3D waterfall
+loses its traces; with it off, the spectrum is there. Both halves were real.
+
+**The threshold had been quietly made harsher.** Since 1.0.495 the noise
+estimate had moved from the 10th to the 25th percentile — a quarter of the
+spectrum declared noise and cut away instead of a tenth — and the smoothing
+had gone from 0.03 to 0.08, so the floor chases the signal four times faster
+and the cut moves while you watch. Both are back to the 1.0.495 values.
+
+**And it is now yours to set.** A slider next to the Auto box, 5 to 40,
+default 10. Raise it to clean up an empty band, lower it when weak signals
+vanish. It appears only while the threshold is on, and the value is
+remembered. The right setting is not the same for everyone: it depends on the
+band, the receiver, and what you are looking for.
+
+**The 3D ridges were measured on the wrong scale.** With the automatic
+threshold the dB window anchors at the noise floor and runs 80 dB upwards,
+where nothing lives; the 3D normalised the ridge height over all of it. A
+signal 10 dB above the noise raised its trace by 0.8% of the available
+height — invisible. Now the height is measured over the range the signals
+actually occupy: that same signal reaches 11%, one 15 dB up reaches 46%, and
+the strongest in the band reaches full scale. The scale never drops below
+18 dB, so an empty band stays flat instead of being inflated into a
+landscape. All three renderers — the two CPU paths and the shader — were
+corrected to agree; the shader lost two texture reads per vertex it no
+longer needs.
+
+### Translations
+
+Ten new strings in all fifteen languages, with zero unfinished messages: the
+threshold slider, the three strings of the new map work, the logbook line,
+and the four entries of the TX panel context menu — copy, cut, paste, select
+all — which had been in English since they were written.
+
