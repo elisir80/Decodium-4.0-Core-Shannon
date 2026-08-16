@@ -37898,6 +37898,7 @@ QVariantMap DecodiumBridge::loadWindowState(const QString& key) const
     maybeInsertInt("height");
     maybeInsertBool("detached");
     maybeInsertBool("minimized");
+    maybeInsertBool("maximized");
     s.endGroup();
     return state;
 }
@@ -37954,7 +37955,7 @@ void DecodiumBridge::saveWindowStatesAsync(const QVariantMap& states,
         }
 
         static constexpr const char* fields[] = {
-            "x", "y", "width", "height", "detached", "minimized"
+            "x", "y", "width", "height", "detached", "minimized", "maximized"
         };
         for (auto it = states.constBegin(); it != states.constEnd(); ++it) {
             QString const key = it.key().trimmed();

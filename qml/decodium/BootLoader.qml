@@ -108,7 +108,9 @@ ApplicationWindow {
                 if (mainWindowObject.closing) {
                     mainWindowObject.closing.connect(function() { Qt.quit() })
                 }
-                if (mainWindowObject.show)
+                if (mainWindowObject.showRestoredWindowState)
+                    mainWindowObject.showRestoredWindowState()
+                else if (mainWindowObject.show)
                     mainWindowObject.show()
                 if (mainWindowObject.raise)
                     mainWindowObject.raise()

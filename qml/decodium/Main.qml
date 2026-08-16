@@ -31,6 +31,15 @@ ApplicationWindow {
          | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
     title: "Decodium 4.0 — " + (bridge ? bridge.mode : "") + " — " + (bridge ? bridge.callsign : "")
     property bool windowStateRestoreInProgress: true
+    // Persist the native maximised state separately from the last usable
+    // windowed geometry.  On Windows QWindow reports the maximised dimensions
+    // through width/height; saving those as normal geometry reopens an
+    // oversized window while losing the maximised state.
+    property bool mainWindowMaximized: false
+    property int normalWindowX: 0
+    property int normalWindowY: 0
+    property int normalWindowWidth: preferredMinimumWidth
+    property int normalWindowHeight: 800
     property int floatingGeometryInteractionDepth: 0
     property bool deferredWindowStateSave: false
     readonly property bool txVisualActive: !!(bridge && (bridge.transmitting || bridge.tuning))
@@ -571,6 +580,9 @@ ApplicationWindow {
 
         var state = safeWindowState("mainWindow")
         startupLog("main window state read")
+        mainWindowMaximized = state.maximized !== undefined
+                ? coerceBool(state.maximized, false)
+                : false
         var restoredWidth = safeNumber(state.width, width)
         var restoredHeight = safeNumber(state.height, height)
         if (restoredWidth > 0) width = restoredWidth
@@ -590,12 +602,17 @@ ApplicationWindow {
         }
         x = pos.x
         y = pos.y
+        normalWindowX = Math.round(x)
+        normalWindowY = Math.round(y)
+        normalWindowWidth = Math.round(width)
+        normalWindowHeight = Math.round(height)
         startupLog("main window geometry applied x=" + x + " y=" + y + " w=" + width + " h=" + height)
-        windowStateRestoreInProgress = false
 
-        // Force window visible on Windows — some WM/GPU combos need explicit calls
-        visible = true
-        show()
+        // Force the native state explicitly on Windows. BootLoader repeats this
+        // presentation call after configuring the graphics backend, so it must
+        // preserve rather than reset a restored maximised state.
+        showRestoredWindowState()
+        windowStateRestoreInProgress = false
         raise()
         requestActivate()
         startupLog("main window show/raise/requestActivate done")
@@ -641,6 +658,13 @@ ApplicationWindow {
         interval: 500
         repeat: false
         onTriggered: persistWindowLayouts()
+    }
+    Timer {
+        id: normalWindowGeometryTimer
+        objectName: "normalWindowGeometryTimer"
+        interval: 180
+        repeat: false
+        onTriggered: captureNormalWindowGeometry()
     }
     Timer {
         id: firstUseWarmupTimer
@@ -730,6 +754,40 @@ ApplicationWindow {
             deferredWindowStateSave = false
             windowStateSaveTimer.restart()
         }
+    }
+
+    function captureNormalWindowGeometry() {
+        if (windowStateRestoreInProgress || visibility !== Window.Windowed)
+            return
+
+        var capturedWidth = Math.round(safeNumber(width, normalWindowWidth))
+        var capturedHeight = Math.round(safeNumber(height, normalWindowHeight))
+        var capturedX = Math.round(safeNumber(x, normalWindowX))
+        var capturedY = Math.round(safeNumber(y, normalWindowY))
+        if (capturedWidth < minimumWidth || capturedHeight < minimumHeight
+                || capturedWidth > 10000 || capturedHeight > 6000
+                || !isFinite(capturedX) || !isFinite(capturedY))
+            return
+
+        normalWindowX = capturedX
+        normalWindowY = capturedY
+        normalWindowWidth = capturedWidth
+        normalWindowHeight = capturedHeight
+    }
+
+    function scheduleNormalWindowGeometryCapture() {
+        if (!windowStateRestoreInProgress && visibility === Window.Windowed
+                && typeof normalWindowGeometryTimer !== "undefined"
+                && normalWindowGeometryTimer)
+            normalWindowGeometryTimer.restart()
+    }
+
+    function showRestoredWindowState() {
+        visible = true
+        if (mainWindowMaximized && typeof showMaximized === "function")
+            showMaximized()
+        else
+            show()
     }
 
     function frequencyDisplayCells(freqHz) {
@@ -839,23 +897,36 @@ ApplicationWindow {
     }
 
     function persistWindowLayouts() {
-        function snapshot(windowRef, detached, minimized) {
+        function snapshot(windowRef, detached, minimized, geometryOverride, maximized) {
+            var geometry = geometryOverride || windowRef
             var minimumWidthValue = Math.max(1, safeNumber(windowRef.minimumWidth, 1))
             var minimumHeightValue = Math.max(1, safeNumber(windowRef.minimumHeight, 1))
-            return {
-                x: Math.round(windowRef.x),
-                y: Math.round(windowRef.y),
+            var state = {
+                x: Math.round(safeNumber(geometry.x, windowRef.x)),
+                y: Math.round(safeNumber(geometry.y, windowRef.y)),
                 width: Math.max(minimumWidthValue,
-                                Math.round(safeNumber(windowRef.width, minimumWidthValue))),
+                                Math.round(safeNumber(geometry.width, minimumWidthValue))),
                 height: Math.max(minimumHeightValue,
-                                 Math.round(safeNumber(windowRef.height, minimumHeightValue))),
+                                 Math.round(safeNumber(geometry.height, minimumHeightValue))),
                 detached: !!detached,
                 minimized: !!minimized
             }
+            if (maximized !== undefined)
+                state.maximized = !!maximized
+            return state
         }
 
         var states = ({})
-        states.mainWindow = snapshot(mainWindow, false, visibility === Window.Minimized)
+        var mainNormalGeometry = {
+            x: normalWindowX,
+            y: normalWindowY,
+            width: normalWindowWidth,
+            height: normalWindowHeight
+        }
+        states.mainWindow = snapshot(mainWindow, false,
+                                     visibility === Window.Minimized,
+                                     mainNormalGeometry,
+                                     mainWindowMaximized)
         states.waterfallWindow = snapshot(waterfallWindow, waterfallDetached, waterfallMinimized)
         states.logFloatingWindow = snapshot(logFloatingWindow, logWindowDetached, logWindowMinimized)
         states.astroFloatingWindow = snapshot(astroFloatingWindow, astroWindowDetached, astroWindowMinimized)
@@ -934,6 +1005,8 @@ ApplicationWindow {
                 visibility = Window.Windowed
                 width = 1280; height = 800; x = 100; y = 100
             }
+            mainWindowMaximized = false
+            captureNormalWindowGeometry()
             raise(); requestActivate()
 
             // 3) Forza salvataggio nuovo state pulito (sovrascrive QSettings)
@@ -945,11 +1018,13 @@ ApplicationWindow {
     onClosing: function(close) {
         saveTimer.stop()
         windowStateSaveTimer.stop()
+        normalWindowGeometryTimer.stop()
         applicationClosing = true
         // Keep the last position even when the user closes immediately after
         // dragging, before the normal settings debounce can run.
         persistWorldClockPos()
         persistSettingsDialogIfOpen()
+        captureNormalWindowGeometry()
         persistWindowLayouts()
         console.log("Main window closing - shutting down application")
         // Close all floating windows
@@ -976,10 +1051,35 @@ ApplicationWindow {
         Qt.quit()
     }
 
-    onXChanged: scheduleWindowStateSave()
-    onYChanged: scheduleWindowStateSave()
-    onWidthChanged: scheduleWindowStateSave()
-    onHeightChanged: scheduleWindowStateSave()
+    onXChanged: {
+        scheduleNormalWindowGeometryCapture()
+        scheduleWindowStateSave()
+    }
+    onYChanged: {
+        scheduleNormalWindowGeometryCapture()
+        scheduleWindowStateSave()
+    }
+    onWidthChanged: {
+        scheduleNormalWindowGeometryCapture()
+        scheduleWindowStateSave()
+    }
+    onHeightChanged: {
+        scheduleNormalWindowGeometryCapture()
+        scheduleWindowStateSave()
+    }
+    onVisibilityChanged: {
+        if (windowStateRestoreInProgress)
+            return
+        if (visibility === Window.Maximized) {
+            normalWindowGeometryTimer.stop()
+            mainWindowMaximized = true
+        } else if (visibility === Window.Windowed) {
+            mainWindowMaximized = false
+            scheduleNormalWindowGeometryCapture()
+        }
+        if (visibility === Window.Maximized || visibility === Window.Windowed)
+            scheduleWindowStateSave()
+    }
 
     component FloatingResizeHandles: Item {
         id: resizeRoot

@@ -4,11 +4,11 @@ import QtQuick.Controls
 // Shared viewport for every Settings page.
 //
 // Qt's automatic ScrollView sizing is not reliable when a GridLayout is
-// anchored to the viewport but its controls have larger minimum widths.  In
-// that case the controls overflow while contentWidth remains equal to the
-// viewport, so the horizontal bar has no range.  Measuring the first page
-// item explicitly keeps both scroll axes usable on small screens, translated
-// labels and high-DPI configurations.
+// anchored to the viewport but its controls have larger minimum widths.  The
+// caller therefore supplies the responsive minimum width explicitly.  Do not
+// derive the horizontal extent from a page's implicitWidth: a single long
+// translated label or spanning control can make that value several screens
+// wide and create a huge, useless horizontal scroll range.
 Flickable {
     id: root
 
@@ -37,10 +37,6 @@ Flickable {
     readonly property Item measuredItem: pageCanvas.children.length > 0
                                          ? pageCanvas.children[0]
                                          : null
-    readonly property real measuredImplicitWidth: measuredItem
-                                                   ? Math.max(0,
-                                                              measuredItem.implicitWidth)
-                                                   : 0
     readonly property real measuredImplicitHeight: measuredItem
                                                     ? Math.max(0,
                                                                measuredItem.implicitHeight,
@@ -56,9 +52,11 @@ Flickable {
     // layout starts with a horizontal overflow and the vertical range is
     // calculated a frame later.
     flickableDirection: Flickable.HorizontalAndVerticalFlick
-    contentWidth: Math.max(width,
-                           minimumContentWidth,
-                           measuredImplicitWidth + pageLeftMargin + pageRightMargin)
+    // minimumContentWidth is calculated by SettingsDialog from the active
+    // two/four-column layout.  It is the only horizontal overflow source; the
+    // page still scrolls on genuinely narrow screens, but cannot grow because
+    // of an anomalous child implicitWidth.
+    contentWidth: Math.max(width, minimumContentWidth)
     contentHeight: Math.max(height,
                             measuredImplicitHeight + pageTopMargin + pageBottomMargin)
 
