@@ -16595,8 +16595,8 @@ De ernstige (≥1100ms of burst van 4+ korte haperingen) zijn het sterkste signa
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Diepe decode in TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Diepe decodering van het laatste RX-slot tijdens TX (alleen lijst):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -22213,8 +22213,8 @@ De ernstige (≥1100ms of burst van 4+ korte haperingen) zijn het sterkste signa
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Diepe decode in TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Diepe decodering van het laatste RX-slot tijdens TX (alleen lijst):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

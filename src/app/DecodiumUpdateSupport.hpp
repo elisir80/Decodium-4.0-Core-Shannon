@@ -4,9 +4,53 @@
 #include <QString>
 #include <QStringList>
 #include <QSaveFile>
+#include <QList>
 
 namespace decodium {
 namespace update {
+
+enum class ReleaseCheckDecision
+{
+    UseUpdate,
+    CheckFallback,
+    NoUpdate
+};
+
+inline QList<int> versionParts(const QString& version)
+{
+    QList<int> parts;
+    const auto tokens = version.split(QLatin1Char('.'));
+    for (const QString& token : tokens)
+        parts << token.toInt();
+    while (parts.size() < 3)
+        parts << 0;
+    return parts;
+}
+
+inline bool isVersionNewer(const QString& candidate, const QString& current)
+{
+    if (candidate.trimmed().isEmpty())
+        return false;
+
+    const QList<int> candidateParts = versionParts(candidate);
+    const QList<int> currentParts = versionParts(current);
+    for (int i = 0; i < 3; ++i) {
+        if (candidateParts[i] != currentParts[i])
+            return candidateParts[i] > currentParts[i];
+    }
+    return false;
+}
+
+inline ReleaseCheckDecision releaseCheckDecision(const QString& candidate,
+                                                  const QString& current,
+                                                  bool fallbackAvailable)
+{
+    if (isVersionNewer(candidate, current))
+        return ReleaseCheckDecision::UseUpdate;
+    return fallbackAvailable
+        ? ReleaseCheckDecision::CheckFallback
+        : ReleaseCheckDecision::NoUpdate;
+}
 
 inline QString normalizedArchitecture(QString architecture)
 {

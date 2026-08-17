@@ -16583,8 +16583,8 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>TX 中 Deep decode：</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>TX期间深度解码最后一个RX时隙（仅列表）：</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -17511,7 +17511,7 @@ If unsure, use High.</source>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8440"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>仅 W&amp;amp;P 筛选：</translation>
+        <translation>仅 W&amp;P 筛选：</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8448"/>
@@ -20116,7 +20116,7 @@ If unsure, use High.</source>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="323"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>仅 W&amp;amp;P 筛选：</translation>
+        <translation>仅 W&amp;P 筛选：</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="331"/>
@@ -22201,8 +22201,8 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>TX 中 Deep decode：</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>TX期间深度解码最后一个RX时隙（仅列表）：</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

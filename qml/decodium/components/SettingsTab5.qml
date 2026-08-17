@@ -386,7 +386,15 @@ SettingsPageScroll {
         }
 
         // 1.0.299 — deep decode-list-only durante TX (recupera stazioni terze in QSO)
-        Text { text: qsTr("Deep decode in TX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        Text {
+            text: qsTr("Deep decode of last RX slot during TX (list only):")
+            color: textSecondary
+            font.pixelSize: 12
+            wrapMode: Text.WordWrap
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
+            Layout.fillWidth: true
+            Layout.preferredWidth: 0
+        }
         CheckBox {
             checked: bridge.ft8DeepDecodeInTx
             onCheckedChanged: {

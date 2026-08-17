@@ -10,6 +10,38 @@ class TestDecodiumUpdateSupport final : public QObject
     Q_OBJECT
 
 private slots:
+    void releaseVersionsAreComparedNumerically()
+    {
+        QVERIFY(decodium::update::isVersionNewer(
+            QStringLiteral("1.0.560"), QStringLiteral("1.0.99")));
+        QVERIFY(!decodium::update::isVersionNewer(
+            QStringLiteral("1.0.559"), QStringLiteral("1.0.559")));
+    }
+
+    void primaryNewReleaseStopsTheFallback()
+    {
+        QCOMPARE(decodium::update::releaseCheckDecision(
+                     QStringLiteral("1.0.560"), QStringLiteral("1.0.559"), true),
+                 decodium::update::ReleaseCheckDecision::UseUpdate);
+    }
+
+    void primaryWithoutNewReleaseChecksTheFallback()
+    {
+        QCOMPARE(decodium::update::releaseCheckDecision(
+                     QStringLiteral("1.0.559"), QStringLiteral("1.0.559"), true),
+                 decodium::update::ReleaseCheckDecision::CheckFallback);
+        QCOMPARE(decodium::update::releaseCheckDecision(
+                     QString(), QStringLiteral("1.0.559"), true),
+                 decodium::update::ReleaseCheckDecision::CheckFallback);
+    }
+
+    void secondaryWithoutNewReleaseCompletesTheCheck()
+    {
+        QCOMPARE(decodium::update::releaseCheckDecision(
+                     QStringLiteral("1.0.559"), QStringLiteral("1.0.559"), false),
+                 decodium::update::ReleaseCheckDecision::NoUpdate);
+    }
+
     void linuxX86DoesNotSelectArmFirst()
     {
         const QStringList assets {

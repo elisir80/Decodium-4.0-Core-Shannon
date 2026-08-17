@@ -59,8 +59,9 @@ public:
     void    setCheckOnStartup(bool on);
     void    setOfflineMode(bool offline);
 
-    // Interroga le release del fork. silent=true (avvio) non disturba l'utente
-    // se non c'e' nulla di nuovo o se la rete non risponde.
+    // Interroga prima elisir80 e, se non trova una versione piu' nuova, usa
+    // iu8lmc come fallback. silent=true (avvio) non disturba l'utente se non
+    // c'e' nulla di nuovo o se la rete non risponde.
     Q_INVOKABLE void check(bool silent = false);
 
     // Da chiamare all'avvio: rispetta checkOnStartup e non ricontrolla piu' di
@@ -94,7 +95,10 @@ private:
     void setBusy(bool b);
     void setProgress(int p);
     void setStatus(const QString& s);
-    void onCheckFinished(QNetworkReply* reply, bool silent);
+    void requestReleaseCheck(bool silent, bool secondary);
+    void onCheckFinished(QNetworkReply* reply, bool silent, bool secondary);
+    void finishCheckWithoutUpdate(bool silent);
+    void recordCheckCompleted();
     void launchInstaller(const QString& path);
 
     QNetworkAccessManager* m_nam {nullptr};
@@ -103,6 +107,9 @@ private:
     QString m_releaseNotes;
     QString m_downloadUrl;
     QString m_assetName;
+    QString m_releasePageUrl;
+    QString m_bestCheckedVersion;
+    bool    m_anyRepositoryCheckedSuccessfully {false};
     bool    m_available {false};
     bool    m_busy {false};
     int     m_progress {0};

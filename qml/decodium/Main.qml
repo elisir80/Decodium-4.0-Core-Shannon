@@ -11246,6 +11246,17 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         title: qsTr("Settings - Decodium")
         color: "transparent"
 
+        // The settings dialog is hosted in its own top-level Window.  Keep
+        // the Material palette here as well as on mainWindow: without it,
+        // buttons that do not provide a custom background fall back to the
+        // platform's light button (white on the Darkcodium theme), making
+        // their label and enabled/disabled state hard to read.
+        Material.theme: bridge.themeManager.isLightTheme ? Material.Light : Material.Dark
+        Material.accent: bridge.themeManager.primaryColor
+        Material.primary: bridge.themeManager.secondaryColor
+        Material.foreground: bridge.themeManager.textPrimary
+        Material.background: bridge.themeManager.bgDeep
+
         x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
         y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
 

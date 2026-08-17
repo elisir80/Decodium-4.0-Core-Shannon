@@ -16106,8 +16106,8 @@ Schwere (≥1100 ms oder ein Stoß von 4+ kurzen Stalls) sind das stärkste Sign
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep Decode bei TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Tiefendekodierung des letzten RX-Slots während TX (nur Liste):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -22203,8 +22203,8 @@ Schwere (≥1100 ms oder ein Stoß von 4+ kurzen Stalls) sind das stärkste Sign
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep Decode bei TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Tiefendekodierung des letzten RX-Slots während TX (nur Liste):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

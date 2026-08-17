@@ -3,6 +3,7 @@
 
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
@@ -26,13 +27,19 @@
 
 namespace {
 
-// Le release da controllare sono quelle del FORK, non di elisir80: gli utenti
-// installano i pacchetti provvisti pubblicati qui, e l'asset da scaricare vive
-// solo su questo repo. (DecodiumBridge::checkForUpdates guarda invece elisir80,
-// ed e' comunque spento dalla 1.0.62.)
-constexpr auto kReleasesApi =
+// Un'unica linea di release con due punti di pubblicazione. Il repository di
+// elisir80 e' primario; iu8lmc e' il fallback consultato soltanto quando il
+// primario non offre una versione piu' nuova o non restituisce una release
+// valida. Asset, note e pagina web restano quelli della release selezionata.
+constexpr auto kPrimaryRepository = "elisir80/Decodium-4.0-Core-Shannon";
+constexpr auto kPrimaryReleasesApi =
+    "https://api.github.com/repos/elisir80/Decodium-4.0-Core-Shannon/releases/latest";
+constexpr auto kPrimaryReleasesPage =
+    "https://github.com/elisir80/Decodium-4.0-Core-Shannon/releases/latest";
+constexpr auto kSecondaryRepository = "iu8lmc/Decodium-4.0-Core-Shannon";
+constexpr auto kSecondaryReleasesApi =
     "https://api.github.com/repos/iu8lmc/Decodium-4.0-Core-Shannon/releases/latest";
-constexpr auto kReleasesPage =
+constexpr auto kSecondaryReleasesPage =
     "https://github.com/iu8lmc/Decodium-4.0-Core-Shannon/releases/latest";
 
 // Chiavi nello store impostazioni (dalla 1.0.482 e' un INI, non piu' il registro).
@@ -46,28 +53,19 @@ QSettings settingsStore()
                      QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
 }
 
-// "1.0.482" -> {1,0,482}. Confronto numerico: "1.0.9" < "1.0.10", che il
-// confronto fra stringhe sbaglierebbe.
-QList<int> splitVersion(const QString& v)
+const char* releasesApi(bool secondary)
 {
-    QList<int> parts;
-    const auto tokens = v.split(QLatin1Char('.'));
-    for (const QString& t : tokens)
-        parts << t.toInt();
-    while (parts.size() < 3)
-        parts << 0;
-    return parts;
+    return secondary ? kSecondaryReleasesApi : kPrimaryReleasesApi;
 }
 
-bool isNewer(const QString& candidate, const QString& current)
+const char* releasesPage(bool secondary)
 {
-    const QList<int> c = splitVersion(candidate);
-    const QList<int> k = splitVersion(current);
-    for (int i = 0; i < 3; ++i) {
-        if (c[i] != k[i])
-            return c[i] > k[i];
-    }
-    return false;
+    return secondary ? kSecondaryReleasesPage : kPrimaryReleasesPage;
+}
+
+const char* repositoryName(bool secondary)
+{
+    return secondary ? kSecondaryRepository : kPrimaryRepository;
 }
 
 QString currentPlatformKey()
@@ -95,6 +93,7 @@ DecodiumUpdater::DecodiumUpdater(QObject* parent)
     : QObject(parent)
     , m_nam(new QNetworkAccessManager(this))
     , m_currentVersion(QStringLiteral(FORK_RELEASE_VERSION))
+    , m_releasePageUrl(QString::fromLatin1(kPrimaryReleasesPage))
 {
     m_checkOnStartup = settingsStore().value(kKeyCheckOnStartup, true).toBool();
     if (currentPlatformKey() == QLatin1String("linux")) {
@@ -181,19 +180,57 @@ void DecodiumUpdater::check(bool silent)
     setProgress(-1);
     setStatus(tr("Checking for updates..."));
 
-    QNetworkRequest req{QUrl(QString::fromLatin1(kReleasesApi))};
+    m_bestCheckedVersion.clear();
+    m_anyRepositoryCheckedSuccessfully = false;
+    requestReleaseCheck(silent, /*secondary=*/false);
+}
+
+void DecodiumUpdater::requestReleaseCheck(bool silent, bool secondary)
+{
+    qInfo().noquote()
+        << "[UPDATE] Checking GitHub releases"
+        << "repository=" << repositoryName(secondary)
+        << "role=" << (secondary ? "secondary" : "primary");
+
+    QNetworkRequest req{QUrl(QString::fromLatin1(releasesApi(secondary)))};
     req.setRawHeader("Accept", "application/vnd.github+json");
     req.setRawHeader("User-Agent", "Decodium/4.0");
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
                      QNetworkRequest::NoLessSafeRedirectPolicy);
 
     QNetworkReply* reply = m_nam->get(req);
-    connect(reply, &QNetworkReply::finished, this, [this, reply, silent]() {
-        onCheckFinished(reply, silent);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, silent, secondary]() {
+        onCheckFinished(reply, silent, secondary);
     });
 }
 
-void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent)
+void DecodiumUpdater::recordCheckCompleted()
+{
+    QSettings settings = settingsStore();
+    settings.setValue(kKeyLastCheckUtc, QDateTime::currentDateTimeUtc());
+    settings.sync();
+    setBusy(false);
+    setProgress(0);
+}
+
+void DecodiumUpdater::finishCheckWithoutUpdate(bool silent)
+{
+    recordCheckCompleted();
+    m_available = false;
+    m_latestVersion = m_bestCheckedVersion.isEmpty()
+        ? m_currentVersion
+        : m_bestCheckedVersion;
+    m_releaseNotes.clear();
+    m_downloadUrl.clear();
+    m_assetName.clear();
+    m_releasePageUrl = QString::fromLatin1(kPrimaryReleasesPage);
+    emit stateChanged();
+    setStatus(tr("Decodium is up to date (%1).").arg(m_currentVersion));
+    if (!silent)
+        emit upToDate(m_currentVersion);
+}
+
+void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent, bool secondary)
 {
     reply->deleteLater();
     if (m_offlineMode) {
@@ -202,44 +239,67 @@ void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent)
         setStatus(tr("Offline: update checks disabled"));
         return;
     }
-    setBusy(false);
-    setProgress(0);
 
-    QSettings s = settingsStore();
-    s.setValue(kKeyLastCheckUtc, QDateTime::currentDateTimeUtc());
-    s.sync();
-
+    QString failure;
+    QJsonObject root;
+    QString version;
     if (reply->error() != QNetworkReply::NoError) {
-        setStatus(tr("Could not check for updates: %1").arg(reply->errorString()));
-        // All'avvio un problema di rete non e' affar dell'utente: e' rumore.
-        if (!silent)
-            emit errorOccurred(m_statusText);
+        failure = reply->errorString();
+    } else {
+        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        if (doc.isObject()) {
+            root = doc.object();
+            QString tag = root.value(QStringLiteral("tag_name")).toString();
+            if (!tag.isEmpty()) {
+                version = tag;
+                if (version.startsWith(QLatin1Char('v'), Qt::CaseInsensitive))
+                    version.remove(0, 1);
+            }
+        }
+        if (version.isEmpty())
+            failure = tr("Could not read the release information.");
+    }
+
+    if (!version.isEmpty()) {
+        m_anyRepositoryCheckedSuccessfully = true;
+        if (m_bestCheckedVersion.isEmpty()
+            || decodium::update::isVersionNewer(version, m_bestCheckedVersion)) {
+            m_bestCheckedVersion = version;
+        }
+    } else {
+        qWarning().noquote()
+            << "[UPDATE] GitHub release check failed"
+            << "repository=" << repositoryName(secondary)
+            << "error=" << failure;
+    }
+
+    const auto decision = decodium::update::releaseCheckDecision(
+        version, m_currentVersion, !secondary);
+    if (decision == decodium::update::ReleaseCheckDecision::CheckFallback) {
+        qInfo().noquote()
+            << "[UPDATE] Primary has no newer release; checking fallback"
+            << "primary_version=" << (version.isEmpty() ? QStringLiteral("unavailable") : version)
+            << "current_version=" << m_currentVersion;
+        requestReleaseCheck(silent, /*secondary=*/true);
         return;
     }
 
-    const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-    if (!doc.isObject()) {
-        setStatus(tr("Could not read the release information."));
-        if (!silent)
-            emit errorOccurred(m_statusText);
+    if (decision == decodium::update::ReleaseCheckDecision::NoUpdate) {
+        if (m_anyRepositoryCheckedSuccessfully) {
+            finishCheckWithoutUpdate(silent);
+        } else {
+            recordCheckCompleted();
+            setStatus(tr("Could not check for updates: %1").arg(failure));
+            // All'avvio un problema di rete non e' affar dell'utente: e' rumore.
+            if (!silent)
+                emit errorOccurred(m_statusText);
+        }
         return;
     }
-
-    const QJsonObject root = doc.object();
-    const QString tag = root.value(QStringLiteral("tag_name")).toString();
-    if (tag.isEmpty()) {
-        setStatus(tr("Could not read the release information."));
-        if (!silent)
-            emit errorOccurred(m_statusText);
-        return;
-    }
-
-    QString version = tag;
-    if (version.startsWith(QLatin1Char('v'), Qt::CaseInsensitive))
-        version.remove(0, 1);
 
     m_latestVersion = version;
     m_releaseNotes  = root.value(QStringLiteral("body")).toString();
+    m_releasePageUrl = QString::fromLatin1(releasesPage(secondary));
 
     m_downloadUrl.clear();
     m_assetName.clear();
@@ -260,16 +320,9 @@ void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent)
     }
 
     const QString skipped = settingsStore().value(kKeySkippedVersion).toString();
-    const bool newer = isNewer(m_latestVersion, m_currentVersion);
-    m_available = newer;
+    m_available = true;
+    recordCheckCompleted();
     emit stateChanged();
-
-    if (!newer) {
-        setStatus(tr("Decodium is up to date (%1).").arg(m_currentVersion));
-        if (!silent)
-            emit upToDate(m_currentVersion);
-        return;
-    }
 
     setStatus(tr("Version %1 is available.").arg(m_latestVersion));
 
@@ -303,7 +356,7 @@ void DecodiumUpdater::downloadAndInstall()
     // Nessun asset per questa piattaforma: non lasciamo l'utente a mani vuote,
     // apriamo la pagina della release.
     if (m_downloadUrl.isEmpty()) {
-        QDesktopServices::openUrl(QUrl(QString::fromLatin1(kReleasesPage)));
+        QDesktopServices::openUrl(QUrl(m_releasePageUrl));
         return;
     }
 

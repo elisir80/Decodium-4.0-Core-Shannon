@@ -16647,8 +16647,8 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode in TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Deep decode of last RX slot during TX (list only):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -17575,7 +17575,7 @@ If unsure, use High.</translation>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8440"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P Filters Only:</translation>
+        <translation>W&amp;P Filters Only:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8448"/>
@@ -20152,7 +20152,7 @@ If unsure, use High.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="323"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P Filters Only:</translation>
+        <translation>W&amp;P Filters Only:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="331"/>
@@ -22237,8 +22237,8 @@ Severe ones (≥1100ms or burst of 4+ short stalls) are the strongest signal: if
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode in TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Deep decode of last RX slot during TX (list only):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

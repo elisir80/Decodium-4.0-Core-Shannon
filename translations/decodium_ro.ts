@@ -10729,8 +10729,8 @@ Cele grave (peste 1100 ms sau o rafală de cel puțin patru blocaje scurte) sunt
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Decodificare profundă în emisie:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Decodificarea profundă a ultimului slot RX în timpul TX (doar listă):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -16745,8 +16745,8 @@ Cele grave (peste 1100 ms sau o rafală de cel puțin patru blocaje scurte) sunt
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Decodificare profundă în emisie:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Decodificarea profundă a ultimului slot RX în timpul TX (doar listă):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

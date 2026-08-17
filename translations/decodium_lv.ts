@@ -16573,8 +16573,8 @@ Nopietnie (≥1100ms vai 4+ īsu aizķeršanos uzliesmojums) ir spēcīgākais s
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Dziļā dekodēšana TX laikā:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Pēdējā RX slota dziļā dekodēšana TX laikā (tikai saraksts):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -22216,8 +22216,8 @@ Nopietnie (≥1100ms vai 4+ īsu aizķeršanos uzliesmojums) ir spēcīgākais s
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Dziļā dekodēšana TX laikā:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Pēdējā RX slota dziļā dekodēšana TX laikā (tikai saraksts):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

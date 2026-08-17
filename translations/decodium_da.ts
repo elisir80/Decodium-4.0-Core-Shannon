@@ -16583,8 +16583,8 @@ De alvorlige (≥1100ms eller burst af 4+ korte stalls) er det stærkeste signal
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode i TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Dybdekodning af seneste RX-slot under TX (kun liste):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -17511,7 +17511,7 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8440"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P kun filtre:</translation>
+        <translation>W&amp;P kun filtre:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8448"/>
@@ -20116,7 +20116,7 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="323"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P kun filtre:</translation>
+        <translation>W&amp;P kun filtre:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="331"/>
@@ -22201,8 +22201,8 @@ De alvorlige (≥1100ms eller burst af 4+ korte stalls) er det stærkeste signal
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode i TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Dybdekodning af seneste RX-slot under TX (kun liste):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

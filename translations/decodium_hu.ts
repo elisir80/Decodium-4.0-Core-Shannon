@@ -16453,8 +16453,8 @@ A súlyosak (≥1100ms vagy 4+ rövid elakadás csomója) a legerősebb jel: ha 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Mély dekódolás TX-ben:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Az utolsó RX-időrés mély dekódolása TX alatt (csak lista):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -17381,7 +17381,7 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8440"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P csak szűrők:</translation>
+        <translation>W&amp;P csak szűrők:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8448"/>
@@ -19986,7 +19986,7 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="323"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P csak szűrők:</translation>
+        <translation>W&amp;P csak szűrők:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="331"/>
@@ -22071,8 +22071,8 @@ A súlyosak (≥1100ms vagy 4+ rövid elakadás csomója) a legerősebb jel: ha 
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Mély dekódolás TX-ben:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Az utolsó RX-időrés mély dekódolása TX alatt (csak lista):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

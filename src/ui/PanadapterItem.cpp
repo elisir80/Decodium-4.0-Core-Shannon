@@ -231,6 +231,18 @@ float gpuDirectAutoRangeFloorMarginDb()
     return env > 0 ? static_cast<float>(qBound(0, env, 40)) : 6.0f;
 }
 
+float gpuDirectNoiseCutBiasDb(int noiseFloorPercentile)
+{
+    // GPU Direct estimates the floor from time-domain RMS and therefore has no
+    // sorted FFT-bin percentile to select.  Convert the UI percentile into the
+    // equivalent white-noise FFT power quantile instead: 10% remains exactly
+    // neutral, lower values reveal weaker signals and higher values cut more.
+    float const probability = static_cast<float>(qBound(5, noiseFloorPercentile, 40)) / 100.0f;
+    float const quantilePower = -std::log1p(-probability);
+    float const referencePower = -std::log1p(-0.10f);
+    return 10.0f * std::log10(quantilePower / referencePower);
+}
+
 float gpuDirectAutoRangeSpanDb(int contrastLevel)
 {
     int const env = qEnvironmentVariableIntValue("DECODIUM_GPU_PANADAPTER_DIRECT_SPAN_DB");
@@ -929,6 +941,7 @@ struct PanadapterItem::GpuFftState
     bool loggedDirectActive = false;
     bool loggedDirectDebugReadback = false;
     bool loggedDirectAutoRange = false;
+    int loggedDirectNoiseCutPercent = -1;
     bool readbackPending = false;
     qint64 readbackPendingSinceMs = 0;
     quint64 readbackSerial = 0;
@@ -2361,6 +2374,20 @@ void PanadapterItem::setSpectrum3d(bool enabled)
     update();
 }
 
+void PanadapterItem::setNoiseFloorPercentile(int value)
+{
+    int const clamped = qBound(5, value, 40);
+    {
+        QMutexLocker lock(&m_mutex);
+        if (m_noiseFloorPercentile == clamped)
+            return;
+        m_noiseFloorPercentile = clamped;
+    }
+
+    emit noiseFloorPercentileChanged();
+    update();
+}
+
 void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
                                       float minDb, float maxDb,
                                       float freqMinHz, float freqMaxHz)
@@ -2461,7 +2488,8 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
                 << "visible_hz=" << QStringLiteral("%1..%2")
                                       .arg(visibleStart, 0, 'f', 1)
                                       .arg(visibleEnd, 0, 'f', 1)
-                << "floor_p25_db=" << fl
+                << "floor_percentile=" << m_noiseFloorPercentile
+                << "floor_percentile_db=" << fl
                 << "reset=" << resetFloor
                 << "span_db=80";
         }
@@ -4996,6 +5024,8 @@ void PanadapterItem::recordGpuFftCompute()
         float peakDecay = 0.97f;
         float displayMinDb = -70.0f;
         float displayMaxDb = 35.0f;
+        int noiseCutPercent = 10;
+        float noiseCutBiasDb = 0.0f;
         float estimatedFloorDb = estimateGpuDirectNoiseFloorDb(frame.sampleRms, N)
             + gpuDirectAutoRangeFloorOffsetDb();
         bool rangePropertiesChanged = false;
@@ -5007,6 +5037,8 @@ void PanadapterItem::recordGpuFftCompute()
             waterfallWriteRow = m_wfWriteRow % waterfallRows;
             peakHold = m_peakHold;
             peakDecay = m_peakDecay;
+            noiseCutPercent = m_noiseFloorPercentile;
+            noiseCutBiasDb = gpuDirectNoiseCutBiasDb(noiseCutPercent);
             if (m_autoRange) {
                 if (!std::isfinite(estimatedFloorDb))
                     estimatedFloorDb = std::isfinite(m_measuredFloor) ? m_measuredFloor : -70.0f;
@@ -5022,7 +5054,8 @@ void PanadapterItem::recordGpuFftCompute()
                 float const directBlackThresh = waterfallBlackThresholdForLevel(m_blackLevel, true);
                 displayMinDb = measuredFloorDb
                     - directBlackThresh * displayRangeDb
-                    - gpuDirectAutoRangeFloorMarginDb();
+                    - gpuDirectAutoRangeFloorMarginDb()
+                    + noiseCutBiasDb;
                 displayMaxDb = displayMinDb + displayRangeDb;
                 if (std::abs(m_minDb - displayMinDb) > 0.25f
                     || std::abs(m_maxDb - displayMaxDb) > 0.25f) {
@@ -5376,7 +5409,9 @@ void PanadapterItem::recordGpuFftCompute()
                 << "fallback=FFTW_CPU";
             m_gpuFft->loggedDirectActive = true;
         }
-        if (m_autoRange && !m_gpuFft->loggedDirectAutoRange) {
+        if (m_autoRange
+            && (!m_gpuFft->loggedDirectAutoRange
+                || m_gpuFft->loggedDirectNoiseCutPercent != noiseCutPercent)) {
             qInfo().noquote()
                 << "[GPUDBG] Panadapter direct auto-range active"
                 << "input_rms=" << frame.sampleRms
@@ -5386,9 +5421,12 @@ void PanadapterItem::recordGpuFftCompute()
                 << "span_db=" << (displayMaxDb - displayMinDb)
                 << "contrast=" << m_contrastLevel
                 << "floor_margin_db=" << gpuDirectAutoRangeFloorMarginDb()
+                << "cut_percent=" << noiseCutPercent
+                << "cut_bias_db=" << noiseCutBiasDb
                 << "black_threshold=" << waterfallBlackThresholdForLevel(m_blackLevel, true)
                 << "readback=off";
             m_gpuFft->loggedDirectAutoRange = true;
+            m_gpuFft->loggedDirectNoiseCutPercent = noiseCutPercent;
         }
         if (debugReadbackEnabled && !m_gpuFft->loggedDirectDebugReadback) {
             qInfo().noquote()

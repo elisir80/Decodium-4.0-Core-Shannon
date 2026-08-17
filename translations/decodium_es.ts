@@ -16445,8 +16445,8 @@ Los severos (≥1100ms o ráfaga de 4+ stalls cortos) son la señal más fuerte:
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode en TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Decodificación profunda de la última ranura RX durante TX (solo lista):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -22542,8 +22542,8 @@ Los severos (≥1100ms o ráfaga de 4+ stalls cortos) son la señal más fuerte:
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode en TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Decodificación profunda de la última ranura RX durante TX (solo lista):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

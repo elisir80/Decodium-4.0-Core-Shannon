@@ -153,15 +153,7 @@ public:
         float const clamped = qBound(0.0f, v, 40.0f);
         if (!qFuzzyCompare(m_spectrum3dFloorDepth, clamped)){m_spectrum3dFloorDepth=clamped;emit spectrum3dFloorDepthChanged();update();}
     }
-    void setNoiseFloorPercentile(int v)
-    {
-        int const clamped = qBound(5, v, 40);
-        if (m_noiseFloorPercentile != clamped) {
-            m_noiseFloorPercentile = clamped;
-            emit noiseFloorPercentileChanged();
-            update();
-        }
-    }
+    void setNoiseFloorPercentile(int v);
     void setPeakDecay(float v)     { if (m_peakDecay!=v){m_peakDecay=v;emit peakDecayChanged();} }
     void setAvgFrames(int v)       { if (m_avgFrames!=v){m_avgFrames=qBound(1,v,32);emit avgFramesChanged();} }
     void setSpectrumHeight(int v)  { if (m_spectrumH!=v){m_spectrumH=v;emit spectrumHeightChanged();markGeomDirty();} }

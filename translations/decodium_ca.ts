@@ -16586,8 +16586,8 @@ Els greus (≥1100ms o ràfega de 4+ bloquejos curts) són el senyal més fort: 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode a TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Decodificació profunda de l&apos;últim slot RX durant TX (només llista):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -17514,7 +17514,7 @@ En cas de dubte, fes servir Alta.</translation>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8440"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P Filters Only:</translation>
+        <translation>W&amp;P Filters Only:</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="8448"/>
@@ -20119,7 +20119,7 @@ En cas de dubte, fes servir Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="323"/>
         <source>W&amp;P Filters Only:</source>
-        <translation>W&amp;amp;P Filters Only:</translation>
+        <translation>W&amp;P Filters Only:</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="331"/>
@@ -22204,8 +22204,8 @@ Els greus (≥1100ms o ràfega de 4+ bloquejos curts) són el senyal més fort: 
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Deep decode a TX:</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Decodificació profunda de l&apos;últim slot RX durant TX (només llista):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

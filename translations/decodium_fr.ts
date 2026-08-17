@@ -16106,8 +16106,8 @@ Les sévères (≥1100ms ou rafale de 4+ courts ralentissements) sont le signal 
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5399"/>
-        <source>Deep decode in TX:</source>
-        <translation>Décodage profond en TX :</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Décodage profond du dernier créneau RX pendant TX (liste uniquement) :</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="5411"/>
@@ -22203,8 +22203,8 @@ Les sévères (≥1100ms ou rafale de 4+ courts ralentissements) sont le signal 
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="383"/>
-        <source>Deep decode in TX:</source>
-        <translation>Décodage profond en TX :</translation>
+        <source>Deep decode of last RX slot during TX (list only):</source>
+        <translation>Décodage profond du dernier créneau RX pendant TX (liste uniquement) :</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab5.qml" line="395"/>

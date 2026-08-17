@@ -27,11 +27,16 @@ Dialog {
     readonly property int popupBaseHeight: Math.min(popupParentHeight, popupScreenHeight)
     readonly property int popupMaxWidth: Math.max(1, popupBaseWidth - popupViewportMargin)
     readonly property int popupMaxHeight: Math.max(1, popupBaseHeight - popupViewportMargin)
+    // Accessibility zoom for this Setup instance only.  It deliberately does
+    // not use bridge.fontScale, which also changes the main operating window.
+    property real settingsFontScale: 1.0
+    readonly property int settingsFontZoomPercent: Math.round(settingsFontScale * 100)
+    readonly property real effectiveSettingsContentWidth: width / settingsFontScale
     // At 1280 px the dialog still has about 1,050 px for the page after the
     // sidebar.  The old 1180 px threshold therefore selected the wide grid
     // and pushed its fourth column beyond the screen.
-    readonly property bool compactSettingsLayout: width < 1420
-    readonly property bool narrowSettingsLayout: width < 1060
+    readonly property bool compactSettingsLayout: effectiveSettingsContentWidth < 1420
+    readonly property bool narrowSettingsLayout: effectiveSettingsContentWidth < 1060
     title: qsTr("Settings")
     modal: !warmupInProgress
     opacity: warmupInProgress ? 0 : 1
@@ -56,6 +61,21 @@ Dialog {
         return isFinite(savedTab) ? Math.max(0, Math.min(13, Math.floor(savedTab))) : 0
     }
     property bool closeAlreadyPersisted: false
+
+    function increaseSetupFont() {
+        settingsFontScale = Math.min(1.3,
+                                     Math.round((settingsFontScale + 0.1) * 10) / 10)
+    }
+
+    function decreaseSetupFont() {
+        settingsFontScale = Math.max(1.0,
+                                     Math.round((settingsFontScale - 0.1) * 10) / 10)
+    }
+
+    function resetSetupFont() {
+        settingsFontScale = 1.0
+    }
+
     readonly property int labelWidth: narrowSettingsLayout ? 112 : (compactSettingsLayout ? 132 : 172)
     readonly property int fieldMinWidth: narrowSettingsLayout ? 180 : (compactSettingsLayout ? 240 : 380)
     readonly property int wideFieldMinWidth: narrowSettingsLayout ? 260 : (compactSettingsLayout ? 340 : 620)
@@ -1589,6 +1609,108 @@ Dialog {
 
             Rectangle {
                 width: 34; height: 34; radius: 6
+                readonly property bool available: settingsDialog.settingsFontScale > 1.0
+                color: !available ? Qt.rgba(1, 1, 1, 0.04)
+                       : setupFontDecreaseMA.containsMouse
+                       ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
+                       : Qt.rgba(1, 1, 1, 0.1)
+                border.color: !available ? glassBorder
+                              : setupFontDecreaseMA.containsMouse ? secondaryCyan : glassBorder
+
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("A−")
+                    color: !parent.available ? textDim
+                           : setupFontDecreaseMA.containsMouse ? secondaryCyan : textPrimary
+                    font.pixelSize: 13
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: setupFontDecreaseMA
+                    anchors.fill: parent
+                    enabled: parent.available
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: settingsDialog.decreaseSetupFont()
+                }
+
+                ToolTip.visible: setupFontDecreaseMA.containsMouse
+                ToolTip.delay: 400
+                ToolTip.text: qsTr("Setup text size: %1%. Decrease. This affects Setup only.")
+                              .arg(settingsDialog.settingsFontZoomPercent)
+            }
+
+            Rectangle {
+                width: 34; height: 34; radius: 6
+                readonly property bool available: settingsDialog.settingsFontScale < 1.3
+                color: !available ? Qt.rgba(1, 1, 1, 0.04)
+                       : setupFontIncreaseMA.containsMouse
+                         ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
+                         : Qt.rgba(1, 1, 1, 0.1)
+                border.color: !available ? glassBorder
+                              : setupFontIncreaseMA.containsMouse ? secondaryCyan : glassBorder
+
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("A+")
+                    color: !parent.available ? textDim
+                           : setupFontIncreaseMA.containsMouse ? secondaryCyan : textPrimary
+                    font.pixelSize: 13
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: setupFontIncreaseMA
+                    anchors.fill: parent
+                    enabled: parent.available
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: settingsDialog.increaseSetupFont()
+                }
+
+                ToolTip.visible: setupFontIncreaseMA.containsMouse
+                ToolTip.delay: 400
+                ToolTip.text: qsTr("Setup text size: %1%. Increase. This affects Setup only.")
+                              .arg(settingsDialog.settingsFontZoomPercent)
+            }
+
+            Rectangle {
+                width: 48; height: 34; radius: 6
+                readonly property bool available: settingsDialog.settingsFontScale !== 1.0
+                color: !available ? Qt.rgba(1, 1, 1, 0.04)
+                       : setupFontResetMA.containsMouse
+                         ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.20)
+                         : Qt.rgba(1, 1, 1, 0.1)
+                border.color: !available ? glassBorder
+                              : setupFontResetMA.containsMouse ? secondaryCyan : glassBorder
+
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("Reset")
+                    color: !parent.available ? textDim
+                           : setupFontResetMA.containsMouse ? secondaryCyan : textPrimary
+                    font.pixelSize: 9
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: setupFontResetMA
+                    anchors.fill: parent
+                    enabled: parent.available
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: settingsDialog.resetSetupFont()
+                }
+
+                ToolTip.visible: setupFontResetMA.containsMouse
+                ToolTip.delay: 400
+                ToolTip.text: qsTr("Setup text size: %1%. Reset to 100%. This affects Setup only.")
+                              .arg(settingsDialog.settingsFontZoomPercent)
+            }
+
+            Rectangle {
+                width: 34; height: 34; radius: 6
                 color: closeMA.containsMouse ? Qt.rgba(0.95,0.26,0.21,0.3) : Qt.rgba(1,1,1,0.1)
                 border.color: closeMA.containsMouse ? "#f44336" : glassBorder
                 Text { anchors.centerIn: parent; text: qsTr("\u2715"); color: closeMA.containsMouse ? "#f44336" : textPrimary; font.pixelSize: 14 }
@@ -1672,16 +1794,23 @@ Dialog {
     contentItem: Item {
         clip: true
 
-        RowLayout {
-            anchors.fill: parent
-            spacing: 0
+        Item {
+            id: settingsContentScaler
+            width: parent.width / settingsDialog.settingsFontScale
+            height: parent.height / settingsDialog.settingsFontScale
+            scale: settingsDialog.settingsFontScale
+            transformOrigin: Item.TopLeft
 
-            // ── Sidebar ──────────────────────────────────────────────
-            Rectangle {
-                Layout.preferredWidth: settingsDialog.narrowSettingsLayout ? 156 : (settingsDialog.compactSettingsLayout ? 180 : 210)
-                Layout.minimumWidth: settingsDialog.narrowSettingsLayout ? 148 : (settingsDialog.compactSettingsLayout ? 160 : 210)
-                Layout.fillHeight: true
-                color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
+            RowLayout {
+                anchors.fill: parent
+                spacing: 0
+
+                // ── Sidebar ──────────────────────────────────────────────
+                Rectangle {
+                    Layout.preferredWidth: settingsDialog.narrowSettingsLayout ? 156 : (settingsDialog.compactSettingsLayout ? 180 : 210)
+                    Layout.minimumWidth: settingsDialog.narrowSettingsLayout ? 148 : (settingsDialog.compactSettingsLayout ? 160 : 210)
+                    Layout.fillHeight: true
+                    color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.5)
 
                 Flickable {
                     id: settingsTabScroll
@@ -2001,6 +2130,7 @@ Dialog {
 
             } // tab host
         } // RowLayout
-    } // contentItem
+    } // settingsContentScaler
+} // contentItem
 
-}
+} // SettingsDialog
