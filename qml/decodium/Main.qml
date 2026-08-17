@@ -1349,8 +1349,13 @@ ApplicationWindow {
         property real aspectRatio: 15 / 7
         property int minWidth: 450
         property int maxWidth: 1800
-        property int cornerSize: 18
+        // A frameless Windows window has no native resize border.  Keep a
+        // generous hit target for the two proportional corner grips so the
+        // resize remains usable with display scaling enabled.
+        property int cornerSize: 32
         property bool resizeActive: false
+        property bool nativeResizeActive: false
+        property bool nativeResizeAdjusting: false
 
         anchors.fill: parent
         enabled: !!targetWindow && aspectRatio > 0
@@ -1367,8 +1372,37 @@ ApplicationWindow {
             mainWindow.beginFloatingGeometryInteraction()
         }
 
+        // QWindow's native resize path is more reliable than changing the
+        // geometry one frame at a time on Windows, especially for a
+        // transparent frameless window.  macOS keeps the existing manual
+        // proportional path, which also preserves its current behaviour.
+        function startNativeResize(edges) {
+            if (Qt.platform.os !== "windows" || !targetWindow
+                    || typeof targetWindow.startSystemResize !== "function")
+                return false
+            try {
+                return targetWindow.startSystemResize(edges)
+            } catch (error) {
+                console.log("Decometer startSystemResize failed: " + error)
+            }
+            return false
+        }
+
+        function constrainNativeAspect() {
+            if (!nativeResizeActive || nativeResizeAdjusting || !targetWindow)
+                return
+            var bounded = boundedWidth(targetWindow.width)
+            var proportionalHeight = Math.max(targetWindow.minimumHeight,
+                                              Math.min(targetWindow.maximumHeight,
+                                                       Math.round(bounded / aspectRatio)))
+            nativeResizeAdjusting = true
+            targetWindow.width = bounded
+            targetWindow.height = proportionalHeight
+            nativeResizeAdjusting = false
+        }
+
         function applyBottomResize(handle, mouse, fromLeft) {
-            if (!targetWindow || !handle.pressed)
+            if (!targetWindow || !handle.pressed || nativeResizeActive)
                 return
             var currentGlobal = handle.mapToGlobal(mouse.x, mouse.y)
             var deltaX = currentGlobal.x - handle.pressGlobalPos.x
@@ -1390,6 +1424,7 @@ ApplicationWindow {
         function finishResize() {
             if (!targetWindow || !resizeActive)
                 return
+            nativeResizeActive = false
             resizeActive = false
             mainWindow.finishFloatingWindowDrag(targetWindow, aspectRatio)
             mainWindow.endFloatingGeometryInteraction()
@@ -1414,6 +1449,8 @@ ApplicationWindow {
                 pressWindowSize = Qt.size(proportionalResizeRoot.targetWindow.width,
                                           proportionalResizeRoot.targetWindow.height)
                 proportionalResizeRoot.beginResize()
+                proportionalResizeRoot.nativeResizeActive =
+                        proportionalResizeRoot.startNativeResize(Qt.LeftEdge | Qt.BottomEdge)
             }
             onPositionChanged: function(mouse) {
                 proportionalResizeRoot.applyBottomResize(proportionalBottomLeft, mouse, true)
@@ -1441,6 +1478,8 @@ ApplicationWindow {
                 pressWindowSize = Qt.size(proportionalResizeRoot.targetWindow.width,
                                           proportionalResizeRoot.targetWindow.height)
                 proportionalResizeRoot.beginResize()
+                proportionalResizeRoot.nativeResizeActive =
+                        proportionalResizeRoot.startNativeResize(Qt.RightEdge | Qt.BottomEdge)
             }
             onPositionChanged: function(mouse) {
                 proportionalResizeRoot.applyBottomResize(proportionalBottomRight, mouse, false)
@@ -12053,7 +12092,11 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
         onXChanged: mainWindow.scheduleWindowStateSave()
         onYChanged: mainWindow.scheduleWindowStateSave()
-        onWidthChanged: mainWindow.scheduleWindowStateSave()
+        onWidthChanged: {
+            mainWindow.scheduleWindowStateSave()
+            if (decometerResizeHandles.nativeResizeActive)
+                decometerResizeHandles.constrainNativeAspect()
+        }
         onHeightChanged: mainWindow.scheduleWindowStateSave()
         onClosing: function(close) {
             if (!mainWindow.applicationClosing) {
@@ -12084,6 +12127,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         ProportionalResizeHandles {
+            id: decometerResizeHandles
             targetWindow: decometerFloatingWindow
             aspectRatio: decometerFloatingWindow.faceAspectRatio
             minWidth: decometerFloatingWindow.minimumWidth

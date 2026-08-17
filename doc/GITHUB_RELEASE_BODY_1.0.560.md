@@ -18,6 +18,13 @@ breakpoints are calculated from the effective scaled content width, so the
 Settings layout continues to select the appropriate compact or wide form while
 the text size changes.
 
+### Decometer resizing on Windows
+
+The frameless Decometer window now uses Qt's native Windows resize operation
+from its proportional corner grips, with the existing manual path retained on
+macOS and other platforms. The hit area is larger for high-DPI displays, and
+the final geometry is clamped back to the instrument's fixed 15:7 aspect ratio.
+
 ### Readable Settings controls in both themes
 
 The top-level Settings window now receives the same Qt Material palette as the
@@ -75,6 +82,14 @@ modifica i caratteri né il layout della dashboard operativa principale. I
 breakpoint responsive vengono calcolati sulla larghezza effettiva del
 contenuto scalato, così il layout di Impostazioni continua a scegliere
 correttamente la variante compatta o larga anche dopo la modifica del testo.
+
+### Ridimensionamento di Decometer su Windows
+
+La finestra Decometer senza cornice usa ora il ridimensionamento nativo di
+Windows quando si trascinano gli angoli proporzionali; su macOS e sulle altre
+piattaforme resta attivo il percorso manuale già esistente. La zona di aggancio
+è stata ampliata per i monitor ad alta densità e la geometria finale viene
+riportata al rapporto fisso 15:7 dello strumento.
 
 ### Controlli leggibili in Impostazioni con entrambi i temi
 
