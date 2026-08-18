@@ -271,6 +271,48 @@ QString DecodiumCatShare::handleLine(const QString& line)
     if (cmd == QLatin1String("i") || cmd == QLatin1String("\\get_split_freq"))
         return QStringLiteral("%1\n").arg(qint64(up ? m_rig->txFrequency() : 0));
 
+    // ---- misuratori: potenza, ROS, ALC
+    //
+    // Serve a chi opera da remoto. Quando la radio la tiene Decodium nessun
+    // altro programma puo' aprire la stessa seriale, e dall'altra parte del
+    // mondo si trasmetteva senza vedere ne' quanto si stava erogando ne' se
+    // l'antenna rispondeva. Decodium queste tre cose le misura gia': mancava
+    // soltanto il modo di chiederle da fuori.
+    //
+    // I nomi sono quelli di Hamlib, cosi' li capisce qualunque client scritto
+    // per rigctl senza sapere che dall'altra parte c'e' Decodium.
+    if (cmd == QLatin1String("l") || cmd == QLatin1String("\\get_level")) {
+        if (parts.size() < 2 || !up) return QString::fromLatin1(kNotImpl);
+        auto const quale = parts.at(1).trimmed().toUpper();
+
+        // A riposo i misuratori di trasmissione non misurano niente. Rispondere
+        // zero direbbe «nessuna potenza, ROS perfetto», che somiglia a una
+        // stazione che va benissimo: meglio dire che il dato non c'e'.
+        bool const diTx = quale == QLatin1String("SWR")
+                          || quale == QLatin1String("ALC")
+                          || quale.startsWith(QLatin1String("RFPOWER_METER"));
+        if (diTx && !m_rig->pttActive()) return QString::fromLatin1(kNotImpl);
+
+        if (quale == QLatin1String("SWR")) {
+            double const v = m_rig->swr();
+            if (v < 1.0) return QString::fromLatin1(kNotImpl);
+            return QStringLiteral("%1\n").arg(v, 0, 'f', 6);
+        }
+        if (quale == QLatin1String("ALC")) {
+            // Se la radio non sa dare l'ALC, Decodium lo segna non valido: quel
+            // «non lo so» va riportato tale e quale, non tradotto in zero.
+            if (!m_rig->alcValid()) return QString::fromLatin1(kNotImpl);
+            return QStringLiteral("%1\n").arg(m_rig->alc() / 100.0, 0, 'f', 6);
+        }
+        if (quale == QLatin1String("RFPOWER_METER_WATTS")) {
+            double const w = m_rig->powerWatts();
+            if (w <= 0.0) return QString::fromLatin1(kNotImpl);
+            return QStringLiteral("%1\n").arg(w, 0, 'f', 6);
+        }
+        return QString::fromLatin1(kNotImpl);
+    }
+
+
     // ---- scritture
     if (cmd == QLatin1String("F") || cmd == QLatin1String("\\set_freq")) {
         if (refuseWrite(cmd, false)) return QString::fromLatin1(kRefused);
