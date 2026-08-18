@@ -237,8 +237,14 @@ bool DecodiumCatShare::refuseWrite(const QString& command, bool pttCommand)
 
 QString DecodiumCatShare::handleLine(const QString& line)
 {
-    // Alcuni client antepongono '+' o ';' per chiedere la forma estesa della
-    // risposta. Qui si serve sempre la forma semplice, che tutti accettano.
+    // Alcuni client (rigctld "netrigctl", usato anche dall'app del telefono)
+    // antepongono '+' per chiedere la forma estesa della risposta ai comandi
+    // \get_level: due righe, "get_level: <LIVELLO>" e "Level Value: <numero>",
+    // invece del solo numero nudo. Senza quella forma un client che manda
+    // "+\get_level SWR" non riconosce affatto la risposta e il misuratore
+    // resta vuoto per sempre, anche se il dato c'e'. Gli altri comandi
+    // restano nella forma semplice, che tutti accettano comunque.
+    bool const extended = !line.isEmpty() && line.at(0) == QLatin1Char('+');
     QString cleaned = line;
     while (!cleaned.isEmpty() && (cleaned.at(0) == QLatin1Char('+')
                                   || cleaned.at(0) == QLatin1Char(';')))
@@ -301,31 +307,47 @@ QString DecodiumCatShare::handleLine(const QString& line)
         if (parts.size() < 2 || !up) return QString::fromLatin1(kNotImpl);
         auto const quale = parts.at(1).trimmed().toUpper();
 
+        // Nella forma estesa anche l'errore va introdotto dal nome del
+        // livello: senza quella riga il client non saprebbe a quale
+        // misuratore riferire il RPRT che segue.
+        auto const fail = [&]() -> QString {
+            if (extended)
+                return QStringLiteral("get_level: %1\n").arg(quale)
+                     + QString::fromLatin1(kNotImpl);
+            return QString::fromLatin1(kNotImpl);
+        };
+        auto const ok = [&](double v) -> QString {
+            if (extended)
+                return QStringLiteral("get_level: %1\nLevel Value: %2\nRPRT 0\n")
+                    .arg(quale).arg(v, 0, 'f', 6);
+            return QStringLiteral("%1\n").arg(v, 0, 'f', 6);
+        };
+
         // A riposo i misuratori di trasmissione non misurano niente. Rispondere
         // zero direbbe «nessuna potenza, ROS perfetto», che somiglia a una
         // stazione che va benissimo: meglio dire che il dato non c'e'.
         bool const diTx = quale == QLatin1String("SWR")
                           || quale == QLatin1String("ALC")
                           || quale.startsWith(QLatin1String("RFPOWER_METER"));
-        if (diTx && !m_rig->pttActive()) return QString::fromLatin1(kNotImpl);
+        if (diTx && !m_rig->pttActive()) return fail();
 
         if (quale == QLatin1String("SWR")) {
             double const v = m_rig->swr();
-            if (v < 1.0) return QString::fromLatin1(kNotImpl);
-            return QStringLiteral("%1\n").arg(v, 0, 'f', 6);
+            if (v < 1.0) return fail();
+            return ok(v);
         }
         if (quale == QLatin1String("ALC")) {
             // Se la radio non sa dare l'ALC, Decodium lo segna non valido: quel
             // «non lo so» va riportato tale e quale, non tradotto in zero.
-            if (!m_rig->alcValid()) return QString::fromLatin1(kNotImpl);
-            return QStringLiteral("%1\n").arg(m_rig->alc() / 100.0, 0, 'f', 6);
+            if (!m_rig->alcValid()) return fail();
+            return ok(m_rig->alc() / 100.0);
         }
         if (quale == QLatin1String("RFPOWER_METER_WATTS")) {
             double const w = m_rig->powerWatts();
-            if (w <= 0.0) return QString::fromLatin1(kNotImpl);
-            return QStringLiteral("%1\n").arg(w, 0, 'f', 6);
+            if (w <= 0.0) return fail();
+            return ok(w);
         }
-        return QString::fromLatin1(kNotImpl);
+        return fail();
     }
 
 
