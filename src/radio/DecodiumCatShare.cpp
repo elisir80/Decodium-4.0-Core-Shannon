@@ -181,7 +181,16 @@ QString DecodiumCatShare::dumpState() const
         "0\n0\n0\n0\n"                               // rit, xit, ifshift, announces
         "0\n"                                        // preamplificatori
         "0\n"                                        // attenuatori
-        "0x0\n0x0\n0x0\n0x0\n0x0\n0x0\n"             // func/level/parm
+        // has_get_func, has_set_func, has_get_level, has_set_level, has_get_parm,
+        // has_set_parm. La terza riga e' quella che conta: dichiarando 0x0 si
+        // diceva ai client «questo rig non ha misuratori», e loro smettevano di
+        // chiederli — Decolink non mandava nemmeno la domanda, e le barre di
+        // potenza, ROS e ALC restavano vuote per sempre.
+        //
+        // 0x8170000000 = SWR | ALC | STRENGTH | RFPOWER_METER | RFPOWER_METER_WATTS.
+        // Sono in sola lettura: la scrittura resta 0x0, perche' impostare la
+        // potenza di una radio altrui non e' compito di questo canale.
+        "0x0\n0x0\n0x8170000000\n0x0\n0x0\n0x0\n"
         "vfo_ops=0x0\n"
         "ptt_type=0x1\n"
         "targetable_vfo=0x0\n"
