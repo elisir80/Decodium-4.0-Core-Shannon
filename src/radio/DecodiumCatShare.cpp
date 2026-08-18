@@ -252,6 +252,13 @@ QString DecodiumCatShare::handleLine(const QString& line)
     if (cmd == QLatin1String("\\get_powerstat"))
         return QStringLiteral("1\n");
 
+    // Hamlib lo chiede all'apertura del collegamento. Non gestirlo lasciava
+    // una riga «comando non gestito» nel registro a ogni client che si
+    // collegava: la radio non ha un blocco del VFO, e dirlo e' piu' chiaro
+    // che tacere.
+    if (cmd == QLatin1String("\\get_lock_mode"))
+        return QStringLiteral("0\n");
+
     bool const up = m_rig && m_rig->connected();
 
     // ---- letture: rispondono dallo stato gia' in memoria, senza generare

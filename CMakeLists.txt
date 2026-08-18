@@ -2170,14 +2170,25 @@ endif ()
 # Copy a clean QML tree next to the decodium_qml executable on every build.
 # In particular, remove stale qmlcachegen artifacts left by older builds:
 # Qt prefers adjacent .qmlc files over the updated source QML.
-add_custom_target (sync_decodium_qml ALL
-  COMMAND ${CMAKE_COMMAND} -E remove_directory
-    "${CMAKE_BINARY_DIR}/qml"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_CURRENT_SOURCE_DIR}/qml"
-    "${CMAKE_BINARY_DIR}/qml"
-  COMMENT "Syncing QML files to build output"
-)
+# Quando si compila dentro la cartella dei sorgenti, origine e destinazione
+# sono la stessa cosa: questo passo cancellava i .qml e poi provava a
+# ricopiarli da se stessi, cioe' li perdeva. Chi compilava in-source si
+# ritrovava settantaquattro file spariti e nessun indizio sul perche'.
+if (NOT "${CMAKE_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+  add_custom_target (sync_decodium_qml ALL
+    COMMAND ${CMAKE_COMMAND} -E remove_directory
+      "${CMAKE_BINARY_DIR}/qml"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+      "${CMAKE_BINARY_DIR}/qml"
+    COMMENT "Syncing QML files to build output"
+  )
+else ()
+  # I file sono gia' al loro posto: non c'e' niente da copiare.
+  add_custom_target (sync_decodium_qml ALL
+    COMMENT "QML gia' in posizione (compilazione dentro i sorgenti)"
+  )
+endif ()
 
 add_custom_target (sync_decodium_assets ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory
