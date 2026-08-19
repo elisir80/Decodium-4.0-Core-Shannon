@@ -1372,19 +1372,26 @@ ApplicationWindow {
             mainWindow.beginFloatingGeometryInteraction()
         }
 
-        // QWindow's native resize path is more reliable than changing the
-        // geometry one frame at a time on Windows, especially for a
-        // transparent frameless window.  macOS keeps the existing manual
-        // proportional path, which also preserves its current behaviour.
+        // Il percorso nativo di Windows E' STATO PROVATO E NON FUNZIONA su
+        // questa finestra, ed e' peggio di non averlo: startSystemResize()
+        // risponde true — cioe' "il ridimensionamento me lo prendo io" — ma
+        // poi non muove un pixel, perche' la finestra e' frameless e Windows
+        // non ha un bordo di sistema da trascinare. Quella risposta accendeva
+        // nativeResizeActive, che a sua volta spegne il percorso manuale qui
+        // sotto: il risultato era una finestra semplicemente NON
+        // ridimensionabile, con gli angoli che rispondevano al mouse senza
+        // che succedesse niente.
+        //
+        // Verificato con una sonda sul posto: beginResize scatta, pressed e'
+        // true, startSystemResize torna true, la geometria resta identica.
+        //
+        // Si tiene quindi il percorso manuale, che aggiorna width e height a
+        // ogni movimento: meno fluido di quello di sistema, ma e' sotto il
+        // nostro controllo, rispetta il rapporto 15:7 esatto e soprattutto
+        // funziona. Se un domani si volesse riprovare la strada nativa, va
+        // verificato che la finestra cambi davvero dimensione prima di
+        // fidarsi del valore di ritorno.
         function startNativeResize(edges) {
-            if (Qt.platform.os !== "windows" || !targetWindow
-                    || typeof targetWindow.startSystemResize !== "function")
-                return false
-            try {
-                return targetWindow.startSystemResize(edges)
-            } catch (error) {
-                console.log("Decometer startSystemResize failed: " + error)
-            }
             return false
         }
 
@@ -12128,6 +12135,15 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
         ProportionalResizeHandles {
             id: decometerResizeHandles
+            // Il contenuto della finestra e' un Dialog, e un Dialog vive
+            // nell'Overlay: l'overlay sta SOPRA i figli normali del
+            // contentItem qualunque sia il loro z, perche' e' un livello a
+            // parte e non un fratello. Le maniglie erano figlie del
+            // contentItem, quindi restavano sepolte sotto il quadrante e non
+            // ricevevano un solo click: la finestra risultava non
+            // ridimensionabile pur avendo gli angoli al loro posto.
+            // Mettendole nell'overlay tornano a essere la cosa piu' in alto.
+            parent: Overlay.overlay
             targetWindow: decometerFloatingWindow
             aspectRatio: decometerFloatingWindow.faceAspectRatio
             minWidth: decometerFloatingWindow.minimumWidth
