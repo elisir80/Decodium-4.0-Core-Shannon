@@ -118,6 +118,40 @@ Dialog {
     readonly property real  rawAlc:    (typeof bridge !== "undefined") ? bridge.rigAlc : 0
     readonly property bool  alcValid:  catUp && (typeof bridge !== "undefined") && bridge.rigAlcValid
 
+    // S-meter (1.0.567). Si legge dal gestore CAT, che lo tiene aggiornato e
+    // dichiara da se' se il valore e' stato letto davvero: uno zero, su questa
+    // scala, vorrebbe dire S9, cioe' un segnale pieno su una radio che
+    // magari l'S-meter non ce l'ha nemmeno.
+    //
+    // Hamlib da' i dB rispetto a S9 e sei dB fanno un punto S: -54 e' S0,
+    // 0 e' S9, sopra si contano i "piu'" a decine come sul frontalino.
+    readonly property var   catManager: (typeof bridge !== "undefined" && bridge.hamlibCat)
+                                        ? bridge.hamlibCat : null
+    readonly property int   rawStrengthDb: catManager ? catManager.strengthDb : 0
+    readonly property bool  strengthValid: !!(catManager && catManager.strengthValid) && !txOn
+    readonly property int   sUnit:  Math.max(0, Math.min(9, Math.round(9 + rawStrengthDb / 6)))
+    readonly property int   sOver:  rawStrengthDb > 0 ? Math.round(rawStrengthDb / 10) * 10 : 0
+    readonly property string sTesto: sOver > 0 ? "S9+" + sOver : "S" + sUnit
+
+    // La banda si ricava dalla frequenza invece di chiederla: e' un conto di
+    // due righe, e non lega il frontalino a una proprieta' in piu' del ponte.
+    readonly property string bandaCorrente: {
+        if (typeof bridge === "undefined") return ""
+        // bridge.frequency e' in HERTZ: senza dividere, il confronto con
+        // una tabella in MHz non trova mai niente e la banda resta vuota.
+        var mhz = Number(bridge.frequency) / 1e6
+        if (!isFinite(mhz) || mhz <= 0) return ""
+        var t = [[0.135,0.138,"2200m"], [0.472,0.479,"630m"], [1.8,2.0,"160m"],
+                 [3.5,4.0,"80m"],   [5.3,5.4,"60m"],    [7.0,7.3,"40m"],
+                 [10.1,10.15,"30m"],[14.0,14.35,"20m"], [18.06,18.17,"17m"],
+                 [21.0,21.45,"15m"],[24.89,24.99,"12m"],[28.0,29.7,"10m"],
+                 [50.0,54.0,"6m"],  [70.0,71.0,"4m"],   [144.0,148.0,"2m"],
+                 [222.0,225.0,"1.25m"], [420.0,450.0,"70cm"]]
+        for (var i = 0; i < t.length; ++i)
+            if (mhz >= t[i][0] && mhz <= t[i][1]) return t[i][2]
+        return ""
+    }
+
     // La potenza CAT e' anche una sorgente attendibile dello stato RF. Alcuni
     // backend/apparati aggiornano correttamente i meter senza riflettere nello
     // stesso istante il PTT in bridge.transmitting (per esempio TUNE o PTT
@@ -205,7 +239,39 @@ Dialog {
     readonly property var fsWatt: ["5 W", "50 W", "500 W", "5 kW"]
 
     property int  screenIdx: 0
-    readonly property int screenCount: 3
+    readonly property int screenCount: 4
+
+    // HOLD: le letture restano ferme dove sono. Ferma cio' che si VEDE, non
+    // cio' che si misura — il ROS continua a essere letto e l'allarme continua
+    // a valere, altrimenti sarebbe un modo per non accorgersi di un guasto
+    // all'antenna proprio mentre si guarda lo strumento.
+    property bool hold: false
+    property real holdFwd: 0
+    property real holdRef: 0
+    property real holdSwr: 1
+    property real holdPep: 0
+    property real holdAvg: 0
+
+    function prendiIstantanea() {
+        holdFwd = pkFwdV
+        holdRef = pkRefV
+        holdSwr = vSwr
+        holdPep = pepW
+        holdAvg = avgW
+    }
+
+    // Con HOLD acceso si mostrano i valori del momento del fermo.
+    readonly property real vFwdVista: hold ? holdFwd : pkFwdV
+    readonly property real vRefVista: hold ? holdRef : pkRefV
+    readonly property real vSwrVista: hold ? holdSwr : vSwr
+    readonly property real pepVista:  hold ? holdPep : pepW
+    readonly property real avgVista:  hold ? holdAvg : avgW
+
+    // La potenza in dBm, come la mostra un misuratore da laboratorio:
+    // 1 W = 30 dBm. Sotto il microwatt non si scrive un numero, perche'
+    // sarebbe rumore del misuratore e non segnale.
+    readonly property real fwdDbm: vFwdVista > 1e-6
+                                   ? 10 * Math.log(vFwdVista * 1000) / Math.LN10 : -99
 
     property real clock: 0
 
@@ -602,8 +668,19 @@ Dialog {
                     var sFnow = Math.max(0, (decometerWindow.vSwr - 1) / (decometerWindow.vSwr + 1))
                     arc(580, 20, 64, cl(decometerWindow.vFwd / fs), cl(decometerWindow.pkFwdV / fs), pwCol)
                     arc(520, 15, 46, cl(decometerWindow.vRef / (fs * 0.2)), cl(decometerWindow.pkRefV / (fs * 0.2)), pwCol)
-                    arc(460, 15, 34,
-                        decometerWindow.swrValid ? cl(sFnow) : 0,
+                    // La scala del ROS comincia da 1.0, non da zero: li' non
+                    // c'e' l'assenza di misura, c'e' l'adattamento perfetto.
+                    // L'arco pero' e' pilotato dal coefficiente di riflessione,
+                    // che a ROS 1.00 vale zero netto: nessuna tacca si accendeva,
+                    // e la condizione migliore possibile finiva per somigliare a
+                    // "nessuna lettura". Con una misura valida si accende sempre
+                    // la prima tacca, che sulla scala e' proprio 1.0 - e la mezza
+                    // tacca serve perche' un segmento si illumina quando il suo
+                    // centro rientra nella frazione. Sugli altri due archi non si
+                    // fa: li' lo zero e' davvero niente watt.
+                    var nSwr = 34
+                    arc(460, 15, nSwr,
+                        decometerWindow.swrValid ? Math.max(0.5 / nSwr, cl(sFnow)) : 0,
                         decometerWindow.swrValid ? cl(decometerWindow.pkSwrV) : 0, swCol)
 
                     // arco ALC piu' interno: percentuale di compressione del rig
@@ -725,20 +802,20 @@ Dialog {
                             Readout {
                                 visible: decometerWindow.screenIdx === 0
                                 tag: "FWD"; tint: decometerWindow.colCyan
-                                value: decometerWindow.pwrValid ? decometerWindow.fmtW(decometerWindow.pkFwdV) : "——"
+                                value: decometerWindow.pwrValid ? decometerWindow.fmtW(decometerWindow.vFwdVista) : "——"
                                 unit: "W"
                             }
                             Readout {
                                 visible: decometerWindow.screenIdx === 0
                                 tag: "REF"
                                 value: decometerWindow.pwrValid && decometerWindow.swrValid
-                                       ? decometerWindow.pkRefV.toFixed(3) : "——"
+                                       ? decometerWindow.vRefVista.toFixed(3) : "——"
                                 unit: "W"
                             }
                             Readout {
                                 visible: decometerWindow.screenIdx === 0
                                 tag: "SWR"; tint: decometerWindow.colAmber; valueSize: 22
-                                value: decometerWindow.swrValid ? decometerWindow.vSwr.toFixed(2) : "——"
+                                value: decometerWindow.swrValid ? decometerWindow.vSwrVista.toFixed(2) : "——"
                             }
 
                             // schermata 2 - adattamento
@@ -773,14 +850,50 @@ Dialog {
                             Readout {
                                 visible: decometerWindow.screenIdx === 2
                                 tag: "PEP"; tint: decometerWindow.colCyan
-                                value: decometerWindow.pwrValid ? decometerWindow.fmtW(decometerWindow.pepW) : "——"
+                                value: decometerWindow.pwrValid ? decometerWindow.fmtW(decometerWindow.pepVista) : "——"
                                 unit: "W"
                             }
                             Readout {
                                 visible: decometerWindow.screenIdx === 2
                                 tag: "AVG"; valueSize: 22
-                                value: decometerWindow.pwrValid ? decometerWindow.fmtW(decometerWindow.avgW) : "——"
+                                value: decometerWindow.pwrValid ? decometerWindow.fmtW(decometerWindow.avgVista) : "——"
                                 unit: "W"
+                            }
+
+                            // schermata 4 - segnale ricevuto
+                            // E' l'unica che parla di RICEZIONE: le altre tre
+                            // guardano cosa esce, questa cosa entra. Per
+                            // questo vale a trasmettitore fermo, al contrario
+                            // di tutto il resto del frontalino.
+                            Readout {
+                                visible: decometerWindow.screenIdx === 3
+                                tag: "S"; tint: decometerWindow.colGreen; valueSize: 22
+                                value: decometerWindow.strengthValid ? decometerWindow.sTesto : "——"
+                            }
+                            // La frequenza in chiaro: la banda dice in quale
+                            // porzione si sta operando, ma chi guarda un
+                            // misuratore vuole leggere anche il numero, come
+                            // sul display della radio.
+                            Readout {
+                                visible: decometerWindow.screenIdx === 3
+                                tag: "FRQ"; tint: decometerWindow.colCyan; valueSize: 20
+                                value: {
+                                    if (typeof bridge === "undefined") return "——"
+                                    // bridge.frequency e' in HERTZ (14074000 = 14,074 MHz)
+                                    var hz = Number(bridge.frequency)
+                                    return (isFinite(hz) && hz > 0) ? (hz / 1e6).toFixed(3) : "——"
+                                }
+                                unit: "MHz"
+                            }
+                            // La potenza in dBm accanto ai watt: stessa
+                            // misura in un'altra unita', ed e' quella che
+                            // legge chi lavora con strumenti da laboratorio.
+                            Readout {
+                                visible: decometerWindow.screenIdx === 3
+                                tag: "PWR"
+                                value: decometerWindow.pwrValid && decometerWindow.fwdDbm > -99
+                                       ? decometerWindow.fwdDbm.toFixed(1) : "——"
+                                unit: "dBm"
                             }
                         }
 
@@ -792,20 +905,40 @@ Dialog {
                                 x: 14
                                 spacing: 3
                                 Text {
-                                    text: decometerWindow.screenIdx === 2 ? qsTr("TX TIME") : qsTr("IMPEDANCE")
+                                    text: decometerWindow.screenIdx === 2 ? qsTr("TX TIME")
+                                          : (decometerWindow.screenIdx === 3 ? qsTr("BAND") : qsTr("IMPEDANCE"))
                                     font.pixelSize: 9; font.letterSpacing: 1; font.family: "monospace"
                                     color: decometerWindow.colDim
                                     bottomPadding: 3
                                 }
+                                // Banda e frequenza: un misuratore che non dice DOVE
+                                // si sta operando racconta meta' della cosa, ed e' la
+                                // prima riga del frontalino di ogni wattmetro da tavolo.
                                 Text {
-                                    visible: decometerWindow.screenIdx !== 2
+                                    visible: decometerWindow.screenIdx === 3
+                                    text: decometerWindow.bandaCorrente.length
+                                          ? decometerWindow.bandaCorrente.toUpperCase() : "—"
+                                    font.pixelSize: 20; font.bold: true; font.family: "monospace"
+                                    color: decometerWindow.colCyan
+                                }
+                                Text {
+                                    visible: decometerWindow.screenIdx === 3
+                                    text: decometerWindow.strengthValid ? qsTr("RX SIGNAL")
+                                          : (decometerWindow.txOn ? qsTr("TRANSMITTING") : qsTr("NO S-METER"))
+                                    width: 116
+                                    wrapMode: Text.WordWrap
+                                    font.pixelSize: 8
+                                    color: decometerWindow.colDim
+                                }
+                                Text {
+                                    visible: decometerWindow.screenIdx !== 2 && decometerWindow.screenIdx !== 3
                                     text: decometerWindow.swrValid
                                           ? "|Γ| " + decometerWindow.rho.toFixed(3) : "|Γ| —"
                                     font.pixelSize: 13; font.family: "monospace"
                                     color: "#9FB3BC"
                                 }
                                 Text {
-                                    visible: decometerWindow.screenIdx !== 2
+                                    visible: decometerWindow.screenIdx !== 2 && decometerWindow.screenIdx !== 3
                                     text: decometerWindow.swrValid
                                           ? "R " + decometerWindow.rMin.toFixed(1) + "–" + decometerWindow.rMax.toFixed(1)
                                           : "R —"
@@ -930,25 +1063,60 @@ Dialog {
                     }
                 }
 
-                Rectangle {
+                Row {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: 158; height: 34; radius: 5
-                    color: decometerWindow.autoRange ? Qt.rgba(0.153, 0.769, 0.831, 0.14) : "#181D22"
-                    border.width: 1
-                    border.color: decometerWindow.autoRange ? decometerWindow.colCyan
-                                                            : (autoMouse.containsMouse ? "#3A424A" : "#2A3138")
-                    Text {
-                        anchors.centerIn: parent
-                        text: qsTr("AUTO")
-                        font.pixelSize: 10; font.bold: true; font.letterSpacing: 2
-                        color: decometerWindow.autoRange ? decometerWindow.colCyan : decometerWindow.colLabel
+                    spacing: 6
+
+                    Rectangle {
+                        width: 76; height: 34; radius: 5
+                        color: decometerWindow.autoRange ? Qt.rgba(0.153, 0.769, 0.831, 0.14) : "#181D22"
+                        border.width: 1
+                        border.color: decometerWindow.autoRange ? decometerWindow.colCyan
+                                                                : (autoMouse.containsMouse ? "#3A424A" : "#2A3138")
+                        Text {
+                            anchors.centerIn: parent
+                            text: qsTr("AUTO")
+                            font.pixelSize: 10; font.bold: true; font.letterSpacing: 2
+                            color: decometerWindow.autoRange ? decometerWindow.colCyan : decometerWindow.colLabel
+                        }
+                        MouseArea {
+                            id: autoMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: decometerWindow.autoRange = !decometerWindow.autoRange
+                        }
                     }
-                    MouseArea {
-                        id: autoMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: decometerWindow.autoRange = !decometerWindow.autoRange
+
+                    // HOLD: comodo su un frontalino da tavolo per leggere con
+                    // calma, e indispensabile quando lo strumento sta su un
+                    // secondo schermo che non si guarda mentre si parla.
+                    Rectangle {
+                        width: 76; height: 34; radius: 5
+                        color: decometerWindow.hold ? Qt.rgba(1.0, 0.706, 0.329, 0.16) : "#181D22"
+                        border.width: 1
+                        border.color: decometerWindow.hold ? decometerWindow.colAmber
+                                                           : (holdMouse.containsMouse ? "#3A424A" : "#2A3138")
+                        Text {
+                            anchors.centerIn: parent
+                            text: qsTr("HOLD")
+                            font.pixelSize: 10; font.bold: true; font.letterSpacing: 2
+                            color: decometerWindow.hold ? decometerWindow.colAmber : decometerWindow.colLabel
+                        }
+                        MouseArea {
+                            id: holdMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                // L'istantanea si prende ADESSO: da qui in
+                                // avanti i valori sotto continuano a muoversi,
+                                // ma quelli mostrati restano questi.
+                                if (!decometerWindow.hold)
+                                    decometerWindow.prendiIstantanea()
+                                decometerWindow.hold = !decometerWindow.hold
+                            }
+                        }
                     }
                 }
 
