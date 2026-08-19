@@ -9698,6 +9698,17 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             decodium::profiledSettingsValue({}, QStringLiteral("AmpPollMs"), 500).toInt());
     }
     m_dxCluster       = new DecodiumDxCluster(this);
+    // Ritrasmettitore degli spot in rete locale: si apre solo se l'utente
+    // l'ha chiesto, come la CAT condivisa. Lettura con ricaduta sulla radice
+    // per la stessa ragione — una chiave scritta a livello globale risulta
+    // invisibile a getSetting, e l'interruttore sembrerebbe acceso senza fare
+    // nulla.
+    m_spotShare       = new DecodiumSpotShare(m_dxCluster, this);
+    if (decodium::profiledSettingsValue({}, QStringLiteral("SpotShareEnabled"), false).toBool()) {
+        m_spotShare->configure(
+            true,
+            decodium::profiledSettingsValue({}, QStringLiteral("SpotSharePort"), 4534).toInt());
+    }
     if (m_mapIntelligenceService) {
         m_dxCluster->setOfflineMode(m_mapIntelligenceService->offlineMode());
     }
@@ -19592,6 +19603,11 @@ QObject* DecodiumBridge::catShareObject() const
     return m_catShare;
 }
 
+QObject* DecodiumBridge::spotShareObject() const
+{
+    return m_spotShare;
+}
+
 QObject* DecodiumBridge::amplifierObject() const
 {
     return m_amplifier;
@@ -19645,6 +19661,19 @@ void DecodiumBridge::configureCatShare(bool enabled, int port,
     setSetting(QStringLiteral("CatShareAllowPtt"), allowPtt);
     if (m_catShare)
         m_catShare->configure(enabled, port, allowControl, allowPtt);
+}
+
+// Spot condivisi. Stesso archivio e stessa forma della CAT condivisa, per la
+// stessa ragione: due percorsi di lettura diversi hanno gia' prodotto in
+// passato interruttori accesi senza alcun effetto.
+void DecodiumBridge::configureSpotShare(bool enabled, int port)
+{
+    if (port < 1024 || port > 65535)
+        port = 4534;
+    setSetting(QStringLiteral("SpotShareEnabled"), enabled);
+    setSetting(QStringLiteral("SpotSharePort"), port);
+    if (m_spotShare)
+        m_spotShare->configure(enabled, port);
 }
 
 QString DecodiumBridge::launchSecondInstance(const QString& profileName,

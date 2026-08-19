@@ -26,6 +26,15 @@ SettingsPageScroll {
         bridge.configureCatShare(catShareEnabled.checked, p,
                                  catShareControl.checked, catSharePtt.checked)
     }
+
+    // Spot condivisi: come la CAT, ma per il cluster. Nessun permesso da
+    // concedere, perche' non c'e' niente da comandare.
+    function applySpotShare() {
+        if (!bridge) return
+        var p = parseInt(spotSharePort.text, 10)
+        if (isNaN(p) || p < 1024 || p > 65535) p = 4534
+        bridge.configureSpotShare(spotShareEnabled.checked, p)
+    }
     readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
     readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
     readonly property int pageColumns: compactSettingsLayout ? 2 : 4
@@ -1327,6 +1336,55 @@ SettingsPageScroll {
                 return qsTr("Listening on 127.0.0.1:%1 \u00b7 connected programs: %2")
                        .arg(bridge.catShare.port).arg(bridge.catShare.clientCount)
                        + "  \u00b7  " + qsTr("in other programs choose \"Hamlib NET rigctl\"")
+            }
+        }
+
+        // ── Spot condivisi ──
+        // Decodium tiene la linea col nodo DX Cluster e ne rivende gli spot
+        // gia' interpretati a chi non puo' aprirne una propria: il telefono,
+        // prima di tutto. Una riga JSON per spot, nessun comando accettato.
+        Text { text: qsTr("SHARED SPOTS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+        Text { text: qsTr("Share spots:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            id: spotShareEnabled
+            checked: (bridge && bridge.spotShare) ? bridge.spotShare.enabled : false
+            onToggled: applySpotShare()
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        Text { text: qsTr("Spot port:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            id: spotSharePort
+            text: (bridge && bridge.spotShare) ? String(bridge.spotShare.port) : "4534"
+            inputMethodHints: Qt.ImhDigitsOnly
+            Layout.fillWidth: true
+            implicitHeight: controlHeight
+            font.pixelSize: controlFontSize
+            onEditingFinished: applySpotShare()
+        }
+
+        Text {
+            Layout.columnSpan: pageColumns
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 11
+            color: (bridge && bridge.spotShare && bridge.spotShare.listening) ? accentGreen
+                   : ((bridge && bridge.spotShare && bridge.spotShare.enabled) ? "#ff6b6b" : textSecondary)
+            text: {
+                if (!bridge || !bridge.spotShare)
+                    return ""
+                if (!bridge.spotShare.listening) {
+                    // Come per la CAT: se e' acceso e non ascolta, il motivo
+                    // va detto, altrimenti si cerca il guasto dove non e'.
+                    if (bridge.spotShare.enabled)
+                        return qsTr("Spot sharing not started: %1").arg(bridge.spotShare.status)
+                    return qsTr("Spots stay on this computer. Share them to read the cluster from a phone on the same WiFi.")
+                }
+                return qsTr("Listening on port %1 · connected clients: %2")
+                       .arg(bridge.spotShare.port).arg(bridge.spotShare.clientCount)
+                       + "  ·  " + qsTr("needs the DX Cluster connected")
             }
         }
 

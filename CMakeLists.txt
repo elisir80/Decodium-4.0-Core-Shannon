@@ -535,6 +535,8 @@ set (wsjtx_CXXSRCS
   Network/DecodiumQrzLogbookLite.h
   src/services/DecodiumDxCluster.cpp
   src/services/DecodiumDxCluster.h
+  src/services/DecodiumSpotShare.cpp
+  src/services/DecodiumSpotShare.h
   src/services/DxccLookup.cpp
   src/services/DxccLookup.h
   src/services/CallsignIntelligenceService.cpp
@@ -1963,6 +1965,8 @@ add_executable (decodium_qml
   Network/DecodiumQrzLogbookLite.h
   src/services/DecodiumDxCluster.cpp
   src/services/DecodiumDxCluster.h
+  src/services/DecodiumSpotShare.cpp
+  src/services/DecodiumSpotShare.h
   src/services/DxccLookup.cpp
   src/services/DxccLookup.h
   src/services/CallsignIntelligenceService.cpp

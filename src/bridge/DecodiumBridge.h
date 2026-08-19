@@ -40,6 +40,7 @@
 class ActiveStationsModel;
 class DecodiumAlertManager;
 #include "DecodiumDxCluster.h"
+#include "DecodiumSpotShare.h"
 class DecodiumPskReporterLite;
 class DecodiumCloudlogLite;
 class DecodiumQrzLogbookLite;
@@ -252,6 +253,9 @@ class DecodiumBridge : public QObject
     // === CAT/TRANSCEIVER ===
     // CAT condivisa: il server rigctld esposto ai pannelli QML.
     Q_PROPERTY(QObject* catShare READ catShareObject CONSTANT)
+    // Spot condivisi: il gemello della CAT condivisa, per gli spot del
+    // cluster invece che per la radio.
+    Q_PROPERTY(QObject* spotShare READ spotShareObject CONSTANT)
     // Amplificatore: sorgente di misura indipendente dalla radio.
     Q_PROPERTY(QObject* amplifier READ amplifierObject CONSTANT)
     Q_PROPERTY(bool catConnected READ catConnected NOTIFY catConnectedChanged)
@@ -797,11 +801,15 @@ public:
 
     // CAT
     QObject* catShareObject() const;
+    QObject* spotShareObject() const;
     QObject* amplifierObject() const;
     Q_INVOKABLE void configureAmplifier(bool enabled, const QString& port,
                                         int baud, bool passive, int pollMs);
     Q_INVOKABLE void configureCatShare(bool enabled, int port,
                                        bool allowControl, bool allowPtt);
+    // Spot condivisi in rete locale. Nessun permesso da concedere come per la
+    // CAT: qui non c'e' niente da comandare, si legge e basta.
+    Q_INVOKABLE void configureSpotShare(bool enabled, int port);
     // Apre una seconda istanza su un profilo suo. Torna stringa vuota se e'
     // partita, altrimenti il motivo - da mostrare, non da ingoiare.
     Q_INVOKABLE QString launchSecondInstance(const QString& profileName,
@@ -2686,6 +2694,7 @@ private:
     DecodiumOmniRigManager*       m_omniRigCat    {nullptr};
     DecodiumTransceiverManager*   m_hamlibCat     {nullptr};
     DecodiumCatShare*             m_catShare      {nullptr};
+    DecodiumSpotShare*            m_spotShare     {nullptr};
     DecodiumAmplifier*            m_amplifier     {nullptr};
     QString                       m_catBackend    {"hamlib"};
     bool                          m_suppressCatErrors {false};
