@@ -847,6 +847,15 @@ int HamlibTransceiver::do_start ()
   qmx_swr_threshold_hundredths_ = configured_qmx_swr_threshold_hundredths ();
   qmx_swr_transition_serial_ = 0;
 
+  // S-meter: solo se il rig lo dichiara. Niente sonde opportunistiche come
+  // per l'ALC - quelle sono costate una radio rimasta in trasmissione, e un
+  // indicatore di comodo non vale quel rischio.
+  bool const hasStrength = hasGetLevelFunction
+      && (getLevelCaps & RIG_LEVEL_STRENGTH) == RIG_LEVEL_STRENGTH;
+  do_strength_ = hasStrength;
+  strength_tick_ = 0;
+  strength_failures_ = 0;
+
   do_pwr_ = requestedPowerTelemetry && (hasRfPowerMeterWatts || qmx_raw_power_);
   do_pwr2_ = requestedPowerTelemetry && !do_pwr_ && hasRfPower;
   do_swr_ = requestedSwrTelemetry && (hasSwr || qmx_raw_swr_);
@@ -1941,6 +1950,38 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
       update_power (0);
       update_swr (0);
       update_alc (0);
+
+      // In ricezione l'unica cosa che c'e' da misurare e' il segnale che
+      // arriva. Hamlib lo da' in dB rispetto a S9 (interi: -54 e' S0, 0 e'
+      // S9, +20 e' S9+20), che e' la scala con cui lo legge l'operatore.
+      if (do_strength_)
+        {
+          if (++strength_tick_ >= kStrengthSkipRatio_)
+            {
+              strength_tick_ = 0;
+              value_t s_meter;
+              int const rc_s = rig_get_level (rig, RIG_VFO_CURR, RIG_LEVEL_STRENGTH, &s_meter);
+              if (RIG_OK == rc_s)
+                {
+                  strength_failures_ = 0;
+                  update_level (s_meter.i);
+                }
+              else if (++strength_failures_ >= kStrengthMaxFailures_)
+                {
+                  // Un rig che dichiara l'S-meter e poi non risponde non va
+                  // interrogato per sempre: si smette, e il resto del CAT
+                  // non paga il conto.
+                  do_strength_ = false;
+                  qWarning ().noquote ()
+                    << "[CATDBG] S-meter polling disabled after repeated failures"
+                    << "rc=" << rc_s;
+                }
+              else
+                {
+                  CAT_TRACE ("rig_get_level RIG_LEVEL_STRENGTH failed with rc:" << rc_s << "ignoring");
+                }
+            }
+        }
       if (force_signal)
         {
           update_complete (true);

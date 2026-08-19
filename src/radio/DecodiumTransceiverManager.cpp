@@ -2009,6 +2009,15 @@ void DecodiumTransceiverManager::connectRig()
                                 static_cast<double>(state.swr()) / 100.0,
                                 static_cast<double>(state.alc()),
                                 state.alc_valid());
+                // S-meter: arriva dallo stesso stato, ma non passa da
+                // updateTelemetry perche' non e' telemetria di trasmissione —
+                // vive nell'altra meta' del ciclo, quella in cui si ascolta.
+                if (state.level_valid() != m_strengthValid
+                    || (state.level_valid() && state.level() != m_strengthDb)) {
+                    m_strengthValid = state.level_valid();
+                    m_strengthDb = state.level();
+                    emit strengthChanged();
+                }
             },
             Qt::QueuedConnection);
 

@@ -81,6 +81,10 @@ private:
   bool do_pwr2_ = false;
   bool do_swr_ = false;
   bool do_alc_ = false;  // 1.0.323 — lettura RIG_LEVEL_ALC in TX (ALC automatico, fase 1 display)
+  // S-meter: si legge SOLO in ricezione, dove il ciclo e' gia' rallentato, e
+  // con un passo tutto suo. In trasmissione non ha significato e ruberebbe
+  // tempo ai misuratori che invece contano.
+  bool do_strength_ = false;
   bool alc_probe_pending_ = false;
   bool qmx_raw_power_ = false;
   bool qmx_raw_swr_ = false;
@@ -105,7 +109,16 @@ private:
   static constexpr int kFrequencyPollInitialBackoffTicks_ = 2;
   static constexpr int kFrequencyPollMaxBackoffTicks_ = 10;
   static constexpr int kFrequencyPollWriteQuietTicks_ = 2;
+  // L'S-meter si legge una volta ogni quattro giri di telemetria: in
+  // ricezione il ciclo ne salta gia' tre su quattro, quindi in pratica e'
+  // una lettura ogni pochi secondi. Basta per un indicatore che si guarda,
+  // e su una seriale lenta non toglie il posto a nient'altro - il costo di
+  // una lettura di troppo su questo bus e' documentato dalla nota qui sopra.
+  static constexpr int kStrengthSkipRatio_ = 4;
+  static constexpr int kStrengthMaxFailures_ = 5;
   int telemetry_tick_ = 0;
+  int strength_tick_ = 0;
+  int strength_failures_ = 0;
   int frequency_poll_failures_ = 0;
   int frequency_poll_skip_ticks_ = 0;
   int frequency_poll_write_quiet_ticks_ = 0;

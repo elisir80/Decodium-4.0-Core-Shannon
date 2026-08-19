@@ -57,6 +57,11 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(bool    pttActive   READ pttActive   NOTIFY pttActiveChanged)
     Q_PROPERTY(bool    split       READ split       NOTIFY splitChanged)
     Q_PROPERTY(double  powerWatts  READ powerWatts  NOTIFY powerWattsChanged)
+    // S-meter in ricezione, in dB rispetto a S9 come lo da' Hamlib. Il flag
+    // di validita' non e' un lusso: zero su questa scala vuol dire S9, quindi
+    // un rig senza S-meter sembrerebbe ricevere un segnale pieno.
+    Q_PROPERTY(int     strengthDb  READ strengthDb  NOTIFY strengthChanged)
+    Q_PROPERTY(bool    strengthValid READ strengthValid NOTIFY strengthChanged)
     Q_PROPERTY(double  swr         READ swr         NOTIFY swrChanged)
     Q_PROPERTY(double  alc         READ alc         NOTIFY alcChanged)  // 1.0.323 — ALC meter 0..100
     Q_PROPERTY(bool    alcValid    READ alcValid    NOTIFY alcChanged)
@@ -108,6 +113,8 @@ public:
     bool    pttActive()    const { return m_pttActive; }
     bool    split()        const { return m_split; }
     double  powerWatts()   const { return m_powerWatts; }
+    int     strengthDb()   const { return m_strengthDb; }
+    bool    strengthValid() const { return m_strengthValid && m_connected && !m_pttActive; }
     double  swr()          const { return m_swr; }
     double  alc()          const { return m_alc; }
     bool    alcValid()     const { return m_alcValid; }
@@ -210,6 +217,7 @@ signals:
     void pttActiveChanged();
     void splitChanged();
     void powerWattsChanged();
+    void strengthChanged();
     void swrChanged();
     void alcChanged();
     void catAutoConnectChanged();
@@ -266,6 +274,8 @@ private:
     bool    m_pttActive    {false};
     bool    m_split        {false};
     double  m_powerWatts   {0.0};
+    int     m_strengthDb   {0};
+    bool    m_strengthValid {false};
     double  m_swr          {0.0};
     double  m_alc          {0.0};  // 1.0.323 — ALC meter 0..100
     bool    m_alcValid     {false};

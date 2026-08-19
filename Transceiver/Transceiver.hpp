@@ -109,6 +109,7 @@ public:
       , swr_ {0}
       , alc_ {0}
       , alc_valid_ {false}
+      , level_valid_ {false}
       , jtmode_ {"FT8"}  //w3sz tci
       , fastmode_ {false}  //w3sz tci
     {
@@ -142,6 +143,10 @@ public:
     unsigned int swr () const {return swr_;}
     unsigned int alc () const {return alc_;}
     bool alc_valid () const {return alc_valid_;}
+    // Un S-meter mai letto vale 0, che sulla scala di Hamlib e' S9: senza
+    // questa bandiera un rig che l'S-meter non ce l'ha sembrerebbe ricevere
+    // un segnale pieno.
+    bool level_valid () const {return level_valid_;}
     QString jtmode () const {return jtmode_;}  //w3sz tci
     bool fastmode () const {return fastmode_;}  //w3sz tci
 
@@ -168,7 +173,8 @@ public:
     void nsym (int nsym) {nsym_ = nsym;}
     void volume (qreal volume) {volume_ = volume;}
     void txvolume (qreal txvolume) {txvolume_ = txvolume;}
-    void level (int strength) {level_ = strength;}
+    void level (int strength) {level_ = strength; level_valid_ = true;}
+    void level_invalid () {level_ = 0; level_valid_ = false;}
     void power (unsigned int mwpower) {power_ = mwpower;}
     void swr (unsigned int mswr) {swr_ = mswr;}
     void alc (unsigned int malc) {alc_ = malc;}
@@ -205,6 +211,7 @@ public:
     unsigned int swr_;
     unsigned int alc_;  // 1.0.323 — ALC meter 0..100 (TX)
     bool alc_valid_ {false};
+    bool level_valid_ {false};
     QString jtmode_;  //w3sz tci
     bool fastmode_;  //w3sz tci
 

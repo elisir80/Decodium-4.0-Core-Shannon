@@ -331,6 +331,16 @@ QString DecodiumCatShare::handleLine(const QString& line)
                           || quale.startsWith(QLatin1String("RFPOWER_METER"));
         if (diTx && !m_rig->pttActive()) return fail();
 
+        // S-meter: e' l'unico livello di RICEZIONE, quindi non passa dal
+        // filtro "diTx" qui sopra — anzi vale solo mentre NON si trasmette.
+        // Il rig lo legge solo se lo dichiara fra le proprie capacita'; se non
+        // c'e', si risponde che non c'e' invece di mandare uno zero, che su
+        // questa scala vorrebbe dire S9.
+        if (quale == QLatin1String("STRENGTH")) {
+            if (!m_rig->strengthValid()) return fail();
+            return ok(m_rig->strengthDb());
+        }
+
         if (quale == QLatin1String("SWR")) {
             double const v = m_rig->swr();
             if (v < 1.0) return fail();
