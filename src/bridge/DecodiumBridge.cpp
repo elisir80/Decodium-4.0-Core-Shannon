@@ -21882,11 +21882,13 @@ void DecodiumBridge::setMamMultiStream(bool on)
     bridgeLog(QStringLiteral("MAM multi-stream sequencer toggled: %1").arg(on ? 1 : 0));
 }
 
-// FASE 3 - cap stream simultanei MAM (clamp 2..5). Persistito nello store
-// canonico Decodium3; riletto da loadSettings al prossimo avvio.
+// FASE 3 - cap stream simultanei MAM (clamp 1..10 da 1.0.569; era 2..5).
+// 1 = risposta a un chiamante per volta ma sulla SUA frequenza (modello MSHV),
+// 10 = pileup pieno da DX-pedition. Persistito nello store canonico Decodium3;
+// riletto da loadSettings al prossimo avvio.
 void DecodiumBridge::setMamMaxStreams(int v)
 {
-    int const clamped = qBound(2, v, 5);
+    int const clamped = qBound(1, v, 10);
     if (m_mamMaxStreams == clamped) {
         return;
     }
@@ -21897,6 +21899,58 @@ void DecodiumBridge::setMamMaxStreams(int v)
     bridgeLog(QStringLiteral("MAM max streams set: %1").arg(m_mamMaxStreams));
 }
 
+// 1.0.569+ - CQ paralleli sugli slot liberi. Persistito nello store canonico
+// Decodium3. Default ON, ma agisce solo quando il multi-stream e' attivo (che
+// e' a sua volta opt-in, default OFF): con multi-slot spento non cambia nulla.
+void DecodiumBridge::setMamCqSlots(bool on)
+{
+    if (m_mamCqSlots == on) {
+        return;
+    }
+    m_mamCqSlots = on;
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    settings.setValue(QStringLiteral("MamCqSlots"), on);
+    emit mamCqSlotsChanged();
+    bridgeLog(QStringLiteral("MAM parallel CQ slots toggled: %1").arg(on ? 1 : 0));
+}
+
+// 1.0.569+ - sceglie fino a `count` frequenze audio per i CQ paralleli. Parte
+// dalla frequenza TX dell'operatore e sale a passi di 60 Hz (la spaziatura gia'
+// usata dal de-dup degli slot: un segnale FT8 occupa 50 Hz), poi ripiega verso
+// il basso. Salta tutto cio' che dista meno di 50 Hz da una frequenza gia' in
+// uso, cosi' i CQ non si sovrappongono tra loro ne' ai QSO in corso.
+QVector<int> DecodiumBridge::mamPlanCqFrequencies(int count, const QVector<int>& used) const
+{
+    QVector<int> out;
+    if (count <= 0) {
+        return out;
+    }
+    constexpr int spacingHz = 60;
+    constexpr int minGapHz = 50;
+    constexpr int maxSteps = 64;
+    int const base = qBound(200, m_txFrequency > 0 ? m_txFrequency : m_rxFrequency, 4000);
+    QVector<int> taken = used;
+    auto tryPlace = [&](int f) {
+        if (f < 200 || f > 4000) {
+            return;
+        }
+        for (int t : std::as_const(taken)) {
+            if (qAbs(t - f) < minGapHz) {
+                return;
+            }
+        }
+        taken.append(f);
+        out.append(f);
+    };
+    for (int step = 0; out.size() < count && step <= maxSteps; ++step) {
+        tryPlace(base + step * spacingHz);
+    }
+    for (int step = 1; out.size() < count && step <= maxSteps; ++step) {
+        tryPlace(base - step * spacingHz);
+    }
+    return out;
+}
+
 // FASE 3 - snapshot read-only degli slot QSO multi-stream attivi per la UI.
 // Un QVariantMap per slot; NON muta stato. Emesso via mamActiveSlotsChanged()
 // dai punti che modificano m_mamSlots.
@@ -21904,6 +21958,7 @@ QVariantList DecodiumBridge::mamActiveSlots() const
 {
     QVariantList out;
     out.reserve(m_mamSlots.size());
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     for (MamQsoSlot const& s : m_mamSlots) {
         QVariantMap m;
         m.insert(QStringLiteral("call"), s.callFull.isEmpty() ? s.call : s.callFull);
@@ -21912,9 +21967,88 @@ QVariantList DecodiumBridge::mamActiveSlots() const
         m.insert(QStringLiteral("tx"), s.currentTx);
         m.insert(QStringLiteral("snr"), s.partnerSnrDb);
         m.insert(QStringLiteral("retry"), s.retryCount);
+        // 1.0.569+ - campi aggiuntivi per il pannello DX-Pedition multi-slot.
+        // Read-only: nessuno muta lo stato dello slot.
+        m.insert(QStringLiteral("baseCall"), s.call);
+        m.insert(QStringLiteral("grid"), s.grid);
+        m.insert(QStringLiteral("rptSent"), s.reportSent);
+        m.insert(QStringLiteral("rptRcvd"), s.reportReceived);
+        m.insert(QStringLiteral("logged"), s.logged);
+        m.insert(QStringLiteral("msg"), s.lastTransmittedMessage);
+        m.insert(QStringLiteral("state"),
+                 s.state == MamQsoSlot::State::Done     ? 2
+               : s.state == MamQsoSlot::State::Signoff  ? 1
+                                                        : 0);
+        m.insert(QStringLiteral("ageSec"),
+                 s.startedOnMs > 0 ? static_cast<int>((nowMs - s.startedOnMs) / 1000) : 0);
         out.append(m);
     }
     return out;
+}
+
+// 1.0.569+ - FT2 e' l'unico modo in cui il multi-stream non e' mai stato
+// validato on-air (primo pileup reale fallito: i chiamanti non decodificavano
+// il report). Il pannello DX-Pedition usa questo flag per il banner di avviso;
+// la scelta resta all'operatore.
+bool DecodiumBridge::mamModeExperimental() const
+{
+    return m_mode.trimmed().toUpper() == QStringLiteral("FT2");
+}
+
+// 1.0.569+ - rimuove manualmente uno slot (pulsante X nella lista slot). Non
+// logga: e' un abbandono esplicito. La stazione puo' rientrare piu' tardi.
+void DecodiumBridge::mamDropSlot(const QString& call)
+{
+    int const idx = mamSlotIndexForCall(call);
+    if (idx < 0) {
+        return;
+    }
+    QString const dropped = m_mamSlots.at(idx).callFull;
+    m_mamSlots.removeAt(idx);
+    bridgeLog(QStringLiteral("MAM slot dropped by operator: %1 (%2 active)")
+                  .arg(dropped).arg(m_mamSlots.size()));
+    emit mamActiveSlotsChanged();
+}
+
+// 1.0.569+ - forza il log di uno slot senza attendere il signoff (il partner
+// e' sparito ma lo scambio e' completo). Riusa mamLogSlot: stessa via del log
+// automatico, quindi cooldown e anti-duplicato restano coerenti.
+void DecodiumBridge::mamLogSlotNow(const QString& call)
+{
+    int const idx = mamSlotIndexForCall(call);
+    if (idx < 0) {
+        return;
+    }
+    mamLogSlot(m_mamSlots[idx]);
+    mamPruneSlots();
+    emit mamActiveSlotsChanged();
+}
+
+// 1.0.569+ - svuota tutti gli slot attivi (pulsante CLEAR). Non logga nulla.
+void DecodiumBridge::mamClearSlots()
+{
+    if (m_mamSlots.isEmpty()) {
+        return;
+    }
+    int const n = m_mamSlots.size();
+    m_mamSlots.clear();
+    m_mamMessages.clear();
+    m_mamF0sHz.clear();
+    bridgeLog(QStringLiteral("MAM slots cleared by operator: %1 removed").arg(n));
+    emit mamActiveSlotsChanged();
+}
+
+// 1.0.569+ - svuota la coda dei chiamanti in attesa (m_callerQueue), lasciando
+// intatti gli slot gia' attivi.
+void DecodiumBridge::mamClearQueue()
+{
+    if (m_callerQueue.isEmpty()) {
+        return;
+    }
+    int const n = m_callerQueue.size();
+    m_callerQueue.clear();
+    bridgeLog(QStringLiteral("MAM caller queue cleared by operator: %1 removed").arg(n));
+    emit callerQueueChanged();
 }
 
 bool DecodiumBridge::mamMultiStreamSequencerActive() const
@@ -22380,21 +22514,49 @@ void DecodiumBridge::mamDispatchPeriod()
         }
     }
 
-    if (m_mamMessages.isEmpty()) {
-        // (5) Nessuno slot da servire. Costruiamo un CQ singolo direttamente per
-        // restare nel path MAM (non deleghiamo a checkAndStartPeriodicTx per
-        // evitare ricorsione, dato che quello rientra in mamDispatchPeriod).
-        QString const grid4 = m_grid.left(4);
-        QString cq = m_tx6.trimmed();
-        if (cq.isEmpty() && !m_callsign.trimmed().isEmpty()) {
-            cq = QStringLiteral("CQ %1%2")
-                     .arg(m_callsign.trimmed().toUpper(),
-                          grid4.isEmpty() ? QString() : QStringLiteral(" ") + grid4);
+    // (4b) 1.0.569+ - CQ PARALLELI sugli slot liberi. Il multi-slot non serve
+    // solo a rispondere: ogni posizione non occupata da un QSO chiama CQ su una
+    // frequenza propria, cosi' il pileup si distribuisce su tutta la larghezza
+    // scelta invece di ammassarsi su una sola. Con m_mamCqSlots spento resta il
+    // comportamento precedente (un solo CQ, e solo se non c'e' nessuno slot).
+    QString const grid4 = m_grid.left(4);
+    QString cqMessage = m_tx6.trimmed();
+    if (cqMessage.isEmpty() && !m_callsign.trimmed().isEmpty()) {
+        cqMessage = QStringLiteral("CQ %1%2")
+                        .arg(m_callsign.trimmed().toUpper(),
+                             grid4.isEmpty() ? QString() : QStringLiteral(" ") + grid4);
+    }
+    if (m_mamCqSlots
+        && m_autoCqRepeat
+        && !cqMessage.isEmpty()
+        && m_mamMessages.size() < m_mamMaxStreams) {
+        int const want = m_mamMaxStreams - m_mamMessages.size();
+        QVector<int> const cqFreqs = mamPlanCqFrequencies(want, m_mamF0sHz);
+        for (int f : cqFreqs) {
+            m_mamMessages.append(cqMessage);
+            m_mamF0sHz.append(f);
         }
-        if (m_autoCqRepeat && !cq.isEmpty()) {
-            m_mamMessages.append(cq);
+        if (!cqFreqs.isEmpty()) {
+            QStringList shown;
+            shown.reserve(cqFreqs.size());
+            for (int f : cqFreqs) {
+                shown << QString::number(f);
+            }
+            bridgeLog(QStringLiteral("MAM dispatch: %1 parallel CQ stream(s) [%2] on %3Hz")
+                          .arg(cqFreqs.size())
+                          .arg(cqMessage, shown.join(QLatin1Char('/'))));
+        }
+    }
+
+    if (m_mamMessages.isEmpty()) {
+        // (5) Nessuno slot da servire e nessun CQ parallelo: CQ singolo sulla
+        // frequenza TX, restando nel path MAM (non deleghiamo a
+        // checkAndStartPeriodicTx per evitare ricorsione, dato che quello
+        // rientra in mamDispatchPeriod).
+        if (m_autoCqRepeat && !cqMessage.isEmpty()) {
+            m_mamMessages.append(cqMessage);
             m_mamF0sHz.append(qBound(200, m_txFrequency > 0 ? m_txFrequency : m_rxFrequency, 4000));
-            bridgeLog(QStringLiteral("MAM dispatch: no active slots, sending CQ [%1]").arg(cq));
+            bridgeLog(QStringLiteral("MAM dispatch: no active slots, sending CQ [%1]").arg(cqMessage));
         } else {
             // Niente da trasmettere: resto in ascolto.
             return;
@@ -37304,7 +37466,8 @@ void DecodiumBridge::loadSettings()
     m_ft2AsyncSkipRedundantSyncDecode = s.value(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), false).toBool();
     // 1.0.364+ - MAM multi-stream (MSHV) FASE 3 (default OFF; cap 2..5, default 3)
     m_mamMultiStream = s.value(QStringLiteral("MamMultiStream"), false).toBool();
-    m_mamMaxStreams  = qBound(2, s.value(QStringLiteral("MamMaxStreams"), 3).toInt(), 5);
+    m_mamMaxStreams  = qBound(1, s.value(QStringLiteral("MamMaxStreams"), 3).toInt(), 10);
+    m_mamCqSlots     = s.value(QStringLiteral("MamCqSlots"), true).toBool();
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
     m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
     m_ft8SubpassHarvest     = s.value(QStringLiteral("Ft8SubpassHarvest"),     false).toBool();
@@ -45630,6 +45793,14 @@ void DecodiumBridge::onSpectrumTimer()
                 m_lastPanadapterFrameMs = nowMs;
 #if defined(DECODIUM_QML_PANADAPTER_DIRECT)
                 bool anyAlive = false;
+                // 1.0.569+ - un pannello NASCOSTO ritorna true da addPcmFrameI16
+                // senza disegnare nulla. Con due panadapter registrati (DX-Pedition
+                // ON: il classico nascosto + quello del workspace) quel true
+                // mascherava il rifiuto dell'unico visibile: anyAccepted restava
+                // vero, il GPU non veniva mai marcato indisponibile e il fallback
+                // FFTW CPU non partiva -> panadapter fermo. Conto le accettazioni
+                // solo dei pannelli che possono davvero consumare il frame.
+                bool anyConsumer = false;
                 bool anyAccepted = false;
                 m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
                 for (const QPointer<PanadapterItem>& ref : m_panadapterItems) {
@@ -45637,6 +45808,9 @@ void DecodiumBridge::onSpectrumTimer()
                     if (!it)
                         continue;
                     anyAlive = true;
+                    if (!it->isFrameConsumer())
+                        continue;
+                    anyConsumer = true;
                     bool const accepted = it->addPcmFrameI16(m_wfRing,
                                                              WF_RING_SIZE,
                                                              ringStart,
@@ -45655,7 +45829,7 @@ void DecodiumBridge::onSpectrumTimer()
                     metricHighRes = true;
                     metricGpu = true;
                     metricUsable = usable;
-                    if (!anyAccepted) {
+                    if (anyConsumer && !anyAccepted) {
                         setGpuPanadapterFftAvailable(
                             false,
                             QStringLiteral("PanadapterItem rejected GPU FFT I16 frame"));

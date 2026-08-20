@@ -1779,13 +1779,16 @@ ApplicationWindow {
     property bool uiBtnMacroVisible:          settingBool("uiBtnMacroVisible", true)
     property bool uiBtnAstroVisible:          settingBool("uiBtnAstroVisible", true)
     property bool uiBtnCatVisible:            settingBool("uiBtnCatVisible", true)
+    // 1.0.569 — scorciatoia per entrare nel workspace DX-Pedition (il gemello
+    // del pulsante EXIT che c'e' dentro il workspace).
+    property bool uiBtnDxPedVisible:          settingBool("uiBtnDxPedVisible", true)
 
     // === Ordine pulsanti toolbar (drag&drop riordinabile, persistente) ===
-    readonly property string uiToolbarOrderDefault: "setup,rec,wav,sep1,log,macro,astro,layout,history,sep2,cat"
+    readonly property string uiToolbarOrderDefault: "setup,rec,wav,sep1,log,macro,astro,layout,history,dxped,sep2,cat"
     property var uiToolbarOrder: parseToolbarOrder(String(bridge.getSetting("uiToolbarOrder", "") || ""))
 
     // Tutti gli id validi (pulsanti + separatori). Usato per validare/normalizzare.
-    readonly property var uiToolbarKnownIds: ["setup","rec","wav","log","macro","astro","layout","history","cat","sep1","sep2"]
+    readonly property var uiToolbarKnownIds: ["setup","rec","wav","log","macro","astro","layout","history","dxped","cat","sep1","sep2"]
 
     function applyFt2LinkModeLayout() {
         if (typeof period1FloatingWindow !== "undefined" && period1FloatingWindow)
@@ -1894,10 +1897,12 @@ ApplicationWindow {
             seen[id] = true
             out.push(id)
         }
-        // Aggiungi eventuali id mancanti (es. nuovo pulsante introdotto dopo) in coda nell'ordine di default
+        // Inserisci gli id mancanti (es. un pulsante nuovo) alla loro POSIZIONE
+        // di default, non in coda: appesi in fondo finirebbero oltre il bordo
+        // della toolbar e l'utente non li vedrebbe mai.
         for (var j = 0; j < def.length; ++j) {
             if (!seen[def[j]]) {
-                out.push(def[j])
+                out.splice(Math.min(j, out.length), 0, def[j])
                 seen[def[j]] = true
             }
         }
@@ -1920,6 +1925,7 @@ ApplicationWindow {
         case "astro": return uiBtnAstroVisible
         case "layout": return uiBtnFooterResetVisible
         case "history": return uiBtnFooterHistoryVisible
+        case "dxped": return uiBtnDxPedVisible
         case "cat": return uiBtnCatVisible
         case "sep1":
         case "sep2": return true
@@ -1937,6 +1943,7 @@ ApplicationWindow {
         case "astro": return 48
         case "layout": return 64
         case "history": return 68
+        case "dxped": return 66
         case "cat": return 48
         case "sep1":
         case "sep2": return 1
@@ -5175,6 +5182,7 @@ ApplicationWindow {
                                     case "astro":  return comp_astro
                                     case "layout": return comp_layout
                                     case "history": return comp_history
+                                    case "dxped": return comp_dxped
                                     case "cat":    return comp_cat
                                     case "sep1":
                                     case "sep2":   return comp_sep
@@ -5581,6 +5589,42 @@ ApplicationWindow {
                         }
                     }
 
+                    // 1.0.569 — passa al workspace DX-Pedition. Si torna al
+                    // classico con il pulsante EXIT della barra tattica.
+                    Component {
+                        id: comp_dxped
+                        Rectangle {
+                            property bool hovered: false
+                            readonly property bool btnVisible: mainWindow.uiBtnDxPedVisible
+                            readonly property real prefWidth: 66
+                            readonly property string tip: qsTr("Switch to the DX-Pedition workspace (3-column tactical layout)")
+                            function activate(mouse) {
+                                mainWindow.dxPeditionMode = true
+                                bridge.setSetting("uiDxPeditionMode", true)
+                            }
+                            radius: 3
+                            color: hovered ? Qt.rgba(25/255, 255/255, 136/255, 0.20) : "transparent"
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 4
+                                Text {
+                                    text: "◤"
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                    color: Qt.rgba(25/255, 255/255, 136/255, 1.0)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: qsTr("DX-Ped")
+                                    font.pixelSize: 9
+                                    font.bold: true
+                                    color: Qt.rgba(25/255, 255/255, 136/255, 1.0)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                        }
+                    }
+
                     // Decode history
                     Component {
                         id: comp_history
@@ -5710,8 +5754,11 @@ ApplicationWindow {
 	                // World Clock with Analog Display
 	                Item {
 	                    id: worldClock
-	                    visible: showWorldClock
-	                    width: showWorldClock ? compactWidth : 0
+	                    // 1.0.569 — in DX-Pedition il workspace occupa tutto lo
+	                    // schermo e l'orologio draggabile ci finiva sopra: qui la
+	                    // barra tattica ha gia' il suo orologio UTC.
+	                    visible: showWorldClock && !mainWindow.dxPeditionMode
+	                    width: (showWorldClock && !mainWindow.dxPeditionMode) ? compactWidth : 0
 	                    height: 80
 	                    readonly property int analogClockWidth: 60
 	                    readonly property int cardMargins: 10

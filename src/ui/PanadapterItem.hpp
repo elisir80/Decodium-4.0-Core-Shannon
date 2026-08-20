@@ -206,6 +206,12 @@ public:
                         quint64 serial);
     void activateCpuSpectrumFallback();
     void prepareGpuSpectrumRetry();
+    // 1.0.569+ - vero solo se questo pannello puo' davvero consumare e disegnare
+    // un frame PCM. Un pannello nascosto (es. il waterfall classico mentre e'
+    // attivo il workspace DX-Pedition) non e' un consumatore: il suo "accetto"
+    // di cortesia mascherava il rifiuto di quello visibile e teneva il feed
+    // inchiodato sul path GPU, senza mai attivare il fallback FFTW CPU.
+    bool isFrameConsumer() const;
 
     Q_INVOKABLE void resetPeakHold()  { m_peakBins.clear(); markDirty(); }
     Q_INVOKABLE void resetWaterfall();

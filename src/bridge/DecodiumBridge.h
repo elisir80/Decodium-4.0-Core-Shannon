@@ -539,6 +539,12 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int mamMaxStreams READ mamMaxStreams WRITE setMamMaxStreams NOTIFY mamMaxStreamsChanged)
     Q_PROPERTY(QVariantList mamActiveSlots READ mamActiveSlots NOTIFY mamActiveSlotsChanged)
     Q_PROPERTY(int mamActiveSlotCount READ mamActiveSlotCount NOTIFY mamActiveSlotsChanged)
+    // 1.0.569+ - DX-Pedition multi-slot: coda chiamanti in attesa di uno slot
+    // libero (m_callerQueue) e stato del modo corrente rispetto al multi-stream.
+    Q_PROPERTY(int mamQueueCount READ callerQueueSize NOTIFY callerQueueChanged)
+    Q_PROPERTY(bool mamCqSlots READ mamCqSlots WRITE setMamCqSlots NOTIFY mamCqSlotsChanged)
+    Q_PROPERTY(bool mamModeSupported READ mamModeSupported NOTIFY modeChanged)
+    Q_PROPERTY(bool mamModeExperimental READ mamModeExperimental NOTIFY modeChanged)
     // 1.0.187 — FT2 Weak-Signal Pack F (v2): partner-memory opt-in.
     // Diversamente dalla 1.0.186 revertita, qui e' default OFF e ha gate molto
     // piu' stretti + log immediato di ogni invocazione (anche se guardrail rifiuta).
@@ -1725,6 +1731,7 @@ signals:
     void mamMultiStreamChanged();      // 1.0.364+ — MAM multi-stream FASE 3
     void mamMaxStreamsChanged();       // 1.0.364+ — cap stream simultanei
     void mamActiveSlotsChanged();      // 1.0.364+ — lista slot QSO attivi per UI
+    void mamCqSlotsChanged();          // 1.0.569+ — CQ paralleli sugli slot liberi
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
     void ft2Tx2ResendOnStallChanged();      // 1.0.187 — Pack G
     void smoothDecodeFlowChanged();  // 1.0.179 — Smooth Decode Flow
@@ -2982,6 +2989,10 @@ private:
     };
     QVector<MamQsoSlot> m_mamSlots;
     int                 m_mamMaxStreams {3};
+    // 1.0.569+ — riempi gli slot liberi con CQ paralleli (modello DX-pedition:
+    // chiamo CQ su piu' frequenze insieme e ogni risposta si prende il suo slot).
+    // Ha effetto solo dentro il multi-stream, che e' gia' opt-in (default OFF).
+    bool                m_mamCqSlots {true};
     bool               m_txAudioPrecomputeScheduled {false};
     bool               m_cachedTxOutputDeviceValid {false};
     QString            m_cachedTxOutputDeviceName;
@@ -3736,6 +3747,23 @@ public:
     // pieno, alla coda. Q_INVOKABLE per un eventuale pulsante QML. Gated da
     // mamMultiStreamSequencerActive(): con MAM OFF non fa nulla.
     Q_INVOKABLE void mamEnqueueClickedStation(const QString& callFull, int audioFreqHz);
+
+    // 1.0.569+ - DX-Pedition multi-slot. Controlli manuali sugli slot esposti al
+    // pannello DX-Pedition (DxPedTxPanel.qml). Tutti no-op quando non ci sono
+    // slot: non toccano il path single-QSO.
+    bool    mamCqSlots() const { return m_mamCqSlots; }
+    void    setMamCqSlots(bool on);
+    // Pianifica le frequenze audio dei CQ paralleli: parte dalla frequenza TX e
+    // sale a passi di 60 Hz, poi scende, saltando quelle gia' occupate.
+    QVector<int> mamPlanCqFrequencies(int count, const QVector<int>& used) const;
+    bool    mamModeSupported() const { return isMamMultiStreamMode(); }
+    // FT2: il multi-stream non e' mai stato validato on-air (primo pileup reale
+    // fallito, 1.0.449) -> la UI mostra un avviso ma lascia la scelta.
+    bool    mamModeExperimental() const;
+    Q_INVOKABLE void mamDropSlot(const QString& call);
+    Q_INVOKABLE void mamLogSlotNow(const QString& call);
+    Q_INVOKABLE void mamClearSlots();
+    Q_INVOKABLE void mamClearQueue();
 
 private:
 

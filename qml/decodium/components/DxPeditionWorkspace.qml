@@ -9,6 +9,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 
 Item {
     id: workspace
@@ -54,89 +55,511 @@ Item {
     readonly property int densRowH:   tm ? tm.densityRowHeight()   : 22
     readonly property int densFont:   tm ? tm.densityFontSize()    : 12
 
+    // =========================================================================
+    // 1.0.569 — pannelli STACCABILI e INTERSCAMBIABILI.
+    // Tecnica (la stessa dello swap del layout classico): i figli degli SplitView
+    // sono 7 SLOT fissi — non cambiano mai, quindi maniglie e dimensioni restano
+    // stabili — mentre i pannelli veri vivono in un pool, creati UNA volta sola.
+    // Scambiare due pannelli = scambiare due voci nella mappa e RE-PARENTARE:
+    // il contenuto non viene mai ricreato, cosi' il Waterfall non perde il feed
+    // PCM e il TxPanel non perde il suo popup di conferma log.
+    // =========================================================================
+    readonly property var panelKeys: ["cluster", "psk", "waterfall", "fullspectrum", "signalrx", "tx", "log"]
+    readonly property string defaultPanelOrder: "cluster,psk,waterfall,fullspectrum,signalrx,tx,log"
+    property string panelOrder: defaultPanelOrder
+    property var detachedKeys: []
+    // Pannelli CHIUSI: non stanno ne' nello slot ne' in finestra. Lo slot
+    // collassa (visible:false, come vuole SplitView) invece di restare un buco,
+    // e il pannello torna nel pool, quindi smette anche di consumare CPU.
+    property var hiddenKeys: []
+    property var slotItems: []
+    property bool layoutReady: false
+    // Le finestre dei pannelli staccati non vanno mostrate mentre il workspace
+    // e' ancora in costruzione: il Loader di Main.qml e' asincrono e una Window
+    // figlia mostrata durante l'incubazione riceve da Qt un `closing` spurio
+    // appena la finestra madre viene agganciata alla scena — che verrebbe letto
+    // come "riaggancia" e annullerebbe da solo lo stacco appena ripristinato.
+    property bool floatsReady: false
+
+    function orderList() {
+        var raw = String(workspace.panelOrder || "").split(",")
+        var out = []
+        for (var i = 0; i < raw.length; ++i) {
+            var k = raw[i].trim()
+            if (k.length > 0 && workspace.panelKeys.indexOf(k) >= 0 && out.indexOf(k) < 0)
+                out.push(k)
+        }
+        // Reintegra gli id mancanti alla loro posizione di default: una mappa
+        // salvata da una versione con meno pannelli non deve farne sparire.
+        var def = workspace.defaultPanelOrder.split(",")
+        for (var j = 0; j < def.length; ++j) {
+            if (out.indexOf(def[j]) < 0)
+                out.splice(Math.min(j, out.length), 0, def[j])
+        }
+        return out
+    }
+
+    function panelKeyForSlot(index) {
+        var o = orderList()
+        return (index >= 0 && index < o.length) ? o[index] : ""
+    }
+
+    function isDetached(key) {
+        return workspace.detachedKeys.indexOf(key) >= 0
+    }
+
+    function isHidden(key) {
+        return workspace.hiddenKeys.indexOf(key) >= 0
+    }
+
+    // Chiude il pannello ovunque si trovi: se era staccato la finestra sparisce,
+    // se era agganciato lo slot collassa. Nessuno spazio vuoto lasciato dietro.
+    function closePanel(key) {
+        if (!key || isHidden(key))
+            return
+        workspace.detachedKeys = workspace.detachedKeys.filter(function(k) { return k !== key })
+        var l = workspace.hiddenKeys.slice()
+        l.push(key)
+        workspace.hiddenKeys = l
+        applyLayout()
+        persistLayout()
+    }
+
+    function showPanel(key) {
+        if (!key || !isHidden(key))
+            return
+        workspace.hiddenKeys = workspace.hiddenKeys.filter(function(k) { return k !== key })
+        applyLayout()
+        persistLayout()
+    }
+
+    function togglePanel(key) {
+        if (isHidden(key))
+            showPanel(key)
+        else
+            closePanel(key)
+    }
+
+    function panelTitle(key) {
+        switch (key) {
+        case "cluster":      return poolCluster.leftTab === 0 ? qsTr("Cluster") : qsTr("MAM")
+        case "psk":          return qsTr("PSK Reporter")
+        case "waterfall":    return qsTr("Waterfall")
+        case "fullspectrum": return qsTr("Full Spectrum · Decode")
+        case "signalrx":     return qsTr("Signal RX · QSO Lock")
+        case "tx":           return qsTr("DX-Ped TX · Slot")
+        case "log":          return qsTr("Log · QSO Entry")
+        }
+        return ""
+    }
+
+    function panelMeta(key) {
+        switch (key) {
+        case "cluster":      return "live feed"
+        case "psk":          return "heard-by"
+        case "waterfall":    return "panadapter"
+        case "fullspectrum": return "live"
+        case "signalrx":     return "live"
+        case "tx":           return (workspace.bridge && workspace.bridge.mamMultiStream)
+                                    ? (workspace.bridge.mamActiveSlotCount + "/" + workspace.bridge.mamMaxStreams)
+                                    : "single"
+        case "log":          return "live"
+        }
+        return ""
+    }
+
+    function panelLive(key) {
+        switch (key) {
+        case "cluster":
+        case "psk":
+        case "fullspectrum":
+        case "signalrx":
+            return true
+        case "tx":
+            return workspace.bridge ? workspace.bridge.mamMultiStream : false
+        }
+        return false
+    }
+
+    function panelItemFor(key) {
+        switch (key) {
+        case "cluster":      return poolCluster
+        case "psk":          return poolPsk
+        case "waterfall":    return poolWaterfall
+        case "fullspectrum": return poolFullSpectrum
+        case "signalrx":     return poolSignalRx
+        case "tx":           return poolTx
+        case "log":          return poolLog
+        }
+        return null
+    }
+
+    function floatBodyFor(key) {
+        switch (key) {
+        case "cluster":      return floatCluster.body
+        case "psk":          return floatPsk.body
+        case "waterfall":    return floatWaterfall.body
+        case "fullspectrum": return floatFullSpectrum.body
+        case "signalrx":     return floatSignalRx.body
+        case "tx":           return floatTx.body
+        case "log":          return floatLog.body
+        }
+        return null
+    }
+
+    function reparentPanel(item, host) {
+        if (!item || !host || item.parent === host)
+            return
+        // Sganciare gli anchor PRIMA del cambio di parent: un anchor che punta
+        // al vecchio parent dopo il re-parent e' un errore a runtime.
+        item.anchors.fill = undefined
+        item.parent = host
+        item.anchors.fill = host
+    }
+
+    function applyLayout() {
+        if (!workspace.layoutReady)
+            return
+        var o = orderList()
+        for (var i = 0; i < o.length; ++i) {
+            var key = o[i]
+            var item = panelItemFor(key)
+            if (!item)
+                continue
+            // Chiuso -> torna nel pool invisibile: fuori dalla scena non
+            // disegna e non consuma (il waterfall smette di macinare FFT).
+            var host = isHidden(key)
+                     ? panelPool
+                     : (isDetached(key)
+                        ? floatBodyFor(key)
+                        : ((i < workspace.slotItems.length && workspace.slotItems[i])
+                           ? workspace.slotItems[i].body : null))
+            reparentPanel(item, host)
+        }
+    }
+
+    function persistLayout() {
+        if (!workspace.bridge)
+            return
+        workspace.bridge.setSetting("uiDxPedPanelOrder", orderList().join(","))
+        workspace.bridge.setSetting("uiDxPedDetachedPanels", workspace.detachedKeys.join(","))
+        workspace.bridge.setSetting("uiDxPedHiddenPanels", workspace.hiddenKeys.join(","))
+    }
+
+    // Posizione e dimensione di ogni finestra staccata, per riaprirla dove
+    // l'utente l'aveva lasciata. Chiamata dalla finestra stessa quando smette
+    // di essere spostata o ridimensionata.
+    function persistFloatGeometry(key, x, y, w, h) {
+        if (!workspace.bridge || !key)
+            return
+        workspace.bridge.setSetting("uiDxPedFloat_" + key, [x, y, w, h].join(","))
+    }
+
+    function restoreFloatGeometry(win) {
+        if (!workspace.bridge || !win || !win.panelKey)
+            return
+        var raw = workspace.bridge.getSetting("uiDxPedFloat_" + win.panelKey, "")
+        var parts = Array.isArray(raw) ? raw : String(raw || "").split(",")
+        if (parts.length < 4)
+            return
+        var x = parseInt(parts[0]), y = parseInt(parts[1])
+        var w = parseInt(parts[2]), h = parseInt(parts[3])
+        if (isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h) || w < 120 || h < 100)
+            return
+        win.x = x
+        win.y = y
+        win.width = w
+        win.height = h
+    }
+
+    function swapSlots(a, b) {
+        var o = orderList()
+        if (a < 0 || b < 0 || a >= o.length || b >= o.length || a === b)
+            return
+        var tmp = o[a]
+        o[a] = o[b]
+        o[b] = tmp
+        workspace.panelOrder = o.join(",")
+        applyLayout()
+        persistLayout()
+    }
+
+    function detachPanel(key) {
+        if (!key || isDetached(key))
+            return
+        var l = workspace.detachedKeys.slice()
+        l.push(key)
+        workspace.detachedKeys = l
+        applyLayout()
+        persistLayout()
+    }
+
+    function dockPanel(key) {
+        if (!key || !isDetached(key))
+            return
+        // Riporta PRIMA il pannello nel suo slot: se la finestra venisse distrutta
+        // mentre lo contiene ancora, si porterebbe via il contenuto.
+        var idx = orderList().indexOf(key)
+        var item = panelItemFor(key)
+        if (item && idx >= 0 && idx < workspace.slotItems.length && workspace.slotItems[idx])
+            reparentPanel(item, workspace.slotItems[idx].body)
+        workspace.detachedKeys = workspace.detachedKeys.filter(function(k) { return k !== key })
+        persistLayout()
+    }
+
+    function resetPanelLayout() {
+        var det = workspace.detachedKeys.slice()
+        for (var i = 0; i < det.length; ++i)
+            dockPanel(det[i])
+        workspace.hiddenKeys = []
+        workspace.panelOrder = workspace.defaultPanelOrder
+        applyLayout()
+        persistLayout()
+    }
+
+    // ---- trascinamento per lo scambio ---------------------------------------
+    property bool dragActive: false
+    property int  dragFromSlot: -1
+    property int  dragTargetSlot: -1
+    property real dragX: 0
+    property real dragY: 0
+    property string dragTitle: ""
+
+    function beginDrag(index, pt) {
+        workspace.dragFromSlot = index
+        workspace.dragTargetSlot = index
+        workspace.dragTitle = panelTitle(panelKeyForSlot(index))
+        workspace.dragX = pt.x
+        workspace.dragY = pt.y
+        workspace.dragActive = true
+    }
+
+    function updateDrag(pt) {
+        if (!workspace.dragActive)
+            return
+        workspace.dragX = pt.x
+        workspace.dragY = pt.y
+        workspace.dragTargetSlot = slotIndexAt(pt.x, pt.y)
+    }
+
+    function slotIndexAt(x, y) {
+        for (var i = 0; i < workspace.slotItems.length; ++i) {
+            var s = workspace.slotItems[i]
+            if (!s || !s.visible || s.width <= 0 || s.height <= 0)
+                continue
+            var p = workspace.mapToItem(s, x, y)
+            if (p.x >= 0 && p.y >= 0 && p.x <= s.width && p.y <= s.height)
+                return i
+        }
+        return -1
+    }
+
+    function endDrag() {
+        if (workspace.dragActive
+            && workspace.dragTargetSlot >= 0
+            && workspace.dragTargetSlot !== workspace.dragFromSlot) {
+            swapSlots(workspace.dragFromSlot, workspace.dragTargetSlot)
+        }
+        cancelDrag()
+    }
+
+    function cancelDrag() {
+        workspace.dragActive = false
+        workspace.dragFromSlot = -1
+        workspace.dragTargetSlot = -1
+    }
+
+    Component.onCompleted: {
+        workspace.slotItems = [dxSlot0, dxSlot1, dxSlot2, dxSlot3, dxSlot4, dxSlot5, dxSlot6]
+        if (workspace.bridge) {
+            // getSetting puo' restituire una lista invece di una stringa quando il
+            // valore salvato contiene virgole e non e' quotato: normalizziamo.
+            function asCsv(v) {
+                if (v === undefined || v === null) return ""
+                return Array.isArray(v) ? v.join(",") : String(v)
+            }
+            var savedOrder = asCsv(workspace.bridge.getSetting("uiDxPedPanelOrder", ""))
+            if (savedOrder.length > 0)
+                workspace.panelOrder = savedOrder
+            var savedDetached = asCsv(workspace.bridge.getSetting("uiDxPedDetachedPanels", ""))
+            workspace.detachedKeys = savedDetached.length > 0
+                ? savedDetached.split(",").filter(function(k) { return workspace.panelKeys.indexOf(k) >= 0 })
+                : []
+            var savedHidden = asCsv(workspace.bridge.getSetting("uiDxPedHiddenPanels", ""))
+            workspace.hiddenKeys = savedHidden.length > 0
+                ? savedHidden.split(",").filter(function(k) { return workspace.panelKeys.indexOf(k) >= 0 })
+                : []
+        }
+        workspace.layoutReady = true
+        applyLayout()
+    }
+
+    // Sblocca le finestre flottanti solo quando la finestra madre e' davvero
+    // sullo schermo (vedi floatsReady): un ritardo fisso non basta, la main
+    // window di Decodium compare dopo ~3.5 s e mostrarne prima una transiente
+    // si prende il `closing` spurio del re-parent.
+    readonly property var hostWindow: workspace.Window.window
+
+    Timer {
+        interval: 800
+        repeat: false
+        running: !workspace.floatsReady
+                 && workspace.hostWindow !== null
+                 && workspace.hostWindow !== undefined
+                 && workspace.hostWindow.visible
+        onTriggered: {
+            workspace.floatsReady = true
+            workspace.applyLayout()
+        }
+    }
+
     // Background fill so the classic chrome never shows through behind the shell.
     Rectangle { anchors.fill: parent; color: workspace.cBg }
 
     // ---------------------------------------------------------------------------
-    // Reusable styled panel: rounded Rectangle + 30px header + body slot.
+    // Slot fisso del workspace: cornice + header con il titolo del pannello che
+    // ospita in QUEL momento, maniglia di scambio e pulsante stacca. Il corpo
+    // nasce vuoto: il pannello vero ci viene riparentato dentro da applyLayout().
     // ---------------------------------------------------------------------------
-    component DxPanel: Rectangle {
-        id: panel
-        property string title: ""
-        property string meta: ""
-        property bool live: false
-        property color accent: workspace.cAccent
-        default property alias content: bodyHolder.data
+    component DxSlot: Rectangle {
+        id: slot
+        property int slotIndex: -1
+        readonly property string panelKey: workspace.panelKeyForSlot(slot.slotIndex)
+        readonly property bool detached: workspace.isDetached(slot.panelKey)
+        // Lo slot esiste solo se il pannello e' qui: chiuso o staccato collassa,
+        // e SplitView ridistribuisce lo spazio agli altri.
+        visible: slot.panelKey.length > 0
+                 && !workspace.isHidden(slot.panelKey)
+                 && !workspace.isDetached(slot.panelKey)
+        readonly property bool dragSource: workspace.dragActive
+                                        && workspace.dragFromSlot === slot.slotIndex
+        readonly property bool dropTarget: workspace.dragActive
+                                        && workspace.dragTargetSlot === slot.slotIndex
+                                        && workspace.dragFromSlot !== slot.slotIndex
+        property alias body: slotBody
 
         radius: 10
         color: workspace.cPanel
-        border.color: workspace.cBorder
-        border.width: 1
+        border.color: slot.dropTarget ? workspace.cAccent : workspace.cBorder
+        border.width: slot.dropTarget ? 2 : 1
+        opacity: slot.dragSource ? 0.55 : 1.0
         clip: true
 
-        // Header (panelHeader 30px, uppercase 10px accent title).
         Rectangle {
-            id: hdr
+            id: slotHdr
             anchors { left: parent.left; right: parent.right; top: parent.top }
             height: workspace.densPanelH
             color: workspace.cPanelHdr
             radius: 10
-            // Square the bottom corners.
+            // Squadra gli angoli bassi.
             Rectangle {
                 anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
-                height: 10; color: parent.color
+                height: 10
+                color: parent.color
             }
+
             RowLayout {
-                anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
+                anchors { fill: parent; leftMargin: 8; rightMargin: 8 }
                 spacing: 8
+
+                // Maniglia: lo scambio si trascina SOLO da qui, mai dal corpo.
+                Text {
+                    text: "⠿"
+                    color: (gripMA.containsMouse || slot.dragSource) ? workspace.cAccent : workspace.cTextDim
+                    font.pixelSize: 13
+                    Layout.alignment: Qt.AlignVCenter
+                    MouseArea {
+                        id: gripMA
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        hoverEnabled: true
+                        preventStealing: true
+                        cursorShape: workspace.dragActive ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                        onPressed: function(mouse) {
+                            workspace.beginDrag(slot.slotIndex, mapToItem(workspace, mouse.x, mouse.y))
+                        }
+                        onPositionChanged: function(mouse) {
+                            workspace.updateDrag(mapToItem(workspace, mouse.x, mouse.y))
+                        }
+                        onReleased: workspace.endDrag()
+                        onCanceled: workspace.cancelDrag()
+                    }
+                }
+
                 Rectangle {
-                    visible: panel.live
+                    visible: workspace.panelLive(slot.panelKey)
                     width: 8; height: 8; radius: 4
-                    color: panel.accent
+                    color: workspace.cAccent
                     SequentialAnimation on opacity {
-                        running: panel.live; loops: Animation.Infinite
+                        running: workspace.panelLive(slot.panelKey)
+                        loops: Animation.Infinite
                         NumberAnimation { from: 1.0; to: 0.25; duration: 800 }
                         NumberAnimation { from: 0.25; to: 1.0; duration: 800 }
                     }
                 }
+
                 Text {
-                    text: panel.title.toUpperCase()
-                    color: panel.accent
+                    text: workspace.panelTitle(slot.panelKey).toUpperCase()
+                    color: workspace.cAccent
                     font.pixelSize: 10
                     font.bold: true
                     font.letterSpacing: 1.4
+                    elide: Text.ElideRight
                     Layout.alignment: Qt.AlignVCenter
                 }
+
                 Item { Layout.fillWidth: true }
+
                 Text {
-                    text: panel.meta
-                    visible: panel.meta.length > 0
+                    text: workspace.panelMeta(slot.panelKey)
+                    visible: text.length > 0
                     color: workspace.cTextDim
                     font.pixelSize: 10
                     elide: Text.ElideRight
                     Layout.alignment: Qt.AlignVCenter
                 }
+
+                // Stacca in finestra propria.
+                Text {
+                    text: "↗"
+                    color: detachMA.containsMouse ? workspace.cAccent : workspace.cTextDim
+                    font.pixelSize: 13
+                    Layout.alignment: Qt.AlignVCenter
+                    MouseArea {
+                        id: detachMA
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: workspace.detachPanel(slot.panelKey)
+                    }
+                }
+
+                // Chiude il pannello: lo slot collassa, si riapre da PANELS.
+                Text {
+                    text: "✕"
+                    color: closeMA.containsMouse ? workspace.cHot : workspace.cTextDim
+                    font.pixelSize: 12
+                    Layout.alignment: Qt.AlignVCenter
+                    MouseArea {
+                        id: closeMA
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: workspace.closePanel(slot.panelKey)
+                    }
+                }
             }
         }
 
-        // Body slot.
+        // Contenitore del pannello ospitato.
         Item {
-            id: bodyHolder
-            anchors { left: parent.left; right: parent.right; top: hdr.bottom; bottom: parent.bottom }
+            id: slotBody
+            anchors { left: parent.left; right: parent.right; top: slotHdr.bottom; bottom: parent.bottom }
             anchors.margins: 1
         }
-    }
 
-    // A neutral "panel placeholder" body — used until the real component is extracted.
-    component PanelStub: Item {
-        property string note: "panel"
-        Text {
-            anchors.centerIn: parent
-            text: parent.note
-            color: workspace.cTextDim
-            font.pixelSize: 11
-            font.italic: true
-        }
     }
 
     // ===========================================================================
@@ -268,7 +691,7 @@ Item {
                     spacing: 6
                     Layout.alignment: Qt.AlignVCenter
                     Repeater {
-                        model: ["SETUP", "LOG", "MAM", "MACRO", "CAT"]
+                        model: ["PANELS", "SETUP", "LOG", "MAM", "MACRO", "CAT"]
                         delegate: Rectangle {
                             required property string modelData
                             implicitWidth: tbTxt.implicitWidth + 16
@@ -290,7 +713,9 @@ Item {
                                 // 1.0.345 — tutti i pulsanti header cablati.
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (parent.modelData === "SETUP")
+                                    if (parent.modelData === "PANELS")
+                                        panelsPopup.open()
+                                    else if (parent.modelData === "SETUP")
                                         workspace.requestOpenSettings()
                                     else if (parent.modelData === "LOG")
                                         workspace.requestOpenLog()
@@ -417,8 +842,11 @@ Item {
         }
 
         // -------- ROW 3 — MAIN 3 COLUMNS (resizable) ---------------------------
-        // 1.0.342 — SplitView annidati: orizzontale per le 3 colonne (resize larghezza),
-        // verticale dentro ogni colonna (resize altezza pannelli). Maniglie trascinabili.
+        // 1.0.342 — SplitView annidati: orizzontale per le 3 colonne (resize
+        // larghezza), verticale dentro ogni colonna (resize altezza).
+        // 1.0.569 — i figli degli SplitView sono SLOT fissi: i pannelli ci
+        // vengono riparentati dentro secondo panelOrder, quindi si scambiano
+        // senza mai toccare la struttura (niente maniglie duplicate).
         SplitView {
             id: mainSplit
             Layout.fillWidth: true
@@ -437,10 +865,13 @@ Item {
                 }
             }
 
-            // ---- COL LEFT : Cluster 1.4 / PSK 1 -------------------------------
+            // ---- COL LEFT ------------------------------------------------------
             SplitView {
                 id: colLeftSplit
                 orientation: Qt.Vertical
+                // Colonna senza piu' pannelli: sparisce, cosi' le altre due si
+                // prendono tutta la larghezza invece di lasciare una striscia.
+                visible: dxSlot0.visible || dxSlot1.visible
                 SplitView.preferredWidth: 340
                 SplitView.minimumWidth: 240
                 handle: Rectangle {
@@ -450,109 +881,25 @@ Item {
                     Rectangle { anchors.centerIn: parent; width: 28; height: 2; radius: 1; color: workspace.cBorder }
                 }
 
-                DxPanel {
-                    id: clusterMamPanel
+                DxSlot {
+                    id: dxSlot0
+                    slotIndex: 0
                     SplitView.preferredHeight: 360
                     SplitView.minimumHeight: 120
-                    title: clusterMamPanel.leftTab === 0 ? "Cluster" : "MAM"
-                    meta: "live feed"
-                    live: true
-                    // 1.0.345 — tab Cluster|MAM: 0=DX Cluster, 1=Multi-Answer Mode.
-                    property int leftTab: 0
-
-                    // Selettore tab in cima al body del pannello.
-                    Row {
-                        id: clusterMamTabs
-                        anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: 2 }
-                        height: 26
-                        spacing: 6
-                        Repeater {
-                            model: ["CLUSTER", "MAM"]
-                            delegate: Rectangle {
-                                required property int index
-                                required property string modelData
-                                width: (clusterMamTabs.width - 6) / 2
-                                height: 24
-                                radius: 4
-                                readonly property bool sel: clusterMamPanel.leftTab === index
-                                color: sel ? workspace.cAccentDeep
-                                           : (tabMA.containsMouse ? workspace.cPanelHdr : "transparent")
-                                border.color: sel ? workspace.cAccentDim : workspace.cBorder
-                                border.width: 1
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: parent.modelData
-                                    color: parent.sel ? workspace.cAccent : workspace.cTextDim
-                                    font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.2
-                                }
-                                MouseArea {
-                                    id: tabMA; anchors.fill: parent; hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: clusterMamPanel.leftTab = index
-                                }
-                            }
-                        }
-                    }
-
-                    // Cluster (tab 0)
-                    Loader {
-                        anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
-                        active: workspace.visible
-                        visible: clusterMamPanel.leftTab === 0
-                        sourceComponent: clusterComp
-                    }
-                    Component {
-                        id: clusterComp
-                        DxClusterPanel {
-                            embedded: true   // 1.0.343 — no drag/resize interni nel workspace
-                            minPanelWidth: 0
-                            minPanelHeight: 0
-                            x: 0; y: 0
-                            width: parent ? parent.width : 320
-                            height: parent ? parent.height : 280
-                            radius: 0
-                            border.width: 0
-                        }
-                    }
-
-                    // MAM (tab 1) — 1.0.345 contenuto MAM incassato (MamPanel).
-                    Loader {
-                        anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
-                        active: workspace.visible && clusterMamPanel.leftTab === 1
-                        visible: clusterMamPanel.leftTab === 1
-                        sourceComponent: mamPanelComp
-                    }
-                    Component {
-                        id: mamPanelComp
-                        MamPanel {
-                            anchors.fill: parent
-                            engine: workspace.engine
-                        }
-                    }
                 }
-
-                DxPanel {
+                DxSlot {
+                    id: dxSlot1
+                    slotIndex: 1
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 100
-                    title: qsTr("PSK Reporter")
-                    meta: "heard-by"
-                    live: true
-                    Loader {
-                        anchors.fill: parent
-                        active: workspace.visible
-                        sourceComponent: pskReporterComp
-                    }
-                    Component {
-                        id: pskReporterComp
-                        PSKReporterPanel { anchors.fill: parent }
-                    }
                 }
             }
 
-            // ---- COL CENTER : Waterfall / Full Spectrum ----------------------
+            // ---- COL CENTER ----------------------------------------------------
             SplitView {
                 id: colCenterSplit
                 orientation: Qt.Vertical
+                visible: dxSlot2.visible || dxSlot3.visible
                 SplitView.fillWidth: true
                 SplitView.minimumWidth: 360
                 handle: Rectangle {
@@ -562,47 +909,25 @@ Item {
                     Rectangle { anchors.centerIn: parent; width: 28; height: 2; radius: 1; color: workspace.cBorder }
                 }
 
-                DxPanel {
+                DxSlot {
+                    id: dxSlot2
+                    slotIndex: 2
                     SplitView.preferredHeight: 340
                     SplitView.minimumHeight: 160
-                    title: qsTr("Waterfall")
-                    meta: "panadapter"
-                    Loader {
-                        anchors.fill: parent
-                        active: workspace.visible
-                        sourceComponent: waterfallComp
-                    }
-                    Component {
-                        id: waterfallComp
-                        Waterfall {
-                            anchors.fill: parent
-                            showControls: true
-                        }
-                    }
                 }
-
-                DxPanel {
+                DxSlot {
+                    id: dxSlot3
+                    slotIndex: 3
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 120
-                    title: qsTr("Full Spectrum · Decode")
-                    meta: "live"
-                    live: true
-                    Loader {
-                        anchors.fill: parent
-                        active: workspace.visible
-                        sourceComponent: fullSpectrumComp
-                    }
-                    Component {
-                        id: fullSpectrumComp
-                        FullSpectrumPanel { anchors.fill: parent }
-                    }
                 }
             }
 
-            // ---- COL RIGHT : Signal RX / TX / Log ----------------------------
+            // ---- COL RIGHT -----------------------------------------------------
             SplitView {
                 id: colRightSplit
                 orientation: Qt.Vertical
+                visible: dxSlot4.visible || dxSlot5.visible || dxSlot6.visible
                 SplitView.preferredWidth: 520
                 SplitView.minimumWidth: 380
                 handle: Rectangle {
@@ -612,66 +937,23 @@ Item {
                     Rectangle { anchors.centerIn: parent; width: 28; height: 2; radius: 1; color: workspace.cBorder }
                 }
 
-                DxPanel {
-                    SplitView.preferredHeight: 350
-                    SplitView.minimumHeight: 160
-                    title: qsTr("Signal RX · QSO Lock")
-                    meta: "live"
-                    live: true
-                    Loader {
-                        anchors.fill: parent
-                        active: workspace.visible
-                        sourceComponent: signalRxComp
-                    }
-                    Component {
-                        id: signalRxComp
-                        SignalRxPanel { anchors.fill: parent }
-                    }
+                DxSlot {
+                    id: dxSlot4
+                    slotIndex: 4
+                    SplitView.preferredHeight: 260
+                    SplitView.minimumHeight: 140
                 }
-
-                DxPanel {
-                    SplitView.preferredHeight: 250
-                    SplitView.minimumHeight: 150
-                    title: qsTr("TX Macros")
-                    meta: "live"
-                    Loader {
-                        anchors.fill: parent
-                        active: workspace.visible && workspace.engine !== undefined && workspace.engine !== null
-                        sourceComponent: txComp
-                    }
-                    Component {
-                        id: txComp
-                        TxPanel {
-                            anchors.fill: parent
-                            engine: workspace.engine
-                            // In DX-Pedition il pannello TX di Main.qml e' dentro un
-                            // contenitore invisibile e la sua guardia lo esclude: se
-                            // anche questo restasse a false, la conferma di log non
-                            // si aprirebbe piu' e il QSO sembrerebbe non registrato.
-                            handleLogPrompt: !workspace.txPanelDetached
-                            showAsyncIcon: false
-                            showBandBar: false
-                            // 1.0.344 — il pulsante MAM in TX Macros apre la finestra MAM
-                            // (propagata a Main.qml che possiede l'istanza MamWindow).
-                            onMamWindowRequested: workspace.requestOpenMam()
-                        }
-                    }
+                DxSlot {
+                    id: dxSlot5
+                    slotIndex: 5
+                    SplitView.preferredHeight: 420
+                    SplitView.minimumHeight: 220
                 }
-
-                DxPanel {
+                DxSlot {
+                    id: dxSlot6
+                    slotIndex: 6
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 100
-                    title: qsTr("Log · QSO Entry")
-                    meta: "live"
-                    Loader {
-                        anchors.fill: parent
-                        active: workspace.visible
-                        sourceComponent: logQsoComp
-                    }
-                    Component {
-                        id: logQsoComp
-                        LogQsoPanel { anchors.fill: parent }
-                    }
                 }
             }
         }
@@ -689,4 +971,300 @@ Item {
             catStatus: (workspace.bridge && workspace.bridge.catConnected) ? "Connected" : "Disconnected"
         }
     }
+
+    // =========================================================================
+    // POOL — i pannelli veri. Creati una volta sola e riparentati negli slot (o
+    // nelle finestre flottanti). NON sono figli di uno SplitView: metterceli
+    // direttamente creerebbe maniglie fantasma, lezione dello swap classico.
+    // =========================================================================
+    Item {
+        id: panelPool
+        width: 0
+        height: 0
+        visible: false
+
+        // Cluster + MAM a schede (era inline nella colonna sinistra).
+        Item {
+            id: poolCluster
+            property int leftTab: 0
+
+            Row {
+                id: clusterMamTabs
+                anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: 2 }
+                height: 26
+                spacing: 6
+                Repeater {
+                    model: ["CLUSTER", "MAM"]
+                    delegate: Rectangle {
+                        required property int index
+                        required property string modelData
+                        width: (clusterMamTabs.width - 6) / 2
+                        height: 24
+                        radius: 4
+                        readonly property bool sel: poolCluster.leftTab === index
+                        color: sel ? workspace.cAccentDeep
+                                   : (tabMA.containsMouse ? workspace.cPanelHdr : "transparent")
+                        border.color: sel ? workspace.cAccentDim : workspace.cBorder
+                        border.width: 1
+                        Text {
+                            anchors.centerIn: parent
+                            text: parent.modelData
+                            color: parent.sel ? workspace.cAccent : workspace.cTextDim
+                            font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.2
+                        }
+                        MouseArea {
+                            id: tabMA
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: poolCluster.leftTab = index
+                        }
+                    }
+                }
+            }
+
+            Loader {
+                anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
+                active: true
+                visible: poolCluster.leftTab === 0
+                sourceComponent: clusterComp
+            }
+            Component {
+                id: clusterComp
+                DxClusterPanel {
+                    embedded: true   // 1.0.343 — no drag/resize interni nel workspace
+                    minPanelWidth: 0
+                    minPanelHeight: 0
+                    x: 0; y: 0
+                    width: parent ? parent.width : 320
+                    height: parent ? parent.height : 280
+                    radius: 0
+                    border.width: 0
+                }
+            }
+
+            Loader {
+                anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
+                active: poolCluster.leftTab === 1
+                visible: poolCluster.leftTab === 1
+                sourceComponent: mamPanelComp
+            }
+            Component {
+                id: mamPanelComp
+                MamPanel {
+                    anchors.fill: parent
+                    engine: workspace.engine
+                }
+            }
+        }
+
+        PSKReporterPanel { id: poolPsk }
+
+        Waterfall {
+            id: poolWaterfall
+            showControls: true
+        }
+
+        FullSpectrumPanel { id: poolFullSpectrum }
+
+        SignalRxPanel { id: poolSignalRx }
+
+        DxPedTxPanel {
+            id: poolTx
+            engine: workspace.engine
+            // In DX-Pedition il pannello TX di Main.qml e' dentro un contenitore
+            // invisibile e la sua guardia lo esclude: se anche questo restasse a
+            // false, la conferma di log non si aprirebbe piu' e il QSO
+            // sembrerebbe non registrato.
+            handleLogPrompt: !workspace.txPanelDetached
+            // 1.0.344 — il pulsante MAM apre la finestra MAM (propagata a
+            // Main.qml, che possiede l'istanza MamWindow).
+            onMamWindowRequested: workspace.requestOpenMam()
+        }
+
+        LogQsoPanel { id: poolLog }
+    }
+
+    // ---- finestre dei pannelli staccati -------------------------------------
+    // Una finestra STATICA per pannello, nascosta finche' il pannello e'
+    // agganciato. Niente creazione/distruzione dinamica: cosi' non esiste la
+    // corsa fra il re-parent del contenuto e la distruzione della finestra che
+    // lo contiene, e il corpo di destinazione e' sempre pronto.
+    component DxPedFloat: DxPedFloatWindow {
+        bgColor: workspace.cPanel
+        borderColor: workspace.cBorder
+        accentColor: workspace.cAccent
+        textDim: workspace.cTextDim
+        panelTitle: workspace.panelTitle(panelKey)
+        visible: workspace.floatsReady && workspace.isDetached(panelKey)
+        onDockRequested: workspace.dockPanel(panelKey)
+        onCloseRequested: workspace.closePanel(panelKey)
+        onGeometrySettled: workspace.persistFloatGeometry(panelKey, x, y, width, height)
+        Component.onCompleted: workspace.restoreFloatGeometry(this)
+    }
+
+    DxPedFloat { id: floatCluster;      panelKey: "cluster" }
+    DxPedFloat { id: floatPsk;          panelKey: "psk" }
+    DxPedFloat { id: floatWaterfall;    panelKey: "waterfall"; width: 900; height: 480 }
+    DxPedFloat { id: floatFullSpectrum; panelKey: "fullspectrum"; width: 780; height: 420 }
+    DxPedFloat { id: floatSignalRx;     panelKey: "signalrx" }
+    DxPedFloat { id: floatTx;           panelKey: "tx"; width: 620; height: 620 }
+    DxPedFloat { id: floatLog;          panelKey: "log" }
+
+    // ---- menu PANELS: stato dei pannelli e riapertura di quelli chiusi ------
+    Popup {
+        id: panelsPopup
+        parent: workspace
+        x: workspace.width - width - 24
+        y: 78
+        width: 320
+        padding: 10
+        modal: false
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        background: Rectangle {
+            color: workspace.cPanel
+            border.color: workspace.cAccentDim
+            border.width: 1
+            radius: 8
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 6
+
+            Text {
+                text: qsTr("PANELS")
+                color: workspace.cAccent
+                font.pixelSize: 10
+                font.bold: true
+                font.letterSpacing: 1.4
+            }
+            Text {
+                text: qsTr("Click a panel to close or reopen it. A closed panel frees its slot instead of leaving a gap.")
+                color: workspace.cTextDim
+                font.pixelSize: 10
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                Layout.bottomMargin: 2
+            }
+
+            Repeater {
+                model: workspace.panelKeys
+                delegate: Rectangle {
+                    id: panelRow
+                    required property string modelData
+                    readonly property bool closed: workspace.isHidden(panelRow.modelData)
+                    readonly property bool floated: workspace.isDetached(panelRow.modelData)
+                    Layout.fillWidth: true
+                    implicitHeight: 26
+                    radius: 4
+                    color: rowMA.containsMouse ? workspace.cAccentDeep : "transparent"
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 6
+                        anchors.rightMargin: 6
+                        spacing: 8
+
+                        Rectangle {
+                            width: 8
+                            height: 8
+                            radius: 4
+                            color: panelRow.closed ? workspace.cBorder : workspace.cAccent
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        Text {
+                            text: workspace.panelTitle(panelRow.modelData)
+                            color: panelRow.closed ? workspace.cTextDim : workspace.cText
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        Text {
+                            text: panelRow.closed ? qsTr("closed")
+                                                  : (panelRow.floated ? qsTr("window") : qsTr("docked"))
+                            color: workspace.cTextDim
+                            font.pixelSize: 9
+                            font.letterSpacing: 0.8
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                    }
+
+                    MouseArea {
+                        id: rowMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: workspace.togglePanel(panelRow.modelData)
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                Layout.topMargin: 2
+                color: workspace.cBorder
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 24
+                radius: 4
+                color: resetMA.containsMouse ? workspace.cAccentDeep : "transparent"
+                border.color: workspace.cBorder
+                border.width: 1
+                Text {
+                    anchors.centerIn: parent
+                    text: qsTr("RESTORE DEFAULT LAYOUT")
+                    color: workspace.cAccent
+                    font.pixelSize: 9
+                    font.bold: true
+                    font.letterSpacing: 1.0
+                }
+                MouseArea {
+                    id: resetMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        workspace.resetPanelLayout()
+                        panelsPopup.close()
+                    }
+                }
+            }
+        }
+    }
+
+    // ---- strato di trascinamento: fantasma sopra a tutto --------------------
+    Item {
+        anchors.fill: parent
+        z: 1000
+        visible: workspace.dragActive
+
+        Rectangle {
+            x: workspace.dragX - width / 2
+            y: workspace.dragY - height / 2
+            width: ghostTxt.implicitWidth + 28
+            height: 26
+            radius: 6
+            color: workspace.cAccentDeep
+            border.color: workspace.cAccent
+            border.width: 1
+            opacity: 0.92
+            Text {
+                id: ghostTxt
+                anchors.centerIn: parent
+                text: workspace.dragTitle.toUpperCase()
+                color: workspace.cAccent
+                font.pixelSize: 10
+                font.bold: true
+                font.letterSpacing: 1.2
+            }
+        }
+    }
+
 }

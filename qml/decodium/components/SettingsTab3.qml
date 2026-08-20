@@ -1011,7 +1011,7 @@ SettingsPageScroll {
 
                 // 1.0.364+ — MAM multi-stream: numero massimo di stream simultanei
                 Text {
-                    text: qsTr("MAM multi-stream: max stream simultanei:")
+                    text: qsTr("MAM multi-stream: max stream simultanei (1-10):")
                     color: textSecondary
                     font.pixelSize: 12
                     elide: Text.ElideRight
@@ -1024,7 +1024,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.valueWidth
                     Layout.alignment: Qt.AlignLeft
                     implicitHeight: controlHeight
-                    from: 2; to: 5; editable: true
+                    from: 1; to: 10; editable: true
                     enabled: bridge ? bridge.mamMultiStream : false
                     opacity: enabled ? 1.0 : 0.4
                     value: bridge ? bridge.mamMaxStreams : 3
@@ -1039,7 +1039,7 @@ SettingsPageScroll {
                     hoverEnabled: true
                     ToolTip.visible: hovered
                     ToolTip.delay: 400
-                    ToolTip.text: qsTr("How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.\n\nRange 2-5. Default: 3.\n\nHigher values require more CPU to generate overlapping audio streams. Enabled only when MAM multi-stream is active.")
+                    ToolTip.text: qsTr("How many parallel QSOs MAM multi-stream can run at the same time, each on its own frequency.\n\nRange 1-10. Default: 3. With 1 you answer one caller at a time, but still on THEIR frequency (MSHV style).\n\nHigher values split the TX power across the streams (about 1/sqrt(N) each) and need more CPU to generate the overlapping audio. Enabled only when MAM multi-stream is active.")
                 }
 
                 // 1.0.187 — FT2 Weak-Signal Pack F v2: partner-memory cache (30s)

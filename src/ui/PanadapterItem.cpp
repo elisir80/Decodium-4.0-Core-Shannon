@@ -2811,6 +2811,14 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
     return true;
 }
 
+// 1.0.569+ - stesse condizioni della guardia in testa ad addPcmFrameI16: se
+// sono false l'item ritorna "accettato" senza fare nulla, quindi il chiamante
+// deve poterlo escludere dal conteggio delle accettazioni.
+bool PanadapterItem::isFrameConsumer() const
+{
+    return isVisible() && window() && width() > 0.0 && height() > 0.0;
+}
+
 bool PanadapterItem::addPcmFrameI16(const short* ring,
                                     int ringSize,
                                     int ringStart,

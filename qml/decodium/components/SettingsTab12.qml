@@ -75,6 +75,7 @@ SettingsPageScroll {
             { label: qsTr("Layout (window reset)"),  key: "uiBtnFooterResetVisible" },
             { label: qsTr("History (decode history)"), key: "uiBtnFooterHistoryVisible" },
             { label: "CAT",                          key: "uiBtnCatVisible" },
+            { label: qsTr("DX-Pedition (workspace)"), key: "uiBtnDxPedVisible" },
             { label: qsTr("Async FT2 (A)"),          key: "uiAsyncIconVisible" },
             { label: "PSK Reporter",                 key: "uiPskReporterToolbarVisible" },
             { label: qsTr("DX Cluster (toolbar)"),   key: "uiDxClusterToolbarVisible" },

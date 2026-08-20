@@ -3464,6 +3464,41 @@ Errore: %2 - %3</translation>
 <context>
     <name>DxPeditionWorkspace</name>
     <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>PANELS</source>
+        <translation>PANNELLI</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>Click a panel to close or reopen it. A closed panel frees its slot instead of leaving a gap.</source>
+        <translation>Clicca un pannello per chiuderlo o riaprirlo. Un pannello chiuso libera il suo posto invece di lasciare un buco.</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>closed</source>
+        <translation>chiuso</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>window</source>
+        <translation>finestra</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>docked</source>
+        <translation>agganciato</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>RESTORE DEFAULT LAYOUT</source>
+        <translation>RIPRISTINA DISPOSIZIONE</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPeditionWorkspace.qml"/>
+        <source>DX-Ped TX · Slot</source>
+        <translation>DX-Ped TX · Slot</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/DxPeditionWorkspace.qml" line="255"/>
         <source>UTC · OPER IU8LMC</source>
         <translation>UTC · OPER IU8LMC</translation>
@@ -7336,6 +7371,16 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
 </context>
 <context>
     <name>Main</name>
+    <message>
+        <location filename="../qml/decodium/Main.qml"/>
+        <source>DX-Ped</source>
+        <translation>DX-Ped</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml"/>
+        <source>Switch to the DX-Pedition workspace (3-column tactical layout)</source>
+        <translation>Passa al workspace DX-Pedition (layout tattico a 3 colonne)</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/Main.qml" line="9960"/>
         <source>Slow-PC mode</source>
@@ -20180,6 +20225,11 @@ Nel dubbio, usa Alta.</translation>
 <context>
     <name>SettingsTab12</name>
     <message>
+        <location filename="../qml/decodium/components/SettingsTab12.qml"/>
+        <source>DX-Pedition (workspace)</source>
+        <translation>DX-Pedition (workspace)</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab12.qml" line="62"/>
         <source>Monitor (MON / STOP)</source>
         <translation>Monitor (MON / STOP)</translation>
@@ -29173,6 +29223,127 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Disconnesso</translation>
+    </message>
+</context>
+<context>
+    <name>DxPedTxPanel</name>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>CQ MULTI</source>
+        <translation>CQ MULTI</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>CQ</source>
+        <translation>CQ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>On air - %1 QSO + %2 parallel CQ on %3 slots, %4 queued</source>
+        <translation>In aria - %1 QSO + %2 CQ paralleli su %3 slot, %4 in coda</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>MULTI-SLOT</source>
+        <translation>MULTI-SLOT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>SLOT</source>
+        <translation>SLOT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>MAM</source>
+        <translation>MAM</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>AUTO CQ</source>
+        <translation>AUTO CQ</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>ARM</source>
+        <translation>ARMA</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>FT2: multi-slot never validated on air - if QSOs do not close, go back to 1 slot</source>
+        <translation>FT2: multi-slot mai validato in aria - se i QSO non chiudono, torna a 1 slot</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>Multi-slot OFF - serial MAM, one caller at a time</source>
+        <translation>Multi-slot OFF - MAM seriale, un chiamante per volta</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>Mode %1: multi-slot not available (needs FT8, FT4 or FT2)</source>
+        <translation>Modo %1: multi-slot non disponibile (servono FT8, FT4 o FT2)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>TX disabled - press ARM or ENABLE TX</source>
+        <translation>TX disabilitato - premi ARMA o ENABLE TX</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>MAM or AUTO CQ is required to answer callers</source>
+        <translation>Serve MAM o AUTO CQ per rispondere ai chiamanti</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>On air - %1 of %2 slots busy, %3 queued</source>
+        <translation>In aria - %1 slot su %2 occupati, %3 in coda</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>free</source>
+        <translation>libero</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>QUEUE %1</source>
+        <translation>CODA %1</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>CLEAR QUEUE</source>
+        <translation>SVUOTA CODA</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>CLEAR SLOTS</source>
+        <translation>CHIUDI SLOT</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>TX MACROS ▴</source>
+        <translation>MACRO TX ▴</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedTxPanel.qml"/>
+        <source>TX MACROS ▾</source>
+        <translation>MACRO TX ▾</translation>
+    </message>
+</context>
+<context>
+    <name>DxPedFloatWindow</name>
+    <message>
+        <location filename="../qml/decodium/components/DxPedFloatWindow.qml"/>
+        <source>⇲ DOCK</source>
+        <translation>⇲ AGGANCIA</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/DxPedFloatWindow.qml"/>
+        <source>DX-Pedition panel</source>
+        <translation>Pannello DX-Pedition</translation>
     </message>
 </context>
 </TS>
