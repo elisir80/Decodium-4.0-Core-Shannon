@@ -18,6 +18,11 @@ Window {
     property color accentColor: "#19ff88"
     property color textDim: "#6c7872"
     property alias body: bodyItem
+    // Il pannello della finestra staccata e' una ISTANZA PROPRIA, caricata da
+    // qui: spostare quello agganciato dentro un'altra finestra significherebbe
+    // portarsi dietro nodi di scenegraph e popup legati alla finestra di
+    // origine, ed e' cosi' che si arriva a un access violation.
+    property url contentSource: ""
 
     signal dockRequested()
     // La X della finestra CHIUDE il pannello (sparisce anche dallo slot, che
@@ -128,6 +133,13 @@ Window {
             id: bodyItem
             anchors { left: parent.left; right: parent.right; top: hdr.bottom; bottom: parent.bottom }
             anchors.margins: 2
+
+            Loader {
+                anchors.fill: parent
+                asynchronous: false
+                active: win.visible && String(win.contentSource).length > 0
+                source: win.contentSource
+            }
         }
     }
 }

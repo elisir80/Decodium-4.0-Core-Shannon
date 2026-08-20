@@ -112,6 +112,27 @@ Item {
         return workspace.hiddenKeys.indexOf(key) >= 0
     }
 
+    // Tutti i pannelli si staccano. La finestra staccata carica una PROPRIA
+    // istanza (vedi floatSourceFor): il pannello agganciato resta dov'e', solo
+    // nascosto. Lo scambio fra slot continua a spostare l'istanza viva, ma li'
+    // la finestra e la scena sono le stesse, quindi e' sicuro.
+    function panelDetachable(key) {
+        return key.length > 0 && floatSourceFor(key).length > 0
+    }
+
+    function floatSourceFor(key) {
+        switch (key) {
+        case "cluster":      return "DxPedClusterPanel.qml"
+        case "psk":          return "PSKReporterPanel.qml"
+        case "waterfall":    return "Waterfall.qml"
+        case "fullspectrum": return "FullSpectrumPanel.qml"
+        case "signalrx":     return "SignalRxPanel.qml"
+        case "tx":           return "DxPedTxPanel.qml"
+        case "log":          return "LogQsoPanel.qml"
+        }
+        return ""
+    }
+
     // Chiude il pannello ovunque si trovi: se era staccato la finestra sparisce,
     // se era agganciato lo slot collassa. Nessuno spazio vuoto lasciato dietro.
     function closePanel(key) {
@@ -194,19 +215,6 @@ Item {
         return null
     }
 
-    function floatBodyFor(key) {
-        switch (key) {
-        case "cluster":      return floatCluster.body
-        case "psk":          return floatPsk.body
-        case "waterfall":    return floatWaterfall.body
-        case "fullspectrum": return floatFullSpectrum.body
-        case "signalrx":     return floatSignalRx.body
-        case "tx":           return floatTx.body
-        case "log":          return floatLog.body
-        }
-        return null
-    }
-
     function reparentPanel(item, host) {
         if (!item || !host || item.parent === host)
             return
@@ -226,14 +234,13 @@ Item {
             var item = panelItemFor(key)
             if (!item)
                 continue
-            // Chiuso -> torna nel pool invisibile: fuori dalla scena non
-            // disegna e non consuma (il waterfall smette di macinare FFT).
-            var host = isHidden(key)
-                     ? panelPool
-                     : (isDetached(key)
-                        ? floatBodyFor(key)
-                        : ((i < workspace.slotItems.length && workspace.slotItems[i])
-                           ? workspace.slotItems[i].body : null))
+            // Il pannello agganciato vive SEMPRE nel suo slot, anche quando e'
+            // chiuso o mostrato in finestra: in quei casi lo slot e' invisibile,
+            // quindi non disegna e non consuma (isFrameConsumer guarda proprio
+            // la visibilita'). L'unico spostamento e' fra slot della stessa
+            // finestra: mai fra finestre diverse.
+            var host = (i < workspace.slotItems.length && workspace.slotItems[i])
+                     ? workspace.slotItems[i].body : null
             reparentPanel(item, host)
         }
     }
@@ -285,7 +292,7 @@ Item {
     }
 
     function detachPanel(key) {
-        if (!key || isDetached(key))
+        if (!key || isDetached(key) || !panelDetachable(key))
             return
         var l = workspace.detachedKeys.slice()
         l.push(key)
@@ -297,13 +304,8 @@ Item {
     function dockPanel(key) {
         if (!key || !isDetached(key))
             return
-        // Riporta PRIMA il pannello nel suo slot: se la finestra venisse distrutta
-        // mentre lo contiene ancora, si porterebbe via il contenuto.
-        var idx = orderList().indexOf(key)
-        var item = panelItemFor(key)
-        if (item && idx >= 0 && idx < workspace.slotItems.length && workspace.slotItems[idx])
-            reparentPanel(item, workspace.slotItems[idx].body)
         workspace.detachedKeys = workspace.detachedKeys.filter(function(k) { return k !== key })
+        applyLayout()
         persistLayout()
     }
 
@@ -383,7 +385,9 @@ Item {
                 workspace.panelOrder = savedOrder
             var savedDetached = asCsv(workspace.bridge.getSetting("uiDxPedDetachedPanels", ""))
             workspace.detachedKeys = savedDetached.length > 0
-                ? savedDetached.split(",").filter(function(k) { return workspace.panelKeys.indexOf(k) >= 0 })
+                ? savedDetached.split(",").filter(function(k) {
+                      return workspace.panelKeys.indexOf(k) >= 0 && workspace.panelDetachable(k)
+                  })
                 : []
             var savedHidden = asCsv(workspace.bridge.getSetting("uiDxPedHiddenPanels", ""))
             workspace.hiddenKeys = savedHidden.length > 0
@@ -519,9 +523,10 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                 }
 
-                // Stacca in finestra propria.
+                // Stacca in finestra propria (non per il Waterfall).
                 Text {
                     text: "↗"
+                    visible: workspace.panelDetachable(slot.panelKey)
                     color: detachMA.containsMouse ? workspace.cAccent : workspace.cTextDim
                     font.pixelSize: 13
                     Layout.alignment: Qt.AlignVCenter
@@ -983,79 +988,11 @@ Item {
         height: 0
         visible: false
 
-        // Cluster + MAM a schede (era inline nella colonna sinistra).
-        Item {
+        // Cluster + MAM a schede (estratto in DxPedClusterPanel.qml, cosi' la
+        // finestra staccata puo' istanziarne uno suo).
+        DxPedClusterPanel {
             id: poolCluster
-            property int leftTab: 0
-
-            Row {
-                id: clusterMamTabs
-                anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: 2 }
-                height: 26
-                spacing: 6
-                Repeater {
-                    model: ["CLUSTER", "MAM"]
-                    delegate: Rectangle {
-                        required property int index
-                        required property string modelData
-                        width: (clusterMamTabs.width - 6) / 2
-                        height: 24
-                        radius: 4
-                        readonly property bool sel: poolCluster.leftTab === index
-                        color: sel ? workspace.cAccentDeep
-                                   : (tabMA.containsMouse ? workspace.cPanelHdr : "transparent")
-                        border.color: sel ? workspace.cAccentDim : workspace.cBorder
-                        border.width: 1
-                        Text {
-                            anchors.centerIn: parent
-                            text: parent.modelData
-                            color: parent.sel ? workspace.cAccent : workspace.cTextDim
-                            font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.2
-                        }
-                        MouseArea {
-                            id: tabMA
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: poolCluster.leftTab = index
-                        }
-                    }
-                }
-            }
-
-            Loader {
-                anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
-                active: true
-                visible: poolCluster.leftTab === 0
-                sourceComponent: clusterComp
-            }
-            Component {
-                id: clusterComp
-                DxClusterPanel {
-                    embedded: true   // 1.0.343 — no drag/resize interni nel workspace
-                    minPanelWidth: 0
-                    minPanelHeight: 0
-                    x: 0; y: 0
-                    width: parent ? parent.width : 320
-                    height: parent ? parent.height : 280
-                    radius: 0
-                    border.width: 0
-                }
-            }
-
-            Loader {
-                anchors { top: clusterMamTabs.bottom; left: parent.left; right: parent.right; bottom: parent.bottom; topMargin: 4 }
-                active: poolCluster.leftTab === 1
-                visible: poolCluster.leftTab === 1
-                sourceComponent: mamPanelComp
-            }
-            Component {
-                id: mamPanelComp
-                MamPanel {
-                    anchors.fill: parent
-                    engine: workspace.engine
-                }
-            }
+            engine: workspace.engine
         }
 
         PSKReporterPanel { id: poolPsk }
@@ -1096,6 +1033,7 @@ Item {
         accentColor: workspace.cAccent
         textDim: workspace.cTextDim
         panelTitle: workspace.panelTitle(panelKey)
+        contentSource: workspace.floatSourceFor(panelKey)
         visible: workspace.floatsReady && workspace.isDetached(panelKey)
         onDockRequested: workspace.dockPanel(panelKey)
         onCloseRequested: workspace.closePanel(panelKey)
