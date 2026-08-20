@@ -393,18 +393,75 @@ void DecodeListModel::clearBudgetedTarget()
     m_budgetTargetKeySet.clear();
 }
 
+bool DecodeListModel::budgetedBackpressureActive(qint64 nowMs) const
+{
+#ifdef Q_OS_WIN
+    return nowMs < m_budgetBackpressureUntilMs;
+#else
+    Q_UNUSED(nowMs);
+    return false;
+#endif
+}
+
+int DecodeListModel::effectiveBudgetedStepIntervalMs(qint64 nowMs) const
+{
+    return budgetedBackpressureActive(nowMs) ? 32 : 16;
+}
+
+int DecodeListModel::effectiveBudgetRowsPerCycle(qint64 nowMs) const
+{
+    return budgetedBackpressureActive(nowMs)
+        ? qMin(m_budgetRowsPerCycle, 4)
+        : m_budgetRowsPerCycle;
+}
+
+void DecodeListModel::noteBudgetedStepBackpressure(qint64 lateMs, qint64 workUs)
+{
+#ifdef Q_OS_WIN
+    // A late timer means the event loop was already unable to service the
+    // previous slice. A long model slice has the same practical effect once
+    // QML delegates are attached. Pace only the visual model for a short
+    // recovery window; the decoder, audio and CAT paths are not involved.
+    static constexpr qint64 kLateThresholdMs = 75;
+    static constexpr qint64 kWorkThresholdUs = 10000;
+    static constexpr qint64 kRecoveryMs = 2200;
+    if (lateMs < kLateThresholdMs && workUs < kWorkThresholdUs) {
+        return;
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    bool const wasActive = budgetedBackpressureActive(nowMs);
+    m_budgetBackpressureUntilMs = qMax(m_budgetBackpressureUntilMs,
+                                       nowMs + kRecoveryMs);
+    if (!wasActive || nowMs - m_budgetBackpressureLastLogMs >= 5000) {
+        m_budgetBackpressureLastLogMs = nowMs;
+        DIAG_WARN(QStringLiteral("[MODELSTEP] visual backpressure model=%1 late_ms=%2 work_us=%3 interval_ms=32 rows_per_cycle=4 recovery_ms=%4")
+                      .arg(objectName().isEmpty() ? QStringLiteral("unnamed") : objectName())
+                      .arg(lateMs)
+                      .arg(workUs)
+                      .arg(kRecoveryMs));
+    }
+#else
+    Q_UNUSED(lateMs);
+    Q_UNUSED(workUs);
+#endif
+}
+
 void DecodeListModel::scheduleBudgetedStep()
 {
     if (!m_budgetTimer) {
         m_budgetTimer = new QTimer(this);
         m_budgetTimer->setSingleShot(true);
-        m_budgetTimer->setInterval(16);
         connect(m_budgetTimer, &QTimer::timeout,
                 this, &DecodeListModel::applyBudgetedStep);
     }
     if (m_budgetTargetActive && !m_budgetTimer->isActive()) {
-        m_budgetStepExpectedAtMs = QDateTime::currentMSecsSinceEpoch()
-            + m_budgetTimer->interval();
+        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+        int const intervalMs = effectiveBudgetedStepIntervalMs(nowMs);
+        if (m_budgetTimer->interval() != intervalMs) {
+            m_budgetTimer->setInterval(intervalMs);
+        }
+        m_budgetStepExpectedAtMs = nowMs + intervalMs;
         m_budgetTimer->start();
     }
 }
@@ -547,8 +604,15 @@ void DecodeListModel::applyBudgetedStep()
         : 0;
     QElapsedTimer totalTimer;
     totalTimer.start();
+    noteBudgetedStepBackpressure(lateMs, 0);
+    auto workBackpressureGuard = qScopeGuard([this, lateMs, &totalTimer]() {
+        noteBudgetedStepBackpressure(lateMs, totalTimer.nsecsElapsed() / 1000);
+    });
 #endif
     m_budgetStepExpectedAtMs = 0;
+
+    int const rowBudget = effectiveBudgetRowsPerCycle(
+        QDateTime::currentMSecsSinceEpoch());
 
     if (!hasPendingBudgetedUpdate()) {
         bool const completedSnapshot = m_budgetTargetActive;
@@ -590,7 +654,7 @@ void DecodeListModel::applyBudgetedStep()
 
     if (oldMiddleCount > 0 && newMiddleCount > 0) {
         int replaceCount = 0;
-        int const maxReplace = std::min({m_budgetRowsPerCycle,
+        int const maxReplace = std::min({rowBudget,
                                          oldMiddleCount,
                                          newMiddleCount});
         while (replaceCount < maxReplace
@@ -618,7 +682,7 @@ void DecodeListModel::applyBudgetedStep()
             insertCap = 1;
         }
 #endif
-        int const insertCount = qMin(qMin(m_budgetRowsPerCycle, newMiddleCount), insertCap);
+        int const insertCount = qMin(qMin(rowBudget, newMiddleCount), insertCap);
 #ifdef Q_OS_WIN
         qint64 const beforeBeginUs = totalTimer.nsecsElapsed() / 1000;
 #endif
@@ -658,7 +722,7 @@ void DecodeListModel::applyBudgetedStep()
         }
 #endif
     } else if (oldMiddleCount > 0) {
-        int const removeCount = qMin(qMin(m_budgetRowsPerCycle, oldMiddleCount), 12);
+        int const removeCount = qMin(qMin(rowBudget, oldMiddleCount), 12);
         beginRemoveRows(QModelIndex(), commonPrefix,
                         commonPrefix + removeCount - 1);
         m_entries.remove(commonPrefix, removeCount);
@@ -672,7 +736,7 @@ void DecodeListModel::applyBudgetedStep()
         QVector<QPair<int, int>> changedRegions;
         for (int i = 0;
              i < newCount
-             && rowsChanged < m_budgetRowsPerCycle
+             && rowsChanged < rowBudget
              && (rowsChanged == 0 || stepBudget.elapsed() < kBudgetedStepMaxMs);
              ++i) {
             if (m_entries.at(i) == m_budgetTargetEntries.at(i)) {

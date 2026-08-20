@@ -3859,7 +3859,8 @@ static bool hasPortableOperatingDesignator(QString const& token)
     static const QSet<QString> portableSuffixes {
         QStringLiteral("P"), QStringLiteral("M"), QStringLiteral("MM"),
         QStringLiteral("AM"), QStringLiteral("A"), QStringLiteral("R"),
-        QStringLiteral("QRP"), QStringLiteral("PM"), QStringLiteral("MA")
+        QStringLiteral("QRP"), QStringLiteral("PM"), QStringLiteral("MA"),
+        QStringLiteral("LH")
     };
     return portableSuffixes.contains(suffix);
 }
@@ -6657,7 +6658,8 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
             }
             static QRegularExpression const strictCallRe(
                 QStringLiteral("^([A-Z][0-9]?|[0-9A-Z][A-Z])[0-9][A-Z]{0,3}$"));
-            if (!strictCallRe.match(partnerBase).hasMatch()) {
+            if (!strictCallRe.match(partnerBase).hasMatch()
+                && !isSpecialEventStyleCallsignToken(partnerCandidate)) {
                 bridgeLog(QStringLiteral("[GhostFilter] strict-call reject: partner=%1 base=%2 db=%3")
                               .arg(partnerCandidate, partnerBase, QString::number(db)));
                 return true;

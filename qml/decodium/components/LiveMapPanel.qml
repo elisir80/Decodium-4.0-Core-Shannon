@@ -4456,7 +4456,14 @@ Rectangle {
                                     180, Math.min(360, intelligencePanel.height * 0.45))
                                 clip: true
                                 spacing: 3
-                                model: root.mapLayers ? root.mapLayers.roster : []
+                                // The roster contains rich delegates. Do not make every
+                                // live-map snapshot rebuild it while the user is on the
+                                // MAP/LOGBOOK/STATS tabs; bind the current snapshot when
+                                // ROSTER is actually selected.
+                                model: intelligenceTabs.currentIndex === 1 && root.mapLayers
+                                       ? root.mapLayers.roster : []
+                                reuseItems: true
+                                cacheBuffer: 260
                                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
                                 delegate: Rectangle {
                                     required property var modelData

@@ -13,6 +13,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QMetaObject>
@@ -2133,6 +2134,14 @@ MapIntelligenceService::MapIntelligenceService(QObject* parent,
     connect(m_snapshotFlushTimer, &QTimer::timeout,
             this, &MapIntelligenceService::flushPendingSnapshot);
 
+    // Publishing one SQLite snapshot can touch several independent QML
+    // surfaces. Deliver the current state in short groups so a decode burst
+    // cannot turn into one long main-thread MetaCall on Windows.
+    m_snapshotNotificationTimer = new QTimer(this);
+    m_snapshotNotificationTimer->setSingleShot(true);
+    connect(m_snapshotNotificationTimer, &QTimer::timeout,
+            this, &MapIntelligenceService::flushSnapshotNotifications);
+
     scheduleQuery();
 }
 
@@ -4099,6 +4108,101 @@ void MapIntelligenceService::flushPendingSnapshot()
     Snapshot snapshot = std::move(m_pendingSnapshot);
     m_pendingSnapshot = Snapshot {};
     applySnapshotNow(std::move(snapshot));
+}
+
+void MapIntelligenceService::queueSnapshotNotifications(int flags)
+{
+    if (flags == SnapshotNotifyNone) {
+        return;
+    }
+    m_pendingSnapshotNotificationFlags |= flags;
+    if (!m_snapshotNotificationTimer->isActive()) {
+        // Queue after the snapshot handoff. This leaves the current event
+        // loop turn available to audio, CAT and the scene graph.
+        m_snapshotNotificationTimer->start(0);
+    }
+}
+
+void MapIntelligenceService::flushSnapshotNotifications()
+{
+    int const pending = m_pendingSnapshotNotificationFlags;
+    if (pending == SnapshotNotifyNone) {
+        return;
+    }
+
+    // Coverage is the only map-visible data that needs the first turn. The
+    // following groups are independent dashboards and can safely yield one
+    // or two frames to the renderer between their notifications.
+    int flags = SnapshotNotifyNone;
+    int nextDelayMs = 45;
+    int const coverageGroup = SnapshotNotifyFilters | SnapshotNotifyCoverage;
+    int const rosterGroup = SnapshotNotifyRoster | SnapshotNotifyPreferences;
+    int const activityGroup = SnapshotNotifySpotAnalytics
+        | SnapshotNotifyBandActivity | SnapshotNotifyPropagation;
+    int const auxiliaryGroup = SnapshotNotifyAwards | SnapshotNotifyAlerts
+        | SnapshotNotifyRules | SnapshotNotifyMatrices | SnapshotNotifyStatistics;
+    if (pending & coverageGroup) {
+        flags = pending & coverageGroup;
+    } else if (pending & rosterGroup) {
+        flags = pending & rosterGroup;
+    } else if (pending & activityGroup) {
+        flags = pending & activityGroup;
+    } else {
+        flags = pending & auxiliaryGroup;
+        nextDelayMs = 0;
+    }
+    m_pendingSnapshotNotificationFlags &= ~flags;
+
+    QElapsedTimer timer;
+    timer.start();
+    if (flags & SnapshotNotifyFilters) {
+        emit filtersChanged();
+    }
+    if (flags & SnapshotNotifyCoverage) {
+        rebuildVisibleCoverage();
+    }
+    if (flags & SnapshotNotifyRoster) {
+        emit rosterChanged();
+    }
+    if (flags & SnapshotNotifyPreferences) {
+        emit rosterPreferencesChanged();
+    }
+    if (flags & SnapshotNotifyBandActivity) {
+        emit bandActivityChanged();
+    }
+    if (flags & SnapshotNotifyPropagation) {
+        emit propagationStatisticsChanged();
+    }
+    if (flags & SnapshotNotifySpotAnalytics) {
+        emit spotAnalyticsChanged();
+    }
+    if (flags & SnapshotNotifyAwards) {
+        emit awardsChanged();
+    }
+    if (flags & SnapshotNotifyAlerts) {
+        emit alertsChanged();
+    }
+    if (flags & SnapshotNotifyRules) {
+        emit rosterRulesChanged();
+    }
+    if (flags & SnapshotNotifyMatrices) {
+        emit rosterMatricesChanged();
+    }
+    if (flags & SnapshotNotifyStatistics) {
+        emit statisticsChanged();
+    }
+
+    qint64 const elapsedMs = timer.elapsed();
+    if (elapsedMs >= 50) {
+        qWarning().noquote()
+            << "[MAPINT] notification slice"
+            << "flags=" << flags
+            << "elapsed_ms=" << elapsedMs
+            << "remaining=" << m_pendingSnapshotNotificationFlags;
+    }
+    if (m_pendingSnapshotNotificationFlags != SnapshotNotifyNone) {
+        m_snapshotNotificationTimer->start(nextDelayMs);
+    }
 }
 
 QList<MapIntelligenceService::QsoRecord>
@@ -7833,18 +7937,20 @@ void MapIntelligenceService::applySnapshotNow(Snapshot snapshot)
     m_layerModel->setCount(QStringLiteral("active"), m_activeGridCount);
     m_layerModel->setCount(QStringLiteral("missing"), m_missingGridCount);
     m_layerModel->setCount(QStringLiteral("psk"), snapshot.pskListenerCount);
-    if (filtersDataChanged) emit filtersChanged();
-    if (rosterDataChanged) emit rosterChanged();
-    if (rosterPreferencesDataChanged) emit rosterPreferencesChanged();
-    if (awardsDataChanged) emit awardsChanged();
-    if (alertsDataChanged) emit alertsChanged();
-    if (spotAnalyticsDataChanged) emit spotAnalyticsChanged();
-    if (bandActivityDataChanged) emit bandActivityChanged();
-    if (propagationDataChanged) emit propagationStatisticsChanged();
-    if (rosterRulesDataChanged) emit rosterRulesChanged();
-    if (rosterMatricesDataChanged) emit rosterMatricesChanged();
-    if (statisticsDataChanged) emit statisticsChanged();
-    if (coverageDataChanged) rebuildVisibleCoverage();
+    int notificationFlags = SnapshotNotifyNone;
+    if (filtersDataChanged) notificationFlags |= SnapshotNotifyFilters;
+    if (coverageDataChanged) notificationFlags |= SnapshotNotifyCoverage;
+    if (rosterDataChanged) notificationFlags |= SnapshotNotifyRoster;
+    if (rosterPreferencesDataChanged) notificationFlags |= SnapshotNotifyPreferences;
+    if (awardsDataChanged) notificationFlags |= SnapshotNotifyAwards;
+    if (alertsDataChanged) notificationFlags |= SnapshotNotifyAlerts;
+    if (spotAnalyticsDataChanged) notificationFlags |= SnapshotNotifySpotAnalytics;
+    if (bandActivityDataChanged) notificationFlags |= SnapshotNotifyBandActivity;
+    if (propagationDataChanged) notificationFlags |= SnapshotNotifyPropagation;
+    if (rosterRulesDataChanged) notificationFlags |= SnapshotNotifyRules;
+    if (rosterMatricesDataChanged) notificationFlags |= SnapshotNotifyMatrices;
+    if (statisticsDataChanged) notificationFlags |= SnapshotNotifyStatistics;
+    queueSnapshotNotifications(notificationFlags);
 
     qInfo().noquote()
         << QStringLiteral("[MAPINT] snapshot qso=%1 worked=%2 confirmed=%3 active=%4 missing=%5 live=%6 roster=%7 wanted=%8 alerts=%9 db=%10")

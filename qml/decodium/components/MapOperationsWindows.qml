@@ -81,7 +81,12 @@ Item {
                 Layout.fillHeight: true
                 clip: true
                 spacing: 3
-                model: root.mapLayers ? root.mapLayers.roster : []
+                // A hidden detached window must not retain a second live
+                // roster delegate tree during RX.
+                model: rosterWindow.visible && root.mapLayers
+                       ? root.mapLayers.roster : []
+                reuseItems: true
+                cacheBuffer: 320
                 ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
                 delegate: Rectangle {
                     required property var modelData

@@ -451,8 +451,25 @@ private slots:
     void scheduleQuery();
     void flushPendingLiveSpots();
     void flushPendingSnapshot();
+    void flushSnapshotNotifications();
 
 private:
+    enum SnapshotNotification : int {
+        SnapshotNotifyNone          = 0,
+        SnapshotNotifyFilters       = 1 << 0,
+        SnapshotNotifyCoverage      = 1 << 1,
+        SnapshotNotifyRoster        = 1 << 2,
+        SnapshotNotifyPreferences   = 1 << 3,
+        SnapshotNotifyAwards        = 1 << 4,
+        SnapshotNotifyAlerts        = 1 << 5,
+        SnapshotNotifySpotAnalytics = 1 << 6,
+        SnapshotNotifyBandActivity  = 1 << 7,
+        SnapshotNotifyPropagation   = 1 << 8,
+        SnapshotNotifyRules         = 1 << 9,
+        SnapshotNotifyMatrices      = 1 << 10,
+        SnapshotNotifyStatistics    = 1 << 11
+    };
+
     struct QsoRecord {
         QString sourceKey;
         QString call;
@@ -658,6 +675,7 @@ private:
                                 const QList<LiveSpot>& spots,
                                 const AlertRules& rules,
                                 QString* error);
+    void queueSnapshotNotifications(int flags);
     static bool clearLiveSpotRows(const QString& databasePath, QString* error);
     static bool clearPskHeardByRows(const QString& databasePath, QString* error);
     static bool clearAlertRows(const QString& databasePath, QString* error);
@@ -710,10 +728,12 @@ private:
     QTimer* m_queryTimer {nullptr};
     QTimer* m_liveFlushTimer {nullptr};
     QTimer* m_snapshotFlushTimer {nullptr};
+    QTimer* m_snapshotNotificationTimer {nullptr};
     QList<PendingDecode> m_pendingDecodes;
     Snapshot m_pendingSnapshot;
     quint64 m_pendingSnapshotGeneration {0};
     bool m_snapshotPending {false};
+    int m_pendingSnapshotNotificationFlags {SnapshotNotifyNone};
     QVariantList m_rawCoverage;
     QVariantList m_coverageCells;
     QVariantList m_roster;

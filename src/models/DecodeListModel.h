@@ -124,9 +124,18 @@ private:
     bool m_budgetTargetActive {false};
     bool m_completedNonEmptySnapshot {false};
     qint64 m_budgetStepExpectedAtMs {0};
+    // Windows can deliver several QML list mutations in the same overloaded
+    // scene-graph turn. Keep normal machines at the 16 ms cadence, but briefly
+    // spread follow-up work after the model itself observes a late/slow step.
+    qint64 m_budgetBackpressureUntilMs {0};
+    qint64 m_budgetBackpressureLastLogMs {0};
 
     static QString decodeMatchKey(QVariantMap const& entry);
     void applyBudgetedStep();
     void scheduleBudgetedStep();
     void clearBudgetedTarget();
+    bool budgetedBackpressureActive(qint64 nowMs) const;
+    int effectiveBudgetedStepIntervalMs(qint64 nowMs) const;
+    int effectiveBudgetRowsPerCycle(qint64 nowMs) const;
+    void noteBudgetedStepBackpressure(qint64 lateMs, qint64 workUs);
 };
