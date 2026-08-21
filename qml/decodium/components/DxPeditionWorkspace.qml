@@ -112,6 +112,11 @@ Item {
         return workspace.hiddenKeys.indexOf(key) >= 0
     }
 
+    // Quanti pannelli sono chiusi in questo momento. Serve a dirlo sul pulsante
+    // PANELS: un pannello che sparisce senza lasciare traccia e' un pannello
+    // perso, e l'operatore si ritrova a cercarlo.
+    readonly property int closedPanelCount: workspace.hiddenKeys.length
+
     // Tutti i pannelli si staccano. La finestra staccata carica una PROPRIA
     // istanza (vedi floatSourceFor): il pannello agganciato resta dov'e', solo
     // nascosto. Lo scambio fra slot continua a spostare l'istanza viva, ma li'
@@ -472,6 +477,11 @@ Item {
                     color: (gripMA.containsMouse || slot.dragSource) ? workspace.cAccent : workspace.cTextDim
                     font.pixelSize: 13
                     Layout.alignment: Qt.AlignVCenter
+                    ToolTip {
+                        visible: gripMA.containsMouse && !workspace.dragActive
+                        delay: 500
+                        text: qsTr("Drag onto another panel to swap the two")
+                    }
                     MouseArea {
                         id: gripMA
                         anchors.fill: parent
@@ -530,6 +540,11 @@ Item {
                     color: detachMA.containsMouse ? workspace.cAccent : workspace.cTextDim
                     font.pixelSize: 13
                     Layout.alignment: Qt.AlignVCenter
+                    ToolTip {
+                        visible: detachMA.containsMouse
+                        delay: 500
+                        text: qsTr("Open this panel in a window of its own")
+                    }
                     MouseArea {
                         id: detachMA
                         anchors.fill: parent
@@ -546,6 +561,12 @@ Item {
                     color: closeMA.containsMouse ? workspace.cHot : workspace.cTextDim
                     font.pixelSize: 12
                     Layout.alignment: Qt.AlignVCenter
+                    ToolTip {
+                        visible: closeMA.containsMouse
+                        delay: 500
+                        // Dire DOVE va a finire, non solo che si chiude.
+                        text: qsTr("Close this panel - reopen it from PANELS in the top bar")
+                    }
                     MouseArea {
                         id: closeMA
                         anchors.fill: parent
@@ -639,8 +660,18 @@ Item {
                 }
 
                 // Large frequency display.
+                // Con lo scaling al 175% su una finestra da ~1130 px logici la
+                // riga non ci stava e la barra dei comandi finiva OLTRE il bordo
+                // destro: PANELS e compagni diventavano irraggiungibili, e con
+                // loro il modo di riaprire un pannello chiuso. Adesso a cedere e'
+                // la frequenza — si rimpicciolisce e al limite si tronca —
+                // mentre orologio e comandi tengono la loro dimensione.
                 Text {
+                    id: freqDisplay
                     Layout.alignment: Qt.AlignVCenter
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    elide: Text.ElideRight
                     text: {
                         var hz = workspace.bridge && workspace.bridge.dialFrequency !== undefined
                                  ? Number(workspace.bridge.dialFrequency) : 0
@@ -657,11 +688,14 @@ Item {
                         return out
                     }
                     color: workspace.cAccent
-                    font.pixelSize: 36; font.bold: true
+                    // Tre scalini invece di una dimensione fissa: su una finestra
+                    // stretta la frequenza resta leggibile e lascia passare i
+                    // comandi.
+                    font.pixelSize: workspace.width > 1500 ? 36
+                                  : (workspace.width > 1150 ? 28 : 22)
+                    font.bold: true
                     font.family: decodiumMonoFontFamily
                 }
-
-                Item { Layout.fillWidth: true }
 
                 // UTC clock.
                 ColumnLayout {
@@ -698,19 +732,41 @@ Item {
                     Repeater {
                         model: ["PANELS", "SETUP", "LOG", "MAM", "MACRO", "CAT"]
                         delegate: Rectangle {
+                            id: tbBtn
                             required property string modelData
+                            readonly property bool isPanels: tbBtn.modelData === "PANELS"
+                            readonly property bool flagged: tbBtn.isPanels
+                                                         && workspace.closedPanelCount > 0
+                            // Riferirsi al delegate per id e non tramite `parent`:
+                            // dentro un delegate con proprieta' richieste quella
+                            // catena non risolve, e i pulsanti restavano larghi
+                            // 16 px con il testo vuoto — la barra c'era ma non si
+                            // vedeva, e con essa spariva l'unico modo di riaprire
+                            // un pannello chiuso.
                             implicitWidth: tbTxt.implicitWidth + 16
                             implicitHeight: 32
                             radius: 6
                             color: tbMA.containsMouse ? workspace.cAccentDeep : "transparent"
-                            border.color: workspace.cBorder
+                            border.color: tbBtn.flagged ? workspace.cWarn : workspace.cBorder
                             border.width: 1
                             Text {
                                 id: tbTxt
                                 anchors.centerIn: parent
-                                text: parent.modelData
-                                color: tbMA.containsMouse ? workspace.cAccent : workspace.cTextDim
+                                text: tbBtn.flagged
+                                      ? tbBtn.modelData + "  " + workspace.closedPanelCount
+                                      : tbBtn.modelData
+                                color: tbBtn.flagged
+                                       ? workspace.cWarn
+                                       : (tbMA.containsMouse ? workspace.cAccent : workspace.cTextDim)
                                 font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0
+                            }
+                            ToolTip {
+                                visible: tbMA.containsMouse && tbBtn.isPanels
+                                delay: 400
+                                text: workspace.closedPanelCount > 0
+                                      ? qsTr("%1 closed panel(s). Open this to bring them back.")
+                                            .arg(workspace.closedPanelCount)
+                                      : qsTr("Shows where every panel is, and reopens the closed ones.")
                             }
                             MouseArea {
                                 id: tbMA; anchors.fill: parent; hoverEnabled: true
@@ -718,17 +774,17 @@ Item {
                                 // 1.0.345 — tutti i pulsanti header cablati.
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (parent.modelData === "PANELS")
+                                    if (tbBtn.modelData === "PANELS")
                                         panelsPopup.open()
-                                    else if (parent.modelData === "SETUP")
+                                    else if (tbBtn.modelData === "SETUP")
                                         workspace.requestOpenSettings()
-                                    else if (parent.modelData === "LOG")
+                                    else if (tbBtn.modelData === "LOG")
                                         workspace.requestOpenLog()
-                                    else if (parent.modelData === "MAM")
+                                    else if (tbBtn.modelData === "MAM")
                                         workspace.requestOpenMam()
-                                    else if (parent.modelData === "MACRO")
+                                    else if (tbBtn.modelData === "MACRO")
                                         workspace.requestOpenMacro()
-                                    else if (parent.modelData === "CAT")
+                                    else if (tbBtn.modelData === "CAT")
                                         workspace.requestOpenCat()
                                 }
                             }
