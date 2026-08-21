@@ -283,6 +283,114 @@ def do_connect(host, port, seconds, tune_hz, mode_name):
     return 0
 
 
+# ── radio finta ─────────────────────────────────────────────────────────────
+# Una radio che non esiste, che si annuncia e manda un tono: serve a provare il
+# lato client — scoperta, collegamento, audio nel decoder — senza una seconda
+# radio e senza un secondo computer.
+
+def do_serve(port, seconds, label, freq_hz, tone_hz):
+    import math
+
+    ann = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ann.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    ses = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ses.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    ses.bind(("", port))
+    ses.settimeout(0.01)
+
+    rate = 12000
+    frame = rate * 10 // 1000          # 10 ms, come il gateway vero
+    state = {"freq": freq_hz, "mode": MODES.index("DIGU")}
+    clients = {}
+    stream_id = 0x5EED
+    seq = {"ann": 0, "ctx": 0, "aud": 0}
+    phase = 0.0
+    step = 2.0 * math.pi * tone_hz / rate
+
+    def context_payload():
+        return encode_context(frequencyHz=state["freq"], mode=state["mode"], ptt=0,
+                              sMeterTenths=300, sampleRate=rate, channels=1,
+                              bandwidthHz=3000, rigLabel=label,
+                              stateFlags=(1 << 0) | (1 << 1), txAudioLeadMs=0,
+                              sessionPort=port)
+
+    print("radio finta '%s' su porta %d, tono %d Hz - %d s" % (label, port, tone_hz, seconds))
+    t_end = time.time() + seconds
+    t_ann = 0.0
+    t_aud = time.time()
+    while time.time() < t_end:
+        now = time.time()
+        if now - t_ann >= 2.0:
+            t_ann = now
+            seq["ann"] += 1
+            pkt = build(ANNOUNCE, stream_id, seq["ann"], payload=context_payload())
+            for target in ("127.0.0.1", "255.255.255.255"):
+                try:
+                    ann.sendto(pkt, (target, ANNOUNCE_PORT))
+                except OSError:
+                    pass
+
+        try:
+            data, addr = ses.recvfrom(65535)
+            msg = parse(data)
+            if msg and (not AUTH_KEY or msg["authenticated"]):
+                t = msg["type"]
+                if t == HELLO:
+                    if not clients:
+                        # L'orologio dell'audio riparte da adesso: altrimenti si
+                        # rovescerebbe addosso al client l'attesa fatta a vuoto.
+                        t_aud = now
+                    clients[addr] = now
+                    print("  <- HELLO da %s:%d" % addr)
+                    seq["ctx"] += 1
+                    ses.sendto(build(CONTEXT, stream_id, seq["ctx"],
+                                     payload=context_payload()), addr)
+                elif t == KEEPALIVE:
+                    clients[addr] = now
+                elif t == BYE:
+                    clients.pop(addr, None)
+                    print("  <- BYE da %s:%d" % addr)
+                elif t == COMMAND:
+                    cmd = decode_context(msg["payload"])
+                    if "frequencyHz" in cmd:
+                        state["freq"] = cmd["frequencyHz"]
+                        print("  <- TUNE %.3f kHz" % (state["freq"] / 1000.0))
+                    if "mode" in cmd:
+                        state["mode"] = cmd["mode"]
+                        print("  <- MODE %s" % MODES[state["mode"]])
+                    seq["ctx"] += 1
+                    for c in clients:
+                        ses.sendto(build(CONTEXT, stream_id, seq["ctx"],
+                                         payload=context_payload()), c)
+        except socket.timeout:
+            pass
+        except OSError:
+            pass
+
+        # L'audio esce a tempo reale: un frame ogni 10 ms, non a raffica.
+        while clients and time.time() - t_aud >= 0.010:
+            t_aud += 0.010
+            buf = bytearray()
+            for _ in range(frame):
+                v = int(9000 * math.sin(phase))
+                phase += step
+                buf += struct.pack("<h", v)
+            seq["aud"] += 1
+            pkt = build(AUDIO_RX, stream_id, seq["aud"], payload=bytes(buf))
+            for c in list(clients):
+                if now - clients[c] > 15:
+                    del clients[c]
+                    continue
+                try:
+                    ses.sendto(pkt, c)
+                except OSError:
+                    pass
+        time.sleep(0.002)
+
+    print("fine: %d frame audio inviati" % seq["aud"])
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description="Client di prova DecoPort")
     ap.add_argument("--listen", type=int, metavar="SEC",
@@ -295,6 +403,14 @@ def main():
     ap.add_argument("--mode", metavar="NAME", help="e questo modo (USB, DIGU, ...)")
     ap.add_argument("--password", metavar="PW",
                     help="password DecoPort: senza, il gateway non risponde")
+    ap.add_argument("--serve", action="store_true",
+                    help="fai la radio: annunciati e manda un tono, per provare un client")
+    ap.add_argument("--label", default="DecoPort Test Rig",
+                    help="nome della radio finta")
+    ap.add_argument("--freq", type=int, default=14074000,
+                    help="frequenza dichiarata dalla radio finta")
+    ap.add_argument("--tone", type=int, default=1500,
+                    help="tono generato, in Hz sull'audio")
     args = ap.parse_args()
 
     global AUTH_KEY
@@ -302,6 +418,8 @@ def main():
         print("derivo la chiave dalla password...")
         AUTH_KEY = derive_key(args.password)
 
+    if args.serve:
+        return do_serve(args.port, args.seconds, args.label, args.freq, args.tone)
     if args.listen:
         return do_listen(args.listen)
     if args.connect:

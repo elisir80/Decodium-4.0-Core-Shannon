@@ -207,6 +207,53 @@ private:
         if (m_sampleCallback) m_sampleCallback(sample);
     }
 
+public:
+    // Campioni da una sorgente che NON e' la scheda audio (oggi: la radio
+    // remota di DecoPort), gia' alla frequenza di decodifica. Entrano nello
+    // stesso buffer e fanno scattare gli stessi segnali, cosi' decoder,
+    // cascata e S-meter non sanno da dove arrivi l'audio e non devono saperlo.
+    //
+    // Chi la usa deve avere fermato la cattura locale: due sorgenti che
+    // riempiono lo stesso buffer si mescolerebbero in rumore.
+    void injectExternalSamples(const QVector<short>& samples)
+    {
+        if (samples.isEmpty())
+            return;
+
+        double rms = 0.0;
+        double peak = 0.0;
+        int dynamicRange = 0;
+        int clippedSamples = 0;
+        {
+            QMutexLocker locker(m_bufferMutex);
+            if (m_discardSamples.load(std::memory_order_acquire))
+                return;
+            double sumSq = 0.0;
+            int minSample = 32767;
+            int maxSample = -32768;
+            int peakAbs = 0;
+            for (short sample : samples) {
+                const int value = sample;
+                const int absValue = value < 0 ? -value : value;
+                sumSq += static_cast<double>(value) * static_cast<double>(value);
+                if (value < minSample) minSample = value;
+                if (value > maxSample) maxSample = value;
+                if (absValue > peakAbs) peakAbs = absValue;
+                if (absValue >= 32700) ++clippedSamples;
+                appendOutputSample(sample);
+            }
+            rms = std::sqrt(sumSq / samples.size()) / 32768.0;
+            peak = static_cast<double>(peakAbs) / 32768.0;
+            dynamicRange = maxSample - minSample;
+            m_lastRms = rms;
+        }
+        emit audioLevelChanged(m_lastRms);
+        emit audioHealthChanged(rms, peak, dynamicRange, clippedSamples, samples.size());
+        emit audioSamplesReady(samples);
+    }
+
+private:
+
     void appendFilteredFil4(short const* input, int frames)
     {
         int index = 0;

@@ -263,6 +263,12 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QObject* decoPortGateway READ decoPortGatewayObject CONSTANT)
     Q_PROPERTY(QObject* decoPortDiscovery READ decoPortDiscoveryObject CONSTANT)
     Q_PROPERTY(QObject* decoPortLink READ decoPortLinkObject CONSTANT)
+    // Quando e' acceso, l'audio del decoder viene dalla radio remota invece che
+    // dalla scheda locale, e la frequenza mostrata e' la sua.
+    Q_PROPERTY(bool decoPortUseRemote READ decoPortUseRemote WRITE setDecoPortUseRemote NOTIFY decoPortUseRemoteChanged)
+    // L'ascolto in altoparlante e' un'altra cosa dal decodificare: si puo'
+    // volere l'uno senza l'altro.
+    Q_PROPERTY(bool decoPortMonitor READ decoPortMonitor WRITE setDecoPortMonitor NOTIFY decoPortMonitorChanged)
     // Spot condivisi: il gemello della CAT condivisa, per gli spot del
     // cluster invece che per la radio.
     Q_PROPERTY(QObject* spotShare READ spotShareObject CONSTANT)
@@ -827,6 +833,10 @@ public:
     // La password si chiede UNA volta (installazione o finestra DecoPort) e non
     // si ripresenta piu': quello che resta salvato e' la chiave derivata, mai la
     // parola scritta dall'utente.
+    bool decoPortUseRemote() const { return m_decoPortUseRemote; }
+    Q_INVOKABLE void setDecoPortUseRemote(bool on);
+    bool decoPortMonitor() const { return m_decoPortMonitor; }
+    Q_INVOKABLE void setDecoPortMonitor(bool on);
     Q_INVOKABLE bool hasDecoPortPassword() const;
     Q_INVOKABLE bool setDecoPortPassword(const QString& password);
     Q_INVOKABLE void clearDecoPortPassword();
@@ -1758,6 +1768,8 @@ signals:
     void mamMaxStreamsChanged();       // 1.0.364+ — cap stream simultanei
     void mamActiveSlotsChanged();      // 1.0.364+ — lista slot QSO attivi per UI
     void mamCqSlotsChanged();          // 1.0.569+ — CQ paralleli sugli slot liberi
+    void decoPortUseRemoteChanged();   // 1.0.574+ — radio remota come sorgente
+    void decoPortMonitorChanged();     // 1.0.574+ — ascolto in altoparlante
     void ft2PartnerMemoryEnabledChanged();  // 1.0.187 — Pack F v2
     void ft2Tx2ResendOnStallChanged();      // 1.0.187 — Pack G
     void smoothDecodeFlowChanged();  // 1.0.179 — Smooth Decode Flow
@@ -2728,6 +2740,16 @@ private:
     DecodiumTransceiverManager*   m_hamlibCat     {nullptr};
     DecodiumCatShare*             m_catShare      {nullptr};
     QByteArray decoPortAuthKey() const;
+    void onDecoPortRxAudio(const QVector<short>& samples, quint64 captureTsNs);
+    void onDecoPortRemoteState();
+    bool       m_decoPortApplyingRemote {false};
+    bool       m_decoPortMonitor {false};
+    QThread*            m_decoPortMonitorThread {nullptr};
+    RtlSdrAudioOutput*  m_decoPortMonitorOut {nullptr};
+    int                 m_decoPortMonitorRate {0};
+    bool       m_decoPortUseRemote {false};
+    qint64     m_decoPortRemoteSamples {0};
+    qint64     m_lastDecoPortAudioLogMs {0};
     mutable DecodiumDecoPortGateway* m_decoPortGateway {nullptr};
     mutable DecoPortDiscovery*       m_decoPortDiscovery {nullptr};
     mutable DecoPortLink*            m_decoPortLink {nullptr};

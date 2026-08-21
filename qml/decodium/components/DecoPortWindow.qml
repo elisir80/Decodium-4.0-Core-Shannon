@@ -17,6 +17,9 @@ Window {
     readonly property var gw: eng ? eng.decoPortGateway : null
     readonly property var disc: eng ? eng.decoPortDiscovery : null
     readonly property var lnk: eng ? eng.decoPortLink : null
+    // Collegati e' una cosa, usarla al posto della propria scheda un'altra.
+    readonly property bool useRemote: !!(eng && eng.decoPortUseRemote)
+    readonly property bool monitorOn: !!(eng && eng.decoPortMonitor)
 
     readonly property var tm: eng ? eng.themeManager : null
     readonly property color cBg:      tm ? tm.bgDeep        : "#0a0f14"
@@ -486,12 +489,92 @@ Window {
                         }
                         Text {
                             // Onesta' su cosa questo collegamento sa ancora fare.
-                            text: qsTr("keying and audio are not carried yet")
+                            text: qsTr("keying and transmit audio are not carried yet")
                             color: win.cDim
                             font.pixelSize: 10
                             font.italic: true
                             Layout.fillWidth: true
                             elide: Text.ElideRight
+                        }
+                    }
+                }
+
+                // ── usare davvero questa radio ──────────────────────────
+                // Collegarsi mostra la radio; questo la mette al posto della
+                // scheda audio locale, che e' il punto di tutto l'esercizio.
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    visible: !!(win.lnk && win.lnk.linked)
+                    implicitHeight: useCol.implicitHeight + 20
+                    radius: 6
+                    color: win.useRemote
+                           ? Qt.rgba(win.cOk.r, win.cOk.g, win.cOk.b, 0.10) : "transparent"
+                    border.width: 1
+                    border.color: win.useRemote ? win.cOk : win.cBorder
+
+                    ColumnLayout {
+                        id: useCol
+                        anchors { left: parent.left; right: parent.right; top: parent.top }
+                        anchors.margins: 10
+                        spacing: 6
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+                            Chip {
+                                label: win.useRemote ? qsTr("IN USE") : qsTr("NOT IN USE")
+                                on: win.useRemote
+                                tint: win.cOk
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: win.useRemote
+                                      ? qsTr("Decoding the remote radio — the local sound card is released")
+                                      : qsTr("Decoding the local sound card")
+                                color: win.cText
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                            }
+                            Btn {
+                                label: win.useRemote ? qsTr("STOP USING") : qsTr("USE THIS RADIO")
+                                danger: win.useRemote
+                                onClicked: if (win.eng)
+                                    win.eng.setDecoPortUseRemote(!win.useRemote)
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+                            visible: win.useRemote
+                            Chip {
+                                label: win.monitorOn ? qsTr("LISTENING") : qsTr("SILENT")
+                                on: win.monitorOn
+                                tint: win.cAccent
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: qsTr("Hear the remote radio on the speaker as well as decoding it")
+                                color: win.cDim
+                                font.pixelSize: 11
+                                elide: Text.ElideRight
+                            }
+                            Btn {
+                                label: win.monitorOn ? qsTr("MUTE") : qsTr("LISTEN")
+                                onClicked: if (win.eng)
+                                    win.eng.setDecoPortMonitor(!win.monitorOn)
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            // Una stringa sola: qsTr() con una concatenazione
+                            // non finisce nei cataloghi di traduzione.
+                            text: qsTr("Its audio goes into the decoder and its frequency becomes the one shown in the application, in both directions. Transmission stays local.")
+                            color: win.cDim
+                            font.pixelSize: 10
+                            wrapMode: Text.WordWrap
                         }
                     }
                 }
@@ -503,7 +586,11 @@ Window {
                     Btn {
                         label: qsTr("DISCONNECT")
                         danger: true
-                        onClicked: if (win.lnk) win.lnk.disconnectFromGateway()
+                        onClicked: {
+                            if (win.eng && win.useRemote)
+                                win.eng.setDecoPortUseRemote(false)
+                            if (win.lnk) win.lnk.disconnectFromGateway()
+                        }
                     }
                     Item { Layout.fillWidth: true }
                 }

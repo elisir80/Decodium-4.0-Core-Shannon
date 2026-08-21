@@ -10881,6 +10881,14 @@ DecodiumBridge::~DecodiumBridge()
     safeQuitThread(m_soundInputThread,   "soundInput");
     safeQuitThread(m_rtlSdrAudioThread,  "rtlSdrAudio");
     m_rtlSdrAudioOutput = nullptr;
+    if (m_decoPortMonitorOut && m_decoPortMonitorThread
+        && m_decoPortMonitorThread->isRunning()) {
+        QMetaObject::invokeMethod(m_decoPortMonitorOut,
+                                  &RtlSdrAudioOutput::shutdown,
+                                  Qt::BlockingQueuedConnection);
+    }
+    safeQuitThread(m_decoPortMonitorThread, "decoPortMonitor");
+    m_decoPortMonitorOut = nullptr;
 }
 
 QObject * DecodiumBridge::propagationManager() const
@@ -15785,6 +15793,15 @@ double DecodiumBridge::displayFrequency() const
 }
 
 void DecodiumBridge::setFrequency(double v) {
+    // Con la radio remota in uso la manopola dell'applicazione e' la sua: quello
+    // che l'operatore cambia qui deve arrivare li'. Il flag evita il rimbalzo,
+    // perche' la stessa frequenza torna indietro nel contesto successivo.
+    if (m_decoPortUseRemote && !m_decoPortApplyingRemote && v > 0.0) {
+        if (auto* link = qobject_cast<DecoPortLink*>(decoPortLinkObject())) {
+            if (link->isLinked() && std::abs(link->frequencyHz() - v) > 1.0)
+                link->tune(v);
+        }
+    }
     bool const monitorShouldStayActive = m_monitoring || m_monitorRequested;
     quint64 const monitorSessionId = m_periodTimerSessionId;
     bool frequencyChangedForRecovery = false;
@@ -19648,6 +19665,15 @@ QObject* DecodiumBridge::decoPortLinkObject() const
     if (!m_decoPortLink) {
         m_decoPortLink = new DecoPortLink(const_cast<DecodiumBridge*>(this));
         m_decoPortLink->setAuthKey(decoPortAuthKey());
+        // Se il collegamento cade, la scheda audio locale deve tornare da sola:
+        // restare a decodificare il silenzio sarebbe il modo peggiore di
+        // accorgersi che la radio remota non c'e' piu'.
+        auto* self = const_cast<DecodiumBridge*>(this);
+        connect(m_decoPortLink, &DecoPortLink::linkedChanged, self, [self]() {
+            if (self->m_decoPortUseRemote && self->m_decoPortLink
+                && !self->m_decoPortLink->isLinked())
+                self->setDecoPortUseRemote(false);
+        });
     }
     return m_decoPortLink;
 }
@@ -19693,6 +19719,192 @@ QByteArray DecodiumBridge::decoPortAuthKey() const
                                                         QStringLiteral("DecoPortKey"),
                                                         QString()).toString();
     return hex.isEmpty() ? QByteArray() : QByteArray::fromHex(hex.toUtf8());
+}
+
+// L'audio della radio remota entra nello stesso buffer che riempirebbe la
+// scheda locale. Il decoder, la cascata e l'S-meter non sanno da dove venga, ed
+// e' esattamente il punto: da qui in poi e' una radio come le altre.
+void DecodiumBridge::onDecoPortRxAudio(const QVector<short>& samples, quint64 captureTsNs)
+{
+    Q_UNUSED(captureTsNs)
+    if (!m_decoPortUseRemote || samples.isEmpty() || !m_audioSink)
+        return;
+    if (m_transmitting || m_tuning)
+        return;
+
+    m_audioSink->injectExternalSamples(samples);
+    m_decoPortRemoteSamples += samples.size();
+
+    if (m_decoPortMonitor && m_decoPortMonitorOut && m_decoPortMonitorRate > 0) {
+        // Se la scheda non accetta i 12 kHz si va a 48 ripetendo ogni campione
+        // quattro volte: per un ascolto di controllo e' un compromesso onesto,
+        // e non tocca affatto quello che entra nel decoder.
+        QVector<short> out_samples;
+        if (m_decoPortMonitorRate == SAMPLE_RATE) {
+            out_samples = samples;
+        } else {
+            int const factor = m_decoPortMonitorRate / SAMPLE_RATE;
+            out_samples.reserve(samples.size() * factor);
+            for (short s : samples)
+                for (int i = 0; i < factor; ++i)
+                    out_samples.append(s);
+        }
+        QPointer<RtlSdrAudioOutput> out(m_decoPortMonitorOut);
+        int const rate = m_decoPortMonitorRate;
+        QMetaObject::invokeMethod(m_decoPortMonitorOut, [out, out_samples, rate]() {
+            if (out) out->enqueueSamples(out_samples, rate);
+        }, Qt::QueuedConnection);
+    }
+
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (nowMs - m_lastDecoPortAudioLogMs >= 5000) {
+        m_lastDecoPortAudioLogMs = nowMs;
+        bridgeLog(QStringLiteral("DecoPort remote audio: %1 samples fed to the decoder (%2 s)")
+                      .arg(m_decoPortRemoteSamples)
+                      .arg(static_cast<double>(m_decoPortRemoteSamples) / SAMPLE_RATE, 0, 'f', 1));
+    }
+}
+
+// L'ascolto usa la stessa meccanica di riproduzione della ricezione RTL-SDR —
+// e' una coda verso un QAudioSink su un thread suo — ma con la propria istanza:
+// mescolare i due ascolti vorrebbe dire che spegnerne uno spegne l'altro.
+void DecodiumBridge::setDecoPortMonitor(bool on)
+{
+    if (m_decoPortMonitor == on)
+        return;
+    m_decoPortMonitor = on;
+
+    if (on) {
+        if (!m_decoPortMonitorThread) {
+            m_decoPortMonitorThread = new QThread(this);
+            m_decoPortMonitorThread->setObjectName(QStringLiteral("DecoPortMonitor"));
+            m_decoPortMonitorOut = new RtlSdrAudioOutput;
+            m_decoPortMonitorOut->moveToThread(m_decoPortMonitorThread);
+            connect(m_decoPortMonitorThread, &QThread::finished,
+                    m_decoPortMonitorOut, &QObject::deleteLater);
+            connect(m_decoPortMonitorOut, &RtlSdrAudioOutput::error,
+                    this, [this](const QString& message) {
+                bridgeLog(QStringLiteral("DecoPort monitor error: %1").arg(message));
+                emit errorMessage(message);
+            }, Qt::QueuedConnection);
+            m_decoPortMonitorThread->start();
+        }
+        QAudioDevice const output =
+            cachedDefaultAudioOutput(QStringLiteral("DecoPort remote monitor"), false);
+        if (output.id().isEmpty()) {
+            m_decoPortMonitor = false;
+            bridgeLog(QStringLiteral("DecoPort monitor refused: no audio output available"));
+            emit decoPortMonitorChanged();
+            return;
+        }
+        // Quale frequenza accetta la scheda si decide qui, una volta: la
+        // riproduzione non sa risamplare e rifiuterebbe in silenzio.
+        auto supportsRate = [&output](int rate) {
+            for (QAudioFormat::SampleFormat sf : {QAudioFormat::Int16, QAudioFormat::Float}) {
+                for (int ch : {1, 2}) {
+                    QAudioFormat f;
+                    f.setSampleRate(rate);
+                    f.setChannelCount(ch);
+                    f.setSampleFormat(sf);
+                    if (output.isFormatSupported(f))
+                        return true;
+                }
+            }
+            return false;
+        };
+        m_decoPortMonitorRate = supportsRate(SAMPLE_RATE) ? SAMPLE_RATE
+                              : (supportsRate(48000) ? 48000 : 0);
+        if (m_decoPortMonitorRate == 0) {
+            m_decoPortMonitor = false;
+            bridgeLog(QStringLiteral("DecoPort monitor refused: [%1] takes neither 12000 nor 48000 Hz")
+                          .arg(output.description()));
+            emit decoPortMonitorChanged();
+            return;
+        }
+        QPointer<RtlSdrAudioOutput> out(m_decoPortMonitorOut);
+        int const rate = m_decoPortMonitorRate;
+        QMetaObject::invokeMethod(m_decoPortMonitorOut, [out, output, rate]() {
+            if (out) out->start(output, rate);
+        }, Qt::QueuedConnection);
+        bridgeLog(QStringLiteral("DecoPort monitor ON: remote audio to [%1] at %2 Hz")
+                      .arg(output.description()).arg(m_decoPortMonitorRate));
+    } else if (m_decoPortMonitorOut) {
+        QPointer<RtlSdrAudioOutput> out(m_decoPortMonitorOut);
+        QMetaObject::invokeMethod(m_decoPortMonitorOut, [out]() {
+            if (out) out->stop(QStringLiteral("decoport-monitor-off"));
+        }, Qt::QueuedConnection);
+        m_decoPortMonitorRate = 0;
+        bridgeLog(QStringLiteral("DecoPort monitor OFF"));
+    }
+    emit decoPortMonitorChanged();
+}
+
+// Il verso opposto: la radio remota si e' mossa (l'ha girata qualcuno, o un
+// altro client) e l'applicazione deve seguirla. Il modo NON si specchia: quello
+// della radio e' DIGU/USB, quello dell'applicazione e' FT8 o FT4, e sono due
+// cose diverse che si somigliano solo nel nome.
+void DecodiumBridge::onDecoPortRemoteState()
+{
+    if (!m_decoPortUseRemote)
+        return;
+    auto* link = qobject_cast<DecoPortLink*>(decoPortLinkObject());
+    if (!link || !link->isLinked())
+        return;
+
+    double const f = link->frequencyHz();
+    if (f <= 0.0 || std::abs(f - m_frequency) <= 1.0)
+        return;
+
+    m_decoPortApplyingRemote = true;
+    setFrequency(f);
+    m_decoPortApplyingRemote = false;
+    if (m_bandManager)
+        m_bandManager->updateFromFrequency(f);
+}
+
+// Passare alla radio remota vuol dire fermare la scheda locale: due sorgenti
+// nello stesso buffer si mescolerebbero in rumore.
+void DecodiumBridge::setDecoPortUseRemote(bool on)
+{
+    if (m_decoPortUseRemote == on)
+        return;
+
+    auto* link = qobject_cast<DecoPortLink*>(decoPortLinkObject());
+    if (on && (!link || !link->isLinked())) {
+        bridgeLog(QStringLiteral("DecoPort remote source refused: not linked to a radio"));
+        return;
+    }
+
+    m_decoPortUseRemote = on;
+    m_decoPortRemoteSamples = 0;
+
+    if (on) {
+        // Il collegamento all'audio si fa una volta sola: Qt::UniqueConnection
+        // evita che riaccendere la modalita' lo dupli.
+        connect(link, &DecoPortLink::rxAudio,
+                this, &DecodiumBridge::onDecoPortRxAudio,
+                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
+        connect(link, &DecoPortLink::stateChanged,
+                this, &DecodiumBridge::onDecoPortRemoteState,
+                static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        stopAudioCapture();
+        // Il codec USB deve stare dentro il modulatore, altrimenti la radio
+        // ascolta il microfono e noi non decodifichiamo niente.
+        link->setModeName(QStringLiteral("DIGU"));
+        onDecoPortRemoteState();
+        bridgeLog(QStringLiteral("DecoPort remote source ON: local sound card released, "
+                                 "audio now comes from %1").arg(link->rigLabel()));
+    } else {
+        if (link) {
+            disconnect(link, &DecoPortLink::rxAudio, this, &DecodiumBridge::onDecoPortRxAudio);
+            disconnect(link, &DecoPortLink::stateChanged, this, &DecodiumBridge::onDecoPortRemoteState);
+        }
+        bridgeLog(QStringLiteral("DecoPort remote source OFF: back to the local sound card"));
+        setDecoPortMonitor(false);
+        if (m_monitoring)
+            startAudioCapture(false);
+    }
+    emit decoPortUseRemoteChanged();
 }
 
 bool DecodiumBridge::hasDecoPortPassword() const
@@ -47262,6 +47474,12 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
             if (!m_decoPortGateway || !m_decoPortGateway->running())
                 return;
             if (samples.isEmpty() || !m_monitoring || m_transmitting || m_tuning)
+                return;
+            // Quello che si pubblica e' la radio attaccata a questo computer.
+            // Con una radio remota in uso i campioni sono i suoi, e rimandarli
+            // in giro vorrebbe dire ripubblicare la radio di qualcun altro —
+            // e, se i due si collegassero a vicenda, farla girare all'infinito.
+            if (m_decoPortUseRemote)
                 return;
             m_decoPortGateway->setAudioFormat(static_cast<quint32>(SAMPLE_RATE),
                                               1);
