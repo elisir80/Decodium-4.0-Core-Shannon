@@ -3845,6 +3845,7 @@ private:
     QStringList parseFt8Row(const QString& row) const;
     QStringList parseWsprRow(const QString& row) const;
     QStringList parseJt65Row(const QString& row) const;
+    void ensureAudioSink();
     void startAudioCapture(bool watchdogRecovery = false);
     void stopAudioCapture();
     void scheduleAudioDeviceRefresh(int delayMs = 250, bool verboseLog = false);

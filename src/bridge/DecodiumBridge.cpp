@@ -19887,6 +19887,9 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
         connect(link, &DecoPortLink::stateChanged,
                 this, &DecodiumBridge::onDecoPortRemoteState,
                 static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        // Il sink e' il punto d'ingresso dell'audio remoto: che il monitor sia
+        // acceso, spento o delegato al backend legacy, deve esistere.
+        ensureAudioSink();
         // Riempire il buffer non basta: se il monitor e' spento, onPeriodTimer
         // esce alla prima riga e nessuno guarda mai quei campioni. Quindi si
         // avvia la ricezione per intero — decoder, timer di periodo, spettro —
@@ -47332,120 +47335,8 @@ void DecodiumBridge::processRtlSdrSpectrum()
     QThreadPool::globalInstance()->start(task, -1);
 }
 
-void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
+void DecodiumBridge::ensureAudioSink()
 {
-    MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
-                               QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
-                                   .arg(m_audioInputDevice, m_mode)
-                                   .arg(usingLegacyBackendForRx() ? 1 : 0),
-                               25);
-    bridgeLog("startAudioCapture() called");
-    // Con la radio remota in uso la scheda locale non si riapre, da nessuna
-    // strada: non dal watchdog, non dal riaggancio dopo un cambio banda. Sono
-    // gli automatismi che tengono viva la ricezione quando l'audio manca, e
-    // qui l'audio non manca — arriva dalla rete. Riaprirla vorrebbe dire due
-    // sorgenti nello stesso buffer.
-    if (m_decoPortUseRemote) {
-        bridgeLog(QStringLiteral("startAudioCapture skipped: the remote radio is the source"));
-        return;
-    }
-    qint64 const captureRequestMs = QDateTime::currentMSecsSinceEpoch();
-    constexpr qint64 kFt2LinkPostTxAckGuardMs = 15000;
-    if (isFt2LinkApplicationMode(m_mode)
-        && (m_transmitting
-            || m_ft2LinkTxActive
-            || (m_soundInput
-                && m_ft2LinkPostTxAckGuardUntilMs > 0
-                && captureRequestMs < m_ft2LinkPostTxAckGuardUntilMs)
-            || (m_lastTxEndMs > 0
-                && captureRequestMs - m_lastTxEndMs < kFt2LinkPostTxAckGuardMs))) {
-        bridgeLog(QStringLiteral(
-            "startAudioCapture skipped: FT2-Link post-TX ACK guard tx=%1 ft2Tx=%2 sinceTxEnd=%3ms guardLeft=%4ms")
-                      .arg(m_transmitting ? 1 : 0)
-                      .arg(m_ft2LinkTxActive ? 1 : 0)
-                      .arg(m_lastTxEndMs > 0 ? captureRequestMs - m_lastTxEndMs : -1)
-                      .arg(qMax<qint64>(0, m_ft2LinkPostTxAckGuardUntilMs - captureRequestMs)));
-        m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs,
-                                            captureRequestMs + kFt2LinkPostTxAckGuardMs);
-        return;
-    }
-    if (rtlSdrEnabled()) {
-        // 1.0.537 iu8lmc - la modalita' RTL-SDR vale per le chiavette basate
-        // su RTL2832U. Una ColibriNANO o un altro SDR pilotato da software
-        // esterno non si apre di li' ("opening device 0 failed") e, poiche'
-        // questo ramo usciva comunque, restava senza alcuna sorgente audio.
-        // Se la ricerca USB e' finita senza trovare nulla e l'audio TCI e'
-        // configurato, si prosegue invece di lasciare il ricevitore muto.
-        if (!m_rtlSdrDiscoveryPending && m_rtlSdrDevices.isEmpty() && usingTciAudioInput()) {
-            bridgeLog(QStringLiteral(
-                "startAudioCapture: nessuna chiavetta RTL-SDR presente, si usa l'audio TCI"));
-        } else {
-            bridgeLog(QStringLiteral("startAudioCapture: using RTL-SDR RX input"));
-            startRtlSdrCapture();
-            return;
-        }
-    }
-    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
-        bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
-        if (m_monitoring) {
-            rearmLegacyPcmSpectrumFeed(QStringLiteral("blocked modern capture start"));
-        }
-        return;
-    }
-    if (usingLegacyBackendForRx()
-        && useModernSpectrumFeedWithLegacy()
-        && !useDedicatedModernAudioCaptureWithLegacy()) {
-        bridgeLog(QStringLiteral("startAudioCapture skipped: legacy PCM tap is the single RX source for Direct Visual"));
-        m_legacyPcmSpectrumFeed = true;
-        if (m_soundInput || m_tciAudioCaptureActive) {
-            stopAudioCapture();
-        }
-        return;
-    }
-    if (usingTciAudioInput()) {
-        bridgeLog(QStringLiteral("startAudioCapture: using TCI audio stream"));
-        startTciAudioCapture();
-        return;
-    }
-
-    // Qt6: use the debounced audio-device cache here; RX start stays off the
-    // expensive QMediaDevices::audioInputs() hot path.
-#ifdef Q_OS_LINUX
-    const QString pulseSourceName = linuxPulseSourceNameFromDisplay(m_audioInputDevice);
-#endif
-    bool requestedDeviceFound = false;
-    QString inputMatchReason;
-    QAudioDevice selectedDevice =
-        resolveRxInputDevice(m_audioInputDevice, m_audioInputDeviceId,
-                             &requestedDeviceFound, &inputMatchReason);
-    QString const selectedDeviceId = audioDeviceIdForSettings(selectedDevice);
-    bridgeLog(QStringLiteral("startAudioCapture: RX device resolve saved=[%1] saved_id=%2 match=%3 found=%4 selected=[%5] selected_id=%6 default=[%7] default_id=%8 input_count=%9")
-                  .arg(m_audioInputDevice,
-                       audioDeviceIdSettingForLog(m_audioInputDeviceId),
-                       inputMatchReason,
-                       requestedDeviceFound ? QStringLiteral("1") : QStringLiteral("0"),
-                       selectedDevice.description(),
-                       audioDeviceIdSettingForLog(selectedDeviceId),
-                       cachedDefaultAudioInput(QStringLiteral("startAudioCapture log default"), false).description(),
-                       audioDeviceIdForLog(cachedDefaultAudioInput(QStringLiteral("startAudioCapture log default"), false)))
-                  .arg(cachedAudioInputs(QStringLiteral("startAudioCapture log input count"), false).size()));
-    if (requestedDeviceFound) {
-        rememberAudioInputDeviceIdentity(selectedDevice,
-                                         QStringLiteral("startAudioCapture %1").arg(inputMatchReason),
-                                         !m_audioInputDevice.trimmed().isEmpty());
-    } else if (!m_audioInputDevice.trimmed().isEmpty()) {
-        QString const warning = inputMatchReason.startsWith(QStringLiteral("ambiguous"))
-            ? QStringLiteral("Audio input non univoco, uso default: %1")
-            : QStringLiteral("Audio input non trovato, uso default: %1");
-        bridgeLog(QStringLiteral("startAudioCapture: requested input unresolved; fallback default selected=[%1] selected_id=%2 requested=[%3] requested_id=%4 reason=%5")
-                      .arg(selectedDevice.description(),
-                           audioDeviceIdSettingForLog(selectedDeviceId),
-                           m_audioInputDevice,
-                           audioDeviceIdSettingForLog(m_audioInputDeviceId),
-                           inputMatchReason));
-        emit statusMessage(warning.arg(selectedDevice.description()));
-    }
-
     // Create the audio sink (once, reused across start/stop cycles).
     // downSampleFactor=4: QAudioSource a 48000 Hz → buffer a 12000 Hz
     if (!m_audioSink) {
@@ -47614,6 +47505,126 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
         }, Qt::QueuedConnection);
         bridgeLog("audioSink created and connected");
     }
+}
+
+void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
+{
+    MainThreadTraceScope trace(QStringLiteral("start_audio_capture"),
+                               QStringLiteral("requested_in=[%1] mode=%2 legacy=%3")
+                                   .arg(m_audioInputDevice, m_mode)
+                                   .arg(usingLegacyBackendForRx() ? 1 : 0),
+                               25);
+    bridgeLog("startAudioCapture() called");
+    // Con la radio remota in uso la scheda locale non si riapre, da nessuna
+    // strada: non dal watchdog, non dal riaggancio dopo un cambio banda. Sono
+    // gli automatismi che tengono viva la ricezione quando l'audio manca, e
+    // qui l'audio non manca — arriva dalla rete. Riaprirla vorrebbe dire due
+    // sorgenti nello stesso buffer.
+    if (m_decoPortUseRemote) {
+        // Il sink pero' serve lo stesso: e' il punto in cui l'audio della radio
+        // remota entra nel decoder, e senza non entra da nessuna parte.
+        ensureAudioSink();
+        bridgeLog(QStringLiteral("startAudioCapture skipped: the remote radio is the source"));
+        return;
+    }
+    qint64 const captureRequestMs = QDateTime::currentMSecsSinceEpoch();
+    constexpr qint64 kFt2LinkPostTxAckGuardMs = 15000;
+    if (isFt2LinkApplicationMode(m_mode)
+        && (m_transmitting
+            || m_ft2LinkTxActive
+            || (m_soundInput
+                && m_ft2LinkPostTxAckGuardUntilMs > 0
+                && captureRequestMs < m_ft2LinkPostTxAckGuardUntilMs)
+            || (m_lastTxEndMs > 0
+                && captureRequestMs - m_lastTxEndMs < kFt2LinkPostTxAckGuardMs))) {
+        bridgeLog(QStringLiteral(
+            "startAudioCapture skipped: FT2-Link post-TX ACK guard tx=%1 ft2Tx=%2 sinceTxEnd=%3ms guardLeft=%4ms")
+                      .arg(m_transmitting ? 1 : 0)
+                      .arg(m_ft2LinkTxActive ? 1 : 0)
+                      .arg(m_lastTxEndMs > 0 ? captureRequestMs - m_lastTxEndMs : -1)
+                      .arg(qMax<qint64>(0, m_ft2LinkPostTxAckGuardUntilMs - captureRequestMs)));
+        m_audioWatchdogIgnoreUntilMs = qMax(m_audioWatchdogIgnoreUntilMs,
+                                            captureRequestMs + kFt2LinkPostTxAckGuardMs);
+        return;
+    }
+    if (rtlSdrEnabled()) {
+        // 1.0.537 iu8lmc - la modalita' RTL-SDR vale per le chiavette basate
+        // su RTL2832U. Una ColibriNANO o un altro SDR pilotato da software
+        // esterno non si apre di li' ("opening device 0 failed") e, poiche'
+        // questo ramo usciva comunque, restava senza alcuna sorgente audio.
+        // Se la ricerca USB e' finita senza trovare nulla e l'audio TCI e'
+        // configurato, si prosegue invece di lasciare il ricevitore muto.
+        if (!m_rtlSdrDiscoveryPending && m_rtlSdrDevices.isEmpty() && usingTciAudioInput()) {
+            bridgeLog(QStringLiteral(
+                "startAudioCapture: nessuna chiavetta RTL-SDR presente, si usa l'audio TCI"));
+        } else {
+            bridgeLog(QStringLiteral("startAudioCapture: using RTL-SDR RX input"));
+            startRtlSdrCapture();
+            return;
+        }
+    }
+    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
+        bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
+        if (m_monitoring) {
+            rearmLegacyPcmSpectrumFeed(QStringLiteral("blocked modern capture start"));
+        }
+        return;
+    }
+    if (usingLegacyBackendForRx()
+        && useModernSpectrumFeedWithLegacy()
+        && !useDedicatedModernAudioCaptureWithLegacy()) {
+        bridgeLog(QStringLiteral("startAudioCapture skipped: legacy PCM tap is the single RX source for Direct Visual"));
+        m_legacyPcmSpectrumFeed = true;
+        if (m_soundInput || m_tciAudioCaptureActive) {
+            stopAudioCapture();
+        }
+        return;
+    }
+    if (usingTciAudioInput()) {
+        bridgeLog(QStringLiteral("startAudioCapture: using TCI audio stream"));
+        startTciAudioCapture();
+        return;
+    }
+
+    // Qt6: use the debounced audio-device cache here; RX start stays off the
+    // expensive QMediaDevices::audioInputs() hot path.
+#ifdef Q_OS_LINUX
+    const QString pulseSourceName = linuxPulseSourceNameFromDisplay(m_audioInputDevice);
+#endif
+    bool requestedDeviceFound = false;
+    QString inputMatchReason;
+    QAudioDevice selectedDevice =
+        resolveRxInputDevice(m_audioInputDevice, m_audioInputDeviceId,
+                             &requestedDeviceFound, &inputMatchReason);
+    QString const selectedDeviceId = audioDeviceIdForSettings(selectedDevice);
+    bridgeLog(QStringLiteral("startAudioCapture: RX device resolve saved=[%1] saved_id=%2 match=%3 found=%4 selected=[%5] selected_id=%6 default=[%7] default_id=%8 input_count=%9")
+                  .arg(m_audioInputDevice,
+                       audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                       inputMatchReason,
+                       requestedDeviceFound ? QStringLiteral("1") : QStringLiteral("0"),
+                       selectedDevice.description(),
+                       audioDeviceIdSettingForLog(selectedDeviceId),
+                       cachedDefaultAudioInput(QStringLiteral("startAudioCapture log default"), false).description(),
+                       audioDeviceIdForLog(cachedDefaultAudioInput(QStringLiteral("startAudioCapture log default"), false)))
+                  .arg(cachedAudioInputs(QStringLiteral("startAudioCapture log input count"), false).size()));
+    if (requestedDeviceFound) {
+        rememberAudioInputDeviceIdentity(selectedDevice,
+                                         QStringLiteral("startAudioCapture %1").arg(inputMatchReason),
+                                         !m_audioInputDevice.trimmed().isEmpty());
+    } else if (!m_audioInputDevice.trimmed().isEmpty()) {
+        QString const warning = inputMatchReason.startsWith(QStringLiteral("ambiguous"))
+            ? QStringLiteral("Audio input non univoco, uso default: %1")
+            : QStringLiteral("Audio input non trovato, uso default: %1");
+        bridgeLog(QStringLiteral("startAudioCapture: requested input unresolved; fallback default selected=[%1] selected_id=%2 requested=[%3] requested_id=%4 reason=%5")
+                      .arg(selectedDevice.description(),
+                           audioDeviceIdSettingForLog(selectedDeviceId),
+                           m_audioInputDevice,
+                           audioDeviceIdSettingForLog(m_audioInputDeviceId),
+                           inputMatchReason));
+        emit statusMessage(warning.arg(selectedDevice.description()));
+    }
+
+    ensureAudioSink();
 
     // Create SoundInput (once).
     if (!m_soundInput) {
