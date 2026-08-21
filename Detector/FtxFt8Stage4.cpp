@@ -709,6 +709,7 @@ bool is_standard_ft8_exchange_tail (std::string const& word)
 
 std::vector<std::string> split_words (std::string const& text);
 bool is_packable_cq_call_message (std::string const& call);
+bool is_ft8_call_word (std::string const& word);
 
 bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded)
 {
@@ -741,7 +742,7 @@ bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded
           || (callIndex + 2 == words.size () && is_grid4 (words[callIndex + 1]));
     }
 
-  if (!is_standard_call_word (words[0]) || !is_standard_call_word (words[1]))
+  if (!is_ft8_call_word (words[0]) || !is_ft8_call_word (words[1]))
     {
       return false;
     }
@@ -753,7 +754,10 @@ bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded
     {
       return false;
     }
-  return words.size () == 3;
+  return words.size () == 3
+      || (words.size () == 4
+          && words[3] == "TU"
+          && is_report_token (words[2]));
 }
 
 bool is_directed_pair_only_message (FixedChars<kFt8DecodedChars> const& decoded)
@@ -761,8 +765,8 @@ bool is_directed_pair_only_message (FixedChars<kFt8DecodedChars> const& decoded)
   std::vector<std::string> const words = split_words (trim_fixed (decoded));
   return words.size () == 2
       && words[0] != "CQ"
-      && is_standard_call_word (words[0])
-      && is_standard_call_word (words[1]);
+      && is_ft8_call_word (words[0])
+      && is_ft8_call_word (words[1]);
 }
 
 bool is_hash_call_placeholder_word (std::string const& word)
@@ -774,9 +778,10 @@ bool is_hash_call_placeholder_word (std::string const& word)
   if (word.size () <= 2 || word.front () != '<' || word.back () != '>')
     {
       return false;
-    }
+  }
   std::string const inner = word.substr (1, word.size () - 2);
-  return is_standard_call_word (inner);
+  return is_standard_call_word (inner)
+      || is_packable_cq_call_message (inner);
 }
 
 bool is_resolved_hash_call_word (std::string const& word)
@@ -885,6 +890,17 @@ bool is_standard_or_hash_call_word (std::string const& word)
       || is_resolved_hash_call_word (word);
 }
 
+bool is_ft8_call_word (std::string const& word)
+{
+  // FT8 type-4 can carry a raw non-standard callsign (for example the
+  // Indonesian special-event calls 8A81JK and 8B81JB).  Such calls are not
+  // standard 28-bit calls and are therefore not covered by the standard/hash
+  // predicate above, but they are valid when the encoder can round-trip them
+  // as a CQ call.
+  return is_standard_or_hash_call_word (word)
+      || is_packable_cq_call_message (word);
+}
+
 bool ft8_word_has_valid_punctuation (std::string const& word)
 {
   if (word.find (';') != std::string::npos
@@ -925,7 +941,7 @@ bool is_plausible_ft8_message_for_emit (FixedChars<kFt8DecodedChars> const& deco
           call_index = 2;
         }
       if (call_index >= words.size ()
-          || !is_standard_or_hash_call_word (words[call_index]))
+          || !is_ft8_call_word (words[call_index]))
         {
           return false;
         }
@@ -933,8 +949,8 @@ bool is_plausible_ft8_message_for_emit (FixedChars<kFt8DecodedChars> const& deco
           || (call_index + 2 == words.size () && is_grid4 (words[call_index + 1]));
     }
 
-  if (!is_standard_or_hash_call_word (words[0])
-      || !is_standard_or_hash_call_word (words[1]))
+  if (!is_ft8_call_word (words[0])
+      || !is_ft8_call_word (words[1]))
     {
       return false;
     }
@@ -942,8 +958,13 @@ bool is_plausible_ft8_message_for_emit (FixedChars<kFt8DecodedChars> const& deco
     {
       return true;
     }
-  return words.size () == 3
-      && (is_grid4 (words[2]) || is_report_token (words[2]));
+  if (words.size () == 3)
+    {
+      return is_grid4 (words[2]) || is_report_token (words[2]);
+    }
+  return words.size () == 4
+      && is_report_token (words[2])
+      && words[3] == "TU";
 }
 
 FixedChars<kFt8DecodedChars> normalize_resolved_hash_call_tokens (
@@ -9449,6 +9470,17 @@ extern "C" void ftx_ft8_stage4_reset_c ()
   stage4_state ().reset ();
   cq_signal_history ().reset ();
   call_grid_history ().reset ();
+}
+
+extern "C" int ftx_ft8_message_is_plausible_for_emit_c (char const msg37[37])
+{
+  if (!msg37)
+    {
+      return 0;
+    }
+  FixedChars<kFt8DecodedChars> const normalized =
+      normalize_resolved_hash_call_tokens (fixed_from_chars<kFt8DecodedChars> (msg37));
+  return is_plausible_ft8_message_for_emit (normalized) ? 1 : 0;
 }
 
 extern "C" void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* grid,

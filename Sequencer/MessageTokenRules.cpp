@@ -149,6 +149,8 @@ bool isStrictAmateurCallsignToken(QString const& token)
 
             QStringLiteral("QRP"), QStringLiteral("PM"), QStringLiteral("MA"),
 
+            QStringLiteral("LH"),
+
             QStringLiteral("0"), QStringLiteral("1"), QStringLiteral("2"),
 
             QStringLiteral("3"), QStringLiteral("4"), QStringLiteral("5"),
@@ -222,6 +224,12 @@ bool isSpecialEventStyleCallsignToken(QString const& token)
 
     bool hasLetterAfterDigit = false;
 
+    bool const hasDigitLetterPrefix = base.size() >= 2
+
+        && base.at(0).isDigit()
+
+        && base.at(1).isLetter();
+
     bool allHex = true;
 
     int digitCount = 0;
@@ -260,7 +268,9 @@ bool isSpecialEventStyleCallsignToken(QString const& token)
 
     if (!hasLetter || !hasDigit || digitCount < 2
 
-        || !hasLetterBeforeDigit || !hasLetterAfterDigit) {
+        || (!hasLetterBeforeDigit && !hasDigitLetterPrefix)
+
+        || !hasLetterAfterDigit) {
 
         return false;
 

@@ -187,6 +187,10 @@ private slots:
     QVERIFY (isPlausibleDecodedCallsignToken ("8A3B"));
     QVERIFY (isPlausibleDecodedCallsignToken ("IZ1ABC/0"));
     QVERIFY (isPlausibleDecodedCallsignToken ("IZ1ABC/1"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("8A81JK/LH"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("8B81JB/LH"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("8A1AA/LH"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("8A1AAA/LH"));
     QVERIFY (!isPlausibleDecodedCallsignToken ("ABCDEF12"));
 
     QCOMPARE (decodedDxCallToken ("CQ 8B8FTDM OI33"), QString ("8B8FTDM"));

@@ -36,6 +36,7 @@ using fortran_charlen_t_local = size_t;
 extern "C" void ftx_ft8_prepare_pass_c (int ndepth, int ipass, int ndecodes,
                                          float* syncmin, int* imetric,
                                          int* lsubtract, int* run_pass);
+extern "C" int ftx_ft8_message_is_plausible_for_emit_c (char const msg37[37]);
 extern "C" void genmsk_128_90_ (char* msg, int* ichk, char* msgsent, int* itone, int* itype,
                                  size_t, size_t);
 extern "C" void ana64_ (short iwave[], int* npts, std::complex<float> c0[]);
@@ -2816,6 +2817,108 @@ private:
               QStringLiteral ("-06"));
     QVERIFY (decodium::seq::signalReportFromMessage(
                  QStringLiteral ("<M9NTS> DL75WAU RR73")).isEmpty ());
+  }
+
+  Q_SLOT void ftx_indonesian_special_event_calls_decode_full_sequence ()
+  {
+    QStringList const calls {
+      QStringLiteral ("8A81JK"),
+      QStringLiteral ("8B81JB"),
+      QStringLiteral ("8A81JK/LH"),
+      QStringLiteral ("8B81JB/LH"),
+      // Standard one-digit Indonesian-shaped calls, plus longer raw
+      // type-4 variants that exercise the same callsign-shape boundaries.
+      QStringLiteral ("8A1AA"),
+      QStringLiteral ("8A1AAA"),
+      QStringLiteral ("8A1AA/LH"),
+      QStringLiteral ("8A1AAA/LH"),
+      QStringLiteral ("8A81AA"),
+      QStringLiteral ("8A81AAA"),
+      QStringLiteral ("8B81AA"),
+      QStringLiteral ("8B81BBB")
+    };
+    QString const standardCall = QStringLiteral ("K1ABC");
+    QString const grid = QStringLiteral ("JM68");
+
+    auto const hash = [] (QString const& call) {
+      return decodium::txmsg::bracketHashCall (call);
+    };
+
+    auto const appendDecodedMessages = [] (QStringList& target,
+                                           QString const& special,
+                                           QString const& peer) {
+      QString const specialHash = decodium::txmsg::bracketHashCall (special);
+      QString const peerHash = decodium::txmsg::bracketHashCall (peer);
+
+      // Special call as DX: CQ + TX1..TX5, including RRR/RR73 and TU.
+      target << QStringLiteral ("CQ ") + special;
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" JM68");
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" -10");
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" R-10");
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" R-10 TU");
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" RRR");
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" RR73");
+      target << specialHash + QLatin1Char (' ') + peer + QStringLiteral (" 73");
+
+      // Special call as MYCALL: the asymmetric type-4 sequence.
+      target << peerHash + QLatin1Char (' ') + special;
+      target << peer + QLatin1Char (' ') + specialHash + QStringLiteral (" -10");
+      target << peer + QLatin1Char (' ') + specialHash + QStringLiteral (" R-10");
+      target << peer + QLatin1Char (' ') + specialHash + QStringLiteral (" R-10 TU");
+      target << peerHash + QLatin1Char (' ') + special + QStringLiteral (" RRR");
+      target << peerHash + QLatin1Char (' ') + special + QStringLiteral (" RR73");
+      target << peerHash + QLatin1Char (' ') + special + QStringLiteral (" 73");
+    };
+
+    for (QString const& call : calls)
+      {
+        QStringList messages;
+        appendDecodedMessages (messages, call, standardCall);
+        QString const other = call.startsWith (QStringLiteral ("8A"))
+            ? QStringLiteral ("8B81JB")
+            : QStringLiteral ("8A81JK");
+
+        // Both ends using special-event calls exercises the final branch of
+        // standardFtxQsoMessage as well.  Keep the /LH cases on the valid
+        // one-hash side of the FT8 type-4 compound format.
+        if (!call.endsWith (QStringLiteral ("/LH")))
+          {
+            QString const callHash = hash (call);
+            QString const otherHash = hash (other);
+            messages << callHash + QLatin1Char (' ') + otherHash
+                             + QLatin1Char (' ') + grid;
+            messages << callHash + QLatin1Char (' ') + otherHash + QStringLiteral (" -10");
+            messages << otherHash + QLatin1Char (' ') + callHash + QStringLiteral (" R-10");
+            messages << otherHash + QLatin1Char (' ') + callHash + QStringLiteral (" R-10 TU");
+            messages << call + QLatin1Char (' ') + otherHash + QStringLiteral (" RRR");
+            messages << call + QLatin1Char (' ') + otherHash + QStringLiteral (" RR73");
+            messages << call + QLatin1Char (' ') + otherHash + QStringLiteral (" 73");
+          }
+
+        for (QString const& message : messages)
+          {
+            decodium::txmsg::EncodedMessage const encoded =
+                decodium::txmsg::encodeFt8 (message);
+            QVERIFY2 (encoded.ok, qPrintable (message));
+
+            decodium::txmsg::Decode77Context context;
+            context.saveHashCall (call);
+            context.saveHashCall (other);
+            context.saveHashCall (standardCall);
+            decodium::txmsg::DecodedMessage const decoded =
+                decodium::txmsg::decode77 (encoded.msgbits, encoded.i3, encoded.n3,
+                                            &context, true);
+            QVERIFY2 (decoded.ok, qPrintable (message));
+
+            QString const decodedText =
+                QString::fromLatin1 (decoded.msgsent).trimmed ();
+            QVERIFY2 (decodedText.contains (call), qPrintable (decodedText));
+
+            QByteArray const fixedMessage = decoded.msgsent.leftJustified (37, ' ');
+            QVERIFY2 (ftx_ft8_message_is_plausible_for_emit_c (fixedMessage.constData ()) == 1,
+                     qPrintable (message + QStringLiteral (" -> ") + decodedText));
+          }
+      }
   }
 
   Q_SLOT void ftx_decode77_updates_recent_calls ()

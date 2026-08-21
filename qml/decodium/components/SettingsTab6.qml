@@ -278,6 +278,8 @@ SettingsPageScroll {
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.qrzLogbookEnabled
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: {
                 bridge.qrzLogbookEnabled = checked
                 dialog.scheduleSettingsPersist()
@@ -289,6 +291,8 @@ SettingsPageScroll {
         Text { text: qsTr("Replace duplicates:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 130 }
         CheckBox {
             checked: bridge.qrzLogbookReplaceDuplicates
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: {
                 bridge.qrzLogbookReplaceDuplicates = checked
                 dialog.scheduleSettingsPersist()
@@ -356,6 +360,8 @@ SettingsPageScroll {
         Text { text: qsTr("LotW Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.lotwEnabled
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: {
                 bridge.lotwEnabled = checked
                 dialog.scheduleSettingsPersist()
@@ -366,6 +372,7 @@ SettingsPageScroll {
         Text { text: qsTr("Password:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
             text: bridge.getSetting("Lotw_pwd", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
+            Layout.minimumWidth: fieldMinWidth
             color: textPrimary; font.pixelSize: controlFontSize; echoMode: TextInput.Password
             background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
             onTextChanged: bridge.setSetting("Lotw_pwd", text)
@@ -374,6 +381,8 @@ SettingsPageScroll {
         Text { text: qsTr("Non-QSL'd:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.getSetting("NonQsl", false)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: bridge.setSetting("NonQsl", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
@@ -382,7 +391,7 @@ SettingsPageScroll {
         SpinBox {
             id: lotwDaysSpin
             from: 0; to: 9999; value: Number(bridge.getSetting("LotWDaysSinceLastUpload", 365)); editable: true
-            implicitHeight: controlHeight; Layout.fillWidth: true
+            implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth
             onValueChanged: bridge.setSetting("LotWDaysSinceLastUpload", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: lotwDaysSpin.textFromValue(lotwDaysSpin.value, lotwDaysSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !lotwDaysSpin.editable; validator: lotwDaysSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
@@ -396,6 +405,8 @@ SettingsPageScroll {
         CheckBox {
             id: promptToLogCheck
             checked: boolSetting("PromptToLog", false)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onToggled: {
                 if (!dialog.loggingChecksUpdating)
                     dialog.setLoggingMode(checked)
@@ -407,6 +418,8 @@ SettingsPageScroll {
         CheckBox {
             id: autoLogCheck
             checked: boolSetting("AutoLog", true)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onToggled: {
                 if (!dialog.loggingChecksUpdating)
                     dialog.setLoggingMode(!checked)
@@ -419,6 +432,8 @@ SettingsPageScroll {
         Text { text: qsTr("Log as RTTY:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.getSetting("LogAsRTTY", false)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: bridge.setSetting("LogAsRTTY", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
@@ -427,6 +442,8 @@ SettingsPageScroll {
         Text { text: qsTr("4-digit Grids:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.getSetting("Log4DigitGrids", false)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: bridge.setSetting("Log4DigitGrids", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
@@ -436,6 +453,8 @@ SettingsPageScroll {
             enabled: !promptToLogCheck.checked
             opacity: enabled ? 1.0 : 0.45
             checked: bridge.getSetting("ContestingOnly", false)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: bridge.setSetting("ContestingOnly", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
@@ -444,6 +463,8 @@ SettingsPageScroll {
         Text { text: qsTr("Spec Op Cmts:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.getSetting("SpecOpInComments", false)
+            Layout.fillWidth: true
+            Layout.minimumWidth: fieldMinWidth
             onCheckedChanged: bridge.setSetting("SpecOpInComments", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
