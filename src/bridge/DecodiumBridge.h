@@ -39,6 +39,9 @@
 
 class ActiveStationsModel;
 class DecodiumAlertManager;
+class DecodiumDecoPortGateway;
+class DecoPortDiscovery;
+class DecoPortLink;
 #include "DecodiumDxCluster.h"
 #include "DecodiumSpotShare.h"
 class DecodiumPskReporterLite;
@@ -253,6 +256,13 @@ class DecodiumBridge : public QObject
     // === CAT/TRANSCEIVER ===
     // CAT condivisa: il server rigctld esposto ai pannelli QML.
     Q_PROPERTY(QObject* catShare READ catShareObject CONSTANT)
+    // DecoPort: la radio pubblicata in rete (gateway), l'ascolto degli annunci
+    // (scoperta) e il collegamento a una radio altrui. Vedi
+    // doc/DECOPORT_PROTOCOL.md. Creati alla prima richiesta: chi non li apre
+    // non li paga.
+    Q_PROPERTY(QObject* decoPortGateway READ decoPortGatewayObject CONSTANT)
+    Q_PROPERTY(QObject* decoPortDiscovery READ decoPortDiscoveryObject CONSTANT)
+    Q_PROPERTY(QObject* decoPortLink READ decoPortLinkObject CONSTANT)
     // Spot condivisi: il gemello della CAT condivisa, per gli spot del
     // cluster invece che per la radio.
     Q_PROPERTY(QObject* spotShare READ spotShareObject CONSTANT)
@@ -807,6 +817,22 @@ public:
 
     // CAT
     QObject* catShareObject() const;
+    QObject* decoPortGatewayObject() const;
+    QObject* decoPortDiscoveryObject() const;
+    QObject* decoPortLinkObject() const;
+    Q_INVOKABLE bool startDecoPortGateway(int port = 5559);
+    Q_INVOKABLE void stopDecoPortGateway();
+    // Un PC di stazione deve pubblicare la radio da solo all'avvio: la finestra
+    // DecoPort serve a guardare, non a tenere acceso il servizio.
+    // La password si chiede UNA volta (installazione o finestra DecoPort) e non
+    // si ripresenta piu': quello che resta salvato e' la chiave derivata, mai la
+    // parola scritta dall'utente.
+    Q_INVOKABLE bool hasDecoPortPassword() const;
+    Q_INVOKABLE bool setDecoPortPassword(const QString& password);
+    Q_INVOKABLE void clearDecoPortPassword();
+    Q_INVOKABLE bool decoPortAutoStart() const;
+    Q_INVOKABLE void setDecoPortAutoStart(bool on);
+    Q_INVOKABLE int  decoPortConfiguredPort() const;
     QObject* spotShareObject() const;
     QObject* amplifierObject() const;
     Q_INVOKABLE void configureAmplifier(bool enabled, const QString& port,
@@ -2701,6 +2727,10 @@ private:
     DecodiumOmniRigManager*       m_omniRigCat    {nullptr};
     DecodiumTransceiverManager*   m_hamlibCat     {nullptr};
     DecodiumCatShare*             m_catShare      {nullptr};
+    QByteArray decoPortAuthKey() const;
+    mutable DecodiumDecoPortGateway* m_decoPortGateway {nullptr};
+    mutable DecoPortDiscovery*       m_decoPortDiscovery {nullptr};
+    mutable DecoPortLink*            m_decoPortLink {nullptr};
     DecodiumSpotShare*            m_spotShare     {nullptr};
     DecodiumAmplifier*            m_amplifier     {nullptr};
     QString                       m_catBackend    {"hamlib"};

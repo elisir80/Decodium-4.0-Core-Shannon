@@ -1,0 +1,314 @@
+#!/usr/bin/env python3
+"""Client di prova DecoPort — scopre le radio annunciate, si collega a una e,
+se richiesto, le cambia frequenza.
+
+Serve a dimostrare il protocollo senza passare dall'interfaccia di Decodium, e a
+collaudare un gateway da un'altra macchina prima di fidarsi.
+
+    python tools/decoport_probe.py --listen 15
+    python tools/decoport_probe.py --connect 192.168.1.81 --seconds 20
+    python tools/decoport_probe.py --connect 192.168.1.81 --tune 14074000
+
+Protocollo: doc/DECOPORT_PROTOCOL.md.
+"""
+import argparse
+import hashlib
+import hmac
+import socket
+import struct
+import sys
+import time
+
+MAGIC = 0x44505254          # 'DPRT'
+VERSION = 1
+HEADER = 28
+SESSION_PORT = 5559
+ANNOUNCE_PORT = 5560
+
+ANNOUNCE, HELLO, BYE, KEEPALIVE, CONTEXT, COMMAND, AUDIO_RX, AUDIO_TX, STATUS = range(1, 10)
+
+FLAG_TIMESTAMP = 1 << 0
+FLAG_AUTH = 1 << 1
+AUTH_TAG_BYTES = 16
+# Stesso sale e stesse iterazioni del lato Decodium: la chiave deve venire
+# identica sulle due macchine, altrimenti non si parlano.
+KDF_SALT = b"Decodium-DecoPort-v1"
+KDF_ITERATIONS = 200000
+
+AUTH_KEY = b""
+
+
+def derive_key(password):
+    if not password:
+        return b""
+    return hashlib.pbkdf2_hmac("sha256", password.strip().encode("utf-8"),
+                               KDF_SALT, KDF_ITERATIONS, 32)
+
+TYPE_NAMES = {
+    ANNOUNCE: "ANNOUNCE", HELLO: "HELLO", BYE: "BYE", KEEPALIVE: "KEEPALIVE",
+    CONTEXT: "CONTEXT", COMMAND: "COMMAND", AUDIO_RX: "AUDIO_RX",
+    AUDIO_TX: "AUDIO_TX", STATUS: "STATUS",
+}
+
+FIELDS = [
+    (1 << 0,  "frequencyHz",   ">q", 8),
+    (1 << 1,  "mode",          ">B", 1),
+    (1 << 2,  "ptt",           ">B", 1),
+    (1 << 3,  "sMeterTenths",  ">H", 2),
+    (1 << 4,  "sampleRate",    ">I", 4),
+    (1 << 5,  "channels",      ">B", 1),
+    (1 << 6,  "bandwidthHz",   ">I", 4),
+    (1 << 7,  "rigLabel",      None, 0),     # uint8 len + utf8
+    (1 << 8,  "stateFlags",    ">I", 4),
+    (1 << 9,  "txAudioLeadMs", ">H", 2),
+    (1 << 10, "sessionPort",   ">H", 2),
+]
+
+MODES = ["UNKNOWN", "USB", "LSB", "CW", "CWR", "AM", "FM",
+         "DIGU", "DIGL", "RTTY", "RTTYR", "PKTFM"]
+
+STATE_BITS = [(1 << 0, "CAT"), (1 << 1, "AUDIO-IN"), (1 << 2, "AUDIO-OUT"),
+              (1 << 3, "CAN-TX"), (1 << 4, "TX-HELD")]
+
+
+def now_ns():
+    return int(time.time() * 1_000_000_000)
+
+
+def build(ptype, stream_id=0, sequence=0, ts_ns=None, payload=b""):
+    if ts_ns is None:
+        ts_ns = now_ns()
+    flags = FLAG_TIMESTAMP if ts_ns else 0
+    if AUTH_KEY:
+        flags |= FLAG_AUTH
+    pkt = struct.pack(">IBBHIIIIHH",
+                      MAGIC, VERSION, ptype, flags, stream_id, sequence,
+                      ts_ns // 1_000_000_000, ts_ns % 1_000_000_000,
+                      len(payload), 0) + payload
+    if AUTH_KEY:
+        pkt += hmac.new(AUTH_KEY, pkt, hashlib.sha256).digest()[:AUTH_TAG_BYTES]
+    return pkt
+
+
+def parse(datagram):
+    if len(datagram) < HEADER:
+        return None
+    magic, version, ptype, flags, stream, seq, secs, nanos, plen, _ = \
+        struct.unpack(">IBBHIIIIHH", datagram[:HEADER])
+    if magic != MAGIC or version != VERSION:
+        return None
+    if HEADER + plen > len(datagram):
+        return None
+
+    authed = False
+    if flags & FLAG_AUTH:
+        signed_len = HEADER + plen
+        if len(datagram) < signed_len + AUTH_TAG_BYTES:
+            return None
+        if AUTH_KEY:
+            expected = hmac.new(AUTH_KEY, datagram[:signed_len],
+                                hashlib.sha256).digest()[:AUTH_TAG_BYTES]
+            authed = hmac.compare_digest(expected,
+                                         datagram[signed_len:signed_len + AUTH_TAG_BYTES])
+    return {
+        "type": ptype, "flags": flags, "streamId": stream, "sequence": seq,
+        "tsNs": secs * 1_000_000_000 + nanos,
+        "payload": datagram[HEADER:HEADER + plen],
+        "authenticated": authed,
+    }
+
+
+def decode_context(payload):
+    if len(payload) < 4:
+        return {}
+    mask = struct.unpack(">I", payload[:4])[0]
+    off = 4
+    out = {"mask": mask}
+    for bit, name, fmt, size in FIELDS:
+        if not (mask & bit):
+            continue
+        if name == "rigLabel":
+            if off + 1 > len(payload):
+                break
+            length = payload[off]
+            off += 1
+            out[name] = payload[off:off + length].decode("utf-8", "replace")
+            off += length
+            continue
+        if off + size > len(payload):
+            break
+        out[name] = struct.unpack(fmt, payload[off:off + size])[0]
+        off += size
+    return out
+
+
+def encode_context(**kw):
+    mask = 0
+    body = b""
+    for bit, name, fmt, _size in FIELDS:
+        if name not in kw:
+            continue
+        mask |= bit
+        if name == "rigLabel":
+            data = kw[name].encode("utf-8")[:255]
+            body += bytes([len(data)]) + data
+        else:
+            body += struct.pack(fmt, kw[name])
+    return struct.pack(">I", mask) + body
+
+
+def describe(ctx):
+    bits = [n for b, n in STATE_BITS if ctx.get("stateFlags", 0) & b]
+    # Il gateway omette i campi che non conosce: senza CAT in linea non c'e'
+    # ne' modo ne' frequenza, e il client deve reggerlo invece di rompersi.
+    mode_id = ctx.get("mode", 0)
+    mode = MODES[mode_id] if mode_id < len(MODES) else "?"
+    freq = ctx.get("frequencyHz", 0)
+    return ("%-28s  %10.3f kHz  %-6s  ptt=%d  [%s]"
+            % (ctx.get("rigLabel", "?"), freq / 1000.0, mode,
+               ctx.get("ptt", 0), " ".join(bits) or "-"))
+
+
+def do_listen(seconds):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind(("", ANNOUNCE_PORT))
+    sock.settimeout(1.0)
+    print("in ascolto degli annunci su %d per %d s...\n" % (ANNOUNCE_PORT, seconds))
+    seen = {}
+    deadline = time.time() + seconds
+    while time.time() < deadline:
+        try:
+            data, addr = sock.recvfrom(2048)
+        except socket.timeout:
+            continue
+        pkt = parse(data)
+        if not pkt or pkt["type"] != ANNOUNCE:
+            continue
+        if not pkt["authenticated"]:
+            # Annuncio non verificabile: password sbagliata o assente.
+            continue
+        ctx = decode_context(pkt["payload"])
+        key = (addr[0], pkt["streamId"])
+        if key not in seen:
+            print("TROVATA  %s:%d   %s" % (addr[0], ctx.get("sessionPort", SESSION_PORT),
+                                           describe(ctx)))
+        seen[key] = ctx
+    if not seen:
+        if AUTH_KEY:
+            print("nessun annuncio verificato. Gateway acceso? Password giusta?")
+        else:
+            print("nessun annuncio. Senza --password non si vede nulla: DecoPort")
+            print("non pubblica in chiaro. Il gateway e' acceso? Stessa rete?")
+        return 1
+    print("\n%d radio annunciate." % len(seen))
+    return 0
+
+
+def do_connect(host, port, seconds, tune_hz, mode_name):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(("", 0))
+    sock.settimeout(0.5)
+    peer = (host, port)
+
+    print("HELLO -> %s:%d" % peer)
+    sock.sendto(build(HELLO), peer)
+
+    last_keepalive = time.time()
+    audio_packets = 0
+    audio_samples = 0
+    contexts = 0
+    commanded = False
+    first_ctx = None
+    deadline = time.time() + seconds
+
+    while time.time() < deadline:
+        if time.time() - last_keepalive > 2.0:
+            sock.sendto(build(KEEPALIVE), peer)
+            last_keepalive = time.time()
+
+        try:
+            data, _ = sock.recvfrom(4096)
+        except socket.timeout:
+            continue
+        pkt = parse(data)
+        if not pkt or not pkt["authenticated"]:
+            continue
+
+        if pkt["type"] in (CONTEXT, STATUS):
+            ctx = decode_context(pkt["payload"])
+            contexts += 1
+            if first_ctx is None:
+                first_ctx = ctx
+                print("COLLEGATO  %s" % describe(ctx))
+            elif contexts % 8 == 0:
+                print("           %s" % describe(ctx))
+
+            # Il comando parte solo dopo il primo contesto: prima non sappiamo
+            # nemmeno se la radio abbia il CAT in linea.
+            if tune_hz and not commanded:
+                if not (ctx.get("stateFlags", 0) & 1):
+                    print("!! il gateway dichiara il CAT NON in linea: non comando nulla")
+                    commanded = True
+                else:
+                    print("COMMAND -> frequenza %.3f kHz" % (tune_hz / 1000.0))
+                    sock.sendto(build(COMMAND, payload=encode_context(frequencyHz=tune_hz)), peer)
+                    commanded = True
+            if mode_name and commanded and mode_name in MODES:
+                sock.sendto(build(COMMAND, payload=encode_context(mode=MODES.index(mode_name))), peer)
+                mode_name = None
+
+        elif pkt["type"] == AUDIO_RX:
+            audio_packets += 1
+            audio_samples += len(pkt["payload"]) // 2
+
+    sock.sendto(build(BYE), peer)
+
+    rate = (first_ctx or {}).get("sampleRate", 0)
+    print("\n--- riepilogo ---")
+    print("contesti ricevuti : %d" % contexts)
+    if rate:
+        heard = audio_samples / float(rate)
+        print("pacchetti audio   : %d (%d campioni, %.2f s dichiarati a %d Hz)"
+              % (audio_packets, audio_samples, heard, rate))
+        # Il rapporto fra audio ricevuto e tempo trascorso e' la misura che
+        # conta: 1.00 vuol dire tempo reale, sotto vuol dire che si perde roba.
+        print("resa              : %.3f  (1.000 = tempo reale)" % (heard / float(seconds)))
+    else:
+        print("pacchetti audio   : %d (%d campioni; il gateway non ha dichiarato la frequenza)"
+              % (audio_packets, audio_samples))
+    if contexts == 0:
+        print("\nnessun contesto: il gateway non ha risposto. Porta giusta? Firewall?")
+        return 1
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Client di prova DecoPort")
+    ap.add_argument("--listen", type=int, metavar="SEC",
+                    help="ascolta gli annunci per SEC secondi ed esci")
+    ap.add_argument("--connect", metavar="HOST", help="collegati a questo gateway")
+    ap.add_argument("--port", type=int, default=SESSION_PORT)
+    ap.add_argument("--seconds", type=int, default=15, help="durata del collegamento")
+    ap.add_argument("--tune", type=int, metavar="HZ",
+                    help="dopo il collegamento, chiedi questa frequenza")
+    ap.add_argument("--mode", metavar="NAME", help="e questo modo (USB, DIGU, ...)")
+    ap.add_argument("--password", metavar="PW",
+                    help="password DecoPort: senza, il gateway non risponde")
+    args = ap.parse_args()
+
+    global AUTH_KEY
+    if args.password:
+        print("derivo la chiave dalla password...")
+        AUTH_KEY = derive_key(args.password)
+
+    if args.listen:
+        return do_listen(args.listen)
+    if args.connect:
+        return do_connect(args.connect, args.port, args.seconds, args.tune, args.mode)
+    ap.print_help()
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

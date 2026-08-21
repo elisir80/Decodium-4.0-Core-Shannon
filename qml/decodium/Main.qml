@@ -1693,6 +1693,28 @@ ApplicationWindow {
         if (typeof historyDialogLoader !== "undefined")
             shutdownLoader(historyDialogLoader)
     }
+    // 1.0.571 - finestra DecoPort, creata alla prima apertura.
+    function openDecoPortWindow() {
+        decoPortWindowLoader.active = true
+        if (decoPortWindowLoader.item) {
+            decoPortWindowLoader.item.show()
+            decoPortWindowLoader.item.raise()
+            decoPortWindowLoader.item.requestActivate()
+        }
+    }
+
+    Loader {
+        id: decoPortWindowLoader
+        active: false
+        asynchronous: true
+        source: "components/DecoPortWindow.qml"
+        onLoaded: {
+            item.show()
+            item.raise()
+            item.requestActivate()
+        }
+    }
+
     function syncSpectrumVisibility() {
         if (bridge)
             bridge.spectrumVisible = waterfallPanelVisible && startupWaterfallVisualReady
@@ -12312,6 +12334,25 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     radius: 3
                     color: "transparent"
                 }
+            }
+        }
+
+        MenuItem {
+            // 1.0.571 - DecoPort: pubblica la radio in rete e usa quelle degli
+            // altri. La finestra e' un Loader: chi non la apre non paga nulla.
+            text: qsTr("DecoPort - radio on the network...")
+            icon.source: ""
+            onTriggered: mainWindow.openDecoPortWindow()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: textPrimary
+                leftPadding: 10
             }
         }
 

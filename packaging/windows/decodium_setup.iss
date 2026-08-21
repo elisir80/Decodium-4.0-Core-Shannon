@@ -89,6 +89,19 @@ Name: "chinesetraditional"; MessagesFile: "languages\ChineseTraditional.isl"
 Name: "latvian";            MessagesFile: "languages\Latvian.isl"
 
 [CustomMessages]
+; 1.0.571 - pagina della password DecoPort. Le lingue non elencate ricadono
+; sull'inglese, che e' il comportamento normale di Inno per i CustomMessages.
+english.DecoPortPageTitle=DecoPort security
+italian.DecoPortPageTitle=Sicurezza DecoPort
+english.DecoPortPageSubtitle=A password protects the radio you put on the network
+italian.DecoPortPageSubtitle=Una password protegge la radio che metti in rete
+english.DecoPortPageText=DecoPort can publish this radio on the network, so that another computer can listen to it and tune it. Anyone who knows this password can do so: choose one, and use the same on the other computer.%n%nIt is not stored as you type it: Decodium turns it into a key and discards the password.%n%nLeave it empty if you do not want to publish the radio. Without a password the gateway refuses to start.
+italian.DecoPortPageText=DecoPort puo' pubblicare questa radio sulla rete, in modo che un altro computer possa ascoltarla e sintonizzarla. Chiunque conosca questa password puo' farlo: scegline una e usa la stessa sull'altro computer.%n%nNon viene salvata come la scrivi: Decodium la trasforma in una chiave e la butta.%n%nLasciala vuota se non vuoi pubblicare la radio. Senza password il gateway si rifiuta di partire.
+english.DecoPortPasswordLabel=DecoPort password (leave empty to not publish):
+italian.DecoPortPasswordLabel=Password DecoPort (vuota per non pubblicare):
+english.DecoPortPasswordShort=The password is too short: use at least 8 characters, or leave it empty not to publish the radio.
+italian.DecoPortPasswordShort=La password e' troppo corta: usane almeno 8 caratteri, oppure lasciala vuota per non pubblicare la radio.
+
 ; 1.0.430 — messaggi del riavvio post-installazione, tradotti in tutte le lingue
 ; dell'app. RebootPrompt = avviso/domanda (MsgBox); RebootCountdown = testo mostrato
 ; da Windows durante il conto alla rovescia di shutdown.exe. Vedi [Code]/CurStepChanged.
@@ -332,6 +345,9 @@ Name: "{autodesktop}\{#AppName}";        Filename: "{app}\{#AppExeName}"; IconFi
 ; Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
+var
+  DecoPortPage: TInputQueryWizardPage;
+
 const
   AppUninstallKey =
     'Software\Microsoft\Windows\CurrentVersion\Uninstall\{D3C0D1A4-4000-4A10-8C64-6F7C3A6F4000}_is1';
@@ -429,6 +445,49 @@ begin
   end;
 end;
 
+{ 1.0.571 - DecoPort mette la radio in rete, quindi la password si chiede QUI,
+  una volta sola. Non viene salvata come l'hai scritta: al primo avvio Decodium
+  ne ricava una chiave (PBKDF2-SHA256) e cancella la parola dal file. Lasciarla
+  vuota e' legittimo e vuol dire "non pubblicare la radio": senza chiave il
+  gateway si rifiuta di partire. }
+procedure InitializeWizard;
+begin
+  DecoPortPage := CreateInputQueryPage(wpSelectTasks,
+    ExpandConstant('{cm:DecoPortPageTitle}'),
+    ExpandConstant('{cm:DecoPortPageSubtitle}'),
+    ExpandConstant('{cm:DecoPortPageText}'));
+  DecoPortPage.Add(ExpandConstant('{cm:DecoPortPasswordLabel}'), True);
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  Result := True;
+  if (DecoPortPage <> nil) and (CurPageID = DecoPortPage.ID) then
+  begin
+    { Una password di tre lettere non e' una password. Vuota si accetta: e' la
+      scelta esplicita di non esporre la radio. }
+    if (Length(DecoPortPage.Values[0]) > 0) and (Length(DecoPortPage.Values[0]) < 8) then
+    begin
+      MsgBox(ExpandConstant('{cm:DecoPortPasswordShort}'), mbError, MB_OK);
+      Result := False;
+    end;
+  end;
+end;
+
+{ Scrive la password nella radice di Decodium3.ini. Decodium al primo avvio la
+  converte in chiave e la rimuove. }
+procedure StoreDecoPortPassword;
+var
+  IniPath: String;
+begin
+  if (DecoPortPage = nil) or (Length(DecoPortPage.Values[0]) = 0) then
+    exit;
+  IniPath := ExpandConstant('{userappdata}\Decodium\Decodium3.ini');
+  ForceDirectories(ExtractFileDir(IniPath));
+  SetIniString('General', 'DecoPortPasswordPending', DecoPortPage.Values[0], IniPath);
+  SetIniString('General', 'DecoPortAutoStart', 'true', IniPath);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;
@@ -436,6 +495,9 @@ begin
   { Prima di copiare i file: disinstalla automaticamente la versione precedente. }
   if CurStep = ssInstall then
     UninstallPreviousVersion;
+
+  if CurStep = ssPostInstall then
+    StoreDecoPortPassword;
 
   { 1.0.430 — Riavvio PC OPZIONALE a fine installazione interattiva (era forzato
     nella 1.0.428). Mostriamo un avviso che RACCOMANDA VIVAMENTE il riavvio (audio,

@@ -1,4 +1,7 @@
 #include "DecodiumBridge.h"
+
+#include "DecoPortLink.h"
+#include "DecodiumDecoPortGateway.h"
 #include "DecodeUiFilterPolicy.h"
 #include "src/core/HostProcessEnvironment.h"
 #include "Ft2LinkSatelliteHalfDuplex.h"
@@ -19603,6 +19606,187 @@ QObject* DecodiumBridge::catShareObject() const
     return m_catShare;
 }
 
+// -- DecoPort ---------------------------------------------------------------
+// I tre oggetti nascono alla prima richiesta dal QML. Il gateway riceve dei
+// ganci verso la radio invece di un backend: cosi' non sa, e non deve sapere,
+// se sotto ci sia il nativo, Hamlib, OmniRig o TCI.
+QObject* DecodiumBridge::decoPortGatewayObject() const
+{
+    if (!m_decoPortGateway) {
+        auto* self = const_cast<DecodiumBridge*>(this);
+        m_decoPortGateway = new DecodiumDecoPortGateway(self);
+        DecodiumDecoPortGateway::RigHooks hooks;
+        hooks.connected      = [self]() { return self->catConnected(); };
+        hooks.frequencyHz    = [self]() { return self->frequency(); };
+        hooks.modeName       = [self]() { return self->catMode(); };
+        hooks.pttActive      = [self]() { return self->transmitting(); };
+        hooks.setFrequencyHz = [self](double hz) { self->setFrequency(hz); };
+        hooks.setModeName    = [self](const QString& m) { self->setMode(m); };
+        // Il PTT NON e' cablato di proposito. Finche' l'audio di trasmissione
+        // non passa da DecoPort, dare a un client il modo di mandare in aria la
+        // radio significa solo poterla lasciare a portante vuota. Il gateway
+        // dichiara StateCanTransmit=0 e i client lo vedono.
+        m_decoPortGateway->setRigHooks(std::move(hooks));
+        m_decoPortGateway->setAuthKey(decoPortAuthKey());
+    }
+    return m_decoPortGateway;
+}
+
+QObject* DecodiumBridge::decoPortDiscoveryObject() const
+{
+    if (!m_decoPortDiscovery) {
+        m_decoPortDiscovery = new DecoPortDiscovery(const_cast<DecodiumBridge*>(this));
+        m_decoPortDiscovery->setAuthKey(decoPortAuthKey());
+    }
+    return m_decoPortDiscovery;
+}
+
+QObject* DecodiumBridge::decoPortLinkObject() const
+{
+    if (!m_decoPortLink) {
+        m_decoPortLink = new DecoPortLink(const_cast<DecodiumBridge*>(this));
+        m_decoPortLink->setAuthKey(decoPortAuthKey());
+    }
+    return m_decoPortLink;
+}
+
+bool DecodiumBridge::startDecoPortGateway(int port)
+{
+    auto* gw = qobject_cast<DecodiumDecoPortGateway*>(decoPortGatewayObject());
+    if (!gw)
+        return false;
+    bool const ok = gw->start(port);
+    bridgeLog(QStringLiteral("DecoPort gateway start on %1: %2")
+                  .arg(port).arg(ok ? QStringLiteral("ok") : gw->status()));
+    return ok;
+}
+
+void DecodiumBridge::stopDecoPortGateway()
+{
+    if (m_decoPortGateway) {
+        m_decoPortGateway->stop();
+        bridgeLog(QStringLiteral("DecoPort gateway stopped"));
+    }
+}
+
+// La chiave vive nello store come esadecimale. Chi legge il file non ottiene la
+// password: per risalirci dovrebbe rifare 200000 giri di PBKDF2 per ogni
+// tentativo. Non e' un caveau, e' una serratura ragionevole per una rete locale.
+QByteArray DecodiumBridge::decoPortAuthKey() const
+{
+    // La password lasciata dall'installazione viene PRIMA della chiave gia'
+    // salvata: se l'utente l'ha appena digitata, e' quella che vuole. Altrimenti
+    // reinstallare con una password nuova non cambierebbe niente e sarebbe un
+    // modo silenzioso di non funzionare.
+    QString const pending = decodium::profiledSettingsValue(
+                                QString(), QStringLiteral("DecoPortPasswordPending"),
+                                QString()).toString();
+    if (!pending.trimmed().isEmpty()) {
+        const_cast<DecodiumBridge*>(this)->setDecoPortPassword(pending);
+        // setDecoPortPassword ha scritto la chiave e cancellato il testo in
+        // chiaro: da qui in avanti si rilegge la chiave come sempre.
+    }
+
+    QString const hex = decodium::profiledSettingsValue(QString(),
+                                                        QStringLiteral("DecoPortKey"),
+                                                        QString()).toString();
+    return hex.isEmpty() ? QByteArray() : QByteArray::fromHex(hex.toUtf8());
+}
+
+bool DecodiumBridge::hasDecoPortPassword() const
+{
+    return !decoPortAuthKey().isEmpty();
+}
+
+bool DecodiumBridge::setDecoPortPassword(const QString& password)
+{
+    QByteArray const key = decoport::deriveKeyFromPassword(password);
+    if (key.isEmpty()) {
+        bridgeLog(QStringLiteral("DecoPort password rejected: empty"));
+        return false;
+    }
+    QSettings s(QSettings::IniFormat, QSettings::UserScope,
+                QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (decodium::beginActiveSettingsProfile(s)) {
+        s.setValue(QStringLiteral("DecoPortKey"), QString::fromUtf8(key.toHex()));
+        s.remove(QStringLiteral("DecoPortPasswordPending"));
+        s.endGroup();
+        s.endGroup();
+    } else {
+        s.setValue(QStringLiteral("DecoPortKey"), QString::fromUtf8(key.toHex()));
+        s.remove(QStringLiteral("DecoPortPasswordPending"));
+    }
+    // La parola in chiaro lasciata dall'installazione va tolta anche dalla
+    // radice, non solo dal profilo attivo.
+    s.remove(QStringLiteral("DecoPortPasswordPending"));
+    s.sync();
+
+    if (m_decoPortGateway)
+        m_decoPortGateway->setAuthKey(key);
+    if (m_decoPortLink)
+        m_decoPortLink->setAuthKey(key);
+    if (m_decoPortDiscovery)
+        m_decoPortDiscovery->setAuthKey(key);
+    bridgeLog(QStringLiteral("DecoPort password set (key stored, password discarded)"));
+    return true;
+}
+
+void DecodiumBridge::clearDecoPortPassword()
+{
+    QSettings s(QSettings::IniFormat, QSettings::UserScope,
+                QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (decodium::beginActiveSettingsProfile(s)) {
+        s.remove(QStringLiteral("DecoPortKey"));
+        s.endGroup();
+        s.endGroup();
+    }
+    s.remove(QStringLiteral("DecoPortKey"));
+    s.sync();
+    if (m_decoPortGateway) {
+        m_decoPortGateway->stop();
+        m_decoPortGateway->setAuthKey(QByteArray());
+    }
+    if (m_decoPortLink)
+        m_decoPortLink->setAuthKey(QByteArray());
+    if (m_decoPortDiscovery)
+        m_decoPortDiscovery->setAuthKey(QByteArray());
+    bridgeLog(QStringLiteral("DecoPort password cleared; gateway stopped"));
+}
+
+bool DecodiumBridge::decoPortAutoStart() const
+{
+    return decodium::profiledSettingsValue(QString(),
+                                           QStringLiteral("DecoPortAutoStart"),
+                                           false).toBool();
+}
+
+void DecodiumBridge::setDecoPortAutoStart(bool on)
+{
+    // Si scrive DOVE si legge. profiledSettingsValue guarda prima nel profilo
+    // attivo e solo dopo nella radice: un setter che scrivesse in radice
+    // funzionerebbe finche' il profilo non ha la chiave, e smetterebbe di
+    // funzionare il giorno in cui qualcuno ce la mette.
+    QSettings s(QSettings::IniFormat, QSettings::UserScope,
+                QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (decodium::beginActiveSettingsProfile(s)) {
+        s.setValue(QStringLiteral("DecoPortAutoStart"), on);
+        s.endGroup();
+        s.endGroup();
+    } else {
+        s.setValue(QStringLiteral("DecoPortAutoStart"), on);
+    }
+    s.sync();
+    bridgeLog(QStringLiteral("DecoPort auto-start set: %1").arg(on ? 1 : 0));
+}
+
+int DecodiumBridge::decoPortConfiguredPort() const
+{
+    int const port = decodium::profiledSettingsValue(QString(),
+                                                     QStringLiteral("DecoPortPort"),
+                                                     5559).toInt();
+    return (port >= 1024 && port <= 65535) ? port : 5559;
+}
+
 QObject* DecodiumBridge::spotShareObject() const
 {
     return m_spotShare;
@@ -37818,6 +38002,18 @@ void DecodiumBridge::loadSettings()
     applyNtpSettings();
     // Garantisce che TX6 (CQ) sia sempre valorizzato dopo il caricamento settings
     regenerateTxMessages();
+
+    // DecoPort: se questa postazione e' quella che pubblica la radio, si accende
+    // da sola. Differito, perche' qui il CAT non e' ancora salito e il gateway
+    // annuncerebbe una radio che risulta senza controllo per i primi secondi.
+    if (decoPortAutoStart() && hasDecoPortPassword()) {
+        int const port = decoPortConfiguredPort();
+        QTimer::singleShot(4000, this, [this, port]() {
+            if (m_shuttingDown)
+                return;
+            startDecoPortGateway(port);
+        });
+    }
 }
 
 void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
@@ -47054,6 +47250,22 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
                 this, [this](double rms, double peak, int dynamicRange, int clippedSamples, int samples) {
             handleAudioHealth(rms, peak, dynamicRange, clippedSamples, samples);
         }, Qt::QueuedConnection);
+        // DecoPort: l'audio ricevuto va anche ai client di rete. E' un
+        // rubinetto a parte da quello di FT2-Link, perche' non deve dipendere
+        // dal modo: il gateway pubblica quello che la radio sta ascoltando,
+        // qualunque cosa stia facendo l'applicazione. Costa nulla quando il
+        // gateway e' spento — prima riga, ed esce.
+        connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
+                this, [this](QVector<short> samples) {
+            if (!m_decoPortGateway || !m_decoPortGateway->running())
+                return;
+            if (samples.isEmpty() || !m_monitoring || m_transmitting || m_tuning)
+                return;
+            m_decoPortGateway->setAudioFormat(static_cast<quint32>(SAMPLE_RATE),
+                                              1);
+            m_decoPortGateway->pushRxAudio(samples, decoport::nowUnixNs());
+        });
+
         connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
                 this, [this](QVector<short> samples) {
             // IU8LMC fix 1.0.449: gate FT2-Link audio tap — skip DSP entirely

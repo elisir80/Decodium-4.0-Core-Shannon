@@ -420,6 +420,79 @@ Rectangle {
             }
         }
 
+        // ── DecoPort ────────────────────────────────────────────────────────
+        // Compare solo quando c'e' qualcosa da dire: radio pubblicata in rete,
+        // oppure radio altrui in uso. Con DecoPort spento non occupa spazio.
+        Rectangle {
+            width: 1
+            height: footerSeparatorHeight
+            visible: decoPortRow.visible
+            color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1)
+        }
+
+        RowLayout {
+            id: decoPortRow
+            spacing: 4
+
+            readonly property var gw: bridge ? bridge.decoPortGateway : null
+            readonly property var lnk: bridge ? bridge.decoPortLink : null
+            readonly property bool publishing: !!(gw && gw.running)
+            readonly property bool usingRemote: !!(lnk && lnk.linked)
+            readonly property int clients: gw ? gw.clientCount : 0
+
+            visible: publishing || usingRemote
+
+            Rectangle {
+                width: 8
+                height: 8
+                radius: 4
+                color: accentGreen
+            }
+
+            Text {
+                // L'indirizzo, non un conteggio: e' quello che serve scrivere
+                // sull'altra macchina, o sapere per capire quale radio si sta
+                // usando. Il resto sta nel tooltip.
+                text: {
+                    if (decoPortRow.usingRemote)
+                        return "DECOPORT: " + decoPortRow.lnk.peerAddress
+                    var addr = decoPortRow.gw ? decoPortRow.gw.primaryAddress : ""
+                    if (addr.length === 0)
+                        return "DECOPORT: " + qsTr("no address")
+                    return "DECOPORT: " + addr + ":" + decoPortRow.gw.sessionPort
+                }
+                font.pixelSize: 10
+                color: accentGreen
+                elide: Text.ElideRight
+                Layout.maximumWidth: 220
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: if (typeof mainWindow !== 'undefined' && mainWindow.openDecoPortWindow)
+                        mainWindow.openDecoPortWindow()
+                    ToolTip {
+                        visible: parent.containsMouse
+                        delay: 500
+                        text: {
+                            if (decoPortRow.usingRemote) {
+                                return decoPortRow.lnk.rigLabel + "\n"
+                                     + decoPortRow.lnk.status + "\n"
+                                     + qsTr("Click to open DecoPort")
+                            }
+                            var all = decoPortRow.gw ? decoPortRow.gw.addresses : []
+                            return qsTr("This radio is published on the network, %1 client connected")
+                                       .arg(decoPortRow.clients)
+                                 + (all.length > 1 ? "\n" + qsTr("also reachable at: ")
+                                                     + all.slice(1).join(", ") : "")
+                                 + "\n" + qsTr("Click to open DecoPort")
+                        }
+                    }
+                }
+            }
+        }
+
             Rectangle {
                 width: 1
                 height: footerSeparatorHeight

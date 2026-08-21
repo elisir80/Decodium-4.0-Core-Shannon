@@ -266,6 +266,7 @@ set (DECODIUM_SOURCE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/src/bridge
   ${CMAKE_CURRENT_SOURCE_DIR}/src/core
   ${CMAKE_CURRENT_SOURCE_DIR}/src/models
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/net
   ${CMAKE_CURRENT_SOURCE_DIR}/src/radio
   ${CMAKE_CURRENT_SOURCE_DIR}/src/security
   ${CMAKE_CURRENT_SOURCE_DIR}/src/services
@@ -1836,6 +1837,13 @@ add_executable (decodium_qml
   src/app/DecodiumUpdateSupport.hpp
   src/services/DecodiumCommunityReport.cpp
   src/services/DecodiumCommunityReport.hpp
+  src/net/DecoPortPacket.cpp
+  src/net/DecoPortPacket.h
+  src/net/RadioLink.h
+  src/net/DecoPortLink.cpp
+  src/net/DecoPortLink.h
+  src/net/DecodiumDecoPortGateway.cpp
+  src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
   src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
