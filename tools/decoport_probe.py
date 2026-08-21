@@ -403,6 +403,10 @@ def main():
     ap.add_argument("--mode", metavar="NAME", help="e questo modo (USB, DIGU, ...)")
     ap.add_argument("--password", metavar="PW",
                     help="password DecoPort: senza, il gateway non risponde")
+    ap.add_argument("--key-from-ini", metavar="FILE",
+                    help="prendi la chiave gia' derivata da un Decodium3.ini "
+                         "(voce DecoPortKey): serve a provare in locale senza "
+                         "conoscere la password")
     ap.add_argument("--serve", action="store_true",
                     help="fai la radio: annunciati e manda un tono, per provare un client")
     ap.add_argument("--label", default="DecoPort Test Rig",
@@ -417,6 +421,22 @@ def main():
     if args.password:
         print("derivo la chiave dalla password...")
         AUTH_KEY = derive_key(args.password)
+    elif args.key_from_ini:
+        # La chiave sta nell'INI gia' derivata: la si prende com'e', non la si
+        # stampa e non la si scrive da nessuna parte.
+        import re as _re
+        key_hex = ""
+        with open(args.key_from_ini, "r", encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                # La voce puo' stare dentro un profilo: "FT991A\DecoPortKey=..."
+                m = _re.search(r"DecoPortKey\s*=\s*(\S+)", line)
+                if m:
+                    key_hex = m.group(1).strip().strip('"')
+        if not key_hex:
+            print("DecoPortKey non trovata in " + args.key_from_ini)
+            return 2
+        AUTH_KEY = bytes.fromhex(key_hex)
+        print("chiave presa dall'INI (%d byte)" % len(AUTH_KEY))
 
     if args.serve:
         return do_serve(args.port, args.seconds, args.label, args.freq, args.tone)

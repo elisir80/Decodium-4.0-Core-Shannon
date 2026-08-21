@@ -19887,11 +19887,22 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
         connect(link, &DecoPortLink::stateChanged,
                 this, &DecodiumBridge::onDecoPortRemoteState,
                 static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        // Riempire il buffer non basta: se il monitor e' spento, onPeriodTimer
+        // esce alla prima riga e nessuno guarda mai quei campioni. Quindi si
+        // avvia la ricezione per intero — decoder, timer di periodo, spettro —
+        // e solo dopo si lascia andare la scheda locale, che startRx() apre in
+        // fondo e a noi non serve.
+        if (!m_monitoring) {
+            bridgeLog(QStringLiteral("DecoPort remote source: starting RX (monitor was off)"));
+            startRx();
+        }
         stopAudioCapture();
         // Il codec USB deve stare dentro il modulatore, altrimenti la radio
         // ascolta il microfono e noi non decodifichiamo niente.
         link->setModeName(QStringLiteral("DIGU"));
         onDecoPortRemoteState();
+        emit statusMessage(tr("Using the remote radio %1 — decoding its audio")
+                               .arg(link->rigLabel()));
         bridgeLog(QStringLiteral("DecoPort remote source ON: local sound card released, "
                                  "audio now comes from %1").arg(link->rigLabel()));
     } else {
@@ -47329,6 +47340,15 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
                                    .arg(usingLegacyBackendForRx() ? 1 : 0),
                                25);
     bridgeLog("startAudioCapture() called");
+    // Con la radio remota in uso la scheda locale non si riapre, da nessuna
+    // strada: non dal watchdog, non dal riaggancio dopo un cambio banda. Sono
+    // gli automatismi che tengono viva la ricezione quando l'audio manca, e
+    // qui l'audio non manca — arriva dalla rete. Riaprirla vorrebbe dire due
+    // sorgenti nello stesso buffer.
+    if (m_decoPortUseRemote) {
+        bridgeLog(QStringLiteral("startAudioCapture skipped: the remote radio is the source"));
+        return;
+    }
     qint64 const captureRequestMs = QDateTime::currentMSecsSinceEpoch();
     constexpr qint64 kFt2LinkPostTxAckGuardMs = 15000;
     if (isFt2LinkApplicationMode(m_mode)
