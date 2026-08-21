@@ -458,6 +458,13 @@ set (wsjtx_CXXSRCS
   widgets/mainwindow.cpp
   src/app/Configuration.cpp
   src/app/main.cpp
+  src/net/DecoPortPacket.cpp
+  src/net/DecoPortPacket.h
+  src/net/RadioLink.h
+  src/net/DecoPortLink.cpp
+  src/net/DecoPortLink.h
+  src/net/DecodiumDecoPortGateway.cpp
+  src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
   src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp

@@ -90,6 +90,13 @@ FT8 special callsigns and `/LH` lighthouse activations, back-pressure handling
 for the Windows decode list, batched Live Map notifications, and a pair of
 compiler diagnostics fixed in the bundled QCustomPlot.
 
+### Cross-platform build integration
+
+The DecoPort implementation is now part of both application targets. This
+keeps the classic macOS bundle and the QML frontend linked with the same
+network-radio implementation, so the Windows executable and all macOS/Linux
+packages contain the feature consistently.
+
 ### Validation
 
 Discovery, control and received audio were exercised against a real FT-991A: the
@@ -188,6 +195,13 @@ radio trovate in rete e quella a cui sei collegato.
 Nominativi speciali FT8 e attivazioni faro `/LH`, gestione della contropressione
 nella lista dei decode su Windows, notifiche della Live Map raggruppate, e due
 diagnostiche del compilatore sistemate nel QCustomPlot incluso.
+
+### Integrazione della build multipiattaforma
+
+L'implementazione DecoPort ora fa parte di entrambi i target applicativi. In
+questo modo sia il bundle macOS classico sia il frontend QML vengono collegati
+con la stessa implementazione della radio in rete, e l'eseguibile Windows e
+tutti i pacchetti macOS/Linux includono la funzione in modo coerente.
 
 ### Verifiche
 
