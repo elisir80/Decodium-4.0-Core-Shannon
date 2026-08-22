@@ -56,6 +56,8 @@ radio control path:
 - macOS release packaging now creates and publishes only DMG files and their
   SHA-256 checksums. The additional application ZIP packages are no longer
   created or uploaded.
+- Removed three unused lambda captures in the DecoPort bridge so AppleClang's
+  `-Werror,-Wunused-lambda-capture` cannot block the macOS release builds.
 - The release source tree and version metadata are updated to v1.0.581.
 
 ### Platform packages
@@ -124,6 +126,9 @@ della radio remota:
 - Il packaging macOS ora crea e pubblica solo i pacchetti DMG e i relativi
   checksum SHA-256. I pacchetti applicazione ZIP aggiuntivi non vengono più
   creati né caricati.
+- Rimossi tre capture lambda inutilizzati nel bridge DecoPort, così il controllo
+  AppleClang `-Werror,-Wunused-lambda-capture` non blocca più le build macOS di
+  release.
 - Il codice sorgente e i metadati di versione sono aggiornati alla v1.0.581.
 
 ### Pacchetti della piattaforma

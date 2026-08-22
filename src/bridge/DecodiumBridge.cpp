@@ -19833,11 +19833,11 @@ void DecodiumBridge::decoPortEnsureRigDriver()
 
     if (!m_decoPortRig) {
         m_decoPortRig = new DecoPortRigDriver(this);
-        connect(m_decoPortRig, &DecoPortRigDriver::opened, this, [this](const QString& name) {
+        connect(m_decoPortRig, &DecoPortRigDriver::opened, this, [](const QString& name) {
             bridgeLog(QStringLiteral("DecoPort rig driver: %1 open, talking to the radio directly")
                           .arg(name));
         });
-        connect(m_decoPortRig, &DecoPortRigDriver::failed, this, [this](const QString& why) {
+        connect(m_decoPortRig, &DecoPortRigDriver::failed, this, [](const QString& why) {
             bridgeLog(QStringLiteral("DecoPort rig driver: %1").arg(why));
         });
     }
@@ -20183,7 +20183,7 @@ void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples)
         connect(m_decoPortTxOutThread, &QThread::finished,
                 m_decoPortTxOut, &QObject::deleteLater);
         connect(m_decoPortTxOut, &RtlSdrAudioOutput::error, this,
-                [this](const QString& message) {
+                [](const QString& message) {
             bridgeLog(QStringLiteral("DecoPort transmit audio error: %1").arg(message));
         }, Qt::QueuedConnection);
         m_decoPortTxOutThread->start();
