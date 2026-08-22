@@ -28139,10 +28139,26 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
     }
 
     if (decoPortIsCat(m_catBackend)) {
-        if (g_decoPortCatLink && g_decoPortCatLink->isLinked()) {
-            bridgeLog(QStringLiteral("CAT rig mode sync (%1): decoport -> %2").arg(reason, rigMode));
-            g_decoPortCatLink->setModeName(rigMode);
-        }
+        if (!g_decoPortCatLink || !g_decoPortCatLink->isLinked())
+            return;
+        // Il vocabolario di DecoPort e' funzionale: DIGU vuol dire "metti il
+        // codec USB dentro il modulatore". La voce "modo radio CAT" descrive
+        // invece come quel modo si scrive su UNA radio locale — "USB",
+        // "DATA-U" — e su DecoPort quella traduzione spetta al gateway.
+        //
+        // Mandarla tale e quale metteva la radio remota in USB, cioe' sul
+        // microfono: da li' si trasmetterebbe il silenzio della stanza. Con una
+        // radio in rete l'audio arriva sempre dal codec USB, quindi il modo da
+        // chiedere e' sempre quello dei dati.
+        QString const wanted = rigMode.contains(QStringLiteral("-L"), Qt::CaseInsensitive)
+                               || rigMode.compare(QStringLiteral("LSB"), Qt::CaseInsensitive) == 0
+                                   ? QStringLiteral("DIGL")
+                                   : QStringLiteral("DIGU");
+        if (m_catMode.compare(wanted, Qt::CaseInsensitive) == 0)
+            return;
+        bridgeLog(QStringLiteral("CAT rig mode sync (%1): decoport -> %2 (configurato: %3)")
+                      .arg(reason, wanted, rigMode));
+        g_decoPortCatLink->setModeName(wanted);
         return;
     }
 
