@@ -300,7 +300,9 @@ def do_serve(port, seconds, label, freq_hz, tone_hz):
 
     rate = 12000
     frame = rate * 10 // 1000          # 10 ms, come il gateway vero
-    state = {"freq": freq_hz, "mode": MODES.index("DIGU")}
+    state = {"freq": freq_hz, "mode": MODES.index("DIGU"), "ptt": 0}
+    tx = {"frames": 0, "samples": 0, "early": 0, "late": 0, "first": None,
+          "peak": 0, "keyed_at": None}
     clients = {}
     stream_id = 0x5EED
     seq = {"ann": 0, "ctx": 0, "aud": 0}
@@ -308,11 +310,15 @@ def do_serve(port, seconds, label, freq_hz, tone_hz):
     step = 2.0 * math.pi * tone_hz / rate
 
     def context_payload():
-        return encode_context(frequencyHz=state["freq"], mode=state["mode"], ptt=0,
+        # CAT + AUDIO-IN + AUDIO-OUT + CAN-TX: la radio finta accetta anche di
+        # "trasmettere", cioe' di misurare quello che riceve senza mandarlo in
+        # aria. E' il modo di provare la trasmissione senza trasmettere.
+        return encode_context(frequencyHz=state["freq"], mode=state["mode"],
+                              ptt=1 if state["ptt"] else 0,
                               sMeterTenths=300, sampleRate=rate, channels=1,
                               bandwidthHz=3000, rigLabel=label,
-                              stateFlags=(1 << 0) | (1 << 1), txAudioLeadMs=0,
-                              sessionPort=port)
+                              stateFlags=(1 << 0) | (1 << 1) | (1 << 2) | (1 << 3),
+                              txAudioLeadMs=200, sessionPort=port)
 
     print("radio finta '%s' su porta %d, tono %d Hz - %d s" % (label, port, tone_hz, seconds))
     t_end = time.time() + seconds
@@ -350,8 +356,39 @@ def do_serve(port, seconds, label, freq_hz, tone_hz):
                 elif t == BYE:
                     clients.pop(addr, None)
                     print("  <- BYE da %s:%d" % addr)
+                elif t == AUDIO_TX:
+                    # Non si suona niente: si misura. Quanto audio, quanto in
+                    # anticipo rispetto all'ora dichiarata, e quanto forte.
+                    body = msg["payload"]
+                    n = len(body) // 2
+                    tx["frames"] += 1
+                    tx["samples"] += n
+                    if tx["first"] is None:
+                        tx["first"] = now
+                    ahead_ms = (msg["tsNs"] - now_ns()) / 1e6
+                    if ahead_ms < 0:
+                        tx["late"] += 1
+                    elif ahead_ms > 2000:
+                        tx["early"] += 1
+                    for i in range(0, len(body), 2):
+                        v = struct.unpack_from("<h", body, i)[0]
+                        if abs(v) > tx["peak"]:
+                            tx["peak"] = abs(v)
                 elif t == COMMAND:
                     cmd = decode_context(msg["payload"])
+                    if "ptt" in cmd:
+                        state["ptt"] = int(cmd["ptt"])
+                        if state["ptt"]:
+                            tx.update({"frames": 0, "samples": 0, "early": 0,
+                                       "late": 0, "first": None, "peak": 0,
+                                       "keyed_at": now})
+                            print("  <- PTT SU (niente va in aria: e' una radio finta)")
+                        else:
+                            held = (now - tx["keyed_at"]) if tx["keyed_at"] else 0.0
+                            print("  <- PTT GIU' dopo %.2f s | %d frame, %.2f s di audio, "
+                                  "picco %d, %d in ritardo, %d troppo in anticipo"
+                                  % (held, tx["frames"], tx["samples"] / rate,
+                                     tx["peak"], tx["late"], tx["early"]))
                     if "frequencyHz" in cmd:
                         state["freq"] = cmd["frequencyHz"]
                         print("  <- TUNE %.3f kHz" % (state["freq"] / 1000.0))

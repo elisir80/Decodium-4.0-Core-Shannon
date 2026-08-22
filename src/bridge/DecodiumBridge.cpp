@@ -10889,6 +10889,17 @@ DecodiumBridge::~DecodiumBridge()
     }
     safeQuitThread(m_decoPortMonitorThread, "decoPortMonitor");
     m_decoPortMonitorOut = nullptr;
+    if (m_decoPortRemoteKeyed) {
+        activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false,
+                        m_omniRigCat, m_legacyBackend);
+        m_decoPortRemoteKeyed = false;
+    }
+    if (m_decoPortTxOut && m_decoPortTxOutThread && m_decoPortTxOutThread->isRunning()) {
+        QMetaObject::invokeMethod(m_decoPortTxOut, &RtlSdrAudioOutput::shutdown,
+                                  Qt::BlockingQueuedConnection);
+    }
+    safeQuitThread(m_decoPortTxOutThread, "decoPortTxOut");
+    m_decoPortTxOut = nullptr;
 }
 
 QObject * DecodiumBridge::propagationManager() const
@@ -19641,11 +19652,17 @@ QObject* DecodiumBridge::decoPortGatewayObject() const
         hooks.pttActive      = [self]() { return self->transmitting(); };
         hooks.setFrequencyHz = [self](double hz) { self->setFrequency(hz); };
         hooks.setModeName    = [self](const QString& m) { self->setMode(m); };
-        // Il PTT NON e' cablato di proposito. Finche' l'audio di trasmissione
-        // non passa da DecoPort, dare a un client il modo di mandare in aria la
-        // radio significa solo poterla lasciare a portante vuota. Il gateway
-        // dichiara StateCanTransmit=0 e i client lo vedono.
+        // Il PTT ora c'e', ma solo se questa stazione puo' davvero trasmettere:
+        // serve il CAT per alzarlo e una radio che non stia gia' trasmettendo
+        // per conto suo. Quando manca, il gateway dichiara StateCanTransmit=0 e
+        // i client lo vedono invece di provarci e basta.
+        hooks.canTransmit    = [self]() {
+            return self->catConnected() && !self->m_transmitting && !self->m_tuning;
+        };
+        hooks.setPtt         = [self](bool on) { self->decoPortKeyLocalRig(on); };
         m_decoPortGateway->setRigHooks(std::move(hooks));
+        connect(m_decoPortGateway, &DecodiumDecoPortGateway::txAudioDue,
+                self, &DecodiumBridge::decoPortPlayTxAudio);
         m_decoPortGateway->setAuthKey(decoPortAuthKey());
     }
     return m_decoPortGateway;
@@ -19837,6 +19854,237 @@ void DecodiumBridge::setDecoPortMonitor(bool on)
         bridgeLog(QStringLiteral("DecoPort monitor OFF"));
     }
     emit decoPortMonitorChanged();
+}
+
+// La forma d'onda esce da qui verso la radio remota. Non si spara tutta in una
+// volta: dodici secondi di FT8 sono trecento e passa datagrammi, e rovesciarli
+// insieme sulla rete e' il modo di perderne. Se ne mandano avanti un secondo e
+// mezzo alla volta, ognuno con l'ora esatta in cui deve suonare: il gateway li
+// trattiene fino a quell'istante, cosi' il jitter della rete finisce in un
+// buffer invece che sul confine di slot.
+bool DecodiumBridge::decoPortSendTxWave(const QVector<float>& wave, double* durationSeconds)
+{
+    auto* link = qobject_cast<DecoPortLink*>(decoPortLinkObject());
+    if (!link || !link->isLinked()) {
+        emit errorMessage(tr("Transmit refused: no remote radio connected"));
+        return false;
+    }
+    if (!(link->state().stateFlags & decoport::StateCanTransmit)) {
+        emit errorMessage(tr("Transmit refused: the remote radio does not accept transmission "
+                             "(no CAT for its PTT, or it is already transmitting)"));
+        return false;
+    }
+    if (wave.isEmpty())
+        return false;
+
+    // La forma d'onda del modem sta a 48 kHz e non ha niente sopra i 3 kHz:
+    // uno su quattro porta a 12 kHz senza alias, che e' la frequenza che il
+    // gateway dichiara per questo flusso.
+    int const outCount = wave.size() / 4;
+    QVector<short> pcm(outCount);
+    for (int i = 0; i < outCount; ++i) {
+        float const v = wave[i * 4] * 32767.0f;
+        pcm[i] = static_cast<short>(v > 32767.0f ? 32767.0f : (v < -32768.0f ? -32768.0f : v));
+    }
+
+    int const frameSamples = SAMPLE_RATE * 40 / 1000;   // 40 ms: sta in un MTU
+    m_decoPortTxFrames.clear();
+    m_decoPortTxFrames.reserve(outCount / frameSamples + 1);
+    for (int off = 0; off < outCount; off += frameSamples)
+        m_decoPortTxFrames.append(pcm.mid(off, qMin(frameSamples, outCount - off)));
+    m_decoPortTxNextFrame = 0;
+
+    int const leadMs = qMax(200, static_cast<int>(link->txAudioLeadMs()));
+    m_decoPortTxStartNs = decoport::nowUnixNs() + static_cast<quint64>(leadMs) * 1000000ull;
+
+    // Il PTT parte subito: deve essere su prima che arrivi il primo campione,
+    // ed e' per questo che l'audio ha un anticipo dichiarato.
+    link->setPtt(true, 0);
+
+    if (!m_decoPortTxPacer) {
+        m_decoPortTxPacer = new QTimer(this);
+        m_decoPortTxPacer->setInterval(100);
+        connect(m_decoPortTxPacer, &QTimer::timeout,
+                this, &DecodiumBridge::decoPortPumpTxFrames);
+    }
+    m_decoPortTxPacer->start();
+    // Il primo scaglione parte adesso, non fra cento millisecondi: l'anticipo
+    // dichiarato e' duecento, e mangiarne meta' in attesa del timer sarebbe
+    // buttare via proprio il margine che serve.
+    decoPortPumpTxFrames();
+
+    double const seconds = static_cast<double>(outCount) / SAMPLE_RATE;
+    if (durationSeconds)
+        *durationSeconds = seconds;
+    bridgeLog(QStringLiteral("DecoPort TX: %1 frames, %2 s of audio, starting in %3 ms on %4")
+                  .arg(m_decoPortTxFrames.size())
+                  .arg(seconds, 0, 'f', 2)
+                  .arg(leadMs)
+                  .arg(link->rigLabel()));
+    return true;
+}
+
+void DecodiumBridge::decoPortPumpTxFrames()
+{
+    auto* link = qobject_cast<DecoPortLink*>(decoPortLinkObject());
+    if (!link || !link->isLinked()) {
+        decoPortStopTx(QStringLiteral("link lost"));
+        return;
+    }
+    quint64 const horizon = decoport::nowUnixNs() + 1500000000ull;
+    quint64 const frameNs = 40000000ull;
+    while (m_decoPortTxNextFrame < m_decoPortTxFrames.size()) {
+        quint64 const playAt = m_decoPortTxStartNs
+            + static_cast<quint64>(m_decoPortTxNextFrame) * frameNs;
+        if (playAt > horizon)
+            break;
+        link->sendTxAudio(m_decoPortTxFrames[m_decoPortTxNextFrame], playAt);
+        ++m_decoPortTxNextFrame;
+    }
+    if (m_decoPortTxNextFrame >= m_decoPortTxFrames.size() && m_decoPortTxPacer)
+        m_decoPortTxPacer->stop();
+}
+
+// Chiudere la trasmissione remota vuol dire soprattutto abbassare il PTT: non
+// lasciarlo su e' l'unica cosa che qui non si puo' sbagliare.
+void DecodiumBridge::decoPortStopTx(const QString& reason)
+{
+    if (m_decoPortTxPacer)
+        m_decoPortTxPacer->stop();
+    m_decoPortTxFrames.clear();
+    m_decoPortTxNextFrame = 0;
+    if (auto* link = qobject_cast<DecoPortLink*>(decoPortLinkObject())) {
+        if (link->isLinked())
+            link->setPtt(false, 0);
+    }
+    bridgeLog(QStringLiteral("DecoPort TX stopped: %1").arg(reason));
+}
+
+// Il PTT chiesto da un client. Il pericolo qui non e' alzarlo: e' non riabbassarlo.
+// Se il client muore, se cade la rete, se il suo audio finisce a meta', la radio
+// resta in aria a portante vuota finche' qualcuno non se ne accorge. Percio' il
+// PTT alzato da remoto porta con se' una scadenza, che l'audio riprodotto
+// rinnova: quando l'audio smette, entro tre secondi il PTT scende da solo.
+void DecodiumBridge::decoPortKeyLocalRig(bool on)
+{
+    if (on && (!m_catConnected || m_transmitting || m_tuning)) {
+        bridgeLog(QStringLiteral("DecoPort remote PTT refused: cat=%1 tx=%2 tune=%3")
+                      .arg(m_catConnected ? 1 : 0).arg(m_transmitting ? 1 : 0)
+                      .arg(m_tuning ? 1 : 0));
+        return;
+    }
+    if (m_decoPortRemoteKeyed == on)
+        return;
+
+    if (!m_decoPortTxGuard) {
+        m_decoPortTxGuard = new QTimer(this);
+        m_decoPortTxGuard->setSingleShot(true);
+        m_decoPortTxGuard->setInterval(3000);
+        connect(m_decoPortTxGuard, &QTimer::timeout, this, [this]() {
+            if (!m_decoPortRemoteKeyed)
+                return;
+            bridgeLog(QStringLiteral("DecoPort remote PTT dropped: no transmit audio for 3s"));
+            decoPortKeyLocalRig(false);
+        });
+    }
+
+    m_decoPortRemoteKeyed = on;
+    activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, on,
+                    m_omniRigCat, m_legacyBackend);
+    if (on)
+        m_decoPortTxGuard->start();
+    else
+        m_decoPortTxGuard->stop();
+    bridgeLog(QStringLiteral("DecoPort remote PTT %1").arg(on ? "up" : "down"));
+}
+
+// L'audio che il client vuole mandare in aria, gia' arrivato all'istante in cui
+// va suonato: il gateway l'ha trattenuto fino a qui apposta. Va nel codec USB
+// della radio, cioe' nello stesso dispositivo che userebbe la trasmissione
+// locale.
+void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples)
+{
+    if (samples.isEmpty() || m_transmitting || m_tuning)
+        return;
+
+    if (!m_decoPortTxOutThread) {
+        m_decoPortTxOutThread = new QThread(this);
+        m_decoPortTxOutThread->setObjectName(QStringLiteral("DecoPortTxOut"));
+        m_decoPortTxOut = new RtlSdrAudioOutput;
+        m_decoPortTxOut->moveToThread(m_decoPortTxOutThread);
+        connect(m_decoPortTxOutThread, &QThread::finished,
+                m_decoPortTxOut, &QObject::deleteLater);
+        connect(m_decoPortTxOut, &RtlSdrAudioOutput::error, this,
+                [this](const QString& message) {
+            bridgeLog(QStringLiteral("DecoPort transmit audio error: %1").arg(message));
+        }, Qt::QueuedConnection);
+        m_decoPortTxOutThread->start();
+    }
+
+    if (m_decoPortTxOutRate == 0) {
+        bool found = false;
+        QAudioDevice const outDev = resolveTxOutputDevice(&found);
+        if (outDev.id().isEmpty()) {
+            bridgeLog(QStringLiteral("DecoPort transmit audio dropped: no output device"));
+            return;
+        }
+        auto supportsRate = [&outDev](int rate) {
+            for (QAudioFormat::SampleFormat sf : {QAudioFormat::Int16, QAudioFormat::Float}) {
+                for (int ch : {1, 2}) {
+                    QAudioFormat f;
+                    f.setSampleRate(rate);
+                    f.setChannelCount(ch);
+                    f.setSampleFormat(sf);
+                    if (outDev.isFormatSupported(f))
+                        return true;
+                }
+            }
+            return false;
+        };
+        // 48 kHz per primo: e' la frequenza a cui girano i codec USB delle
+        // radio, e portarci i 12 kHz per interpolazione lascia le immagini
+        // sopra i 6 kHz, dove il filtro SSB della radio le toglie comunque.
+        m_decoPortTxOutRate = supportsRate(48000) ? 48000
+                            : (supportsRate(SAMPLE_RATE) ? SAMPLE_RATE : 0);
+        if (m_decoPortTxOutRate == 0) {
+            bridgeLog(QStringLiteral("DecoPort transmit audio dropped: [%1] takes neither 48000 nor 12000 Hz")
+                          .arg(outDev.description()));
+            return;
+        }
+        QPointer<RtlSdrAudioOutput> out(m_decoPortTxOut);
+        int const rate = m_decoPortTxOutRate;
+        QMetaObject::invokeMethod(m_decoPortTxOut, [out, outDev, rate]() {
+            if (out) out->start(outDev, rate);
+        }, Qt::QueuedConnection);
+        bridgeLog(QStringLiteral("DecoPort transmit audio to [%1] at %2 Hz")
+                      .arg(outDev.description()).arg(m_decoPortTxOutRate));
+    }
+
+    QVector<short> out_samples;
+    if (m_decoPortTxOutRate == SAMPLE_RATE) {
+        out_samples = samples;
+    } else {
+        // Interpolazione lineare, non ripetizione: qui il segnale va in aria e
+        // i gradini di una ripetizione sarebbero larghezza di banda regalata.
+        int const factor = m_decoPortTxOutRate / SAMPLE_RATE;
+        out_samples.reserve(samples.size() * factor);
+        for (int i = 0; i < samples.size(); ++i) {
+            int const a = samples[i];
+            int const b = (i + 1 < samples.size()) ? samples[i + 1] : samples[i];
+            for (int k = 0; k < factor; ++k)
+                out_samples.append(static_cast<short>(a + (b - a) * k / factor));
+        }
+    }
+
+    QPointer<RtlSdrAudioOutput> out(m_decoPortTxOut);
+    int const rate = m_decoPortTxOutRate;
+    QMetaObject::invokeMethod(m_decoPortTxOut, [out, out_samples, rate]() {
+        if (out) out->enqueueSamples(out_samples, rate);
+    }, Qt::QueuedConnection);
+
+    // Finche' l'audio scorre il PTT resta su; e' questo che rinnova la scadenza.
+    if (m_decoPortRemoteKeyed && m_decoPortTxGuard)
+        m_decoPortTxGuard->start();
 }
 
 // Il verso opposto: la radio remota si e' mossa (l'ha girata qualcuno, o un
@@ -25196,6 +25444,34 @@ void DecodiumBridge::startTx()
         appendTxDecodeEntry(msg);
     }
 
+    // Con la radio remota in uso l'audio non va alla scheda di questo computer:
+    // va alla radio, che sta da un'altra parte. Tutto il resto della
+    // trasmissione — sequencer, log, fine dello slot — resta com'era.
+    if (m_decoPortUseRemote) {
+        double waveSeconds = 0.0;
+        if (!decoPortSendTxWave(wave, &waveSeconds)) {
+            m_transmitting = false;
+            emit transmittingChanged();
+            m_txPcmData.clear();
+            m_activeTxNumber = 0;
+            m_activeTxMessage.clear();
+            bridgeLog(QStringLiteral("startTx: DecoPort transmit refused"));
+            return;
+        }
+        quint64 const serial = m_txPlaybackSerial;
+        int const holdMs = static_cast<int>(waveSeconds * 1000.0)
+                           + qMax(200, static_cast<int>(
+                                 qobject_cast<DecoPortLink*>(decoPortLinkObject())->txAudioLeadMs()))
+                           + 250;
+        QTimer::singleShot(holdMs, this, [this, serial]() {
+            if (serial != m_txPlaybackSerial || !m_transmitting)
+                return;
+            decoPortStopTx(QStringLiteral("waveform finished"));
+            completeTxPlayback(QStringLiteral("decoport-audio-done"));
+        });
+        return;
+    }
+
     if (tciAudioTx) {
         unsigned symbolsLength = 79;
         double framesPerSymbol = 1920.0;
@@ -25854,6 +26130,10 @@ void DecodiumBridge::resetStandardTxMessages()
 
 void DecodiumBridge::stopTx()
 {
+    // Qualunque sia il motivo per cui si smette, la radio remota deve smettere
+    // con noi: e' l'unica che non puo' accorgersene da sola.
+    if (m_decoPortUseRemote || !m_decoPortTxFrames.isEmpty())
+        decoPortStopTx(QStringLiteral("stopTx"));
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, &DecodiumBridge::stopTx, Qt::QueuedConnection);
         return;
