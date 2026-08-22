@@ -25125,8 +25125,20 @@ void DecodiumBridge::startTx()
               + " remoteLinked=" + QString::number(
                     (m_decoPortLink && m_decoPortLink->isLinked()) ? 1 : 0));
     if (msg.trimmed().isEmpty()) {
-        emit errorMessage("Nessun messaggio TX selezionato");
-        bridgeLog("startTx: empty msg abort");
+        // "Nessun messaggio selezionato" manda a cercare nel posto sbagliato
+        // quando il messaggio non c'e' perche' non puo' esserci: senza
+        // nominativo regenerateTxMessages() esce alla prima riga e restano
+        // vuoti tutti e sei. Capita su un computer installato solo per usare
+        // una radio in rete, dove i dati di stazione non li ha messi nessuno.
+        if (m_callsign.trimmed().isEmpty()) {
+            emit errorMessage(tr("Cannot transmit: no callsign set. "
+                                 "Fill in your callsign (and locator) in Settings > Station: "
+                                 "without it no transmit message can be built."));
+            bridgeLog("startTx: abort, callsign empty (no TX messages can exist)");
+            return;
+        }
+        emit errorMessage(tr("No TX message selected"));
+        bridgeLog("startTx: empty msg abort (callsign=[" + m_callsign + "] tx6=[" + m_tx6 + "])");
         return;
     }
     if (!customAudioTxActive && !repairOrRejectStalePartnerTxMessage(msg, QStringLiteral("startTx"))) {
