@@ -22446,9 +22446,13 @@ void DecodiumBridge::precomputeTxAudioForCurrentMessage(const QString& reason)
         return;
     }
 
-    bool needPcm = !usingTciAudioInput();
+    // Con la radio remota in uso il PCM per la scheda locale non serve: l'audio
+    // esce dalla forma d'onda verso la rete. Costruirlo comunque vuol dire
+    // pretendere un dispositivo di uscita che su quel computer puo' benissimo
+    // non esserci — e fallire li', prima ancora di provare a trasmettere.
+    bool needPcm = !usingTciAudioInput() && !m_decoPortUseRemote;
 #if defined(Q_OS_MAC)
-    needPcm = shouldUseBridgeAudioForLegacyDigitalTx();
+    needPcm = shouldUseBridgeAudioForLegacyDigitalTx() && !m_decoPortUseRemote;
 #endif
 
     QVector<float> wave;
@@ -24900,7 +24904,10 @@ void DecodiumBridge::startTx()
     if (!customAudioTxActive) {
         forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
     }
-    bridgeLog("startTx: msg=[" + msg + "]");
+    bridgeLog("startTx: msg=[" + msg + "]"
+              + " decoPortRemote=" + QString::number(m_decoPortUseRemote ? 1 : 0)
+              + " remoteLinked=" + QString::number(
+                    (m_decoPortLink && m_decoPortLink->isLinked()) ? 1 : 0));
     if (msg.trimmed().isEmpty()) {
         emit errorMessage("Nessun messaggio TX selezionato");
         bridgeLog("startTx: empty msg abort");
@@ -25001,7 +25008,8 @@ void DecodiumBridge::startTx()
                            QString::number(xitHz),
                            QString::number(catSplitTxDialFrequencyHz(), 'f', 0)));
     }
-    bool needPcm = !tciAudioTx;
+    // Come sopra: la radio remota si porta via l'audio prima della scheda.
+    bool needPcm = !tciAudioTx && !m_decoPortUseRemote;
 #if defined(Q_OS_MAC)
     needPcm = false;
 #endif
