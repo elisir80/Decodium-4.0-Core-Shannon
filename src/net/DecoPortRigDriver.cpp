@@ -46,11 +46,25 @@ int collectEntry(const struct rig_caps* caps, rig_ptr_t data)
     return 1;   // 1 = continua l'iterazione
 }
 
+// Hamlib parte con la traccia accesa e scrive su stderr a ogni comando: su un
+// gateway che interroga la radio due volte al secondo sono centinaia di
+// kilobyte al minuto di I/O sincrono, che nessuno ha chiesto e che rallenta il
+// thread da cui esce — misurato, faceva perdere il 6% dell'audio pubblicato.
+void silenceHamlibOnce()
+{
+    static bool done = false;
+    if (done)
+        return;
+    done = true;
+    rig_set_debug(RIG_DEBUG_ERR);
+}
+
 QVector<CatalogueEntry> catalogue()
 {
     static QVector<CatalogueEntry> cached;
     if (!cached.isEmpty())
         return cached;
+    silenceHamlibOnce();
     rig_load_all_backends();
     QVector<CatalogueEntry> entries;
     rig_list_foreach(collectEntry, &entries);
@@ -169,6 +183,7 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
         return;
     }
 
+    silenceHamlibOnce();
     rig_load_all_backends();
     d->rig = rig_init(static_cast<rig_model_t>(model));
     if (!d->rig) {
