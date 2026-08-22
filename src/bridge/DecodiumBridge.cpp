@@ -1,6 +1,7 @@
 #include "DecodiumBridge.h"
 
 #include "DecoPortLink.h"
+#include "DecoPortRigDriver.h"
 #include "DecodiumDecoPortGateway.h"
 #include "DecodeUiFilterPolicy.h"
 #include "src/core/HostProcessEnvironment.h"
@@ -301,6 +302,10 @@ static constexpr int kFt2LinkAccessHashBytes = 32;
 static QString const kCatProfileRootGroup = QStringLiteral("CAT_Profiles");
 static QString const kCatProfileActiveKey = QStringLiteral("CAT_ProfileActive");
 
+// "decoport" e' una modalita', non una configurazione: quando la radio remota
+// fa da CAT, cio' che va salvato resta il backend che l'utente ha scelto. Senza
+// questo, salvare un profilo mentre si usa una radio in rete riscriverebbe di
+// nascosto la sua impostazione in "hamlib".
 static QString normalizedCatBackendForSettings(QString value)
 {
     value = value.trimmed().toLower();
@@ -6048,6 +6053,18 @@ static inline bool catSignalMatchesBackend(QString const& activeBackend, QString
         || (active == QStringLiteral("tci") && signal == QStringLiteral("hamlib"));
 }
 
+// Quando la radio remota fa da CAT, i punti di comando qui sotto devono mandare
+// i comandi a lei invece che a un manager locale che non e' connesso. Sono
+// funzioni libere di file, chiamate da decine di posti: passare il collegamento
+// a ognuna vorrebbe dire toccarle tutte. Il bridge e' uno solo, e questo
+// puntatore vive quanto la modalita' che lo accende.
+static DecoPortLink* g_decoPortCatLink = nullptr;
+
+static inline bool decoPortIsCat(const QString& backend)
+{
+    return backend == QLatin1String("decoport");
+}
+
 static inline DecodiumCat4OmManager* activeCat4OmManager(
     DecodiumCatManager* native, DecodiumCat4OmManager* explicitManager = nullptr)
 {
@@ -6062,6 +6079,10 @@ static inline bool activeCatCanPtt(DecodiumCatManager* n, DecodiumTransceiverMan
                                    DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
                                    DecodiumCat4OmManager* c = nullptr)
 {
+    // Il PTT la radio remota lo sa alzare: c'e' un comando apposta nel
+    // protocollo, e non serve ne' VOX ne' una linea seriale.
+    if (decoPortIsCat(b))
+        return g_decoPortCatLink && g_decoPortCatLink->isLinked();
     c = activeCat4OmManager(n, c);
     auto const isVox = [](QString const& method) {
         return method.trimmed().compare(QStringLiteral("VOX"), Qt::CaseInsensitive) == 0;
@@ -6081,6 +6102,9 @@ static inline bool activeCatUsesVoxPtt(DecodiumCatManager* n, DecodiumTransceive
                                        DecodiumOmniRigManager* o = nullptr,
                                        DecodiumCat4OmManager* c = nullptr)
 {
+    // Mai VOX verso la radio remota: il PTT si dice, non si fa indovinare.
+    if (decoPortIsCat(b))
+        return false;
     c = activeCat4OmManager(n, c);
     auto const isVox = [](QString const& method) {
         return method.trimmed().compare(QStringLiteral("VOX"), Qt::CaseInsensitive) == 0;
@@ -6095,6 +6119,10 @@ static inline void activeCatSetPtt(DecodiumCatManager* n, DecodiumTransceiverMan
                                    DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
                                    DecodiumCat4OmManager* c = nullptr)
 {
+    if (decoPortIsCat(b)) {
+        if (g_decoPortCatLink) g_decoPortCatLink->setPtt(on, 0);
+        return;
+    }
     c = activeCat4OmManager(n, c);
     if (useLegacyRigControlFallback(legacy, b)) {
         legacy->setRigPtt(on);
@@ -6111,6 +6139,10 @@ static inline void activeCatSetTxPtt(DecodiumCatManager* n, DecodiumTransceiverM
                                      DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
                                      DecodiumCat4OmManager* c = nullptr)
 {
+    if (decoPortIsCat(b)) {
+        activeCatSetPtt(n, h, b, on, o, legacy, c);
+        return;
+    }
     c = activeCat4OmManager(n, c);
     if (b == QStringLiteral("cat4om") && c && !useLegacyRigControlFallback(legacy, b)) {
         c->setRigTxFrequencyAndPttAsync(txDialHz, on);
@@ -6135,6 +6167,10 @@ static inline bool activeCatSetTxPttAsync(DecodiumCatManager* n, DecodiumTransce
                                           DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
                                           DecodiumCat4OmManager* c = nullptr)
 {
+    if (decoPortIsCat(b)) {
+        activeCatSetPtt(n, h, b, on, o, legacy, c);
+        return false;   // niente asincrono: il comando e' gia' partito
+    }
     c = activeCat4OmManager(n, c);
     if (b == QStringLiteral("cat4om") && c && !useLegacyRigControlFallback(legacy, b)) {
         c->setRigTxFrequencyAndPttAsync(txDialHz, on);
@@ -6195,6 +6231,10 @@ static inline void activeCatSetFreq(DecodiumCatManager* n, DecodiumTransceiverMa
                                     DecodiumOmniRigManager* o = nullptr, DecodiumLegacyBackend* legacy = nullptr,
                                     DecodiumCat4OmManager* c = nullptr)
 {
+    if (decoPortIsCat(b)) {
+        if (g_decoPortCatLink && hz > 0.0) g_decoPortCatLink->tune(hz);
+        return;
+    }
     c = activeCat4OmManager(n, c);
     if (useLegacyRigControlFallback(legacy, b)) {
         legacy->setDialFrequency(hz);
@@ -6210,6 +6250,10 @@ static inline void activeCatSetTxFreq(DecodiumCatManager* n, DecodiumTransceiver
                                       DecodiumOmniRigManager* o = nullptr,
                                       DecodiumCat4OmManager* c = nullptr)
 {
+    // Niente split verso la radio remota: DecoPort ha una frequenza sola, e
+    // fingere di averne due vorrebbe dire spostare quella di ricezione.
+    if (decoPortIsCat(b))
+        return;
     c = activeCat4OmManager(n, c);
     if (b=="native") n->setRigTxFrequency(hz);
     else if (b=="cat4om") { if (c) c->setRigTxFrequency(hz); }
@@ -19646,18 +19690,45 @@ QObject* DecodiumBridge::decoPortGatewayObject() const
         auto* self = const_cast<DecodiumBridge*>(this);
         m_decoPortGateway = new DecodiumDecoPortGateway(self);
         DecodiumDecoPortGateway::RigHooks hooks;
-        hooks.connected      = [self]() { return self->catConnected(); };
-        hooks.frequencyHz    = [self]() { return self->frequency(); };
-        hooks.modeName       = [self]() { return self->catMode(); };
-        hooks.pttActive      = [self]() { return self->transmitting(); };
-        hooks.setFrequencyHz = [self](double hz) { self->setFrequency(hz); };
-        hooks.setModeName    = [self](const QString& m) { self->setMode(m); };
+        // I ganci guardano prima al driver: se il gateway e' riuscito ad aprire
+        // la radio per conto suo, quella e' la verita' — la frequenza viene dal
+        // bus, non da quello che l'applicazione crede. Solo se non ce l'ha
+        // fatta si torna a chiedere all'applicazione.
+        auto rigOpen = [self]() -> DecoPortRigDriver* {
+            return (self->m_decoPortRig && self->m_decoPortRig->isOpen())
+                       ? self->m_decoPortRig : nullptr;
+        };
+        hooks.connected      = [self, rigOpen]() {
+            return rigOpen() != nullptr || self->catConnected();
+        };
+        hooks.frequencyHz    = [self, rigOpen]() {
+            if (auto* r = rigOpen()) return r->frequencyHz();
+            return self->frequency();
+        };
+        hooks.modeName       = [self, rigOpen]() {
+            if (auto* r = rigOpen()) return r->modeName();
+            return self->catMode();
+        };
+        hooks.pttActive      = [self, rigOpen]() {
+            if (auto* r = rigOpen()) return r->ptt();
+            return self->transmitting();
+        };
+        hooks.setFrequencyHz = [self, rigOpen](double hz) {
+            if (auto* r = rigOpen()) { r->setFrequencyHz(hz); return; }
+            self->setFrequency(hz);
+        };
+        hooks.setModeName    = [self, rigOpen](const QString& m) {
+            if (auto* r = rigOpen()) { r->setModeName(m); return; }
+            self->setMode(m);
+        };
         // Il PTT ora c'e', ma solo se questa stazione puo' davvero trasmettere:
         // serve il CAT per alzarlo e una radio che non stia gia' trasmettendo
         // per conto suo. Quando manca, il gateway dichiara StateCanTransmit=0 e
         // i client lo vedono invece di provarci e basta.
-        hooks.canTransmit    = [self]() {
-            return self->catConnected() && !self->m_transmitting && !self->m_tuning;
+        hooks.canTransmit    = [self, rigOpen]() {
+            if (self->m_transmitting || self->m_tuning)
+                return false;
+            return rigOpen() != nullptr || self->catConnected();
         };
         hooks.setPtt         = [self](bool on) { self->decoPortKeyLocalRig(on); };
         m_decoPortGateway->setRigHooks(std::move(hooks));
@@ -19695,11 +19766,104 @@ QObject* DecodiumBridge::decoPortLinkObject() const
     return m_decoPortLink;
 }
 
+QString DecodiumBridge::catBackendForPersistence() const
+{
+    return (m_catBackend == QLatin1String("decoport") && !m_catBackendBeforeDecoPort.isEmpty())
+               ? m_catBackendBeforeDecoPort
+               : m_catBackend;
+}
+
+// Aprire la radio da soli e' quello che rende DecoPort indipendente dal CAT
+// dell'applicazione. Il modello non lo si chiede a nessuno: l'identita' USB dice
+// che radio e', e il catalogo che Hamlib espone a runtime dice come si parla.
+//
+// L'unico caso in cui non si apre e' quando la porta e' gia' in mano al CAT di
+// questa applicazione: due programmi sulla stessa seriale non sono due
+// programmi sulla stessa seriale, sono nessuno dei due. Li' si continua a
+// passare dai ganci, che e' come funzionava prima.
+void DecodiumBridge::decoPortEnsureRigDriver()
+{
+    if (m_decoPortRig && m_decoPortRig->isOpen())
+        return;
+
+    QVariantList const candidates = DecodiumRigDetector::detect();
+    if (candidates.isEmpty()) {
+        bridgeLog(QStringLiteral("DecoPort rig driver: nothing detected"));
+        return;
+    }
+
+    QVariantMap const best = candidates.first().toMap();
+    QString const port  = best.value(QStringLiteral("catPort")).toString().trimmed();
+    QString const label = best.value(QStringLiteral("rigLabel")).toString();
+    QString const token = best.value(QStringLiteral("rigToken")).toString();
+    int const baud      = best.value(QStringLiteral("baudRate")).toInt();
+    int const civ       = best.value(QStringLiteral("civAddress")).toInt();
+
+    if (port.isEmpty()) {
+        bridgeLog(QStringLiteral("DecoPort rig driver: no CAT port for [%1]").arg(label));
+        return;
+    }
+
+    // Il modello si risolve sempre, anche quando poi non si aprira' niente:
+    // sapere che radio DecoPort ha riconosciuto e' meta' della diagnosi, e
+    // cercarla nel catalogo non tocca il bus.
+    QString matched;
+    int const model = DecoPortRigDriver::resolveModel(label, token, &matched);
+    if (model == 0) {
+        bridgeLog(QStringLiteral("DecoPort rig driver: no Hamlib model matches [%1] token=[%2]")
+                      .arg(label, token));
+    } else {
+        bridgeLog(QStringLiteral("DecoPort rig driver: [%1] resolved to Hamlib model %2 (%3)")
+                      .arg(label).arg(model).arg(matched));
+    }
+
+    QString const wanted = port.toUpper();
+    bool const clash =
+        (m_hamlibCat && (wanted == m_hamlibCat->serialPort().trimmed().toUpper()
+                         || wanted == m_hamlibCat->pttPort().trimmed().toUpper()))
+        || (m_nativeCat && wanted == m_nativeCat->serialPort().trimmed().toUpper());
+    if (clash) {
+        bridgeLog(QStringLiteral("DecoPort rig driver: %1 is already the application's CAT port; "
+                                 "staying on the application hooks").arg(port));
+        return;
+    }
+
+    if (model == 0)
+        return;
+
+    if (!m_decoPortRig) {
+        m_decoPortRig = new DecoPortRigDriver(this);
+        connect(m_decoPortRig, &DecoPortRigDriver::opened, this, [this](const QString& name) {
+            bridgeLog(QStringLiteral("DecoPort rig driver: %1 open, talking to the radio directly")
+                          .arg(name));
+        });
+        connect(m_decoPortRig, &DecoPortRigDriver::failed, this, [this](const QString& why) {
+            bridgeLog(QStringLiteral("DecoPort rig driver: %1").arg(why));
+        });
+    }
+    bridgeLog(QStringLiteral("DecoPort rig driver: opening %1 at %2 baud as Hamlib model %3 (%4)")
+                  .arg(port).arg(baud).arg(model).arg(matched));
+    m_decoPortRig->open(port, baud, civ, model);
+}
+
+QVariantMap DecodiumBridge::decoPortRigDriverState() const
+{
+    QVariantMap out;
+    bool const open = m_decoPortRig && m_decoPortRig->isOpen();
+    out.insert(QStringLiteral("open"), open);
+    out.insert(QStringLiteral("rigName"), open ? m_decoPortRig->rigName() : QString());
+    out.insert(QStringLiteral("frequencyHz"), open ? m_decoPortRig->frequencyHz() : 0.0);
+    out.insert(QStringLiteral("modeName"), open ? m_decoPortRig->modeName() : QString());
+    out.insert(QStringLiteral("error"), m_decoPortRig ? m_decoPortRig->lastError() : QString());
+    return out;
+}
+
 bool DecodiumBridge::startDecoPortGateway(int port)
 {
     auto* gw = qobject_cast<DecodiumDecoPortGateway*>(decoPortGatewayObject());
     if (!gw)
         return false;
+    decoPortEnsureRigDriver();
     bool const ok = gw->start(port);
     bridgeLog(QStringLiteral("DecoPort gateway start on %1: %2")
                   .arg(port).arg(ok ? QStringLiteral("ok") : gw->status()));
@@ -19967,7 +20131,8 @@ void DecodiumBridge::decoPortStopTx(const QString& reason)
 // rinnova: quando l'audio smette, entro tre secondi il PTT scende da solo.
 void DecodiumBridge::decoPortKeyLocalRig(bool on)
 {
-    if (on && (!m_catConnected || m_transmitting || m_tuning)) {
+    bool const haveOwnRig = m_decoPortRig && m_decoPortRig->isOpen();
+    if (on && ((!m_catConnected && !haveOwnRig) || m_transmitting || m_tuning)) {
         bridgeLog(QStringLiteral("DecoPort remote PTT refused: cat=%1 tx=%2 tune=%3")
                       .arg(m_catConnected ? 1 : 0).arg(m_transmitting ? 1 : 0)
                       .arg(m_tuning ? 1 : 0));
@@ -19989,8 +20154,11 @@ void DecodiumBridge::decoPortKeyLocalRig(bool on)
     }
 
     m_decoPortRemoteKeyed = on;
-    activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, on,
-                    m_omniRigCat, m_legacyBackend);
+    if (m_decoPortRig && m_decoPortRig->isOpen())
+        m_decoPortRig->setPtt(on);
+    else
+        activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, on,
+                        m_omniRigCat, m_legacyBackend);
     if (on)
         m_decoPortTxGuard->start();
     else
@@ -20099,6 +20267,24 @@ void DecodiumBridge::onDecoPortRemoteState()
     if (!link || !link->isLinked())
         return;
 
+    // Lo stato del CAT dell'applicazione e' quello della radio remota: se cade
+    // il collegamento, si vede subito dove si guarda sempre.
+    bool const linkedNow = link->isLinked();
+    if (m_catConnected != linkedNow) {
+        m_catConnected = linkedNow;
+        emit catConnectedChanged();
+    }
+    QString const remoteMode = link->modeName();
+    if (!remoteMode.isEmpty() && m_catMode != remoteMode) {
+        m_catMode = remoteMode;
+        emit catModeChanged();
+    }
+    QString const remoteName = link->rigLabel();
+    if (!remoteName.isEmpty() && m_catRigName != remoteName) {
+        m_catRigName = remoteName;
+        emit catRigNameChanged();
+    }
+
     double const f = link->frequencyHz();
     if (f <= 0.0 || std::abs(f - m_frequency) <= 1.0)
         return;
@@ -20135,6 +20321,24 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
         connect(link, &DecoPortLink::stateChanged,
                 this, &DecodiumBridge::onDecoPortRemoteState,
                 static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        // Da qui in avanti la radio dell'applicazione e' quella remota, a tutti
+        // gli effetti: non una frequenza copiata in una casella, ma il backend
+        // CAT da cui passano frequenza, modo e PTT. Il backend precedente si
+        // mette da parte e non si tocca il file delle impostazioni: quando si
+        // smette, si torna esattamente com'era.
+        m_catBackendBeforeDecoPort   = m_catBackend;
+        m_catConnectedBeforeDecoPort = m_catConnected;
+        m_catRigNameBeforeDecoPort   = m_catRigName;
+        m_catModeBeforeDecoPort      = m_catMode;
+        g_decoPortCatLink = link;
+        m_catBackend  = QStringLiteral("decoport");
+        m_catConnected = link->isLinked();
+        m_catRigName   = link->rigLabel();
+        m_catMode      = link->modeName();
+        emit catBackendChanged();
+        emit catConnectedChanged();
+        emit catRigNameChanged();
+        emit catModeChanged();
         // Il sink e' il punto d'ingresso dell'audio remoto: che il monitor sia
         // acceso, spento o delegato al backend legacy, deve esistere.
         ensureAudioSink();
@@ -20160,6 +20364,18 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
         if (link) {
             disconnect(link, &DecoPortLink::rxAudio, this, &DecodiumBridge::onDecoPortRxAudio);
             disconnect(link, &DecoPortLink::stateChanged, this, &DecodiumBridge::onDecoPortRemoteState);
+        }
+        g_decoPortCatLink = nullptr;
+        if (!m_catBackendBeforeDecoPort.isEmpty()) {
+            m_catBackend   = m_catBackendBeforeDecoPort;
+            m_catConnected = m_catConnectedBeforeDecoPort;
+            m_catRigName   = m_catRigNameBeforeDecoPort;
+            m_catMode      = m_catModeBeforeDecoPort;
+            m_catBackendBeforeDecoPort.clear();
+            emit catBackendChanged();
+            emit catConnectedChanged();
+            emit catRigNameChanged();
+            emit catModeChanged();
         }
         bridgeLog(QStringLiteral("DecoPort remote source OFF: back to the local sound card"));
         setDecoPortMonitor(false);
@@ -27508,7 +27724,7 @@ bool DecodiumBridge::saveCatProfile(const QString& rawName)
 
     QSettings source(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
     decodium::beginActiveSettingsProfile(source);
-    source.setValue(QStringLiteral("catBackend"), normalizedCatBackendForSettings(m_catBackend));
+    source.setValue(QStringLiteral("catBackend"), normalizedCatBackendForSettings(catBackendForPersistence()));
 
     QVariantMap rootValues;
     for (QString const& key : catProfileSnapshotRootKeys()) {
@@ -27537,7 +27753,7 @@ bool DecodiumBridge::saveCatProfile(const QString& rawName)
     dest.beginGroup(key);
     dest.remove(QString());
     dest.setValue(QStringLiteral("name"), name);
-    dest.setValue(QStringLiteral("catBackend"), normalizedCatBackendForSettings(m_catBackend));
+    dest.setValue(QStringLiteral("catBackend"), normalizedCatBackendForSettings(catBackendForPersistence()));
     if (QObject const* cat = catManagerObj()) {
         dest.setValue(QStringLiteral("rigName"), cat->property("rigName").toString());
     }
@@ -27906,6 +28122,14 @@ void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
         if (m_nativeCat && m_nativeCat->connected()) {
             bridgeLog(QStringLiteral("CAT rig mode sync (%1): native -> %2").arg(reason, rigMode));
             m_nativeCat->setRigMode(rigMode);
+        }
+        return;
+    }
+
+    if (decoPortIsCat(m_catBackend)) {
+        if (g_decoPortCatLink && g_decoPortCatLink->isLinked()) {
+            bridgeLog(QStringLiteral("CAT rig mode sync (%1): decoport -> %2").arg(reason, rigMode));
+            g_decoPortCatLink->setModeName(rigMode);
         }
         return;
     }

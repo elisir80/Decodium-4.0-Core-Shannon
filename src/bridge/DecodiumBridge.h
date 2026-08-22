@@ -42,6 +42,7 @@ class DecodiumAlertManager;
 class DecodiumDecoPortGateway;
 class DecoPortDiscovery;
 class DecoPortLink;
+class DecoPortRigDriver;
 #include "DecodiumDxCluster.h"
 #include "DecodiumSpotShare.h"
 class DecodiumPskReporterLite;
@@ -827,6 +828,8 @@ public:
     QObject* decoPortDiscoveryObject() const;
     QObject* decoPortLinkObject() const;
     Q_INVOKABLE bool startDecoPortGateway(int port = 5559);
+    // Cosa il gateway e' riuscito ad aprire da solo, da mostrare nella finestra.
+    Q_INVOKABLE QVariantMap decoPortRigDriverState() const;
     Q_INVOKABLE void stopDecoPortGateway();
     // Un PC di stazione deve pubblicare la radio da solo all'avvio: la finestra
     // DecoPort serve a guardare, non a tenere acceso il servizio.
@@ -2743,6 +2746,9 @@ private:
     void onDecoPortRxAudio(const QVector<short>& samples, quint64 captureTsNs);
     void onDecoPortRemoteState();
     void decoPortKeyLocalRig(bool on);
+    void decoPortEnsureRigDriver();
+    QString catBackendForPersistence() const;
+    DecoPortRigDriver* m_decoPortRig {nullptr};
     bool decoPortSendTxWave(const QVector<float>& wave, double* durationSeconds);
     void decoPortStopTx(const QString& reason);
     void decoPortPumpTxFrames();
@@ -2757,6 +2763,10 @@ private:
     RtlSdrAudioOutput* m_decoPortTxOut {nullptr};
     int                m_decoPortTxOutRate {0};
     bool       m_decoPortApplyingRemote {false};
+    QString    m_catBackendBeforeDecoPort;
+    bool       m_catConnectedBeforeDecoPort {false};
+    QString    m_catRigNameBeforeDecoPort;
+    QString    m_catModeBeforeDecoPort;
     bool       m_decoPortMonitor {false};
     QThread*            m_decoPortMonitorThread {nullptr};
     RtlSdrAudioOutput*  m_decoPortMonitorOut {nullptr};
