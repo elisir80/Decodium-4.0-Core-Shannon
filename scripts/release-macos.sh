@@ -21,7 +21,6 @@ What it does:
   5) Re-signs the app bundle (ad-hoc by default)
   6) Creates versioned assets:
        decodium4-ft2-<version>-<asset-suffix>.dmg
-       decodium4-ft2-<version>-<asset-suffix>.zip
        decodium4-ft2-<version>-<asset-suffix>-sha256.txt
   7) Optionally creates/updates the GitHub release when --publish is used
 EOF
@@ -564,7 +563,6 @@ if [[ -z "$ASSET_SUFFIX" ]]; then
 fi
 
 DMG_OUT="${PREFIX}-${VERSION}-${ASSET_SUFFIX}.dmg"
-ZIP_OUT="${PREFIX}-${VERSION}-${ASSET_SUFFIX}.zip"
 SHA_OUT="${PREFIX}-${VERSION}-${ASSET_SUFFIX}-sha256.txt"
 
 echo "[6/7] Re-signing app bundle..."
@@ -573,13 +571,12 @@ sign_app_bundle "${STAGED_APP_ABS}" "${CODESIGN_IDENTITY}"
 echo "[7/7] Creating release assets..."
 create_dmg_from_staged_root "${STAGED_ROOT_ABS}" "${BUILD_DIR}/${DMG_OUT}" "${APP_VOLUME_NAME}"
 (
-  /usr/bin/ditto -c -k --sequesterRsrc --keepParent "${STAGED_APP_ABS}" "${BUILD_DIR}/${ZIP_OUT}"
   cd "$BUILD_DIR"
-  shasum -a 256 "$DMG_OUT" "$ZIP_OUT" > "$SHA_OUT"
+  shasum -a 256 "$DMG_OUT" > "$SHA_OUT"
 )
 
 echo "Assets ready:"
-ls -lh "${BUILD_DIR}/${DMG_OUT}" "${BUILD_DIR}/${ZIP_OUT}" "${BUILD_DIR}/${SHA_OUT}"
+ls -lh "${BUILD_DIR}/${DMG_OUT}" "${BUILD_DIR}/${SHA_OUT}"
 echo
 cat "${BUILD_DIR}/${SHA_OUT}"
 
@@ -603,7 +600,6 @@ See \`CHANGELOG.md\` for full details.
 
 Assets:
 - \`${DMG_OUT}\`
-- \`${ZIP_OUT}\`
 - \`${SHA_OUT}\`
 
 ## Italiano
@@ -616,7 +612,6 @@ Per i dettagli completi, vedi \`CHANGELOG.md\`.
 
 Asset:
 - \`${DMG_OUT}\`
-- \`${ZIP_OUT}\`
 - \`${SHA_OUT}\`
 
 ## Espanol
@@ -629,7 +624,6 @@ Para todos los detalles, ver \`CHANGELOG.md\`.
 
 Artefactos:
 - \`${DMG_OUT}\`
-- \`${ZIP_OUT}\`
 - \`${SHA_OUT}\`
 EOF
 
@@ -637,7 +631,6 @@ EOF
   if gh release view "$VERSION" --repo "$REPO" >/dev/null 2>&1; then
     gh release upload "$VERSION" \
       "${BUILD_DIR}/${DMG_OUT}" \
-      "${BUILD_DIR}/${ZIP_OUT}" \
       "${BUILD_DIR}/${SHA_OUT}" \
       --repo "$REPO" \
       --clobber
@@ -645,7 +638,6 @@ EOF
   else
     gh release create "$VERSION" \
       "${BUILD_DIR}/${DMG_OUT}" \
-      "${BUILD_DIR}/${ZIP_OUT}" \
       "${BUILD_DIR}/${SHA_OUT}" \
       --repo "$REPO" \
       --title "Decodium 4 FT2 ${VERSION} (macOS)" \

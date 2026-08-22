@@ -327,7 +327,6 @@ jobs:
           if-no-files-found: error
           path: |
             build/decodium4-ft2-${{ env.VERSION }}-${{ matrix.asset_suffix }}.dmg
-            build/decodium4-ft2-${{ env.VERSION }}-${{ matrix.asset_suffix }}.zip
             build/decodium4-ft2-${{ env.VERSION }}-${{ matrix.asset_suffix }}-sha256.txt
 
   publish:
@@ -364,13 +363,10 @@ jobs:
           ls -lh release-assets
           VERSION="${{ steps.version.outputs.version }}"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.dmg"
-          test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.zip"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64-sha256.txt"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.dmg"
-          test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.zip"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64-sha256.txt"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.dmg"
-          test -f "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.zip"
           test -f "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64-sha256.txt"
 
       - name: Publish release
@@ -393,13 +389,10 @@ jobs:
 
           ASSETS=(
             "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.dmg"
-            "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64.zip"
             "release-assets/decodium4-ft2-${VERSION}-macos-ventura-x86_64-sha256.txt"
             "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.dmg"
-            "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64.zip"
             "release-assets/decodium4-ft2-${VERSION}-macos-sonoma-x86_64-sha256.txt"
             "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.dmg"
-            "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64.zip"
             "release-assets/decodium4-ft2-${VERSION}-macos-sequoia-x86_64-sha256.txt"
           )
 
