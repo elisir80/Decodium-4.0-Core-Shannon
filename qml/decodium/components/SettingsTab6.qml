@@ -8,20 +8,13 @@ SettingsPageScroll {
     id: root
     property var dialog
     readonly property var bridge: dialog ? dialog.appBridge : null
-    readonly property bool compactSettingsLayout: dialog ? dialog.compactSettingsLayout : false
-    readonly property bool narrowSettingsLayout: dialog ? dialog.narrowSettingsLayout : false
-    // Issue #66: the dialog width also includes the sidebar.  On Linux/KDE a
-    // wide dialog could therefore still leave a narrow Reporting viewport,
-    // while this page selected four columns and placed the second pair of
-    // controls beyond the visible area.  Decide from this page's actual
-    // viewport and use four columns only when the complete grid fits.
-    readonly property int fourColumnMinimumWidth: dialog
-                                                   ? dialog.settingsPageMinimumContentWidth(4)
-                                                   : 1156
-    readonly property int pageColumns: compactSettingsLayout
-                                      || width <= 0
-                                      || width < fourColumnMinimumWidth
-                                    ? 2 : 4
+    // Issue #66: Reporting must stay a label/control grid.  A four-column
+    // layout can be measured against the outer Settings dialog instead of
+    // this tab's actual viewport on KDE/XCB, leaving every second control
+    // outside the clip region.  This page is deliberately two columns at all
+    // sizes: it trades a little vertical space for reliable access to every
+    // setting on fixed-size dialogs and every Qt platform plugin.
+    readonly property int pageColumns: 2
     readonly property int labelWidth: dialog ? dialog.labelWidth : 120
     readonly property int fieldMinWidth: dialog ? dialog.fieldMinWidth : 180
     readonly property int wideFieldMinWidth: dialog ? dialog.wideFieldMinWidth : 260
