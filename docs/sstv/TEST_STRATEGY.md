@@ -51,26 +51,31 @@ and DSP tests link `decodium_sstv_core`; Qt integration tests link only the
 smallest relevant integration target. Every SSTV target explicitly requests
 C++17 because `tests/CMakeLists.txt` currently defaults to C++11.
 
-The native foundation runs on 2026-08-24 added and passed ten labelled CTest
+The native foundation runs on 2026-08-24 added and passed twelve labelled CTest
 targets:
 
 ```text
 ctest --test-dir build -L sstv --output-on-failure
-10/10 passed: mode registry, timing accumulator, VIS codec, FSK ID codec,
+12/12 passed: mode registry, timing accumulator, VIS codec, FSK ID codec,
 resampler, audio/replay buffers, tone generator/TX pull stream, RX state
-machine, tone detector and progressive image/colour core
+machine, tone detector, progressive image/colour core, RX preprocessing/
+frequency demodulation/signal metrics and streaming PCM16 WAV output
 ```
 
 The second tranche also passed 33 resampler/buffer QtTest cases and 10 tone/TX
 stream cases in standalone sanitizer runs (ASan/UBSan, plus TSan for the audio
 buffer). The RX state machine/tone detector add 34 QtTest cases, while the
 progressive image/colour core adds 14; their standalone ASan/UBSan runs and
-strict-warning builds also passed. The in-tree CTest execution passed every
+strict-warning builds also passed. The RX frontend adds 19 QtTest cases and the
+WAV stream writer adds 11; both also passed standalone strict-warning and
+ASan/UBSan runs. The in-tree CTest execution passed every
 registered SSTV executable. These
 remain protocol/DSP unit results: they prove bounded chunk-independent sample
 rate conversion, queue/replay policy, fractional duration scheduling and
 phase-continuous pull generation, deterministic acquisition state transitions,
-discrete-tone classification and bounded progressive frame assembly. They do
+discrete-tone classification, bounded progressive frame assembly, conditioned
+12 kHz acquisition, bounded frequency demodulation/metrics and a seekable
+streaming RIFF writer. They do
 not prove a complete analog mode encoder/decoder, live sound hardware, CAT/PTT
 sequencing or independent application interoperability.
 

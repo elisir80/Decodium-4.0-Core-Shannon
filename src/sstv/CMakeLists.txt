@@ -4,7 +4,10 @@ set (DECODIUM_SSTV_CORE_SOURCES
   core/SstvModeSpec.cpp
   core/SstvTimingAccumulator.cpp
   core/SstvVisCodec.cpp
+  dsp/SstvFrequencyDemodulator.cpp
+  dsp/SstvPreprocessor.cpp
   dsp/SstvResampler.cpp
+  dsp/SstvSignalMetrics.cpp
   dsp/SstvToneDetector.cpp
   image/SstvColourConverter.cpp
   image/SstvImageFrame.cpp
@@ -13,6 +16,7 @@ set (DECODIUM_SSTV_CORE_SOURCES
   rx/SstvRxStateMachine.cpp
   tx/SstvToneGenerator.cpp
   tx/SstvTxStream.cpp
+  tx/SstvWavStreamWriter.cpp
   )
 
 set (DECODIUM_SSTV_CORE_HEADERS
@@ -22,7 +26,10 @@ set (DECODIUM_SSTV_CORE_HEADERS
   core/SstvTimingAccumulator.h
   core/SstvTypes.h
   core/SstvVisCodec.h
+  dsp/SstvFrequencyDemodulator.h
+  dsp/SstvPreprocessor.h
   dsp/SstvResampler.h
+  dsp/SstvSignalMetrics.h
   dsp/SstvToneDetector.h
   image/SstvColourConverter.h
   image/SstvImageFrame.h
@@ -31,6 +38,7 @@ set (DECODIUM_SSTV_CORE_HEADERS
   rx/SstvRxStateMachine.h
   tx/SstvToneGenerator.h
   tx/SstvTxStream.h
+  tx/SstvWavStreamWriter.h
   )
 
 find_package (Threads REQUIRED)
