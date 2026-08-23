@@ -99,8 +99,12 @@ english.DecoPortPageText=DecoPort can publish this radio on the network, so that
 italian.DecoPortPageText=DecoPort puo' pubblicare questa radio sulla rete, in modo che un altro computer possa ascoltarla e sintonizzarla. Chiunque conosca questa password puo' farlo: scegline una e usa la stessa sull'altro computer.%n%nNon viene salvata come la scrivi: Decodium la trasforma in una chiave e la butta.%n%nLasciala vuota se non vuoi pubblicare la radio. Senza password il gateway si rifiuta di partire.
 english.DecoPortPasswordLabel=DecoPort password (leave empty to not publish):
 italian.DecoPortPasswordLabel=Password DecoPort (vuota per non pubblicare):
+english.DecoPortPasswordConfirmLabel=Repeat the password:
+italian.DecoPortPasswordConfirmLabel=Ripeti la password:
 english.DecoPortPasswordShort=The password is too short: use at least 8 characters, or leave it empty not to publish the radio.
 italian.DecoPortPasswordShort=La password e' troppo corta: usane almeno 8 caratteri, oppure lasciala vuota per non pubblicare la radio.
+english.DecoPortPasswordMismatch=The two passwords do not match. Retype them: the password is not shown as you type, so a typo would leave the radio unreachable.
+italian.DecoPortPasswordMismatch=Le due password non coincidono. Riscrivile: la password non si vede mentre la digiti, quindi un errore di battitura renderebbe la radio irraggiungibile.
 
 ; 1.0.430 — messaggi del riavvio post-installazione, tradotti in tutte le lingue
 ; dell'app. RebootPrompt = avviso/domanda (MsgBox); RebootCountdown = testo mostrato
@@ -445,11 +449,14 @@ begin
   end;
 end;
 
-{ 1.0.571 - DecoPort mette la radio in rete, quindi la password si chiede QUI,
-  una volta sola. Non viene salvata come l'hai scritta: al primo avvio Decodium
-  ne ricava una chiave (PBKDF2-SHA256) e cancella la parola dal file. Lasciarla
-  vuota e' legittimo e vuol dire "non pubblicare la radio": senza chiave il
-  gateway si rifiuta di partire. }
+{ 1.0.571 - DecoPort mette la radio in rete, quindi la password si chiede QUI.
+  Non viene salvata come l'hai scritta: al primo avvio Decodium ne ricava una
+  chiave (PBKDF2-SHA256) e cancella la parola dal file. Lasciarla vuota e'
+  legittimo e vuol dire "non pubblicare la radio": senza chiave il gateway si
+  rifiuta di partire.
+  1.0.583 - i campi sono DUE, password e conferma: quello che si scrive qui non
+  si rilegge piu' da nessuna parte (diventa una chiave), quindi un refuso non
+  scoperto significa un gateway che non parte o un altro PC che non entra. }
 procedure InitializeWizard;
 begin
   DecoPortPage := CreateInputQueryPage(wpSelectTasks,
@@ -457,6 +464,7 @@ begin
     ExpandConstant('{cm:DecoPortPageSubtitle}'),
     ExpandConstant('{cm:DecoPortPageText}'));
   DecoPortPage.Add(ExpandConstant('{cm:DecoPortPasswordLabel}'), True);
+  DecoPortPage.Add(ExpandConstant('{cm:DecoPortPasswordConfirmLabel}'), True);
 end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
@@ -469,6 +477,13 @@ begin
     if (Length(DecoPortPage.Values[0]) > 0) and (Length(DecoPortPage.Values[0]) < 8) then
     begin
       MsgBox(ExpandConstant('{cm:DecoPortPasswordShort}'), mbError, MB_OK);
+      Result := False;
+    end
+    else if DecoPortPage.Values[0] <> DecoPortPage.Values[1] then
+    begin
+      { Anche il caso "prima vuota, conferma piena" finisce qui: e' comunque un
+        errore dell'utente, non una rinuncia a pubblicare la radio. }
+      MsgBox(ExpandConstant('{cm:DecoPortPasswordMismatch}'), mbError, MB_OK);
       Result := False;
     end;
   end;
