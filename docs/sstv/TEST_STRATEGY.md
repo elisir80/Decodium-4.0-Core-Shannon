@@ -51,6 +51,18 @@ and DSP tests link `decodium_sstv_core`; Qt integration tests link only the
 smallest relevant integration target. Every SSTV target explicitly requests
 C++17 because `tests/CMakeLists.txt` currently defaults to C++11.
 
+The first native foundation run on 2026-08-24 added and passed four labelled
+CTest targets:
+
+```text
+ctest --test-dir build -L sstv --output-on-failure
+4/4 passed: mode registry, timing accumulator, VIS codec, FSK ID codec
+```
+
+These are protocol-unit results only. They do not prove audio-tone detection,
+an analog mode encoder/decoder, live sound hardware, CAT/PTT sequencing or
+independent application interoperability.
+
 Planned groups:
 
 - `test_sstv_mode_registry`: IDs, names, dimensions, VIS uniqueness/conflicts,

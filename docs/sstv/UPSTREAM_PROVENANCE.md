@@ -31,6 +31,14 @@ The ledger is a merge gate. A component absent from it may be a clean-room
 implementation based on public protocol behaviour, but it may not silently
 contain upstream expressions or tables.
 
+## Clean-room behaviour components
+
+| Decodium component | Audited behaviour sources | Current evidence and limit |
+|---|---|---|
+| `src/sstv/core/SstvVisCodec.*` | QSSTV `8c27d6d`, SlowRX `a50a4e2c`, libsstv `193157a9`, pySSTV `d998fad1`, the MMSSTV manual and SSTV Handbook | Original C++17 symbol/framing codec. Standard VIS and MMSSTV wide extended-VIS deterministic tests pass; the DSP tone classifier and mode mapping are separate, and narrow N-VIS is not implemented by this codec. |
+| `src/sstv/core/SstvFskIdCodec.*` | QSSTV `8c27d6d`, SlowRX `a50a4e2c`; pySSTV `d998fad1` used only to expose its incomplete framing | Original C++17 bit/symbol codec and tone plan. Tests cover framing, sanitisation, raw diagnostics and checksum failures. Checksum and complete tone envelope still have only one audited implementation lineage, so this is not independent on-air interoperability proof. |
+| `src/sstv/core/SstvModeRegistry.*` and `SstvTimingAccumulator.*` | Mission catalogue, this audit and public protocol units | Original validation/fixed-point infrastructure. The canonical registry intentionally contains identities and blockers only; it claims no mode RX/TX support and invents no unresolved timing or VIS values. |
+
 ## Functional coverage observed upstream
 
 - QSSTV/QT6SSTV contain RX and TX paths for M1/M2, S1/S2/DX,
@@ -58,8 +66,9 @@ supports the mode or that upstream interoperability was executed.
 ## Conflicts that require independent resolution
 
 1. QSSTV assigns extended VIS `0x4A23` to both MR140 and MR175; QT6SSTV repeats
-   the collision. Neither value may enter a verified registry without another
-   specification or waveform.
+   the collision. The SSTV Handbook table instead lists MR175 as `0x4C23`.
+   That identifies the likely table correction, but no independent waveform
+   has yet been executed, so neither mapping may enter a verified mode registry.
 2. QSSTV/libsstv often store parity-inclusive eight-bit VIS values while
    SlowRX/Robot36/pySSTV store the seven-bit payload. The Decodium schema must
    separate payload, parity and extended encoding before comparing values.

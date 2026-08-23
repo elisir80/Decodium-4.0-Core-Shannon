@@ -53,8 +53,8 @@ once a row has validated data; they are omitted here rather than guessed.
 | MR73 | MMSSTV extended/analog | — | — | — | none | Independent extended-VIS vector. |
 | MR90 | MMSSTV extended/analog | — | — | — | none | Independent extended-VIS vector. |
 | MR115 | MMSSTV extended/analog | — | — | — | none | Independent extended-VIS vector. |
-| MR140 | MMSSTV extended/analog | blocked | blocked | blocked | none | QSSTV extended VIS collides with MR175. |
-| MR175 | MMSSTV extended/analog | blocked | blocked | blocked | none | QSSTV extended VIS collides with MR140. |
+| MR140 | MMSSTV extended/analog | blocked | blocked | blocked | none | QSSTV extended VIS collides with its MR175 row; independent waveform required. |
+| MR175 | MMSSTV extended/analog | blocked | blocked | blocked | none | QSSTV `0x4A23` conflicts with Handbook `0x4C23`; independent waveform required. |
 | ML180 | MMSSTV extended/analog | — | — | — | none | Independent extended-VIS vector. |
 | ML240 | MMSSTV extended/analog | — | — | — | none | Independent extended-VIS vector. |
 | ML280 | MMSSTV extended/analog | — | — | — | none | Independent extended-VIS vector. |
@@ -73,9 +73,9 @@ once a row has validated data; they are omitted here rather than guessed.
 
 | Capability | RX | TX | Evidence | Status |
 |---|---:|---:|---|---|
-| Six-bit identifier framing | — | — | QSSTV behaviour only | Unimplemented; independent vector needed. |
-| Raw symbols/confidence/checksum diagnostics | — | n/a | none | Unimplemented. |
-| Sanitised callsign/custom text | n/a | — | none | Unimplemented. |
+| Six-bit identifier framing | — | — | `test_sstv_fskid`; QSSTV/SlowRX behaviour audit | Native symbol codec implemented and tested; detector, radio TX integration and independent waveform remain pending. |
+| Raw symbols/confidence/checksum diagnostics | — | n/a | `test_sstv_fskid` | Native codec diagnostics implemented; checksum has only one complete audited producer lineage. |
+| Sanitised callsign/custom text | n/a | — | `test_sstv_fskid` | Native validation/tone plan implemented; no on-air TX support claim until the streaming TX coordinator is proven. |
 
 ## Digital compatibility
 

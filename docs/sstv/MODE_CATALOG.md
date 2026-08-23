@@ -62,8 +62,8 @@ are resolved. They will not be copied into independent hand-maintained tables.
 | `mr-73` | MR73 | analog | Q RX/TX | Extended VIS; independent vector/specification missing. |
 | `mr-90` | MR90 | analog | Q RX/TX | Extended VIS; independent vector/specification missing. |
 | `mr-115` | MR115 | analog | Q RX/TX | Extended VIS; independent vector/specification missing. |
-| `mr-140` | MR140 | analog | Q RX/TX | QSSTV extended VIS `0x4A23` collides with MR175. Blocked pending independent resolution. |
-| `mr-175` | MR175 | analog | Q RX/TX | QSSTV extended VIS `0x4A23` collides with MR140. Blocked pending independent resolution. |
+| `mr-140` | MR140 | analog | Q RX/TX | QSSTV extended VIS `0x4A23` collides with its MR175 row. Blocked pending independent waveform validation. |
+| `mr-175` | MR175 | analog | Q RX/TX | QSSTV says `0x4A23`; SSTV Handbook says `0x4C23`. Likely table correction recorded, but still blocked pending independent waveform validation. |
 | `ml-180` | ML180 | analog | Q RX/TX | Extended VIS; independent vector/specification missing. |
 | `ml-240` | ML240 | analog | Q RX/TX | Extended VIS; independent vector/specification missing. |
 | `ml-280` | ML280 | analog | Q RX/TX | Extended VIS; independent vector/specification missing. |

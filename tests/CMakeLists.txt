@@ -22,6 +22,10 @@ include_directories (
   ${DECODIUM_SOURCE_DIRS}
   )
 
+if (TARGET decodium_sstv_core)
+  add_subdirectory (sstv)
+endif ()
+
 add_executable (test_qt_helpers
   test_qt_helpers.cpp
   ../Detector/MSK144DecodeWorker.cpp

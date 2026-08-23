@@ -202,6 +202,8 @@ option (WSJT_RIG_NONE_CAN_SPLIT "Allow split operation with \"None\" as rig.")
 option (WSJT_TRACE_UDP "Debugging option that turns on UDP message protocol diagnostics.")
 option (WSJT_BUILD_UTILS "Build simulators and code demonstrators." OFF)
 option (WSJT_FOX_OTP "Enable Fox OTP Verification Messages." ON)
+option (DECODIUM_ENABLE_SSTV
+  "Build the native analog SSTV subsystem inside Decodium" ON)
 CMAKE_DEPENDENT_OPTION (WSJT_QDEBUG_IN_RELEASE "Leave Qt debugging statements in Release configuration." OFF
   "NOT is_debug_build" OFF)
 CMAKE_DEPENDENT_OPTION (WSJT_ENABLE_EXPERIMENTAL_FEATURES "Enable features not fully ready for public releases." ON
@@ -1027,18 +1029,22 @@ if (RIGCTLCOM_EXE)
   get_filename_component (RIGCTLCOM_EXE "${RIGCTLCOM_EXE}" REALPATH)
 endif ()
 
+set (_decodium_saved_required_includes "${CMAKE_REQUIRED_INCLUDES}")
+set (_decodium_saved_required_libraries "${CMAKE_REQUIRED_LIBRARIES}")
+set (_decodium_saved_extra_include_files "${CMAKE_EXTRA_INCLUDE_FILES}")
+list (APPEND CMAKE_REQUIRED_INCLUDES "${Hamlib_INCLUDE_DIR}")
+list (APPEND CMAKE_REQUIRED_LIBRARIES Hamlib::Hamlib)
+list (APPEND CMAKE_EXTRA_INCLUDE_FILES "hamlib/rig.h")
 check_type_size (CACHE_ALL HAMLIB_OLD_CACHING)
 check_symbol_exists (rig_set_cache_timeout_ms "hamlib/rig.h" HAVE_HAMLIB_CACHING)
 check_symbol_exists (rig_get_conf2 "hamlib/rig.h" HAVE_HAMLIB_GET_CONF2)
-set (_decodium_saved_required_includes "${CMAKE_REQUIRED_INCLUDES}")
-set (_decodium_saved_required_libraries "${CMAKE_REQUIRED_LIBRARIES}")
-list (APPEND CMAKE_REQUIRED_INCLUDES "${Hamlib_INCLUDE_DIR}")
-list (APPEND CMAKE_REQUIRED_LIBRARIES Hamlib::Hamlib)
 check_symbol_exists (rig_send_raw "hamlib/rig.h" HAVE_HAMLIB_SEND_RAW)
 set (CMAKE_REQUIRED_INCLUDES "${_decodium_saved_required_includes}")
 set (CMAKE_REQUIRED_LIBRARIES "${_decodium_saved_required_libraries}")
+set (CMAKE_EXTRA_INCLUDE_FILES "${_decodium_saved_extra_include_files}")
 unset (_decodium_saved_required_includes)
 unset (_decodium_saved_required_libraries)
+unset (_decodium_saved_extra_include_files)
 
 find_package (Usb REQUIRED)
 
@@ -1236,6 +1242,10 @@ set_target_properties (ft2link_core PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED ON
   )
+
+if (DECODIUM_ENABLE_SSTV)
+  add_subdirectory (src/sstv)
+endif ()
 
 if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/tests AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
   add_subdirectory (tests)
@@ -1761,6 +1771,12 @@ if (OPENMP_FOUND)
     endif ()
 endif ()
 target_link_libraries (wsjtx Qt6::SerialPort Qt6::Quick Qt6::Qml Qt6::QuickControls2 Qt6::Network Qt6::Sql Qt6::WebSockets Qt6::Concurrent wsjt_qtmm ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
+if (TARGET Decodium::SstvCore)
+  target_link_libraries (wsjtx Decodium::SstvCore)
+  target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_SSTV=1)
+else ()
+  target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_SSTV=0)
+endif ()
 if (APPLE)
   target_link_libraries (wsjtx Qt6::DBus "-framework AudioToolbox")
 endif ()
@@ -2044,6 +2060,12 @@ target_link_libraries (decodium_qml
   ${FFTW3_LIBRARIES}
   ${LIBM_LIBRARIES}
 )
+if (TARGET Decodium::SstvCore)
+  target_link_libraries (decodium_qml Decodium::SstvCore)
+  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=1)
+else ()
+  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=0)
+endif ()
 if (DECODIUM_HAS_RTLSDR)
   target_link_libraries (decodium_qml RtlSdr::RtlSdr)
 endif ()
