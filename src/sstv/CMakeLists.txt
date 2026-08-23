@@ -5,8 +5,12 @@ set (DECODIUM_SSTV_CORE_SOURCES
   core/SstvTimingAccumulator.cpp
   core/SstvVisCodec.cpp
   dsp/SstvResampler.cpp
+  dsp/SstvToneDetector.cpp
+  image/SstvColourConverter.cpp
+  image/SstvImageFrame.cpp
   rx/SstvAudioRingBuffer.cpp
   rx/SstvReplayBuffer.cpp
+  rx/SstvRxStateMachine.cpp
   tx/SstvToneGenerator.cpp
   tx/SstvTxStream.cpp
   )
@@ -19,8 +23,12 @@ set (DECODIUM_SSTV_CORE_HEADERS
   core/SstvTypes.h
   core/SstvVisCodec.h
   dsp/SstvResampler.h
+  dsp/SstvToneDetector.h
+  image/SstvColourConverter.h
+  image/SstvImageFrame.h
   rx/SstvAudioRingBuffer.h
   rx/SstvReplayBuffer.h
+  rx/SstvRxStateMachine.h
   tx/SstvToneGenerator.h
   tx/SstvTxStream.h
   )

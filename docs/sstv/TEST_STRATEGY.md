@@ -51,23 +51,28 @@ and DSP tests link `decodium_sstv_core`; Qt integration tests link only the
 smallest relevant integration target. Every SSTV target explicitly requests
 C++17 because `tests/CMakeLists.txt` currently defaults to C++11.
 
-The native foundation runs on 2026-08-24 added and passed seven labelled CTest
+The native foundation runs on 2026-08-24 added and passed ten labelled CTest
 targets:
 
 ```text
 ctest --test-dir build -L sstv --output-on-failure
-7/7 passed: mode registry, timing accumulator, VIS codec, FSK ID codec,
-resampler, audio/replay buffers, tone generator/TX pull stream
+10/10 passed: mode registry, timing accumulator, VIS codec, FSK ID codec,
+resampler, audio/replay buffers, tone generator/TX pull stream, RX state
+machine, tone detector and progressive image/colour core
 ```
 
 The second tranche also passed 33 resampler/buffer QtTest cases and 10 tone/TX
 stream cases in standalone sanitizer runs (ASan/UBSan, plus TSan for the audio
-buffer). The in-tree CTest execution passed all three new executables. These
+buffer). The RX state machine/tone detector add 34 QtTest cases, while the
+progressive image/colour core adds 14; their standalone ASan/UBSan runs and
+strict-warning builds also passed. The in-tree CTest execution passed every
+registered SSTV executable. These
 remain protocol/DSP unit results: they prove bounded chunk-independent sample
 rate conversion, queue/replay policy, fractional duration scheduling and
-phase-continuous pull generation, but do not prove audio-tone detection, an
-analog mode encoder/decoder, live sound hardware, CAT/PTT sequencing or
-independent application interoperability.
+phase-continuous pull generation, deterministic acquisition state transitions,
+discrete-tone classification and bounded progressive frame assembly. They do
+not prove a complete analog mode encoder/decoder, live sound hardware, CAT/PTT
+sequencing or independent application interoperability.
 
 Planned groups:
 
