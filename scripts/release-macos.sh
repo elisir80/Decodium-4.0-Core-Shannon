@@ -224,6 +224,10 @@ verify_app_identity() {
       return 1
     fi
   done
+  if [[ ! -f "${app_bundle}/Contents/PlugIns/sqldrivers/libqsqlite.dylib" ]]; then
+    echo "error: missing Qt SQLite driver in app bundle: libqsqlite.dylib"
+    return 1
+  fi
   if ! find "${app_bundle}/Contents/PlugIns/tls" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
     echo "warning: missing Qt TLS plugins in app bundle"
   fi
@@ -437,6 +441,10 @@ cmake_args=(
   -DCMAKE_BUILD_TYPE=Release
   -DCMAKE_OSX_DEPLOYMENT_TARGET="$COMPAT_MACOS"
   -DFORK_RELEASE_VERSION="$VERSION"
+  # Published macOS releases include the native SSTV workspace and HAMDRM.
+  # Keep them explicit so a reused build directory cannot retain a feature-off cache.
+  -DDECODIUM_ENABLE_SSTV=ON
+  -DDECODIUM_ENABLE_HAMDRM=ON
   -DBUILD_TESTING=OFF
   -DWSJT_GENERATE_DOCS=OFF
   -DWSJT_SKIP_MANPAGES=ON
@@ -500,6 +508,13 @@ cmake \
   -B "$BUILD_DIR" \
   "${cmake_args[@]}"
 
+for release_feature in DECODIUM_ENABLE_SSTV DECODIUM_ENABLE_HAMDRM; do
+  if ! grep -Fxq "${release_feature}:BOOL=ON" "${BUILD_DIR}/CMakeCache.txt"; then
+    echo "error: advertised macOS release must enable ${release_feature}" >&2
+    exit 1
+  fi
+done
+
 echo "[2/7] Building project..."
 cmake --build "$BUILD_DIR" -j"$JOBS"
 
@@ -553,23 +568,21 @@ case "${DECODIUM_REQUIRE_RTLSDR:-OFF}" in
     ;;
 esac
 
-if grep -Fxq 'DECODIUM_ENABLE_HAMDRM:BOOL=ON' "${BUILD_DIR}/CMakeCache.txt"; then
-  if ! find "${STAGED_APP_ABS}/Contents/Frameworks" -maxdepth 1 \
-      -type f -name 'libopenjp2*.dylib' -print -quit | grep -q .; then
-    echo "error: HAMDRM OpenJPEG runtime library was not bundled"
-    exit 1
-  fi
-  if ! otool -L "${STAGED_APP_ABS}/Contents/MacOS/Decodium4" \
-      | awk 'NR>1 {print $1}' | grep -Eq '^@rpath/libopenjp2'; then
-    echo "error: Decodium4 is not linked to the bundled OpenJPEG runtime"
-    exit 1
-  fi
-  if [[ ! -f "${STAGED_APP_ABS}/Contents/Resources/doc/wsjtx/THIRD_PARTY_LICENSES_OPENJPEG.md" ]]; then
-    echo "error: OpenJPEG third-party notice is missing from the app bundle"
-    exit 1
-  fi
-  echo "HAMDRM OpenJPEG runtime and notice bundled"
+if ! find "${STAGED_APP_ABS}/Contents/Frameworks" -maxdepth 1 \
+    -type f -name 'libopenjp2*.dylib' -print -quit | grep -q .; then
+  echo "error: HAMDRM OpenJPEG runtime library was not bundled"
+  exit 1
 fi
+if ! otool -L "${STAGED_APP_ABS}/Contents/MacOS/Decodium4" \
+    | awk 'NR>1 {print $1}' | grep -Eq '^@rpath/libopenjp2'; then
+  echo "error: Decodium4 is not linked to the bundled OpenJPEG runtime"
+  exit 1
+fi
+if [[ ! -f "${STAGED_APP_ABS}/Contents/Resources/doc/wsjtx/THIRD_PARTY_LICENSES_OPENJPEG.md" ]]; then
+  echo "error: OpenJPEG third-party notice is missing from the app bundle"
+  exit 1
+fi
+echo "HAMDRM OpenJPEG runtime and notice bundled"
 
 if [[ "$SKIP_COMPAT_CHECK" -eq 0 ]]; then
   echo "[5/7] Checking bundle compatibility target macOS ${COMPAT_MACOS}..."

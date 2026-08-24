@@ -223,6 +223,8 @@ cmake -S "${ROOT_DIR}" -B "${BUILD_DIR}" -G "Unix Makefiles" \
   -DRtlSdr_INCLUDE_DIR="${RTLSDR_PREFIX}/include" \
   -DRtlSdr_LIBRARY="${RTLSDR_LIBRARY}" \
   -DDECODIUM_REQUIRE_RTLSDR=ON \
+  -DDECODIUM_ENABLE_SSTV=ON \
+  -DDECODIUM_ENABLE_HAMDRM=ON \
   -DRIGCTL_EXE="${HAMLIB_PREFIX}/bin/rigctl" \
   -DRIGCTLD_EXE="${HAMLIB_PREFIX}/bin/rigctld" \
   -DRIGCTLCOM_EXE="${HAMLIB_PREFIX}/bin/rigctlcom" \
@@ -231,6 +233,13 @@ cmake -S "${ROOT_DIR}" -B "${BUILD_DIR}" -G "Unix Makefiles" \
   -DWSJT_GENERATE_DOCS=OFF \
   -DWSJT_SKIP_MANPAGES=ON \
   -DWSJT_BUILD_UTILS=OFF
+
+for release_feature in DECODIUM_ENABLE_SSTV DECODIUM_ENABLE_HAMDRM; do
+  if ! grep -Fxq "${release_feature}:BOOL=ON" "${BUILD_DIR}/CMakeCache.txt"; then
+    echo "error: advertised AppImage release must enable ${release_feature}" >&2
+    exit 1
+  fi
+done
 
 log "Verify AppImage GPU build path"
 RHI_FLAG="$(cat "${BUILD_DIR}/decodium_qt_rhi_texture_upload.enabled" 2>/dev/null || echo 0)"
@@ -290,6 +299,10 @@ mkdir -p "${TOOLS_DIR}"
 if [[ -z "${QT_PLUGIN_DIR_FOR_BUILD}" \
       || ! -f "${QT_PLUGIN_DIR_FOR_BUILD}/imageformats/libqtiff.so" ]]; then
   echo "error: required Qt TIFF image plugin is unavailable before linuxdeploy" >&2
+  exit 1
+fi
+if [[ ! -f "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers/libqsqlite.so" ]]; then
+  echo "error: required Qt SQLite driver is unavailable before linuxdeploy" >&2
   exit 1
 fi
 ensure_linuxdeploy_qt_plugin_dirs
@@ -732,6 +745,24 @@ for image_plugin in libqgif.so libqjpeg.so libqtiff.so libqwebp.so; do
     exit 1
   fi
 done
+qsqlite_plugin="$(find "${EXTRACTED_APPDIR}" -type f -path '*/sqldrivers/libqsqlite.so' -print -quit)"
+if [[ -z "${qsqlite_plugin}" ]]; then
+  echo "error: final AppImage is missing Qt SQLite driver libqsqlite.so" >&2
+  exit 1
+fi
+if ! qsqlite_ldd_output="$(
+  LD_LIBRARY_PATH="${EXTRACTED_APPDIR}/usr/lib:${EXTRACTED_APPDIR}/usr/bin" \
+    ldd "${qsqlite_plugin}" 2>&1
+)"; then
+  echo "error: unable to inspect final AppImage Qt SQLite driver dependencies" >&2
+  printf '%s\n' "${qsqlite_ldd_output}" >&2
+  exit 1
+fi
+if grep -q 'not found' <<<"${qsqlite_ldd_output}"; then
+  echo "error: final AppImage Qt SQLite driver has unresolved dependencies" >&2
+  printf '%s\n' "${qsqlite_ldd_output}" >&2
+  exit 1
+fi
 verify_qml_plugin_dependencies "final AppImage" \
   "${EXTRACTED_APPDIR}/usr/bin/qml" \
   "${EXTRACTED_APPDIR}/usr/lib"

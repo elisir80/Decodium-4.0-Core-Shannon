@@ -245,6 +245,8 @@ jobs:
             -DRtlSdr_INCLUDE_DIR="${RtlSdr_INCLUDE_DIR}" \
             -DRtlSdr_LIBRARY="${RtlSdr_LIBRARY}" \
             -DDECODIUM_REQUIRE_RTLSDR=ON \
+            -DDECODIUM_ENABLE_SSTV=ON \
+            -DDECODIUM_ENABLE_HAMDRM=ON \
             -DRIGCTL_EXE="${RIGCTL_EXE}" \
             -DRIGCTLD_EXE="${RIGCTLD_EXE}" \
             -DRIGCTLCOM_EXE="${RIGCTLCOM_EXE}" \
@@ -252,6 +254,13 @@ jobs:
             -DWSJT_GENERATE_DOCS=OFF \
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
+
+          for release_feature in DECODIUM_ENABLE_SSTV DECODIUM_ENABLE_HAMDRM; do
+            if ! grep -Fxq "${release_feature}:BOOL=ON" build-windows/CMakeCache.txt; then
+              echo "error: advertised Windows release must enable ${release_feature}" >&2
+              exit 1
+            fi
+          done
 
       - name: Build Decodium
         run: |
@@ -310,6 +319,17 @@ jobs:
           fi
 
           "${WINDEPLOYQT}" "${WINDEPLOY_ARGS[@]}"
+
+          # Qt deploy tools do not necessarily infer a runtime-selected SQL
+          # driver from the executable. Copy the required SQLite driver
+          # explicitly; the dependency pass below validates its DLL closure.
+          QSQLITE_PLUGIN="${QT_PREFIX}/plugins/sqldrivers/qsqlite.dll"
+          if [[ ! -f "${QSQLITE_PLUGIN}" ]]; then
+            echo "Required Qt SQLite driver is unavailable: ${QSQLITE_PLUGIN}" >&2
+            exit 1
+          fi
+          mkdir -p "${DIST}/sqldrivers"
+          cp -f "${QSQLITE_PLUGIN}" "${DIST}/sqldrivers/qsqlite.dll"
 
           SEARCH_DIRS=(
             "${QT_PREFIX}/bin"
@@ -466,6 +486,7 @@ jobs:
           echo "Qt runtime ABI verified: $(tr '\n' ' ' <<< "${core_private_abis}")"
           test -f "${DIST}/librtlsdr.dll"
           test -f "${DIST}/libopenjp2-7.dll"
+          test -f "${DIST}/sqldrivers/qsqlite.dll"
           test -f "${DIST}/imageformats/qgif.dll"
           test -f "${DIST}/imageformats/qjpeg.dll"
           test -f "${DIST}/imageformats/qtiff.dll"
