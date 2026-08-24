@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <cstdint>
 #include <cstring>
 #include <random>
 #include <vector>
@@ -23,6 +24,7 @@
 
 #include "Detector/FST4DecodeWorker.hpp"
 #include "Detector/MSK144DecodeWorker.hpp"
+#include "lib/wsprd/nhash.h"
 #include "Modulator/FtxMessageEncoder.hpp"
 #include "Modulator/FtxWaveformGenerator.hpp"
 #include "Sequencer/MessageTokenRules.hpp"
@@ -1299,6 +1301,24 @@ private:
                       qPrintable (QStringLiteral ("hotABetter mismatch: %1").arg (context)));
           }
       }
+  }
+
+  Q_SLOT void msk144_shorthand_hash_accepts_exact_37_byte_buffer ()
+  {
+    // This is deliberately an exact-size, 4-byte-aligned key.  The MSK144
+    // shorthand encoder hashes this 37-byte padded field; ASan must therefore
+    // catch any attempt to word-load the one-byte tail beyond its boundary.
+    alignas (std::uint32_t) std::array<unsigned char, 37> hashBytes {};
+    hashBytes.fill (static_cast<unsigned char> (' '));
+    QByteArray const hashText = QByteArrayLiteral ("K1ABC W9XYZ");
+    std::copy (hashText.cbegin (), hashText.cend (), hashBytes.begin ());
+
+    QCOMPARE (nhash (hashBytes.data (), hashBytes.size (), 146u), std::uint32_t {4002u});
+
+    decodium::txmsg::EncodedMessage const encoded =
+        decodium::txmsg::encodeMsk144 (QStringLiteral ("<K1ABC W9XYZ> R+03"));
+    QVERIFY (encoded.ok);
+    QCOMPARE (encoded.messageType, 7);
   }
 
   Q_SLOT void msk144_encoder_matches_fortran_for_standard_and_free_text ()
