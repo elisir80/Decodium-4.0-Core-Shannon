@@ -20,6 +20,7 @@ on:
       - 'src/rtl/RtlSdrInput.*'
       - 'src/services/SatelliteTrackingService.*'
       - 'src/sstv/**'
+      - 'tests/CMakeLists.txt'
       - 'tests/sstv/**'
       - 'translations/decodium_it.*'
       - 'packaging/**'
@@ -44,6 +45,7 @@ on:
       - 'src/rtl/RtlSdrInput.*'
       - 'src/services/SatelliteTrackingService.*'
       - 'src/sstv/**'
+      - 'tests/CMakeLists.txt'
       - 'tests/sstv/**'
       - 'translations/decodium_it.*'
       - 'packaging/**'
@@ -109,7 +111,7 @@ jobs:
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
 
-      - name: Build Decodium and every SSTV test binary
+      - name: Build Decodium and all regression test binaries
         run: |
           set -euo pipefail
           cmake --build build-native-sstv \
@@ -117,6 +119,7 @@ jobs:
               wsjtx \
               decodium_qml \
               decodium_sstv_test_binaries \
+              decodium_regression_test_binaries \
               translations \
             --parallel "$(sysctl -n hw.ncpu)"
 
@@ -129,6 +132,19 @@ jobs:
           set -euo pipefail
           ctest --test-dir build-native-sstv \
             -L '^sstv$' \
+            --parallel 2 \
+            --timeout 300 \
+            --output-on-failure
+
+      - name: Run non-SSTV regression suite
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QSG_RHI_BACKEND: software
+          QT_QUICK_CONTROLS_STYLE: Basic
+        run: |
+          set -euo pipefail
+          ctest --test-dir build-native-sstv \
+            -LE '^sstv$' \
             --parallel 2 \
             --timeout 300 \
             --output-on-failure
@@ -242,7 +258,7 @@ jobs:
             -DWSJT_BUILD_UTILS=OFF \
             "${extra_args[@]}"
 
-      - name: Build Decodium and every SSTV test binary
+      - name: Build Decodium and all regression test binaries
         env:
           SSTV: ${{ matrix.sstv }}
           SANITIZER: ${{ matrix.sanitizer }}
@@ -252,7 +268,7 @@ jobs:
           if [[ "${SANITIZER}" == "true" && "${jobs}" -gt 4 ]]; then
             jobs=4
           fi
-          targets=(wsjtx decodium_qml translations)
+          targets=(wsjtx decodium_qml decodium_regression_test_binaries translations)
           if [[ "${SSTV}" == "ON" ]]; then
             targets+=(decodium_sstv_test_binaries)
           fi
@@ -272,6 +288,21 @@ jobs:
           set -euo pipefail
           ctest --test-dir build-native-sstv \
             -L '^sstv$' \
+            --parallel 2 \
+            --timeout 300 \
+            --output-on-failure
+
+      - name: Run non-SSTV regression suite
+        env:
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+          QT_QPA_PLATFORM: offscreen
+          QSG_RHI_BACKEND: software
+          QT_QUICK_CONTROLS_STYLE: Basic
+        run: |
+          set -euo pipefail
+          ctest --test-dir build-native-sstv \
+            -LE '^sstv$' \
             --parallel 2 \
             --timeout 300 \
             --output-on-failure
@@ -457,7 +488,7 @@ jobs:
             -DWSJT_SKIP_MANPAGES=ON \
             -DWSJT_BUILD_UTILS=OFF
 
-      - name: Build Decodium and every SSTV test binary
+      - name: Build Decodium and all regression test binaries
         run: |
           set -euo pipefail
           cmake --build build-native-sstv \
@@ -465,6 +496,7 @@ jobs:
               wsjtx \
               decodium_qml \
               decodium_sstv_test_binaries \
+              decodium_regression_test_binaries \
               translations \
             --parallel "$(nproc)"
 
@@ -477,6 +509,19 @@ jobs:
           set -euo pipefail
           ctest --test-dir build-native-sstv \
             -L '^sstv$' \
+            --parallel 2 \
+            --timeout 300 \
+            --output-on-failure
+
+      - name: Run non-SSTV regression suite
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QSG_RHI_BACKEND: software
+          QT_QUICK_CONTROLS_STYLE: Basic
+        run: |
+          set -euo pipefail
+          ctest --test-dir build-native-sstv \
+            -LE '^sstv$' \
             --parallel 2 \
             --timeout 300 \
             --output-on-failure

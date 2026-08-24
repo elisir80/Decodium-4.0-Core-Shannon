@@ -131,6 +131,15 @@ qt_add_resources (test_map_layer_service test_map_layer_service_award_resources
     "${CMAKE_SOURCE_DIR}/resources/map/decodium-awards-catalog.json"
   )
 add_test (NAME test_map_layer_service COMMAND $<TARGET_FILE:test_map_layer_service>)
+# MapIntelligenceService resolves the bundled DXCC database next to the
+# executable at runtime.  Make the test self-contained when CI builds only the
+# regression-test aggregate (rather than decodium_qml, which normally copies
+# this runtime file into the build tree).
+add_custom_command (TARGET test_map_layer_service POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_SOURCE_DIR}/resources/runtime/cty.dat"
+    "$<TARGET_FILE_DIR:test_map_layer_service>/cty.dat"
+  COMMENT "Copying cty.dat beside test_map_layer_service")
 
 add_executable (test_sgp4
   test_sgp4.cpp
@@ -323,3 +332,55 @@ if (WSJT_BUILD_UTILS)
     endif()
   endforeach()
 endif ()
+
+# Native SSTV CI selects this target before running ``ctest -LE sstv``.  The
+# ordinary tests otherwise exist only as individual executable targets, so a
+# label-excluded CTest invocation can silently turn into a collection of
+# "Not Run" entries when the build step materialises SSTV tests only.  Keep
+# hardware-only ``test_rtlsdr_input`` out: it is intentionally not registered
+# with CTest and needs a real USB receiver.
+add_custom_target (decodium_regression_test_binaries)
+set (_decodium_regression_test_targets
+  test_qt_helpers
+  test_qso_sequencer_rules
+  test_tx_pipeline
+  test_ptt_transition_policy
+  test_audio_sink_tx_gate
+  test_amplifier_telemetry
+  test_qmx_telemetry
+  test_decodium_update_support
+  test_jt4_roundtrip
+  test_dx_cluster_band
+  test_map_layer_service
+  test_sgp4
+  test_rotator_service
+  test_cat4om_manager
+  test_civ_address_settings
+  test_udp_client_id
+  test_ftx_weak_decode
+  test_ft2_qso_sim
+  test_secure_settings
+  test_callsign_intelligence
+  test_dxcc_lookup
+  test_filedownload
+  test_streaming_list_model
+  test_decode_list_model
+  test_ft_decode_thread_budget
+  test_legacy_decode_window
+  test_b4_worked_before
+  test_ft2link
+  test_ft2link_satellite_half_duplex
+  test_linux_drm_gpu_usage
+  test_rtlsdr_dsp
+  test_rtlsdr_rf_spectrum
+  test_rtlsdr_capabilities
+  test_rtlsdr_tuning_plan
+  test_ft2link_qml_adapter
+  )
+foreach (_decodium_regression_test_target IN LISTS
+    _decodium_regression_test_targets)
+  add_dependencies (decodium_regression_test_binaries
+    ${_decodium_regression_test_target})
+endforeach ()
+unset (_decodium_regression_test_target)
+unset (_decodium_regression_test_targets)
