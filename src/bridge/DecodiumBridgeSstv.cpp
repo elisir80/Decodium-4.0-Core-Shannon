@@ -4153,7 +4153,13 @@ void DecodiumBridge::refreshSstvProducerTaps()
 {
 #if DECODIUM_HAS_SSTV
     Q_ASSERT(QThread::currentThread() == thread());
-    disconnectSstvProducerTaps();
+    // A tap rebind is a real producer-generation boundary, not merely a Qt
+    // signal-list update.  A DirectConnection callback may already be inside
+    // DecodiumSstvAudioRelay when QObject::disconnect() returns.  Drain that
+    // callback before publishing a new route/backend: analog ingress rejects
+    // stale route tokens, but the separate HAMDRM PCM backend deliberately
+    // receives raw samples and has no analog-route token to reject.
+    disableSstvProducerTaps();
     const bool analogActive = m_sstvRxRequested && m_sstvRxRuntime
         && m_sstvRxRuntime->state() == SstvRxRuntime::State::Running;
 #if DECODIUM_HAS_HAMDRM
@@ -4483,6 +4489,10 @@ void DecodiumBridge::selectSstvRxSource(
                 != static_cast<std::uint8_t>(kind)
             || m_hamDrmRxStreamId != streamId;
         if (changed || resetExistingStream) {
+            // Fence the old DirectConnection producer before resetting the
+            // raw HAMDRM stream.  Otherwise a callback that started before
+            // the source switch can enqueue old PCM into the new generation.
+            disableSstvProducerTaps();
             m_hamDrmRxSourceKind = static_cast<std::uint8_t>(kind);
             m_hamDrmRxStreamId = streamId;
             m_hamDrmRxBackend->resetAudioStream();
@@ -4493,8 +4503,19 @@ void DecodiumBridge::selectSstvRxSource(
     }
 
     const auto current = m_sstvRxRuntime->routeToken();
+    const bool sourceChangeRequested = current.source.kind != kind
+        || current.source.streamId != streamId;
+    // Fence before either RX implementation changes generation.  The analog
+    // runtime validates its route token, while HAMDRM intentionally accepts
+    // raw PCM; draining here therefore prevents an already-running old
+    // producer from crossing the shared source boundary.
+    const bool producerFenceRequired = sourceChangeRequested
+        || resetExistingStream;
+    if (producerFenceRequired) {
+        disableSstvProducerTaps();
+    }
     bool changed = false;
-    if (current.source.kind != kind || current.source.streamId != streamId) {
+    if (sourceChangeRequested) {
         changed = m_sstvRxRuntime->switchSource(kind, streamId);
     } else if (resetExistingStream) {
         // A queued chunk may exist before the worker has published either an
@@ -4547,7 +4568,7 @@ void DecodiumBridge::selectSstvRxSource(
     // token. Rebind at a generation boundary, or once when a selected producer
     // has just been constructed lazily. Repeated DecoPort state telemetry must
     // not churn an otherwise stable audio tap.
-    if (changed || digitalChanged || resetExistingStream
+    if (changed || digitalChanged || producerFenceRequired
         || selectedTapMissing) {
         refreshSstvProducerTaps();
     }
