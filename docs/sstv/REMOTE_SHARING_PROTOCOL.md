@@ -1,213 +1,515 @@
-# Decodium SSTV Remote Sharing Protocol
+# Decodium SSTV remote sharing protocol
 
-Status: protocol design v1 for Milestone 0, 2026-08-24. No production Decodium SSTV sharing backend is known in this checkout. This document is not evidence that a provider, relay, inbox or E2EE implementation exists.
+Status: version 1 client protocol and implementation ledger, 2026-08-24.
+Decodium4 contains an opt-in native sharing client, queue and Sharing page, but
+this checkout does not contain, name or configure a production sharing service.
+No compatible endpoint or account is bundled, deployed or independently
+validated by this implementation.
+
+The machine-readable reference profile is
+[`remote-sharing-openapi.yaml`](remote-sharing-openapi.yaml). It deliberately
+contains no `servers` entry and records an empty production-endpoint list.
+
+## Current implementation boundary
+
+| Capability | Current checkout | What must not be inferred |
+| --- | --- | --- |
+| Strict manifest/security/transfer core | Implemented in `src/sstv/sharing/SstvShareManifest.*`, `SstvShareSecurity.*` and `SstvShareTransfer.*`; focused native tests exist. | A parser and state machine are not a deployed service. |
+| Provider abstraction | Implemented as the asynchronous, cancellable `SstvShareProvider` interface with explicit capabilities and redacted result categories. | Unsupported operations are not emulated. |
+| Generic REST outbound client | Implemented for configured create, sequential chunk, status/resume, complete and cancel path templates. | There are no built-in provider URLs, accounts or server defaults. |
+| WebDAV and pre-signed PUT clients | WebDAV collection validation/upload/status/delete plus bounded direct GET and a trusted-lease single PUT are implemented and exercised by deterministic HTTP tests. The UI exposes pre-signed PUT as unavailable until a trusted target broker is configured. | WebDAV does not invent a recipient directory or inbox-list/decision contract. A user-pasted or persisted signed URL is never accepted. |
+| Durable upload/download/inbox queue | SQLite schema v3, transactional v1/v2-to-v3 migration, retry/restart recovery, public durable pause/resume for both directions, explicit accept/acknowledge/reject/cancel, validated Save As, local-copy deletion, bounded persistent sender blocks, provider incoming deletion, diagnostics and metered-network policy are implemented in `SstvShareQueueManager.*`. At configured record limits, the store deterministically reclaims only the oldest terminal transfers and closed inbox rows; active/retryable work and any managed local or staging file remain protected. A completed upload with a persisted remote-object ID can also be explicitly deleted or revoked only when the selected provider has a real executable capability. | Local tests, including migration/restart with more than 10,000 inbox cycles, do not prove Internet interoperability. Provider delete/block remains unavailable unless capability discovery verifies it. |
+| Validated handoff to Gallery storage | `DecodiumBridge` connects `SstvShareController::incomingHandoffReady` to `SstvStorageWorker::importValidatedIncomingHandoff` on the storage worker thread. The importer strictly parses schema v1, reopens, re-hashes and fully decodes the private normalized PNG, preserves its exact bytes in the existing imported-image layout, commits SQLite and only then removes staging. UUID/hash replay is idempotent and focused tests cover the exact controller signal/slot contract. | This proves the in-process lifecycle and local persistence path, not any production sharing endpoint or Internet interoperability. |
+| Generic HTTP recipient/inbox/download/decision mapping | Implemented fail-closed by `SstvGenericRestShareProvider`, including authenticated capability discovery, recipient lookup, bounded metadata list/range GET, idempotent acknowledge/reject/incoming-delete and sender block. | No production endpoint has been named, audited or tested. Delete/block are additive optional v1 capabilities and default false when absent. |
+| Credentials | `SstvShareController` uses `secure_settings::Backend` directly for namespaced Bearer/Basic secrets, creates opaque credential leases and fails closed instead of persisting a secret through ordinary settings. Focused tests cover successful store/remove on the worker and scan the test `QSettings` file for the submitted secret. | Backend-unavailable and lookup/store/remove failure paths, platform stores and diagnostic/log surfaces still require complete release evidence. |
+| Peer/relay, local integration and E2EE | `SstvLocalIntegrationShareProvider` is a deterministic bounded process-local contract adapter exercised through the queue/controller in developer tests. Production peer/relay and E2EE remain explicit unavailable states. | The local adapter opens no socket, persists no credential and is available only by explicit test injection. No relay, peer discovery, direct listener, key exchange, encrypted envelope or production endpoint is shipped. |
+
+`qml/decodium/components/sstv/SstvSharePage.qml` is now connected through
+`DecodiumBridge::sstvShare` to the worker-owned controller. Sharing defaults
+off; the page configures only user-supplied HTTPS REST/WebDAV endpoints,
+requires explicit recipient confirmation and exposes active/history/inbox
+models. Each upload explicitly selects expiry, optional callsign/grid disclosure
+and whether metered transfer is allowed; public/automatic sharing and EXIF stay
+off. REST inbound controls are enabled only after a complete authenticated
+capability response; WebDAV exposes direct bounded GET but no inbox listing.
+Pre-signed PUT and peer/relay are visible, navigable unavailable states: the
+former requires a maintained trusted target broker, and the latter requires an
+authenticated relay backend. Neither state exposes a field for a signed URL or
+starts peer discovery/listening.
+Before queueing an outgoing item, the worker accepts only a bounded decodable
+PNG/JPEG under the native SSTV storage root, reconstructs its pixels as a new
+private owner-only PNG under `sharing/outgoing`, omits source text/EXIF metadata
+and hashes that immutable staged payload. The focused controller test exercises
+this sanitisation path.
 
 ## Scope and separation from radio
 
-DSRP transfers an already received or prepared image over an IP network. It is not analog SSTV, VIS/FSK ID, HAMDRM or any other RF mode. Provider and inbox code must not assert PTT, start TX audio or request CAT changes. Importing an item creates a local gallery record only; on-air transmission requires a later explicit local action through Decodium's existing TX coordinator and interlocks.
+The protocol transfers an already received or prepared image over an IP
+network. It is not analog SSTV, VIS/FSK ID, HAMDRM or any other RF mode.
+Provider and queue code have no authority to assert PTT, start TX audio or
+change CAT state. Accepting a download emits a precise validated local
+handoff; its Gallery consumer is storage-only, and any later on-air
+transmission remains a separate action through the existing Decodium TX
+coordinator and interlocks.
 
-All client-side code belongs natively inside Decodium4 and reuses Qt Network, `SecureSettings`, `QStandardPaths`, `QSaveFile`, the native models and a worker-owned Qt SQL connection. A relay, when one actually exists, is an external service and must be configured; local SSTV remains fully usable without it.
-
-`Network/RemoteCommandServer.*` is a radio-control console over HTTP/WebSocket, not a DSRP provider. It must not be advertised or silently extended as a production file-sharing backend. Until a separate backend audit proves all protocol, authentication, storage, expiry and operational requirements, the production-backend status is **none**.
-
-## Protocol identifiers and versioning
-
-- Protocol name: `decodium-sstv-share`.
-- Manifest major/minor: `1.0`.
-- Media type: `application/vnd.decodium.sstv-share+json;version=1`.
-- UUIDs use lower-case canonical RFC 4122 text.
-- Times use RFC 3339 UTC with `Z`; clients retain millisecond precision at most.
-- Hashes are lower-case hexadecimal SHA-256.
-- Major versions are incompatible and must be rejected. A receiver may accept a higher minor version only if all required fields and semantics are understood; unknown optional fields are retained or ignored, never interpreted as security policy.
-- The exact UTF-8 manifest bytes are immutable after upload creation. For hashing/AAD, JSON is serialized with RFC 8785 JSON Canonicalization Scheme. Duplicate object keys, non-integer numeric fields, invalid Unicode and non-canonical security-critical input are rejected before use.
-- Manifest size is at most 64 KiB, JSON nesting depth at most 8, free-form message at most 2 KiB UTF-8 and every identity/display field has a provider-declared limit no greater than 4 KiB.
-
-## Provider abstraction
-
-`SstvShareProvider` isolates gallery/QML from transport details. It is asynchronous, cancellable and injected with a Qt network manager; it never owns GUI, storage or TX policy. The stable interface supports:
-
-- capability discovery and authentication status;
-- recipient lookup by stable provider ID, not callsign alone;
-- create upload, upload chunk, resume/query upload, complete and cancel;
-- list incoming metadata, download, acknowledge, reject and block where supported;
-- revoke/delete remote object and refresh credentials;
-- byte progress and structured, redacted errors.
-
-Capabilities are explicit data, including API versions, maximum bytes/chunk size, resumable upload, out-of-order chunks, inbox, acknowledgement, revoke/delete, expiry bounds, E2EE suites and recipient-key lookup. UI actions remain disabled when a capability is absent. A provider must never emulate success for an unsupported operation.
-
-Expected native providers are generic HTTPS REST, WebDAV over HTTPS, trusted-service-issued pre-signed HTTPS PUT, a deterministic local integration provider, and a peer/relay provider only after audit. Provider-specific HTTP and JSON do not leak into QML or gallery models.
-
-Errors are classified as `temporary`, `rate_limited`, `authentication`, `authorization`, `validation`, `conflict`, `expired`, `revoked`, `not_found`, `integrity`, `tls`, `local_io`, `cancelled` or `unsupported`. Only temporary/rate-limited errors retry automatically; authentication and validation never loop indefinitely.
+All client code stays inside the Decodium4 process and repository. It reuses Qt
+Network, Qt SQL, `QStandardPaths`, `QSaveFile`, native models and Decodium's
+security backend. `Network/RemoteCommandServer.*` is a radio-control console,
+not an image-sharing backend, and cannot be relabelled as one.
 
 ## Manifest v1
 
-Every transfer has one immutable manifest. Synthetic example:
+The native manifest is an exact-field, canonical JSON object with integer
+`protocolVersion: 1`. Unknown or missing fields are rejected. UUIDs are
+lower-case canonical text, hashes are lower-case hexadecimal SHA-256 and times
+are UTC RFC 3339 strings ending in `Z`. The canonical UTF-8 form is immutable
+after queueing and is bound to the transfer-derived idempotency key.
+
+Synthetic valid-shape example:
 
 ```json
 {
-  "protocol": {"name": "decodium-sstv-share", "version": "1.0"},
-  "transfer_id": "018f2f79-2a3d-7d91-8d42-111111111111",
-  "sender": {
-    "provider": "local-test",
-    "id": "sender-0001",
-    "callsign": "N0CALL",
-    "grid": "AA00aa",
-    "key_id": ""
+  "byteSize": 123456,
+  "callsign": {
+    "grid": "",
+    "remoteCallsign": "",
+    "senderCallsign": ""
   },
-  "recipient": {
-    "id": "recipient-0002",
-    "callsign": "N1TEST",
-    "key_id": ""
-  },
-  "created_utc": "2026-08-24T10:00:00.000Z",
-  "expires_utc": "2026-08-31T10:00:00.000Z",
-  "content": {
-    "original_filename": "synthetic-test-card.png",
-    "display_filename": "synthetic-test-card.png",
-    "mime_type": "image/png",
-    "byte_size": 123456,
-    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-    "width": 320,
-    "height": 256,
-    "chunk_size": 1048576,
-    "chunk_count": 1,
-    "disposition": "attachment"
-  },
-  "sstv": {
-    "classification": "analog",
-    "mode": "Martin M1",
-    "event_utc": "2026-08-24T09:58:00.000Z",
-    "completion": "complete",
-    "completion_percent": 100
-  },
-  "message": "Synthetic protocol example",
-  "privacy": {
-    "public": false,
-    "location_included": false,
-    "exif_retained": false
-  },
+  "chunkCount": 1,
+  "completion": "complete",
+  "contentDisposition": "attachment",
+  "createdUtc": "2026-08-24T10:00:00.000Z",
   "encryption": {
-    "policy": "tls_only",
-    "suite": "none",
-    "recipient_key_id": "",
-    "nonce": "",
-    "ciphertext_sha256": ""
-  }
+    "algorithm": "none",
+    "downgradeProtected": true,
+    "keyId": "",
+    "manifestBoundAsAuthenticatedData": false,
+    "mode": "transport-tls",
+    "nonceBase64": "",
+    "recipientKeyFingerprint": ""
+  },
+  "expiresUtc": "2026-08-31T10:00:00.000Z",
+  "height": 256,
+  "mediaSource": "analog-reception",
+  "mediaUtc": "2026-08-24T09:58:00.000Z",
+  "message": "Synthetic protocol example",
+  "mimeType": "image/png",
+  "originalFilename": "synthetic-test-card.png",
+  "privacy": {
+    "automaticIncomingDownloadAllowed": false,
+    "automaticUploadAllowed": false,
+    "callsignIncluded": false,
+    "exifRetained": false,
+    "explicitExpiry": true,
+    "gridIncluded": false,
+    "locationIncluded": false,
+    "meteredNetworkAllowed": false,
+    "publicShare": false,
+    "recipientConfirmed": true
+  },
+  "protocolVersion": 1,
+  "providerId": "local-test",
+  "recipientId": "recipient-0002",
+  "safeDisplayFilename": "synthetic-test-card.png",
+  "senderId": "sender-0001",
+  "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "sstvMode": "Martin M1",
+  "transferId": "018f2f79-2a3d-7d91-8d42-111111111111",
+  "transport": {
+    "certificateValidationRequired": true,
+    "providerCanReadContent": true,
+    "sameOriginRedirectsOnly": true,
+    "tlsRequired": true
+  },
+  "width": 320
 }
 ```
 
-Required validation:
+Native hard limits are part of the protocol contract:
 
-- `transfer_id`, sender/recipient stable IDs, creation/expiry, original and safe display filename, MIME, byte size, plaintext SHA-256, dimensions, source classification, event time, completion, protocol version, encryption policy, chunk size/count, disposition and privacy flags are present.
-- Sender/provider and recipient IDs match the authenticated operation; display callsigns are metadata only.
-- `created_utc < expires_utc`; expiry is within provider policy and not already elapsed.
-- Byte size, dimensions, pixel arithmetic and chunk arithmetic are non-negative, within negotiated application/provider limits and internally consistent. Empty content is rejected.
-- MIME is allowlisted and later verified against bytes and decoder output. The original filename is never used as a local path; `display_filename` is sanitized display text.
-- `classification` is `analog`, `digital` or `prepared`; remote sharing itself is never a classification/mode.
-- `completion` is `complete` or `partial`, and percent is an integer from 0 through 100.
-- Public defaults false; location/EXIF default absent or false. Missing security/privacy fields do not become permissive.
+- manifest JSON: 65,536 bytes, depth 8 and 4,096 nodes;
+- image payload: 1 through 67,108,864 bytes;
+- dimensions: 1 through 8,192 per side and at most 16,777,216 pixels;
+- chunks: 1 through 4,096 and no more chunks than payload bytes;
+- lifetime: greater than zero and at most 30 days;
+- message: at most 1,000 sanitized characters;
+- original and display filenames: at most 128 sanitized characters, never a
+  local path;
+- MIME: `image/png` or `image/jpeg` only;
+- media source: `analog-reception`, `analog-transmission`,
+  `digital-reception` or `digital-transmission`;
+- completion: `complete` or `partial`.
 
-The client computes `manifest_sha256` over canonical manifest bytes. Providers bind the transfer object to that digest; a create/resume/complete request presenting a different digest for the same transfer ID returns conflict.
+For an outgoing transfer, expiry must still be in the future and
+`privacy.recipientConfirmed` must be true. Callsign/grid values are legal only
+when their corresponding inclusion flag is true. Remote sharing itself is
+never stored as an SSTV mode or media source.
 
-## HTTP transport profile
+Transport-TLS manifests require `algorithm: none`, empty key/nonce fields,
+`manifestBoundAsAuthenticatedData: false` and
+`providerCanReadContent: true`. The schema also validates the shape of future
+`end-to-end` envelopes, but schema acceptance is not an E2EE implementation or
+availability claim.
 
-Production requests are HTTPS only. The client validates URL syntax, scheme, host, port, certificates and hostname with Qt; it never calls `ignoreSslErrors()` and never offers a normal UI bypass. Plain HTTP is permitted solely for an explicitly compiled test/development build and loopback deterministic server. Release builds contain no runtime checkbox for it.
+## Provider contract and errors
 
-The generic REST mapping to be captured in `remote-sharing-openapi.yaml` is:
+`SstvShareProvider` exposes authentication status and these capabilities:
+recipient lookup, chunked/resumable upload, download, acknowledgement,
+rejection, incoming deletion, sender blocking, revocation, remote delete,
+incoming list, E2EE envelope, strict TLS, maximum chunk bytes and maximum
+response bytes. UI and queue actions remain disabled when a capability is
+absent. The two new abuse/lifecycle flags are additive: a legacy v1 capability
+document that omits them is valid but means `false`; a wrong type or unknown
+field rejects the complete document.
 
-| Operation | Method and path | Idempotency |
+The concrete public interface is asynchronous and cancellable:
+
+- recipient lookup;
+- create, chunk upload, resume/status, complete and cancel;
+- bounded download;
+- acknowledge, reject, provider-side incoming delete and sender block;
+- revoke/delete, refresh credentials and bounded inbox listing.
+
+Provider handles are opaque safe identifiers. They cannot contain URLs,
+filesystem paths, bearer tokens or cookies. Results expose only bounded payload
+bytes and a redacted category. Retryable categories are
+`transient-network`, `provider-unavailable`, `offline` and `rate-limited`;
+authentication, authorization, validation, conflict, integrity, TLS and other
+permanent failures do not enter an automatic retry loop.
+
+## HTTPS REST profile
+
+All production endpoints are configured by the user/provider; none is embedded
+in this repository. The reference paths below are interoperability names. The
+generic client accepts equivalent validated path templates containing exactly
+one `{uploadId}` placeholder where required.
+
+### Implemented generic REST outbound mapping
+
+| Operation | Reference method/path | Required binding |
 | --- | --- | --- |
-| Capabilities | `GET /api/v1/capabilities` | Cache with bounded expiry. |
-| Recipient lookup | `GET /api/v1/recipients/{id}` | Read only; response authenticated by TLS/provider. |
-| Create | `POST /api/v1/transfers` | `Idempotency-Key: <transfer_id>` and manifest digest. |
-| Status/resume | `GET /api/v1/transfers/{id}` | Returns immutable digest, state and accepted ranges. |
-| Chunk | `PUT /api/v1/transfers/{id}/chunks/{index}` | Same bytes/range/hash may repeat; changed bytes conflict. |
-| Complete | `POST /api/v1/transfers/{id}/complete` | Idempotent; repeated completion returns the same object state. |
-| Cancel/revoke | `DELETE /api/v1/transfers/{id}` | Idempotent; missing/already deleted is success where ownership matches. |
-| Inbox | `GET /api/v1/inbox?cursor=...` | Bounded page and opaque cursor. Metadata only by default. |
-| Download | `GET /api/v1/transfers/{id}/content` | Range only if advertised; always bounded and re-hashed. |
-| Decision | `POST /api/v1/transfers/{id}/decision` | Idempotency key includes transfer and `accept`, `reject` or `ack`. |
+| Create | `POST /api/v1/transfers` | Exact canonical manifest plus the transfer-derived lower-case SHA-256 `Idempotency-Key`. Response is exactly `uploadId` and optional `committedBytes`. |
+| Status/resume | `GET /api/v1/transfers/{uploadId}` | Response is exactly `committedBytes`; values beyond declared size fail. |
+| Chunk | `PUT /api/v1/transfers/{uploadId}/chunks` | Sequential `Upload-Offset`, body SHA-256 in `Digest` and `X-Content-SHA256`, and operation-derived idempotency key. |
+| Complete | `POST /api/v1/transfers/{uploadId}/complete` | Body contains final `byteSize` and `sha256`; default client policy requires the server to echo both with a safe `remoteObjectId`. |
+| Cancel/revoke | `DELETE /api/v1/transfers/{uploadId}` | Stable idempotency key; 200/202/204 and authenticated already-missing 404 are terminal. |
 
-Bearer/OAuth credentials stay in C++ and are loaded from a fail-closed `SecureSettings` integration. Authorization headers and cookies are stripped on every origin change. Redirects are bounded, HTTPS-only and accepted only under explicit provider policy. Full signed URLs are credentials: never log them or store them in ordinary settings/SQLite. A trusted service must issue or refresh pre-signed PUT URLs; user-supplied URLs require explicit validation and confirmation.
+The v1 REST profile has no endpoint that deletes by `remoteObjectId`.
+Consequently the generic client clamps discovered `remoteDelete` to false even
+if a server advertises it, and exposes only `revocation` through the configured
+cancel/revoke upload path. Before a history revocation after restart, the queue
+rehydrates the opaque upload session with the documented idempotent create
+operation and requires the exact persisted upload identity. It never derives
+or invents a remote-object URL.
 
-Responses have allowlisted status codes/MIME, bounded headers/body and strict JSON validation. The client counts actual streamed bytes even when `Content-Length` is missing or false. Rate limiting honors a bounded `Retry-After` plus jitter.
+The current implementation allows only sequential chunks and a single durable
+committed offset; the earlier indexed/out-of-order chunk design is not a current
+capability. The REST client keeps its provider-session map in memory, while the
+queue persists its opaque session handle and committed byte offset and
+rehydrates it with idempotent create before status/resume reconciliation on
+restart.
 
-## Idempotency, chunks, resume and integrity
+WebDAV validates the configured collection, uploads a single bounded object
+with overwrite policy, checks status/integrity, can delete it and exposes a
+bounded direct `GET` for a caller that already has an opaque object name. It
+does not invent recipient lookup, inbox listing or acknowledgement/rejection
+semantics that WebDAV itself does not define. The pre-signed provider accepts
+exactly one full-object PUT target obtained through an opaque trusted lease;
+the signed URL never enters queue persistence or a public result.
 
-The generated transfer UUID and idempotency key remain stable across retry and restart. The SQLite worker persists manifest digest, object ID, state, retry count/time, accepted byte ranges/chunks and provider account handle before the corresponding network action. Secrets and full content do not enter SQLite.
+For WebDAV completion, the persisted remote-object ID is exactly Decodium's
+locally derived lower-case transfer UUID plus `.png` or `.jpg`. History delete
+accepts no other identifier shape and appends that single name to the already
+configured collection URL. The Decodium WebDAV profile authorizes an
+authenticated same-origin 404 as an idempotent success only after an explicit
+delete request for such a persisted completed object. This makes a retry safe
+across a crash between remote success and the local SQLite commit; unrelated
+or caller-supplied object names are rejected before network I/O.
 
-Chunks cover the content exactly once without gaps/overlap. Index, start, length and SHA-256 are checked with overflow-safe arithmetic. Provider-advertised chunk size is clamped to Decodium's bounds. On resume the client queries status and accepts progress only when transfer ID, manifest digest, total length and already accepted chunk hashes match locally; otherwise it restarts safely or fails conflict. Server-reported offsets beyond total size are rejected.
+### Native generic REST inbound mapping
 
-Completion requires all chunks plus a streaming final SHA-256. The receiver downloads to quarantine, verifies received byte count and ciphertext hash (when encrypted), authenticates/decrypts if required, verifies plaintext SHA-256, then validates image MIME/dimensions before decode. Only after those gates does `QSaveFile` atomically promote a UUID-named object under a `QStandardPaths` root and the SQLite worker publish it to the gallery.
+| Operation | Reference method/path | Queue behavior |
+| --- | --- | --- |
+| Capabilities | `GET /api/v1/capabilities` | Exact versioned response; inbound operations remain disabled after any missing, unknown or unsafe field. Remote limits are clamped to local bounds. |
+| Recipient lookup | `GET /api/v1/recipients/{recipientId}` | Exact stable provider/recipient identity, bounded display data and optional verified key metadata. |
+| Inbox | `GET /api/v1/inbox?limit=...` | Exact metadata-only response, bounded to at most 1,000; duplicate identities and manifest-binding mismatches fail the entire response. The current interface has no continuation cursor. |
+| Download | `GET /api/v1/inbox/{incomingId}/content` with one `Range` | Sequential bounded chunks to private staging; final size/hash verified. |
+| Acknowledge | `POST /api/v1/inbox/{incomingId}/acknowledge` | Stable action-specific idempotency key; legal only after explicit native-validated local acceptance. |
+| Reject | `POST /api/v1/inbox/{incomingId}/reject` | Stable distinct idempotency key; separate from accept, acknowledgement and remote deletion. |
+| Delete incoming provider copy | `DELETE /api/v1/inbox/{incomingId}` | Enabled only by verified `incomingDelete`; stable action key; 404 is idempotent only for an authenticated configured provider. Success persists `ProviderDeleted` without deleting local or Gallery files. |
+| Block sender | `POST /api/v1/senders/{senderId}/block` | Enabled only by verified `senderBlocking` and only for a sender obtained from the bounded authenticated inbox. Success is also persisted locally. |
 
-Duplicate delivery is detected by provider/transfer ID and content hash. It never overwrites a distinct local record silently. Cancellation stops network/file work, persists `Cancelled`, removes safe temporary data and requests provider cancellation; it does not claim remote deletion unless acknowledged.
+Inbound metadata carries provider ID, sender ID, incoming opaque ID, exact
+canonical manifest JSON, its SHA-256, byte size, receipt time and expiry. The
+queue validates that all duplicated fields bind to the manifest before writing
+SQLite. Automatic content download is off.
 
-## Durable state machines
+Local sender blocking is a separate explicit action. It never contacts the
+provider and is labelled local-only in the UI. Provider blocking never silently
+falls back to local-only when its capability/request fails. Persistent block
+records are keyed by configured provider and opaque sender ID, capped by the
+queue limit, and apply to later listings. `Save As` copies only a revalidated
+normalized PNG to a new non-symlink destination via `QSaveFile`; the chosen
+destination is not persisted or reported in diagnostics. Deleting the private
+sharing copy is idempotent and leaves any already imported Gallery record,
+independent Save As file and provider object unchanged.
 
-Outgoing states and legal principal transitions:
+The transport uses manual redirects and cache/cookie/auth-reuse controls,
+validates TLS peers, rejects cross-origin redirect credential forwarding, caps
+redirects at five and timeouts at five minutes, caps HTTP response bodies at 1
+MiB, response headers at 128/32 KiB and transport URLs at 8 KiB. Default
+response and redirect limits are smaller. Plain HTTP requires both a dedicated
+compile definition and an explicit loopback-only test option; the production
+library is compiled without that definition.
 
-```text
-Draft -> Queued -> Preparing -> Encrypting? -> Uploading
-Uploading -> WaitingForAcknowledgement -> Completed
-any active -> Paused -> Queued
-temporary error -> RetryScheduled -> Queued
-any nonterminal -> Cancelled | Rejected | Expired | Failed
-```
+## Durable queue, files and SQLite
 
-`Encrypting` is skipped only when the persisted policy is `tls_only`. `Uploading` includes create/chunk/complete substate persisted with bytes. Provider upload completion does not imply recipient acknowledgement. Terminal states are durable; retry never moves `Expired`, `Rejected` or `Cancelled` back to active without creating a new transfer UUID.
+`SstvShareQueueManager` is timer-agnostic and QObject-thread-affine.
+`SstvShareController` now owns it on a dedicated `SstvShareWorker` thread and
+drives `processDue()` from a bounded timer and explicit events. Embedders of the
+core manager retain the same thread-affinity requirement. Queue defaults are:
 
-Incoming states:
+- 10,000 transfer rows and 10,000 inbox rows;
+- 4,096 provider/sender block rows;
+- 200 rows per model query;
+- two concurrent transfers, one per provider;
+- 1 MiB upload and download chunks;
+- five retries with deterministic jitter and bounded provider `Retry-After`.
 
-```text
-ListedMetadata -> AwaitingDecision -> Downloading -> Verifying
-Verifying -> ReadyToImport -> Accepted
-AwaitingDecision -> Rejected
-any nonterminal -> Expired | Revoked | Failed
-```
+Absolute configurable ceilings are 100,000 transfer/inbox rows, 100,000 sender
+blocks, 1,000 query rows and 16 concurrent transfers. Queue state, attempts,
+next retry, byte offset, manifest, provider opaque session and redacted error
+are committed transactionally. Credentials and full image BLOBs are not stored
+in SQLite.
 
-Inbox polling downloads safe, bounded metadata only by default. `Accepted` means a validated atomic local import, not an RF transmission. Restart reconciliation compares persisted state, quarantine/final files and provider status before advancing. Every transition records UTC, reason/error class and monotonically increasing local revision through the SQLite worker.
+Uploads whose manifest does not explicitly allow metered transfer are eligible
+only when the platform probe positively reports an unmetered route. A metered
+or unknown result leaves the row durably queued; the UI explains this before
+queueing. The controller publishes a versioned diagnostics map containing only
+bounded uploaded/downloaded byte totals, bounded average bytes/second, active/
+upload/download queue depths and UTC reset time. Totals saturate at `2^53-1`
+for exact QML integer representation and reset explicitly. Provider IDs, URLs,
+credentials, tokens, manifest text and local/export paths are not diagnostics
+fields.
 
-## Expiry, inbox and deletion
+Remote-copy removal is a separate asynchronous history action, never a normal
+transfer cancellation. It accepts only upload rows whose managed and embedded
+core states are both `Completed`, whose provider upload handle and
+`remoteObjectId` survived strict persistence validation, and whose current
+provider is authenticated and advertises an executable capability. Real
+remote delete takes precedence over revocation. A failure remains `Completed`
+with a redacted durable diagnostic and requires an explicit retry; there is no
+automatic destructive retry. Success retains the immutable completed transfer
+snapshot and changes only the managed terminal projection to `RemoteDeleted`
+or `RemoteRevoked`, so restart and history queries remain valid. Operation
+claims make late callbacks after cancellation, provider replacement or
+shutdown inert.
 
-- Expired transfers cannot be newly uploaded, resumed, downloaded or imported. In-flight work aborts when expiry is observed; bounded clock-skew handling may refresh trusted time but cannot extend expiry silently.
-- The sender chooses an explicit expiry within provider limits. A provider advertises retention/deletion semantics and should delete content after expiry; the client displays when deletion is best-effort.
-- Inbox entries show authenticated sender ID, callsign as display data, provider, safe preview/metadata, size, mode, timestamp, hash, message and expiry. Automatic image download is off. Preview bytes undergo the same bounded validation and cannot reference remote content.
-- Accept, reject, acknowledge, block and remote-delete are separate actions with auditable results. Reject does not imply deletion; revoke cannot retract copies already downloaded.
-- Quotas are reserved before download. Paging, queue size, polling cadence and retry count are bounded. A malicious sender/provider cannot create an unbounded in-memory model.
+The active-queue model exposes capability-derived `Pause` and `Resume`
+actions. Pausing first invalidates the current provider-operation claim, asks
+the provider to cancel only that in-flight request, then persists `Paused`.
+Upload core state retains its exact resume target; download state retains the
+private staging path and byte checkpoint and resumes as `DownloadQueued`.
+Paused rows survive manager/process restart and `processDue()` cannot start a
+provider request until explicit resume. Cancellation remains available while
+paused and is a separate terminal request. Downloads already awaiting user
+acceptance cannot be paused because their network transfer is complete.
+The History model exposes `Delete provider copy` or `Revoke provider upload`
+only for the exact action selected above. Its modal confirmation requires a
+second acknowledgement and states that Decodium's local Gallery is unchanged;
+the controller/queue/provider path has no CAT, PTT, audio or TX dependency.
 
-## Credential model
+Downloads remain under a configured canonical root. Symlink/path escape,
+hostile display filenames, unexpected MIME/magic, pre-existing destination and
+oversize inputs fail. Raw bytes are written to a private UUID-named `.partial`
+file, checkpointed and fully re-hashed. Before `AwaitingAcceptance`, the native
+validator enforces the manifest byte/hash/dimension/pixel contract, an
+allowlisted PNG/JPEG magic and MIME match, single-frame `QImageReader` decoding
+under a checked allocation cap, then reconstructs the pixels as a metadata-free
+owner-only PNG using `QSaveFile` with direct-write fallback disabled. A separate
+user accept re-inspects that private object, persists `Accepted`, removes the
+raw remote bytes and emits a versioned validated handoff. The storage consumer
+then repeats path, permission, byte, SHA-256, PNG structure, dimension, pixel,
+allocation and full-decode checks, atomically publishes the exact normalized
+PNG plus sidecar in the existing imported layout, commits the Gallery row and
+only afterwards unlinks staging. Acknowledgement is a later provider
+operation. Reject removes raw
+and normalized staging but does not imply remote deletion; cancellation never
+deletes the source upload or an already accepted handoff.
 
-SQLite/QSettings store only provider configuration, non-secret policy and an opaque account identifier. Passwords, access/refresh tokens, API keys, persistent signed URLs and private keys use Decodium's platform `SecureSettings` backend. Because the current convenience API can fall back to plain `QSettings`, SSTV must call a fail-closed wrapper/direct backend path: unavailable lookup/store disables authenticated transfer and reports the error. Credentials are never exposed as QML properties, diagnostics or crash context and are held in memory only for the request lifetime where practical.
+The live controller derives `queue.sqlite`, `downloads` and `outgoing` below
+the native SSTV `sharing` directory. Generated outgoing copies are separate
+from gallery/source files and are removed only after their transfer reaches a
+terminal state; cancelling never removes the operator's original image.
 
-## E2EE and downgrade prevention
+### Validated incoming handoff and storage ownership
 
-Protocol v1 defines policy even when no E2EE implementation is built:
+The native `schemaVersion: 1` map is exact-field and contains `transferId`,
+`providerId`, `incomingId`, `senderId`, `safeDisplayFilename`, `sstvMode`,
+`sourceMimeType`, `sourceSha256`, `sourceByteSize`, `stagedCanonicalPath`,
+`stagedMimeType`, `stagedSha256`, `stagedByteSize`, `width`, `height`,
+`receivedUtc` and `expiresUtc`. Unknown, missing or type-coerced fields are
+rejected. `DecodiumBridge` connects
+`SstvShareController::incomingHandoffReady(QVariantMap)` with a queued
+connection directly to
+`SstvStorageWorker::importValidatedIncomingHandoff(QVariantMap)`; native callers
+may instead use `importValidatedIncomingHandoffTyped(...)`.
 
-- `encryption.policy` is `tls_only` or `e2ee_required`; it is immutable and included in manifest hashing/authenticated data.
-- `e2ee_required` needs a mutually supported, versioned suite from an audited packaged crypto library, a verified recipient public-key ID/fingerprint, authenticated encryption and library-generated unique nonces. No cryptographic primitive is implemented locally.
-- Canonical manifest bytes are authenticated associated data. The envelope records suite, sender/recipient key IDs, nonce and ciphertext SHA-256; the plaintext SHA-256 is verified only after successful authentication/decryption and before image processing.
-- Create/status/complete responses echo encryption policy, suite, key IDs and manifest digest. Any missing/changed value fails `integrity`; retry/resume cannot change it.
-- Key rotation creates a new key ID. A resumed transfer continues with its original valid key or fails; it never silently selects cleartext or an unverified replacement.
-- If E2EE is not compiled, selecting `e2ee_required` is unavailable/fails before queueing. `tls_only` remains a separate explicit choice and the UI states that the provider can read content.
+Completion is reported as one typed
+`incomingImportFinished(SstvIncomingImportResult)`. The result carries
+`transferId`, `ok`, `retryable`, `idempotent`, a bounded error category/message
+and the committed `SstvImageRecord` when one exists. On `ok`, Gallery PNG,
+sidecar and SQLite row are verified and staging is absent. On every pre-commit
+or retryable failure staging remains owned by the sharing side; a post-commit
+cleanup interruption returns `CleanupPending`, and replay finishes cleanup by
+matching transfer UUID plus normalized PNG SHA-256. A restart can also adopt a
+fully verified exact PNG/sidecar pair left between file publication and the
+database commit. A conflicting UUID/hash is never overwritten.
 
-E2EE is **not implemented by this document**. Its availability may be claimed only after dependency, packaging, test-vector and interoperability evidence exists on maintained platforms.
+For process-restart recovery, the controller emits each still-valid durable
+`Accepted`, `Acknowledging` or `Acknowledged` handoff once after rebuilding its
+queue manager. The Bridge makes two bounded delayed retries after a retryable
+Gallery result, always with the same immutable handoff; after that an accepted
+item remains explicitly retryable while its private staging file exists and
+can be imported again from the UI or on restart. Provider acknowledgement is a
+separate operator action and is never inferred from Gallery import success.
 
-## Privacy, logs and UI contract
+The Gallery record stores only metadata with a matching native meaning:
+validated mode, receive/expiry times, provider ID, provider incoming-object ID,
+remote/imported status, dimensions and the exact normalized PNG hash. The
+opaque `senderId` is deliberately not guessed to be a callsign, and remote
+filename/text/embedded image metadata is not copied into record note, callsign
+or QSO fields.
 
-Remote sharing is opt-in. Automatic upload/public sharing/content download, EXIF/location retention and metered background transfer default off. Recipient, provider, encryption status and expiry are confirmed visibly. Callsign/grid inclusion is configurable. Upload preparation strips EXIF unless explicitly retained.
+## Credentials and privacy
 
-Logs contain transfer UUID, provider name, state, redacted error class, byte counts and timing where useful. They exclude authorization data, signed URLs, private keys, full envelopes/content and unnecessary identity/message data. Provider errors are normalized before reaching QML; QML receives typed bounded fields, not credentials or executable markup.
+Bearer/refresh tokens, passwords, API keys, persistent signed URLs and private
+keys must use `secure_settings::Backend` directly through an SSTV-specific,
+fail-closed credential source. The controller implements that rule for its
+current Bearer/Basic provider secret and does not use the convenience
+`load_or_import()` or `value_for_write()` paths, which can return plaintext for
+ordinary `QSettings` persistence when the platform backend is unavailable or a
+store fails.
 
-## Implementation and conformance gates
+Only an opaque provider/account handle and non-secret policy may enter settings
+or SQLite. A credential lease is the only object permitted to modify a network
+request; it cannot change the endpoint or relax redirect, cookie, cache or TLS
+policy. Signed target URLs are leases too and are never returned in public
+results. Backend unavailable, lookup failure or refresh-needed status disables
+authenticated transfer with an actionable redacted error.
 
-The protocol is conformant only when all of the following are evidence-backed:
+Remote sharing, public sharing, automatic incoming download, EXIF/location,
+metered-network background work and callsign/grid disclosure default false.
+The native page explains the opt-in and secure-store boundary, exposes expiry
+and every optional disclosure before upload, and states explicitly that the
+configured TLS-only provider can read content. This is not an E2EE claim.
 
-1. Provider abstraction and persistent outgoing/incoming queues exist outside QML.
-2. Generic HTTPS, WebDAV HTTPS and pre-signed HTTPS PUT behavior is tested against deterministic servers; unsupported capabilities are accurately exposed.
-3. Strict TLS, redirect/origin, response-size, JSON and credential-redaction tests pass.
-4. Create/chunk/complete idempotency, crash/restart resume, wrong hashes, duplicate completion, rate limits, outage, expiry, revoke and inbox rejection pass.
-5. Quarantine, bounded image validation, `QSaveFile` promotion, path safety and worker-thread SQLite ordering pass.
-6. `SecureSettings` backend failures prove fail-closed behavior with no plaintext secret persistence.
-7. E2EE is advertised only when audited crypto, envelope tests, key rotation and downgrade tests pass.
-8. No sharing event or manifest field can invoke TX/PTT, and local SSTV works with all providers disabled.
-9. A production provider is listed only after its deployed endpoint, authentication, operations, limits, privacy, retention, monitoring and credentials are independently verified. As of this document, that list is empty.
+The compiled pre-signed provider can receive a target only through a trusted
+`SstvSharePresignedTargetSource` lease. A signed URL is a bearer secret: it is
+not a provider ID, manifest field, controller configuration value, model role,
+queue/telemetry field or ordinary setting. This repository contains no broker
+that authenticates a Decodium user and mints that lease, so the native selector
+shows the provider as unavailable. Enabling it requires a maintained broker,
+audited authentication/authorization and expiry/replay policy, plus tests that
+the signed target never crosses the lease boundary. Manual signed-URL entry is
+intentionally unsupported.
+
+## Local integration adapter and peer/relay boundary
+
+When no external backend is available, deterministic integration tests inject
+`SstvLocalIntegrationShareProvider` behind the normal `SstvShareProvider`
+contract. It implements bounded create/chunk/status/complete/cancel, inbox,
+download, acknowledge/reject, revoke/delete and sender-block semantics with
+stable local participant IDs, expiry, hash verification and idempotency. One
+resident-payload budget covers both active sessions and completed objects;
+pending operation count and captured chunk bytes are jointly bounded. Cancel,
+reject, revoke, delete and expiry reclaim their payload budget. This adapter is
+not registered in production settings/UI, opens no listener or client socket,
+stores no secret and is not an Internet or LAN provider.
+
+Production peer/relay is a future provider design, not implemented code. If pursued, it
+must remain an adapter behind `SstvShareProvider`; no relay logic, second GUI or
+helper process belongs in Decodium. A separately deployed relay would need an
+audited stable-identity directory, authenticated rendezvous, bounded object and
+inbox APIs, expiry/retention enforcement, abuse controls, monitoring and an
+independent privacy policy. Direct inbound listeners and automatic NAT/port
+mapping remain off by default.
+
+Relay metadata and content visibility must be stated explicitly. A claim that
+the relay cannot read content requires a separately audited E2EE envelope,
+recipient-key verification, nonce uniqueness, manifest-bound authenticated
+data, rotation/revocation behavior and maintained-platform packaging. Relay or
+peer messages can never carry an instruction that invokes TX/PTT.
+
+DecoPort, the existing remote-command WebSocket channel and any other Decodium
+control transport remain out of scope unless a separate audit establishes the
+sharing protocol, authentication, origin, storage, expiry and abuse boundaries.
+
+## Build and packaging requirements
+
+The native targets require Qt 6 Core; the queue additionally requires Qt 6 Sql
+and the runtime `QSQLITE` driver; HTTP providers additionally require Qt 6
+Network. Queue initialization fails closed when `QSQLITE` is absent. Linux
+build containers already install `libqt6sql6-sqlite`, and the AppImage script
+has explicit `sqldrivers/libqsqlite` handling, but every produced macOS,
+Windows and Linux artifact must still be inspected before a release claim.
+
+No additional server, Python runtime or external SSTV application is required
+for local analog SSTV. A provider service is optional and independently
+configured.
+
+REST and WebDAV upload sessions and pre-signed target leases have explicit
+hard-bounded active-session and terminal-idempotency tables. Concurrent create
+reservations prevent response races from exceeding the active cap. Successful
+complete/cancel/revoke/delete transitions remove the full session; a minimal
+bounded tombstone preserves an immediate idempotent retry until its manifest
+expiry. Expired records are purged on the next provider operation. Pre-signed
+target leases are released on completion, cancellation, expiry and provider
+destruction. HTTP request concurrency remains capped at 16 with a shared
+128 MiB request-body-plus-response reservation budget.
+
+## Local verification snapshot
+
+On 2026-08-24 the sharing UI and `decodium_qml` application target built and
+linked locally. A timed, isolated, software-rendered launch loaded the native
+`BootLoader`/`Main.qml` application and exited normally. The focused CTest
+targets cover sharing core, queue manager, incoming-media validation, the
+Gallery importer and crash-window recovery, controller, QML, HTTP providers
+and the production plaintext gate; the queue test includes upload/download
+pause, restart-without-network-work, checkpointed resume, fail-closed metered
+policy, monotonic/reset diagnostics, bounded persistent sender blocks, remote
+incoming deletion, Save As and local-copy deletion. HTTP tests cover verified
+delete/block capabilities and stable action keys, while the controller test
+exercises explicit privacy manifests and secret-free diagnostics. The Sharing page
+also has a 1040x700 offscreen render test. This proves only the tested native paths in that build
+environment, not a live HTTPS service, certificate/hostname matrix, real
+platform credential store, packaged QSQLITE plugin, peer/relay deployment or
+maintained-platform interoperability.
+
+## Remaining M6 release gates
+
+The current code and deterministic tests implement a native bidirectional
+generic REST client tranche, not a completed or deployed M6 service. Release
+readiness still requires:
+
+1. complete fail-closed credential tests for backend-unavailable and
+   lookup/store/remove failures, plus scans of SQLite, QML, logs and diagnostic
+   exports and maintained-platform secure-store validation;
+2. full lifecycle/thread-affinity validation of the Bridge/worker/QML
+   integration, beyond the passing focused controller and offscreen-render
+   tests;
+3. broader shutdown-race and expiry-during-operation coverage around provider
+   deletion/blocking, the accepted-handoff importer and pause/resume controls;
+4. additional expiry-during-transfer, pagination/quota and
+   concurrent-shutdown tests beyond the deterministic inbound success, auth,
+   redirect, cancel, integrity, decision and restart coverage;
+5. OpenAPI conformance tests against any server offered for use;
+6. maintained-platform build/package verification including QSQLITE;
+7. explicit architecture evidence that no provider/manifest/inbox transition
+   can call CAT/PTT/TX;
+8. an independent audit of any named production endpoint, authentication,
+   limits, privacy, retention, operations and monitoring.
+
+Until those gates pass, the production-provider list remains empty. The Sharing
+page remains explicit opt-in, and every operation not advertised by its
+configured provider remains disabled; no bundled service makes it turnkey.

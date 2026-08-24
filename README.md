@@ -51,6 +51,22 @@ Decodium include supporto operativo per:
 
 La disponibilita effettiva di alcune funzioni puo dipendere dal backend di decode usato, dalla piattaforma e dalla configurazione di build.
 
+#### SSTV nativo
+
+Le build con `DECODIUM_ENABLE_SSTV=ON` includono un unico workspace SSTV
+integrato per ricezione e trasmissione analogica, Studio immagini, Gallery,
+logging QSO, condivisione HTTPS opt-in e diagnostica.  Usa gli stessi percorsi
+audio e lo stesso coordinamento CAT/PTT di Decodium; non avvia un decoder
+esterno e non apre una seconda sorgente di cattura.  HAMDRM e' un sottosistema
+digitale separato, disponibile solo quando `DECODIUM_ENABLE_HAMDRM=ON` e quando
+il backend dichiara le capacita effettive.
+
+La [guida utente SSTV](docs/sstv/USER_GUIDE.md) descrive il flusso operativo e
+i limiti di sicurezza.  La [matrice dei modi](docs/sstv/MODE_MATRIX.md) indica
+esattamente quali righe hanno prove native o indipendenti: una funzione
+implementata non implica automaticamente una prova on-air, con radio reale o
+con un'altra applicazione.
+
 #### FT2 e weak signal
 
 FT2 e' uno dei focus principali del progetto. Decodium 4 include:
@@ -506,6 +522,21 @@ Decodium provides operating support for:
 - `WSPR`
 
 The exact runtime availability of some features can depend on platform, decoder backend and build configuration.
+
+#### Native SSTV
+
+Builds with `DECODIUM_ENABLE_SSTV=ON` include one integrated SSTV workspace for
+analogue receive/transmit, image Studio, Gallery, QSO logging, opt-in HTTPS
+sharing and diagnostics.  It reuses Decodium's audio routes and CAT/PTT
+coordination; it neither launches an external decoder nor opens a second
+capture source.  HAMDRM is a separate digital subsystem, present only with
+`DECODIUM_ENABLE_HAMDRM=ON` and enabled according to the backend's reported
+capabilities.
+
+See the [SSTV user guide](docs/sstv/USER_GUIDE.md) for operation and safety
+limits.  The [mode matrix](docs/sstv/MODE_MATRIX.md) states exactly which rows
+have native or independent evidence: implemented functionality is not by
+itself an on-air, real-radio or cross-application interoperability result.
 
 #### FT2 and Weak-Signal Operation
 

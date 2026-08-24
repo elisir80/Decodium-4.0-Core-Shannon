@@ -1,6 +1,6 @@
 # Native SSTV implementation plan
 
-Status: active design contract, 2026-08-23.
+Status: active design contract and progress ledger, 2026-08-24.
 
 This plan implements SSTV inside the existing Decodium4 process. It does not
 define a companion program, a second audio capture path, or a runtime bridge to
@@ -25,9 +25,10 @@ QSSTV, Python, Java, or Android code. The baseline is tag `v1.0.583`, commit
   each SSTV test target will explicitly request C++17 rather than changing
   unrelated test targets.
 - Analog SSTV remains usable when HAMDRM, remote sharing, or both are disabled.
-- A mode is not marked supported until its timing, colour order, VIS handling,
-  deterministic tests, and an independent source/vector are recorded in the
-  generated mode matrix.
+- A mode is marked `implemented` only when timing, colour order, VIS handling
+  and deterministic executable tests are complete. It is not marked
+  `verified` until independent evidence and the exact interoperability scope
+  are recorded in the mode matrix.
 
 ## Target structure
 
@@ -44,7 +45,7 @@ src/sstv/
   storage/      atomic files, SQLite worker, thumbnails and gallery model
   sharing/      providers, persistent queues, manifests and incoming inbox
   digital/      separately gated HAMDRM codecs, profiles, objects and BSR
-qml/decodium/sstv/
+qml/decodium/components/sstv/
 tests/sstv/
 docs/sstv/
 ```
@@ -122,6 +123,51 @@ Gate: every mandatory mode has an explicit RX/TX/auto-detect status and proof
 cell. No user or release text says "all modes" unless every required row is
 verified.
 
+Current Wraase/Pasokon tranche: SC2-60/120/180 and P3/P5/P7 have one original
+table-driven bounded RGB mapper, streaming TX encoder and one-scanline RX
+decoder, automatic standard VIS selection in the existing RX runtime, shared
+TX coordinator/WAV source construction and Studio descriptors. Timing and
+geometry conflicts are represented as explicit compatibility profiles in the
+registry and provenance audit. Executed pinned pySSTV landmarks cover
+SC2-120/180 and P3/P5/P7; SC2-60 has deterministic self-generated evidence
+only. All six therefore remain implemented, not verified, pending live-radio
+and cross-application evidence; SC2-60 additionally needs a second executable
+lineage or independent waveform. These RX sessions use the VIS-derived image
+anchor and cumulative protocol clock; line syncs are observed for diagnostics,
+but missing-sync reacquisition, measured slant correction and on-air clock/AFC
+performance have not been demonstrated for this family. Pasokon transmits all
+496 prepared RGB rows: the Handbook reserves the upper 16 for calibration but
+does not define a unique grayscale pixel pattern, so the native Studio does not
+synthesize one implicitly.
+
+Current PD tranche: PD50/90/120/160/180/240/290 share one table-driven
+cumulative mapper, phase-continuous bounded TX encoder and four-scan-bounded RX
+decoder/session. The existing in-process RX runtime maps standard VIS
+93/99/95/98/96/97/94 to these sessions; the shared TX coordinator, atomic WAV
+export and Studio mode model use the same descriptors and exact geometry. A
+radio scan is always 20 ms sync, 2.08 ms porch, Y-even, floor-average Cr,
+floor-average Cb and Y-odd, and the mapper terminates at exactly `height/2`
+pairs. Pinned pySSTV landmarks independently cover PD90-PD290; a separately
+executed pinned libsstv path covers all seven only through the canonical image
+boundary. Its verified extra-pair/out-of-bounds suffix is negative evidence and
+is never reproduced. All seven remain implemented, not verified: no live radio
+or cross-application exchange has measured long-duration AFC, slant or terminal
+compatibility, and PD50 still lacks a second independent executable lineage.
+
+Current AVT tranche: normal AVT24/90/94 share one cumulative, sync-free RGB
+mapper plus a fixed-memory protected-countdown detector. The existing runtime
+requires a mapped normal standard VIS and a valid inverse-protected 32x17
+countdown before starting a progressive image session; it does not invent
+per-line anchors after a discontinuity. TX, the SoundOutput/PTT coordinator,
+atomic WAV export and Studio use the same native pull source. AVT90 preserves
+the Handbook's 256x240 effective resolution separately from the audited
+320x240 prepared/wire raster and uses prefix `101`, not the pinned MMSSTV
+`010` defect. The complete AVT24 PCM runtime loopback and pinned source
+landmarks are deterministic developer evidence only, so all three normal modes
+remain implemented rather than verified. Narrow/QRM/Narrow-QRM VIS identities
+are catalogued but deliberately have no RX, TX, autodetect, WAV or Studio
+capability until complete picture semantics and independent evidence exist.
+
 ### M4: storage, gallery and native QML workspace
 
 Add a controller and C++ models registered by `main_qml.cpp`, then a navigable
@@ -138,6 +184,28 @@ Gate: QML lint and rendered smoke checks pass; a large synthetic gallery stays
 incremental; atomic-save, migration, quota-preview and hostile-image limits are
 tested. The feature is reachable from normal Decodium navigation.
 
+Current Gallery integration is native and incremental. Per-record actions can
+atomically export a re-verified PNG on the storage worker, open the indexed
+image in the existing Transmit Studio without keying the radio, start the
+existing bounded WAV replay path when retained raw audio exists, or preselect
+the image on the opt-in Remote Sharing page without queueing it. The export
+refuses non-local/linked/non-PNG destinations, existing files unless explicit
+replacement is requested, and the indexed source itself; it streams and hashes
+the copy before atomic commit. Index-only removal remains deliberately labelled
+and preserves PNG/sidecar files. A separate strongly confirmed destructive
+action verifies every selected record, refuses unsafe/shared mandatory paths,
+privately stages the owned PNG, sidecar, thumbnail and exclusive retained WAV,
+then deletes the SQLite rows transactionally and removes the staged files.
+In-process failures restore staged files; a bounded private journal lets startup
+restore a pre-commit interruption or finish post-commit cleanup; shared optional
+files are retained. Gallery favourites and versioned retention settings are now
+first-class in SQLite/sidecars/model/QML. Separate image/thumbnail/raw-audio
+quota inventory feeds a non-destructive deterministic preview; manual apply
+requires an exact phrase and automatic apply is persisted opt-in, off by
+default, with favourite/QSO/shared/unowned protections. Both reuse the same
+bounded deletion journal. See `GALLERY_RETENTION_POLICY.md`. QSO logging and a
+dedicated re-decode-parameter UI remain separate M4 integration work.
+
 ### M5: Decodium TX/CAT/PTT integration
 
 The SSTV coordinator validates prepared content, obtains exclusive TX
@@ -146,6 +214,25 @@ PCM through the existing output selection, watches progress/underruns, and
 releases ownership on every success, cancellation, error, disconnect,
 shutdown and destructor path. A fail-safe guard is mandatory.
 
+The current native VOX path no longer treats a logical VOX selection as proof
+that the radio was already keyed. For live SoundOutput only, the coordinator
+streams one bounded envelope consisting of a configurable 1900 Hz pre-key
+tone, the unchanged SSTV/FSK payload, and a configurable hang tone. Protocol
+landmarks are shifted explicitly, UI progress excludes the envelope, and
+cancellation reaches all three phases through the same audio lease. CAT/PTT
+continues to use confirmed feedback plus silent lead/tail barriers. WAV export
+remains protocol-only. Timing controls are exposed on the SSTV Settings page,
+are persisted through Decodium settings, apply only while TX is inactive, and
+are locked for the duration of a session.
+
+Local verification built and linked `decodium_qml`, rendered the Settings page
+offscreen without QML warnings, and ran the coordinator suite twenty times.
+The tests compare the emitted VOX tone samples with the native DDS, verify
+absolute pre-key/header/image/payload/hang boundaries, progress semantics,
+runtime timing updates, cancellation, lease retention and the absence of a
+CAT PTT-off request for VOX. This is not an on-air VOX threshold or radio
+hardware validation.
+
 Gate: tests cover PTT success/timeout, cancellation at header/image/FSK,
 device loss, watchdog and concurrent weak-signal TX rejection. WAV export and
 internal loopback never key the radio. Real-radio validation remains a separate
@@ -153,15 +240,76 @@ manual result, not inferred from mocks.
 
 ### M6: secure remote sharing
 
-Implement the provider-neutral persistent state machine first, then the local
-test provider, generic HTTPS REST, WebDAV over HTTPS and pre-signed PUT flows.
-Audit the existing DecoPort/WebSocket channel before deciding whether it can
-carry a Decodium relay provider. No fictional production service is embedded.
+Current native implementation:
 
-Gate: local HTTP integration tests cover auth redaction, idempotency, restart,
-resume, hash failure, redirect-origin restrictions, expiry and inbox rejection;
-the OpenAPI description matches the implementation. Remote sharing stays
-opt-in and local SSTV works with no credentials or service.
+- strict canonical manifest v1, bounded JSON/security helpers, provider
+  abstraction, redacted failure classes and persistent transfer state;
+- generic HTTPS REST outbound create/sequential-chunk/status/complete/cancel
+  plus fail-closed capability/recipient/inbox/range-download/acknowledge/reject,
+  WebDAV HTTPS collection/upload/status/delete/direct bounded GET and
+  trusted-lease pre-signed PUT providers;
+- SQLite schema v1 upload/download/inbox queue with bounded concurrency,
+  deterministic retry, restart recovery, durable operator pause/resume for
+  uploads and downloads, private staging, full SHA-256, explicit accept,
+  acknowledge, reject and cancellation;
+- deterministic tests for the core, HTTP providers and queue, including
+  plaintext production gating, cross-origin redirect rejection, idempotency,
+  restart boundaries, hash mismatch and inbox decisions;
+- a dedicated sharing worker/controller exposed through
+  `DecodiumBridge::sstvShare`, with privacy-off startup, user-configured HTTPS
+  REST/WebDAV, capability-driven queue/history/inbox models and a rendered QML
+  page;
+- bounded outgoing image decode and dimension checks followed by an atomic,
+  owner-only metadata-free PNG copy under native SSTV sharing storage; the
+  operator's original gallery/storage image is never the queued mutable source;
+- bounded incoming byte/hash/MIME/magic/dimension/pixel/allocation and
+  single-frame checks, followed by an atomic private metadata-free PNG and a
+  versioned handoff;
+- an owner-thread Gallery storage consumer for that exact schema-v1 handoff,
+  with repeated canonical/private path, no-symlink, byte/hash, PNG and bounded
+  full-decode checks, exact-byte atomic publication in the existing imported
+  layout, transactional SQLite insertion, post-commit staging cleanup and
+  UUID/hash idempotency;
+- a direct fail-closed `secure_settings::Backend` credential path for current
+  Bearer/Basic providers; a focused test covers worker-thread store/remove and
+  absence of the submitted secret from its ordinary settings file;
+- a server-neutral reference contract in
+  `docs/sstv/remote-sharing-openapi.yaml`, with no production endpoint.
+
+Local verification on 2026-08-24 built the sharing UI and linked
+`decodium_qml`; focused sharing CTest targets and the 1040x700 offscreen
+Sharing-page render passed. No live server, real platform keychain/secret
+store, packaged artifact or Internet interoperability was exercised.
+
+This is a native bidirectional generic REST client tranche, not a completed or
+deployed milestone. Sender blocking and provider-delete flows remain absent.
+Native accepted-image save/import and strongly confirmed local Gallery deletion
+are present. The native storage
+import API, controller-to-storage integration test and queued Bridge lifecycle
+connection exist; the controller's secure-store and lifecycle tests still do
+not cover every failure or maintained release platform.
+
+Qt 6 Sql and the runtime `QSQLITE` driver are mandatory for the persistent
+queue. Linux build/package paths already mention the SQLite plugin, but every
+produced Windows, macOS and Linux artifact must be verified. Missing `QSQLITE`
+is a fail-closed initialization error, not an in-memory fallback.
+
+Peer/relay remains design-only behind `SstvShareProvider`. Audit the existing
+DecoPort/WebSocket control channels before any reuse decision. A relay would be
+a separately deployed, explicitly configured service with independently
+verified identity, authentication, limits, retention, privacy and operations;
+no fictional production service or URL is embedded. E2EE remains unavailable
+until an audited crypto dependency, key lifecycle, envelope vectors and
+maintained-platform packaging exist.
+
+Remaining gate: add sender-block and provider-delete actions; make TLS-only
+provider visibility explicit; prove provider events
+cannot reach TX/PTT; extend expiry, revoke, quota/flood, TLS
+certificate/hostname, worker lifecycle and credential-backend failure coverage;
+scan every persistence/diagnostic surface for secrets; verify QSQLITE and the
+platform secure store in maintained-platform artifacts; and run conformance
+against any provider offered to users. Remote sharing stays opt-in and local
+SSTV must work with no credentials or service.
 
 ### M7: separate HAMDRM subsystem
 
@@ -182,6 +330,11 @@ HAMDRM objects; sanitizer CI; performance counters/benchmarks; full docs and
 notices; and platform build/package jobs. Run complete regressions and verify
 actual produced bundles contain required Qt image plugins and optional native
 libraries.
+
+The storage slice now has fixed-size, saturating counters for bounded database
+queue depth and image-save duration/success/failure, with lifecycle,
+concurrency, privacy and real-save tests. Other M8 counters, maintained-platform
+benchmarks and package jobs remain separate work.
 
 Gate: maintained Windows, macOS and Linux jobs build the application and SSTV
 tests. Hardware/radio/platform claims are limited to what was actually run.

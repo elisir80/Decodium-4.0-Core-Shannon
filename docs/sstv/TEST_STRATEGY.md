@@ -85,8 +85,9 @@ Planned groups:
   rational timing, component ordering, capability/evidence invariants;
 - `test_sstv_timing`: fractional sample accumulation for all supported rates,
   bounded accumulated error and encoder total duration;
-- `test_sstv_vis`: standard/extended VIS bit order, parity, framing, drift,
-  offset, truncation, noise, false positives and repeated headers;
+- `test_sstv_vis`: standard/wide-extended VIS and four-group narrow N-VIS bit
+  order, parity/checksum, framing, drift, offset, truncation, noise, false
+  positives and repeated headers;
 - `test_sstv_fskid`: allowed alphabet, sanitisation, raw symbols, malformed
   input, confidence and deterministic RX/TX framing;
 - `test_sstv_colour`: fixed reference pixels for every distinct colour system
@@ -97,12 +98,31 @@ Planned groups:
 - `test_sstv_roundtrip`: waveform passed through an independent channel model;
 - `test_sstv_impairments`: acquisition, degradation and graceful partial exit;
 - `test_sstv_wav`: RIFF boundaries, streaming writes and hostile imports;
-- `test_sstv_storage`: paths, atomic files, migration, concurrency and quota;
+- `test_sstv_storage`: paths, atomic files, schema/sidecar favourite migration
+  and restart, separate quota buckets, retention ordering/protections,
+  confirmation, auto opt-in and deletion-journal crash recovery;
 - `test_sstv_sharing`: deterministic local server and persistent queues;
 - `test_sstv_security`: resource ceilings, redirects, JSON/path validation and
   secret/log redaction;
 - `test_sstv_tx_integration`: exclusive TX ownership and PTT release invariants;
 - `test_hamdrm`: profiles, objects, CRC, BSR, retransmission and malformed data.
+
+The operator-facing Studio/TX path additionally uses
+`test_sstv_image_preprocessor` for every preparation control/overlay and the
+bounded local codec boundary; `test_sstv_studio_controller` for immutable
+snapshots, template persistence/migration, WAV lifecycle and real PCM into a
+real `SstvRxRuntime`; `test_sstv_tx_audio_device` for the four calibration
+frequencies and peak/clipping counters; `test_sstv_tx_coordinator` for prepared
+calibration PTT/cancel lifecycle; and `test_sstv_studio_qml` for instantiated
+controls and offscreen rendering. These are unit, integration-local,
+self-generated and rendered-UI evidence, not live radio or cross-application
+evidence. See [STUDIO_TX.md](STUDIO_TX.md).
+
+The preprocessing, coordinator and Studio tests also assert low-rate
+structured-event coverage for validation rejection, TX/calibration lifecycle
+and loopback lifecycle. They verify exact `sstv.security`/`sstv.tx` categories,
+allowlisted scalar fields, bounded fixed reason codes, and absence of injected
+paths or free-form failure details.
 
 ## Registry and protocol correctness
 
@@ -122,13 +142,118 @@ frequency offsets, timing drift, bad parity, bad start/stop bits, damaged break,
 back-to-back headers and noise-only false-positive runs. FSK tests preserve raw
 symbols and reject or replace invalid characters deterministically.
 
+## AVT normal-family evidence
+
+Normal AVT24/90/94 use one clean-room implementation and the compact
+documentary/source-landmark fixture
+`tests/sstv/fixtures/avt-handbook-qsstv-landmarks.json`. The fixture pins the
+SSTV Handbook PDF at SHA-256
+`e244de9d5cbba525d33b25906c3751ab0ed62af2a3b373feffda44de4f13909d`,
+QSSTV at `8c27d6d169d8c6c197eb47c2089870e39bc06a02` and the MMSSTV mirror at
+`8060b5f1e9727b0052d74108081c6db7b26babad`. It contains no audio or copied
+implementation.
+
+Deterministic coverage is split across:
+
+- `test_sstv_avt_sync`: protected 17-symbol words, exact inverses, every mode
+  prefix/counter and all standard variant VIS identities;
+- `test_sstv_avt`: 128/320 prepared geometry, AVT90's separate 256 effective
+  width, exact triple VIS plus 32-frame countdown, cumulative no-line-sync RGB
+  mapper, bounded/chunk-invariant encoder/decoder, real one-sample-hop
+  frequency-demodulator acquisition, counter timing and full AVT24 PCM
+  loopback within both detector and decoder consume bounds;
+- `test_sstv_avt_rx_session`: progressive publication, completion,
+  cancellation, hostile bounds and fail-closed discontinuity without invented
+  phase;
+- `test_sstv_mode_registry`: implemented claims only for normal VIS 64/68/72,
+  explicit sync-free timing fields, 320 prepared versus 256 effective AVT90,
+  and catalogue-only/unimplemented Narrow/QRM/Narrow-QRM VIS 65-75;
+- `test_sstv_rx_runtime`: the actual in-process preprocessor/demodulator,
+  standard-VIS detector, protected-countdown detector and progressive session
+  select every normal mode; a full AVT24 128x120 frame completes from native
+  PCM, and reset permits a later non-AVT VIS without stale suppression;
+- `test_sstv_tx_coordinator`, `test_sstv_wav_exporter` and
+  `test_sstv_studio_controller`: native shared audio/PTT source selection,
+  exact 8.0425 s header/total frame counts, RIFF export and visible prepared
+  geometry without any external process.
+
+The AVT90 negative test requires prefix `101` and rejects copying the pinned
+MMSSTV transmitter's conflicting `010` prefix. Narrow, QRM and Narrow-QRM
+headers remain catalogue identities only: no test or document promotes them
+to executable picture modes without complete semantics and independent
+evidence.
+
+All AVT PCM used end-to-end is generated by Decodium itself. There has been no
+independently captured AVT waveform, live audio device, radio/PTT, on-air
+contact, packaged-platform execution or MMSSTV/QSSTV cross-application decode.
+
+## MMSSTV extended-family evidence
+
+The required extended family is represented by one native implementation and
+one canonical source-landmark fixture:
+`tests/sstv/fixtures/mmsstv-8060b5-extended-mode-landmarks.json`. The fixture
+pins the MMSSTV source mirror at
+`8060b5f1e9727b0052d74108081c6db7b26babad` and QSSTV at
+`8c27d6d169d8c6c197eb47c2089870e39bc06a02`. It records exact dimensions,
+scan counts, layouts, timing/frequency boundaries, raw wide extension octets
+and narrow payloads for all nineteen modes; it does not contain audio.
+
+The deterministic coverage is split across:
+
+- `test_sstv_mmsstv_extended`: all mode specifications, cumulative sample
+  mapping, fractional boundaries, MP vertical chroma, MR/ML horizontal chroma
+  and terminal holds, MC sequential RGB, streaming TX chunk invariance,
+  progressive bounded decode and hostile-input limits;
+- `test_sstv_mmsstv_vis`, `test_sstv_narrow_vis` and
+  `test_sstv_narrow_vis_detector`: exact wide extended-VIS/N-VIS framing,
+  parity/checksum, fragmentation, invalid candidates and false positives;
+- `test_sstv_mode_registry`: unique lookup and implemented RX/TX/autodetect
+  claims for all nineteen stable IDs, including the fixture-backed MP73-Narrow
+  payload `0x02`;
+- `test_sstv_rx_runtime`: encoder-to-PCM-to-detector-to-native-session
+  acquisition and progressive image publication for every wide and narrow
+  mode, plus coexistence with standard VIS;
+- `test_sstv_tx_coordinator`, `test_sstv_wav_exporter`,
+  `test_sstv_studio_controller` and `test_sstv_studio_qml`: native streaming
+  source selection, exact phase/frame boundaries, RIFF length and visible mode
+  selection without launching an external process.
+
+MR175 explicitly accepts raw extension `0x4C`, as transmitted/listed by the
+pinned original MMSSTV source and Handbook, and rejects QSSTV's duplicate
+MR140 `0x4A` typo. MC110-Narrow follows the executable 140 ms component and
+428.5 ms structural scan rather than the conflicting 143 ms prose. These are
+documented implementation resolutions, not interoperability proof.
+
+All end-to-end waveforms in this suite are produced by Decodium itself. The
+pinned source fixture is a clean-room protocol-landmark oracle, not independent
+PCM. No externally captured MMSSTV recording, live audio device, radio/PTT,
+on-air contact, packaged-platform run or independent application decode has
+been exercised; those remain separate release evidence.
+
+Current MMSSTV gates on macOS ARM64 (2026-08-24):
+
+- direct syntax builds of the new core, session, N-VIS codec/detector and the
+  RX runtime/TX source/coordinator/Studio integration pass with
+  `-Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Werror`;
+- the five protocol/registry targets pass 25 consecutive CTest executions each
+  (125 runs, 101.17 s); TX coordinator, WAV exporter, Studio controller and
+  offscreen Studio QML pass five consecutive executions each (20 runs,
+  56.15 s); the complete multi-family RX runtime passes twice consecutively
+  (156.23 s);
+- the nine targeted protocol/registry/runtime/TX/WAV/Studio targets pass
+  9/9 under combined ASan+UBSan with halt-on-error enabled (284.51 s).
+
+The linker emitted the existing deployment-target warning because the local
+Homebrew Qt frameworks target a newer macOS release than the configured 13.0
+minimum. No compiler, test, ASan or UBSan failure was reported.
+
 ## Encoder proof
 
 For every TX row, encode a fixed colour bars/grid/edge test card at all required
 sample rates. Measure event boundaries from PCM, not from private encoder state.
 Assertions cover:
 
-- leader/break/VIS/extended-VIS tones and durations;
+- leader/break/VIS/wide-extended-VIS/N-VIS tones and durations;
 - phase continuity across every segment and pixel;
 - exact transmitted lines and component sequence;
 - porch, separator, sync and pixel frequency bounds;
@@ -171,6 +296,8 @@ channels.
 Tests randomize producer block sizes and cancellation times while measuring:
 
 - bounded input/replay queue depth and reported drop count;
+- bounded database queue current/peak depth, rejection and shutdown
+  cancellation, plus last/average/maximum image-save time;
 - no image/file/SQL/network operation from the audio callback;
 - worker affinity and no QObject cross-thread warnings;
 - GUI update throttle and dirty-rectangle size;
@@ -182,6 +309,13 @@ Tests randomize producer block sizes and cancellation times while measuring:
 Performance reports record machine, build type, sample rate, mode, corpus and
 commit. One fast run is not a cross-platform performance claim.
 
+Storage counter tests use exact injected nanosecond values for arithmetic,
+multi-threaded updates for synchronization and a stalled/queued worker path for
+lifecycle. Real PNG timing assertions check attempt/success/failure accounting
+and invariants rather than a machine-specific speed threshold. The snapshot is
+also constrained to scalar values so paths and record metadata cannot enter a
+diagnostic export. See [PERFORMANCE_COUNTERS.md](PERFORMANCE_COUNTERS.md).
+
 ## Storage, parser and network security proof
 
 Hostile tests impose hard compressed bytes, dimensions, pixel/memory, WAV
@@ -189,6 +323,20 @@ duration/chunk, JSON depth/field and response-byte ceilings. Cases cover integer
 overflow, truncated RIFF, decompression bombs, invalid MIME, traversal,
 absolute/reserved names, Unicode normalization, symlink escape and interrupted
 atomic writes.
+
+Gallery export tests use a real indexed PNG/sidecar, require worker-thread
+verification and an exact streamed byte copy, inspect owner-only permissions,
+and prove that an existing destination, the indexed source path and a non-local
+URL are refused without modifying either file. The offscreen Gallery render
+also instantiates the per-record action menu, the destructive-delete control
+and its separate confirmation popup. A focused storage/model test proves that
+physical deletion removes the verified PNG, sidecar, thumbnail and exclusive
+retained WAV only after the row transaction, leaves index-only files untouched,
+and leaves no staging directory on the success path. A restart test constructs
+the exact bounded journal and proves both pre-commit restoration and post-commit
+staged-file cleanup. Shared-reference/fault-injection coverage, a real forced
+process kill and full user-dialog automation on each maintained desktop remain
+separate evidence.
 
 The local network server verifies HTTPS policy separately from localhost test
 exceptions and covers origin-changing redirects, credential forwarding,
