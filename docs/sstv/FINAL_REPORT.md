@@ -8,11 +8,13 @@ complete**. The exact remaining gates are recorded in
 
 Rebase/current-verification note: this branch was rebased onto `upstream/main`
 `0bcd8b04a` (release v1.0.584). Subsequent current-tree local verification
-built SSTV+HAMDRM, analog-only and SSTV-off configurations, then passed 82/82
-SSTV tests in 87.29 seconds and 37/37 non-SSTV tests in 96.80 seconds. The
-prior numerical sanitizer, performance and independent-vector evidence remains
-historical where no rerun is listed; current local tests do not prove external
-platforms, packages, radio, providers or independent interoperability.
+built SSTV+HAMDRM aggregate targets, analog-only and SSTV-off configurations,
+then passed the complete normal CTest set: 120/120 in 170.89 seconds (83
+SSTV-labelled and 37 non-SSTV). An independently built ASan/UBSan tree covered
+the same 120 tests in two invocations without an address/undefined finding.
+The prior numerical sanitizer, performance and independent-vector evidence
+remains historical where no rerun is listed; current local tests do not prove
+external platforms, packages, radio, providers or independent interoperability.
 
 ## 1. Starting branch and starting commit
 
@@ -36,11 +38,15 @@ hardware RTL-SDR test are recorded in
 - Rebased documentation-evidence commit: `fbac29f80`
 - Local storage/UI hardening commit: `4d05a5b9f`
 - Local package hardening commit: `79db9fc5a`
+- Audio-source handoff fence: `678f9ca70`
+- Incoming-media boundary fuzzing: `9cbdf1d2e`
+- Sanitizer fixes/coverage: `5733cbcc0`, `2114f4d21`, `62275bdd8` and
+  `efd1bc720`
 
 The rebase retained the native implementation and build/CI changes at the
 immutable SHAs above. The current local build/test evidence described here
-includes the two local hardening commits; no push, release or remote workflow
-has occurred.
+includes these local hardening commits. No push, release, package upload or
+remote workflow has occurred; the visible SSTV workspace remains **BETA**.
 
 Committed inventory so far:
 
@@ -56,6 +62,12 @@ f5dbce00d Complete native SSTV workspace and HAMDRM integration
 fbac29f80 Document native SSTV operation evidence and release gates
 4d05a5b9f Harden SSTV workspace storage and beta UI
 79db9fc5a Harden native SSTV release packaging
+678f9ca70 Fence SSTV audio source handoffs
+9cbdf1d2e Fuzz incoming SSTV image and range boundaries
+5733cbcc0 Fix MSK144 shorthand hash tail overflow
+2114f4d21 Fix FST4 test diagnostic bounds
+62275bdd8 Run Decodium regressions in native SSTV CI
+efd1bc720 Fix Base32 TOTP shift overflow
 ~~~
 
 ## 3. Architecture summary
@@ -113,7 +125,7 @@ Decodium TX interlocks.
 | src/sstv/diagnostics/* | Allowlisted event ring, bounded scalar snapshots and atomic export; stable source tokens, at-most-4-Hz active-TX refresh plus terminal update, explicit unavailable HAMDRM state and persistent guarded test-tone result. |
 | qml/decodium/components/sstv/*; qml/decodium/Main.qml | Lazy workspace with Receive, Studio, Gallery, Sharing, HAMDRM, Settings and Diagnostics pages; shared Material/palette contrast and the visible `SSTV - image radio... (BETA)` menu label. |
 | translations/decodium_it.{ts,qm} | Integrated Italian strings through the existing workflow; validation reports 6,857 finished and 0 unfinished entries. |
-| tests/sstv/* | 82 SSTV-labelled protocol, DSP, mode, integration, QML, storage, sharing, security, HAMDRM, performance and fuzz-smoke tests; the current invocation passed 82/82. |
+| tests/sstv/* | 83 SSTV-labelled protocol, DSP, mode, integration, QML, storage, sharing, security, HAMDRM, performance and fuzz-smoke tests; the final normal CTest invocation passed 83/83 SSTV-labelled tests within 120/120 overall. |
 | workflows, scripts and packaging/docker files | Platform/feature matrices and explicit Qt image-format, QSQLITE, ShaderTools and optional OpenJPEG packaging checks. Workflow definitions are not executed platform evidence. |
 | docs/sstv/*; doc/THIRD_PARTY_LICENSES_OPENJPEG.md | Architecture, modes, provenance, RX/TX, storage, QSO, sharing/OpenAPI, HAMDRM, security, test, performance, user/developer and release evidence. |
 
@@ -187,6 +199,7 @@ Current local builds:
 
 ~~~zsh
 cmake --build /tmp/decodium-hamdrm.csmxg7 \
+  --target decodium_sstv_test_binaries decodium_regression_test_binaries \
   --parallel 6
 
 cmake --build /tmp/decodium-sstv-analog.biDO0t \
@@ -195,21 +208,28 @@ cmake --build /tmp/decodium-sstv-analog.biDO0t \
 
 cmake --build /tmp/decodium-sstv-off.Hu9Bvh \
   --target wsjtx decodium_qml translations --parallel 6
+
+cmake --build /tmp/decodium-sstv-asan.xmrVk5 \
+  --target decodium_sstv_test_binaries decodium_regression_test_binaries \
+  --parallel 6
 ~~~
 
 The current caches confirm Release/Ninja/deployment target 13.0 and respectively
 SSTV=ON,HAMDRM=ON; SSTV=ON,HAMDRM=OFF; and SSTV=OFF,HAMDRM=OFF. The enabled
-cache resolves OpenJPEG through /opt/homebrew/lib/cmake/openjpeg-2.5.
-All three current builds completed successfully. Build elapsed values are not
-reported because the invocations rebuilt different cached target sets.
+cache resolves OpenJPEG through /opt/homebrew/lib/cmake/openjpeg-2.5. The
+separate ASan/UBSan cache uses the same
+`DECODIUM_SSTV_EXTERNAL_VECTOR_DIR=/tmp/decodium-sstv-external-vectors` as the
+normal tree. All four listed target builds completed successfully. Build elapsed
+values are not reported because the invocations rebuilt different cached target
+sets.
 
 ## 9. Platforms built
 
 | Platform/configuration | Actual result |
 |---|---|
-| macOS 26.5.2, Apple Silicon arm64, Qt 6.11, Release, SSTV+HAMDRM | current main application/test build succeeded; application executables and all test binaries were built locally |
-| Same host, analog-only | current build succeeded; application executables and analog test binaries built locally |
-| Same host, SSTV disabled | current build succeeded; application executables built locally |
+| macOS 26.5.2, Apple Silicon arm64, Qt 6.11, Release, SSTV+HAMDRM | current application/test build succeeded; `decodium_sstv_test_binaries` and `decodium_regression_test_binaries` were built and normal CTest passed 120/120 |
+| Same host, analog-only | `/tmp/decodium-sstv-analog.biDO0t` built `wsjtx`, `decodium_qml`, SSTV test binaries and translations successfully |
+| Same host, SSTV disabled | `/tmp/decodium-sstv-off.Hu9Bvh` built `wsjtx`, `decodium_qml` and translations successfully |
 | macOS Intel | workflow updated; not executed |
 | Windows x64 | workflow updated; not executed |
 | Linux x86_64 | workflow/package scripts updated; not executed |
@@ -220,19 +240,42 @@ worktree. macOS compilation cannot establish those platform claims.
 
 ## 10. Tests executed
 
-Current current-tree test commands were:
+The final normal current-tree CTest invocation was:
 
 ~~~zsh
 QT_QPA_PLATFORM=offscreen ctest --test-dir /tmp/decodium-hamdrm.csmxg7 \
-  -L sstv --parallel 4 --timeout 300 --output-on-failure
-
-QT_QPA_PLATFORM=offscreen ctest --test-dir /tmp/decodium-hamdrm.csmxg7 \
-  -LE sstv --parallel 4 --timeout 300 --output-on-failure
+  --parallel 4 --timeout 300 --output-on-failure
 ~~~
 
-They exercised the current 82 SSTV-labelled and 37 non-SSTV registered tests.
-The SSTV run includes the new Gallery metadata/archive, HAMDRM snapshot and
-offscreen-QML coverage.
+It passed 120/120 in 170.89 seconds: 83 SSTV-labelled and 37 non-SSTV tests.
+The SSTV portion includes the Gallery metadata/archive, HAMDRM snapshot,
+offscreen-QML and incoming-image staging-boundary coverage. The latter's
+deterministic fuzz-smoke target drives 259 valid/hostile cases through the real
+private staging path.
+
+The separately configured ASan/UBSan tree built the same two test aggregates
+with the same external-vector directory. Its final ordinary CTest coverage was
+split only because `test_qt_helpers` requires a longer instrumented timeout:
+
+~~~zsh
+ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 \
+UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
+QT_QPA_PLATFORM=offscreen \
+ctest --test-dir /tmp/decodium-sstv-asan.xmrVk5 \
+  -E '^test_qt_helpers$' --timeout 300 --output-on-failure
+
+ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 \
+UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
+QT_QPA_PLATFORM=offscreen \
+ctest --test-dir /tmp/decodium-sstv-asan.xmrVk5 \
+  -R '^test_qt_helpers$' --timeout 900 --output-on-failure
+~~~
+
+The first sanitizer invocation passed 119/119 in 152.20 seconds; the second
+passed 1/1 in 338.63 seconds. Together they cover all 120 current tests without
+an ASan or UBSan finding. macOS ASan explicitly reports leak detection
+unsupported, so `detect_leaks=0` is required: this is address/undefined
+sanitizer evidence, not LeakSanitizer evidence.
 
 Historical pre-rebase supplemental evidence includes:
 
@@ -250,20 +293,26 @@ Historical pre-rebase supplemental evidence includes:
   and controller tests;
 - deterministic parser fuzz smoke and focused ASan+UBSan repetitions.
 
-The current enabled build registers 82 SSTV-labelled tests and 119 tests
-overall. The SSTV invocation passed 82/82 in 87.29 seconds; the non-SSTV run
-passed 37/37 in 96.80 seconds. This establishes executable current-tree
-coverage across two explicit invocations, not a single fictitious aggregate
-119/119 result.
+The current enabled build registers 83 SSTV-labelled tests and 120 tests
+overall. The full normal CTest invocation passed 120/120 in 170.89 seconds.
+The full ordinary sanitizer coverage passed in its two documented invocations,
+119/119 plus 1/1. This establishes executable current-tree normal and
+address/undefined-sanitized coverage without claiming coverage-guided fuzzing
+or a leak-sanitizer result.
 
 ## 11. Test results
 
 Current results:
 
 - SSTV+HAMDRM, analog-only and SSTV-off builds: success;
-- SSTV-labelled suite: 82/82 passed in 87.29 seconds;
-- non-SSTV suite: 37/37 passed in 96.80 seconds;
-- registered total: 119 tests, evidenced by the two explicit invocations above;
+- normal full suite: 120/120 passed in 170.89 seconds (83 SSTV-labelled, 37
+  non-SSTV);
+- ASan/UBSan full ordinary suite: 119/119 passed in 152.20 seconds plus
+  `test_qt_helpers` 1/1 in 338.63 seconds; `detect_leaks=0` on macOS because
+  that ASan runtime does not support leak detection;
+- real incoming-image staging fuzz smoke: 259 deterministic cases passed;
+- native-SSTV CI definition now builds both SSTV and non-SSTV regression
+  aggregates, but no GitHub workflow was run;
 - package-script syntax, Windows workflow YAML, Italian TS XML, the SSTV QML
   pages and repository-layout validation: passed locally.
 
@@ -273,10 +322,9 @@ represented as a warning-free application audit.
 
 Historical focused evidence remains useful but is not relabelled as current:
 the 5/5 mode-doc/external-vector/performance/sharing-core/schema-v3 run passed
-in 6.16 seconds, focused sanitizer runs reported no ASan/UBSan failure, and the
-schema-v3 queue tests cover migration/restart/rollback, more than 10,000 closed
-inbox cycles, oldest-first terminal reclamation and protection of
-active/retryable/file-owning rows.
+in 6.16 seconds, and the schema-v3 queue tests cover migration/restart/rollback,
+more than 10,000 closed inbox cycles, oldest-first terminal reclamation and
+protection of active/retryable/file-owning rows.
 
 ## 12. Independent interoperability vectors used
 
@@ -379,8 +427,9 @@ included.
 - Final Windows, Linux x86_64/ARM64 and macOS Intel build/package evidence is
   absent; workflow edits are configuration only.
 - The feature was rebased onto v1.0.584. Its rebased implementation, build/CI
-  and documentation-evidence SHAs are recorded above, but the historical local
-  build/test evidence must be repeated on the rebased HEAD.
+  and documentation-evidence SHAs are recorded above; normal and
+  address/undefined-sanitized local test evidence has now been repeated on the
+  rebased current tree, but maintained-platform verification remains absent.
 - Only Martin M2, Robot 36 and Robot B/W 8 have independent full PCM
   encoder-to-native-decoder vectors. Most rows have native loopback or
   timing/source landmarks only.
@@ -396,8 +445,10 @@ included.
   Narrow/QRM lack complete defensible semantics.
 - Final packages have not been inspected for QSQLITE, Qt image plugins,
   ShaderTools/QML assets and OpenJPEG closure.
-- Full libFuzzer runs, complete-tree sanitizer stress, forced process-kill
-  recovery and cross-platform performance remain open.
+- Coverage-guided libFuzzer runs, longer sanitizer concurrency/shutdown stress,
+  forced process-kill recovery and cross-platform performance remain open.
+  Apple Clang lacks the libFuzzer runtime locally, and the configured Linux
+  fuzz job has not been executed.
 
 ## 18. Manual radio tests still recommended
 
@@ -446,6 +497,9 @@ Suggested title while external gates remain:
 Draft: add native analog SSTV, secure sharing and separate HAMDRM support
 ~~~
 
+This is documentation-only draft text. It does **not** authorize creating a
+pull request, pushing the branch, uploading packages or publishing a release.
+
 Suggested body:
 
 ~~~markdown
@@ -463,8 +517,11 @@ No second audio capture device or external SSTV/Python/Java runtime is used.
 
 - untouched baseline: 37/37 CTest tests;
 - macOS Apple Silicon builds: SSTV+HAMDRM, analog-only and SSTV-off;
-- current rebased tree: 82/82 SSTV and 37/37 non-SSTV tests passed in two
-  explicit invocations (no false single aggregate claim);
+- current rebased tree: normal full CTest 120/120 in 170.89 seconds (83
+  SSTV-labelled and 37 non-SSTV);
+- current rebased ASan/UBSan tree: 119/119 plus `test_qt_helpers` 1/1, with
+  macOS leak detection explicitly unavailable; no address/undefined finding;
+- real incoming-image staging fuzz smoke: 259 deterministic cases;
 - three pinned PySSTV WAVs decoded through production replay/runtime;
 - Robot B/W 8 canonical 66 ms and compatibility 67 ms paths passed 40 repeats
   plus ASan;
@@ -479,7 +536,8 @@ See docs/sstv/FINAL_REPORT.md and DEFINITION_OF_DONE.md for exact limits.
 - execute/inspect maintained Windows, macOS and Linux CI/packages;
 - run real radio/audio/CAT/PTT and cross-application trials;
 - audit a production sharing provider and secure-store behavior;
-- complete libFuzzer/full-tree sanitizer and package inspection.
+- execute coverage-guided libFuzzer, longer sanitizer stress and package
+  inspection.
 
 Do not treat loopback, source landmarks or workflow YAML as on-air,
 interoperability or platform-package evidence.

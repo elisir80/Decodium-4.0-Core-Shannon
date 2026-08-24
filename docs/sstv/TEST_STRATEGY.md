@@ -1,6 +1,7 @@
 # Native SSTV test strategy
 
-Status: Milestone 0 contract, 2026-08-23.
+Status: Milestone 0 contract with current local-verification addendum,
+2026-08-24.
 
 ## Baseline evidence
 
@@ -26,6 +27,27 @@ The build emitted existing CMake policy/Qt private-header warnings and macOS
 deployment-target warnings for newer Homebrew libraries. Ninja recovered a
 premature dependency-file EOF before rebuilding; no concurrent build may use
 the same build directory.
+
+## Current final local verification snapshot
+
+On the current local tree through `efd1bc720`, macOS Apple Silicon Release
+builds succeeded for SSTV+HAMDRM, analog-only and SSTV-off configurations. The
+full SSTV+HAMDRM build explicitly built both `decodium_sstv_test_binaries` and
+`decodium_regression_test_binaries`, then normal CTest passed 120/120 in 170.89
+seconds (83 SSTV-labelled and 37 non-SSTV tests).
+
+The same two aggregates also built in an ASan/UBSan configuration with the same
+`DECODIUM_SSTV_EXTERNAL_VECTOR_DIR`. Its ordinary CTest coverage passed 119/119
+excluding `test_qt_helpers` in 152.20 seconds and `test_qt_helpers` 1/1 in
+338.63 seconds under a 900-second timeout. That covers all 120 current tests
+without an address/undefined finding. macOS ASan does not support leak
+detection, so this run used `ASAN_OPTIONS=detect_leaks=0`: it is not a
+LeakSanitizer result.
+
+This is local build/test evidence only. Apple Clang has no libFuzzer runtime in
+this environment, and neither the configured Linux fuzz job nor any GitHub
+workflow, package, hardware/radio, provider or independent-interoperability
+test was executed.
 
 ## Evidence classes
 
@@ -345,8 +367,10 @@ expiry, cancellation, restart/resume, permanent-auth failures, malformed and
 mismatched `Content-Range` responses, and log redaction.
 The incoming-media fuzz target drives the real private staging boundary with
 valid PNG/JPEG seeds and hostile bytes, rechecking hash/MIME, decode allocation,
-normalisation and restart inspection. Fuzz targets retain crashing inputs and
-run with ASan/UBSan where supported.
+normalisation and restart inspection. Its deterministic ordinary-test smoke
+executes 259 cases through that boundary. Fuzz targets retain crashing inputs
+and run with ASan/UBSan where supported; this smoke test is not a substitute
+for coverage-guided libFuzzer execution.
 
 ## TX safety proof
 
@@ -378,6 +402,12 @@ jobs are:
 - sanitizer/fuzz job on a suitable Linux runner;
 - package inspection for QML files, Qt image plugins and optional OpenJPEG;
 - separate opt-in jobs for large pinned fixture packs and hardware.
+
+The native-SSTV workflow definition builds both `decodium_sstv_test_binaries`
+and `decodium_regression_test_binaries`, then runs the SSTV-labelled and
+non-SSTV CTest partitions so an SSTV-only test build cannot mask ordinary
+regressions. That definition, including its Linux libFuzzer job, has not been
+executed for this snapshot.
 
 The final report lists the exact jobs, artifacts, test totals, skips and platform
 limitations. A green packaging workflow with `BUILD_TESTING=OFF` is build/package
