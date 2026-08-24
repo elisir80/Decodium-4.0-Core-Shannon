@@ -20140,6 +20140,26 @@ If unsure, use High.</translation>
         <translation>Hide stations already logged today in UTC.</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="315"/>
+        <source>Worked Yesterday Too:</source>
+        <translation>Worked Yesterday Too:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="326"/>
+        <source>Widen Worked Today to cover today and yesterday in UTC.</source>
+        <translation>Widen Worked Today to cover today and yesterday in UTC.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="329"/>
+        <source>Worked Ever:</source>
+        <translation>Worked Ever:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="338"/>
+        <source>Hide every station already present in the log, on any band and any date.</source>
+        <translation>Hide every station already present in the log, on any band and any date.</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="309"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Wait &amp; Pounce:</translation>

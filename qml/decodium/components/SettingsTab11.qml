@@ -312,6 +312,32 @@ SettingsPageScroll {
             ToolTip.text: qsTr("Hide stations already logged today in UTC.")
         }
 
+        Text { text: qsTr("Hide") + " " + qsTr("Worked Yesterday Too:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140 }
+        CheckBox {
+            enabled: dialog.boolSetting("FiltersHideWorkedToday", false)
+            opacity: enabled ? 1.0 : 0.45
+            checked: dialog.boolSetting("FiltersWorkedTodayIncludesYesterday", false)
+            onToggled: dialog.setBoolSettingIfChanged("FiltersWorkedTodayIncludesYesterday", checked, false)
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+            hoverEnabled: true
+            ToolTip.visible: hovered
+            ToolTip.delay: 400
+            ToolTip.text: qsTr("Widen Worked Today to cover today and yesterday in UTC.")
+        }
+
+        Text { text: qsTr("Hide") + " " + qsTr("Worked Ever:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 140 }
+        CheckBox {
+            checked: dialog.boolSetting("FiltersHideWorkedEver", false)
+            onToggled: dialog.setBoolSettingIfChanged("FiltersHideWorkedEver", checked, false)
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+            hoverEnabled: true
+            ToolTip.visible: hovered
+            ToolTip.delay: 400
+            ToolTip.text: qsTr("Hide every station already present in the log, on any band and any date.")
+        }
+
         Text { text: qsTr("Wait & Pounce:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.waitPounceActive

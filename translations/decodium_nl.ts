@@ -20116,6 +20116,26 @@ Gebruik Hoog als u het niet zeker weet.</translation>
         <translation>Verberg stations die vandaag al in UTC zijn gelogd.</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="315"/>
+        <source>Worked Yesterday Too:</source>
+        <translation>Gisteren ook gewerkt:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="326"/>
+        <source>Widen Worked Today to cover today and yesterday in UTC.</source>
+        <translation>Verbreedt “Vandaag gewerkt” naar vandaag en gisteren in UTC.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="329"/>
+        <source>Worked Ever:</source>
+        <translation>Ooit gewerkt:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="338"/>
+        <source>Hide every station already present in the log, on any band and any date.</source>
+        <translation>Verberg alle stations die al in het log staan, op elke band en datum.</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="309"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Wait &amp; Pounce:</translation>

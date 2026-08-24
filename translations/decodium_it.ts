@@ -20202,6 +20202,26 @@ Nel dubbio, usa Alta.</translation>
         <translation>Nasconde le stazioni già registrate oggi in UTC.</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="315"/>
+        <source>Worked Yesterday Too:</source>
+        <translation>Lavorate anche ieri:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="326"/>
+        <source>Widen Worked Today to cover today and yesterday in UTC.</source>
+        <translation>Estende “Lavorate oggi” a oggi e ieri in UTC.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="329"/>
+        <source>Worked Ever:</source>
+        <translation>Lavorate in passato:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="338"/>
+        <source>Hide every station already present in the log, on any band and any date.</source>
+        <translation>Nasconde tutte le stazioni già presenti nel log, su qualsiasi banda e data.</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="309"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Aspetta e salta:</translation>

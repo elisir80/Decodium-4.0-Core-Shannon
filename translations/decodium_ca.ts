@@ -20107,6 +20107,26 @@ En cas de dubte, fes servir Alta.</translation>
         <translation>Amaga les estacions ja registrades avui en UTC.</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="315"/>
+        <source>Worked Yesterday Too:</source>
+        <translation>Treballades ahir també:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="326"/>
+        <source>Widen Worked Today to cover today and yesterday in UTC.</source>
+        <translation>Amplia «Treballades avui» a avui i ahir en UTC.</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="329"/>
+        <source>Worked Ever:</source>
+        <translation>Treballades alguna vegada:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="338"/>
+        <source>Hide every station already present in the log, on any band and any date.</source>
+        <translation>Amaga totes les estacions ja presents al registre, en qualsevol banda i data.</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="309"/>
         <source>Wait &amp; Pounce:</source>
         <translation>Espera i salta:</translation>

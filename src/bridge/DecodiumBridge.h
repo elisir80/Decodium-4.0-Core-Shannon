@@ -3,6 +3,7 @@
 #include <QStringList>
 #include <QVariantList>
 #include <QVariantMap>
+#include "DecodeUiFilterPolicy.h"
 #include <QString>
 #include <QByteArray>
 #include <QVector>
@@ -3380,8 +3381,13 @@ private:
         QSet<QString> gridByBand;
         QSet<QString> callByBand;        // call already in m_workedCalls (ever)
         QSet<QString> callByBandMode;    // B4 for the exact call + band + mode
-        QSet<QString> callToday;         // call worked today, by ADIF UTC QSO_DATE
-        QSet<QString> callTodayByBand;   // call worked today on band
+        // 1.0.584: the four sets below are keyed by BASE call (IK8OLM for
+        // IK8OLM/P), so a portable suffix no longer defeats the filters.
+        QSet<QString> callToday;         // base call worked today, by ADIF UTC QSO_DATE
+        QSet<QString> callTodayByBand;   // base call worked today on band
+        QSet<QString> callYesterday;     // base call worked yesterday (UTC)
+        QSet<QString> callYesterdayByBand;
+        QSet<QString> callEver;          // base call worked on any date/band
         void clear() {
             dxccEver.clear(); dxccByBand.clear();
             continentEver.clear(); continentByBand.clear();
@@ -3392,6 +3398,9 @@ private:
             callByBandMode.clear();
             callToday.clear();
             callTodayByBand.clear();
+            callYesterday.clear();
+            callYesterdayByBand.clear();
+            callEver.clear();
         }
     };
     WorkedSets m_worked;
@@ -3620,9 +3629,11 @@ private:
     QVariantList filterEntriesForBandActivity(QVariantList const& source) const;
     QVariantList filterEntriesForRxDecode(QVariantList const& source) const;
     bool shouldDisplayEntryForBandActivity(QVariantMap const& entry) const;
-    bool shouldDisplayEntryForBandActivity(QVariantMap const& entry,
-                                           bool hideWorkedBand,
-                                           bool hideWorkedToday) const;
+    bool shouldDisplayEntryForBandActivity(
+        QVariantMap const& entry,
+        decodium::decode_ui::WorkedFilterOptions const& workedFilters) const;
+    // Reads the Settings > Filters switches once, honouring "Bypass Filters".
+    decodium::decode_ui::WorkedFilterOptions workedFilterOptions() const;
     bool entryBelongsToCurrentQso(QVariantMap const& entry,
                                   bool ghostAlreadyAccepted = false) const;
     void injectPeriodSeparators(QVariantList& filtered) const;

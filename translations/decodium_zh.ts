@@ -20104,6 +20104,26 @@ If unsure, use High.</source>
         <translation>隐藏今天 UTC 已记录的电台。</translation>
     </message>
     <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="315"/>
+        <source>Worked Yesterday Too:</source>
+        <translation>昨日也已通联:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="326"/>
+        <source>Widen Worked Today to cover today and yesterday in UTC.</source>
+        <translation>将“今日已通联”扩展为 UTC 的今天和昨天。</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="329"/>
+        <source>Worked Ever:</source>
+        <translation>曾经通联:</translation>
+    </message>
+    <message>
+        <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="338"/>
+        <source>Hide every station already present in the log, on any band and any date.</source>
+        <translation>隐藏日志中已有的所有电台，不限波段和日期。</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab11.qml" line="309"/>
         <source>Wait &amp; Pounce:</source>
         <translation>等待并猛扑：</translation>

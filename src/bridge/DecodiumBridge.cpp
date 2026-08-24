@@ -6319,8 +6319,7 @@ struct DecodeUiSnapshotJob
     quint64 generation {0};
     int flags {0};
     bool includeBandSourceInRx {false};
-    bool hideWorkedBand {false};
-    bool hideWorkedToday {false};
+    decodium::decode_ui::WorkedFilterOptions workedFilters;
     bool preserveWorkedCq {false};
     bool hideTelemetry {true};
     bool showTxMessagesInRx {true};
@@ -6354,6 +6353,8 @@ static QString decodeUiPredicateCacheKey(QVariantMap const& entry)
     key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorked")).toBool() ? QLatin1String("1") : QLatin1String("0"));
     key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorkedBand")).toBool() ? QLatin1String("1") : QLatin1String("0"));
     key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorkedToday")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorkedYesterday")).toBool() ? QLatin1String("1") : QLatin1String("0"));
+    key += QLatin1Char('|') + (entry.value(QStringLiteral("dxIsWorkedEver")).toBool() ? QLatin1String("1") : QLatin1String("0"));
     key += QLatin1Char('|') + (entry.value(QStringLiteral("forceRxPane")).toBool() ? QLatin1String("1") : QLatin1String("0"));
     return key;
 }
@@ -6368,8 +6369,7 @@ static bool decodeUiEntryPassesBandFilters(QVariantMap const& entry,
                .compare(QStringLiteral("TX"), Qt::CaseInsensitive) == 0;
     if (!isTxEntry
         && decodium::decode_ui::isHiddenByWorkedFilters(
-            entry, job.hideWorkedBand, job.hideWorkedToday,
-            job.preserveWorkedCq)) {
+            entry, job.workedFilters, job.preserveWorkedCq)) {
         return false;
     }
     if (!job.hideTelemetry) return true;
@@ -6573,18 +6573,33 @@ static DecodeUiSnapshotResult prepareDecodeUiSnapshot(DecodeUiSnapshotJob job)
 
 } // namespace
 
-bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry) const
+// 1.0.584: single place where the worked-station switches are read, so the
+// four display pipelines cannot drift apart.  "Bypass Filters" clears them all.
+decodium::decode_ui::WorkedFilterOptions DecodiumBridge::workedFilterOptions() const
 {
-    bool const hideWorkedBand = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
-    bool const hideWorkedToday = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
-    return shouldDisplayEntryForBandActivity(entry, hideWorkedBand, hideWorkedToday);
+    decodium::decode_ui::WorkedFilterOptions options;
+    if (m_filtersBypassed) {
+        return options;
+    }
+    options.hideWorkedBand =
+        getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
+    options.hideWorkedToday =
+        getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    options.hideWorkedEver =
+        getSetting(QStringLiteral("FiltersHideWorkedEver"), false).toBool();
+    options.todayIncludesYesterday =
+        getSetting(QStringLiteral("FiltersWorkedTodayIncludesYesterday"), false).toBool();
+    return options;
 }
 
-bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry,
-                                                       bool hideWorkedBand,
-                                                       bool hideWorkedToday) const
+bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry) const
+{
+    return shouldDisplayEntryForBandActivity(entry, workedFilterOptions());
+}
+
+bool DecodiumBridge::shouldDisplayEntryForBandActivity(
+    QVariantMap const& entry,
+    decodium::decode_ui::WorkedFilterOptions const& workedFilters) const
 {
     if (entry.isEmpty()) return false;
     // 1.0.145: prima cosa, filter ghost decode se attivo. Le entries TX sono
@@ -6596,7 +6611,7 @@ bool DecodiumBridge::shouldDisplayEntryForBandActivity(QVariantMap const& entry,
     bool const preserveWorkedCq = !m_filtersBypassed && m_filterCqOnly;
     if (!isTxEntry
         && decodium::decode_ui::isHiddenByWorkedFilters(
-            entry, hideWorkedBand, hideWorkedToday, preserveWorkedCq)) {
+            entry, workedFilters, preserveWorkedCq)) {
         return false;
     }
     if (!m_hideTelemetryOnlyDecodes) return true;
@@ -8753,13 +8768,10 @@ QVariantList DecodiumBridge::filterEntriesForBandActivity(QVariantList const& so
 {
     QVariantList filtered;
     filtered.reserve(source.size());
-    bool const hideWorkedBand = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
-    bool const hideWorkedToday = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    decodium::decode_ui::WorkedFilterOptions const workedFilters = workedFilterOptions();
     for (QVariant const& v : source) {
         QVariantMap const e = v.toMap();
-        if (shouldDisplayEntryForBandActivity(e, hideWorkedBand, hideWorkedToday)) {
+        if (shouldDisplayEntryForBandActivity(e, workedFilters)) {
             filtered.append(e);
         }
     }
@@ -8774,13 +8786,10 @@ QVariantList DecodiumBridge::filterEntriesForRxDecode(QVariantList const& source
     filtered.reserve(source.size());
     bool const showTxMessagesInRx =
         getSetting(QStringLiteral("TXMessagesToRX"), true).toBool();
-    bool const hideWorkedBand = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
-    bool const hideWorkedToday = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    decodium::decode_ui::WorkedFilterOptions const workedFilters = workedFilterOptions();
     for (QVariant const& v : source) {
         QVariantMap const e = v.toMap();
-        if (!shouldDisplayEntryForBandActivity(e, hideWorkedBand, hideWorkedToday)) continue;
+        if (!shouldDisplayEntryForBandActivity(e, workedFilters)) continue;
         if (e.value(QStringLiteral("isTx")).toBool() && !showTxMessagesInRx) continue;
         QString const key = decodeRxClearEntryKey(e);
         if (!key.isEmpty() && m_clearedRxDecodeKeys.contains(key)) continue;
@@ -8888,10 +8897,7 @@ void DecodiumBridge::startDecodeUiSnapshotRefresh()
     job.flags = flags;
     job.generation = m_decodeUiSnapshotGeneration;
     job.mode = m_mode;
-    job.hideWorkedBand = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool();
-    job.hideWorkedToday = !m_filtersBypassed
-        && getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool();
+    job.workedFilters = workedFilterOptions();
     job.preserveWorkedCq = !m_filtersBypassed && m_filterCqOnly;
     job.hideTelemetry = m_hideTelemetryOnlyDecodes;
     job.showTxMessagesInRx =
@@ -9371,6 +9377,8 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             }
             if (key == QStringLiteral("FiltersHideWorkedBand")
                 || key == QStringLiteral("FiltersHideWorkedToday")
+                || key == QStringLiteral("FiltersHideWorkedEver")
+                || key == QStringLiteral("FiltersWorkedTodayIncludesYesterday")
                 || key == QStringLiteral("HideB4")
                 || key == QStringLiteral("HideWorkedBand")
                 || key == QStringLiteral("HideToday")
@@ -15034,6 +15042,15 @@ static QString todayAdifDateTokenUtc()
     return QDateTime::currentDateTimeUtc().date().toString(QStringLiteral("yyyyMMdd"));
 }
 
+// 1.0.584: "worked today and yesterday" is the WSJT-X / JTDX quick filter the
+// Settings switch mirrors.  Yesterday is always the calendar day before the
+// current UTC date, so the set rolls over at 00:00Z like the log does.
+static QString yesterdayAdifDateTokenUtc()
+{
+    return QDateTime::currentDateTimeUtc().date().addDays(-1)
+        .toString(QStringLiteral("yyyyMMdd"));
+}
+
 void DecodiumBridge::appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz,
                                      const QString& mode, const QString& qsoDateUtc)
 {
@@ -15050,14 +15067,27 @@ void DecodiumBridge::appendWorkedQso(const QString& call, const QString& grid, q
         }
     }
 
+    // 1.0.584: the date-scoped and ever sets are keyed by BASE call so that a
+    // QSO logged as IK8OLM also covers a decode of IK8OLM/P, and vice versa.
+    QString const baseCall = normalizedBaseCall(upCall);
+    QString const baseBandKey = workedCallBandKey(band, baseCall);
+    if (!baseCall.isEmpty()) {
+        m_worked.callEver.insert(baseCall);
+    }
+
     QString dateToken = normalizedAdifDateToken(qsoDateUtc);
     if (dateToken.isEmpty()) {
         dateToken = todayAdifDateTokenUtc();
     }
-    if (dateToken == todayAdifDateTokenUtc()) {
-        m_worked.callToday.insert(upCall);
-        if (!callBandKey.isEmpty()) {
-            m_worked.callTodayByBand.insert(callBandKey);
+    if (!baseCall.isEmpty() && dateToken == todayAdifDateTokenUtc()) {
+        m_worked.callToday.insert(baseCall);
+        if (!baseBandKey.isEmpty()) {
+            m_worked.callTodayByBand.insert(baseBandKey);
+        }
+    } else if (!baseCall.isEmpty() && dateToken == yesterdayAdifDateTokenUtc()) {
+        m_worked.callYesterday.insert(baseCall);
+        if (!baseBandKey.isEmpty()) {
+            m_worked.callYesterdayByBand.insert(baseBandKey);
         }
     }
 
@@ -15131,6 +15161,7 @@ void DecodiumBridge::rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> co
 {
     m_worked.clear();
     QString const today = todayAdifDateTokenUtc();
+    QString const yesterday = yesterdayAdifDateTokenUtc();
     for (ParsedAdifRecord const& record : records) {
         const QString call = record.fields.value(QStringLiteral("CALL")).trimmed().toUpper();
         if (call.isEmpty()) continue;
@@ -15156,11 +15187,21 @@ void DecodiumBridge::rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> co
                 m_worked.callByBandMode.insert(bandModeKey);
             }
         }
+        QString const baseCall = normalizedBaseCall(call);
+        QString const baseBandKey = workedCallBandKey(band, baseCall);
+        if (!baseCall.isEmpty()) {
+            m_worked.callEver.insert(baseCall);
+        }
         QString const qsoDate = normalizedAdifDateToken(record.fields.value(QStringLiteral("QSO_DATE")));
-        if (qsoDate == today) {
-            m_worked.callToday.insert(call);
-            if (!callBandKey.isEmpty()) {
-                m_worked.callTodayByBand.insert(callBandKey);
+        if (!baseCall.isEmpty() && qsoDate == today) {
+            m_worked.callToday.insert(baseCall);
+            if (!baseBandKey.isEmpty()) {
+                m_worked.callTodayByBand.insert(baseBandKey);
+            }
+        } else if (!baseCall.isEmpty() && qsoDate == yesterday) {
+            m_worked.callYesterday.insert(baseCall);
+            if (!baseBandKey.isEmpty()) {
+                m_worked.callYesterdayByBand.insert(baseBandKey);
             }
         }
 
@@ -43753,12 +43794,22 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry, bool countAsReceived)
     bool const dxIsWorkedBand = !selfEntry
         && !callBandKey.isEmpty()
         && m_worked.callByBand.contains(callBandKey);
+    // 1.0.584: match on the BASE call. m_worked.callToday & friends are keyed
+    // the same way, so IK8OLM/P is recognised as IK8OLM and vice versa.
+    QString const dxStatusBaseCall = normalizedBaseCall(dxStatusCall);
+    QString const baseCallBandKey = workedCallBandKey(curBand, dxStatusBaseCall);
     bool const dxIsWorkedToday = !selfEntry
-        && !dxStatusCall.isEmpty()
-        && m_worked.callToday.contains(dxStatusCall);
+        && !dxStatusBaseCall.isEmpty()
+        && m_worked.callToday.contains(dxStatusBaseCall);
+    bool const dxIsWorkedYesterday = !selfEntry
+        && !dxStatusBaseCall.isEmpty()
+        && m_worked.callYesterday.contains(dxStatusBaseCall);
+    bool const dxIsWorkedEver = !selfEntry
+        && !dxStatusBaseCall.isEmpty()
+        && m_worked.callEver.contains(dxStatusBaseCall);
     bool const dxIsWorkedTodayBand = !selfEntry
-        && !callBandKey.isEmpty()
-        && m_worked.callTodayByBand.contains(callBandKey);
+        && !baseCallBandKey.isEmpty()
+        && m_worked.callTodayByBand.contains(baseCallBandKey);
     bool const dxIsNewCallBand = !selfEntry
         && !dxStatusCall.isEmpty()
         && !curBand.isEmpty()
@@ -43845,6 +43896,8 @@ void DecodiumBridge::enrichDecodeEntry(QVariantMap& entry, bool countAsReceived)
     entry["dxIsWorkedEver"] = isWorkedEver && !selfEntry;
     entry["dxIsWorkedBand"] = dxIsWorkedBand;
     entry["dxIsWorkedToday"] = dxIsWorkedToday;
+    entry["dxIsWorkedYesterday"] = dxIsWorkedYesterday;
+    entry["dxIsWorkedEver"] = dxIsWorkedEver;
     entry["dxIsWorkedTodayBand"] = dxIsWorkedTodayBand;
     entry["dxIsNewBand"] = entry.value("dxIsNewBand", false);
     entry["dxIsNewCountry"] = dxIsNewCountry;
@@ -53372,8 +53425,10 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     }
     invalidateQsoSearchCache();
     warmLogCacheAsync();
-    if (getSetting(QStringLiteral("FiltersHideWorkedBand"), false).toBool()
-        || getSetting(QStringLiteral("FiltersHideWorkedToday"), false).toBool()) {
+    decodium::decode_ui::WorkedFilterOptions const workedFilters = workedFilterOptions();
+    if (workedFilters.hideWorkedBand
+        || workedFilters.hideWorkedToday
+        || workedFilters.hideWorkedEver) {
         invalidateDecodeUiPredicateCaches();
         rebuildBandActivityModel();
         rebuildRxDecodeModel();
