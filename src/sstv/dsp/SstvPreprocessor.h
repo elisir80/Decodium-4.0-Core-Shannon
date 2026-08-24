@@ -23,6 +23,22 @@ struct SstvPreprocessorConfig
   double bandPassLowHz {900.0};
   double bandPassHighHz {2'500.0};
 
+  // Optional narrow mains-hum rejection.  The default band-pass already
+  // rejects 50/60 Hz strongly, but this independently testable stage is useful
+  // when an operator deliberately widens or disables that pass-band for
+  // diagnostics.  It is off by default so the ordinary SSTV phase path is
+  // unchanged.
+  bool humNotchEnabled {false};
+  double humFrequencyHz {50.0};
+  double humNotchQ {20.0};
+
+  // Optional three-sample causal outlier suppressor.  Only a current sample
+  // whose distance from the median of the last two inputs and itself exceeds
+  // this normalized-amplitude threshold is replaced.  Keeping this opt-in
+  // avoids silently rounding legitimate high-frequency SSTV transitions.
+  bool impulseSuppressorEnabled {false};
+  double impulseThreshold {0.45};
+
   double inputGain {1.0};
   bool levelControlEnabled {true};
   double targetRms {0.22};
@@ -51,6 +67,7 @@ struct SstvPreprocessorMetrics
   std::uint64_t rejectedSamples {0};
   std::uint64_t inputClippedSamples {0};
   std::uint64_t preLimiterClippedSamples {0};
+  std::uint64_t impulseSamplesSuppressed {0};
   std::uint64_t limiterEvents {0};
   std::uint64_t outputClippedSamples {0};
   std::uint64_t internalNumericFaults {0};
@@ -104,6 +121,9 @@ private:
 
   static Biquad makeHighPass (double sampleRateHz, double cutoffHz);
   static Biquad makeLowPass (double sampleRateHz, double cutoffHz);
+  static Biquad makeNotch (double sampleRateHz,
+                           double frequencyHz,
+                           double qualityFactor);
   static void validateConfig (SstvPreprocessorConfig const& config);
   static void saturatingAdd (std::uint64_t& value,
                              std::uint64_t increment) noexcept;
@@ -122,10 +142,14 @@ private:
   double peakRelease_ {0.0};
   Biquad highPass_;
   Biquad lowPass_;
+  Biquad humNotch_;
 
   mutable std::mutex mutex_;
   double previousDcInput_ {0.0};
   double previousDcOutput_ {0.0};
+  double impulsePreviousOne_ {0.0};
+  double impulsePreviousTwo_ {0.0};
+  std::uint8_t impulseHistorySize_ {0u};
   double levelPower_ {0.0};
   bool levelPowerInitialized_ {false};
   double automaticGain_ {1.0};

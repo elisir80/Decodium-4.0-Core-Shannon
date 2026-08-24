@@ -38,6 +38,9 @@ SstvPreprocessor::SstvPreprocessor (SstvPreprocessorConfig config)
                                      config_.peakReleaseTimeMs);
   highPass_ = makeHighPass (config_.sampleRateHz, config_.bandPassLowHz);
   lowPass_ = makeLowPass (config_.sampleRateHz, config_.bandPassHighHz);
+  humNotch_ = makeNotch (config_.sampleRateHz,
+                         config_.humFrequencyHz,
+                         config_.humNotchQ);
   resetStateUnlocked ();
 }
 
@@ -92,6 +95,34 @@ bool SstvPreprocessor::process (float const* input,
           previousDcInput_ = raw;
           previousDcOutput_ = blocked;
           filtered = blocked;
+        }
+      if (config_.impulseSuppressorEnabled)
+        {
+          double const original = filtered;
+          if (impulseHistorySize_ >= 2u)
+            {
+              double const minimum = std::min (
+                  impulsePreviousTwo_, impulsePreviousOne_);
+              double const maximum = std::max (
+                  impulsePreviousTwo_, impulsePreviousOne_);
+              double const median = std::max (minimum,
+                                              std::min (maximum, original));
+              if (std::abs (original - median) > config_.impulseThreshold)
+                {
+                  filtered = median;
+                  saturatingAdd (counters_.impulseSamplesSuppressed, 1u);
+                }
+            }
+          impulsePreviousTwo_ = impulsePreviousOne_;
+          impulsePreviousOne_ = original;
+          if (impulseHistorySize_ < 2u)
+            {
+              ++impulseHistorySize_;
+            }
+        }
+      if (config_.humNotchEnabled)
+        {
+          filtered = humNotch_.process (filtered);
         }
       if (config_.bandPassEnabled)
         {
@@ -152,8 +183,12 @@ bool SstvPreprocessor::process (float const* input,
           saturatingAdd (counters_.internalNumericFaults, 1u);
           highPass_.reset ();
           lowPass_.reset ();
+          humNotch_.reset ();
           previousDcInput_ = 0.0;
           previousDcOutput_ = 0.0;
+          impulsePreviousOne_ = 0.0;
+          impulsePreviousTwo_ = 0.0;
+          impulseHistorySize_ = 0u;
           levelPower_ = 0.0;
           levelPowerInitialized_ = false;
           automaticGain_ = 1.0;
@@ -168,8 +203,12 @@ bool SstvPreprocessor::process (float const* input,
           saturatingAdd (counters_.internalNumericFaults, 1u);
           highPass_.reset ();
           lowPass_.reset ();
+          humNotch_.reset ();
           previousDcInput_ = 0.0;
           previousDcOutput_ = 0.0;
+          impulsePreviousOne_ = 0.0;
+          impulsePreviousTwo_ = 0.0;
+          impulseHistorySize_ = 0u;
           levelPower_ = 0.0;
           levelPowerInitialized_ = false;
           automaticGain_ = 1.0;
@@ -283,6 +322,26 @@ SstvPreprocessor::Biquad SstvPreprocessor::makeLowPass (
   return result;
 }
 
+SstvPreprocessor::Biquad SstvPreprocessor::makeNotch (
+    double sampleRateHz,
+    double frequencyHz,
+    double qualityFactor)
+{
+  double const omega = 2.0 * Pi * frequencyHz / sampleRateHz;
+  double const cosine = std::cos (omega);
+  double const sine = std::sin (omega);
+  double const alpha = sine / (2.0 * qualityFactor);
+  double const a0 = 1.0 + alpha;
+
+  Biquad result;
+  result.b0 = 1.0 / a0;
+  result.b1 = (-2.0 * cosine) / a0;
+  result.b2 = result.b0;
+  result.a1 = result.b1;
+  result.a2 = (1.0 - alpha) / a0;
+  return result;
+}
+
 void SstvPreprocessor::validateConfig (SstvPreprocessorConfig const& config)
 {
   double const nyquist = config.sampleRateHz / 2.0;
@@ -296,6 +355,16 @@ void SstvPreprocessor::validateConfig (SstvPreprocessorConfig const& config)
       || config.bandPassLowHz <= 0.0
       || config.bandPassHighHz <= config.bandPassLowHz
       || config.bandPassHighHz >= nyquist
+      || !std::isfinite (config.humFrequencyHz)
+      || config.humFrequencyHz < 45.0
+      || config.humFrequencyHz > 65.0
+      || config.humFrequencyHz >= nyquist
+      || !std::isfinite (config.humNotchQ)
+      || config.humNotchQ < 2.0
+      || config.humNotchQ > 100.0
+      || !std::isfinite (config.impulseThreshold)
+      || config.impulseThreshold <= 0.0
+      || config.impulseThreshold > 4.0
       || !std::isfinite (config.inputGain) || config.inputGain <= 0.0
       || config.inputGain > 64.0
       || !std::isfinite (config.targetRms) || config.targetRms <= 0.0
@@ -355,6 +424,9 @@ void SstvPreprocessor::resetStateUnlocked () noexcept
 {
   previousDcInput_ = 0.0;
   previousDcOutput_ = 0.0;
+  impulsePreviousOne_ = 0.0;
+  impulsePreviousTwo_ = 0.0;
+  impulseHistorySize_ = 0u;
   levelPower_ = 0.0;
   levelPowerInitialized_ = false;
   automaticGain_ = 1.0;
@@ -364,6 +436,7 @@ void SstvPreprocessor::resetStateUnlocked () noexcept
   outputMetricPeak_ = 0.0;
   highPass_.reset ();
   lowPass_.reset ();
+  humNotch_.reset ();
   counters_ = {};
 }
 

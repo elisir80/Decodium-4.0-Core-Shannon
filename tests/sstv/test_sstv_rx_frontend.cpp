@@ -220,6 +220,81 @@ private Q_SLOTS:
     QVERIFY (std::abs (tailMean (withDc, 6'000u)) < 1.0e-3);
   }
 
+  void optionalHumNotchRejectsMainsWithoutDamagingImageBand ()
+  {
+    SstvPreprocessorConfig config = SstvPreprocessorConfig::sstvDefaults ();
+    config.dcBlockerEnabled = false;
+    config.bandPassEnabled = false;
+    config.levelControlEnabled = false;
+    config.limiterEnabled = false;
+    config.humNotchEnabled = true;
+    config.humFrequencyHz = 50.0;
+    config.humNotchQ = 20.0;
+
+    auto response = [&config] (double frequencyHz) {
+      SstvPreprocessor processor {config};
+      return processor.process (makeTone (frequencyHz, 36'000u, 0.4));
+    };
+    std::vector<float> const rejected = response (50.0);
+    std::vector<float> const preserved = response (1'500.0);
+    double const inputRms = 0.4 / std::sqrt (2.0);
+    QVERIFY2 (tailRms (rejected, 18'000u) < inputRms / 20.0,
+              "50 Hz notch did not settle to the required rejection");
+    QVERIFY2 (tailRms (preserved, 18'000u) > inputRms * 0.98,
+              "mains notch damaged the SSTV image-tone band");
+
+    config.humFrequencyHz = 60.0;
+    SstvPreprocessor sixtyHertz {config};
+    auto const sixty = sixtyHertz.process (makeTone (60.0, 36'000u, 0.4));
+    QVERIFY (tailRms (sixty, 18'000u) < inputRms / 20.0);
+  }
+
+  void optionalImpulseSuppressorIsBoundedAndChunkInvariant ()
+  {
+    SstvPreprocessorConfig config = SstvPreprocessorConfig::sstvDefaults ();
+    config.dcBlockerEnabled = false;
+    config.bandPassEnabled = false;
+    config.levelControlEnabled = false;
+    config.limiterEnabled = false;
+    config.impulseSuppressorEnabled = true;
+    config.impulseThreshold = 0.20;
+
+    std::vector<float> input (4'096u, 0.05F);
+    input[3] = 1.0F;
+    input[257] = -1.0F;
+    input[2'048] = 0.95F;
+
+    SstvPreprocessor whole {config};
+    std::vector<float> const expected = whole.process (input);
+    QCOMPARE (whole.metricsSnapshot ().impulseSamplesSuppressed,
+              std::uint64_t {3u});
+    QVERIFY (std::abs (expected[3] - 0.05F) < 1.0e-6F);
+    QVERIFY (std::abs (expected[257] - 0.05F) < 1.0e-6F);
+    QVERIFY (std::abs (expected[2'048] - 0.05F) < 1.0e-6F);
+
+    SstvPreprocessor fragmented {config};
+    std::vector<float> actual (input.size (), 0.0F);
+    std::vector<std::size_t> const chunks {1u, 2u, 17u, 251u, 7u};
+    std::size_t offset = 0u;
+    std::size_t chunk = 0u;
+    while (offset < input.size ())
+      {
+        std::size_t const count = std::min (
+            chunks[chunk++ % chunks.size ()], input.size () - offset);
+        QVERIFY (fragmented.process (input.data () + offset,
+                                     count,
+                                     actual.data () + offset));
+        offset += count;
+      }
+    QCOMPARE (actual, expected);
+    QCOMPARE (fragmented.metricsSnapshot ().impulseSamplesSuppressed,
+              whole.metricsSnapshot ().impulseSamplesSuppressed);
+
+    fragmented.reset ();
+    QCOMPARE (fragmented.metricsSnapshot ().impulseSamplesSuppressed,
+              std::uint64_t {0u});
+  }
+
   void levelControlLimiterAndClippingRemainVisible ()
   {
     std::vector<float> const input = makeTone (1'500.0, 12'000u, 0.4);
@@ -537,6 +612,18 @@ private Q_SLOTS:
 
     SstvPreprocessorConfig invalidPre = SstvPreprocessorConfig::sstvDefaults ();
     invalidPre.sampleRateHz = 44'100.0;
+    QVERIFY_THROWS_EXCEPTION (std::invalid_argument,
+                              SstvPreprocessor {invalidPre});
+    invalidPre = SstvPreprocessorConfig::sstvDefaults ();
+    invalidPre.humFrequencyHz = 70.0;
+    QVERIFY_THROWS_EXCEPTION (std::invalid_argument,
+                              SstvPreprocessor {invalidPre});
+    invalidPre = SstvPreprocessorConfig::sstvDefaults ();
+    invalidPre.humNotchQ = 1.0;
+    QVERIFY_THROWS_EXCEPTION (std::invalid_argument,
+                              SstvPreprocessor {invalidPre});
+    invalidPre = SstvPreprocessorConfig::sstvDefaults ();
+    invalidPre.impulseThreshold = 0.0;
     QVERIFY_THROWS_EXCEPTION (std::invalid_argument,
                               SstvPreprocessor {invalidPre});
     SstvFrequencyDemodulatorConfig invalidDemod =
