@@ -85,6 +85,18 @@ enum ContextField : quint32 {
     FieldStateFlags     = 1u << 8,
     FieldTxAudioLeadMs  = 1u << 9,
     FieldSessionPort    = 1u << 10,
+    // Gli strumenti. Si mandano solo quando sono stati letti davvero: la radio
+    // che non riporta la corrente di finale lascia il bit spento, e l'assenza
+    // e' la risposta. Non esiste un valore riservato che significhi "non lo
+    // so", quindi nessun client puo' scambiarlo per una misura.
+    FieldForwardPower   = 1u << 11,
+    FieldSwr            = 1u << 12,
+    FieldAlc            = 1u << 13,
+    FieldDrainVoltage   = 1u << 14,
+    FieldDrainCurrent   = 1u << 15,
+    FieldPaTemperature  = 1u << 16,
+    FieldCompression    = 1u << 17,
+    FieldPowerSetting   = 1u << 18,
 };
 
 enum StateFlag : quint32 {
@@ -122,6 +134,17 @@ struct Context {
     quint32 stateFlags {0};
     quint16 txAudioLeadMs {0};
     quint16 sessionPort {kSessionPort};
+    // Interi in scala fissa come il resto del contesto: sul filo non passa mai
+    // virgola mobile, cosi' due macchine con FPU diverse leggono lo stesso
+    // numero.
+    quint16 forwardPowerTenthW {0};   // watt x 10
+    quint16 swrHundredths {0};        // ROS x 100, 100 = 1.00
+    qint16  alcTenthPct {0};          // percento x 10
+    quint16 drainVoltHundredths {0};  // volt x 100
+    quint16 drainAmpHundredths {0};   // ampere x 100
+    qint16  paTempTenthC {0};         // gradi x 10, negativi ammessi
+    quint16 compressionTenthDb {0};   // dB x 10
+    quint16 powerSetTenthPct {0};     // percento x 10
 
     bool has(ContextField f) const { return (mask & static_cast<quint32>(f)) != 0; }
 
@@ -137,7 +160,28 @@ struct Context {
     void setTxAudioLeadMs(quint16 ms) { txAudioLeadMs = ms;mask |= FieldTxAudioLeadMs; }
     void setSessionPort(quint16 p)    { sessionPort = p;   mask |= FieldSessionPort; }
 
+    // Le misure entrano in unita' naturali e vengono arrotondate qui dentro,
+    // una volta sola: se ogni chiamante scegliesse da se' la scala, due
+    // gateway direbbero numeri diversi della stessa radio.
+    void setForwardPowerW(double watts);
+    void setSwr(double ratio);
+    void setAlcPct(double pct);
+    void setDrainVoltage(double volts);
+    void setDrainCurrent(double amps);
+    void setPaTemperature(double celsius);
+    void setCompressionDb(double db);
+    void setPowerSettingPct(double pct);
+
     double sMeterDbm() const { return static_cast<double>(sMeterDbmTenths) / 10.0; }
+
+    double forwardPowerW()   const { return forwardPowerTenthW   / 10.0; }
+    double swr()             const { return swrHundredths        / 100.0; }
+    double alcPct()          const { return alcTenthPct          / 10.0; }
+    double drainVoltage()    const { return drainVoltHundredths  / 100.0; }
+    double drainCurrent()    const { return drainAmpHundredths   / 100.0; }
+    double paTemperature()   const { return paTempTenthC         / 10.0; }
+    double compressionDb()   const { return compressionTenthDb   / 10.0; }
+    double powerSettingPct() const { return powerSetTenthPct     / 10.0; }
 };
 
 // ── serializzazione ──────────────────────────────────────────────────────────

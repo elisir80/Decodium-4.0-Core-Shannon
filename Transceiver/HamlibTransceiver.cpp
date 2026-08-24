@@ -812,6 +812,19 @@ int HamlibTransceiver::do_start ()
   // does not advertise it. Probe once during TX, then disable only on ENAVAIL/ENIMPL.
   bool const hasAlcCap = hasGetLevelFunction
       && (getLevelCaps & RIG_LEVEL_ALC) == RIG_LEVEL_ALC;
+  // 1.0.581 — strumenti del finale: solo se dichiarati. Vale la stessa cautela
+  // scritta piu' sotto per l'ALC, ma senza l'eccezione della sonda: quattro
+  // livelli in piu' chiesti "per vedere se rispondono" su un CI-V a 19200
+  // sarebbero traffico speso quasi sempre per niente.
+  do_vd_ = hasGetLevelFunction
+      && (getLevelCaps & RIG_LEVEL_VD_METER) == RIG_LEVEL_VD_METER;
+  do_id_ = hasGetLevelFunction
+      && (getLevelCaps & RIG_LEVEL_ID_METER) == RIG_LEVEL_ID_METER;
+  do_pa_temp_ = hasGetLevelFunction
+      && (getLevelCaps & RIG_LEVEL_TEMP_METER) == RIG_LEVEL_TEMP_METER;
+  do_comp_ = hasGetLevelFunction
+      && (getLevelCaps & RIG_LEVEL_COMP_METER) == RIG_LEVEL_COMP_METER;
+  do_rfpower_ = hasRfPower;
   // 1.0.365 — do NOT run the opportunistic ALC probe on slow serial buses
   // (Icom CI-V, Yaesu): on a rig whose caps mask does not advertise ALC, the
   // extra rig_get_level(ALC) issued every TX tick congests the serial port and
@@ -2123,6 +2136,65 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
           update_alc (0, false);
         }
     }
+
+  // 1.0.581 — strumenti del finale: tensione, corrente, temperatura,
+  // compressione. Uno schema solo, ripetuto quattro volte, perche' quattro
+  // varianti dello stesso schema sono quattro posti dove sbagliare.
+  //
+  // Una lettura riuscita fuori trasmissione vale comunque: la temperatura del
+  // finale scende dopo, ed e' proprio dopo che si guarda. Le altre tre a
+  // riposo non dicono niente di utile, ma nemmeno di falso, e il "valido" del
+  // livello e' il posto giusto per distinguerle — non un if in piu' qui.
+  auto const leggi_livello = [&] (bool attivo, setting_t livello, char const * nome,
+                                  auto&& applica) {
+    if (!attivo) return;
+    value_t v {};
+    int const rc_l = rig_get_level (rig, RIG_VFO_CURR, livello, &v);
+    if (RIG_OK == rc_l && std::isfinite (v.f))
+      {
+        applica (static_cast<double> (v.f), true);
+      }
+    else
+      {
+        CAT_TRACE ("rig_get_level " << nome << " failed with rc:" << rc_l << "ignoring");
+        applica (0.0, false);
+      }
+  };
+
+  // Hamlib da' VD e ID in volt e ampere, la temperatura in gradi e la
+  // compressione in dB: le scale intere sono affare nostro, e stanno qui e
+  // basta perche' chi legge piu' avanti non debba ricordarsele.
+  // Tensione, corrente e compressione hanno senso solo mentre si trasmette, e
+  // fuori dalla trasmissione sarebbero tre transazioni per niente su un bus che
+  // e' gia' il collo di bottiglia. La temperatura no: quella si guarda DOPO,
+  // mentre il finale si raffredda, quindi si legge sempre.
+  leggi_livello (do_vd_ && tx_active, RIG_LEVEL_VD_METER, "RIG_LEVEL_VD_METER",
+                 [this] (double v, bool ok) {
+                   update_vd (ok ? static_cast<unsigned int> (std::lround (v * 100.0)) : 0u, ok);
+                 });
+  leggi_livello (do_id_ && tx_active, RIG_LEVEL_ID_METER, "RIG_LEVEL_ID_METER",
+                 [this] (double v, bool ok) {
+                   update_id (ok ? static_cast<unsigned int> (std::lround (v * 100.0)) : 0u, ok);
+                 });
+  leggi_livello (do_pa_temp_, RIG_LEVEL_TEMP_METER, "RIG_LEVEL_TEMP_METER",
+                 [this] (double v, bool ok) {
+                   update_pa_temp (ok ? static_cast<int> (std::lround (v * 10.0)) : 0, ok);
+                 });
+  leggi_livello (do_comp_ && tx_active, RIG_LEVEL_COMP_METER, "RIG_LEVEL_COMP_METER",
+                 [this] (double v, bool ok) {
+                   update_comp (ok ? static_cast<unsigned int> (std::lround (v * 10.0)) : 0u, ok);
+                 });
+
+  // La manopola della potenza e' un'impostazione, non una misura: durante una
+  // trasmissione non cambia, e chiederla li' sarebbe l'unica delle dieci letture
+  // spesa dove il bus e' piu' stretto. Si legge a riposo, sul giro gia'
+  // rallentato di ricezione, che per un valore che cambia quando lo gira
+  // l'operatore e' persino troppo spesso.
+  leggi_livello (do_rfpower_ && !tx_active, RIG_LEVEL_RFPOWER, "RIG_LEVEL_RFPOWER",
+                 [this] (double v, bool ok) {
+                   // Hamlib la da' come frazione 0..1 del massimo del rig.
+                   update_rfpower (ok ? static_cast<unsigned int> (std::lround (v * 1000.0)) : 0u, ok);
+                 });
 
   if (do_pwr_)
     {

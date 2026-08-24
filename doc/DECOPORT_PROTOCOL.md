@@ -91,6 +91,22 @@ serves both.
 | 8 | stateFlags | uint32, see below |
 | 9 | txAudioLeadMs | uint16 |
 | 10 | sessionPort | uint16 |
+| 11 | forwardPower | uint16, watts × 10 |
+| 12 | swr | uint16, ratio × 100 (100 is 1.00) |
+| 13 | alc | int16, per cent × 10 |
+| 14 | drainVoltage | uint16, volts × 100 |
+| 15 | drainCurrent | uint16, amperes × 100 |
+| 16 | paTemperature | int16, degrees Celsius × 10 |
+| 17 | compression | uint16, decibels × 10 |
+| 18 | powerSetting | uint16, per cent × 10 |
+
+Bits 11 to 18 are meters, and a meter is only ever sent when it has been read.
+A rig that does not report its drain current simply leaves bit 15 clear, and
+the absence is the answer: there is no reserved value meaning "unknown", so a
+client can never mistake one for a reading. `powerSetting` is the exception in
+kind — it is where the operator put the knob, not what the antenna received —
+and it is here because on most rigs it is the only one of the eight that can
+be read while the transmitter is at rest.
 
 `stateFlags`: bit 0 CAT online, bit 1 audio input online, bit 2 audio output
 online, bit 3 the gateway will key the transmitter, bit 4 a client already holds

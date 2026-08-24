@@ -197,6 +197,27 @@ Context DecodiumDecoPortGateway::buildContext() const
             ctx.setPtt(m_hooks.pttActive());
         if (m_hooks.canTransmit && m_hooks.canTransmit())
             flags |= StateCanTransmit;
+
+        // Gli strumenti: si chiedono tutti, si mandano solo quelli che hanno
+        // risposto. Il gancio assente e la lettura fallita finiscono nello
+        // stesso posto — il bit resta spento — ed e' giusto cosi': per chi
+        // guarda il quadrante non c'e' differenza fra una radio che il ROS non
+        // lo misura e una che in questo istante non lo sa dire.
+        auto const misura = [this, &ctx](const std::function<bool(double&)>& leggi,
+                                         void (Context::*posa)(double)) {
+            double v = 0.0;
+            if (leggi && leggi(v))
+                (ctx.*posa)(v);
+        };
+        misura(m_hooks.sMeterDbm,       &Context::setSMeterDbm);
+        misura(m_hooks.forwardPowerW,   &Context::setForwardPowerW);
+        misura(m_hooks.swr,             &Context::setSwr);
+        misura(m_hooks.alcPct,          &Context::setAlcPct);
+        misura(m_hooks.drainVoltage,    &Context::setDrainVoltage);
+        misura(m_hooks.drainCurrent,    &Context::setDrainCurrent);
+        misura(m_hooks.paTemperature,   &Context::setPaTemperature);
+        misura(m_hooks.compressionDb,   &Context::setCompressionDb);
+        misura(m_hooks.powerSettingPct, &Context::setPowerSettingPct);
     }
     if (!m_audioInputName.isEmpty())
         flags |= StateAudioIn;

@@ -118,6 +118,71 @@ void Context::setSMeterDbm(double dbm)
     mask |= FieldSMeter;
 }
 
+// Gli strumenti, tutti con la stessa forma: limita, arrotonda, alza il bit.
+//
+// Il limite non e' pignoleria sul tipo. Una lettura CAT sbagliata — una riga
+// arrivata a meta', un byte perso — puo' dare numeri assurdi, e un ago mandato
+// a fondo scala da un errore di trasmissione e' peggio di un ago fermo: chi
+// guarda crede di avere un guasto in antenna e stacca.
+namespace {
+template <typename T>
+T scalato(double valore, double scala, double minimo, double massimo)
+{
+    double const v = std::isfinite(valore) ? qBound(minimo, valore, massimo) : minimo;
+    return static_cast<T>(std::lround(v * scala));
+}
+}  // namespace
+
+void Context::setForwardPowerW(double watts)
+{
+    forwardPowerTenthW = scalato<quint16>(watts, 10.0, 0.0, 6553.0);
+    mask |= FieldForwardPower;
+}
+
+void Context::setSwr(double ratio)
+{
+    // Sotto 1.00 il ROS non esiste: se la radio lo dice, mente lei o mente la
+    // conversione, e in nessuno dei due casi va mostrato com'e'.
+    swrHundredths = scalato<quint16>(ratio, 100.0, 1.0, 99.99);
+    mask |= FieldSwr;
+}
+
+void Context::setAlcPct(double pct)
+{
+    alcTenthPct = scalato<qint16>(pct, 10.0, -100.0, 200.0);
+    mask |= FieldAlc;
+}
+
+void Context::setDrainVoltage(double volts)
+{
+    drainVoltHundredths = scalato<quint16>(volts, 100.0, 0.0, 655.0);
+    mask |= FieldDrainVoltage;
+}
+
+void Context::setDrainCurrent(double amps)
+{
+    drainAmpHundredths = scalato<quint16>(amps, 100.0, 0.0, 655.0);
+    mask |= FieldDrainCurrent;
+}
+
+void Context::setPaTemperature(double celsius)
+{
+    paTempTenthC = scalato<qint16>(celsius, 10.0, -50.0, 200.0);
+    mask |= FieldPaTemperature;
+}
+
+void Context::setCompressionDb(double db)
+{
+    compressionTenthDb = scalato<quint16>(db, 10.0, 0.0, 60.0);
+    mask |= FieldCompression;
+}
+
+void Context::setPowerSettingPct(double pct)
+{
+    powerSetTenthPct = scalato<quint16>(pct, 10.0, 0.0, 100.0);
+    mask |= FieldPowerSetting;
+}
+
 QByteArray encodeContextPayload(const Context& ctx)
 {
     QByteArray out;
@@ -140,6 +205,14 @@ QByteArray encodeContextPayload(const Context& ctx)
     if (ctx.has(FieldStateFlags))    putU32(out, ctx.stateFlags);
     if (ctx.has(FieldTxAudioLeadMs)) putU16(out, ctx.txAudioLeadMs);
     if (ctx.has(FieldSessionPort))   putU16(out, ctx.sessionPort);
+    if (ctx.has(FieldForwardPower))  putU16(out, ctx.forwardPowerTenthW);
+    if (ctx.has(FieldSwr))           putU16(out, ctx.swrHundredths);
+    if (ctx.has(FieldAlc))           putU16(out, static_cast<quint16>(ctx.alcTenthPct));
+    if (ctx.has(FieldDrainVoltage))  putU16(out, ctx.drainVoltHundredths);
+    if (ctx.has(FieldDrainCurrent))  putU16(out, ctx.drainAmpHundredths);
+    if (ctx.has(FieldPaTemperature)) putU16(out, static_cast<quint16>(ctx.paTempTenthC));
+    if (ctx.has(FieldCompression))   putU16(out, ctx.compressionTenthDb);
+    if (ctx.has(FieldPowerSetting))  putU16(out, ctx.powerSetTenthPct);
     return out;
 }
 
@@ -179,6 +252,23 @@ bool decodeContextPayload(const QByteArray& payload, Context* out)
     if (ctx.has(FieldStateFlags)    && !takeU32(payload, off, &ctx.stateFlags))    return false;
     if (ctx.has(FieldTxAudioLeadMs) && !takeU16(payload, off, &ctx.txAudioLeadMs)) return false;
     if (ctx.has(FieldSessionPort)   && !takeU16(payload, off, &ctx.sessionPort))   return false;
+
+    if (ctx.has(FieldForwardPower)  && !takeU16(payload, off, &ctx.forwardPowerTenthW))  return false;
+    if (ctx.has(FieldSwr)           && !takeU16(payload, off, &ctx.swrHundredths))       return false;
+    if (ctx.has(FieldAlc)) {
+        quint16 v = 0;
+        if (!takeU16(payload, off, &v)) return false;
+        ctx.alcTenthPct = static_cast<qint16>(v);
+    }
+    if (ctx.has(FieldDrainVoltage)  && !takeU16(payload, off, &ctx.drainVoltHundredths)) return false;
+    if (ctx.has(FieldDrainCurrent)  && !takeU16(payload, off, &ctx.drainAmpHundredths))  return false;
+    if (ctx.has(FieldPaTemperature)) {
+        quint16 v = 0;
+        if (!takeU16(payload, off, &v)) return false;
+        ctx.paTempTenthC = static_cast<qint16>(v);
+    }
+    if (ctx.has(FieldCompression)   && !takeU16(payload, off, &ctx.compressionTenthDb))  return false;
+    if (ctx.has(FieldPowerSetting)  && !takeU16(payload, off, &ctx.powerSetTenthPct))    return false;
 
     *out = ctx;
     return true;

@@ -2018,6 +2018,41 @@ void DecodiumTransceiverManager::connectRig()
                     m_strengthDb = state.level();
                     emit strengthChanged();
                 }
+                // 1.0.581 — strumenti del finale. Un solo segnale per tutti e
+                // quattro: cambiano insieme, arrivano insieme, e quattro
+                // segnali separati vorrebbero dire quattro giri di binding in
+                // QML per un dato che e' uno solo.
+                {
+                    double const vd = state.vd() / 100.0;
+                    double const id = state.id() / 100.0;
+                    double const tp = state.pa_temp() / 10.0;
+                    double const cp = state.comp() / 10.0;
+                    double const pk = state.rfpower() / 10.0;   // millesimi -> percento
+                    bool const cambiato =
+                        m_drainVoltageValid  != state.vd_valid()
+                        || m_drainCurrentValid  != state.id_valid()
+                        || m_paTemperatureValid != state.pa_temp_valid()
+                        || m_compressionValid   != state.comp_valid()
+                        || (state.vd_valid()      && m_drainVoltage  != vd)
+                        || (state.id_valid()      && m_drainCurrent  != id)
+                        || (state.pa_temp_valid() && m_paTemperature != tp)
+                        || (state.comp_valid()    && m_compressionDb != cp)
+                        || m_powerSettingValid  != state.rfpower_valid()
+                        || (state.rfpower_valid() && m_powerSettingPct != pk);
+                    if (cambiato) {
+                        m_drainVoltageValid  = state.vd_valid();
+                        m_drainCurrentValid  = state.id_valid();
+                        m_paTemperatureValid = state.pa_temp_valid();
+                        m_compressionValid   = state.comp_valid();
+                        m_drainVoltage  = vd;
+                        m_drainCurrent  = id;
+                        m_paTemperature = tp;
+                        m_compressionDb = cp;
+                        m_powerSettingValid = state.rfpower_valid();
+                        m_powerSettingPct = pk;
+                        emit paMetersChanged();
+                    }
+                }
             },
             Qt::QueuedConnection);
 

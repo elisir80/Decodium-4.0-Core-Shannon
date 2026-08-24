@@ -19772,6 +19772,85 @@ QObject* DecodiumBridge::decoPortGatewayObject() const
             return rigOpen() != nullptr || self->catConnected();
         };
         hooks.setPtt         = [self](bool on) { self->decoPortKeyLocalRig(on); };
+
+        // Gli strumenti, con le stesse regole di validita' della CAT condivisa:
+        // sono la stessa verita' detta da un'altra porta, e due porte che
+        // rispondono diverso sulla stessa radio sono un difetto, non una scelta.
+        //
+        // I misuratori di trasmissione valgono solo mentre si trasmette: a
+        // riposo uno zero direbbe «nessuna potenza, ROS perfetto», che somiglia
+        // a una stazione che va benissimo. L'S-meter e' l'opposto — vale solo in
+        // ricezione — e la sua validita' se la calcola gia' il gestore.
+        auto const inTx = [self]() {
+            return self->m_hamlibCat && self->m_hamlibCat->pttActive();
+        };
+        hooks.sMeterDbm     = [self](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !rig->strengthValid()) return false;
+            v = rig->strengthDb();
+            return true;
+        };
+        hooks.forwardPowerW = [self, inTx](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !inTx()) return false;
+            double const w = rig->powerWatts();
+            if (w <= 0.0) return false;
+            v = w;
+            return true;
+        };
+        hooks.swr           = [self, inTx](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !inTx()) return false;
+            double const s = rig->swr();
+            if (s < 1.0) return false;   // sotto 1 non e' un ROS, e' un errore
+            v = s;
+            return true;
+        };
+        hooks.alcPct        = [self, inTx](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !inTx() || !rig->alcValid()) return false;
+            v = rig->alc();              // il gestore lo tiene gia' in percento
+            return true;
+        };
+        // Gli strumenti del finale. Non passano dal filtro "solo in
+        // trasmissione": la temperatura scende DOPO, ed e' proprio dopo che si
+        // guarda, mentre tensione e corrente a riposo raccontano lo stato
+        // dell'alimentazione. Ognuno ha gia' il suo "valido" dal gestore, che
+        // e' l'unica cosa che distingue una radio senza sensore da una che in
+        // questo istante non ha risposto.
+        hooks.drainVoltage    = [self](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !rig->drainVoltageValid()) return false;
+            v = rig->drainVoltage();
+            return true;
+        };
+        hooks.drainCurrent    = [self](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !rig->drainCurrentValid()) return false;
+            v = rig->drainCurrent();
+            return true;
+        };
+        hooks.paTemperature   = [self](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !rig->paTemperatureValid()) return false;
+            v = rig->paTemperature();
+            return true;
+        };
+        hooks.compressionDb   = [self](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !rig->compressionValid()) return false;
+            v = rig->compressionDb();
+            return true;
+        };
+        // La manopola della potenza: l'unica delle dieci che si legge a
+        // trasmettitore fermo, ed e' li' che si guarda — prima di premere.
+        hooks.powerSettingPct = [self](double& v) {
+            auto const* rig = self->m_hamlibCat;
+            if (!rig || !rig->powerSettingValid()) return false;
+            v = rig->powerSettingPct();
+            return true;
+        };
+
         m_decoPortGateway->setRigHooks(std::move(hooks));
         connect(m_decoPortGateway, &DecodiumDecoPortGateway::txAudioDue,
                 self, &DecodiumBridge::decoPortPlayTxAudio);

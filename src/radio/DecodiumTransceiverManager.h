@@ -65,6 +65,16 @@ class DecodiumTransceiverManager : public QObject
     Q_PROPERTY(double  swr         READ swr         NOTIFY swrChanged)
     Q_PROPERTY(double  alc         READ alc         NOTIFY alcChanged)  // 1.0.323 — ALC meter 0..100
     Q_PROPERTY(bool    alcValid    READ alcValid    NOTIFY alcChanged)
+    Q_PROPERTY(double  drainVoltage       READ drainVoltage       NOTIFY paMetersChanged)
+    Q_PROPERTY(bool    drainVoltageValid  READ drainVoltageValid  NOTIFY paMetersChanged)
+    Q_PROPERTY(double  drainCurrent       READ drainCurrent       NOTIFY paMetersChanged)
+    Q_PROPERTY(bool    drainCurrentValid  READ drainCurrentValid  NOTIFY paMetersChanged)
+    Q_PROPERTY(double  paTemperature      READ paTemperature      NOTIFY paMetersChanged)
+    Q_PROPERTY(bool    paTemperatureValid READ paTemperatureValid NOTIFY paMetersChanged)
+    Q_PROPERTY(double  compressionDb      READ compressionDb      NOTIFY paMetersChanged)
+    Q_PROPERTY(bool    compressionValid   READ compressionValid   NOTIFY paMetersChanged)
+    Q_PROPERTY(double  powerSettingPct    READ powerSettingPct    NOTIFY paMetersChanged)
+    Q_PROPERTY(bool    powerSettingValid  READ powerSettingValid  NOTIFY paMetersChanged)
 
     // ── Liste per UI ──────────────────────────────────────────────────────
     Q_PROPERTY(QStringList rigList  READ rigList  NOTIFY rigListChanged)
@@ -118,6 +128,20 @@ public:
     double  swr()          const { return m_swr; }
     double  alc()          const { return m_alc; }
     bool    alcValid()     const { return m_alcValid; }
+    // 1.0.581 — strumenti del finale, in unita' naturali. Il "valido" e' la
+    // parte che conta: senza sensore non esiste un numero giusto da mostrare,
+    // e uno zero su una tensione di alimentazione direbbe alimentatore spento.
+    double  drainVoltage()      const { return m_drainVoltage; }
+    bool    drainVoltageValid() const { return m_drainVoltageValid; }
+    double  drainCurrent()      const { return m_drainCurrent; }
+    bool    drainCurrentValid() const { return m_drainCurrentValid; }
+    double  paTemperature()     const { return m_paTemperature; }
+    bool    paTemperatureValid() const { return m_paTemperatureValid; }
+    double  compressionDb()     const { return m_compressionDb; }
+    bool    compressionValid()  const { return m_compressionValid; }
+    // La manopola della potenza, in percento del massimo del rig.
+    double  powerSettingPct()   const { return m_powerSettingPct; }
+    bool    powerSettingValid() const { return m_powerSettingValid; }
 
     QStringList rigList()       const;
     QStringList portList()      const { return m_portList; }
@@ -220,6 +244,7 @@ signals:
     void strengthChanged();
     void swrChanged();
     void alcChanged();
+    void paMetersChanged();   // 1.0.581 — tensione, corrente, temperatura, compressione
     void catAutoConnectChanged();
     void audioAutoStartChanged();
     void tciAudioEnabledChanged();
@@ -279,6 +304,17 @@ private:
     double  m_swr          {0.0};
     double  m_alc          {0.0};  // 1.0.323 — ALC meter 0..100
     bool    m_alcValid     {false};
+    // 1.0.581 — strumenti del finale
+    double  m_drainVoltage       {0.0};
+    bool    m_drainVoltageValid  {false};
+    double  m_drainCurrent       {0.0};
+    bool    m_drainCurrentValid  {false};
+    double  m_paTemperature      {0.0};
+    bool    m_paTemperatureValid {false};
+    double  m_compressionDb      {0.0};
+    bool    m_compressionValid   {false};
+    double  m_powerSettingPct    {0.0};
+    bool    m_powerSettingValid  {false};
 
     QStringList m_portList;
     bool    m_catAutoConnect {false};

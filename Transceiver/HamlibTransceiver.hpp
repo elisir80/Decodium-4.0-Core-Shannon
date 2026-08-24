@@ -81,6 +81,16 @@ private:
   bool do_pwr2_ = false;
   bool do_swr_ = false;
   bool do_alc_ = false;  // 1.0.323 — lettura RIG_LEVEL_ALC in TX (ALC automatico, fase 1 display)
+  // 1.0.581 — strumenti del finale. Si accendono SOLO se la radio li dichiara
+  // nelle proprie capacita': niente sonde opportunistiche come per l'ALC,
+  // perche' qui sarebbero quattro interrogazioni in piu' per ogni giro di
+  // trasmissione su un bus che e' gia' il collo di bottiglia, e il prezzo lo
+  // pagherebbe il PTT. Se la radio non li ha, non si chiedono mai.
+  bool do_vd_ = false;
+  bool do_id_ = false;
+  bool do_pa_temp_ = false;
+  bool do_comp_ = false;
+  bool do_rfpower_ = false;   // manopola della potenza, letta solo a riposo
   // S-meter: si legge SOLO in ricezione, dove il ciclo e' gia' rallentato, e
   // con un passo tutto suo. In trasmissione non ha significato e ruberebbe
   // tempo ai misuratori che invece contano.

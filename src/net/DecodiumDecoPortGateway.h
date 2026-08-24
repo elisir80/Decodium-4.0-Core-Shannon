@@ -55,6 +55,22 @@ public:
         std::function<void(double)>          setFrequencyHz;
         std::function<void(const QString&)>  setModeName;
         std::function<void(bool)>            setPtt;
+
+        // Gli strumenti. Hanno una firma diversa dai ganci qui sopra perche'
+        // devono poter dire "non lo so": una radio senza misuratore di ROS non
+        // deve far comparire un ROS, e nemmeno uno zero, che sul quadrante
+        // significherebbe "adattamento perfetto". Restituiscono true solo se
+        // la lettura c'e' stata davvero; il gancio non fornito vale come una
+        // lettura mai avvenuta, e il campo non parte proprio.
+        std::function<bool(double&)>         sMeterDbm;
+        std::function<bool(double&)>         forwardPowerW;
+        std::function<bool(double&)>         swr;
+        std::function<bool(double&)>         alcPct;
+        std::function<bool(double&)>         drainVoltage;
+        std::function<bool(double&)>         drainCurrent;
+        std::function<bool(double&)>         paTemperature;
+        std::function<bool(double&)>         compressionDb;
+        std::function<bool(double&)>         powerSettingPct;
     };
 
     explicit DecodiumDecoPortGateway(QObject* parent = nullptr);
