@@ -1661,7 +1661,10 @@ private:
     QCOMPARE (ftx_fst4_downsample_c (bigfft.data (), nfft1, ndown, nsps, fs, f0, c2_cpp.data (), nfft2), nfft2);
     float max_real_diff = 0.0f;
     float max_imag_diff = 0.0f;
-    int max_index = -1;
+    // QVERIFY2 evaluates its diagnostic expression even when the assertion
+    // passes.  Keep this index valid for the exact-match case, where the loop
+    // never observes a non-zero difference.
+    int max_index = 0;
     for (int i = 0; i < nfft2; i += 97)
       {
         float const real_diff = std::fabs (c2_cpp[static_cast<size_t> (i)].real () - c2_ref[static_cast<size_t> (i)].real ());
