@@ -6,6 +6,14 @@ current feature worktree, **not a declaration that the Definition of Done is
 complete**. The exact remaining gates are recorded in
 [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md).
 
+Rebase/current-verification note: this branch was rebased onto `upstream/main`
+`0bcd8b04a` (release v1.0.584). Subsequent current-tree local verification
+built SSTV+HAMDRM, analog-only and SSTV-off configurations, then passed 82/82
+SSTV tests in 87.29 seconds and 37/37 non-SSTV tests in 96.80 seconds. The
+prior numerical sanitizer, performance and independent-vector evidence remains
+historical where no rerun is listed; current local tests do not prove external
+platforms, packages, radio, providers or independent interoperability.
+
 ## 1. Starting branch and starting commit
 
 - Branch: main
@@ -22,28 +30,32 @@ hardware RTL-SDR test are recorded in
 ## 2. Final branch and final commit
 
 - Working branch: feature/native-sstv
-- Immutable native implementation commit:
-  2aeb0e6660636bca2db797826ce44f10cc476a06
-- Immutable build/packaging/CI commit and current committed HEAD:
-  6f74fb937d0515c29bad61290fd2bc30b55a1314
-- Final documentation-only commit: **not yet available**
+- Rebased target base: `upstream/main` `0bcd8b04a` (release v1.0.584)
+- Rebased native implementation commit: `f5dbce00d`
+- Rebased build/packaging/CI commit: `68ac4014b`
+- Rebased documentation-evidence commit: `fbac29f80`
+- Local storage/UI hardening commit: `4d05a5b9f`
+- Local package hardening commit: `79db9fc5a`
 
-The native implementation and build/CI work are committed at the two immutable
-SHAs above. The remaining worktree changes are this final documentation pass;
-its later commit will not change the tested implementation. Record that final
-documentation SHA after it is created rather than inventing it here.
+The rebase retained the native implementation and build/CI changes at the
+immutable SHAs above. The current local build/test evidence described here
+includes the two local hardening commits; no push, release or remote workflow
+has occurred.
 
 Committed inventory so far:
 
 ~~~text
-e63dbc905 Document native SSTV architecture and delivery contract
-dd4bcbc3e Add native SSTV protocol core foundation
-a7699f744 Add SSTV streaming audio and TX foundations
-dfe9c3e4c Add SSTV RX acquisition and progressive image core
-9f216e74b Add SSTV RX frontend and streaming WAV
-64cc8e17d Add optional SSTV hum and impulse filtering
-2aeb0e666 Complete native SSTV workspace and HAMDRM integration
-6f74fb937 Add native SSTV build packaging and CI coverage
+04c81fede Document native SSTV architecture and delivery contract
+a249ef544 Add native SSTV protocol core foundation
+2428542d2 Add SSTV streaming audio and TX foundations
+97667147e Add SSTV RX acquisition and progressive image core
+f9b4dc08c Add SSTV RX frontend and streaming WAV
+a08b3e918 Add optional SSTV hum and impulse filtering
+f5dbce00d Complete native SSTV workspace and HAMDRM integration
+68ac4014b Add native SSTV build packaging and CI coverage
+fbac29f80 Document native SSTV operation evidence and release gates
+4d05a5b9f Harden SSTV workspace storage and beta UI
+79db9fc5a Harden native SSTV release packaging
 ~~~
 
 ## 3. Architecture summary
@@ -87,7 +99,7 @@ Decodium TX interlocks.
 | File or cohesive path | Significant change |
 |---|---|
 | CMakeLists.txt; src/sstv/CMakeLists.txt; src/sstv/digital/CMakeLists.txt; tests/sstv/CMakeLists.txt | Target-scoped SSTV/HAMDRM feature gates, libraries, application linkage, tests, fuzzers and developer tools without changing the global C++17 level. |
-| src/bridge/DecodiumAudioSink.h; DecodiumBridge.{h,cpp}; DecodiumBridgeSstv.cpp | Existing-audio fan-out, Bridge-owned RX/TX/storage/gallery/sharing/HAMDRM services, settings, QML properties, shutdown and actions. |
+| src/bridge/DecodiumAudioSink.h; DecodiumBridge.{h,cpp}; DecodiumBridgeSstv.cpp | Existing-audio fan-out, Bridge-owned RX/TX/storage/gallery/sharing/HAMDRM services, settings, QML properties, shutdown/actions and immutable Gallery records for prepared/transmitted TX images. |
 | Audio/soundout.{h,cpp} | Bounded pull-source support for long SSTV/HAMDRM streams under the existing output lifecycle. |
 | RTL-SDR, DecoPort, transceiver and legacy-backend integration files | Source-labelled PCM forwarding to the same SSTV relay; no additional capture ownership. |
 | src/sstv/core/* | Canonical registry/specification, standard/wide/narrow VIS, FSK ID and fractional timing. |
@@ -95,13 +107,13 @@ Decodium TX interlocks.
 | src/sstv/analog/* | Table-driven native RX/TX sessions for Martin, Scottie, Robot, Wraase/Pasokon, PD, AVT and MMSSTV wide/narrow. |
 | src/sstv/tx/*; integration/SstvTx*; SstvWav* | Phase-continuous encoding, preparation, optional FSK ID, calibration, atomic WAV, loopback and fail-safe existing CAT/PTT/SoundOutput coordination. |
 | integration/SstvRx*; SstvAudioIngress.* | Worker runtime, bounded ingress, correction controls, retained-audio jobs and replay/re-decode. |
-| src/sstv/storage/*; GalleryModel; ThumbnailProvider | QStandardPaths layout, atomic images/sidecars, versioned SQLite, metadata, retention/delete recovery, paging and lazy thumbnails. |
+| src/sstv/storage/*; GalleryModel; ThumbnailProvider | QStandardPaths layout, atomic images/sidecars, versioned SQLite, safe narrow notes/tags editing with rollback, retention/delete recovery, paging and lazy thumbnails. |
 | src/sstv/sharing/*; SstvShareController | Versioned manifests, durable schema-v3 queue/inbox, REST/WebDAV/pre-signed providers, validation, TLS/credential policy and bounded sessions. |
-| src/sstv/digital/* | Separate HAMDRM profile, MOT/BSR/object, persistence, channel/PHY/waveform, OpenJPEG and controller layers. |
+| src/sstv/digital/* | Separate HAMDRM profile, MOT/BSR/object, persistence, channel/PHY/waveform, OpenJPEG and controller layers; TX now requires a bounded immutable Gallery snapshot before acceptance. |
 | src/sstv/diagnostics/* | Allowlisted event ring, bounded scalar snapshots and atomic export; stable source tokens, at-most-4-Hz active-TX refresh plus terminal update, explicit unavailable HAMDRM state and persistent guarded test-tone result. |
-| qml/decodium/components/sstv/*; qml/decodium/Main.qml | Lazy workspace with Receive, Studio, Gallery, Sharing, HAMDRM, Settings and Diagnostics pages. |
-| translations/decodium_it.{ts,qm} | Integrated Italian strings through the existing workflow; validation reports 6,825 finished and 0 unfinished entries. |
-| tests/sstv/* | 81 SSTV-labelled protocol, DSP, mode, integration, QML, storage, sharing, security, HAMDRM, performance and fuzz-smoke tests; the final current-tree invocation passed 81/81. |
+| qml/decodium/components/sstv/*; qml/decodium/Main.qml | Lazy workspace with Receive, Studio, Gallery, Sharing, HAMDRM, Settings and Diagnostics pages; shared Material/palette contrast and the visible `SSTV - image radio... (BETA)` menu label. |
+| translations/decodium_it.{ts,qm} | Integrated Italian strings through the existing workflow; validation reports 6,857 finished and 0 unfinished entries. |
+| tests/sstv/* | 82 SSTV-labelled protocol, DSP, mode, integration, QML, storage, sharing, security, HAMDRM, performance and fuzz-smoke tests; the current invocation passed 82/82. |
 | workflows, scripts and packaging/docker files | Platform/feature matrices and explicit Qt image-format, QSQLITE, ShaderTools and optional OpenJPEG packaging checks. Workflow definitions are not executed platform evidence. |
 | docs/sstv/*; doc/THIRD_PARTY_LICENSES_OPENJPEG.md | Architecture, modes, provenance, RX/TX, storage, QSO, sharing/OpenAPI, HAMDRM, security, test, performance, user/developer and release evidence. |
 
@@ -175,7 +187,6 @@ Current local builds:
 
 ~~~zsh
 cmake --build /tmp/decodium-hamdrm.csmxg7 \
-  --target wsjtx decodium_qml decodium_sstv_test_binaries translations \
   --parallel 6
 
 cmake --build /tmp/decodium-sstv-analog.biDO0t \
@@ -186,33 +197,47 @@ cmake --build /tmp/decodium-sstv-off.Hu9Bvh \
   --target wsjtx decodium_qml translations --parallel 6
 ~~~
 
-The caches confirm Release/Ninja/deployment target 13.0 and respectively
+The current caches confirm Release/Ninja/deployment target 13.0 and respectively
 SSTV=ON,HAMDRM=ON; SSTV=ON,HAMDRM=OFF; and SSTV=OFF,HAMDRM=OFF. The enabled
 cache resolves OpenJPEG through /opt/homebrew/lib/cmake/openjpeg-2.5.
-The final main application/test build completed successfully in 8.28 seconds;
-the final analog-only build passed in 10.21 seconds and SSTV-off in 6.58 seconds.
+All three current builds completed successfully. Build elapsed values are not
+reported because the invocations rebuilt different cached target sets.
 
 ## 9. Platforms built
 
 | Platform/configuration | Actual result |
 |---|---|
-| macOS 26.5.2, Apple Silicon arm64, Qt 6.11, Release, SSTV+HAMDRM | final main application/test build succeeded in 8.28 seconds; both application executables and all test binaries were built locally |
-| Same host, analog-only | final build passed in 10.21 seconds; both application executables and analog test binaries built locally |
-| Same host, SSTV disabled | final build passed in 6.58 seconds; both application executables built locally |
+| macOS 26.5.2, Apple Silicon arm64, Qt 6.11, Release, SSTV+HAMDRM | current main application/test build succeeded; application executables and all test binaries were built locally |
+| Same host, analog-only | current build succeeded; application executables and analog test binaries built locally |
+| Same host, SSTV disabled | current build succeeded; application executables built locally |
 | macOS Intel | workflow updated; not executed |
 | Windows x64 | workflow updated; not executed |
 | Linux x86_64 | workflow/package scripts updated; not executed |
 | Linux ARM64 | workflow/package scripts updated; not executed |
 
-No final DMG/AppImage/Windows package has been inspected for this final
+No final DMG/AppImage/Windows package has been inspected for the current
 worktree. macOS compilation cannot establish those platform claims.
 
 ## 10. Tests executed
 
-Executed evidence includes:
+Current current-tree test commands were:
+
+~~~zsh
+QT_QPA_PLATFORM=offscreen ctest --test-dir /tmp/decodium-hamdrm.csmxg7 \
+  -L sstv --parallel 4 --timeout 300 --output-on-failure
+
+QT_QPA_PLATFORM=offscreen ctest --test-dir /tmp/decodium-hamdrm.csmxg7 \
+  -LE sstv --parallel 4 --timeout 300 --output-on-failure
+~~~
+
+They exercised the current 82 SSTV-labelled and 37 non-SSTV registered tests.
+The SSTV run includes the new Gallery metadata/archive, HAMDRM snapshot and
+offscreen-QML coverage.
+
+Historical pre-rebase supplemental evidence includes:
 
 - untouched baseline: 37/37 CTest tests;
-- current focused mode-doc, external-vector, performance, sharing-core and
+- focused mode-doc, external-vector, performance, sharing-core and
   schema-v3 queue run;
 - family protocol/RX/TX/WAV/Studio tests for all 52 native analog rows;
 - offscreen Receive, Studio, Gallery, Sharing, Settings, QSO, Diagnostics and
@@ -225,45 +250,33 @@ Executed evidence includes:
   and controller tests;
 - deterministic parser fuzz smoke and focused ASan+UBSan repetitions.
 
-The enabled build registers 81 SSTV-labelled tests and 118 tests overall. The
-final SSTV invocation passed 81/81 in 91.90 seconds. An attempted all-test run
-is deliberately not called an aggregate pass: it ran the 81 already-built tests
-successfully but reported 36 historical executables as `Not Run`. Those 36
-binaries were then built, and the non-SSTV invocation passed 37/37 in 132.59
-seconds. All 118 current-tree tests therefore have passing executable evidence
-across two invocations; no single 118/118 result is claimed.
+The current enabled build registers 82 SSTV-labelled tests and 119 tests
+overall. The SSTV invocation passed 82/82 in 87.29 seconds; the non-SSTV run
+passed 37/37 in 96.80 seconds. This establishes executable current-tree
+coverage across two explicit invocations, not a single fictitious aggregate
+119/119 result.
 
 ## 11. Test results
 
-The current focused command was:
+Current results:
 
-~~~zsh
-ctest --test-dir /tmp/decodium-hamdrm.csmxg7 \
-  -R '^(test_sstv_mode_docs|test_sstv_external_vectors|test_sstv_share_queue_manager|test_sstv_sharing_core|sstv_performance)$' \
-  --output-on-failure
-~~~
+- SSTV+HAMDRM, analog-only and SSTV-off builds: success;
+- SSTV-labelled suite: 82/82 passed in 87.29 seconds;
+- non-SSTV suite: 37/37 passed in 96.80 seconds;
+- registered total: 119 tests, evidenced by the two explicit invocations above;
+- package-script syntax, Windows workflow YAML, Italian TS XML, the SSTV QML
+  pages and repository-layout validation: passed locally.
 
-Final current-tree results:
+`qmllint` exited successfully for the target pages and `Main.qml`; the latter
+still emits unrelated legacy layout/unqualified-access warnings, so it is not
+represented as a warning-free application audit.
 
-- main application/test build: success, 8.28 seconds;
-- analog-only application/test build: success, 10.21 seconds;
-- SSTV-off application build: success, 6.58 seconds;
-- SSTV-labelled suite: 81/81 passed, 91.90 seconds;
-- historical non-SSTV suite after building its 36 missing binaries: 37/37
-  passed, 132.59 seconds;
-- total coverage: all 118 registered tests across those two CTest invocations.
-
-The first attempted all-test invocation had 81 successful executions and 36
-`Not Run` entries because those historical binaries had not been built. It is
-retained as setup evidence and is **not** reported as a passing aggregate run.
-
-The additional focused command above passed 5/5, 0 failed, in 6.16 seconds.
-
-The schema-v3 queue tests include migration/restart/rollback, more than 10,000
-closed inbox cycles, oldest-first terminal reclamation and protection of
-active/retryable/file-owning rows. Focused sanitizer runs reported no
-ASan/UBSan failure. These focused results supplement the final two-invocation
-coverage; they are not presented as a separate single aggregate run.
+Historical focused evidence remains useful but is not relabelled as current:
+the 5/5 mode-doc/external-vector/performance/sharing-core/schema-v3 run passed
+in 6.16 seconds, focused sanitizer runs reported no ASan/UBSan failure, and the
+schema-v3 queue tests cover migration/restart/rollback, more than 10,000 closed
+inbox cycles, oldest-first terminal reclamation and protection of
+active/retryable/file-owning rows.
 
 ## 12. Independent interoperability vectors used
 
@@ -365,8 +378,9 @@ included.
 
 - Final Windows, Linux x86_64/ARM64 and macOS Intel build/package evidence is
   absent; workflow edits are configuration only.
-- Implementation and build/CI have immutable SHAs; only the documentation-only
-  commit produced after this report remains to be recorded.
+- The feature was rebased onto v1.0.584. Its rebased implementation, build/CI
+  and documentation-evidence SHAs are recorded above, but the historical local
+  build/test evidence must be repeated on the rebased HEAD.
 - Only Martin M2, Robot 36 and Robot B/W 8 have independent full PCM
   encoder-to-native-decoder vectors. Most rows have native loopback or
   timing/source landmarks only.
@@ -405,8 +419,8 @@ replace this evidence.
 
 ## 19. Completed UI description and screenshot status
 
-Access is through the top-left hamburger menu: **SSTV - image radio...**. The
-lazy workspace is titled **SSTV - Decodium** and contains:
+Access is through the top-left hamburger menu: **SSTV - image radio... (BETA)**.
+The lazy workspace is titled **SSTV - Decodium** and contains:
 
 - Receive: progressive image and VIS/mode/sync/level/AFC/slant/FSK controls;
 - Transmit Studio: source/prepared/loopback views, edits, overlays/templates,
@@ -419,9 +433,10 @@ lazy workspace is titled **SSTV - Decodium** and contains:
   refresh is capped at 4 Hz plus terminal state; the tone control warns that it
   keys PTT/transmits RF and repeats the normal TX safety guard.
 
-Offscreen QML tests exercised 1040x700 and page-specific layouts. No final
-human-reviewed screenshot from the finished packaged build is recorded, so
-this section provides a description rather than implying visual evidence.
+Offscreen QML tests exercised 1040x700 and page-specific layouts. A local
+offscreen Studio rendering was human-reviewed after the shared Material/palette
+contrast correction; no final human-reviewed screenshot from a packaged build
+is recorded, so this does not imply packaged visual evidence.
 
 ## 20. Suggested pull-request title and body
 
@@ -448,12 +463,12 @@ No second audio capture device or external SSTV/Python/Java runtime is used.
 
 - untouched baseline: 37/37 CTest tests;
 - macOS Apple Silicon builds: SSTV+HAMDRM, analog-only and SSTV-off;
-- current tree: 81/81 SSTV and 37/37 non-SSTV tests passed in two explicit
-  invocations (no false single aggregate claim);
+- current rebased tree: 82/82 SSTV and 37/37 non-SSTV tests passed in two
+  explicit invocations (no false single aggregate claim);
 - three pinned PySSTV WAVs decoded through production replay/runtime;
 - Robot B/W 8 canonical 66 ms and compatibility 67 ms paths passed 40 repeats
   plus ASan;
-- Italian translations: 6,825 finished, 0 unfinished;
+- Italian translations: 6,857 finished, 0 unfinished;
 - focused sanitizer, QML, storage, sharing, TX and HAMDRM coverage.
 
 See docs/sstv/FINAL_REPORT.md and DEFINITION_OF_DONE.md for exact limits.

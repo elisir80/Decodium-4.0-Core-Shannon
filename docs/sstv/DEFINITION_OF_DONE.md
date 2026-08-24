@@ -15,14 +15,12 @@ Status values:
 - `pending`: the required evidence does not yet exist.
 
 Current local evidence is macOS 26.5.2/Apple Silicon, Release, Qt 6.11 and
-OpenJPEG 2.5.4. The final main application/test build completed successfully in
-8.28 seconds. The current tree registers 81 SSTV-labelled tests and 118 tests
-overall. The SSTV invocation passed 81/81 in 91.90 seconds. The first attempted
-all-test invocation is **not** reported as an aggregate pass: it ran the 81
-already-built tests successfully but marked 36 historical binaries `Not Run`.
-After those 36 binaries were built, the non-SSTV invocation passed 37/37 in
-132.59 seconds. Thus all 118 current-tree tests have executable passing
-evidence across two explicit invocations, not one fictitious 118/118 run.
+OpenJPEG 2.5.4. On the rebased current tree, the SSTV+HAMDRM, analog-only and
+SSTV-off configurations all built successfully. The current build registers 82
+SSTV-labelled tests and 119 tests overall. The SSTV invocation passed 82/82 in
+87.29 seconds; the non-SSTV invocation passed 37/37 in 96.80 seconds. These
+are two explicit invocations, not a fictitious single aggregate 119/119 result.
+Earlier pre-rebase timing/build outputs remain historical context only.
 
 A focused run of mode-document synchronisation, the three pinned PySSTV WAV
 vectors, performance, sharing-core security and the schema-v3 queue additionally
@@ -34,14 +32,14 @@ benchmark.
 
 | # | Requirement | Status | Current evidence and remaining gate |
 |---:|---|---|---|
-| 1 | Build on every maintained desktop platform | pending | On macOS Apple Silicon the final main SSTV+HAMDRM build passed in 8.28 seconds, analog-only in 10.21 seconds and SSTV-off in 6.58 seconds. Workflow definitions cover Windows x64, macOS Apple Silicon/Intel, Linux x86_64/ARM64 and Linux feature-off, but those jobs and produced packages have not been executed and inspected for this final tree. |
-| 2 | Existing Decodium tests pass or pre-existing failures are recorded | pass | The untouched baseline passed 37/37 with documented skips. On the final current tree, SSTV passed 81/81 in 91.90 seconds and, after building 36 initially missing historical binaries, non-SSTV passed 37/37 in 132.59 seconds. This is complete 118-test coverage across two invocations; the earlier run with 36 `Not Run` entries is not misreported as a pass. |
+| 1 | Build on every maintained desktop platform | pending | On the current rebased macOS Apple Silicon tree, SSTV+HAMDRM, analog-only and SSTV-off builds succeeded. Workflow definitions cover Windows x64, macOS Apple Silicon/Intel, Linux x86_64/ARM64 and Linux feature-off, but those jobs and their produced packages have not been executed or inspected for the final tree. |
+| 2 | Existing Decodium tests pass or pre-existing failures are recorded | pass | The current rebased tree passed 82/82 SSTV tests in 87.29 seconds and 37/37 non-SSTV tests in 96.80 seconds, across two explicit invocations (119 registered tests). |
 | 3 | No second competing audio-capture engine | pass | Production SSTV consumes the existing Decodium PCM fan-out through a bounded relay/ingress. `src/sstv` creates no `QAudioSource`, independent CAT stack or external decoder process. |
 | 4 | Analog RX from live, external/DecoPort and WAV audio | local-pass | Local sound-card, RTL-SDR, TCI and DecoPort paths publish source-labelled PCM to the same native ingress; WAV/replay and deterministic sources use the same runtime. WAV and source-adapter tests pass. An actual sound device, RTL-SDR/TCI/DecoPort session and RF reception have not been exercised. |
 | 5 | Analog TX through loopback, WAV and real Decodium TX/PTT coordination | local-pass | Native loopback, atomic WAV export and the existing SoundOutput/CAT/PTT ownership path are connected and locally tested, including error and cancellation. No physical rig, audio output or RF transmission has been tested. |
 | 6 | Every mandatory family in the canonical registry | pass | The registry contains 52 implemented analog rows spanning Martin, Scottie, Robot colour/monochrome, Wraase, Pasokon, PD, normal AVT and all required MP/MR/ML/narrow modes. FAX/HFFAX/WEFAX and AVT QRM variants remain separately classified and are not falsely advertised as implemented SSTV. |
 | 7 | Correct timing, dimensions, VIS and colour order | local-pass | Fixed-point registry/family tests and pinned Handbook, libsstv, pySSTV and MMSSTV landmarks cover all implemented rows and preserve documented conflicts. Several rows still lack an independently captured compatible waveform or cross-application trial. |
-| 8 | Deterministic encoder and decoder tests for required modes | pass | Per-family encoder, RX-session, runtime, coordinator, WAV and Studio coverage exists for every implemented analog row and is included in the final 81/81 SSTV pass. Robot B/W 8's canonical 66 ms and PySSTV-compatible 67 ms line periods additionally passed 40 repetitions and ASan. |
+| 8 | Deterministic encoder and decoder tests for required modes | pass | Per-family encoder, RX-session, runtime, coordinator, WAV and Studio coverage exists for every implemented analog row and is included in the current 82/82 SSTV pass. Robot B/W 8's canonical 66 ms and PySSTV-compatible 67 ms line periods additionally passed 40 repetitions and ASan. |
 | 9 | Independent interoperability vectors for common modes | local-pass | Pinned PySSTV WAVs generated independently of Decodium pass native replay for Martin M2 (24.250 dB), Robot 36 (18.024 dB) and Robot B/W 8 (18.661 dB), all complete with coverage 1.0. Robot B/W 8 now explicitly accepts the independently observed 67 ms profile while native TX retains canonical 66 ms timing. Most rows and every external-decoder direction remain unverified. |
 | 10 | Frequency-offset correction works | local-pass | Runtime tests cover automatic acquisition at -100 Hz and +100 Hz, manual/off modes and rejection of image-driven AFC. Live RF drift and tuning have not been measured. |
 | 11 | Automatic and manual slant correction work | local-pass | Automatic and manual correction, retained-audio re-decode and -300/+300 ppm cases are executable and tested. No long live transmission or physical sample-clock mismatch has been measured. |
@@ -63,10 +61,10 @@ benchmark.
 | 27 | Worker threads stop cleanly | local-pass | RX/replay, Studio, storage, sharing, TX and HAMDRM tests cover cancellation, stale generations and shutdown. A complete-tree stress/sanitizer run and maintained-platform lifecycle tests remain open. |
 | 28 | PTT releases after success/error/cancellation | local-pass | Coordinator tests cover success, timeout, audio loss/underrun, CAT disconnect, watchdog, destructor and cancellation during header, image and FSK ID, with exactly-once release. Real PTT feedback is unverified. |
 | 29 | Negligible inactive overhead | local-pass | The post-fix local performance run measured 0.015 ms CPU over 755.027 ms wall time, no worker and zero chunks while inactive; 15 seconds of audio processed in 0.040 seconds (377.408 times real time). Cross-platform and long-duration application profiling remain open. |
-| 30 | Complete mode/licence/security/user/developer documentation | local-pass | The documentation set includes architecture, mode/provenance, RX, TX, storage/gallery/QSO, sharing/OpenAPI, HAMDRM, security, performance, user/developer guides, release notes, this ledger and the final report. Italian translation validation reports 6,825 finished and 0 unfinished entries. Implementation commit `2aeb0e6660636bca2db797826ce44f10cc476a06` and build/CI commit `6f74fb937d0515c29bad61290fd2bc30b55a1314` are immutable; only the final documentation commit and external CI/package evidence remain to record. |
-| 31 | `MODE_MATRIX.md` exactly matches executed evidence | pass | `test_sstv_mode_docs` verifies all 64 registry/catalogue rows and generated cells; it passed in the focused current-tree run. External columns remain explicitly `unverified` where appropriate. |
+| 30 | Complete mode/licence/security/user/developer documentation | local-pass | The documentation set includes architecture, mode/provenance, RX, TX, storage/gallery/QSO, sharing/OpenAPI, HAMDRM, security, performance, user/developer guides, release notes, this ledger and the final report. Italian translation validation reports 6,857 finished and 0 unfinished entries. The rebased implementation, build/CI and local hardening commits are above `upstream/main` `0bcd8b04a` (v1.0.584); current local build/test evidence is recorded above, while external CI/package evidence remains open. |
+| 31 | `MODE_MATRIX.md` exactly matches executed evidence | pass | `test_sstv_mode_docs` verifies all 64 registry/catalogue rows and generated cells; it passed within the current 82/82 SSTV run. External columns remain explicitly `unverified` where appropriate. |
 | 32 | Release notes do not overstate support | pass | `RELEASE_NOTES.md` names the implemented subset and explicitly excludes unexecuted platforms, real radio/provider, E2EE and broad interoperability claims. It still requires final CI identifiers before publication. |
-| 33 | No production stub, TODO-only feature or UI simulation | pass | Operator actions are wired to native controllers and unavailable capabilities are explicit. The final diagnostics fixes use stable ASCII source tokens, cap active TX refresh at 4 Hz plus terminal refresh, represent unavailable HAMDRM without fabricated zero metrics, persist the terminal test-tone result and guard/label the action as a real PTT/RF transmission. The rebuilt current tree passed 81/81 SSTV tests, including Diagnostics/QML coverage. |
+| 33 | No production stub, TODO-only feature or UI simulation | pass | Operator actions are wired to native controllers and unavailable capabilities are explicit. The final diagnostics fixes use stable ASCII source tokens, cap active TX refresh at 4 Hz plus terminal refresh, represent unavailable HAMDRM without fabricated zero metrics, persist the terminal test-tone result and guard/label the action as a real PTT/RF transmission. The current tree passed 82/82 SSTV tests, including Diagnostics/QML coverage. |
 
 ## Completion rule
 
@@ -75,6 +73,6 @@ requires every row to be `pass`; `local-pass` records progress but never
 substitutes for the platform, hardware, provider or independent evidence named
 in the requirement. In particular, workflow YAML is not a platform build,
 loopback is not radio/interoperability evidence, and a local provider is not a
-deployed service. The final report must be refreshed with the immutable final
-commit and actual final CI/package/hardware results rather than promoting these
-rows by inference.
+deployed service. The final report records the current local test/build result;
+actual final CI/package/hardware evidence is still required and must not be
+promoted by inference.

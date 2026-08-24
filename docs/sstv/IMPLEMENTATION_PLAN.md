@@ -203,8 +203,10 @@ first-class in SQLite/sidecars/model/QML. Separate image/thumbnail/raw-audio
 quota inventory feeds a non-destructive deterministic preview; manual apply
 requires an exact phrase and automatic apply is persisted opt-in, off by
 default, with favourite/QSO/shared/unowned protections. Both reuse the same
-bounded deletion journal. See `GALLERY_RETENTION_POLICY.md`. QSO logging and a
-dedicated re-decode-parameter UI remain separate M4 integration work.
+bounded deletion journal. See `GALLERY_RETENTION_POLICY.md`. QSO logging and
+retained-audio re-decode are integrated native workflows: Gallery opens the
+bounded log/associate-QSO dialog or a retained-WAV replay, while Receive
+re-decodes retained audio with the selected AFC, slant and mode controls.
 
 ### M5: Decodium TX/CAT/PTT integration
 
@@ -245,8 +247,9 @@ Current native implementation:
 - strict canonical manifest v1, bounded JSON/security helpers, provider
   abstraction, redacted failure classes and persistent transfer state;
 - generic HTTPS REST outbound create/sequential-chunk/status/complete/cancel
-  plus fail-closed capability/recipient/inbox/range-download/acknowledge/reject,
-  WebDAV HTTPS collection/upload/status/delete/direct bounded GET and
+  plus fail-closed capability/recipient/inbox/range-download/acknowledge/reject/
+  incoming-delete/sender-block/revoke/remote-delete, WebDAV HTTPS
+  collection/upload/status/delete/direct bounded GET and
   trusted-lease pre-signed PUT providers;
 - SQLite schema v1 upload/download/inbox queue with bounded concurrency,
   deterministic retry, restart recovery, durable operator pause/resume for
@@ -282,10 +285,12 @@ Sharing-page render passed. No live server, real platform keychain/secret
 store, packaged artifact or Internet interoperability was exercised.
 
 This is a native bidirectional generic REST client tranche, not a completed or
-deployed milestone. Sender blocking and provider-delete flows remain absent.
-Native accepted-image save/import and strongly confirmed local Gallery deletion
-are present. The native storage
-import API, controller-to-storage integration test and queued Bridge lifecycle
+deployed milestone. Provider incoming-delete, completed-object delete/revoke
+and sender-block flows are wired through the queue, controller and Sharing page;
+each is capability-gated and remains unavailable until an authenticated provider
+advertises the corresponding executable operation. Native accepted-image
+save/import and strongly confirmed local Gallery deletion are present. The
+native storage import API, controller-to-storage integration test and queued Bridge lifecycle
 connection exist; the controller's secure-store and lifecycle tests still do
 not cover every failure or maintained release platform.
 
@@ -302,9 +307,9 @@ no fictional production service or URL is embedded. E2EE remains unavailable
 until an audited crypto dependency, key lifecycle, envelope vectors and
 maintained-platform packaging exist.
 
-Remaining gate: add sender-block and provider-delete actions; make TLS-only
-provider visibility explicit; prove provider events
-cannot reach TX/PTT; extend expiry, revoke, quota/flood, TLS
+Remaining gate: exercise provider delete/block/revoke and provider-event handling
+against a deployed endpoint; prove provider events cannot reach TX/PTT; extend
+expiry, quota/flood, TLS
 certificate/hostname, worker lifecycle and credential-backend failure coverage;
 scan every persistence/diagnostic surface for secrets; verify QSQLITE and the
 platform secure store in maintained-platform artifacts; and run conformance
