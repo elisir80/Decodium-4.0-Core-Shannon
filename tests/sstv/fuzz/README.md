@@ -13,7 +13,8 @@ cmake -S . -B build-fuzz -G Ninja \
   -DCMAKE_CXX_COMPILER=/path/to/clang++
 cmake --build build-fuzz --target \
   fuzz_sstv_protocol_parsers fuzz_sstv_wav_pcm_reader \
-  fuzz_sstv_share_parsers fuzz_sstv_qso_log fuzz_hamdrm_parsers
+  fuzz_sstv_share_parsers fuzz_sstv_incoming_media fuzz_sstv_qso_log \
+  fuzz_hamdrm_parsers
 ```
 
 Example bounded local runs:
@@ -25,6 +26,8 @@ build-fuzz/tests/sstv/fuzz_sstv_protocol_parsers \
   tests/sstv/fuzz/corpus/protocol -max_total_time=60 -max_len=4096
 build-fuzz/tests/sstv/fuzz_sstv_share_parsers \
   tests/sstv/fuzz/corpus/share -max_total_time=60 -max_len=1048576
+build-fuzz/tests/sstv/fuzz_sstv_incoming_media \
+  tests/sstv/fuzz/corpus/incoming-media -max_total_time=60 -max_len=1048576
 build-fuzz/tests/sstv/fuzz_sstv_qso_log \
   tests/sstv/fuzz/corpus/qso -max_total_time=60 -max_len=262144
 build-fuzz/tests/sstv/fuzz_hamdrm_parsers \
@@ -39,3 +42,8 @@ seeds plus core round-trip invariants without requiring Clang or libFuzzer.
 harness through 2,050 deterministic edge and hostile cases, so the same parser
 boundary also runs under ordinary sanitizer builds when a libFuzzer runtime is
 not installed.
+
+`test_sstv_incoming_media_fuzz_smoke` drives the actual remote-image staging
+boundary through committed 1x1 PNG and JPEG seeds plus 256 deterministic
+hostile byte streams. It validates hash/MIME, bounded decode, metadata-free PNG
+normalisation and restart reinspection without using any external provider.

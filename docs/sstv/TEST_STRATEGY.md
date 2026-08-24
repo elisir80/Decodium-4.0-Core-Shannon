@@ -341,8 +341,12 @@ separate evidence.
 The local network server verifies HTTPS policy separately from localhost test
 exceptions and covers origin-changing redirects, credential forwarding,
 timeouts, rate limits, malformed JSON, duplicate completion, wrong hashes,
-expiry, cancellation, restart/resume, permanent-auth failures and log redaction.
-Fuzz targets retain crashing inputs and run with ASan/UBSan where supported.
+expiry, cancellation, restart/resume, permanent-auth failures, malformed and
+mismatched `Content-Range` responses, and log redaction.
+The incoming-media fuzz target drives the real private staging boundary with
+valid PNG/JPEG seeds and hostile bytes, rechecking hash/MIME, decode allocation,
+normalisation and restart inspection. Fuzz targets retain crashing inputs and
+run with ASan/UBSan where supported.
 
 ## TX safety proof
 

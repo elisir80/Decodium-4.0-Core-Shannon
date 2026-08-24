@@ -349,6 +349,7 @@ jobs:
               fuzz_sstv_protocol_parsers \
               fuzz_sstv_wav_pcm_reader \
               fuzz_sstv_share_parsers \
+              fuzz_sstv_incoming_media \
               fuzz_sstv_qso_log \
               fuzz_hamdrm_parsers \
             --parallel 4
@@ -370,6 +371,10 @@ jobs:
             -rss_limit_mb=2048 -print_final_stats=1
           "${fuzz_dir}/fuzz_sstv_share_parsers" \
             tests/sstv/fuzz/corpus/share \
+            -max_total_time=30 -timeout=10 -max_len=1048576 \
+            -rss_limit_mb=2048 -print_final_stats=1
+          "${fuzz_dir}/fuzz_sstv_incoming_media" \
+            tests/sstv/fuzz/corpus/incoming-media \
             -max_total_time=30 -timeout=10 -max_len=1048576 \
             -rss_limit_mb=2048 -print_final_stats=1
           "${fuzz_dir}/fuzz_sstv_qso_log" \

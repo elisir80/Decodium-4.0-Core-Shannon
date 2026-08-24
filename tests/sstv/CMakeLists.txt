@@ -759,6 +759,39 @@ set_tests_properties (test_sstv_fuzz_smoke PROPERTIES
   TIMEOUT 20
   )
 
+# Keep the exact remote-image staging boundary under ordinary CTest as well as
+# the libFuzzer build.  This exercises hostile bytes through the real
+# hash/MIME/decode/normalise/reinspect path without requiring a Clang runtime.
+add_executable (test_sstv_incoming_media_fuzz_smoke
+  test_sstv_incoming_media_fuzz_smoke.cpp
+  fuzz/fuzz_sstv_incoming_media.cpp)
+target_include_directories (test_sstv_incoming_media_fuzz_smoke PRIVATE
+  ${CMAKE_SOURCE_DIR})
+target_link_libraries (test_sstv_incoming_media_fuzz_smoke
+  PRIVATE
+    Decodium::SstvSharingQueue
+    Qt6::Core
+    Qt6::Gui
+  )
+target_compile_definitions (test_sstv_incoming_media_fuzz_smoke PRIVATE
+  DECODIUM_SSTV_INCOMING_MEDIA_FUZZ_CORPUS_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fuzz/corpus/incoming-media"
+  )
+set_target_properties (test_sstv_incoming_media_fuzz_smoke PROPERTIES
+  AUTOMOC OFF
+  AUTORCC OFF
+  AUTOUIC OFF
+  CXX_EXTENSIONS OFF
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  )
+add_test (NAME test_sstv_incoming_media_fuzz_smoke
+  COMMAND $<TARGET_FILE:test_sstv_incoming_media_fuzz_smoke>)
+set_tests_properties (test_sstv_incoming_media_fuzz_smoke PROPERTIES
+  LABELS "sstv;fuzz-smoke;sharing;inbox;image;security"
+  TIMEOUT 30
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+  )
+
 add_executable (test_sstv_protocol_fuzz_smoke
   test_sstv_protocol_fuzz_smoke.cpp
   fuzz/fuzz_sstv_protocol_parsers.cpp)
@@ -827,6 +860,28 @@ if (DECODIUM_ENABLE_SSTV_FUZZING)
     ${CMAKE_SOURCE_DIR})
   target_link_libraries (fuzz_sstv_share_parsers PRIVATE Qt6::Core)
   configure_decodium_sstv_fuzzer (fuzz_sstv_share_parsers)
+
+  # This target deliberately uses the production remote-image validation
+  # sequence, including private staging and reinspection, rather than only a
+  # header parser. The readable PNG and JPEG seeds reach decode and
+  # normalisation; mutated dimensions and byte streams must fail closed before
+  # import.
+  add_executable (fuzz_sstv_incoming_media
+    fuzz/fuzz_sstv_incoming_media.cpp
+    ${CMAKE_SOURCE_DIR}/src/sstv/sharing/SstvIncomingMediaValidator.cpp
+    ${CMAKE_SOURCE_DIR}/src/sstv/sharing/SstvIncomingMediaValidator.h
+    ${CMAKE_SOURCE_DIR}/src/sstv/sharing/SstvShareManifest.cpp
+    ${CMAKE_SOURCE_DIR}/src/sstv/sharing/SstvShareManifest.h
+    ${CMAKE_SOURCE_DIR}/src/sstv/sharing/SstvShareSecurity.cpp
+    ${CMAKE_SOURCE_DIR}/src/sstv/sharing/SstvShareSecurity.h
+    )
+  target_include_directories (fuzz_sstv_incoming_media PRIVATE
+    ${CMAKE_SOURCE_DIR})
+  target_link_libraries (fuzz_sstv_incoming_media PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    )
+  configure_decodium_sstv_fuzzer (fuzz_sstv_incoming_media)
 
   add_executable (fuzz_sstv_qso_log
     fuzz/fuzz_sstv_qso_log.cpp

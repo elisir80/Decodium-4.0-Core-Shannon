@@ -1323,6 +1323,8 @@ bool restInboundDiscoveryLookupDownloadAndDecisionsAreVerified()
     const QDateTime received = manifest.createdUtc.addSecs(2);
     const QByteArray inbox = inboxJson(
         QStringLiteral("incoming:one"), manifest, received);
+    QByteArray contentRange = QByteArray("bytes 0-255/")
+        + QByteArray::number(bytes.size());
     QVector<QByteArray> acknowledgementKeys;
     QVector<QByteArray> rejectionKeys;
     int authenticatedRequests = 0;
@@ -1370,8 +1372,7 @@ bool restInboundDiscoveryLookupDownloadAndDecisionsAreVerified()
             const QByteArray chunk = bytes.left(256);
             return HttpResponse {206, {},
                 {{"Content-Type", "application/octet-stream"},
-                 {"Content-Range", QByteArray("bytes 0-255/")
-                      + QByteArray::number(bytes.size())},
+                 {"Content-Range", contentRange},
                  {"Digest", QByteArray("sha-256=")
                       + sha256Base64(chunk)}}, chunk};
         }
@@ -1441,6 +1442,32 @@ bool restInboundDiscoveryLookupDownloadAndDecisionsAreVerified()
     CHECK(downloaded.result.boundedPayload() == bytes.left(256));
     CHECK(progress == 256U);
 
+    // Route hostile response headers through the actual provider rather than
+    // testing the private range parser in isolation. Every case must fail
+    // before a provider payload is accepted.
+    const QList<QByteArray> hostileRanges {
+        QByteArray("items 0-255/") + QByteArray::number(bytes.size()),
+        QByteArray("bytes 256-511/") + QByteArray::number(bytes.size()),
+        QByteArray("bytes 0-254/") + QByteArray::number(bytes.size()),
+        QByteArray("bytes 0-255/") + QByteArray::number(bytes.size() + 1),
+        QByteArray("bytes 0-255/18446744073709551615"),
+        QByteArray("bytes 0-255/") + QByteArray::number(bytes.size())
+            + QByteArray(" trailing"),
+        QByteArray("bytes ") + QByteArray(100, '0'),
+    };
+    for (const QByteArray& hostileRange : hostileRanges) {
+        contentRange = hostileRange;
+        const Awaited invalid = awaitResult(
+            [&](SstvShareProviderCompletion completion) {
+                return provider.downloadAsync(
+                    QStringLiteral("incoming:one"), 0U, 256U, {},
+                    std::move(completion));
+            });
+        CHECK(!invalid.result.ok());
+        CHECK(invalid.result.category() == SstvShareProviderFailure::Validation);
+    }
+    contentRange = QByteArray("bytes 0-255/") + QByteArray::number(bytes.size());
+
     for (int repetition = 0; repetition < 2; ++repetition) {
         const Awaited acknowledged = awaitResult(
             [&](SstvShareProviderCompletion completion) {
@@ -1462,7 +1489,7 @@ bool restInboundDiscoveryLookupDownloadAndDecisionsAreVerified()
     CHECK(rejectionKeys.at(0).size() == 64);
     CHECK(rejectionKeys.at(0) == rejectionKeys.at(1));
     CHECK(acknowledgementKeys.at(0) != rejectionKeys.at(0));
-    CHECK(authenticatedRequests == 8);
+    CHECK(authenticatedRequests == 15);
     return true;
 }
 
