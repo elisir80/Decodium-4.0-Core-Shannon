@@ -91,6 +91,7 @@ private:
   bool do_pa_temp_ = false;
   bool do_comp_ = false;
   bool do_rfpower_ = false;   // manopola della potenza, letta solo a riposo
+  int  rx_meter_tick_ = 0;    // rallenta manopola e temperatura in ricezione
   // S-meter: si legge SOLO in ricezione, dove il ciclo e' gia' rallentato, e
   // con un passo tutto suo. In trasmissione non ha significato e ruberebbe
   // tempo ai misuratori che invece contano.

@@ -1954,6 +1954,41 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
     }
 
   bool const tx_active = ptt_on_ || state ().ptt ();
+
+  // 1.0.581 — strumenti del finale. Uno schema solo, riusato da entrambi i rami
+  // della funzione: quattro varianti dello stesso schema sarebbero quattro
+  // posti dove sbagliare, e questa definizione sta PRIMA del bivio proprio
+  // perche' la prima versione stava dopo — nel ramo di trasmissione — e a
+  // riposo non veniva mai raggiunta. La manopola della potenza, che a riposo e'
+  // l'unica leggibile, non arrivava mai da nessuna parte.
+  auto const leggi_livello = [&] (bool attivo, setting_t livello, char const * nome,
+                                  auto&& applica) {
+    if (!attivo) return;
+    value_t v {};
+    int const rc_l = rig_get_level (rig, RIG_VFO_CURR, livello, &v);
+    if (RIG_OK == rc_l && std::isfinite (v.f))
+      {
+        applica (static_cast<double> (v.f), true);
+      }
+    else
+      {
+        CAT_TRACE ("rig_get_level " << nome << " failed with rc:" << rc_l << "ignoring");
+        applica (0.0, false);
+      }
+  };
+
+  auto const posa_temp = [this] (double v, bool ok) {
+    update_pa_temp (ok ? static_cast<int> (std::lround (v * 10.0)) : 0, ok);
+  };
+
+  auto const posa_vd = [this] (double v, bool ok) {
+    update_vd (ok ? static_cast<unsigned int> (std::lround (v * 100.0)) : 0u, ok);
+  };
+
+  auto const posa_id = [this] (double v, bool ok) {
+    update_id (ok ? static_cast<unsigned int> (std::lround (v * 100.0)) : 0u, ok);
+  };
+
   if (qmx_raw_swr_ && tx_active != qmx_swr_filter_tx_active_)
     {
       reset_qmx_swr_filter (tx_active, QStringLiteral ("telemetry-state-transition"));
@@ -1995,6 +2030,31 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
                 }
             }
         }
+      // A riposo si leggono le quattro cose che a riposo significano qualcosa:
+      // la manopola della potenza — che e' un'impostazione, non una misura, e in
+      // trasmissione non cambia — la temperatura del finale, che si guarda
+      // proprio DOPO aver trasmesso mentre scende, e tensione e corrente di
+      // alimentazione, che a riposo raccontano lo stato dell'alimentatore.
+      // Senza queste due il gateway continuerebbe a spedire i valori
+      // dell'ultima trasmissione, e un numero vecchio su un quadrante non si
+      // distingue da uno appena letto. Restano fuori solo ALC, ROS, potenza
+      // diretta e compressione: a fermo non esistono.
+      //
+      // Ritmo rallentato: la manopola cambia quando la gira l'operatore, non
+      // dodici volte al secondo, e l'alimentazione a riposo non ha fretta.
+      if (++rx_meter_tick_ >= 4)
+        {
+          rx_meter_tick_ = 0;
+          leggi_livello (do_rfpower_, RIG_LEVEL_RFPOWER, "RIG_LEVEL_RFPOWER",
+                         [this] (double v, bool ok) {
+                           // Hamlib la da' come frazione 0..1 del massimo del rig.
+                           update_rfpower (ok ? static_cast<unsigned int> (std::lround (v * 1000.0)) : 0u, ok);
+                         });
+          leggi_livello (do_pa_temp_, RIG_LEVEL_TEMP_METER, "RIG_LEVEL_TEMP_METER", posa_temp);
+          leggi_livello (do_vd_, RIG_LEVEL_VD_METER, "RIG_LEVEL_VD_METER", posa_vd);
+          leggi_livello (do_id_, RIG_LEVEL_ID_METER, "RIG_LEVEL_ID_METER", posa_id);
+        }
+
       if (force_signal)
         {
           update_complete (true);
@@ -2137,30 +2197,6 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
         }
     }
 
-  // 1.0.581 — strumenti del finale: tensione, corrente, temperatura,
-  // compressione. Uno schema solo, ripetuto quattro volte, perche' quattro
-  // varianti dello stesso schema sono quattro posti dove sbagliare.
-  //
-  // Una lettura riuscita fuori trasmissione vale comunque: la temperatura del
-  // finale scende dopo, ed e' proprio dopo che si guarda. Le altre tre a
-  // riposo non dicono niente di utile, ma nemmeno di falso, e il "valido" del
-  // livello e' il posto giusto per distinguerle — non un if in piu' qui.
-  auto const leggi_livello = [&] (bool attivo, setting_t livello, char const * nome,
-                                  auto&& applica) {
-    if (!attivo) return;
-    value_t v {};
-    int const rc_l = rig_get_level (rig, RIG_VFO_CURR, livello, &v);
-    if (RIG_OK == rc_l && std::isfinite (v.f))
-      {
-        applica (static_cast<double> (v.f), true);
-      }
-    else
-      {
-        CAT_TRACE ("rig_get_level " << nome << " failed with rc:" << rc_l << "ignoring");
-        applica (0.0, false);
-      }
-  };
-
   // Hamlib da' VD e ID in volt e ampere, la temperatura in gradi e la
   // compressione in dB: le scale intere sono affare nostro, e stanno qui e
   // basta perche' chi legge piu' avanti non debba ricordarsele.
@@ -2168,32 +2204,12 @@ void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
   // fuori dalla trasmissione sarebbero tre transazioni per niente su un bus che
   // e' gia' il collo di bottiglia. La temperatura no: quella si guarda DOPO,
   // mentre il finale si raffredda, quindi si legge sempre.
-  leggi_livello (do_vd_ && tx_active, RIG_LEVEL_VD_METER, "RIG_LEVEL_VD_METER",
-                 [this] (double v, bool ok) {
-                   update_vd (ok ? static_cast<unsigned int> (std::lround (v * 100.0)) : 0u, ok);
-                 });
-  leggi_livello (do_id_ && tx_active, RIG_LEVEL_ID_METER, "RIG_LEVEL_ID_METER",
-                 [this] (double v, bool ok) {
-                   update_id (ok ? static_cast<unsigned int> (std::lround (v * 100.0)) : 0u, ok);
-                 });
-  leggi_livello (do_pa_temp_, RIG_LEVEL_TEMP_METER, "RIG_LEVEL_TEMP_METER",
-                 [this] (double v, bool ok) {
-                   update_pa_temp (ok ? static_cast<int> (std::lround (v * 10.0)) : 0, ok);
-                 });
+  leggi_livello (do_vd_, RIG_LEVEL_VD_METER, "RIG_LEVEL_VD_METER", posa_vd);
+  leggi_livello (do_id_, RIG_LEVEL_ID_METER, "RIG_LEVEL_ID_METER", posa_id);
+  leggi_livello (do_pa_temp_, RIG_LEVEL_TEMP_METER, "RIG_LEVEL_TEMP_METER", posa_temp);
   leggi_livello (do_comp_ && tx_active, RIG_LEVEL_COMP_METER, "RIG_LEVEL_COMP_METER",
                  [this] (double v, bool ok) {
                    update_comp (ok ? static_cast<unsigned int> (std::lround (v * 10.0)) : 0u, ok);
-                 });
-
-  // La manopola della potenza e' un'impostazione, non una misura: durante una
-  // trasmissione non cambia, e chiederla li' sarebbe l'unica delle dieci letture
-  // spesa dove il bus e' piu' stretto. Si legge a riposo, sul giro gia'
-  // rallentato di ricezione, che per un valore che cambia quando lo gira
-  // l'operatore e' persino troppo spesso.
-  leggi_livello (do_rfpower_ && !tx_active, RIG_LEVEL_RFPOWER, "RIG_LEVEL_RFPOWER",
-                 [this] (double v, bool ok) {
-                   // Hamlib la da' come frazione 0..1 del massimo del rig.
-                   update_rfpower (ok ? static_cast<unsigned int> (std::lround (v * 1000.0)) : 0u, ok);
                  });
 
   if (do_pwr_)
