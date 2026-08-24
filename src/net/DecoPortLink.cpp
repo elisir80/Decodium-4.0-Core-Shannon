@@ -173,6 +173,15 @@ void DecoPortLink::setLinked(bool v)
     emit linkedChanged();
 }
 
+void DecoPortLink::setRemoteStreamId(quint32 streamId)
+{
+    if (m_remoteStreamId == streamId)
+        return;
+    m_remoteStreamId = streamId;
+    m_haveRxSeq = false;
+    emit remoteStreamChanged(streamId);
+}
+
 bool DecoPortLink::connectTo(const QString& host, int port)
 {
     disconnectFromGateway();
@@ -219,6 +228,7 @@ void DecoPortLink::disconnectFromGateway()
     if (m_socket)    { m_socket->close();   m_socket->deleteLater();   m_socket = nullptr; }
     m_haveRxSeq = false;
     setLinked(false);
+    setRemoteStreamId(0);
     setStatus(tr("not connected"));
 }
 
@@ -255,6 +265,12 @@ void DecoPortLink::onDatagrams()
         if (!authed)
             continue;
 
+        // A gateway process chooses a fresh non-zero stream id. Publish the
+        // boundary before AudioRx so consumers can reject/rebind old-session
+        // work without relabelling the first packet of the new session.
+        if (h.streamId != 0)
+            setRemoteStreamId(h.streamId);
+
         switch (h.type) {
         case Type::Context:
         case Type::Status: {
@@ -286,6 +302,7 @@ void DecoPortLink::onDatagrams()
                 samples[i] = static_cast<short>(static_cast<quint16>(p[2 * i]) |
                                                 (static_cast<quint16>(p[2 * i + 1]) << 8));
             quint64 const ts = static_cast<quint64>(h.tsSeconds) * 1000000000ull + h.tsNanos;
+            emit rxAudioProduced(samples, ts, h.streamId);
             emit rxAudio(samples, ts);
             break;
         }

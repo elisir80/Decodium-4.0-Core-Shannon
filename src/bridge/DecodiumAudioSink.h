@@ -152,6 +152,7 @@ public:
         if (newSamples > 0) {
             emit audioLevelChanged(m_lastRms);
             emit audioHealthChanged(rms, peak, dynamicRange, clippedSamples, newSamples);
+            emit audioSamplesProduced(emittedSamples);
             emit audioSamplesReady(emittedSamples);
         }
 
@@ -161,6 +162,9 @@ public:
 signals:
     void audioLevelChanged(double level);
     void audioHealthChanged(double rms, double peak, int dynamicRange, int clippedSamples, int samples);
+    // First producer-boundary signal for bounded DirectConnection consumers.
+    // UI/network consumers keep using audioSamplesReady below.
+    void audioSamplesProduced(QVector<short> samples);
     void audioSamplesReady(QVector<short> samples);
 
 private:
@@ -249,6 +253,7 @@ public:
         }
         emit audioLevelChanged(m_lastRms);
         emit audioHealthChanged(rms, peak, dynamicRange, clippedSamples, samples.size());
+        emit audioSamplesProduced(samples);
         emit audioSamplesReady(samples);
     }
 

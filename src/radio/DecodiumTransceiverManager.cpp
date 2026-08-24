@@ -2103,6 +2103,9 @@ void DecodiumTransceiverManager::connectRig()
             },
             Qt::QueuedConnection);
     connect(xcv, &Transceiver::tciPcmSamplesReady,
+            this, &DecodiumTransceiverManager::tciPcmSamplesProduced,
+            Qt::DirectConnection);
+    connect(xcv, &Transceiver::tciPcmSamplesReady,
             this, &DecodiumTransceiverManager::tciPcmSamplesReady,
             Qt::QueuedConnection);
     connect(xcv, &Transceiver::tci_mod_active,

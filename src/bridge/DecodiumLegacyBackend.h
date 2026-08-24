@@ -128,6 +128,8 @@ Q_SIGNALS:
                            int rxFrequencyHz,
                            int txFrequencyHz,
                            QString const& mode) const;
+    // First producer-boundary relay for bounded DirectConnection consumers.
+    void audioSamplesProduced(QByteArray const& pcmSamples) const;
     void audioSamplesReady(QByteArray const& pcmSamples) const;
     void preferencesRequested() const;
     void quitRequested() const;

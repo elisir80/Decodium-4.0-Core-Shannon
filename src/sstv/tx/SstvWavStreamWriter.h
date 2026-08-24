@@ -7,10 +7,10 @@
 
 namespace decodium::sstv {
 
-// Minimal seekable byte contract needed by the streaming writer.  A future Qt
-// adapter can implement this over QSaveFile/QFileDevice without making the DSP
-// core depend on Qt.  Implementations must report short writes and translate
-// exceptions into the noexcept return values below.
+// Minimal seekable byte contract needed by the streaming writer.  The native
+// integration layer implements it over QSaveFile/QFileDevice without making
+// the DSP core depend on Qt.  Implementations must report short writes and
+// translate exceptions into the noexcept return values below.
 class SstvSeekableByteSink
 {
 public:

@@ -540,6 +540,10 @@ void RtlSdrInput::startPendingReader()
     connect(m_reader, &RtlSdrReader::readerIq,
             this, &RtlSdrInput::iqSamplesReady, Qt::QueuedConnection);
     connect(m_reader, &RtlSdrReader::readerPcm,
+            this, &RtlSdrInput::pcmSamplesProduced, Qt::DirectConnection);
+    connect(m_reader, &RtlSdrReader::readerAudio,
+            this, &RtlSdrInput::audioSamplesProduced, Qt::DirectConnection);
+    connect(m_reader, &RtlSdrReader::readerPcm,
             this, &RtlSdrInput::pcmSamplesReady, Qt::QueuedConnection);
     connect(m_reader, &RtlSdrReader::readerAudio,
             this, &RtlSdrInput::audioSamplesReady, Qt::QueuedConnection);

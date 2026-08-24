@@ -27,7 +27,8 @@ enum class SstvVisFormat : std::uint8_t
 {
   Unknown,
   Standard,
-  Extended
+  Extended,
+  Narrow
 };
 
 enum class SstvVisParity : std::uint8_t

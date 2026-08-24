@@ -1,5 +1,11 @@
 #include "DecodiumBridge.h"
 
+#if DECODIUM_HAS_SSTV
+#include "src/sstv/integration/SstvQsoLog.h"
+#include "src/sstv/integration/SstvRxRuntime.h"
+#include "src/sstv/integration/SstvTxCoordinator.h"
+#endif
+
 #include "DecoPortLink.h"
 #include "DecoPortRigDriver.h"
 #include "DecodiumDecoPortGateway.h"
@@ -9300,6 +9306,11 @@ void DecodiumBridge::emitRxDecodeListChangedThrottled(bool normalizeBeforeEmit)
 DecodiumBridge::DecodiumBridge(QObject* parent)
     : QObject(parent)
 {
+    // The native SSTV facade is always present in SSTV-enabled builds, while
+    // its worker and DSP pipeline remain stopped until the workspace starts
+    // reception. A stable lifetime is required by the direct bounded PCM tap.
+    initialiseSstvRuntime();
+
     // Istanzia i tre model nativi prima di tutto, così QML non vede mai un
     // puntatore nullo durante il caricamento asincrono dei pannelli.
     applyFtOpenMpSchedulerProfile();
@@ -10594,6 +10605,17 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, syncHamlibTelemetry);
     connect(m_hamlibCat, &DecodiumTransceiverManager::connectedChanged,
             this, syncHamlibTelemetry);
+#if DECODIUM_HAS_SSTV
+    connect(m_hamlibCat, &DecodiumTransceiverManager::connectedChanged,
+            this, [this]() {
+        if (!m_sstvRxRequested || !m_hamlibCat->connected()
+            || !usingTciAudioInput()) {
+            return;
+        }
+        const auto source = decodium::sstv::SstvAudioSourceKind::Tci;
+        selectSstvRxSource(source, currentSstvAudioStreamId(source), true);
+    });
+#endif
 
     auto syncCat4OmTelemetry = [this]() {
         if (!m_cat4OmCat
@@ -10830,6 +10852,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     });
 
     loadSettings();
+    initialiseSstvTx();
     if (m_mapIntelligenceService) {
         m_mapIntelligenceService->setRosterStationCall(m_callsign);
         m_mapIntelligenceService->reloadFromAdif(effectiveAdifLogPath());
@@ -10873,6 +10896,10 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
 DecodiumBridge::~DecodiumBridge()
 {
     beginDecodeCallbackShutdown();
+    // Close the SSTV queue and join its worker before any Decodium RX source
+    // is torn down. The runtime object itself stays alive until member
+    // destruction, so a callback already in flight can only observe Shutdown.
+    shutdownSstvRuntime();
     if (m_adifImportWatcher) {
         m_adifImportWatcher->disconnect(this);
         m_adifImportWatcher->waitForFinished();
@@ -12015,6 +12042,9 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
         m_legacyBackend->setFt8DeepThreadPenalty(m_ft8MicroStallGuard.active());
     }
     scheduleLegacyStateRefreshBurst();
+#if DECODIUM_HAS_SSTV
+    refreshSstvProducerTaps();
+#endif
 
     return true;
 }
@@ -17405,6 +17435,49 @@ bool DecodiumBridge::activeCatReportsPttActive() const
     return m_hamlibCat && m_hamlibCat->pttActive();
 }
 
+bool DecodiumBridge::sstvTxUsesVoxPtt() const
+{
+#if DECODIUM_HAS_SSTV
+    return activeCatUsesVoxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                               m_omniRigCat, m_cat4OmCat);
+#else
+    return false;
+#endif
+}
+
+bool DecodiumBridge::sstvTxCanControlPtt() const
+{
+#if DECODIUM_HAS_SSTV
+    return activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                           m_omniRigCat, m_legacyBackend, m_cat4OmCat);
+#else
+    return false;
+#endif
+}
+
+bool DecodiumBridge::sstvTxPttActive() const
+{
+#if DECODIUM_HAS_SSTV
+    if (decoPortIsCat(m_catBackend)) {
+        return m_decoPortLink && m_decoPortLink->isLinked()
+            && m_decoPortLink->ptt();
+    }
+    return activeCatReportsPttActive();
+#else
+    return false;
+#endif
+}
+
+void DecodiumBridge::setSstvTxPtt(bool on)
+{
+#if DECODIUM_HAS_SSTV
+    activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, on,
+                    m_omniRigCat, m_legacyBackend, m_cat4OmCat);
+#else
+    Q_UNUSED(on)
+#endif
+}
+
 void DecodiumBridge::setTxRequestedState(bool requested)
 {
     if (m_txRequested == requested) return;
@@ -18002,6 +18075,10 @@ void DecodiumBridge::startRtlSdrCapture()
     m_lastPanadapterData.clear();
     if (sameReceiverConfiguration
         && m_rtlSdrInput->retune(config.centerFrequencyHz, config.channelOffsetHz)) {
+#if DECODIUM_HAS_SSTV
+        const auto source = decodium::sstv::SstvAudioSourceKind::RtlSdr;
+        selectSstvRxSource(source, currentSstvAudioStreamId(source), true);
+#endif
         m_audioWatchdogIgnoreUntilMs = QDateTime::currentMSecsSinceEpoch() + 1500;
         bridgeLog(QStringLiteral(
             "RTL-SDR in-place retune requested dial=%1 input=%2 tuner=%3 offset=%4 if=%5 sideband=%6")
@@ -18040,6 +18117,12 @@ void DecodiumBridge::startRtlSdrCapture()
                   .arg(ifEnabled ? 1 : 0)
                   .arg(useLsbIfShift ? QStringLiteral("LSB") : QStringLiteral("USB"))
                   .arg(tuningPlan.spectrumInverted ? 1 : 0));
+#if DECODIUM_HAS_SSTV
+    const auto sstvSource = decodium::sstv::SstvAudioSourceKind::RtlSdr;
+    selectSstvRxSource(sstvSource,
+                       currentSstvAudioStreamId(sstvSource),
+                       true);
+#endif
     m_rtlSdrInput->start(config);
 }
 
@@ -19882,6 +19965,18 @@ QObject* DecodiumBridge::decoPortLinkObject() const
                 && !self->m_decoPortLink->isLinked())
                 self->setDecoPortUseRemote(false);
         });
+#if DECODIUM_HAS_SSTV
+        connect(m_decoPortLink, &DecoPortLink::remoteStreamChanged,
+                self, [self](quint32 streamId) {
+            if (!self->m_decoPortUseRemote || !self->m_sstvRxRequested
+                || streamId == 0U) {
+                return;
+            }
+            self->selectSstvRxSource(
+                decodium::sstv::SstvAudioSourceKind::DecoPort,
+                streamId);
+        }, Qt::DirectConnection);
+#endif
     }
     return m_decoPortLink;
 }
@@ -20387,6 +20482,15 @@ void DecodiumBridge::onDecoPortRemoteState()
     if (!link || !link->isLinked())
         return;
 
+#if DECODIUM_HAS_SSTV
+    // A reconnect to another gateway (or a restarted gateway on the same
+    // address) carries a different protocol stream id. Select it before any
+    // same-event audio is accepted by the SSTV bounded tap.
+    selectSstvRxSource(decodium::sstv::SstvAudioSourceKind::DecoPort,
+                       currentSstvAudioStreamId(
+                           decodium::sstv::SstvAudioSourceKind::DecoPort));
+#endif
+
     // Lo stato del CAT dell'applicazione e' quello della radio remota: se cade
     // il collegamento, si vede subito dove si guarda sempre.
     bool const linkedNow = link->isLinked();
@@ -20435,6 +20539,15 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
     if (on) {
         // Il collegamento all'audio si fa una volta sola: Qt::UniqueConnection
         // evita che riaccendere la modalita' lo dupli.
+#if DECODIUM_HAS_SSTV
+        // Bind the immutable, bounded DirectConnection before the ordinary
+        // payload-bearing queued consumer below. This preserves producer-time
+        // ordering even if the GUI event loop is temporarily backlogged.
+        selectSstvRxSource(decodium::sstv::SstvAudioSourceKind::DecoPort,
+                           currentSstvAudioStreamId(
+                               decodium::sstv::SstvAudioSourceKind::DecoPort),
+                           true);
+#endif
         connect(link, &DecoPortLink::rxAudio,
                 this, &DecodiumBridge::onDecoPortRxAudio,
                 static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
@@ -20499,6 +20612,10 @@ void DecodiumBridge::setDecoPortUseRemote(bool on)
         }
         bridgeLog(QStringLiteral("DecoPort remote source OFF: back to the local sound card"));
         setDecoPortMonitor(false);
+#if DECODIUM_HAS_SSTV
+        const auto source = currentSstvAudioSourceKind();
+        selectSstvRxSource(source, currentSstvAudioStreamId(source));
+#endif
         if (m_monitoring)
             startAudioCapture(false);
     }
@@ -22148,6 +22265,10 @@ void DecodiumBridge::startRx()
 void DecodiumBridge::stopRx()
 {
     bridgeLog("stopRx() called");
+    // The native SSTV engine cannot remain active without Decodium's single
+    // source-of-truth monitor. stopSstvRx() clears the request before calling
+    // setMonitoring(false), so this helper is recursion-safe.
+    stopSstvRxForMonitorStop();
     // 1.0.179 — Smooth Decode Flow: stop RX invalida la coda residua.
     if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
     m_pendingDecodeReleaseQueue.clear();
@@ -22413,6 +22534,12 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
 
 void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
 {
+    if (sstvTxActive()) {
+        bridgeLog(QStringLiteral(
+            "finishModulatorIdlePlayback ignored while native SSTV owns TX: %1")
+                      .arg(reason));
+        return;
+    }
     QElapsedTimer totalTimer;
     totalTimer.start();
     qint64 pttOffMs = 0;
@@ -24541,6 +24668,13 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         return;
     }
 
+    if (sstvTxActive()) {
+        bridgeLog(QStringLiteral(
+            "completeTxPlayback ignored while native SSTV owns TX: %1")
+                      .arg(reason));
+        return;
+    }
+
     bridgeLog("completeTxPlayback: reason=" + reason +
               " transmitting=" + QString::number(m_transmitting) +
               " rxSuspended=" + QString::number(m_rxAudioSuspendedForTx));
@@ -26495,6 +26629,13 @@ void DecodiumBridge::stopTx()
         return;
     }
 
+    if (sstvTxActive()) {
+        bridgeLog(QStringLiteral(
+            "stopTx routed to native SSTV coordinator"));
+        cancelSstvTx();
+        return;
+    }
+
     bool const satelliteHalfDuplex = ft2LinkSatelliteHalfDuplexOperationActive();
     bool const catReportsPttActive =
         (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
@@ -26952,6 +27093,12 @@ void DecodiumBridge::stopTune()
 {
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, &DecodiumBridge::stopTune, Qt::QueuedConnection);
+        return;
+    }
+
+    if (sstvTxActive()) {
+        bridgeLog(QStringLiteral(
+            "stopTune ignored while native SSTV owns TX"));
         return;
     }
 
@@ -28016,6 +28163,11 @@ bool DecodiumBridge::loadCatProfile(const QString& rawName)
         emit errorMessage(QStringLiteral("CAT profile: select a profile to load"));
         return false;
     }
+    if (sstvTxActive()) {
+        cancelSstvTx();
+        emit errorMessage(tr("SSTV TX is releasing PTT: load the CAT profile again after transmission has stopped"));
+        return false;
+    }
     if (!applyCatProfileSnapshotToSettings(name, true)) {
         emit errorMessage(QStringLiteral("CAT profile not found: %1").arg(name));
         return false;
@@ -28146,6 +28298,11 @@ void DecodiumBridge::setCatBackend(const QString& v)
         normalized = QStringLiteral("hamlib");
     }
     if (m_catBackend == normalized) return;
+    if (sstvTxActive()) {
+        cancelSstvTx();
+        emit errorMessage(tr("SSTV TX is releasing PTT: change the CAT backend again after transmission has stopped"));
+        return;
+    }
     halt();
     // Disconnetti TUTTI i manager per difesa: anche quelli non segnati come
     // "connected" possono tenere risorse (es. QAxObject di OmniRig o porta
@@ -32597,6 +32754,10 @@ void DecodiumBridge::shutdown()
     m_settingsShutdownInProgress = true;
     beginDecodeCallbackShutdown();
     halt();
+    // The generic halt path routes an active native SSTV transmission through
+    // its coordinator.  Complete its in-process fail-safe teardown, including
+    // one final PTT-OFF dispatch, before any CAT manager is disconnected.
+    shutdownSstvTx();
     stopRx();
     teardownAudioCapture();
     if (m_catBackend == "native" && m_nativeCat->connected())
@@ -41536,10 +41697,18 @@ void DecodiumBridge::logQsoNow()
                                                        logComments, logPropMode, logSatellite, logSatMode, logFreqRx,
                                                        m_nextLogName, m_nextLogQth, logCqZone, logItuZone).toUtf8();
     traceLogStep(QStringLiteral("adif-record-built"));
-    appendAdifRecord(logDxCall, logDxGrid, logFreqHz, logMode, utcOn, utcOff,
-                     logRptSent, logRptRcvd,
-                     logComments, logPropMode, logSatellite, logSatMode, logFreqRx,
-                     logCqZone, logItuZone);
+    if (!appendAdifRecord(logDxCall, logDxGrid, logFreqHz, logMode,
+                          utcOn, utcOff, logRptSent, logRptRcvd,
+                          logComments, logPropMode, logSatellite, logSatMode,
+                          logFreqRx, logCqZone, logItuZone)) {
+        if (!dedupeKey.isEmpty()) {
+            m_recentQsoLogUtcByKey.remove(dedupeKey);
+        }
+        emit errorMessage(QStringLiteral(
+            "QSO log failed: the active ADIF logbook could not be written"));
+        traceLogStep(QStringLiteral("adif-append-failed"));
+        return;
+    }
     traceLogStep(QStringLiteral("adif-appended"));
 
     // 3) Inoltro ai log esterni compatibili WSJT-X UDP / N1MM.
@@ -41611,6 +41780,190 @@ void DecodiumBridge::logQsoNow()
     emit statusMessage("QSO loggato: " + logDxCall);
     traceLogStep(QStringLiteral("done"));
 }
+
+#if DECODIUM_HAS_SSTV
+bool DecodiumBridge::commitSstvNewQso(
+    const decodium::sstv::SstvQsoLogRequest& request,
+    QString* associationId,
+    QString* error)
+{
+    if (associationId) {
+        associationId->clear();
+    }
+    if (error) {
+        error->clear();
+    }
+    QString validationError;
+    if (!request.createNewQso || !request.validate(&validationError)) {
+        if (error) {
+            *error = validationError.isEmpty()
+                ? QStringLiteral("SSTV request is not a new QSO")
+                : validationError;
+        }
+        return false;
+    }
+
+    const QString dxCall = request.remoteCallsign.trimmed().toUpper();
+    const QString dxGrid = request.remoteGrid.trimmed().toUpper();
+    const QString rstSent = request.reportSent.trimmed().isEmpty()
+        ? QStringLiteral("59") : request.reportSent.trimmed();
+    const QString rstRcvd = request.reportReceived.trimmed().isEmpty()
+        ? QStringLiteral("59") : request.reportReceived.trimmed();
+    const QDateTime onUtc = request.timeOnUtc;
+    const QDateTime offUtc = request.timeOffUtc.isValid()
+        ? request.timeOffUtc : onUtc;
+    const QString comments = decodium::sstv::SstvQsoLog::mergedComment(
+        request.comments, request.imageMode, &validationError);
+    if (comments.isEmpty()) {
+        if (error) {
+            *error = validationError.isEmpty()
+                ? QStringLiteral("SSTV QSO comment is invalid")
+                : validationError;
+        }
+        return false;
+    }
+
+    int cqZone = 0;
+    int ituZone = 0;
+    if (m_dxccLookup && m_dxccLookup->isLoaded()) {
+        const DxccEntity entity = m_dxccLookup->lookup(dxCall);
+        if (entity.cqZone >= 1 && entity.cqZone <= 40) {
+            cqZone = entity.cqZone;
+        }
+        if (entity.ituZone >= 1 && entity.ituZone <= 90) {
+            ituZone = entity.ituZone;
+        }
+    }
+
+    constexpr auto kAdifMode = "SSTV";
+    const QString serialized = bridgeAdifRecordText(
+        dxCall, dxGrid, static_cast<double>(request.frequencyHz),
+        QString::fromLatin1(kAdifMode), onUtc, offUtc,
+        rstSent, rstRcvd, m_callsign, m_grid, comments,
+        {}, {}, {}, {}, m_nextLogName, m_nextLogQth, cqZone, ituZone);
+    const auto checked = decodium::sstv::SstvQsoLog::validateGeneratedAdif(
+        serialized, {request.imageRecordId});
+    if (!checked.ok) {
+        if (error) {
+            *error = QStringLiteral("SSTV ADIF validation failed: %1")
+                         .arg(checked.error);
+        }
+        return false;
+    }
+
+    // The local ADIF log has no stable attachment field. Its canonical QSO
+    // identity is checked against Decodium's asynchronously prepared native
+    // cache, never by reparsing the active ADIF file on the GUI thread.
+    const QString logPath = effectiveAdifLogPath();
+    const QFileInfo logInfo(logPath);
+    const QDateTime logModified = logInfo.exists()
+        ? logInfo.lastModified() : QDateTime {};
+    const qint64 logSize = logInfo.exists() ? logInfo.size() : 0;
+    QVariantList existingRows;
+    bool hadReadyCache = false;
+    bool cacheCurrent = false;
+    {
+        QMutexLocker locker(&m_qsoSearchCacheMutex);
+        hadReadyCache = m_qsoSearchCacheReady;
+        cacheCurrent = m_qsoSearchCacheReady
+            && m_qsoSearchCachePath == logPath
+            && m_qsoSearchCacheModified == logModified
+            && m_qsoSearchCacheSize == logSize;
+        if (cacheCurrent) {
+            existingRows = m_qsoSearchCacheRows;
+        }
+    }
+    if (!cacheCurrent) {
+        if (hadReadyCache) {
+            invalidateQsoSearchCache();
+        }
+        warmLogCacheAsync();
+        if (error) {
+            *error = QStringLiteral(
+                "The active Decodium logbook index is loading; retry this explicit QSO operation when it is ready");
+        }
+        return false;
+    }
+
+    const QString targetDateTime = onUtc.toUTC().toString(
+        QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    const QString targetBand = freqHzToBandToken(
+        static_cast<quint64>(request.frequencyHz)).trimmed().toUpper();
+    for (const QVariant& rowValue : existingRows) {
+        const QVariantMap row = rowValue.toMap();
+        if (row.value(QStringLiteral("call")).toString().trimmed().toUpper()
+                == dxCall
+            && row.value(QStringLiteral("dateTime")).toString().trimmed()
+                == targetDateTime
+            && row.value(QStringLiteral("mode")).toString().trimmed().toUpper()
+                == QString::fromLatin1(kAdifMode)
+            && row.value(QStringLiteral("band")).toString().trimmed().toUpper()
+                == targetBand) {
+            if (error) {
+                *error = QStringLiteral(
+                    "This QSO already exists in the active logbook; associate the image with the existing record");
+            }
+            return false;
+        }
+    }
+
+    if (!appendAdifRecord(dxCall, dxGrid,
+                          static_cast<double>(request.frequencyHz),
+                          QString::fromLatin1(kAdifMode), onUtc, offUtc,
+                          rstSent, rstRcvd, comments, {}, {}, {}, {},
+                          cqZone, ituZone)) {
+        if (error) {
+            *error = QStringLiteral(
+                "the active Decodium ADIF logbook could not be written");
+        }
+        return false;
+    }
+
+    const QString allTxtPath = logAllTxtPath();
+    QDir().mkpath(QFileInfo(allTxtPath).absolutePath());
+    QFile allTxt(allTxtPath);
+    if (allTxt.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream stream(&allTxt);
+        stream << onUtc.toString(QStringLiteral("yyyyMMdd_hhmmss"))
+               << ' ' << m_callsign
+               << ' ' << dxCall
+               << ' ' << dxGrid
+               << ' ' << QString::number(
+                      static_cast<double>(request.frequencyHz) / 1e6,
+                      'f', 6) << "MHz SSTV\n";
+    }
+
+    const QByteArray adifRecord = serialized.toUtf8();
+    udpSendLoggedQso(dxCall, dxGrid,
+                     static_cast<double>(request.frequencyHz),
+                     QString::fromLatin1(kAdifMode), onUtc, offUtc,
+                     rstSent, rstRcvd, adifRecord, comments);
+    udpSendN1mmLoggedQso(dxCall, adifRecord);
+    tcpSendLoggedAdifQso(dxCall, adifRecord);
+    if (m_qrzLogbookEnabled && m_qrzLogbook) {
+        m_qrzLogbook->uploadAdif(dxCall, adifRecord);
+    }
+    if (m_cloudlogEnabled && m_cloudlog) {
+        m_cloudlog->setEnabled(m_cloudlogEnabled);
+        m_cloudlog->setApiUrl(m_cloudlogUrl);
+        m_cloudlog->setApiKey(m_cloudlogApiKey);
+        m_cloudlog->setStationId(qBound(
+            0, getSetting(QStringLiteral("CloudLogStationID"), 1).toInt(),
+            999));
+        m_cloudlog->logQso(dxCall, dxGrid,
+                           static_cast<double>(request.frequencyHz),
+                           QString::fromLatin1(kAdifMode), onUtc, 0,
+                           rstSent, rstRcvd, m_callsign, m_grid);
+    }
+    if (m_callsignIntelligence) {
+        m_callsignIntelligence->notifyQsoLogged(dxCall);
+    }
+    if (associationId) {
+        *associationId = checked.associationId;
+    }
+    return true;
+}
+#endif
 
 QString DecodiumBridge::logAllTxtPath() const
 {
@@ -47895,9 +48248,15 @@ void DecodiumBridge::onRtlSdrAudioSamplesReady(const QVector<short>& samples, in
         return;
     }
     const RtlSdrInput::Config config = m_rtlSdrInput->activeConfig();
+    // WeakSignal has its own 12 kHz callback above. Never feed this parallel
+    // 48 kHz listening path as well, or two demodulators would contend for one
+    // SSTV generation.
+    if (config.demodulator == RtlSdrDsp::Demodulator::WeakSignal) {
+        return;
+    }
     const bool audioEnabled = getSetting(QStringLiteral("RtlSdrAudioEnabled"),
                                          config.demodulator != RtlSdrDsp::Demodulator::WeakSignal).toBool();
-    if (config.demodulator == RtlSdrDsp::Demodulator::WeakSignal || !audioEnabled) {
+    if (!audioEnabled) {
         return;
     }
 
@@ -48175,6 +48534,12 @@ void DecodiumBridge::ensureAudioSink()
                 m_ft2LinkModernRxPending.clear();
             }
         }, Qt::QueuedConnection);
+#if DECODIUM_HAS_SSTV
+        // The selected-source relay owns the only SSTV payload tap. It is
+        // rebound with an immutable generation token and feeds the bounded
+        // ingress directly from the producer thread.
+        refreshSstvProducerTaps();
+#endif
         bridgeLog("audioSink created and connected");
     }
 }
@@ -48193,6 +48558,10 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
     // qui l'audio non manca — arriva dalla rete. Riaprirla vorrebbe dire due
     // sorgenti nello stesso buffer.
     if (m_decoPortUseRemote) {
+#if DECODIUM_HAS_SSTV
+        auto const source = decodium::sstv::SstvAudioSourceKind::DecoPort;
+        selectSstvRxSource(source, currentSstvAudioStreamId(source));
+#endif
         // Il sink pero' serve lo stesso: e' il punto in cui l'audio della radio
         // remota entra nel decoder, e senza non entra da nessuna parte.
         ensureAudioSink();
@@ -48231,11 +48600,19 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
                 "startAudioCapture: nessuna chiavetta RTL-SDR presente, si usa l'audio TCI"));
         } else {
             bridgeLog(QStringLiteral("startAudioCapture: using RTL-SDR RX input"));
+#if DECODIUM_HAS_SSTV
+            auto const source = decodium::sstv::SstvAudioSourceKind::RtlSdr;
+            selectSstvRxSource(source, currentSstvAudioStreamId(source));
+#endif
             startRtlSdrCapture();
             return;
         }
     }
     if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
+#if DECODIUM_HAS_SSTV
+        auto const source = decodium::sstv::SstvAudioSourceKind::LegacyBackend;
+        selectSstvRxSource(source, currentSstvAudioStreamId(source));
+#endif
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy backend owns RX audio/panadapter"));
         if (m_monitoring) {
             rearmLegacyPcmSpectrumFeed(QStringLiteral("blocked modern capture start"));
@@ -48245,6 +48622,10 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
     if (usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
         && !useDedicatedModernAudioCaptureWithLegacy()) {
+#if DECODIUM_HAS_SSTV
+        auto const source = decodium::sstv::SstvAudioSourceKind::LegacyBackend;
+        selectSstvRxSource(source, currentSstvAudioStreamId(source));
+#endif
         bridgeLog(QStringLiteral("startAudioCapture skipped: legacy PCM tap is the single RX source for Direct Visual"));
         m_legacyPcmSpectrumFeed = true;
         if (m_soundInput || m_tciAudioCaptureActive) {
@@ -48253,6 +48634,10 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
         return;
     }
     if (usingTciAudioInput()) {
+#if DECODIUM_HAS_SSTV
+        auto const source = decodium::sstv::SstvAudioSourceKind::Tci;
+        selectSstvRxSource(source, currentSstvAudioStreamId(source), true);
+#endif
         bridgeLog(QStringLiteral("startAudioCapture: using TCI audio stream"));
         startTciAudioCapture();
         return;
@@ -48398,6 +48783,15 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
         m_lastAudioCaptureStartMs = nowMs;
         m_activeRxInputDeviceName = selectedDevice.description().trimmed();
         m_activeRxInputDeviceId = selectedDeviceId;
+#if DECODIUM_HAS_SSTV
+        auto sstvSource = decodium::sstv::SstvAudioSourceKind::LocalSoundCard;
+#ifdef Q_OS_LINUX
+        if (linuxPulseSourceIsMonitor(pulseSourceName)) {
+            sstvSource = decodium::sstv::SstvAudioSourceKind::WebSdr;
+        }
+#endif
+        selectSstvRxSource(sstvSource, currentSstvAudioStreamId(sstvSource), true);
+#endif
         m_rxAudioStartupStartMs = nowMs;
         m_pendingRxAudioStartupHealthLog = true;
         m_audioUnhealthyStartMs = 0;
@@ -48440,6 +48834,15 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
     m_lastAudioCaptureStartMs = nowMs;
     m_activeRxInputDeviceName = selectedDevice.description().trimmed();
     m_activeRxInputDeviceId = selectedDeviceId;
+#if DECODIUM_HAS_SSTV
+    auto sstvSource = decodium::sstv::SstvAudioSourceKind::LocalSoundCard;
+#ifdef Q_OS_LINUX
+    if (linuxPulseSourceIsMonitor(pulseSourceName)) {
+        sstvSource = decodium::sstv::SstvAudioSourceKind::WebSdr;
+    }
+#endif
+    selectSstvRxSource(sstvSource, currentSstvAudioStreamId(sstvSource), true);
+#endif
     m_rxAudioStartupStartMs = nowMs;
     m_pendingRxAudioStartupHealthLog = true;
     m_audioUnhealthyStartMs = 0;
@@ -53463,7 +53866,7 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
     return record;
 }
 
-void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGrid,
+bool DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGrid,
                                        double freqHz, const QString& mode,
                                        const QDateTime& timeOnUtc,
                                        const QDateTime& timeOffUtc,
@@ -53481,7 +53884,9 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
 
     QFile f(logPath);
     bool newFile = !f.exists();
-    if (!f.open(QIODevice::Append | QIODevice::Text)) return;
+    if (!f.open(QIODevice::Append | QIODevice::Text)) {
+        return false;
+    }
 
     QTextStream ts(&f);
     if (newFile) ts << "Decodium3 ADIF Log\n<EOH>\n";
@@ -53493,6 +53898,12 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
                              m_nextLogName, m_nextLogQth, cqZone, ituZone)
         + QStringLiteral("<EOR>\n");
     ts << adifRecord;
+    ts.flush();
+    const bool writeOk = ts.status() == QTextStream::Ok && f.flush();
+    if (!writeOk) {
+        return false;
+    }
+    f.close();
 
     m_workedCalls.insert(dxCall.toUpper());
     QString const qsoDate = (timeOnUtc.isValid() ? timeOnUtc.toUTC() : QDateTime::currentDateTimeUtc())
@@ -53517,6 +53928,7 @@ void DecodiumBridge::appendAdifRecord(const QString& dxCall, const QString& dxGr
     if (m_mapIntelligenceService) {
         m_mapIntelligenceService->appendAdifRecord(adifRecord.toUtf8());
     }
+    return true;
 }
 
 QVariantList DecodiumBridge::logbookProfiles() const

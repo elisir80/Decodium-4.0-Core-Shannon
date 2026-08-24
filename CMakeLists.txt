@@ -204,6 +204,48 @@ option (WSJT_BUILD_UTILS "Build simulators and code demonstrators." OFF)
 option (WSJT_FOX_OTP "Enable Fox OTP Verification Messages." ON)
 option (DECODIUM_ENABLE_SSTV
   "Build the native analog SSTV subsystem inside Decodium" ON)
+option (DECODIUM_ENABLE_HAMDRM
+  "Build the native HAMDRM digital SSTV subsystem inside Decodium" ON)
+if (DECODIUM_ENABLE_HAMDRM AND NOT DECODIUM_ENABLE_SSTV)
+  message (FATAL_ERROR
+    "DECODIUM_ENABLE_HAMDRM requires DECODIUM_ENABLE_SSTV=ON; "
+    "the analog target remains independent when HAMDRM is disabled")
+endif ()
+option (DECODIUM_ENABLE_SSTV_FUZZING
+  "Build Clang/libFuzzer SSTV parser targets (developer-only)" OFF)
+if (DECODIUM_ENABLE_SSTV_FUZZING)
+  if (NOT DECODIUM_ENABLE_SSTV)
+    message (FATAL_ERROR
+      "DECODIUM_ENABLE_SSTV_FUZZING requires DECODIUM_ENABLE_SSTV=ON")
+  endif ()
+  if (NOT BUILD_TESTING)
+    message (FATAL_ERROR
+      "DECODIUM_ENABLE_SSTV_FUZZING requires BUILD_TESTING=ON")
+  endif ()
+  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "^(Clang|AppleClang)$")
+    message (FATAL_ERROR
+      "DECODIUM_ENABLE_SSTV_FUZZING requires a Clang-family C++ compiler")
+  endif ()
+
+  include (CheckCXXSourceCompiles)
+  set (_decodium_saved_required_flags "${CMAKE_REQUIRED_FLAGS}")
+  set (CMAKE_REQUIRED_FLAGS
+    "${CMAKE_REQUIRED_FLAGS} -fsanitize=fuzzer,address,undefined")
+  unset (DECODIUM_SSTV_LIBFUZZER_AVAILABLE CACHE)
+  check_cxx_source_compiles (
+    "#include <cstddef>
+     #include <cstdint>
+     extern \"C\" int LLVMFuzzerTestOneInput(const std::uint8_t*, std::size_t)
+     { return 0; }"
+    DECODIUM_SSTV_LIBFUZZER_AVAILABLE)
+  set (CMAKE_REQUIRED_FLAGS "${_decodium_saved_required_flags}")
+  unset (_decodium_saved_required_flags)
+  if (NOT DECODIUM_SSTV_LIBFUZZER_AVAILABLE)
+    message (FATAL_ERROR
+      "DECODIUM_ENABLE_SSTV_FUZZING needs Clang with the libFuzzer, "
+      "AddressSanitizer and UndefinedBehaviorSanitizer runtimes")
+  endif ()
+endif ()
 CMAKE_DEPENDENT_OPTION (WSJT_QDEBUG_IN_RELEASE "Leave Qt debugging statements in Release configuration." OFF
   "NOT is_debug_build" OFF)
 CMAKE_DEPENDENT_OPTION (WSJT_ENABLE_EXPERIMENTAL_FEATURES "Enable features not fully ready for public releases." ON
@@ -469,6 +511,7 @@ set (wsjtx_CXXSRCS
   src/net/DecoPortRigDriver.cpp
   src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
+  src/bridge/DecodiumBridgeSstv.cpp
   src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
@@ -1771,11 +1814,23 @@ if (OPENMP_FOUND)
     endif ()
 endif ()
 target_link_libraries (wsjtx Qt6::SerialPort Qt6::Quick Qt6::Qml Qt6::QuickControls2 Qt6::Network Qt6::Sql Qt6::WebSockets Qt6::Concurrent wsjt_qtmm ${FFTW3_LIBRARIES} ${LIBM_LIBRARIES})
-if (TARGET Decodium::SstvCore)
-  target_link_libraries (wsjtx Decodium::SstvCore)
+if (TARGET Decodium::SstvIntegration)
+  target_link_libraries (wsjtx Decodium::SstvIntegration)
+  target_link_libraries (wsjtx Decodium::SstvGallery)
+  target_link_libraries (wsjtx Decodium::SstvSharingUi)
+  target_link_libraries (wsjtx Decodium::SstvDiagnostics)
+  if (TARGET Decodium::SstvStudio)
+    target_link_libraries (wsjtx Decodium::SstvStudio)
+  endif ()
   target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_SSTV=1)
 else ()
   target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_SSTV=0)
+endif ()
+if (TARGET Decodium::HamDrmRuntime)
+  target_link_libraries (wsjtx Decodium::HamDrmRuntime)
+  target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_HAMDRM=1)
+else ()
+  target_compile_definitions (wsjtx PRIVATE DECODIUM_HAS_HAMDRM=0)
 endif ()
 if (APPLE)
   target_link_libraries (wsjtx Qt6::DBus "-framework AudioToolbox")
@@ -1870,6 +1925,7 @@ add_executable (decodium_qml
   src/net/DecoPortRigDriver.cpp
   src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
+  src/bridge/DecodiumBridgeSstv.cpp
   src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
   Sequencer/QsoSequencerRules.hpp
@@ -2060,11 +2116,23 @@ target_link_libraries (decodium_qml
   ${FFTW3_LIBRARIES}
   ${LIBM_LIBRARIES}
 )
-if (TARGET Decodium::SstvCore)
-  target_link_libraries (decodium_qml Decodium::SstvCore)
+if (TARGET Decodium::SstvIntegration)
+  target_link_libraries (decodium_qml Decodium::SstvIntegration)
+  target_link_libraries (decodium_qml Decodium::SstvGallery)
+  target_link_libraries (decodium_qml Decodium::SstvSharingUi)
+  target_link_libraries (decodium_qml Decodium::SstvDiagnostics)
+  if (TARGET Decodium::SstvStudio)
+    target_link_libraries (decodium_qml Decodium::SstvStudio)
+  endif ()
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=1)
 else ()
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=0)
+endif ()
+if (TARGET Decodium::HamDrmRuntime)
+  target_link_libraries (decodium_qml Decodium::HamDrmRuntime)
+  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_HAMDRM=1)
+else ()
+  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_HAMDRM=0)
 endif ()
 if (DECODIUM_HAS_RTLSDR)
   target_link_libraries (decodium_qml RtlSdr::RtlSdr)
@@ -2457,9 +2525,25 @@ install (FILES
   doc/project/THANKS
   doc/RTL_SDR.md
   doc/THIRD_PARTY_LICENSES_RTLSDR.md
+  doc/THIRD_PARTY_LICENSES_OPENJPEG.md
   DESTINATION ${CMAKE_INSTALL_DOCDIR}
   #COMPONENT runtime
   )
+
+if (DECODIUM_ENABLE_SSTV)
+  install (DIRECTORY "${PROJECT_SOURCE_DIR}/docs/sstv/"
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}/sstv"
+    FILES_MATCHING
+      PATTERN "*.md"
+      PATTERN "*.yaml"
+    #COMPONENT runtime
+    )
+  install (FILES
+    "${PROJECT_SOURCE_DIR}/tests/sstv/fixtures/EXTERNAL_VECTORS.md"
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}/sstv"
+    #COMPONENT runtime
+    )
+endif ()
 
 install (FILES
   "${DECODIUM_RUNTIME_DATA_DIR}/cty.dat"

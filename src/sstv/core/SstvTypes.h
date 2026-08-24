@@ -61,7 +61,10 @@ enum class VisEncoding : std::uint8_t {
     Unknown,
     None,
     StandardSevenBit,
-    Extended
+    Extended,
+    // MMSSTV's four six-bit-group N-VIS protocol.  It is deliberately
+    // distinct from the standard/wide-extended VIS bit framing.
+    Narrow24Bit
 };
 
 enum class Parity : std::uint8_t {
@@ -96,7 +99,10 @@ enum class ChromaSubsampling : std::uint8_t {
     Cs444,
     Cs422,
     Cs420,
-    ModeSpecific
+    ModeSpecific,
+    // Full horizontal chroma resolution shared vertically by two rows.
+    // Appended to preserve the numeric values of the existing catalogue ABI.
+    Cs440
 };
 
 enum class EvidenceStatus : std::uint8_t {

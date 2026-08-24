@@ -104,7 +104,7 @@ void TestB4WorkedBefore::successfulLogPathsRefreshWorkedBeforeRows()
 
     const QString nativePath = functionBody(
         cpp,
-        QStringLiteral("void DecodiumBridge::appendAdifRecord("),
+        QStringLiteral("bool DecodiumBridge::appendAdifRecord("),
         QStringLiteral("QVariantList DecodiumBridge::logbookProfiles() const"));
     QVERIFY(!nativePath.isEmpty());
     const int nativeAppend = nativePath.indexOf(

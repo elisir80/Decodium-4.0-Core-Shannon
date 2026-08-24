@@ -2700,6 +2700,450 @@ Premi Monitor per iniziare</translation>
         <source>Could not start %1</source>
         <translation>Impossibile avviare %1</translation>
     </message>
+    <message>
+        <location filename="../src/bridge/DecodiumBridgeSstv.cpp" line="+526"/>
+        <location line="+26"/>
+        <location line="+27"/>
+        <location line="+26"/>
+        <location line="+26"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <source>Stop SSTV TX before changing its timing</source>
+        <translation>Interrompi la TX SSTV prima di cambiare la sua temporizzazione</translation>
+    </message>
+    <message>
+        <location line="-156"/>
+        <location line="+26"/>
+        <location line="+27"/>
+        <location line="+26"/>
+        <location line="+26"/>
+        <location line="+29"/>
+        <location line="+29"/>
+        <source>The SSTV TX timing was rejected</source>
+        <translation>La temporizzazione della TX SSTV è stata rifiutata</translation>
+    </message>
+    <message>
+        <location line="+90"/>
+        <location line="+230"/>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <location line="-229"/>
+        <source>Decodium TX audio output is unavailable</source>
+        <translation>L&apos;uscita audio TX Decodium non è disponibile</translation>
+    </message>
+    <message>
+        <location line="+150"/>
+        <source>SSTV TX audio started: %1</source>
+        <translation>L&apos;audio TX SSTV è iniziato: %1</translation>
+    </message>
+    <message>
+        <location line="+80"/>
+        <source>Cannot initialise SSTV TX: %1</source>
+        <translation>Impossibile inizializzare la TX SSTV: %1</translation>
+    </message>
+    <message>
+        <location line="+111"/>
+        <source>HAMDRM TX accepted by Decodium audio/PTT authority</source>
+        <translation>TX HAMDRM accettata dal controllo audio/PTT di Decodium</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Native SSTV TX is unavailable</source>
+        <translation>La TX SSTV nativa non è disponibile</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Prepare an SSTV image before transmitting</source>
+        <translation>Prepara un&apos;immagine SSTV prima di trasmettere</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>SSTV TX preflight is not ready; stop any other TX and verify audio/CAT or VOX</source>
+        <translation>Il controllo preliminare della TX SSTV non è pronto; interrompi qualsiasi altra TX e verifica audio/CAT o VOX</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>SSTV TX was blocked by the Decodium SWR safety check</source>
+        <translation>La TX SSTV è stata bloccata dal controllo SWR di sicurezza di Decodium</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The selected SSTV mode is not executable</source>
+        <translation>Il modo SSTV selezionato non è eseguibile</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>The configured Decodium TX audio output is unavailable; reconnect it or select an available output before SSTV TX</source>
+        <translation>L&apos;uscita audio TX Decodium configurata non è disponibile; riconnettila o seleziona un&apos;uscita disponibile prima della TX SSTV</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Cannot prepare SSTV TX pixels: %1</source>
+        <translation>Impossibile preparare i pixel per la TX SSTV: %1</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>SSTV TX preflight failed</source>
+        <translation>Controllo preliminare della TX SSTV non riuscito</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>SSTV TX accepted: %1</source>
+        <translation>TX SSTV accettata: %1</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <location line="+1216"/>
+        <source>This Decodium build has no native SSTV support</source>
+        <translation>Questa versione di Decodium non include il supporto SSTV nativo</translation>
+    </message>
+    <message>
+        <location line="-1205"/>
+        <source>SSTV TX cancelled</source>
+        <translation>TX SSTV annullata</translation>
+    </message>
+    <message>
+        <location line="+224"/>
+        <source>SSTV storage is not ready; automatic save remains disabled</source>
+        <translation>L&apos;archivio SSTV non è pronto; il salvataggio automatico rimane disabilitato</translation>
+    </message>
+    <message>
+        <location line="+262"/>
+        <source>Incoming SSTV Gallery import rejected: validated handoff has no transfer identifier</source>
+        <translation>Importazione nella Galleria SSTV rifiutata: il passaggio convalidato non contiene un identificatore di trasferimento</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Incoming SSTV Gallery import could not be queued; the validated staging file was retained</source>
+        <translation>Impossibile mettere in coda l&apos;importazione nella Galleria SSTV; il file temporaneo convalidato è stato conservato</translation>
+    </message>
+    <message>
+        <location line="+72"/>
+        <source>SSTV image saved in Gallery: %1</source>
+        <translation>Immagine SSTV salvata nella Galleria: %1</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The SSTV image could not be saved</source>
+        <translation>L&apos;immagine SSTV non è stata salvata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SSTV image save failed: %1</source>
+        <translation>Salvataggio dell&apos;immagine SSTV non riuscito: %1</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>The selected SSTV Gallery image no longer exists</source>
+        <translation>L&apos;immagine SSTV selezionata nella Galleria non esiste più</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>The Gallery returned a different SSTV image record</source>
+        <translation>La Galleria ha restituito un record immagine SSTV diverso</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The SSTV image mode changed before the QSO was logged</source>
+        <translation>Il modo SSTV dell&apos;immagine è cambiato prima della registrazione del QSO</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <location line="+502"/>
+        <source>Select an existing QSO from the current Decodium logbook list</source>
+        <translation>Seleziona un QSO esistente dall&apos;elenco del registro attivo di Decodium</translation>
+    </message>
+    <message>
+        <location line="-485"/>
+        <source>The SSTV QSO was logged, but its local image association could not be queued; associate the image with the existing QSO to retry</source>
+        <translation>Il QSO SSTV è stato registrato, ma non è stato possibile mettere in coda l&apos;associazione locale dell&apos;immagine; associa l&apos;immagine al QSO esistente per riprovare</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The SSTV image association could not be queued</source>
+        <translation>L&apos;associazione immagine SSTV non è stata messa in coda</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>The local SSTV image association was not stored</source>
+        <translation>L&apos;associazione immagine SSTV locale non è stata memorizzata</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Received SSTV image is already in Gallery: %1</source>
+        <translation>L&apos;immagine SSTV ricevuta è già nella Galleria: %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Received SSTV image imported into Gallery: %1</source>
+        <translation>Immagine SSTV ricevuta importata nella Galleria: %1</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The validated incoming SSTV image could not be imported</source>
+        <translation>L&apos;immagine SSTV in arrivo validata non è stata importata</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Incoming SSTV Gallery retry could not be queued; use Import again or restart Decodium</source>
+        <translation>Impossibile mettere in coda un nuovo tentativo di importazione nella Galleria SSTV; usa di nuovo Importa o riavvia Decodium</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Incoming SSTV Gallery import retry %1 of %2 scheduled: %3</source>
+        <translation>Programmato il tentativo %1 di %2 per l&apos;importazione nella Galleria SSTV: %3</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Incoming SSTV Gallery import still needs retry; use Import again or restart Decodium: %1</source>
+        <translation>L&apos;importazione nella Galleria SSTV richiede un nuovo tentativo; usa di nuovo Importa o riavvia Decodium: %1</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Incoming SSTV Gallery import rejected: %1</source>
+        <translation>Importazione nella Galleria SSTV rifiutata: %1</translation>
+    </message>
+    <message>
+        <location line="+93"/>
+        <source>SSTV storage is not ready</source>
+        <translation>L&apos;archivio SSTV non è pronto</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>SSTV RX is unavailable</source>
+        <translation>La RX SSTV non è disponibile</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>The SSTV image is still changing; try saving again</source>
+        <translation>L&apos;immagine SSTV continua a cambiare; prova a salvare di nuovo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>No received SSTV image is available to save</source>
+        <translation>Non è disponibile alcuna immagine SSTV ricevuta da salvare</translation>
+    </message>
+    <message>
+        <location line="+81"/>
+        <source>Could not queue the SSTV image storage operation</source>
+        <translation>Impossibile mettere in coda l&apos;archiviazione dell&apos;immagine SSTV</translation>
+    </message>
+    <message>
+        <location line="+158"/>
+        <source>Decodium is shutting down</source>
+        <translation>Decodium si sta chiudendo</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>SSTV Gallery storage is not ready</source>
+        <translation>L&apos;archivio della Galleria SSTV non è pronto</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Too many SSTV QSO operations are already pending</source>
+        <translation>Sono già in attesa troppe operazioni QSO SSTV</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>This SSTV image already has a pending QSO operation</source>
+        <translation>Questa immagine SSTV ha già un&apos;operazione QSO in attesa</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Could not allocate an SSTV QSO request</source>
+        <translation>Impossibile allocare una richiesta QSO SSTV</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Could not queue the SSTV Gallery preflight</source>
+        <translation>Impossibile mettere in coda il controllo preliminare della Galleria SSTV</translation>
+    </message>
+    <message>
+        <location line="+56"/>
+        <source>The SSTV QSO operation failed</source>
+        <translation>L&apos;operazione QSO SSTV è fallita</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>SSTV QSO logged and image associated locally</source>
+        <translation>QSO SSTV registrato e immagine associata localmente</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SSTV image associated with the selected QSO</source>
+        <translation>Immagine SSTV associata al QSO selezionato</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>SSTV QSO was logged, but image association failed: %1</source>
+        <translation>Il QSO SSTV è stato registrato, ma l&apos;associazione dell&apos;immagine non è riuscita: %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>SSTV QSO operation failed: %1</source>
+        <translation>L&apos;operazione QSO SSTV è fallita: %1</translation>
+    </message>
+    <message>
+        <location line="+91"/>
+        <source>HAMDRM RX attached to the Decodium audio monitor</source>
+        <translation>RX HAMDRM collegata al monitor audio di Decodium</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>HAMDRM RX detached from the Decodium audio monitor</source>
+        <translation>RX HAMDRM scollegata dal monitor audio di Decodium</translation>
+    </message>
+    <message>
+        <location line="+186"/>
+        <source>Decodium shut down before the SSTV QSO operation completed</source>
+        <translation>Decodium è stato chiuso prima che l&apos;operazione QSO SSTV fosse completata</translation>
+    </message>
+    <message>
+        <source>The selected SSTV calibration reference is invalid</source>
+        <translation>Il riferimento di calibrazione SSTV selezionato non è valido</translation>
+    </message>
+    <message>
+        <source>Cannot prepare the SSTV calibration reference: %1</source>
+        <translation>Impossibile preparare il riferimento di calibrazione SSTV: %1</translation>
+    </message>
+    <message>
+        <source>The SSTV calibration audio source is invalid</source>
+        <translation>La sorgente audio per la calibrazione SSTV non è valida</translation>
+    </message>
+    <message>
+        <source>SSTV calibration reference accepted: %1</source>
+        <translation>Riferimento di calibrazione SSTV accettato: %1</translation>
+    </message>
+    <message>
+        <source>HAMDRM %1: %2</source>
+        <translation>HAMDRM %1: %2</translation>
+    </message>
+    <message>
+        <source>Invalid saved SSTV RX controls were reset: %1</source>
+        <translation>I controlli RX SSTV salvati non validi sono stati ripristinati: %1</translation>
+    </message>
+    <message>
+        <source>SSTV RX: %1</source>
+        <translation>RX SSTV: %1</translation>
+    </message>
+    <message>
+        <source>Raw SSTV diagnostic audio saved: %1</source>
+        <translation>Audio diagnostico SSTV grezzo salvato: %1</translation>
+    </message>
+    <message>
+        <source>Raw SSTV audio save failed: %1</source>
+        <translation>Salvataggio dell'audio SSTV grezzo non riuscito: %1</translation>
+    </message>
+    <message>
+        <source>SSTV re-decode preparation failed: %1</source>
+        <translation>Preparazione della ridecodifica SSTV non riuscita: %1</translation>
+    </message>
+    <message>
+        <source>The requested SSTV re-decode controls were rejected</source>
+        <translation>I controlli richiesti per la ridecodifica SSTV sono stati rifiutati</translation>
+    </message>
+    <message>
+        <source>The prepared SSTV re-decode could not start</source>
+        <translation>Impossibile avviare la ridecodifica SSTV preparata</translation>
+    </message>
+    <message>
+        <source>SSTV WAV replay: %1</source>
+        <translation>Riproduzione WAV SSTV: %1</translation>
+    </message>
+    <message>
+        <source>SSTV storage thread ownership violation: %1</source>
+        <translation>Violazione dell'affinità del thread di archiviazione SSTV: %1</translation>
+    </message>
+    <message>
+        <source>SSTV RX: invalid Decodium audio source</source>
+        <translation>RX SSTV: sorgente audio Decodium non valida</translation>
+    </message>
+    <message>
+        <source>Native SSTV support is unavailable</source>
+        <translation>Il supporto SSTV nativo non è disponibile</translation>
+    </message>
+    <message>
+        <source>SSTV RX monitor cannot replace an active WAV replay</source>
+        <translation>Il monitor RX SSTV non può sostituire una riproduzione WAV attiva</translation>
+    </message>
+    <message>
+        <source>SSTV RX runtime is shutting down</source>
+        <translation>Il runtime RX SSTV è in fase di arresto</translation>
+    </message>
+    <message>
+        <source>SSTV RX could not clear its previous session</source>
+        <translation>La RX SSTV non è riuscita a chiudere la sessione precedente</translation>
+    </message>
+    <message>
+        <source>SSTV RX: no Decodium audio source is available</source>
+        <translation>RX SSTV: nessuna sorgente audio Decodium disponibile</translation>
+    </message>
+    <message>
+        <source>SSTV RX worker could not be started</source>
+        <translation>Impossibile avviare il worker RX SSTV</translation>
+    </message>
+    <message>
+        <source>SSTV RX requires an active Decodium monitor</source>
+        <translation>La RX SSTV richiede un monitor Decodium attivo</translation>
+    </message>
+    <message>
+        <source>SSTV RX started from %1</source>
+        <translation>RX SSTV avviata da %1</translation>
+    </message>
+    <message>
+        <source>SSTV RX stopped</source>
+        <translation>RX SSTV arrestata</translation>
+    </message>
+    <message>
+        <source>Current SSTV frame aborted; receiver returned to search</source>
+        <translation>Fotogramma SSTV corrente interrotto; il ricevitore è tornato alla ricerca</translation>
+    </message>
+    <message>
+        <source>The SSTV RX controls were rejected</source>
+        <translation>I controlli RX SSTV sono stati rifiutati</translation>
+    </message>
+    <message>
+        <source>No retained SSTV audio is available to re-decode</source>
+        <translation>Nessun audio SSTV conservato è disponibile per la ridecodifica</translation>
+    </message>
+    <message>
+        <source>Invalid SSTV re-decode parameters</source>
+        <translation>Parametri di ridecodifica SSTV non validi</translation>
+    </message>
+    <message>
+        <source>No retained SSTV acquisition is available to save</source>
+        <translation>Nessuna acquisizione SSTV conservata è disponibile per il salvataggio</translation>
+    </message>
+    <message>
+        <source>SSTV WAV replay failed and the live RX route could not be restored</source>
+        <translation>Riproduzione WAV SSTV non riuscita e impossibile ripristinare il percorso RX live</translation>
+    </message>
+    <message>
+        <source>SSTV WAV replay started: %1</source>
+        <translation>Riproduzione WAV SSTV avviata: %1</translation>
+    </message>
+    <message>
+        <source>This Decodium build has no native SSTV WAV replay support</source>
+        <translation>Questa build di Decodium non supporta la riproduzione WAV SSTV nativa</translation>
+    </message>
+    <message>
+        <source>SSTV re-decode ended but the prior RX controls could not be restored: %1</source>
+        <translation>La ridecodifica SSTV è terminata, ma non è stato possibile ripristinare i controlli RX precedenti: %1</translation>
+    </message>
+    <message>
+        <source>SSTV WAV replay ended but the live RX source could not be restored</source>
+        <translation>La riproduzione WAV SSTV è terminata, ma non è stato possibile ripristinare la sorgente RX live</translation>
+    </message>
+    <message>
+        <source>SSTV WAV replay completed and drained</source>
+        <translation>Riproduzione WAV SSTV completata e svuotata</translation>
+    </message>
+    <message>
+        <source>SSTV WAV replay cancelled</source>
+        <translation>Riproduzione WAV SSTV annullata</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -14186,6 +14630,54 @@ Il file scaricato supera il limite di %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>errore di protocollo sconosciuto</translation>
+    </message>
+    <message>
+        <source>Invalid SSTV RX mode control</source>
+        <translation>Controllo della modalità RX SSTV non valido</translation>
+    </message>
+    <message>
+        <source>Invalid SSTV AFC mode</source>
+        <translation>Modalità AFC SSTV non valida</translation>
+    </message>
+    <message>
+        <source>Invalid manual SSTV AFC correction</source>
+        <translation>Correzione AFC SSTV manuale non valida</translation>
+    </message>
+    <message>
+        <source>Invalid SSTV slant mode</source>
+        <translation>Modalità di inclinazione SSTV non valida</translation>
+    </message>
+    <message>
+        <source>Invalid manual SSTV slant correction</source>
+        <translation>Correzione manuale dell'inclinazione SSTV non valida</translation>
+    </message>
+    <message>
+        <source>Invalid SSTV replay retention</source>
+        <translation>Durata di conservazione della riproduzione SSTV non valida</translation>
+    </message>
+    <message>
+        <source>SSTV RX controls are outside their safe bounds</source>
+        <translation>I controlli RX SSTV non rientrano nei limiti di sicurezza</translation>
+    </message>
+    <message>
+        <source>Local sound card</source>
+        <translation>Scheda audio locale</translation>
+    </message>
+    <message>
+        <source>WebSDR/KiwiSDR monitor</source>
+        <translation>Monitor WebSDR/KiwiSDR</translation>
+    </message>
+    <message>
+        <source>Decodium legacy backend</source>
+        <translation>Backend legacy di Decodium</translation>
+    </message>
+    <message>
+        <source>Replay/WAV</source>
+        <translation>Riproduzione/WAV</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation>Nessuna</translation>
     </message>
 </context>
 <context>
@@ -29364,6 +29856,5404 @@ VUCC: %2</translation>
         <location filename="../qml/decodium/components/DxPedFloatWindow.qml"/>
         <source>DX-Pedition panel</source>
         <translation>Pannello DX-Pedition</translation>
+    </message>
+</context>
+<context>
+    <name>SstvDiagnosticsPage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvDiagnosticsPage.qml" line="+26"/>
+        <source>DIAGNOSTICS</source>
+        <translation>DIAGNOSTICA</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Runtime state</source>
+        <translation>Stato di esecuzione</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <location line="+1"/>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Audio source</source>
+        <translation>Fonte audio</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Generation</source>
+        <translation>Generazione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Queue chunks / samples</source>
+        <translation>Blocchi / campioni in coda</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dropped chunks / samples</source>
+        <translation>Blocchi / campioni persi</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Converted / resampled samples</source>
+        <translation>Campioni convertiti / ri-campionati</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Frequency observations</source>
+        <translation>Rilevazioni della frequenza</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Stale chunks discarded</source>
+        <translation>Blocchi obsoleti scartati</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Processing failures</source>
+        <translation>Errori di elaborazione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Producer rejections</source>
+        <translation>Rifiuti del produttore</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>No native SSTV error reported</source>
+        <translation>Nessun errore SSTV nativo segnalato</translation>
+    </message>
+    <message>
+        <source>Native SSTV diagnostics are unavailable</source>
+        <translation>La diagnostica SSTV nativa non è disponibile</translation>
+    </message>
+    <message>
+        <source>Export privacy-safe SSTV diagnostics</source>
+        <translation>Esporta la diagnostica SSTV rispettosa della privacy</translation>
+    </message>
+    <message>
+        <source>JSON report (*.json)</source>
+        <translation>Rapporto JSON (*.json)</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <source>Refresh SSTV diagnostic counters</source>
+        <translation>Aggiorna i contatori diagnostici SSTV</translation>
+    </message>
+    <message>
+        <source>Transmitting 1500 Hz...</source>
+        <translation>Trasmissione a 1500 Hz...</translation>
+    </message>
+    <message>
+        <source>Transmit 1500 Hz (2 s)</source>
+        <translation>Trasmetti 1500 Hz (2 s)</translation>
+    </message>
+    <message>
+        <source>Transmit a 1500 Hz SSTV calibration tone for two seconds</source>
+        <translation>Trasmetti un tono di calibrazione SSTV a 1500 Hz per due secondi</translation>
+    </message>
+    <message>
+        <source>This may key the configured radio through PTT or VOX after Decodium preflight and SWR safety checks.</source>
+        <translation>Questa azione può attivare la radio configurata tramite PTT o VOX dopo i controlli preliminari di Decodium e i controlli di sicurezza SWR.</translation>
+    </message>
+    <message>
+        <source>Exporting...</source>
+        <translation>Esportazione in corso...</translation>
+    </message>
+    <message>
+        <source>Export JSON...</source>
+        <translation>Esporta JSON...</translation>
+    </message>
+    <message>
+        <source>Export privacy-safe SSTV diagnostic report</source>
+        <translation>Esporta il rapporto diagnostico SSTV rispettoso della privacy</translation>
+    </message>
+    <message>
+        <source>Application and mode registry</source>
+        <translation>Applicazione e registro delle modalità</translation>
+    </message>
+    <message>
+        <source>Decodium / Qt</source>
+        <translation>Decodium / Qt</translation>
+    </message>
+    <message>
+        <source>Platform / ABI</source>
+        <translation>Piattaforma / ABI</translation>
+    </message>
+    <message>
+        <source>Canonical registry</source>
+        <translation>Registro canonico</translation>
+    </message>
+    <message>
+        <source>v%1 - %2 modes - %3</source>
+        <translation>v%1 - %2 modalità - %3</translation>
+    </message>
+    <message>
+        <source>RX</source>
+        <translation>RX</translation>
+    </message>
+    <message>
+        <source>State / mode</source>
+        <translation>Stato / modalità</translation>
+    </message>
+    <message>
+        <source>Queued chunks / samples</source>
+        <translation>Blocchi / campioni in coda</translation>
+    </message>
+    <message>
+        <source>Failures / stale chunks</source>
+        <translation>Errori / blocchi obsoleti</translation>
+    </message>
+    <message>
+        <source>TX</source>
+        <translation>TX</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>Avanzamento</translation>
+    </message>
+    <message>
+        <source>Samples / underruns</source>
+        <translation>Campioni / underrun</translation>
+    </message>
+    <message>
+        <source>Failures</source>
+        <translation>Errori</translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation>Archiviazione</translation>
+    </message>
+    <message>
+        <source>Records</source>
+        <translation>Record</translation>
+    </message>
+    <message>
+        <source>Image / thumbnail bytes</source>
+        <translation>Byte immagini / miniature</translation>
+    </message>
+    <message>
+        <source>Raw audio / quota bytes</source>
+        <translation>Byte audio grezzo / quota</translation>
+    </message>
+    <message>
+        <source>Operations / failures</source>
+        <translation>Operazioni / errori</translation>
+    </message>
+    <message>
+        <source>Sharing</source>
+        <translation>Condivisione</translation>
+    </message>
+    <message>
+        <source>Queue depth</source>
+        <translation>Profondità della coda</translation>
+    </message>
+    <message>
+        <source>Uploaded / downloaded bytes</source>
+        <translation>Byte caricati / scaricati</translation>
+    </message>
+    <message>
+        <source>Upload / download bytes per second</source>
+        <translation>Byte al secondo in upload / download</translation>
+    </message>
+    <message>
+        <source>HAMDRM</source>
+        <translation>HAMDRM</translation>
+    </message>
+    <message>
+        <source>Available / state</source>
+        <translation>Disponibilità / stato</translation>
+    </message>
+    <message>
+        <source>RX / TX bytes</source>
+        <translation>Byte RX / TX</translation>
+    </message>
+    <message>
+        <source>CRC failures / BSR requests</source>
+        <translation>Errori CRC / richieste BSR</translation>
+    </message>
+    <message>
+        <source>Calibration and test tone</source>
+        <translation>Calibrazione e tono di prova</translation>
+    </message>
+    <message>
+        <source>Calibration result</source>
+        <translation>Risultato della calibrazione</translation>
+    </message>
+    <message>
+        <source>Calibration frequency</source>
+        <translation>Frequenza di calibrazione</translation>
+    </message>
+    <message>
+        <source>Test tone state</source>
+        <translation>Stato del tono di prova</translation>
+    </message>
+    <message>
+        <source>Test tone frequency / duration</source>
+        <translation>Frequenza / durata del tono di prova</translation>
+    </message>
+    <message>
+        <source>Bounded structured events</source>
+        <translation>Eventi strutturati limitati</translation>
+    </message>
+    <message>
+        <source>Events available for export</source>
+        <translation>Eventi disponibili per l'esportazione</translation>
+    </message>
+    <message>
+        <source>Only explicitly structured, allowlisted SSTV events are retained. Images, audio, paths, person metadata and credentials are excluded.</source>
+        <translation>Vengono conservati solo gli eventi SSTV esplicitamente strutturati e autorizzati. Immagini, audio, percorsi, metadati personali e credenziali sono esclusi.</translation>
+    </message>
+    <message>
+        <source>Clear events</source>
+        <translation>Cancella eventi</translation>
+    </message>
+    <message>
+        <source>Clear the bounded SSTV diagnostic event buffer</source>
+        <translation>Cancella il buffer limitato degli eventi diagnostici SSTV</translation>
+    </message>
+</context>
+<context>
+    <name>SstvDigitalPage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvDigitalPage.qml" line="+49"/>
+        <source>Select an encoded HAMDRM image object</source>
+        <translation>Seleziona un oggetto immagine HAMDRM codificato</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>HAMDRM images (*.jpg *.jpeg *.jp2 *.png *.gif *.bmp)</source>
+        <translation>Immagini HAMDRM (*.jpg *.jpeg *.jp2 *.png *.gif *.bmp)</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>DIGITAL SSTV · HAMDRM</source>
+        <translation>SSTV DIGITALE · HAMDRM</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>SEPARATE FROM ANALOG SSTV</source>
+        <translation>SEPARATA DALLA SSTV ANALOGICA</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Capability boundary</source>
+        <translation>Limiti funzionali</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Profiles/MOT/BSR: ready</source>
+        <translation>Profili/MOT/BSR: pronti</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>RX waveform: %1</source>
+        <translation>Forma d&apos;onda RX: %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+7"/>
+        <source>connected</source>
+        <translation>collegata</translation>
+    </message>
+    <message>
+        <location line="-7"/>
+        <location line="+7"/>
+        <source>not connected</source>
+        <translation>non collegata</translation>
+    </message>
+    <message>
+        <location line="-2"/>
+        <source>TX waveform: %1</source>
+        <translation>Forma d&apos;onda TX: %1</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>JPEG2000 D/E: %1/%2</source>
+        <translation>JPEG2000 D/E: %1/%2</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+2"/>
+        <location line="+289"/>
+        <source>yes</source>
+        <translation>sì</translation>
+    </message>
+    <message>
+        <location line="-291"/>
+        <location line="+2"/>
+        <location line="+289"/>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <location line="-283"/>
+        <source>Partial resume: %1</source>
+        <translation>Ripristino parziale: %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>configured</source>
+        <translation>configurato</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>not configured</source>
+        <translation>non configurato</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Named HAMDRM profile</source>
+        <translation>Profilo HAMDRM denominato</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Robustness</source>
+        <translation>Robustezza</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bandwidth</source>
+        <translation>Larghezza di banda</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Protection</source>
+        <translation>Protezione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Constellation</source>
+        <translation>Costellazione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Interleaver</source>
+        <translation>Interlacciamento</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Stable ID: %1 · payload %2 bytes/400 ms · expected %3 bit/s</source>
+        <translation>ID stabile: %1 · dati utili %2 byte/400 ms · valore previsto %3 bit/s</translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>WAVEFORM RX</source>
+        <translation>FORMA D&apos;ONDA RX</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <location line="+46"/>
+        <source>State: %1</source>
+        <translation>Stato: %1</translation>
+    </message>
+    <message>
+        <location line="-45"/>
+        <location line="+46"/>
+        <source>State: unavailable</source>
+        <translation>Stato: non disponibile</translation>
+    </message>
+    <message>
+        <location line="-34"/>
+        <source>Start RX</source>
+        <translation>Avvia RX</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Cancel RX</source>
+        <translation>Annulla RX</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>WAVEFORM TX</source>
+        <translation>FORMA D&apos;ONDA TX</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>No encoded image selected</source>
+        <translation>Nessuna immagine codificata selezionata</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Choose image</source>
+        <translation>Scegli immagine</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Validate</source>
+        <translation>Convalida</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Start TX</source>
+        <translation>Avvia TX</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Cancel TX</source>
+        <translation>Annulla TX</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Validated %1 · %2 × %3 · %4 bytes</source>
+        <translation>Convalidata %1 · %2 × %3 · %4 byte</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>MOT OBJECT / SEGMENT INBOX</source>
+        <translation>POSTA OGGETTI / SEGMENTI MOT</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>%1 object(s)</source>
+        <translation>%1 oggetti</translation>
+    </message>
+    <message>
+        <location line="+60"/>
+        <source>Segments %1/%2 · bytes %3/%4 · missing %5 · persisted %6</source>
+        <translation>Segmenti %1/%2 · byte %3/%4 · mancanti %5 · salvati %6</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Resume transport ID (hex)</source>
+        <translation>ID trasporto da riprendere (hex)</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>1234</source>
+        <translation>1234</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Resume partial</source>
+        <translation>Riprendi oggetto parziale</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Build BSR</source>
+        <translation>Costruisci BSR</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Discard object</source>
+        <translation>Scarta oggetto</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Missing segments: %1</source>
+        <translation>Segmenti mancanti: %1</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>none or extent unknown</source>
+        <translation>nessuno oppure estensione sconosciuta</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Select a partial object to inspect missing segments</source>
+        <translation>Seleziona un oggetto parziale per ispezionare i segmenti mancanti</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Generated BSR request appears here</source>
+        <translation>La richiesta BSR generata verrà visualizzata qui</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>HAMDRM is an independent digital object mode. This page never reports analog SSTV compatibility, successful RF transmission, or on-air interoperability without a connected backend and real evidence.</source>
+        <translation>HAMDRM è un modo digitale indipendente per il trasferimento di oggetti. Questa pagina non dichiara mai compatibilità con la SSTV analogica, trasmissione RF riuscita o interoperabilità via radio senza un backend connesso e prove reali.</translation>
+    </message>
+</context>
+<context>
+    <name>SstvGalleryPage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvGalleryPage.qml" line="+56"/>
+        <source>The selected Gallery image could not be queued for the Transmit Studio.</source>
+        <translation>Impossibile mettere in coda l&apos;immagine selezionata della Galleria per lo Studio di trasmissione.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Image opened in Transmit Studio. Transmission still requires an explicit TX action.</source>
+        <translation>Immagine aperta nello Studio di trasmissione. La trasmissione richiede comunque un&apos;azione TX esplicita.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>No retained, valid WAV is available for re-decode.</source>
+        <translation>Non è disponibile alcun WAV valido conservato per una nuova decodifica.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Re-decode started from the retained WAV through Decodium&apos;s native replay path.</source>
+        <translation>Nuova decodifica avviata dal WAV conservato tramite il percorso di riproduzione nativo di Decodium.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>The native SSTV QSO workflow is unavailable.</source>
+        <translation>Il flusso di lavoro QSO SSTV nativo non è disponibile.</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Frequency filters must be valid MHz values.</source>
+        <translation>I filtri di frequenza devono avere valori MHz validi.</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>One or more gallery filters are invalid.</source>
+        <translation>Uno o più filtri della Galleria non sono validi.</translation>
+    </message>
+    <message>
+        <location line="+55"/>
+        <source>SSTV QSO logged and Gallery image associated locally.</source>
+        <translation>QSO SSTV registrato e immagine della Galleria associata localmente.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Gallery image associated with the selected QSO.</source>
+        <translation>Immagine della Galleria associata al QSO selezionato.</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Removed from the gallery index. PNG and JSON files were preserved.</source>
+        <translation>Rimozione dall&apos;indice della Galleria completata. I file PNG e JSON sono stati conservati.</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Index removal failed.</source>
+        <translation>Rimozione dall&apos;indice non riuscita.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Gallery PNG exported atomically to %1</source>
+        <translation>PNG della Galleria esportato in modo atomico in %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Gallery export failed.</source>
+        <translation>Esportazione dalla Galleria non riuscita.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Selected Gallery records and their owned local files were deleted.</source>
+        <translation>I record selezionati della Galleria e i relativi file locali sono stati eliminati.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Local file deletion failed; no successful deletion was reported.</source>
+        <translation>Eliminazione dei file locali non riuscita; non è stata segnalata alcuna eliminazione completata.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Favourite update failed.</source>
+        <translation>Aggiornamento dei preferiti non riuscito.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Retention preview failed.</source>
+        <translation>Anteprima della conservazione non riuscita.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Retention apply failed.</source>
+        <translation>Applicazione della conservazione non riuscita.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Automatic retention completed through the crash-safe deletion journal.</source>
+        <translation>Conservazione automatica completata tramite il registro di eliminazione resistente agli arresti anomali.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Confirmed retention plan completed through the crash-safe deletion journal.</source>
+        <translation>Piano di conservazione confermato e completato tramite il registro di eliminazione resistente agli arresti anomali.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Storage quota calculation failed.</source>
+        <translation>Calcolo della quota di archiviazione non riuscito.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Export Gallery PNG</source>
+        <translation>Esporta PNG della Galleria</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>PNG image (*.png)</source>
+        <translation>Immagine PNG (*.png)</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The Gallery export request could not be queued.</source>
+        <translation>La richiesta di esportazione della Galleria non è stata messa in coda.</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Remove selected records?</source>
+        <translation>Rimuovere i record selezionati?</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>This removes %1 selected record(s) from the SQLite gallery index only. Original PNG and JSON sidecar files will remain on disk.</source>
+        <translation>Verranno rimossi %1 record selezionati solo dall&apos;indice SQLite della Galleria. I file PNG originali e i file JSON complementari rimarranno sul disco.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <location line="+57"/>
+        <location line="+85"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location line="-140"/>
+        <location line="+424"/>
+        <source>Remove from index</source>
+        <translation>Rimuovi dall&apos;indice</translation>
+    </message>
+    <message>
+        <location line="-416"/>
+        <source>The index removal request could not be queued.</source>
+        <translation>Impossibile mettere in coda la richiesta di rimozione dall&apos;indice.</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>Delete selected local SSTV files?</source>
+        <translation>Eliminare i file SSTV locali selezionati?</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>This destructive action removes %1 selected record(s), their verified PNG and JSON sidecar, any thumbnail, and retained raw WAV only when no unselected record shares it. Files are staged privately before the SQLite transaction. Use ‘Remove from index’ if you want to preserve files.</source>
+        <translation>Questa azione distruttiva rimuove %1 record selezionati, i relativi PNG e file JSON complementari verificati, le miniature e il WAV grezzo conservato solo se non è condiviso da record non selezionati. Prima della transazione SQLite i file vengono trasferiti in un&apos;area temporanea privata. Usa ‘Rimuovi dall&apos;indice’ per conservare i file.</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Delete files and records</source>
+        <translation>Elimina file e record</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The local file deletion request could not be queued.</source>
+        <translation>Impossibile mettere in coda la richiesta di eliminazione dei file locali.</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>Confirm Gallery retention plan</source>
+        <translation>Conferma il piano di conservazione della Galleria</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Preview only: %1 record(s), %2 images, %3 thumbnails and %4 raw audio. Favourites, QSO-linked records, protected shared records and unsafe paths were excluded.</source>
+        <translation>Solo anteprima: %1 record, %2 immagini, %3 miniature e %4 file audio grezzi. Sono stati esclusi i preferiti, i record associati a QSO, i record condivisi protetti e i percorsi non sicuri.</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Type exactly: %1</source>
+        <translation>Digita esattamente: %1</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Strong confirmation for Gallery retention</source>
+        <translation>Conferma esplicita per la conservazione della Galleria</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Apply retention</source>
+        <translation>Applica la conservazione</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>The retention plan could not be queued; request a new preview.</source>
+        <translation>Impossibile mettere in coda il piano di conservazione; richiedi una nuova anteprima.</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>GALLERY</source>
+        <translation>GALLERIA</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Search callsign, mode, source, note or tag</source>
+        <translation>Cerca nominativo, modo, sorgente, nota o tag</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Search SSTV gallery</source>
+        <translation>Cerca galleria SSTV</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Hide filters</source>
+        <translation>Nascondi filtri</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Filters</source>
+        <translation>Filtri</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Toggle gallery filters</source>
+        <translation>Mostra o nascondi i filtri della Galleria</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Refresh SSTV gallery</source>
+        <translation>Aggiorna galleria SSTV</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Category</source>
+        <translation>Categoria</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>All</source>
+        <translation>Tutte</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Received</source>
+        <translation>Ricevute</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Transmitted</source>
+        <translation>Trasmesse</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Imported</source>
+        <translation>Importate</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Draft</source>
+        <translation>Bozze</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Origin</source>
+        <translation>Origine</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <location line="+17"/>
+        <location line="+2"/>
+        <location line="+14"/>
+        <location line="+12"/>
+        <source>Any</source>
+        <translation>Qualsiasi</translation>
+    </message>
+    <message>
+        <location line="-44"/>
+        <source>Remote</source>
+        <translation>Remoto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Local</source>
+        <translation>Locale</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>e.g. Martin M1</source>
+        <translation>es. Martin M1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Callsign</source>
+        <translation>Nominativo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Local or remote</source>
+        <translation>Locale o remoto</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>From UTC</source>
+        <translation>Da UTC</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>To UTC</source>
+        <translation>A UTC</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Min MHz</source>
+        <translation>Min MHz</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Max MHz</source>
+        <translation>Max MHz</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Tags</source>
+        <translation>Tag</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Comma separated</source>
+        <translation>Separati da virgole</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tag rule</source>
+        <translation>Regola dei tag</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Match all tags</source>
+        <translation>Abbina tutti i tag</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Image state</source>
+        <translation>Stato immagine</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Partial only</source>
+        <translation>Solo parziali</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Complete only</source>
+        <translation>Solo complete</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Upload</source>
+        <translation>Caricamento</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Not requested</source>
+        <translation>Non richiesto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Pending</source>
+        <translation>In attesa</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Uploading</source>
+        <translation>Caricamento</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Uploaded</source>
+        <translation>Caricato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Failed</source>
+        <translation>Fallito</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Sort</source>
+        <translation>Ordina</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Captured newest</source>
+        <translation>Acquisizione più recente</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Captured oldest</source>
+        <translation>Acquisizione meno recente</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Callsign A-Z</source>
+        <translation>Nominativo A-Z</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Callsign Z-A</source>
+        <translation>Nominativo Z-A</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Mode A-Z</source>
+        <translation>Modo A-Z</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Mode Z-A</source>
+        <translation>Modo Z-A</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Frequency low-high</source>
+        <translation>Frequenza bassa-alta</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Frequency high-low</source>
+        <translation>Frequenza alta-bassa</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Updated newest</source>
+        <translation>Aggiornamento più recente</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Updated oldest</source>
+        <translation>Aggiornamento meno recente</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Reset</source>
+        <translation>Reimposta</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Apply</source>
+        <translation>Applica</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Images %1   Thumbnails %2   Raw audio %3</source>
+        <translation>Immagini %1   Miniature %2   Audio grezzo %3</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Storage quota unavailable</source>
+        <translation>Quota di archiviazione non disponibile</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Incomplete: unsafe or missing paths are protected</source>
+        <translation>Incompleto: i percorsi non sicuri o mancanti sono protetti</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Recalculate</source>
+        <translation>Ricalcola</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Planning...</source>
+        <translation>Pianificazione...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Preview retention...</source>
+        <translation>Anteprima conservazione...</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The retention preview could not be queued.</source>
+        <translation>Impossibile mettere in coda l&apos;anteprima della conservazione.</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>%1 loaded - %2 selected</source>
+        <translation>%1 caricati - %2 selezionati</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Gallery storage is unavailable</source>
+        <translation>L&apos;archivio della Galleria non è disponibile</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Clear selection</source>
+        <translation>Deseleziona tutto</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Removing...</source>
+        <translation>Rimozione...</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Remove selected records from gallery index</source>
+        <translation>Rimuovi i record selezionati dall&apos;indice della Galleria</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Deleting...</source>
+        <translation>Eliminazione...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Delete files...</source>
+        <translation>Elimina file...</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Delete selected Gallery records and owned local files</source>
+        <translation>Elimina i record selezionati della Galleria e i relativi file locali</translation>
+    </message>
+    <message>
+        <location line="+101"/>
+        <source>Loading preview...</source>
+        <translation>Caricamento anteprima...</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Preview unavailable</source>
+        <translation>Anteprima non disponibile</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>COMPLETE</source>
+        <translation>COMPLETA</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>PARTIAL</source>
+        <translation>PARZIALE</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Select image %1</source>
+        <translation>Seleziona immagine %1</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Remove image from favourites</source>
+        <translation>Rimuovi immagine dai preferiti</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Add image to favourites</source>
+        <translation>Aggiungi immagine ai preferiti</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Favourite images are protected from Gallery retention</source>
+        <translation>Le immagini nei preferiti sono protette dalla conservazione della Galleria</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Actions for Gallery image %1</source>
+        <translation>Azioni per l&apos;immagine %1 della Galleria</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Export PNG...</source>
+        <translation>Esporta PNG...</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Open in Transmit Studio</source>
+        <translation>Apri nello Studio di trasmissione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Re-decode retained WAV</source>
+        <translation>Ridecodifica il WAV conservato</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Change QSO association...</source>
+        <translation>Cambia associazione QSO...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Log SSTV QSO...</source>
+        <translation>Registra QSO SSTV...</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Prepare remote sharing...</source>
+        <translation>Prepara condivisione remota...</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Image selected for Remote Sharing. Recipient confirmation and queueing remain explicit.</source>
+        <translation>Immagine selezionata per la condivisione remota. La conferma del destinatario e la messa in coda restano esplicite.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Unknown station</source>
+        <translation>Stazione sconosciuta</translation>
+    </message>
+    <message>
+        <location line="+44"/>
+        <source>Load more</source>
+        <translation>Carica altre</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Gallery unavailable</source>
+        <translation>Galleria non disponibile</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>No SSTV image records match these filters</source>
+        <translation>Nessun record immagine SSTV corrisponde a questi filtri</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Received, transmitted, imported and draft images will appear here as path-only records. Full-resolution files stay on disk.</source>
+        <translation>Le immagini ricevute, trasmesse, importate e in bozza appariranno qui come record contenenti solo il percorso. I file a piena risoluzione rimangono sul disco.</translation>
+    </message>
+    <message>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <source>Save / export PNG...</source>
+        <translation>Salva / esporta PNG...</translation>
+    </message>
+    <message>
+        <source>Prepare retransmission in Studio</source>
+        <translation>Prepara la ritrasmissione in Studio</translation>
+    </message>
+    <message>
+        <source>Remove this record from index...</source>
+        <translation>Rimuovi questo record dall'indice...</translation>
+    </message>
+    <message>
+        <source>Delete this record and owned files...</source>
+        <translation>Elimina questo record e i file di proprietà...</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Griglia</translation>
+    </message>
+    <message>
+        <source>Show Gallery as a grid</source>
+        <translation>Mostra la Galleria come griglia</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Elenco</translation>
+    </message>
+    <message>
+        <source>Show Gallery as a list</source>
+        <translation>Mostra la Galleria come elenco</translation>
+    </message>
+    <message>
+        <source>Selected image metadata and reception quality</source>
+        <translation>Metadati e qualità di ricezione dell'immagine selezionata</translation>
+    </message>
+    <message>
+        <source>PARTIAL %1%</source>
+        <translation>PARZIALE %1%</translation>
+    </message>
+    <message>
+        <source>REMOTE</source>
+        <translation>REMOTA</translation>
+    </message>
+    <message>
+        <source>UPLOAD: %1</source>
+        <translation>UPLOAD: %1</translation>
+    </message>
+    <message>
+        <source>Station / mode</source>
+        <translation>Stazione / modalità</translation>
+    </message>
+    <message>
+        <source>Unknown mode</source>
+        <translation>Modalità sconosciuta</translation>
+    </message>
+    <message>
+        <source>VIS / sync confidence</source>
+        <translation>Affidabilità VIS / sincronizzazione</translation>
+    </message>
+    <message>
+        <source>Slant / frequency offset</source>
+        <translation>Inclinazione / offset di frequenza</translation>
+    </message>
+    <message>
+        <source>Coverage / SNR</source>
+        <translation>Copertura / SNR</translation>
+    </message>
+    <message>
+        <source>Image / category</source>
+        <translation>Immagine / categoria</translation>
+    </message>
+    <message>
+        <source>Frequency / source</source>
+        <translation>Frequenza / sorgente</translation>
+    </message>
+    <message>
+        <source>Line drop rate</source>
+        <translation>Percentuale di righe perse</translation>
+    </message>
+    <message>
+        <source>Captured UTC</source>
+        <translation>Acquisizione UTC</translation>
+    </message>
+    <message>
+        <source>Gallery image %1, %2, %3</source>
+        <translation>Immagine della Galleria %1, %2, %3</translation>
+    </message>
+    <message>
+        <source>complete</source>
+        <translation>completa</translation>
+    </message>
+    <message>
+        <source>partial</source>
+        <translation>parziale</translation>
+    </message>
+    <message>
+        <source>Press Space to select; Enter shows metadata; the Menu key opens actions.</source>
+        <translation>Premi Spazio per selezionare; Invio mostra i metadati; il tasto Menu apre le azioni.</translation>
+    </message>
+    <message>
+        <source>%1 - %2 - VIS %3 - %4% coverage</source>
+        <translation>%1 - %2 - VIS %3 - copertura %4%</translation>
+    </message>
+    <message>
+        <source>unavailable</source>
+        <translation>non disponibile</translation>
+    </message>
+</context>
+<context>
+    <name>SstvImagePreprocessor</name>
+    <message>
+        <location filename="../src/sstv/tx/SstvImagePreprocessor.cpp" line="+211"/>
+        <source>Source aspect ratio was stretched explicitly</source>
+        <translation>Le proporzioni dell&apos;immagine sorgente sono state deformate esplicitamente</translation>
+    </message>
+    <message>
+        <location line="+168"/>
+        <source>Overlay %1 had no safe drawing area</source>
+        <translation>La sovrapposizione %1 non disponeva di un&apos;area di disegno sicura</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>Overlay %1 text was safely elided</source>
+        <translation>Il testo della sovrapposizione %1 è stato abbreviato in sicurezza</translation>
+    </message>
+    <message>
+        <location line="+99"/>
+        <source>Source image is empty</source>
+        <translation>L&apos;immagine sorgente è vuota</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Source image exceeds the SSTV image bound</source>
+        <translation>L&apos;immagine sorgente supera i limiti dell&apos;immagine SSTV</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Output resolution is invalid or too large</source>
+        <translation>La risoluzione di uscita non è valida o è troppo grande</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Crop rectangle must be normalised and bounded</source>
+        <translation>Il rettangolo di ritaglio deve essere normalizzato e delimitato</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Image preparation contains an invalid colour</source>
+        <translation>La preparazione dell&apos;immagine contiene un colore non valido</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Image adjustment is outside its safe range</source>
+        <translation>La regolazione dell&apos;immagine è fuori dall&apos;intervallo sicuro</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Too many image overlays</source>
+        <translation>Troppe sovrapposizioni sull&apos;immagine</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Image overlay is outside its safe range</source>
+        <translation>La sovrapposizione sull&apos;immagine è fuori dall&apos;intervallo sicuro</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Image border width is invalid</source>
+        <translation>La larghezza del bordo dell&apos;immagine non è valida</translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>Image path is empty</source>
+        <translation>Il percorso dell&apos;immagine è vuoto</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Image file does not exist</source>
+        <translation>Il file immagine non esiste</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>File content is not a supported image</source>
+        <translation>Il contenuto del file non è un&apos;immagine supportata</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Decoded image dimensions are invalid or too large</source>
+        <translation>Le dimensioni dell&apos;immagine decodificata non sono valide o sono troppo grandi</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Image content could not be decoded</source>
+        <translation>Impossibile decodificare il contenuto dell&apos;immagine</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Decoded image exceeds the SSTV image bound</source>
+        <translation>L&apos;immagine decodificata supera i limiti dell&apos;immagine SSTV</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Calibration-pattern size is invalid</source>
+        <translation>La dimensione del motivo di calibrazione non è valida</translation>
+    </message>
+    <message>
+        <source>Image file must not be a symbolic link</source>
+        <translation>Il file immagine non deve essere un collegamento simbolico</translation>
+    </message>
+    <message>
+        <source>Compressed image exceeds the Studio file bound</source>
+        <translation>L'immagine compressa supera il limite dei file di Studio</translation>
+    </message>
+    <message>
+        <source>Image file could not be opened</source>
+        <translation>Impossibile aprire il file immagine</translation>
+    </message>
+    <message>
+        <source>Animated or multi-frame images are not accepted</source>
+        <translation>Le immagini animate o con più fotogrammi non sono accettate</translation>
+    </message>
+    <message>
+        <source>Decoded image allocation exceeds the Studio bound</source>
+        <translation>L'allocazione dell'immagine decodificata supera il limite di Studio</translation>
+    </message>
+    <message>
+        <source>Image metadata exceeds the Studio bound</source>
+        <translation>I metadati dell'immagine superano il limite di Studio</translation>
+    </message>
+</context>
+<context>
+    <name>SstvLogQsoDialog</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvLogQsoDialog.qml" line="+44"/>
+        <location line="+491"/>
+        <source>Log SSTV QSO</source>
+        <translation>Registra QSO SSTV</translation>
+    </message>
+    <message>
+        <location line="-435"/>
+        <source>The native Decodium logbook is unavailable.</source>
+        <translation>Il registro nativo Decodium non è disponibile.</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>No matching QSO is available in the active Decodium logbook.</source>
+        <translation>Nessun QSO corrispondente disponibile nel registro Decodium attivo.</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>The SSTV QSO request was rejected.</source>
+        <translation>La richiesta QSO SSTV è stata rifiutata.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Decodium accepted no trackable SSTV QSO request.</source>
+        <translation>Decodium non ha accettato alcuna richiesta QSO SSTV tracciabile.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Verifying the Gallery record and committing the QSO association...</source>
+        <translation>Verifica del record della Galleria e salvataggio dell&apos;associazione QSO...</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>SSTV QSO logged and image associated locally.</source>
+        <translation>QSO SSTV registrato e immagine associata localmente.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SSTV image associated with the selected QSO.</source>
+        <translation>Immagine SSTV associata al QSO selezionato.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The SSTV QSO operation failed.</source>
+        <translation>L&apos;operazione QSO SSTV non è riuscita.</translation>
+    </message>
+    <message>
+        <location line="+73"/>
+        <source>SSTV image being associated with the QSO</source>
+        <translation>Immagine SSTV in fase di associazione al QSO</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Image mode: %1</source>
+        <translation>Modo immagine: %1</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>unknown</source>
+        <translation>sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>The image attachment remains in Decodium Gallery. ADIF receives MODE=SSTV and no local path or invented SUBMODE.</source>
+        <translation>L&apos;allegato immagine rimane nella Galleria Decodium. ADIF riceve MODE=SSTV e nessun percorso locale o SUBMODE inventato.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>This image already has a local QSO association. Choosing another existing QSO will explicitly replace it.</source>
+        <translation>Questa immagine ha già un&apos;associazione QSO locale. La scelta di un altro QSO esistente la sostituirà esplicitamente.</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Create a new SSTV QSO</source>
+        <translation>Crea un nuovo QSO SSTV</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Associate with an existing QSO</source>
+        <translation>Associa a un QSO esistente</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Callsign</source>
+        <translation>nominativo</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Remote callsign</source>
+        <translation>Nominativo remoto</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Grid</source>
+        <translation>Locatore</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Remote Maidenhead grid</source>
+        <translation>Locatore Maidenhead remoto</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>RF frequency</source>
+        <translation>Frequenza RF</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>MHz</source>
+        <translation>MHz</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>RF frequency in megahertz</source>
+        <translation>Frequenza RF in megahertz</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Start UTC</source>
+        <translation>Inizio UTC</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>QSO start time in UTC</source>
+        <translation>Ora di inizio QSO in UTC</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>End UTC</source>
+        <translation>Fine UTC</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Optional ISO UTC</source>
+        <translation>Data e ora UTC ISO facoltative</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Optional QSO end time in UTC</source>
+        <translation>Ora di fine QSO facoltativa in UTC</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Report sent</source>
+        <translation>Rapporto inviato</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Report received</source>
+        <translation>Rapporto ricevuto</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Search callsign, grid, date, band or mode</source>
+        <translation>Cerca nominativo, locatore, data, banda o modo</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Search active Decodium logbook</source>
+        <translation>Cerca nel registro attivo di Decodium</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Search</source>
+        <translation>Cerca</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Unknown</source>
+        <translation>Sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Comments</source>
+        <translation>Commenti</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Optional operator comment; do not paste a local file path</source>
+        <translation>Commento facoltativo dell&apos;operatore; non incollare un percorso di file locale</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>SSTV QSO comments</source>
+        <translation>Commenti QSO SSTV</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>I confirm that Decodium should create this SSTV QSO and associate the Gallery image locally.</source>
+        <translation>Confermo che Decodium deve creare questo QSO SSTV e associare localmente l&apos;immagine della Galleria.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>I confirm that Decodium should associate the Gallery image with the selected existing QSO.</source>
+        <translation>Confermo che Decodium deve associare l&apos;immagine della Galleria al QSO esistente selezionato.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>An SSTV image is never logged automatically after reception</source>
+        <translation>Un&apos;immagine SSTV non viene mai registrata automaticamente dopo la ricezione</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Associate image</source>
+        <translation>Associa immagine</translation>
+    </message>
+</context>
+<context>
+    <name>SstvReceivePage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvReceivePage.qml" line="+37"/>
+        <source>Saving…</source>
+        <translation>Salvataggio…</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Saved in Gallery</source>
+        <translation>Salvata nella Galleria</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Save failed</source>
+        <translation>Salvataggio non riuscito</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Storage unavailable</source>
+        <translation>Archiviazione non disponibile</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Ready to save</source>
+        <translation>Pronta per il salvataggio</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Replay an SSTV WAV recording</source>
+        <translation>Riproduci una registrazione WAV SSTV</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>WAV audio (*.wav *.wave)</source>
+        <translation>Audio WAV (*.wav *.wave)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>All files (*)</source>
+        <translation>Tutti i file (*)</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Native WAV replay started</source>
+        <translation>Riproduzione WAV nativa avviata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>WAV replay could not start</source>
+        <translation>Impossibile avviare la riproduzione WAV</translation>
+    </message>
+    <message>
+        <location line="+55"/>
+        <source>RECEIVE</source>
+        <translation>RICEZIONE</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Streaming decoder on Decodium&apos;s active mono PCM path</source>
+        <translation>Decodificatore continuo sul percorso PCM mono attivo di Decodium</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Stop monitor</source>
+        <translation>Ferma monitoraggio</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Start monitor</source>
+        <translation>Avvia monitoraggio</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>SSTV reception stopped</source>
+        <translation>Ricezione SSTV interrotta</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>SSTV reception started</source>
+        <translation>Ricezione SSTV avviata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SSTV reception could not start</source>
+        <translation>Impossibile avviare ricezione SSTV</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Reset</source>
+        <translation>Reimposta</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Reset SSTV decoder</source>
+        <translation>Reimposta decodificatore SSTV</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Decoder state reset</source>
+        <translation>Stato del decodificatore reimpostato</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Replay WAV…</source>
+        <translation>Riproduci WAV…</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Replay an SSTV WAV file</source>
+        <translation>Riproduci un file WAV SSTV</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Cancel replay</source>
+        <translation>Annulla riproduzione</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Cancelling WAV replay</source>
+        <translation>Annullamento riproduzione WAV</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Auto-save received images</source>
+        <translation>Salva automaticamente le immagini ricevute</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Save each completed or safely recovered partial SSTV image as lossless PNG in the Decodium Gallery</source>
+        <translation>Salva nella Galleria Decodium ogni immagine SSTV completa o parziale recuperata in sicurezza come PNG senza perdita</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Save image</source>
+        <translation>Salva immagine</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Save partial</source>
+        <translation>Salva parziale</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Save the current coherent native decoder snapshot in the Decodium Gallery</source>
+        <translation>Salva nella Galleria Decodium l&apos;istantanea coerente corrente del decodificatore nativo</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>SSTV image queued for lossless storage</source>
+        <translation>Immagine SSTV in coda per l&apos;archiviazione senza perdita</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This SSTV snapshot is already saved</source>
+        <translation>Questa istantanea SSTV è già stata salvata</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>WAV · %1</source>
+        <translation>WAV · %1</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>SSTV WAV replay progress</source>
+        <translation>Avanzamento della riproduzione WAV SSTV</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 percent replayed</source>
+        <translation>%1 per cento riprodotto</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <location line="+170"/>
+        <location line="+15"/>
+        <source>%1%</source>
+        <translation>%1%</translation>
+    </message>
+    <message>
+        <location line="-137"/>
+        <source>Progressive received SSTV image</source>
+        <translation>Immagine SSTV ricevuta progressivamente</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Decoding the WAV recording</source>
+        <translation>Decodifica della registrazione WAV</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Waiting for an SSTV frame</source>
+        <translation>In attesa di un fotogramma SSTV</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Start reception to display a progressive image</source>
+        <translation>Avvia la ricezione per visualizzare un&apos;immagine progressiva</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The image surface is updated from bounded native scan-line events; audio and pixel arrays are never processed in QML.</source>
+        <translation>La superficie dell&apos;immagine viene aggiornata da eventi nativi limitati per linea di scansione; gli array audio e di pixel non vengono mai elaborati in QML.</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Source: %1</source>
+        <translation>Fonte: %1</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Complete · %1</source>
+        <translation>Completa · %1</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <location line="+2"/>
+        <source>SSTV</source>
+        <translation>SSTV</translation>
+    </message>
+    <message>
+        <location line="-1"/>
+        <source>%1 · %2% · %3/%4 lines</source>
+        <translation>%1 · %2% · %3/%4 linee</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>SSTV image reception progress</source>
+        <translation>Progresso ricezione immagine SSTV</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 percent received</source>
+        <translation>%1 per cento ricevuto</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>DETECTED MODE</source>
+        <translation>MODO RILEVATO</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Searching</source>
+        <translation>Ricerca in corso</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>VIS</source>
+        <translation>VIS</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 · %2</source>
+        <translation>%1 · %2</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>valid</source>
+        <translation>valido</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>rejected</source>
+        <translation>respinto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Not detected</source>
+        <translation>Non rilevato</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>TONE ESTIMATE</source>
+        <translation>STIMA TONO</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 Hz</source>
+        <translation>%1 Hz</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>CONFIDENCE</source>
+        <translation>ATTENDIBILITÀ</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>IMAGE</source>
+        <translation>IMMAGINE</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 × %2</source>
+        <translation>%1 × %2</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Waiting</source>
+        <translation>In attesa</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>IMAGE COVERAGE</source>
+        <translation>COPERTURA IMMAGINE</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>INPUT CHUNKS</source>
+        <translation>BLOCCHI IN INGRESSO</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>RESAMPLED SAMPLES</source>
+        <translation>CAMPIONI RICAMPIONATI</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>DISCONTINUITIES</source>
+        <translation>DISCONTINUITÀ</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>BOUNDED QUEUE DROPS</source>
+        <translation>SCARTI DELLA CODA LIMITATA</translation>
+    </message>
+    <message>
+        <source>Receiver control was rejected</source>
+        <translation>Il controllo del ricevitore è stato rifiutato</translation>
+    </message>
+    <message>
+        <source>Abort frame</source>
+        <translation>Interrompi fotogramma</translation>
+    </message>
+    <message>
+        <source>Abort the current SSTV frame</source>
+        <translation>Interrompi il fotogramma SSTV corrente</translation>
+    </message>
+    <message>
+        <source>Current frame aborted</source>
+        <translation>Fotogramma corrente interrotto</translation>
+    </message>
+    <message>
+        <source>Native receiver controls</source>
+        <translation>Controlli del ricevitore nativo</translation>
+    </message>
+    <message>
+        <source>AFC %1 Hz · slant %2 ppm</source>
+        <translation>AFC %1 Hz · inclinazione %2 ppm</translation>
+    </message>
+    <message>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <source>Automatic</source>
+        <translation>Automatica</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>Manuale</translation>
+    </message>
+    <message>
+        <source>SSTV receive mode selection</source>
+        <translation>Selezione della modalità di ricezione SSTV</translation>
+    </message>
+    <message>
+        <source>Mode profile</source>
+        <translation>Profilo modalità</translation>
+    </message>
+    <message>
+        <source>Manual or locked SSTV mode</source>
+        <translation>Modalità SSTV manuale o bloccata</translation>
+    </message>
+    <message>
+        <source>Lock</source>
+        <translation>Blocca</translation>
+    </message>
+    <message>
+        <source>Lock receive mode</source>
+        <translation>Blocca la modalità di ricezione</translation>
+    </message>
+    <message>
+        <source>Receive without VIS</source>
+        <translation>Ricevi senza VIS</translation>
+    </message>
+    <message>
+        <source>Use bounded canonical timing fallback and reject ambiguous modes</source>
+        <translation>Usa il fallback temporale canonico limitato e rifiuta le modalità ambigue</translation>
+    </message>
+    <message>
+        <source>AFC</source>
+        <translation>AFC</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Disattivata</translation>
+    </message>
+    <message>
+        <source>SSTV automatic frequency control mode</source>
+        <translation>Modalità di controllo automatico della frequenza SSTV</translation>
+    </message>
+    <message>
+        <source>Correction (Hz)</source>
+        <translation>Correzione (Hz)</translation>
+    </message>
+    <message>
+        <source>Manual SSTV frequency correction in hertz</source>
+        <translation>Correzione manuale della frequenza SSTV in hertz</translation>
+    </message>
+    <message>
+        <source>Reset AFC</source>
+        <translation>Azzera AFC</translation>
+    </message>
+    <message>
+        <source>AFC estimator reset</source>
+        <translation>Stimatore AFC azzerato</translation>
+    </message>
+    <message>
+        <source>Measured %1 Hz · confidence %2%</source>
+        <translation>Misurati %1 Hz · affidabilità %2%</translation>
+    </message>
+    <message>
+        <source>Slant</source>
+        <translation>Inclinazione</translation>
+    </message>
+    <message>
+        <source>SSTV slant correction mode</source>
+        <translation>Modalità di correzione dell'inclinazione SSTV</translation>
+    </message>
+    <message>
+        <source>Clock (ppm)</source>
+        <translation>Clock (ppm)</translation>
+    </message>
+    <message>
+        <source>Manual SSTV clock error in parts per million</source>
+        <translation>Errore manuale del clock SSTV in parti per milione</translation>
+    </message>
+    <message>
+        <source>Reset slant</source>
+        <translation>Azzera inclinazione</translation>
+    </message>
+    <message>
+        <source>Slant estimator reset</source>
+        <translation>Stimatore dell'inclinazione azzerato</translation>
+    </message>
+    <message>
+        <source>Measured %1 ppm · confidence %2%</source>
+        <translation>Misurati %1 ppm · affidabilità %2%</translation>
+    </message>
+    <message>
+        <source>Canonical timing fallback</source>
+        <translation>Fallback temporale canonico</translation>
+    </message>
+    <message>
+        <source>Retain</source>
+        <translation>Mantieni</translation>
+    </message>
+    <message>
+        <source>Retained receiver audio in seconds</source>
+        <translation>Audio del ricevitore conservato, in secondi</translation>
+    </message>
+    <message>
+        <source>seconds</source>
+        <translation>secondi</translation>
+    </message>
+    <message>
+        <source>Retain diagnostic audio</source>
+        <translation>Conserva audio diagnostico</translation>
+    </message>
+    <message>
+        <source>Live diagnostic scope</source>
+        <translation>Oscilloscopio diagnostico live</translation>
+    </message>
+    <message>
+        <source>Re-decode recent</source>
+        <translation>Ridecodifica recente</translation>
+    </message>
+    <message>
+        <source>Re-decode retained SSTV audio with the selected corrections</source>
+        <translation>Ridecodifica l'audio SSTV conservato con le correzioni selezionate</translation>
+    </message>
+    <message>
+        <source>Preparing retained audio re-decode</source>
+        <translation>Preparazione della ridecodifica dell'audio conservato</translation>
+    </message>
+    <message>
+        <source>Retained audio re-decode could not start</source>
+        <translation>Impossibile avviare la ridecodifica dell'audio conservato</translation>
+    </message>
+    <message>
+        <source>Save raw audio</source>
+        <translation>Salva audio grezzo</translation>
+    </message>
+    <message>
+        <source>Save the retained SSTV acquisition as a diagnostic WAV</source>
+        <translation>Salva l'acquisizione SSTV conservata come WAV diagnostico</translation>
+    </message>
+    <message>
+        <source>Saving retained diagnostic WAV</source>
+        <translation>Salvataggio del WAV diagnostico conservato</translation>
+    </message>
+    <message>
+        <source>Diagnostic WAV could not be saved</source>
+        <translation>Impossibile salvare il WAV diagnostico</translation>
+    </message>
+    <message>
+        <source>Cancel audio job</source>
+        <translation>Annulla operazione audio</translation>
+    </message>
+    <message>
+        <source>Audio job: %1</source>
+        <translation>Operazione audio: %1</translation>
+    </message>
+    <message>
+        <source>Fit</source>
+        <translation>Adatta</translation>
+    </message>
+    <message>
+        <source>Fit SSTV image to view</source>
+        <translation>Adatta l'immagine SSTV alla vista</translation>
+    </message>
+    <message>
+        <source>1:1 pixels</source>
+        <translation>Pixel 1:1</translation>
+    </message>
+    <message>
+        <source>Show SSTV image at native pixel size</source>
+        <translation>Mostra l'immagine SSTV alla dimensione nativa in pixel</translation>
+    </message>
+    <message>
+        <source>−</source>
+        <translation>−</translation>
+    </message>
+    <message>
+        <source>Zoom SSTV image out</source>
+        <translation>Riduci l'immagine SSTV</translation>
+    </message>
+    <message>
+        <source>+</source>
+        <translation>+</translation>
+    </message>
+    <message>
+        <source>Zoom SSTV image in</source>
+        <translation>Ingrandisci l'immagine SSTV</translation>
+    </message>
+    <message>
+        <source>Bounded live SSTV frequency scope</source>
+        <translation>Oscilloscopio live limitato della frequenza SSTV</translation>
+    </message>
+    <message>
+        <source>LIVE SCOPE · 900–2600 Hz · %1 points</source>
+        <translation>OSCILLOSCOPIO LIVE · 900–2600 Hz · %1 punti</translation>
+    </message>
+    <message>
+        <source>RAW VIS BITS</source>
+        <translation>BIT VIS GREZZI</translation>
+    </message>
+    <message>
+        <source>DECODED VIS</source>
+        <translation>VIS DECODIFICATO</translation>
+    </message>
+    <message>
+        <source>Not mapped</source>
+        <translation>Non associato</translation>
+    </message>
+    <message>
+        <source>FSK ID</source>
+        <translation>ID FSK</translation>
+    </message>
+    <message>
+        <source>Valid</source>
+        <translation>Valido</translation>
+    </message>
+    <message>
+        <source>AFC OFFSET / APPLIED</source>
+        <translation>OFFSET AFC / APPLICATO</translation>
+    </message>
+    <message>
+        <source>%1 / %2 Hz</source>
+        <translation>%1 / %2 Hz</translation>
+    </message>
+    <message>
+        <source>AFC CONFIDENCE</source>
+        <translation>AFFIDABILITÀ AFC</translation>
+    </message>
+    <message>
+        <source>%1% · %2 refs</source>
+        <translation>%1% · %2 riferimenti</translation>
+    </message>
+    <message>
+        <source>SLANT MEASURED / APPLIED</source>
+        <translation>INCLINAZIONE MISURATA / APPLICATA</translation>
+    </message>
+    <message>
+        <source>%1 / %2 ppm</source>
+        <translation>%1 / %2 ppm</translation>
+    </message>
+    <message>
+        <source>SYNC / CURRENT LINE</source>
+        <translation>SINCRONIA / RIGA CORRENTE</translation>
+    </message>
+    <message>
+        <source>%1 · line %2</source>
+        <translation>%1 · riga %2</translation>
+    </message>
+    <message>
+        <source>locked</source>
+        <translation>bloccata</translation>
+    </message>
+    <message>
+        <source>searching</source>
+        <translation>ricerca</translation>
+    </message>
+    <message>
+        <source>SIGNAL / SNR</source>
+        <translation>SEGNALE / SNR</translation>
+    </message>
+    <message>
+        <source>%1 RMS · %2 dB</source>
+        <translation>%1 RMS · %2 dB</translation>
+    </message>
+    <message>
+        <source>START UTC</source>
+        <translation>AVVIO UTC</translation>
+    </message>
+    <message>
+        <source>RF FREQUENCY</source>
+        <translation>FREQUENZA RF</translation>
+    </message>
+    <message>
+        <source>RETAINED AUDIO</source>
+        <translation>AUDIO CONSERVATO</translation>
+    </message>
+    <message>
+        <source>%1 / %2 samples</source>
+        <translation>%1 / %2 campioni</translation>
+    </message>
+    <message>
+        <source>DSP BLOCK AVG / MAX</source>
+        <translation>BLOCCO DSP MEDIO / MAX</translation>
+    </message>
+    <message>
+        <source>%1 / %2 ms</source>
+        <translation>%1 / %2 ms</translation>
+    </message>
+    <message>
+        <source>PROGRESSIVE UPDATE RATE</source>
+        <translation>FREQUENZA AGGIORNAMENTI PROGRESSIVI</translation>
+    </message>
+    <message>
+        <source>%1 updates/s</source>
+        <translation>%1 aggiornamenti/s</translation>
+    </message>
+</context>
+<context>
+    <name>SstvSettingsPage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvSettingsPage.qml" line="+69"/>
+        <source>SETTINGS</source>
+        <translation>IMPOSTAZIONI</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SSTV uses safe defaults and does not change existing Decodium audio, CAT or radio profiles.</source>
+        <translation>SSTV usa impostazioni predefinite sicure e non modifica i profili audio, CAT o radio esistenti di Decodium.</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Images and storage</source>
+        <translation>Immagini e archiviazione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Decodium storage ready</source>
+        <translation>Archivio Decodium pronto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Storage unavailable</source>
+        <translation>Archiviazione non disponibile</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Automatically save received SSTV images as lossless PNG</source>
+        <translation>Salva automaticamente le immagini SSTV ricevute come PNG senza perdita</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Enabling this option accepts Decodium&apos;s application-data storage location for automatic SSTV saves</source>
+        <translation>Abilitando questa opzione si accetta l&apos;area dati applicativi di Decodium per i salvataggi SSTV automatici</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Automatic saving is opt-in. PNG encoding, sidecar integrity checks and SQLite indexing run on Decodium&apos;s storage worker, outside the GUI and audio threads.</source>
+        <translation>Il salvataggio automatico richiede il consenso esplicito. La codifica PNG, i controlli di integrità dei file complementari e l&apos;indicizzazione SQLite vengono eseguiti dal processo di archiviazione in background di Decodium, fuori dai thread della GUI e dell&apos;audio.</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Gallery retention and quotas</source>
+        <translation>Conservazione della Galleria e quote</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Storage worker busy</source>
+        <translation>Processo di archiviazione occupato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Preview before deletion</source>
+        <translation>Anteprima prima della cancellazione</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Enable automatic Gallery retention</source>
+        <translation>Abilita la conservazione automatica della Galleria</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Destructive automatic retention is off by default and uses the same protected, journalled planner as manual retention</source>
+        <translation>La conservazione automatica distruttiva è disattivata per impostazione predefinita e usa lo stesso pianificatore protetto con registro della conservazione manuale</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Automatic deletion remains disabled until this switch is explicitly enabled. Manual retention always starts with a non-destructive preview and strong confirmation. Favourites and QSO-linked rows are never candidates.</source>
+        <translation>L&apos;eliminazione automatica rimane disabilitata finché questo interruttore non viene attivato esplicitamente. La conservazione manuale inizia sempre con un&apos;anteprima non distruttiva e una conferma esplicita. Le righe preferite e quelle associate a QSO non sono mai candidate.</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Maximum age (days, 0=off)</source>
+        <translation>Età massima (giorni, 0=disattivato)</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Batch limit</source>
+        <translation>Limite per gruppo</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Image quota (MiB, 0=off)</source>
+        <translation>Quota immagine (MiB, 0=disattivato)</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Thumbnail quota (MiB, 0=off)</source>
+        <translation>Quota miniatura (MiB, 0=disattivato)</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Raw audio quota (MiB, 0=off)</source>
+        <translation>Quota audio grezzo (MiB, 0=disattivato)</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Shared files</source>
+        <translation>File condivisi</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Protect (recommended)</source>
+        <translation>Proteggi (consigliato)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Allow completed uploads</source>
+        <translation>Consenti caricamenti completati</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>Transmission timing</source>
+        <translation>Temporizzazione della trasmissione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Locked during TX</source>
+        <translation>Bloccato durante la TX</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Ready to adjust</source>
+        <translation>Pronto per regolare</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>CAT/PTT lead</source>
+        <translation>Anticipo CAT/PTT</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>SSTV CAT PTT lead milliseconds</source>
+        <translation>Anticipo CAT/PTT SSTV in millisecondi</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>CAT/PTT tail</source>
+        <translation>Coda CAT/PTT</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>SSTV CAT PTT tail milliseconds</source>
+        <translation>Coda CAT/PTT SSTV in millisecondi</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>PTT release retry</source>
+        <translation>Nuovo tentativo di rilascio PTT</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>SSTV PTT release retry milliseconds</source>
+        <translation>Attesa prima di un nuovo rilascio PTT SSTV in millisecondi</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>VOX pre-key</source>
+        <translation>Preattivazione VOX</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>SSTV VOX pre-key milliseconds</source>
+        <translation>Preattivazione VOX SSTV in millisecondi</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>VOX hang</source>
+        <translation>Mantenimento VOX</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>SSTV VOX hang milliseconds</source>
+        <translation>Mantenimento VOX SSTV in millisecondi</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>VOX tone</source>
+        <translation>tono VOX</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>SSTV VOX tone hertz</source>
+        <translation>Tono VOX SSTV in hertz</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>VOX level (%)</source>
+        <translation>livello VOX (%)</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>SSTV VOX tone level percent</source>
+        <translation>Livello percentuale del tono VOX SSTV</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>CAT/PTT lead and tail are silent timing barriers. In VOX mode Decodium instead emits a bounded pre-key tone before the SSTV header and a hang tone after the payload; WAV exports remain protocol-only.</source>
+        <translation>L&apos;anticipo e la coda CAT/PTT sono intervalli di temporizzazione silenziosi. In modo VOX, Decodium emette invece un tono di preattivazione limitato prima dell&apos;intestazione SSTV e un tono di mantenimento dopo i dati utili; le esportazioni WAV contengono solo il protocollo.</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Reception</source>
+        <translation>Ricezione</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Decodium audio source</source>
+        <translation>Fonte audio Decodium</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <location line="+15"/>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <location line="-6"/>
+        <source>Native decoder lifecycle</source>
+        <translation>Ciclo operativo del decodificatore nativo</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>SSTV listens only to Decodium&apos;s selected mono PCM route. It never opens a second audio-capture device and remains inactive until reception or replay is started.</source>
+        <translation>SSTV ascolta solo il percorso PCM mono selezionato da Decodium. Non apre mai un secondo dispositivo di acquisizione audio e rimane inattiva finché non viene avviata la ricezione o la riproduzione.</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Remote sharing</source>
+        <translation>Condivisione remota</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Provider configured</source>
+        <translation>Provider configurato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>No provider configured</source>
+        <translation>Nessun provider configurato</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Enable opt-in remote image sharing</source>
+        <translation>Abilita la condivisione remota delle immagini su consenso esplicito</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>This enables the native sharing client only; no provider, upload or incoming download is selected automatically</source>
+        <translation>Viene abilitato solo il client di condivisione nativo; nessun provider, caricamento o scaricamento in arrivo viene selezionato automaticamente</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Credential storage is available. Uploads, incoming downloads and public sharing remain off until explicitly requested on the Remote Sharing page.</source>
+        <translation>L&apos;archivio delle credenziali è disponibile. Caricamenti, scaricamenti in arrivo e condivisione pubblica restano disattivati finché non vengono richiesti esplicitamente nella pagina Condivisione remota.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Secure credential storage is unavailable; authenticated sharing fails closed.</source>
+        <translation>L&apos;archivio sicuro delle credenziali non è disponibile; la condivisione autenticata si blocca in sicurezza.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remote sharing is unavailable in this build.</source>
+        <translation>La condivisione remota non è disponibile in questa build.</translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>Digital SSTV / HAMDRM</source>
+        <translation>SSTV digitale / HAMDRM</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Named profile</source>
+        <translation>Profilo denominato</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>HAMDRM profile</source>
+        <translation>Profilo HAMDRM</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>HAMDRM is unavailable in this build.</source>
+        <translation>HAMDRM non è disponibile in questa build.</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Runtime diagnostics</source>
+        <translation>Diagnostica di esecuzione</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Queued samples</source>
+        <translation>Campioni in coda</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Dropped samples</source>
+        <translation>Campioni persi</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>DSP chunks</source>
+        <translation>Blocchi DSP</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Failures</source>
+        <translation>Errori</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The Diagnostics page exposes the complete bounded runtime snapshot. Image pixels, raw audio, credentials and signed URLs are not included in these counters.</source>
+        <translation>La pagina Diagnostica espone l&apos;istantanea completa e limitata dello stato di esecuzione. I pixel delle immagini, l&apos;audio grezzo, le credenziali e gli URL firmati non sono inclusi in questi contatori.</translation>
+    </message>
+    <message>
+        <source>Analog receiver defaults</source>
+        <translation>Valori predefiniti del ricevitore analogico</translation>
+    </message>
+    <message>
+        <source>AFC mode</source>
+        <translation>Modalità AFC</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Disattivata</translation>
+    </message>
+    <message>
+        <source>Automatic</source>
+        <translation>Automatica</translation>
+    </message>
+    <message>
+        <source>Manual</source>
+        <translation>Manuale</translation>
+    </message>
+    <message>
+        <source>Default SSTV AFC mode</source>
+        <translation>Modalità AFC SSTV predefinita</translation>
+    </message>
+    <message>
+        <source>Manual AFC (Hz)</source>
+        <translation>AFC manuale (Hz)</translation>
+    </message>
+    <message>
+        <source>Slant mode</source>
+        <translation>Modalità inclinazione</translation>
+    </message>
+    <message>
+        <source>Default SSTV slant mode</source>
+        <translation>Modalità di inclinazione SSTV predefinita</translation>
+    </message>
+    <message>
+        <source>Manual slant (ppm)</source>
+        <translation>Inclinazione manuale (ppm)</translation>
+    </message>
+    <message>
+        <source>Replay buffer (seconds)</source>
+        <translation>Buffer di riproduzione (secondi)</translation>
+    </message>
+    <message>
+        <source>Receive without VIS</source>
+        <translation>Ricevi senza VIS</translation>
+    </message>
+    <message>
+        <source>Fail closed when canonical timing observations are ambiguous</source>
+        <translation>Interrompi in sicurezza quando le osservazioni temporali canoniche sono ambigue</translation>
+    </message>
+    <message>
+        <source>Canonical timing fallback</source>
+        <translation>Fallback temporale canonico</translation>
+    </message>
+    <message>
+        <source>Retain diagnostic audio</source>
+        <translation>Conserva audio diagnostico</translation>
+    </message>
+    <message>
+        <source>Enable bounded live scope</source>
+        <translation>Abilita l'oscilloscopio live limitato</translation>
+    </message>
+    <message>
+        <source>Retained audio is hard-bounded and raw WAV export or re-decode runs outside the GUI and audio callback threads.</source>
+        <translation>L'audio conservato ha limiti rigidi e l'esportazione WAV grezza o la ridecodifica vengono eseguite fuori dai thread della GUI e delle callback audio.</translation>
+    </message>
+</context>
+<context>
+    <name>SstvSharePage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvSharePage.qml" line="+40"/>
+        <location line="+2"/>
+        <source>unknown</source>
+        <translation>sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>%1 B</source>
+        <translation>%1 B</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>%1 KiB</source>
+        <translation>%1 KiB</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>%1 MiB</source>
+        <translation>%1 MiB</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Upload</source>
+        <comment>transfer direction</comment>
+        <translation>Caricamento</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Download</source>
+        <comment>transfer direction</comment>
+        <translation>Scaricamento</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Incoming</source>
+        <translation>In arrivo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <location line="+32"/>
+        <source>Unknown</source>
+        <translation>Sconosciuto</translation>
+    </message>
+    <message>
+        <location line="-26"/>
+        <source>Queued</source>
+        <translation>In coda</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Preparing</source>
+        <translation>Preparazione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Uploading</source>
+        <translation>Caricamento in corso</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Waiting for acknowledgement</source>
+        <translation>In attesa di conferma</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Download queued</source>
+        <translation>Scaricamento in coda</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Downloading</source>
+        <translation>Scaricamento in corso</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Awaiting acceptance</source>
+        <translation>In attesa di accettazione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Accepted</source>
+        <translation>Accettato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Acknowledging</source>
+        <translation>Conferma in corso</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Rejecting</source>
+        <translation>Rifiuto in corso</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Retry scheduled</source>
+        <translation>Nuovo tentativo pianificato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Paused</source>
+        <translation>In pausa</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Completed</source>
+        <translation>Completato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remote copy deleted</source>
+        <translation>Copia remota eliminata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remote upload revoked</source>
+        <translation>Caricamento remoto revocato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Acknowledged</source>
+        <translation>Confermato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cancelled</source>
+        <translation>Annullato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Rejected</source>
+        <translation>Rifiutato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Expired</source>
+        <translation>Scaduto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Failed</source>
+        <translation>Non riuscito</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>New</source>
+        <translation>Nuovo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Blocked locally</source>
+        <translation>Bloccato localmente</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Blocked by provider</source>
+        <translation>Bloccato dal provider</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Deleted at provider</source>
+        <translation>Eliminato presso il provider</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cancellation pending</source>
+        <translation>Annullamento in corso</translation>
+    </message>
+    <message>
+        <location line="+55"/>
+        <source>Select an SSTV gallery image</source>
+        <translation>Seleziona un&apos;immagine della galleria SSTV</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>SSTV images (*.png *.jpg *.jpeg)</source>
+        <translation>Immagini SSTV (*.png *.jpg *.jpeg)</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Save validated SSTV image as</source>
+        <translation>Salva l&apos;immagine SSTV convalidata come</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>PNG image (*.png)</source>
+        <translation>Immagine PNG (*.png)</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Save As could not be queued.</source>
+        <translation>Non è stato possibile mettere in coda il salvataggio con nome.</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Delete local sharing copy?</source>
+        <translation>Eliminare la copia locale di condivisione?</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>This removes only Decodium&apos;s private validated sharing copy. It does not delete an image already imported into the native Gallery and does not contact the provider.</source>
+        <translation>Questa operazione rimuove solo la copia privata convalidata usata da Decodium per la condivisione. Non elimina un&apos;immagine già importata nella Galleria nativa e non contatta il provider.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Local-copy deletion could not be queued.</source>
+        <translation>Non è stato possibile mettere in coda l&apos;eliminazione della copia locale.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Request provider deletion?</source>
+        <translation>Richiedere l&apos;eliminazione al provider?</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>This asks the configured provider to delete its incoming copy of %1. Local Decodium and Gallery files are not deleted.</source>
+        <translation>Questa operazione chiede al provider configurato di eliminare la propria copia in arrivo di %1. I file locali di Decodium e della Galleria non vengono eliminati.</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Provider deletion could not be queued.</source>
+        <translation>Non è stato possibile mettere in coda l&apos;eliminazione presso il provider.</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Block sender %1?</source>
+        <translation>Bloccare il mittente %1?</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Provider blocking is verified for this endpoint. Choose whether to request a provider-wide block or store a local-only block in this Decodium profile.</source>
+        <translation>Il blocco presso il provider è verificato per questo endpoint. Scegli se richiedere un blocco valido per l&apos;intero provider o memorizzare un blocco solo locale in questo profilo Decodium.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This provider has no verified sender-blocking capability. Only the clearly separate local Decodium block is available.</source>
+        <translation>Questo provider non dispone di una funzionalità verificata per bloccare i mittenti. È disponibile solo il blocco locale di Decodium, chiaramente separato.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <location line="+87"/>
+        <location line="+246"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location line="-328"/>
+        <source>Block locally only</source>
+        <translation>Blocca solo localmente</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Local sender block could not be queued.</source>
+        <translation>Non è stato possibile mettere in coda il blocco locale del mittente.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Block at provider</source>
+        <translation>Blocca presso il provider</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Provider sender block could not be queued.</source>
+        <translation>Non è stato possibile mettere in coda il blocco del mittente presso il provider.</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Delete provider copy?</source>
+        <translation>Eliminare la copia del provider?</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Revoke provider upload?</source>
+        <translation>Revocare il caricamento del provider?</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>This asks provider %1 to permanently delete its remote copy of %2.</source>
+        <translation>Questa operazione chiede al provider %1 di eliminare definitivamente la propria copia remota di %2.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>This asks provider %1 to revoke the completed upload of %2 using its documented transfer endpoint.</source>
+        <translation>Questa operazione chiede al provider %1 di revocare il caricamento completato di %2 tramite l&apos;endpoint di trasferimento documentato.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>The image in Decodium&apos;s local Gallery is not deleted. This action uses only the configured IP provider; it never keys PTT and never starts RF/TX.</source>
+        <translation>L&apos;immagine nella Galleria locale di Decodium non viene eliminata. Questa azione usa solo il provider IP configurato; non attiva mai il PTT e non avvia mai RF/TX.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>I understand that only the provider&apos;s remote copy is affected</source>
+        <translation>Comprendo che l&apos;azione riguarda solo la copia remota del provider</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <location line="+312"/>
+        <source>Delete provider copy</source>
+        <translation>Elimina copia del provider</translation>
+    </message>
+    <message>
+        <location line="-311"/>
+        <location line="+312"/>
+        <source>Revoke provider upload</source>
+        <translation>Revoca caricamento del provider</translation>
+    </message>
+    <message>
+        <location line="-301"/>
+        <source>Remote copy removal could not be queued.</source>
+        <translation>La rimozione della copia remota non è stata messa in coda.</translation>
+    </message>
+    <message>
+        <location line="+76"/>
+        <source>Provider %1 · peer %2 · %3</source>
+        <translation>Provider %1 · corrispondente %2 · %3</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Size %1 · expires %2</source>
+        <translation>Dimensione %1 · scade %2</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Payload SHA-256: %1</source>
+        <translation>SHA-256 del contenuto: %1</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Message: %1</source>
+        <translation>Messaggio: %1</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>end-to-end encrypted</source>
+        <translation>crittografato end-to-end</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>TLS transport; provider can read content</source>
+        <translation>trasporto TLS; il provider può leggere il contenuto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>TLS transport</source>
+        <translation>trasporto TLS</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Privacy: recipient-only · %1 · callsign %2 · grid %3 · metered %4</source>
+        <translation>Privacy: solo destinatario · %1 · nominativo %2 · locator %3 · rete a consumo %4</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+2"/>
+        <source>included</source>
+        <translation>incluso</translation>
+    </message>
+    <message>
+        <location line="-1"/>
+        <location line="+2"/>
+        <source>omitted</source>
+        <translation>omesso</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>allowed</source>
+        <translation>consentita</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>blocked</source>
+        <translation>bloccata</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Validated private preview · %1 × %2</source>
+        <translation>Anteprima privata convalidata · %1 × %2</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Source SHA-256: %1</source>
+        <translation>SHA-256 della sorgente: %1</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Preview is a metadata-free PNG. Accept validates and imports it into the native Gallery; it never transmits it. Provider acknowledgement remains explicit.</source>
+        <translation>L&apos;anteprima è un PNG privo di metadati. Accetta convalida l&apos;immagine e la importa nella Galleria nativa; non la trasmette mai. La conferma al provider rimane esplicita.</translation>
+    </message>
+    <message>
+        <location line="+34"/>
+        <source>Download</source>
+        <translation>Scarica</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Pause</source>
+        <translation>Sospendi</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Resume</source>
+        <translation>Riprendi</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Import again</source>
+        <translation>Importa di nuovo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Accept and import</source>
+        <translation>Accetta e importa</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Acknowledge</source>
+        <translation>Conferma ricezione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Reject</source>
+        <translation>Rifiuta</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Save As…</source>
+        <translation>Salva con nome…</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Delete local copy</source>
+        <translation>Elimina copia locale</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Delete at provider</source>
+        <translation>Elimina presso il provider</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Block sender…</source>
+        <translation>Blocca mittente…</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Block locally…</source>
+        <translation>Blocca localmente…</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>REMOTE SHARING</source>
+        <translation>CONDIVISIONE REMOTA</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Sharing unavailable</source>
+        <translation>Condivisione non disponibile</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Enabled</source>
+        <translation>Abilitato</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Off</source>
+        <translation>Disattivata</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Enable remote SSTV sharing</source>
+        <translation>Abilita la condivisione SSTV remota</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Hide provider</source>
+        <translation>Nascondi provider</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Configure provider</source>
+        <translation>Configura provider</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Privacy default: OFF. Uploads require a confirmed recipient; downloads require explicit acceptance. No automatic or public sharing is enabled.</source>
+        <translation>Privacy predefinita: DISATTIVATA. I caricamenti richiedono un destinatario confermato e gli scaricamenti richiedono l&apos;accettazione esplicita. Non è abilitata alcuna condivisione automatica o pubblica.</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Only user-supplied HTTPS REST or WebDAV endpoints are used. %1</source>
+        <translation>Sono utilizzati solo endpoint HTTPS REST o WebDAV forniti dall&apos;utente. %1</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Pre-signed upload is unavailable.</source>
+        <translation>Il caricamento tramite URL prefirmato non è disponibile.</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Verified provider capabilities: inbox %1 · incoming deletion %2 · sender blocking %3</source>
+        <translation>Funzionalità verificate del provider: posta in arrivo %1 · eliminazione elementi in arrivo %2 · blocco mittente %3</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+2"/>
+        <location line="+2"/>
+        <source>yes</source>
+        <translation>sì</translation>
+    </message>
+    <message>
+        <location line="-4"/>
+        <location line="+2"/>
+        <location line="+2"/>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Provider</source>
+        <translation>Provider</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>HTTPS REST</source>
+        <translation>HTTPS REST</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>HTTPS WebDAV</source>
+        <translation>HTTPS WebDAV</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Pre-signed PUT (trusted broker required)</source>
+        <translation>PUT prefirmato (richiede un broker attendibile)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Peer/relay (backend unavailable)</source>
+        <translation>Peer/relay (backend non disponibile)</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Identifier</source>
+        <translation>Identificatore</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Provider identifier</source>
+        <translation>Identificatore del provider</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>HTTPS endpoint</source>
+        <translation>Endpoint HTTPS</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>REST base URL supplied by your provider</source>
+        <translation>URL di base REST fornito dal provider</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>WebDAV collection URL supplied by your provider</source>
+        <translation>URL della raccolta WebDAV fornito dal provider</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Create path</source>
+        <translation>Percorso di creazione</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Required absolute path</source>
+        <translation>Percorso assoluto richiesto</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Chunk path</source>
+        <translation>Percorso dei blocchi</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <location line="+12"/>
+        <location line="+12"/>
+        <location line="+12"/>
+        <source>Required path with {uploadId}</source>
+        <translation>Percorso richiesto con {uploadId}</translation>
+    </message>
+    <message>
+        <location line="-31"/>
+        <source>Status path</source>
+        <translation>Percorso di stato</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Complete path</source>
+        <translation>Percorso di completamento</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Cancel path</source>
+        <translation>Percorso di annullamento</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Provider requires authentication</source>
+        <translation>Il provider richiede l&apos;autenticazione</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Bearer token</source>
+        <translation>Token Bearer</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Basic authentication</source>
+        <translation>Autenticazione di base</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Username</source>
+        <translation>Nome utente</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Credential</source>
+        <translation>Credenziale</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Stored securely; leave blank to keep it</source>
+        <translation>Conservata in modo sicuro; lascia vuoto per mantenerla</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Stored only in the OS secure store</source>
+        <translation>Conservata solo nell&apos;archivio sicuro del sistema operativo</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Pre-signed PUT requires a trusted target broker.</source>
+        <translation>Il PUT prefirmato richiede un broker attendibile.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Peer/relay requires an authenticated backend.</source>
+        <translation>Peer/relay richiede un backend autenticato.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>The OS secure credential store is unavailable. Decodium will not save this secret in ordinary settings.</source>
+        <translation>L&apos;archivio sicuro delle credenziali del sistema operativo non è disponibile. Decodium non salverà questo segreto nelle impostazioni ordinarie.</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>A credential is stored in the OS secure store.</source>
+        <translation>Una credenziale è conservata nell&apos;archivio sicuro del sistema operativo.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>No credential is stored for this configuration.</source>
+        <translation>Nessuna credenziale è conservata per questa configurazione.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Remove credential</source>
+        <translation>Rimuovi credenziale</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Save provider</source>
+        <translation>Salva provider</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Provider configuration could not be queued.</source>
+        <translation>Impossibile mettere in coda la configurazione del provider.</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>QUEUE PRIVATE UPLOAD</source>
+        <translation>METTI IN CODA UN CARICAMENTO PRIVATO</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Select a PNG/JPEG already inside Decodium SSTV storage</source>
+        <translation>Seleziona un file PNG/JPEG già presente nell&apos;archivio SSTV di Decodium</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Choose image</source>
+        <translation>Scegli immagine</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Recipient ID</source>
+        <translation>ID destinatario</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Martin M1</source>
+        <translation>Martin M1</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>SSTV mode</source>
+        <translation>Modo SSTV</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Expiration</source>
+        <translation>Scadenza</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>24 hours</source>
+        <translation>24 ore</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>7 days</source>
+        <translation>7 giorni</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>30 days</source>
+        <translation>30 giorni</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Include callsign</source>
+        <translation>Includi nominativo</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Station callsign</source>
+        <translation>Nominativo della stazione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Include Maidenhead grid/location</source>
+        <translation>Includi locator/posizione Maidenhead</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Grid, for example JM75FV</source>
+        <translation>Locator, ad esempio JM75FV</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Allow this upload on a metered network</source>
+        <translation>Consenti questo caricamento su una rete a consumo</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Private recipient-only transfer. Public and automatic sharing stay off. EXIF is removed. Protection is TLS transport; this provider can read content because optional E2EE is not enabled.</source>
+        <translation>Trasferimento privato riservato al solo destinatario. La condivisione pubblica e automatica resta disattivata. I dati EXIF vengono rimossi. La protezione è fornita dal trasporto TLS; il provider può leggere il contenuto perché la crittografia end-to-end opzionale non è abilitata.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>The current network is metered. This upload will remain durably queued unless you explicitly allow metered transfer.</source>
+        <translation>La rete attuale è a consumo. Questo caricamento resterà memorizzato nella coda finché non consentirai esplicitamente il trasferimento su reti a consumo.</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>The platform cannot determine whether the network is metered. This upload will remain durably queued unless you explicitly allow metered transfer.</source>
+        <translation>La piattaforma non riesce a determinare se la rete è a consumo. Questo caricamento resterà memorizzato nella coda finché non consentirai esplicitamente il trasferimento su reti a consumo.</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Optional private message (URLs are not accepted)</source>
+        <translation>Messaggio privato facoltativo (gli URL non sono accettati)</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>I confirmed this recipient</source>
+        <translation>Ho confermato questo destinatario</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Queue upload</source>
+        <translation>Metti in coda il caricamento</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Upload could not be queued.</source>
+        <translation>Non è stato possibile mettere in coda il caricamento.</translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>SHARING DIAGNOSTICS</source>
+        <translation>DIAGNOSTICA DELLA CONDIVISIONE</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Network: %1</source>
+        <translation>Rete: %1</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Network: unknown</source>
+        <translation>Rete: stato sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Reset counters</source>
+        <translation>Azzera contatori</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Uploaded %1 at %2/s · downloaded %3 at %4/s</source>
+        <translation>Caricati %1 a %2/s · scaricati %3 a %4/s</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Queue depth %1 · uploads %2 · downloads %3 · reset %4</source>
+        <translation>Elementi in coda %1 · caricamenti %2 · scaricamenti %3 · azzeramento %4</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Diagnostics contain only bounded counters and UTC reset time; provider URLs, credentials, tokens and local file paths are never exposed here.</source>
+        <translation>La diagnostica contiene solo contatori limitati e l&apos;ora UTC dell&apos;azzeramento; qui non vengono mai esposti URL del provider, credenziali, token o percorsi di file locali.</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Active queue</source>
+        <translation>Coda attiva</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Incoming inbox</source>
+        <translation>Posta in arrivo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>History</source>
+        <translation>Cronologia</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Check inbox</source>
+        <translation>Controlla posta in arrivo</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Inbox operations stay fail-closed until the configured REST endpoint returns a valid authenticated capability document. WebDAV supports bounded direct GET only; it does not invent an inbox listing contract.</source>
+        <translation>Le operazioni della posta in arrivo si bloccano in sicurezza finché l&apos;endpoint REST configurato non restituisce un documento di funzionalità valido e autenticato. WebDAV supporta solo richieste GET dirette e limitate; non presume un contratto per elencare la posta in arrivo.</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>No active transfers</source>
+        <translation>Nessun trasferimento attivo</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>No incoming items</source>
+        <translation>Nessun elemento in arrivo</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>No transfer history</source>
+        <translation>Nessuna cronologia di trasferimento</translation>
+    </message>
+</context>
+<context>
+    <name>SstvTransmitPage</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvTransmitPage.qml" line="+53"/>
+        <source>Load source image</source>
+        <translation>Carica immagine sorgente</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Images (*.png *.jpg *.jpeg *.webp *.bmp *.tif *.tiff)</source>
+        <translation>Immagini (*.png *.jpg *.jpeg *.webp *.bmp *.tif *.tiff)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>All files (*)</source>
+        <translation>Tutti i file (*)</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Export native SSTV audio</source>
+        <translation>Esporta audio SSTV nativo</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>WAV audio (*.wav)</source>
+        <translation>Audio WAV (*.wav)</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>TRANSMIT STUDIO</source>
+        <translation>STUDIO DI TRASMISSIONE</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Working…</source>
+        <translation>In corso…</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Ready</source>
+        <translation>Pronto</translation>
+    </message>
+    <message>
+        <location line="+37"/>
+        <source>SOURCE IMAGE</source>
+        <translation>IMMAGINE SORGENTE</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Load, paste or drop an image here</source>
+        <translation>Carica, incolla o trascina un&apos;immagine qui</translation>
+    </message>
+    <message>
+        <location line="+53"/>
+        <source>EXACT TX PREVIEW</source>
+        <translation>ANTEPRIMA TX ESATTA</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>%1 × %2 pixels</source>
+        <translation>%1 × %2 pixel</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>%1 × %2 · %3 s</source>
+        <translation>%1 × %2 · %3 s</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Load</source>
+        <translation>Carica</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Paste</source>
+        <translation>Incolla</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Pattern</source>
+        <translation>Mira di prova</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Clear</source>
+        <translation>Cancella</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Geometry</source>
+        <translation>Geometria</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Fit</source>
+        <translation>Adatta</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Fill + crop</source>
+        <translation>Riempi + ritaglia</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Stretch ⚠</source>
+        <translation>Deforma ⚠</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>0°</source>
+        <translation>0°</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>90°</source>
+        <translation>90°</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>180°</source>
+        <translation>180°</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>270°</source>
+        <translation>270°</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Aspect lock</source>
+        <translation>Blocca proporzioni</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Flip H</source>
+        <translation>Capovolgi H</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Flip V</source>
+        <translation>Capovolgi V</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Grayscale</source>
+        <translation>Scala di grigi</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Dither</source>
+        <translation>Retinatura</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Adjustments</source>
+        <translation>Regolazioni</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Brightness</source>
+        <translation>Luminosità</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Contrast</source>
+        <translation>Contrasto</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Gamma</source>
+        <translation>Gamma</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Saturation</source>
+        <translation>Saturazione</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Overlay</source>
+        <translation>Sovrapposizione</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Callsign</source>
+        <translation>Nominativo</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Border</source>
+        <translation>Bordo</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Background</source>
+        <translation>Sfondo</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Transparency background colour</source>
+        <translation>Colore di sfondo per la trasparenza</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>FSK ID</source>
+        <translation>ID FSK</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Append Decodium&apos;s callsign as a native FSK identifier</source>
+        <translation>Aggiungi il nominativo di Decodium come identificatore FSK nativo</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Preview</source>
+        <translation>Anteprima</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Cancel TX</source>
+        <translation>Annulla TX</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Transmit</source>
+        <translation>Trasmetti</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Stop audio and release PTT safely</source>
+        <translation>Interrompi l&apos;audio e rilascia PTT in sicurezza</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Start native TX through Decodium audio and CAT/PTT</source>
+        <translation>Avvia la TX nativa tramite l&apos;audio e CAT/PTT di Decodium</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>WAV preview</source>
+        <translation>Anteprima WAV</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <location line="+4"/>
+        <source>%1 Hz</source>
+        <translation>%1 Hz</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>JSON metadata</source>
+        <translation>Metadati JSON</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Saved: %1</source>
+        <translation>Salvato: %1</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Cancel WAV</source>
+        <translation>Annulla WAV</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Export WAV</source>
+        <translation>Esporta WAV</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Render the same native PCM source without keying PTT</source>
+        <translation>Genera la stessa sorgente PCM nativa senza attivare il PTT</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>SSTV transmission progress</source>
+        <translation>Progresso trasmissione SSTV</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>TX state: %1</source>
+        <translation>Stato TX: %1</translation>
+    </message>
+    <message>
+        <source>LOOPBACK DECODE</source>
+        <translation>DECODIFICA LOOPBACK</translation>
+    </message>
+    <message>
+        <source>Crop %</source>
+        <translation>Ritaglio %</translation>
+    </message>
+    <message>
+        <source>X</source>
+        <translation>X</translation>
+    </message>
+    <message>
+        <source>Y</source>
+        <translation>Y</translation>
+    </message>
+    <message>
+        <source>Width</source>
+        <translation>Larghezza</translation>
+    </message>
+    <message>
+        <source>Height</source>
+        <translation>Altezza</translation>
+    </message>
+    <message>
+        <source>Normalised source crop; width/height are clamped at the image edge</source>
+        <translation>Ritaglio normalizzato della sorgente; larghezza e altezza sono limitate al bordo dell'immagine</translation>
+    </message>
+    <message>
+        <source>Colour/detail</source>
+        <translation>Colore/dettaglio</translation>
+    </message>
+    <message>
+        <source>Exposure</source>
+        <translation>Esposizione</translation>
+    </message>
+    <message>
+        <source>WB red</source>
+        <translation>Bil. bianco rosso</translation>
+    </message>
+    <message>
+        <source>WB green</source>
+        <translation>Bil. bianco verde</translation>
+    </message>
+    <message>
+        <source>WB blue</source>
+        <translation>Bil. bianco blu</translation>
+    </message>
+    <message>
+        <source>Sharpness</source>
+        <translation>Nitidezza</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Locator</translation>
+    </message>
+    <message>
+        <source>UTC</source>
+        <translation>UTC</translation>
+    </message>
+    <message>
+        <source>Frequency</source>
+        <translation>Frequenza</translation>
+    </message>
+    <message>
+        <source>Custom</source>
+        <translation>Personalizzato</translation>
+    </message>
+    <message>
+        <source>Report</source>
+        <translation>Rapporto</translation>
+    </message>
+    <message>
+        <source>Watermark</source>
+        <translation>Filigrana</translation>
+    </message>
+    <message>
+        <source>Top left</source>
+        <translation>In alto a sinistra</translation>
+    </message>
+    <message>
+        <source>Top centre</source>
+        <translation>In alto al centro</translation>
+    </message>
+    <message>
+        <source>Top right</source>
+        <translation>In alto a destra</translation>
+    </message>
+    <message>
+        <source>Centre left</source>
+        <translation>Al centro a sinistra</translation>
+    </message>
+    <message>
+        <source>Centre</source>
+        <translation>Centro</translation>
+    </message>
+    <message>
+        <source>Centre right</source>
+        <translation>Al centro a destra</translation>
+    </message>
+    <message>
+        <source>Bottom left</source>
+        <translation>In basso a sinistra</translation>
+    </message>
+    <message>
+        <source>Bottom centre</source>
+        <translation>In basso al centro</translation>
+    </message>
+    <message>
+        <source>Bottom right</source>
+        <translation>In basso a destra</translation>
+    </message>
+    <message>
+        <source>Font</source>
+        <translation>Carattere</translation>
+    </message>
+    <message>
+        <source>Margin</source>
+        <translation>Margine</translation>
+    </message>
+    <message>
+        <source>Overlay text</source>
+        <translation>Testo sovrapposto</translation>
+    </message>
+    <message>
+        <source>Custom message</source>
+        <translation>Messaggio personalizzato</translation>
+    </message>
+    <message>
+        <source>Signal report</source>
+        <translation>Rapporto del segnale</translation>
+    </message>
+    <message>
+        <source>Frame/TX</source>
+        <translation>Fotogramma/TX</translation>
+    </message>
+    <message>
+        <source>Templates</source>
+        <translation>Modelli</translation>
+    </message>
+    <message>
+        <source>Named preset</source>
+        <translation>Preimpostazione denominata</translation>
+    </message>
+    <message>
+        <source>Save/update</source>
+        <translation>Salva/aggiorna</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation>Applica</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Elimina</translation>
+    </message>
+    <message>
+        <source>Loopback</source>
+        <translation>Loopback</translation>
+    </message>
+    <message>
+        <source>Cancel loopback</source>
+        <translation>Annulla loopback</translation>
+    </message>
+    <message>
+        <source>Run TX→RX</source>
+        <translation>Esegui TX→RX</translation>
+    </message>
+    <message>
+        <source>Encode native PCM and decode it with the real RX runtime; no radio or PTT</source>
+        <translation>Codifica il PCM nativo e lo decodifica con il vero runtime RX, senza radio né PTT</translation>
+    </message>
+    <message>
+        <source>SSTV internal loopback progress</source>
+        <translation>Avanzamento del loopback SSTV interno</translation>
+    </message>
+    <message>
+        <source>State: %1 · %2%</source>
+        <translation>Stato: %1 · %2%</translation>
+    </message>
+    <message>
+        <source>%1 chunks · %2 ms</source>
+        <translation>%1 blocchi · %2 ms</translation>
+    </message>
+    <message>
+        <source>Output/cal</source>
+        <translation>Uscita/calibrazione</translation>
+    </message>
+    <message>
+        <source>1200 Hz sync</source>
+        <translation>Sincronia 1200 Hz</translation>
+    </message>
+    <message>
+        <source>1500 Hz black</source>
+        <translation>Nero 1500 Hz</translation>
+    </message>
+    <message>
+        <source>1900 Hz leader</source>
+        <translation>Leader 1900 Hz</translation>
+    </message>
+    <message>
+        <source>2300 Hz white</source>
+        <translation>Bianco 2300 Hz</translation>
+    </message>
+    <message>
+        <source>Play short reference</source>
+        <translation>Riproduci riferimento breve</translation>
+    </message>
+    <message>
+        <source>Uses the normal audio, CAT/PTT, watchdog and cancellation path</source>
+        <translation>Usa il normale percorso audio, CAT/PTT, watchdog e annullamento</translation>
+    </message>
+    <message>
+        <source>Audio: %1 · CAT: %2 · output −%3 dB</source>
+        <translation>Audio: %1 · CAT: %2 · uscita −%3 dB</translation>
+    </message>
+    <message>
+        <source>default</source>
+        <translation>predefinito</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>nessuno</translation>
+    </message>
+    <message>
+        <source>PTT confirmed</source>
+        <translation>PTT confermato</translation>
+    </message>
+    <message>
+        <source>PTT pending</source>
+        <translation>PTT in attesa</translation>
+    </message>
+    <message>
+        <source>PTT idle</source>
+        <translation>PTT inattivo</translation>
+    </message>
+    <message>
+        <source>Peak %1 · headroom %2 dB · clips %3</source>
+        <translation>Picco %1 · margine %2 dB · clipping %3</translation>
+    </message>
+</context>
+<context>
+    <name>SstvWavExporter</name>
+    <message>
+        <location filename="../src/sstv/integration/SstvWavExporter.cpp" line="+85"/>
+        <source>unknown exception</source>
+        <translation>eccezione sconosciuta</translation>
+    </message>
+    <message>
+        <location line="+169"/>
+        <source>No WAV writer error</source>
+        <translation>Nessun errore del codificatore WAV</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>invalid WAV writer state</source>
+        <translation>stato del codificatore WAV non valido</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>unsupported WAV sample rate</source>
+        <translation>frequenza di campionamento WAV non supportata</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>invalid WAV sample buffer</source>
+        <translation>buffer dei campioni WAV non valido</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>non-finite WAV sample</source>
+        <translation>campione WAV non finito</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV sample chunk exceeds its bound</source>
+        <translation>Il blocco di campioni WAV supera il limite</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV source exceeded its declared length</source>
+        <translation>La sorgente WAV ha superato la lunghezza dichiarata</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV source exceeds the classic RIFF limit</source>
+        <translation>sorgente WAV supera il limite RIFF classico</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV temporary file resize failed</source>
+        <translation>Ridimensionamento del file WAV temporaneo non riuscito</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV temporary file seek failed</source>
+        <translation>Posizionamento nel file WAV temporaneo non riuscito</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV temporary file write failed</source>
+        <translation>Scrittura del file WAV temporaneo non riuscita</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>WAV temporary file flush failed</source>
+        <translation>Sincronizzazione del file WAV temporaneo non riuscita</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <location line="+214"/>
+        <location line="+43"/>
+        <location line="+32"/>
+        <location line="+50"/>
+        <location line="+24"/>
+        <source>WAV export was cancelled</source>
+        <translation>L&apos;esportazione WAV è stata annullata</translation>
+    </message>
+    <message>
+        <location line="-361"/>
+        <source>unknown WAV writer error</source>
+        <translation>errore sconosciuto del codificatore WAV</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Cannot verify the committed WAV file: %1</source>
+        <translation>Non è possibile verificare il file WAV salvato: %1</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Committed WAV size does not match the encoded source</source>
+        <translation>La dimensione del WAV salvato non corrisponde alla sorgente codificata</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Cannot read the committed WAV file: %1</source>
+        <translation>Non è possibile leggere il file WAV salvato: %1</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Committed WAV file ended unexpectedly</source>
+        <translation>Il file WAV salvato è terminato inaspettatamente</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Committed WAV file exceeds its expected size</source>
+        <translation>Il file WAV salvato supera la sua dimensione attesa</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Committed WAV file is incomplete</source>
+        <translation>Il file WAV salvato è incompleto</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>WAV metadata exceeds its structural or size bound</source>
+        <translation>I metadati WAV superano il limite strutturale o di dimensione</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Cannot derive the WAV metadata path</source>
+        <translation>Non è possibile derivare il percorso dei metadati WAV</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>WAV metadata destination must not be a symbolic link</source>
+        <translation>La destinazione dei metadati WAV non può essere un collegamento simbolico</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>WAV metadata destination already exists</source>
+        <translation>La destinazione dei metadati WAV esiste già</translation>
+    </message>
+    <message>
+        <location line="+36"/>
+        <source>WAV metadata exceeds its size bound</source>
+        <translation>I metadati WAV superano il limite di dimensione</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Cannot commit WAV metadata: %1</source>
+        <translation>Impossibile salvare i metadati WAV: %1</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <location line="+13"/>
+        <source>Invalid atomic WAV export request</source>
+        <translation>Richiesta di esportazione WAV atomica non valida</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>WAV destination directory is unavailable or unsafe</source>
+        <translation>La cartella di destinazione WAV non è disponibile o non è sicura</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>WAV source is not a fresh bounded PCM16 stream</source>
+        <translation>La sorgente WAV non è un nuovo flusso PCM16 entro i limiti</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Another process is exporting this WAV file</source>
+        <translation>Un altro processo sta esportando questo file WAV</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>WAV destination already exists</source>
+        <translation>La destinazione WAV esiste già</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Cannot open the atomic WAV destination: %1</source>
+        <translation>Impossibile aprire la destinazione per il salvataggio WAV atomico: %1</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Cannot start WAV encoding: %1</source>
+        <translation>Impossibile avviare la codifica WAV: %1</translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>WAV source changed its declared streaming state</source>
+        <translation>La sorgente WAV ha modificato lo stato di streaming dichiarato</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>WAV source produced more samples than declared</source>
+        <translation>La sorgente WAV ha prodotto più campioni di quanto dichiarato</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>WAV source stalled or violated its pull contract</source>
+        <translation>La sorgente WAV si è bloccata o ha violato il contratto di lettura</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>WAV encoding failed: %1</source>
+        <translation>La codifica WAV è fallita: %1</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>WAV source failed: %1</source>
+        <translation>Errore della sorgente WAV: %1</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>WAV source failed unexpectedly</source>
+        <translation>Errore imprevisto della sorgente WAV</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>WAV source ended at an unexpected sample boundary</source>
+        <translation>La sorgente WAV è terminata su un limite di campioni inatteso</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Cannot finalize WAV encoding: %1</source>
+        <translation>Impossibile finalizzare la codifica WAV: %1</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>WAV destination became a symbolic link</source>
+        <translation>La destinazione WAV è diventata un collegamento simbolico</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>WAV destination appeared during export</source>
+        <translation>La destinazione WAV è apparita durante l&apos;esportazione</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Cannot atomically commit the WAV file: %1</source>
+        <translation>Impossibile salvare atomicamente il file WAV: %1</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Committed WAV size exceeds the platform limit</source>
+        <translation>La dimensione del file WAV salvato supera il limite della piattaforma</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Cannot verify the committed WAV file</source>
+        <translation>Impossibile verificare il file WAV salvato</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>WAV was committed but its metadata sidecar was not</source>
+        <translation>Il file WAV è stato salvato, ma il relativo file complementare dei metadati non è stato salvato</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>WAV metadata failed: %1</source>
+        <translation>Salvataggio dei metadati WAV non riuscito: %1</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>WAV metadata failed unexpectedly</source>
+        <translation>Salvataggio dei metadati WAV non riuscito in modo imprevisto</translation>
+    </message>
+</context>
+<context>
+    <name>SstvWorkspace</name>
+    <message>
+        <location filename="../qml/decodium/components/sstv/SstvWorkspace.qml" line="+27"/>
+        <source>Receive</source>
+        <translation>Ricezione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Transmit Studio</source>
+        <translation>Studio di trasmissione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Gallery</source>
+        <translation>Galleria</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remote Sharing</source>
+        <translation>Condivisione remota</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Digital HAMDRM</source>
+        <translation>HAMDRM digitale</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Settings</source>
+        <translation>Impostazioni</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Diagnostics</source>
+        <translation>Diagnostica</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>SSTV - Decodium</source>
+        <translation>SSTV - Decodium</translation>
+    </message>
+    <message>
+        <location line="+47"/>
+        <source>NATIVE SSTV</source>
+        <translation>SSTV NATIVA</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Native analog SSTV and separate HAMDRM image transfer inside Decodium</source>
+        <translation>SSTV analogica nativa e trasferimento separato di immagini HAMDRM all&apos;interno di Decodium</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>RX ACTIVE</source>
+        <translation>RX ATTIVA</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>RX IDLE</source>
+        <translation>RX INATTIVA</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Close</source>
+        <translation>Chiudi</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Close SSTV workspace</source>
+        <translation>Chiudi l&apos;area di lavoro SSTV</translation>
+    </message>
+    <message>
+        <location line="+63"/>
+        <source>Uses Decodium&apos;s selected RX audio source</source>
+        <translation>Usa la sorgente audio RX selezionata di Decodium</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Native SSTV is unavailable in this build</source>
+        <translation>La SSTV nativa non è disponibile in questa versione</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::sstv::SstvShareController</name>
+    <message>
+        <location filename="../src/sstv/models/SstvShareController.h" line="+231"/>
+        <source>Remote sharing is off</source>
+        <translation>Condivisione remota disattivata</translation>
+    </message>
+    <message>
+        <location filename="../src/sstv/models/SstvShareController.cpp" line="+2376"/>
+        <source>Pre-signed upload is unavailable because no trusted broker is configured; Decodium never accepts a provider URL or credential from untrusted manifest data.</source>
+        <translation>Il caricamento prefirmato non è disponibile perché non è configurato alcun broker attendibile; Decodium non accetta mai URL o credenziali del provider ricavati da dati di manifest non attendibili.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Peer/relay sharing is unavailable because Decodium has no authenticated relay backend; no peer discovery or direct network listener is started.</source>
+        <translation>La condivisione peer/relay non è disponibile perché Decodium non dispone di un backend di relay autenticato; non viene avviato alcun rilevamento dei peer né alcun listener di rete diretto.</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::sstv::SstvShareWorker</name>
+    <message>
+        <location line="-1612"/>
+        <source>Remote sharing is already enabled</source>
+        <translation>La condivisione remota è già abilitata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remote sharing is already disabled</source>
+        <translation>La condivisione remota è già disabilitata</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Remote sharing enabled</source>
+        <translation>Condivisione remota abilitata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Remote sharing disabled</source>
+        <translation>Condivisione remota disabilitata</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Cancel or complete every active transfer before changing provider</source>
+        <translation>Annulla o completa ogni trasferimento attivo prima di cambiare fornitore</translation>
+    </message>
+    <message>
+        <location line="+42"/>
+        <source>A credential cannot be saved while authentication is disabled</source>
+        <translation>Una credenziale non può essere salvata mentre l&apos;autenticazione è disabilitata</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <source>Secure provider configuration saved</source>
+        <translation>Configurazione sicura del provider salvata</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <location line="+779"/>
+        <source>Secure credential storage is unavailable</source>
+        <translation>L&apos;archivio sicuro delle credenziali non è disponibile</translation>
+    </message>
+    <message>
+        <location line="-756"/>
+        <source>Provider credential removed; sharing is off</source>
+        <translation>Credenziale del provider rimossa; la condivisione è disattivata</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Confirm the intended recipient before queuing an upload</source>
+        <translation>Conferma il destinatario previsto prima di mettere in coda un caricamento</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Recipient or SSTV mode is invalid</source>
+        <translation>Il destinatario o il modo SSTV non sono validi</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Choose a bounded PNG or JPEG inside Decodium&apos;s SSTV storage</source>
+        <translation>Scegli un file PNG o JPEG entro i limiti dall&apos;archivio SSTV di Decodium</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>The selected image format or dimensions are invalid</source>
+        <translation>Il formato o le dimensioni dell&apos;immagine selezionata non sono validi</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>The selected image could not be decoded safely</source>
+        <translation>L&apos;immagine selezionata non è stata decodificata in modo sicuro</translation>
+    </message>
+    <message>
+        <location line="+83"/>
+        <source>Upload queued for the confirmed recipient</source>
+        <translation>Caricamento messo in coda per il destinatario confermato</translation>
+    </message>
+    <message>
+        <location line="+33"/>
+        <source>Incoming inbox refreshed</source>
+        <translation>Posta in arrivo aggiornata</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Incoming item or destination filename is invalid</source>
+        <translation>L&apos;elemento in arrivo o il nome del file di destinazione non è valido</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Download queued; acceptance remains manual</source>
+        <translation>Scaricamento messo in coda; l&apos;accettazione resta manuale</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Validated incoming image queued for native Gallery import</source>
+        <translation>Immagine in arrivo convalidata e messa in coda per l&apos;importazione nella Galleria nativa</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Receipt acknowledged</source>
+        <translation>Ricezione confermata</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Incoming item rejected</source>
+        <translation>Elemento in arrivo rifiutato</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Validated incoming image saved as a private PNG</source>
+        <translation>Immagine in arrivo convalidata e salvata come PNG privato</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Private sharing copy deleted; the native Gallery and provider were not changed</source>
+        <translation>Copia privata di condivisione eliminata; la Galleria nativa e il provider non sono stati modificati</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Provider deletion is unavailable without a verified capability</source>
+        <translation>L&apos;eliminazione presso il provider non è disponibile senza una funzionalità verificata</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Provider confirmed deletion of its incoming copy; local files were not changed</source>
+        <translation>Il provider ha confermato l&apos;eliminazione della propria copia in arrivo; i file locali non sono stati modificati</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Provider blocking is unavailable without a verified capability; choose the separate local-only block if desired</source>
+        <translation>Il blocco presso il provider non è disponibile senza una funzionalità verificata; se lo desideri, scegli il blocco separato solo locale</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Sender blocked only in this Decodium profile; the provider was not contacted</source>
+        <translation>Mittente bloccato solo in questo profilo Decodium; il provider non è stato contattato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Provider confirmed the sender block and Decodium also stored it locally</source>
+        <translation>Il provider ha confermato il blocco del mittente e Decodium lo ha memorizzato anche localmente</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>Transfer cancellation requested</source>
+        <translation>Richiesto l&apos;annullamento del trasferimento</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Provider remote copy removed; the local Decodium Gallery was not changed</source>
+        <translation>Copia remota del provider rimossa; la Galleria locale di Decodium non è stata modificata</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>Transfer paused at its durable checkpoint</source>
+        <translation>Trasferimento sospeso al punto di ripristino persistente</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Transfer resumed from its durable checkpoint</source>
+        <translation>Trasferimento ripreso dal punto di ripristino persistente</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Sharing queue refreshed</source>
+        <translation>Coda condivisione aggiornata</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Sharing diagnostics counters reset</source>
+        <translation>Contatori della diagnostica di condivisione azzerati</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>This provider has no verifiable REST inbox capability endpoint</source>
+        <translation>Questo provider non dispone di un endpoint REST verificabile per le funzionalità della posta in arrivo</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Provider capabilities verified</source>
+        <translation>Funzionalità del provider verificate</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>The provider does not advertise an inbox</source>
+        <translation>Il provider non dichiara una posta in arrivo</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>The sharing queue is not ready</source>
+        <translation>La coda condivisione non è pronta</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Remote sharing is off; enable it explicitly before transferring media</source>
+        <translation>La condivisione remota è disattivata; abilitarla esplicitamente prima di trasferire i media</translation>
+    </message>
+    <message>
+        <location line="+70"/>
+        <source>Provider type, identifier or HTTPS endpoint is invalid</source>
+        <translation>Il tipo di provider, l&apos;identificatore o l&apos;endpoint HTTPS non è valido</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Authentication type must be Bearer or Basic</source>
+        <translation>Il tipo di autenticazione deve essere Bearer o Basic</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Basic authentication requires a bounded username</source>
+        <translation>L&apos;autenticazione di base richiede un nome utente entro i limiti</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Every REST path is required; upload paths must contain {uploadId} exactly once</source>
+        <translation>Tutti i percorsi REST sono obbligatori; i percorsi di caricamento devono contenere {uploadId} esattamente una volta</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>The WebDAV collection URL requires a path</source>
+        <translation>L&apos;URL della raccolta WebDAV richiede un percorso</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Secure credential storage is unavailable; the secret was not persisted</source>
+        <translation>L&apos;archivio sicuro delle credenziali non è disponibile; il segreto non è stato salvato</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Credential is empty, oversized or contains an unsafe newline</source>
+        <translation>La credenziale è vuota, troppo lunga o contiene un ritorno a capo non sicuro</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Secure credential storage rejected the credential</source>
+        <translation>L&apos;archivio sicuro delle credenziali ha rifiutato la credenziale</translation>
+    </message>
+    <message>
+        <location line="+39"/>
+        <source>No valid credential is stored for this provider</source>
+        <translation>Non è conservata alcuna credenziale valida per questo provider</translation>
+    </message>
+    <message>
+        <location line="+44"/>
+        <source>The REST provider configuration was rejected</source>
+        <translation>La configurazione del provider REST è stata rifiutata</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>The WebDAV provider configuration was rejected</source>
+        <translation>La configurazione del provider WebDAV è stata rifiutata</translation>
+    </message>
+    <message>
+        <location line="+277"/>
+        <source>Remote sharing is off</source>
+        <translation>La condivisione remota è disattivata</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sharing enabled for %1</source>
+        <translation>Condivisione abilitata per %1</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::sstv::SstvStudioController</name>
+    <message>
+        <location filename="../src/sstv/integration/SstvStudioController.cpp" line="+46"/>
+        <source>Invalid numeric image control: %1</source>
+        <translation>Parametro numerico dell&apos;immagine non valido: %1</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Invalid integer image control: %1</source>
+        <translation>Parametro intero dell&apos;immagine non valido: %1</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Invalid image colour: %1</source>
+        <translation>Colore dell&apos;immagine non valido: %1</translation>
+    </message>
+    <message>
+        <location line="+245"/>
+        <location line="+116"/>
+        <location line="+78"/>
+        <source>Selected SSTV TX mode is not executable</source>
+        <translation>Il modo TX SSTV selezionato non è eseguibile</translation>
+    </message>
+    <message>
+        <location line="-190"/>
+        <source>Wait for the current image operation to finish</source>
+        <translation>Attendi il completamento dell&apos;operazione corrente sull&apos;immagine</translation>
+    </message>
+    <message>
+        <location line="+26"/>
+        <location line="+39"/>
+        <location line="+20"/>
+        <location line="+17"/>
+        <location line="+68"/>
+        <source>An image operation is already running</source>
+        <translation>Un&apos;operazione immagine è già in corso</translation>
+    </message>
+    <message>
+        <location line="-140"/>
+        <source>Only local image files can be loaded</source>
+        <translation>Possono essere caricati solo file immagine locali</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Image path is empty</source>
+        <translation>Il percorso dell&apos;immagine è vuoto</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Image decoding failed: %1</source>
+        <translation>Decodifica dell&apos;immagine non riuscita: %1</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Image decoding failed unexpectedly</source>
+        <translation>Decodifica dell&apos;immagine non riuscita per un errore imprevisto</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>The system clipboard is unavailable</source>
+        <translation>Gli appunti di sistema non sono disponibili</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The clipboard does not contain an image</source>
+        <translation>Gli appunti non contengono un&apos;immagine</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Clipboard</source>
+        <translation>Appunti</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Calibration pattern</source>
+        <translation>Motivo di calibrazione</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Load or paste a source image first</source>
+        <translation>Carica o incolla prima un&apos;immagine sorgente</translation>
+    </message>
+    <message>
+        <location line="+25"/>
+        <source>Image preparation failed: %1</source>
+        <translation>Preparazione dell&apos;immagine non riuscita: %1</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Image preparation failed unexpectedly</source>
+        <translation>Preparazione dell&apos;immagine non riuscita per un errore imprevisto</translation>
+    </message>
+    <message>
+        <location line="+37"/>
+        <source>Prepare an SSTV image before exporting WAV</source>
+        <translation>Prepara un&apos;immagine SSTV prima di esportare WAV</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>WAV export requires a local file destination</source>
+        <translation>L&apos;esportazione WAV richiede un file locale di destinazione</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Unsupported SSTV WAV sample rate</source>
+        <translation>Frequenza di campionamento WAV SSTV non supportata</translation>
+    </message>
+    <message>
+        <location line="+18"/>
+        <source>SSTV audio exports must use the .wav extension</source>
+        <translation>Le esportazioni audio SSTV devono usare l&apos;estensione .wav</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>WAV export path is invalid</source>
+        <translation>Il percorso di esportazione WAV non è valido</translation>
+    </message>
+    <message>
+        <location line="+46"/>
+        <source>WAV export was cancelled</source>
+        <translation>L&apos;esportazione WAV è stata annullata</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Cannot build SSTV WAV source: %1</source>
+        <translation>Impossibile costruire la sorgente WAV SSTV: %1</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Cannot build SSTV WAV source unexpectedly</source>
+        <translation>Impossibile creare la sorgente WAV SSTV a causa di un errore imprevisto</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Cannot start SSTV WAV export: %1</source>
+        <translation>Impossibile avviare esportazione WAV SSTV: %1</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Cannot start SSTV WAV export unexpectedly</source>
+        <translation>Impossibile avviare l&apos;esportazione WAV SSTV a causa di un errore imprevisto</translation>
+    </message>
+    <message>
+        <location line="+36"/>
+        <source>WAV export cancellation requested</source>
+        <translation>Richiesta annullamento esportazione WAV</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Image operation cancelled</source>
+        <translation>Operazione immagine annullata</translation>
+    </message>
+    <message>
+        <location line="+180"/>
+        <source>Unknown image resize mode</source>
+        <translation>Modalità di ridimensionamento dell&apos;immagine sconosciuta</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Rotation must be 0, 90, 180 or 270 degrees</source>
+        <translation>La rotazione deve essere di 0, 90, 180 o 270 gradi</translation>
+    </message>
+    <message>
+        <location line="+99"/>
+        <source>Too many image overlays</source>
+        <translation>Troppe sovrapposizioni sull&apos;immagine</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Image overlay must be an object</source>
+        <translation>La sovrapposizione sull&apos;immagine deve essere un oggetto</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Unknown image overlay kind</source>
+        <translation>Tipo di sovrapposizione sull&apos;immagine sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Unknown image overlay anchor</source>
+        <translation>Ancoraggio della sovrapposizione sull&apos;immagine sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+87"/>
+        <source>Source image is empty or exceeds the SSTV bound</source>
+        <translation>L&apos;immagine sorgente è vuota o supera i limiti SSTV</translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>Image content could not be decoded</source>
+        <translation>Impossibile decodificare il contenuto dell&apos;immagine</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Image preparation did not produce a frame</source>
+        <translation>La preparazione dell&apos;immagine non ha prodotto un fotogramma</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>SSTV WAV export failed</source>
+        <translation>Esportazione WAV SSTV non riuscita</translation>
+    </message>
+    <message>
+        <source>Template contains an unsupported control: %1</source>
+        <translation>Il modello contiene un controllo non supportato: %1</translation>
+    </message>
+    <message>
+        <source>Cancel the current Studio loopback before changing mode</source>
+        <translation>Annulla il loopback Studio corrente prima di cambiare modalità</translation>
+    </message>
+    <message>
+        <source>Template name must contain 1 to %1 printable characters</source>
+        <translation>Il nome del modello deve contenere da 1 a %1 caratteri stampabili</translation>
+    </message>
+    <message>
+        <source>The Studio template limit has been reached</source>
+        <translation>È stato raggiunto il limite dei modelli Studio</translation>
+    </message>
+    <message>
+        <source>Could not save Studio templates</source>
+        <translation>Impossibile salvare i modelli Studio</translation>
+    </message>
+    <message>
+        <source>Studio template was not found</source>
+        <translation>Modello Studio non trovato</translation>
+    </message>
+    <message>
+        <source>Could not delete Studio template</source>
+        <translation>Impossibile eliminare il modello Studio</translation>
+    </message>
+    <message>
+        <source>A Studio loopback is already running</source>
+        <translation>È già in esecuzione un loopback Studio</translation>
+    </message>
+    <message>
+        <source>Wait for the current Studio operation to finish</source>
+        <translation>Attendi il completamento dell'operazione Studio corrente</translation>
+    </message>
+    <message>
+        <source>Prepare an SSTV image before loopback</source>
+        <translation>Prepara un'immagine SSTV prima del loopback</translation>
+    </message>
+    <message>
+        <source>Encoding and decoding native PCM</source>
+        <translation>Codifica e decodifica del PCM nativo</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <source>Cannot start Studio loopback: %1</source>
+        <translation>Impossibile avviare il loopback Studio: %1</translation>
+    </message>
+    <message>
+        <source>Cannot start Studio loopback unexpectedly</source>
+        <translation>Impossibile avviare il loopback Studio a causa di un errore imprevisto</translation>
+    </message>
+    <message>
+        <source>Cancelling loopback</source>
+        <translation>Annullamento del loopback</translation>
+    </message>
+    <message>
+        <source>Template overlay must be a bounded object</source>
+        <translation>La sovrapposizione del modello deve essere un oggetto limitato</translation>
+    </message>
+    <message>
+        <source>Studio template exceeds the storage bound</source>
+        <translation>Il modello Studio supera il limite di archiviazione</translation>
+    </message>
+    <message>
+        <source>Studio template contains an out-of-range image control</source>
+        <translation>Il modello Studio contiene un controllo immagine fuori intervallo</translation>
+    </message>
+    <message>
+        <source>Studio loopback input is unavailable</source>
+        <translation>L'ingresso del loopback Studio non è disponibile</translation>
+    </message>
+    <message>
+        <source>Selected SSTV loopback mode is not executable</source>
+        <translation>La modalità loopback SSTV selezionata non è eseguibile</translation>
+    </message>
+    <message>
+        <source>Native SSTV receiver could not start for loopback</source>
+        <translation>Impossibile avviare il ricevitore SSTV nativo per il loopback</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback encoder made no progress</source>
+        <translation>L'encoder del loopback SSTV nativo non ha prodotto avanzamenti</translation>
+    </message>
+    <message>
+        <source>Native SSTV receiver rejected loopback PCM</source>
+        <translation>Il ricevitore SSTV nativo ha rifiutato il PCM del loopback</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback decoder timed out</source>
+        <translation>Timeout del decoder del loopback SSTV nativo</translation>
+    </message>
+    <message>
+        <source>Native SSTV receiver rejected loopback flush PCM</source>
+        <translation>Il ricevitore SSTV nativo ha rifiutato il PCM di svuotamento del loopback</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback did not produce a complete image</source>
+        <translation>Il loopback SSTV nativo non ha prodotto un'immagine completa</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback image is invalid</source>
+        <translation>L'immagine del loopback SSTV nativo non è valida</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback failed: %1</source>
+        <translation>Loopback SSTV nativo non riuscito: %1</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback failed unexpectedly</source>
+        <translation>Il loopback SSTV nativo non è riuscito a causa di un errore imprevisto</translation>
+    </message>
+    <message>
+        <source>Cancelled</source>
+        <translation>Annullato</translation>
+    </message>
+    <message>
+        <source>Native SSTV loopback produced no image</source>
+        <translation>Il loopback SSTV nativo non ha prodotto immagini</translation>
+    </message>
+    <message>
+        <source>Complete</source>
+        <translation>Completato</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::sstv::hamdrm::HamDrmController</name>
+    <message>
+        <location filename="../src/sstv/digital/HamDrmController.cpp" line="+61"/>
+        <source>Native bounded JPEG2000 decode and lossless encode are linked</source>
+        <translation>La decodifica JPEG2000 nativa entro i limiti e la codifica senza perdita sono collegate</translation>
+    </message>
+    <message>
+        <location line="+163"/>
+        <source>Unknown HAMDRM profile ID; profile selection was unchanged</source>
+        <translation>ID profilo HAMDRM sconosciuto; la selezione del profilo non è cambiata</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Cancel the active HAMDRM operation before changing profile</source>
+        <translation>Annulla l&apos;operazione HAMDRM attiva prima di cambiare profilo</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <location line="+497"/>
+        <source>Complete HAMDRM waveform RX backend is not connected</source>
+        <translation>Il backend RX completo per la forma d&apos;onda HAMDRM non è connesso</translation>
+    </message>
+    <message>
+        <location line="-491"/>
+        <source>Injected HAMDRM RX component is not a complete waveform backend</source>
+        <translation>Il componente RX HAMDRM fornito non è un backend completo per la forma d&apos;onda</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>HAMDRM waveform RX capability probe failed</source>
+        <translation>Verifica delle funzionalità RX della forma d&apos;onda HAMDRM non riuscita</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <location line="+698"/>
+        <source>Complete HAMDRM waveform TX backend is not connected</source>
+        <translation>Il backend TX completo per la forma d&apos;onda HAMDRM non è connesso</translation>
+    </message>
+    <message>
+        <location line="-692"/>
+        <source>Injected HAMDRM TX component is not a complete waveform backend</source>
+        <translation>Il componente TX HAMDRM fornito non è un backend completo per la forma d&apos;onda</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>HAMDRM waveform TX capability probe failed</source>
+        <translation>Verifica delle funzionalità TX della forma d&apos;onda HAMDRM non riuscita</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>JPEG2000 codec adapter is not connected</source>
+        <translation>L&apos;adattatore codec JPEG2000 non è connesso</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Injected JPEG2000 component exposes no operational direction</source>
+        <translation>Il componente JPEG2000 fornito non espone alcuna direzione operativa</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>JPEG2000 capability probe failed</source>
+        <translation>Verifica delle funzionalità JPEG2000 non riuscita</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>complete waveform RX</source>
+        <translation>forma d&apos;onda RX completa</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>complete waveform TX</source>
+        <translation>forma d&apos;onda TX completa</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>JPEG2000 decode adapter</source>
+        <translation>adattatore di decodifica JPEG2000</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>JPEG2000 encode adapter</source>
+        <translation>adattatore di codifica JPEG2000</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>configured partial-object store</source>
+        <translation>archivio configurato degli oggetti parziali</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>HAMDRM application core provides 72 named profiles, bounded MOT/BSR handling and structural image validation.</source>
+        <translation>Il nucleo applicativo HAMDRM offre 72 profili denominati, gestione MOT/BSR entro limiti controllati e convalida strutturale delle immagini.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>All injected adapters report operational; this is not an on-air interoperability claim.</source>
+        <translation>Tutti gli adattatori forniti risultano operativi; ciò non costituisce una dichiarazione di interoperabilità via radio.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Not connected: %1. RF start remains blocked for each missing waveform direction.</source>
+        <translation>Non connesso: %1. L&apos;avvio RF rimane bloccato per ogni direzione di forma d&apos;onda mancante.</translation>
+    </message>
+    <message>
+        <location line="+43"/>
+        <source>Unavailable</source>
+        <translation>Non disponibile</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Idle</source>
+        <translation>Inattivo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Starting</source>
+        <translation>Avvio</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Receiving</source>
+        <translation>Ricezione</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Transmitting</source>
+        <translation>Trasmissione</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cancelling</source>
+        <translation>Annullamento</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Completed</source>
+        <translation>Completato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cancelled</source>
+        <translation>Annullato</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Unknown</source>
+        <translation>Sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+189"/>
+        <source> … and %1 more</source>
+        <translation> … e altre %1 voci</translation>
+    </message>
+    <message>
+        <location line="+147"/>
+        <location line="+219"/>
+        <source>Another HAMDRM RX/TX operation is active</source>
+        <translation>Un&apos;altra operazione RX/TX HAMDRM è attiva</translation>
+    </message>
+    <message>
+        <location line="-206"/>
+        <location line="+219"/>
+        <source>Selected HAMDRM profile is invalid</source>
+        <translation>Il profilo HAMDRM selezionato non è valido</translation>
+    </message>
+    <message>
+        <location line="+65"/>
+        <source>No active HAMDRM RX operation to cancel</source>
+        <translation>Nessuna operazione RX HAMDRM attiva da annullare</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>No active HAMDRM TX operation to cancel</source>
+        <translation>Nessuna operazione TX HAMDRM attiva da annullare</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>No active HAMDRM operation to cancel</source>
+        <translation>Nessuna operazione HAMDRM da annullare</translation>
+    </message>
+    <message>
+        <location line="+309"/>
+        <source>Unknown HAMDRM transport ID</source>
+        <translation>ID trasporto HAMDRM sconosciuto</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Selected HAMDRM object has insufficient partial metadata for BSR</source>
+        <translation>L&apos;oggetto HAMDRM selezionato non contiene metadati parziali sufficienti per BSR</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Selected HAMDRM object has no missing body segments</source>
+        <translation>L&apos;oggetto HAMDRM selezionato non presenta segmenti del corpo mancanti</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>HAMDRM BSR profile or segment size is invalid</source>
+        <translation>Il profilo HAMDRM BSR o la dimensione del segmento non è valida</translation>
+    </message>
+    <message>
+        <location line="+41"/>
+        <source>HAMDRM partial-object store is not configured</source>
+        <translation>L&apos;archivio degli oggetti parziali HAMDRM non è configurato</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <location line="+43"/>
+        <source>HAMDRM transport ID is outside 0…65535</source>
+        <translation>L&apos;ID di trasporto HAMDRM è fuori dall&apos;intervallo 0…65535</translation>
+    </message>
+    <message>
+        <location line="-39"/>
+        <source>HAMDRM transport ID is already present in the inbox</source>
+        <translation>L&apos;ID di trasporto HAMDRM è già presente nella posta in arrivo</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>HAMDRM inbox object bound is exhausted</source>
+        <translation>È stato raggiunto il limite di oggetti nella posta in arrivo HAMDRM</translation>
+    </message>
+    <message>
+        <location line="+110"/>
+        <source>HAMDRM waveform RX backend reported invalid progress</source>
+        <translation>Il backend RX della forma d&apos;onda HAMDRM ha segnalato un avanzamento non valido</translation>
+    </message>
+    <message>
+        <location line="+52"/>
+        <source>HAMDRM waveform TX backend reported invalid progress</source>
+        <translation>Il backend TX della forma d&apos;onda HAMDRM ha segnalato un avanzamento non valido</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::sstv::SstvDiagnosticsController</name>
+    <message>
+        <source>Choose a local .json destination.</source>
+        <translation>Scegli una destinazione .json locale.</translation>
+    </message>
+    <message>
+        <source>The selected destination is not safe.</source>
+        <translation>La destinazione selezionata non è sicura.</translation>
+    </message>
+    <message>
+        <source>A report already exists at that destination.</source>
+        <translation>In quella destinazione esiste già un rapporto.</translation>
+    </message>
+    <message>
+        <source>The diagnostic report could not be opened for writing.</source>
+        <translation>Impossibile aprire il rapporto diagnostico in scrittura.</translation>
+    </message>
+    <message>
+        <source>The diagnostic report could not be written.</source>
+        <translation>Impossibile scrivere il rapporto diagnostico.</translation>
+    </message>
+    <message>
+        <source>The diagnostic report could not be committed atomically.</source>
+        <translation>Impossibile pubblicare atomicamente il rapporto diagnostico.</translation>
+    </message>
+    <message>
+        <source>The bounded diagnostic report exceeded its size limit.</source>
+        <translation>Il rapporto diagnostico limitato ha superato il limite di dimensione.</translation>
+    </message>
+    <message>
+        <source>The diagnostic export failed.</source>
+        <translation>Esportazione della diagnostica non riuscita.</translation>
+    </message>
+    <message>
+        <source>Diagnostics ready</source>
+        <translation>Diagnostica pronta</translation>
+    </message>
+    <message>
+        <source>The diagnostics input contains an unsupported section.</source>
+        <translation>L'input della diagnostica contiene una sezione non supportata.</translation>
+    </message>
+    <message>
+        <source>Diagnostics are not available.</source>
+        <translation>La diagnostica non è disponibile.</translation>
+    </message>
+    <message>
+        <source>A diagnostic export is already running.</source>
+        <translation>È già in corso un'esportazione diagnostica.</translation>
+    </message>
+    <message>
+        <source>Exporting diagnostic report…</source>
+        <translation>Esportazione del rapporto diagnostico…</translation>
+    </message>
+    <message>
+        <source>Diagnostic events cleared</source>
+        <translation>Eventi diagnostici cancellati</translation>
+    </message>
+    <message>
+        <source>The SSTV test tone is unavailable in this build.</source>
+        <translation>Il tono di prova SSTV non è disponibile in questa build.</translation>
+    </message>
+    <message>
+        <source>Test tone requested</source>
+        <translation>Tono di prova richiesto</translation>
+    </message>
+    <message>
+        <source>Diagnostic report exported safely</source>
+        <translation>Rapporto diagnostico esportato in sicurezza</translation>
+    </message>
+    <message>
+        <source>Diagnostic export failed</source>
+        <translation>Esportazione diagnostica non riuscita</translation>
+    </message>
+</context>
+<context>
+    <name>decodium::sstv::SstvRxAudioJobController</name>
+    <message>
+        <source>A private retained-audio re-decode file could not be created</source>
+        <translation>Impossibile creare un file privato per la ridecodifica dell'audio conservato</translation>
+    </message>
+    <message>
+        <source>Raw SSTV audio requires an absolute local .wav destination</source>
+        <translation>L'audio SSTV grezzo richiede una destinazione .wav locale assoluta</translation>
+    </message>
+    <message>
+        <source>No retained SSTV audio is available</source>
+        <translation>Nessun audio SSTV conservato è disponibile</translation>
+    </message>
+    <message>
+        <source>Unknown retained SSTV audio job failure</source>
+        <translation>Errore sconosciuto dell'operazione sull'audio SSTV conservato</translation>
+    </message>
+    <message>
+        <source>Idle</source>
+        <translation>Inattivo</translation>
+    </message>
+    <message>
+        <source>Preparing re-decode</source>
+        <translation>Preparazione della ridecodifica</translation>
+    </message>
+    <message>
+        <source>Saving raw audio</source>
+        <translation>Salvataggio dell'audio grezzo</translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation>Completato</translation>
+    </message>
+    <message>
+        <source>Cancelled</source>
+        <translation>Annullato</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <source>Shutdown</source>
+        <translation>Arrestata</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Sconosciuto</translation>
+    </message>
+    <message>
+        <source>Could not start the retained SSTV audio worker</source>
+        <translation>Impossibile avviare il worker dell'audio SSTV conservato</translation>
+    </message>
+    <message>
+        <source>The retained SSTV audio job failed</source>
+        <translation>L'operazione sull'audio SSTV conservato non è riuscita</translation>
     </message>
 </context>
 </TS>

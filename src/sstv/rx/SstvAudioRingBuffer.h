@@ -23,6 +23,7 @@ enum class SstvAudioSourceKind : std::uint8_t
     Tci,
     WebSdr,
     RtlSdr,
+    LegacyBackend,
     Replay,
 };
 

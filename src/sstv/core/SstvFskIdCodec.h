@@ -17,8 +17,8 @@ namespace decodium::sstv {
 // This is a clean-room, behaviour-only implementation. The audited behaviour
 // is recorded in docs/sstv/UPSTREAM_PROVENANCE.md. In particular, the codec
 // does not contain the detector, oscillator, or application state of any
-// upstream program. A future detector supplies already classified bits or
-// symbols; a future oscillator consumes the returned tone plan.
+// upstream program. Decodium's native streaming detector supplies classified
+// symbols and its native TX stream consumes the returned tone plan.
 class SstvFskIdCodec final
 {
 public:

@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QNetworkRequest>
 #include <QObject>
+#include <QPointer>
 #include <QStringList>
 #include <QVariantList>
 #include <QVariantMap>
@@ -187,7 +188,10 @@ private:
                                                 double nominalFrequencyHz);
 
     QNetworkAccessManager* m_network {nullptr};
-    QNetworkReply* m_reply {nullptr};
+    // A reply may be destroyed by QNetworkAccessManager while application
+    // shutdown is already draining deferred deletes. Keep a guarded pointer
+    // so the service destructor never dereferences a stale reply.
+    QPointer<QNetworkReply> m_reply;
     QTimer* m_timer {nullptr};
     RotatorService* m_rotator {nullptr};
     QVector<SatelliteRecord> m_records;

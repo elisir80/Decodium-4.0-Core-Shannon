@@ -8,6 +8,9 @@
 #include <qmath.h>
 #include <QDebug>
 
+#include <algorithm>
+#include <limits>
+
 #include "Audio/AudioDevice.hpp"
 
 #include "moc_soundout.cpp"
@@ -228,10 +231,167 @@ SoundOutput::~SoundOutput()
   m_streamDevice.clear();
   m_sourceDevice.clear();
   m_coreAudioKeepAlive = false;
+  clearTrackedPlayback();
   retireStream(QStringLiteral("dtor"));
 }
 
-bool SoundOutput::checkStream() const
+bool SoundOutput::restartTrackedPlayback(QIODevice* source,
+                                         quint64 sessionId,
+                                         quint64 expectedFrames)
+{
+  if (m_trackedSessionId != 0U) {
+    emitErrorMessage(tr("Audio TX ownership conflict: a second tracked playback was requested before the active session detached."));
+    return false;
+  }
+  clearTrackedPlayback();
+  m_trackedSessionId = sessionId;
+  m_trackedExpectedFrames = expectedFrames;
+  m_trackedSourceDevice = source;
+  if (!source || sessionId == 0 || expectedFrames == 0) {
+    emitErrorMessage(tr("Audio TX tracked playback requires a source, session id and frame count."));
+    return false;
+  }
+
+  const bool started = restartImpl(source);
+  m_trackedStarted = started;
+  return started && !m_trackedFailed;
+}
+
+SoundOutputPlaybackStatus SoundOutput::trackedPlaybackStatus(
+    quint64 sessionId) const
+{
+  SoundOutputPlaybackStatus result;
+  result.sessionId = sessionId;
+  if (sessionId == 0 || sessionId != m_trackedSessionId) {
+    return result;
+  }
+
+  result.valid = true;
+  result.expectedFrames = m_trackedExpectedFrames;
+  result.leadingQueuedFrames = m_trackedLeadingQueuedFrames;
+  result.underruns = m_trackedUnderruns;
+  result.started = m_trackedStarted;
+  result.failed = m_trackedFailed;
+  result.detail = m_trackedFailureDetail;
+
+  if (!m_stream || !m_trackedStarted) {
+    return result;
+  }
+
+  const int bytesPerFrame = qMax(1, m_stream->format().bytesPerFrame());
+  if (m_trackedSourceDevice) {
+    const qint64 sourceBytes = qMax<qint64>(0, m_trackedSourceDevice->pos());
+    result.sourceFrames = static_cast<quint64>(
+        sourceBytes / static_cast<qint64>(bytesPerFrame));
+  }
+  result.pendingFrames = static_cast<quint64>(
+      (m_pendingWrite.size() + bytesPerFrame - 1) / bytesPerFrame);
+
+  const qint64 processedUs = m_stream->processedUSecs();
+  const qint64 deltaUs = qMax<qint64>(
+      0, processedUs - m_trackedProcessedBaselineUs);
+  const quint64 sampleRate = static_cast<quint64>(
+      qMax(0, m_stream->format().sampleRate()));
+  quint64 backendFrames = 0;
+  if (sampleRate != 0U) {
+    const quint64 delta = static_cast<quint64>(deltaUs);
+    if (delta > std::numeric_limits<quint64>::max() / sampleRate) {
+      backendFrames = std::numeric_limits<quint64>::max();
+    } else {
+      backendFrames = (delta * sampleRate) / 1'000'000U;
+    }
+  }
+  result.processedFrames = backendFrames > m_trackedLeadingQueuedFrames
+      ? backendFrames - m_trackedLeadingQueuedFrames : 0U;
+  result.sinkIdle = m_stream->state() == QAudio::IdleState;
+  result.drained = !result.failed
+      && result.expectedFrames != 0U
+      && result.sourceFrames >= result.expectedFrames
+      && m_pendingWrite.isEmpty()
+      // IdleState is Qt's explicit end-of-queue acknowledgement. Do not turn
+      // processedUSecs() progress alone into completion: an Active sink can
+      // still retain a backend tail even after accepting the final frame.
+      && result.sinkIdle;
+  return result;
+}
+
+bool SoundOutput::finishTrackedPlayback(quint64 sessionId)
+{
+  const SoundOutputPlaybackStatus playback = trackedPlaybackStatus(sessionId);
+  if (!playback.valid || !playback.drained) {
+    return false;
+  }
+  finishPlayback();
+  clearTrackedPlayback();
+  return true;
+}
+
+bool SoundOutput::stopTrackedPlayback(quint64 sessionId)
+{
+  if (sessionId == 0 || sessionId != m_trackedSessionId) {
+    return false;
+  }
+  stop();
+  clearTrackedPlayback();
+  return true;
+}
+
+void SoundOutput::emitErrorMessage(QString const& message)
+{
+  if (m_trackedSessionId != 0U) {
+    m_trackedFailed = true;
+    if (m_trackedFailureDetail.isEmpty()) {
+      m_trackedFailureDetail = message;
+    }
+    Q_EMIT playbackError(m_trackedSessionId, message);
+  }
+  Q_EMIT error(message);
+}
+
+void SoundOutput::emitUnderrunMessage(QString const& message)
+{
+  if (m_trackedSessionId != 0U) {
+    if (m_trackedUnderruns != std::numeric_limits<quint64>::max()) {
+      ++m_trackedUnderruns;
+    }
+    Q_EMIT playbackUnderrun(m_trackedSessionId, message);
+  }
+  Q_EMIT status(message);
+}
+
+void SoundOutput::armTrackedPlaybackClock(bool includeQueuedAudio)
+{
+  if (m_trackedSessionId == 0U || !m_stream) {
+    return;
+  }
+  m_trackedProcessedBaselineUs = m_stream->processedUSecs();
+  m_trackedLeadingQueuedFrames = 0U;
+  if (!includeQueuedAudio) {
+    return;
+  }
+
+  const int bytesPerFrame = qMax(1, m_stream->format().bytesPerFrame());
+  const qint64 queuedBytes = qMax<qint64>(
+      0, static_cast<qint64>(m_stream->bufferSize())
+             - static_cast<qint64>(m_stream->bytesFree()));
+  m_trackedLeadingQueuedFrames = static_cast<quint64>(
+      (queuedBytes + bytesPerFrame - 1) / bytesPerFrame);
+}
+
+void SoundOutput::clearTrackedPlayback() noexcept
+{
+  m_trackedSessionId = 0U;
+  m_trackedExpectedFrames = 0U;
+  m_trackedLeadingQueuedFrames = 0U;
+  m_trackedUnderruns = 0U;
+  m_trackedProcessedBaselineUs = 0;
+  m_trackedSourceDevice.clear();
+  m_trackedStarted = false;
+  m_trackedFailed = false;
+  m_trackedFailureDetail.clear();
+}
+
+bool SoundOutput::checkStream()
 {
   bool result {false};
   Q_ASSERT_X(m_stream, "SoundOutput", "programming error");
@@ -245,18 +405,20 @@ bool SoundOutput::checkStream() const
         .arg(m_stream->bytesFree());
     switch (m_stream->error()) {
     case QAudio::OpenError:
-      Q_EMIT error(tr("Audio TX output open error: Qt could not open the selected output device. %1").arg(context));
+      emitErrorMessage(tr("Audio TX output open error: Qt could not open the selected output device. %1").arg(context));
       break;
     case QAudio::IOError:
-      Q_EMIT error(tr("Audio TX output write error: Qt reported an I/O failure while writing samples. %1").arg(context));
+      emitErrorMessage(tr("Audio TX output write error: Qt reported an I/O failure while writing samples. %1").arg(context));
       break;
     case QAudio::UnderrunError:
-      // Keep underruns non-fatal and report status.
-      Q_EMIT status(tr("Audio TX output underrun: the audio sink fell behind but will continue. %1").arg(context));
+      // Existing short weak-signal transmissions retain their non-fatal status
+      // behavior. A tracked long transmission also receives an immutable
+      // session-scoped event so its coordinator can fail closed.
+      emitUnderrunMessage(tr("Audio TX output underrun: the audio sink fell behind but will continue. %1").arg(context));
       result = true;
       break;
     case QAudio::FatalError:
-      Q_EMIT error(tr("Audio TX output fatal error: the selected output device is not usable now. %1").arg(context));
+      emitErrorMessage(tr("Audio TX output fatal error: the selected output device is not usable now. %1").arg(context));
       break;
     case QAudio::NoError:
       result = true;
@@ -283,6 +445,19 @@ void SoundOutput::setFormat(QAudioDevice const& device, unsigned channels, int f
 
 void SoundOutput::restart(QIODevice* source)
 {
+  if (m_trackedSessionId != 0U) {
+    emitErrorMessage(tr("Audio TX ownership conflict: another transmission tried to replace an active tracked playback."));
+    return;
+  }
+  static_cast<void>(restartImpl(source));
+}
+
+bool SoundOutput::restartImpl(QIODevice* source)
+{
+  if (!source) {
+    emitErrorMessage(tr("Audio TX output start failed: the generated source is null."));
+    return false;
+  }
   QElapsedTimer totalTimer;
   totalTimer.start();
   qint64 retireMs = 0;
@@ -308,6 +483,7 @@ void SoundOutput::restart(QIODevice* source)
     QElapsedTimer phaseTimer;
     phaseTimer.start();
     m_coreAudioKeepAlive = false;
+    armTrackedPlaybackClock(true);
     m_sourceDevice = source;
     m_stream->setVolume(static_cast<float>(m_volume));
     error_ = false;
@@ -332,7 +508,7 @@ void SoundOutput::restart(QIODevice* source)
                       << "dev=" << m_device.description();
     Q_EMIT status(QString("after_start: state=%1 err=%2 bufSize=%3 reuse=1")
       .arg(m_stream->state()).arg(m_stream->error()).arg(m_stream->bufferSize()));
-    return;
+    return !m_trackedFailed;
   }
   m_coreAudioKeepAlive = false;
 #endif
@@ -356,11 +532,11 @@ void SoundOutput::restart(QIODevice* source)
                       .arg(m_device.description()));
 
     if (!format.isValid()) {
-      Q_EMIT error(tr("Audio TX format invalid: device=\"%1\", requested=%2, preferred=%3")
-                   .arg(m_device.description(),
-                        formatSummary(format),
-                        formatSummary(preferred)));
-      return;
+      emitErrorMessage(tr("Audio TX format invalid: device=\"%1\", requested=%2, preferred=%3")
+                         .arg(m_device.description(),
+                              formatSummary(format),
+                              formatSummary(preferred)));
+      return false;
     }
     if (!m_device.isFormatSupported(format)) {
       Q_EMIT status(tr("TX audio: device does not natively support %1 Hz / Int16 "
@@ -375,7 +551,9 @@ void SoundOutput::restart(QIODevice* source)
     m_stream.reset(new QAudioSink(m_device, format));
     createMs = createTimer.elapsed();
     m_openDeviceId = m_device.id();
-    checkStream();
+    if (!checkStream()) {
+      return false;
+    }
     m_stream->setVolume(static_cast<float>(m_volume));
     error_ = false;
     Q_EMIT status(QStringLiteral("TX audio sink opened fmt=%1 dev=%2")
@@ -385,16 +563,24 @@ void SoundOutput::restart(QIODevice* source)
                       << "fmt=" << formatSummary(m_stream->format())
                       << "dev=" << m_device.description();
 
+    const quint64 generation = ++m_streamGeneration;
+    QPointer<QAudioSink> const stream(m_stream.data());
     connect(m_stream.data(), &QAudioSink::stateChanged,
-            this, &SoundOutput::handleStateChanged);
+            this, [this, stream, generation](QAudio::State state) {
+      if (!stream || stream.data() != m_stream.data()
+          || generation != m_streamGeneration) {
+        return;
+      }
+      handleStateChanged(state);
+    });
   }
 
   if (!m_stream) {
     if (!error_) {
       error_ = true;
-      Q_EMIT error(tr("Audio TX output device is not configured: select an output device in Settings > Audio."));
+      emitErrorMessage(tr("Audio TX output device is not configured: select an output device in Settings > Audio."));
     }
-    return;
+    return false;
   } else {
     error_ = false;
   }
@@ -424,13 +610,14 @@ void SoundOutput::restart(QIODevice* source)
   m_streamDevice = m_stream->start();
   startMs = phaseTimer.elapsed();
   if (!m_streamDevice) {
-    Q_EMIT error(tr("Audio TX output start failed: Qt did not return a writable sink device. device=\"%1\", format=%2, state=%3, qt-error=%4")
-                 .arg(m_device.description(),
-                      formatSummary(m_stream->format()),
-                      audioStateName(m_stream->state()),
-                      audioErrorName(m_stream->error())));
-    return;
+    emitErrorMessage(tr("Audio TX output start failed: Qt did not return a writable sink device. device=\"%1\", format=%2, state=%3, qt-error=%4")
+                       .arg(m_device.description(),
+                            formatSummary(m_stream->format()),
+                            audioStateName(m_stream->state()),
+                            audioErrorName(m_stream->error())));
+    return false;
   }
+  armTrackedPlaybackClock(false);
   qInfo().noquote() << "TX SoundOutput start"
                     << "state=" << audioStateName(m_stream->state())
                     << "error=" << audioErrorName(m_stream->error())
@@ -444,8 +631,12 @@ void SoundOutput::restart(QIODevice* source)
   }
 #else
   phaseTimer.restart();
+  armTrackedPlaybackClock(false);
   m_stream->start(source);
   startMs = phaseTimer.elapsed();
+  if (!checkStream()) {
+    return false;
+  }
 #endif
   qInfo().noquote() << "[TX-TL] sound_output_restart"
                     << "total_ms=" << totalTimer.elapsed()
@@ -463,6 +654,7 @@ void SoundOutput::restart(QIODevice* source)
   // diagnostico: stato subito dopo start
   Q_EMIT status(QString("after_start: state=%1 err=%2 bufSize=%3")
     .arg(m_stream->state()).arg(m_stream->error()).arg(m_stream->bufferSize()));
+  return !m_trackedFailed;
 }
 
 void SoundOutput::suspend()
@@ -563,6 +755,7 @@ void SoundOutput::retireStream(QString const& reason)
     return;
   }
 
+  ++m_streamGeneration;
   QElapsedTimer timer;
   timer.start();
   QAudioSink *stream = m_stream.take();
@@ -648,11 +841,11 @@ void SoundOutput::pumpAudio()
       const qint64 written = m_streamDevice->write(m_pendingWrite.constData(), writable);
       if (written < 0) {
         m_pumpTimer.stop();
-        Q_EMIT error(tr("Audio TX output write error: Qt rejected buffered audio data. device=\"%1\", format=%2, state=%3, qt-error=%4")
-                     .arg(m_device.description(),
-                          formatSummary(m_stream->format()),
-                          audioStateName(m_stream->state()),
-                          audioErrorName(m_stream->error())));
+        emitErrorMessage(tr("Audio TX output write error: Qt rejected buffered audio data. device=\"%1\", format=%2, state=%3, qt-error=%4")
+                           .arg(m_device.description(),
+                                formatSummary(m_stream->format()),
+                                audioStateName(m_stream->state()),
+                                audioErrorName(m_stream->error())));
         return;
       }
 
@@ -700,8 +893,8 @@ void SoundOutput::pumpAudio()
         continue;
       }
       m_pumpTimer.stop();
-      Q_EMIT error(tr("Audio TX source read error: generated TX audio source was closed before playback completed. device=\"%1\", format=%2")
-                   .arg(m_device.description(), formatSummary(m_stream->format())));
+      emitErrorMessage(tr("Audio TX source read error: generated TX audio source was closed before playback completed. device=\"%1\", format=%2")
+                         .arg(m_device.description(), formatSummary(m_stream->format())));
       return;
     }
 
@@ -709,8 +902,8 @@ void SoundOutput::pumpAudio()
     const qint64 read = m_sourceDevice->read(chunk.data(), request);
     if (read < 0) {
       m_pumpTimer.stop();
-      Q_EMIT error(tr("Audio TX source read error: Decodium could not read generated TX audio before writing it. device=\"%1\", format=%2")
-                   .arg(m_device.description(), formatSummary(m_stream->format())));
+      emitErrorMessage(tr("Audio TX source read error: Decodium could not read generated TX audio before writing it. device=\"%1\", format=%2")
+                         .arg(m_device.description(), formatSummary(m_stream->format())));
       return;
     }
 
@@ -729,11 +922,11 @@ void SoundOutput::pumpAudio()
     const qint64 written = m_streamDevice->write(chunk.constData(), chunk.size());
     if (written < 0) {
       m_pumpTimer.stop();
-      Q_EMIT error(tr("Audio TX output write error: Qt rejected generated TX audio data. device=\"%1\", format=%2, state=%3, qt-error=%4")
-                   .arg(m_device.description(),
-                        formatSummary(m_stream->format()),
-                        audioStateName(m_stream->state()),
-                        audioErrorName(m_stream->error())));
+      emitErrorMessage(tr("Audio TX output write error: Qt rejected generated TX audio data. device=\"%1\", format=%2, state=%3, qt-error=%4")
+                         .arg(m_device.description(),
+                              formatSummary(m_stream->format()),
+                              audioStateName(m_stream->state()),
+                              audioErrorName(m_stream->error())));
       return;
     }
 
@@ -768,12 +961,31 @@ void SoundOutput::handleStateChanged(QAudio::State newState)
   switch (newState) {
   case QAudio::IdleState:
     pumpAudio();
+    if (m_trackedSessionId != 0U) {
+      const SoundOutputPlaybackStatus playback =
+          trackedPlaybackStatus(m_trackedSessionId);
+      if (!playback.drained
+          && playback.sourceFrames < playback.expectedFrames) {
+        // Idle before the complete tracked source reached the sink is a real
+        // starvation event. Normal EOF is accepted as the drain barrier.
+        if (m_stream && m_stream->error() == QAudio::UnderrunError) {
+          checkStream();
+        } else {
+          emitUnderrunMessage(tr("Audio TX output underrun: the tracked audio sink became idle before the complete session was delivered."));
+        }
+        break;
+      }
+    }
     Q_EMIT status(tr("Idle"));
     break;
   case QAudio::ActiveState:
     Q_EMIT status(tr("Sending"));
     break;
   case QAudio::SuspendedState:
+    if (m_trackedSessionId != 0U) {
+      emitErrorMessage(tr("Audio TX output suspended before the tracked session completed."));
+      break;
+    }
     Q_EMIT status(tr("Suspended"));
     break;
   case QAudio::StoppedState:
@@ -787,6 +999,8 @@ void SoundOutput::handleStateChanged(QAudio::State newState)
       Q_EMIT status(tr("Audio TX output stopped with error: device=\"%1\", state=%2")
                     .arg(m_device.description().isEmpty() ? QStringLiteral("<default output>") : m_device.description(),
                          audioStateName(newState)));
+    else if (m_trackedSessionId != 0U)
+      emitErrorMessage(tr("Audio TX output stopped before the tracked session drain was acknowledged."));
     else
       Q_EMIT status(tr("Stopped"));
     break;

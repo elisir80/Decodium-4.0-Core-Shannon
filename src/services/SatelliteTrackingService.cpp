@@ -88,11 +88,13 @@ SatelliteTrackingService::SatelliteTrackingService(QObject* parent)
 
 SatelliteTrackingService::~SatelliteTrackingService()
 {
-    if (m_reply) {
-        m_reply->abort();
-        m_reply->deleteLater();
-        m_reply = nullptr;
-    }
+    // The network manager is our QObject child and synchronously destroys any
+    // outstanding replies during the base QObject teardown.  At application
+    // shutdown the event dispatcher may already have drained a reply's
+    // deferred delete, so dereferencing it here is both unnecessary and, for
+    // some Qt network backends, unsafe.  Receiver connections are removed by
+    // QObject teardown before the child manager is deleted.
+    m_reply.clear();
 }
 
 void SatelliteTrackingService::setOfflineMode(bool offline)

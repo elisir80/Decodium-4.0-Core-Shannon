@@ -76,6 +76,10 @@ signals:
     // Full-rate signed interleaved I/Q for the RF panadapter/waterfall.  The
     // reader rate-limits this signal so display work never back-pressures USB.
     void iqSamplesReady(QVector<short> samples, int sampleRate, quint32 centerFrequencyHz);
+    // First producer-boundary relays for bounded DirectConnection consumers.
+    // Existing ready signals below retain their owner-thread queued semantics.
+    void pcmSamplesProduced(QVector<short> samples);
+    void audioSamplesProduced(QVector<short> samples, int sampleRate);
     void pcmSamplesReady(QVector<short> samples);
     void audioSamplesReady(QVector<short> samples, int sampleRate);
 

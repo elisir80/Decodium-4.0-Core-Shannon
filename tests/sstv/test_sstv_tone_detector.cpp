@@ -101,6 +101,7 @@ private Q_SLOTS:
   void trackedOffsetDisambiguatesCloselySpacedTones ();
   void overlapIndexesAndMemoryStayBounded ();
   void resetAndExternalOffsetSeedAreExplicit ();
+  void exactBoundaryResetDropsOverlapAndPreservesStreamCoordinates ();
 };
 
 void TestSstvToneDetector::validatesConfigurationAndExposesRequiredBank ()
@@ -460,6 +461,35 @@ void TestSstvToneDetector::resetAndExternalOffsetSeedAreExplicit ()
   detector.seedCommonOffset (-100.0);
   detector.clearCommonOffset ();
   QVERIFY (!detector.hasCommonOffset ());
+}
+
+void TestSstvToneDetector::exactBoundaryResetDropsOverlapAndPreservesStreamCoordinates ()
+{
+  auto config = testConfig ();
+  config.windowSamples = 120;
+  config.hopSamples = 60;
+  SstvToneDetector detector {config};
+
+  const auto first = tone (config.sampleRateHz, 1'500.0, 175);
+  QVERIFY (!detector.consume (first).empty ());
+  QVERIFY (detector.bufferedSampleCount () > 0U);
+  detector.seedCommonOffset (20.0);
+
+  constexpr std::uint64_t boundary = 10'000U;
+  detector.resetAtStreamSample (boundary, false);
+  QCOMPARE (detector.metrics ().samplesConsumed, boundary);
+  QCOMPARE (detector.bufferedSampleCount (), std::size_t {0});
+  QVERIFY (!detector.hasCommonOffset ());
+
+  const auto second = tone (config.sampleRateHz, 1'900.0, 240);
+  const auto observations = detector.consume (second);
+  QVERIFY (!observations.empty ());
+  QCOMPARE (observations.front ().sequence, std::uint64_t {0});
+  QCOMPARE (observations.front ().startSample, boundary);
+  QCOMPARE (observations.front ().centreSample,
+            boundary + config.windowSamples / 2U);
+  QCOMPARE (detector.metrics ().samplesConsumed,
+            boundary + static_cast<std::uint64_t> (second.size ()));
 }
 
 QTEST_APPLESS_MAIN (TestSstvToneDetector)

@@ -16,6 +16,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#if DECODIUM_HAS_SSTV
+#include <QImage>
+#include <QQuickImageProvider>
+#endif
 #include <QQuickGraphicsConfiguration>
 #include <QQuickStyle>
 #include <QQuickWindow>
@@ -104,6 +108,11 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #include "Detector/FT4DecodeWorker.hpp"
 #include "Detector/FT8DecodeWorker.hpp"
 #include "lib/init_random_seed.h"
+#if DECODIUM_HAS_SSTV
+#include "src/sstv/image/SstvImageFrame.h"
+#include "src/sstv/integration/SstvStudioController.h"
+#include "src/sstv/models/SstvThumbnailProvider.h"
+#endif
 
 static void L(const char* msg) {
     QString logPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)
@@ -138,6 +147,112 @@ static QString firstInstalledFontFamily(QStringList const& candidates)
     }
     return families.isEmpty() ? QString{} : families.first();
 }
+
+#if DECODIUM_HAS_SSTV
+// Qt Quick owns this provider through QQmlEngine.  ForceAsynchronousImageLoading
+// guarantees that the coherent native RGB snapshot is copied into QImage away
+// from the GUI thread.  DecodiumBridge is intentionally constructed before the
+// engine and destroyed after it, so this non-owning pointer remains valid while
+// an asynchronous image request can exist.
+class DecodiumSstvImageProvider final : public QQuickImageProvider
+{
+public:
+    explicit DecodiumSstvImageProvider(const DecodiumBridge* bridge)
+        : QQuickImageProvider(QQuickImageProvider::Image,
+                              QQuickImageProvider::ForceAsynchronousImageLoading)
+        , m_bridge(bridge)
+    {
+    }
+
+    QImage requestImage(const QString& id,
+                        QSize* size,
+                        const QSize& requestedSize) override
+    {
+        Q_UNUSED(requestedSize)
+
+        if (size) {
+            *size = {};
+        }
+        if (id.startsWith(QStringLiteral("tx-source/"))
+            || id.startsWith(QStringLiteral("tx-prepared/"))
+            || id.startsWith(QStringLiteral("tx-loopback/"))) {
+            const bool prepared
+                = id.startsWith(QStringLiteral("tx-prepared/"));
+            const bool loopback
+                = id.startsWith(QStringLiteral("tx-loopback/"));
+            std::shared_ptr<const QImage> studioImage;
+            if (m_bridge) {
+                if (loopback) {
+                    const auto* const studio = qobject_cast<
+                        const decodium::sstv::SstvStudioController*>(
+                            m_bridge->sstvStudio());
+                    studioImage = studio ? studio->loopbackSnapshot()
+                                         : std::shared_ptr<const QImage> {};
+                } else {
+                    studioImage = prepared
+                        ? m_bridge->sstvTxPreparedImageSnapshot()
+                        : m_bridge->sstvTxSourceImageSnapshot();
+                }
+            }
+            if (!studioImage || studioImage->isNull()) {
+                return {};
+            }
+            if (size) {
+                *size = studioImage->size();
+            }
+            // QImage is implicitly shared.  The provider returns an immutable
+            // snapshot without a deep copy; detach can only occur in a later
+            // consumer that explicitly writes its local value.
+            return *studioImage;
+        }
+
+        const auto snapshot = m_bridge
+            ? m_bridge->sstvRxImageSnapshot()
+            : std::shared_ptr<const decodium::sstv::SstvImageSnapshot> {};
+        if (!snapshot || snapshot->width == 0U || snapshot->height == 0U
+            || snapshot->width > decodium::sstv::SstvImageFrame::kMaximumDimension
+            || snapshot->height > decodium::sstv::SstvImageFrame::kMaximumDimension) {
+            return {};
+        }
+
+        const std::size_t width = snapshot->width;
+        const std::size_t height = snapshot->height;
+        if (width > decodium::sstv::SstvImageFrame::kMaximumPixels / height
+            || snapshot->pixels.size() != width * height) {
+            return {};
+        }
+
+        QImage image(static_cast<int>(snapshot->width),
+                     static_cast<int>(snapshot->height),
+                     QImage::Format_RGB888);
+        if (image.isNull()) {
+            return {};
+        }
+        // QImage rows may include alignment padding.  Initialise the complete
+        // allocation before filling RGB pixels so the render upload never
+        // observes indeterminate padding bytes.
+        image.fill(Qt::black);
+
+        for (std::size_t y = 0U; y < height; ++y) {
+            uchar* destination = image.scanLine(static_cast<int>(y));
+            const decodium::sstv::SstvRgbPixel* source =
+                snapshot->pixels.data() + (y * width);
+            for (std::size_t x = 0U; x < width; ++x) {
+                destination[(x * 3U) + 0U] = source[x].red;
+                destination[(x * 3U) + 1U] = source[x].green;
+                destination[(x * 3U) + 2U] = source[x].blue;
+            }
+        }
+        if (size) {
+            *size = image.size();
+        }
+        return image;
+    }
+
+private:
+    const DecodiumBridge* const m_bridge;
+};
+#endif
 
 static std::atomic_bool g_shuttingDown {false};
 
@@ -3676,6 +3791,18 @@ int main(int argc, char* argv[])
 
     QQmlApplicationEngine engine;
     L("engine OK");
+#if DECODIUM_HAS_SSTV
+    engine.addImageProvider(QStringLiteral("decodium-sstv"),
+                            new DecodiumSstvImageProvider(&bridge));
+    // QQmlEngine owns both providers. The gallery provider's destructor
+    // cancels responses and joins its bounded decode worker; the bridge keeps
+    // only a QPointer and is constructed before/destroyed after this engine.
+    auto* sstvThumbnailProvider
+        = new decodium::sstv::SstvThumbnailProvider();
+    bridge.setSstvThumbnailProvider(sstvThumbnailProvider);
+    engine.addImageProvider(QStringLiteral("decodium-sstv-gallery"),
+                            sstvThumbnailProvider);
+#endif
     engine.setOutputWarningsToStandardError(true);  // show QML errors on stderr for debugging
     QStringList qmlWarningMessages;
     QObject::connect(&engine, &QQmlEngine::warnings, &app,

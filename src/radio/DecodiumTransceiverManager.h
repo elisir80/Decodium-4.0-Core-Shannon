@@ -252,6 +252,9 @@ signals:
     void hrdStrictRadioMatchChanged();
     void errorOccurred(const QString& msg);
     void statusUpdate(const QString& msg);
+    // First producer boundary. Only bounded, DirectConnection consumers may
+    // attach here; ordinary UI/decoder consumers use tciPcmSamplesReady.
+    void tciPcmSamplesProduced(const QVector<short>& samples);
     void tciPcmSamplesReady(const QVector<short>& samples);
     void tciModActiveChanged(bool active);
 

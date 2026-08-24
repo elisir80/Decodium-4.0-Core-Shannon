@@ -102,6 +102,7 @@ public:
     double  sMeterDbm() const { return m_state.sMeterDbm(); }
     QString status() const { return m_status; }
     int     txAudioLeadMs() const { return m_state.txAudioLeadMs; }
+    quint32 streamId() const { return m_remoteStreamId; }
     QString peerAddress() const {
         return m_peer.isNull() ? QString()
                                : (m_peer.toString() + QLatin1Char(':') + QString::number(m_peerPort));
@@ -116,6 +117,13 @@ public:
 
 signals:
     void statusChanged();
+    void remoteStreamChanged(quint32 streamId);
+    // Emitted synchronously at authenticated packet decode, before the
+    // ordinary RadioLink::rxAudio delivery. Only bounded DirectConnection
+    // consumers may attach here.
+    void rxAudioProduced(const QVector<short>& samples,
+                         quint64 captureTsNs,
+                         quint32 streamId);
 
 private slots:
     void onDatagrams();
@@ -124,6 +132,7 @@ private slots:
 private:
     void setStatus(const QString& s);
     void setLinked(bool v);
+    void setRemoteStreamId(quint32 streamId);
     void sendCommand(const decoport::Context& cmd, quint64 whenNs);
     void sendBare(decoport::Type type);
 
@@ -139,6 +148,7 @@ private:
     qint64  m_lastContextMs {0};
     quint32 m_commandSeq {0};
     quint32 m_txAudioSeq {0};
+    quint32 m_remoteStreamId {0};
 
     // Diagnosi: buchi nella sequenza dell'audio ricevuto.
     quint32 m_lastRxSeq {0};

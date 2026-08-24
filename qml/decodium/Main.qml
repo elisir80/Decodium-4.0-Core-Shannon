@@ -1692,7 +1692,35 @@ ApplicationWindow {
             shutdownLoader(callDialogLoader)
         if (typeof historyDialogLoader !== "undefined")
             shutdownLoader(historyDialogLoader)
+        if (typeof sstvWorkspaceLoader !== "undefined")
+            shutdownLoader(sstvWorkspaceLoader)
     }
+
+    // Native SSTV is loaded only on first use. The C++ facade exists in the
+    // Decodium process, but its RX worker remains stopped until the user starts
+    // reception from this workspace.
+    function openSstvWorkspace() {
+        sstvWorkspaceLoader.active = true
+        if (sstvWorkspaceLoader.item) {
+            sstvWorkspaceLoader.item.show()
+            sstvWorkspaceLoader.item.raise()
+            sstvWorkspaceLoader.item.requestActivate()
+        }
+    }
+
+    Loader {
+        id: sstvWorkspaceLoader
+        active: false
+        asynchronous: true
+        source: "components/sstv/SstvWorkspace.qml"
+        onLoaded: {
+            item.engine = bridge
+            item.show()
+            item.raise()
+            item.requestActivate()
+        }
+    }
+
     // 1.0.571 - finestra DecoPort, creata alla prima apertura.
     function openDecoPortWindow() {
         decoPortWindowLoader.active = true
@@ -12334,6 +12362,24 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     radius: 3
                     color: "transparent"
                 }
+            }
+        }
+
+        MenuItem {
+            text: qsTr("SSTV - image radio...")
+            icon.source: ""
+            enabled: bridge.sstvAvailable
+            onTriggered: mainWindow.openSstvWorkspace()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: parent.enabled ? secondaryCyan : textSecondary
+                leftPadding: 10
             }
         }
 

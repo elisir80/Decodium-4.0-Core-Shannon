@@ -105,6 +105,14 @@ public:
   // established radio offset across a discontinuity only by opting in.
   void reset (bool preserveCommonOffset = false) noexcept;
 
+  // Drops overlap while retaining an absolute stream coordinate.  This is
+  // used at an exact protocol boundary (for example, the first sample after
+  // a completed image) so a following leader cannot share an FFT window with
+  // the previous frame.  It is deliberately distinct from reset(), whose
+  // public contract starts a new zero-based stream.
+  void resetAtStreamSample (std::uint64_t nextSample,
+                            bool preserveCommonOffset = false) noexcept;
+
   void seedCommonOffset (double offsetHz);
   void clearCommonOffset () noexcept;
   bool hasCommonOffset () const noexcept;

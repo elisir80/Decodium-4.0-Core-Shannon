@@ -623,6 +623,11 @@ DecodiumLegacyBackend::DecodiumLegacyBackend(QObject* parent)
         connect(m_mainWindow,
                 SIGNAL(legacyAudioSamplesReady(QByteArray const&)),
                 this,
+                SIGNAL(audioSamplesProduced(QByteArray const&)),
+                Qt::DirectConnection);
+        connect(m_mainWindow,
+                SIGNAL(legacyAudioSamplesReady(QByteArray const&)),
+                this,
                 SIGNAL(audioSamplesReady(QByteArray const&)));
         connect(m_mainWindow,
                 SIGNAL(legacyWarningRaised(QString const&,QString const&,QString const&)),

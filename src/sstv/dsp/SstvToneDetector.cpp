@@ -191,6 +191,19 @@ void SstvToneDetector::reset (bool preserveCommonOffset) noexcept
   commonOffsetHz_ = retained;
 }
 
+void SstvToneDetector::resetAtStreamSample (
+    std::uint64_t nextSample, bool preserveCommonOffset) noexcept
+{
+  std::optional<double> const retained =
+      preserveCommonOffset ? commonOffsetHz_ : std::nullopt;
+  metrics_ = {};
+  metrics_.samplesConsumed = nextSample;
+  buffer_.clear ();
+  bufferStartSample_ = nextSample;
+  observationSequence_ = 0;
+  commonOffsetHz_ = retained;
+}
+
 void SstvToneDetector::seedCommonOffset (double offsetHz)
 {
   if (!std::isfinite (offsetHz)

@@ -12,6 +12,7 @@
 #include <QElapsedTimer>
 #include <QHash>
 #include <QMap>
+#include <QMetaObject>
 #include <QPointer>
 #include <QQueue>
 #include <QSet>
@@ -22,6 +23,7 @@
 #include <QAudioDevice>
 #include <QAudioFormat>
 #include <atomic>
+#include <cstdint>
 #include <functional>
 #include <memory>
 
@@ -72,6 +74,7 @@ class SoundOutput;
 class DecodiumAudioSink;
 class RtlSdrInput;
 class RtlSdrAudioOutput;
+class DecodiumSstvAudioRelay;
 class Modulator;
 class QAudioSink;
 class QBuffer;
@@ -84,6 +87,8 @@ class DecodiumWebServer;
 class PanadapterItem;
 Q_DECLARE_OPAQUE_POINTER(DecoSyncTime*)
 class QDialog;
+class QImage;
+class QUrl;
 namespace decodium {
   namespace ft8     { class FT8DecodeWorker;       struct DecodeRequest; }
   namespace ft2     { class FT2DecodeWorker;       struct DecodeRequest; }
@@ -93,6 +98,33 @@ namespace decodium {
   namespace wspr    { class WSPRDecodeWorker;      struct DecodeRequest; }
   namespace legacyjt{ class LegacyJtDecodeWorker;  struct DecodeRequest; }
   namespace fst4    { class FST4DecodeWorker;      struct DecodeRequest; }
+  namespace sstv {
+    class SstvDiagnosticsController;
+    class SstvGalleryModel;
+    class SstvRxAudioJobController;
+    class SstvRxRuntime;
+    class SstvShareController;
+    class SstvStorageWorker;
+    class SstvStudioController;
+    class SstvThumbnailProvider;
+    class SstvTxAudioDevice;
+    class SstvTxCoordinator;
+    class SstvPcm16Source;
+    class SstvWavReplayController;
+    struct SstvQsoLogRequest;
+    struct SstvTxCoordinatorResult;
+    struct SstvImageRecord;
+    struct SstvImageSnapshot;
+    enum class SstvAudioSourceKind : std::uint8_t;
+    namespace hamdrm {
+      class HamDrmController;
+      struct HamDrmStatus;
+      namespace waveform {
+        class HamDrmNativeRxBackend;
+        class HamDrmNativeTxBackend;
+      }
+    }
+  }
 }
 
 class RemoteCommandServer;
@@ -119,6 +151,52 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool pttConfirmed READ pttConfirmed NOTIFY pttConfirmedChanged)
     Q_PROPERTY(bool tuning READ tuning NOTIFY tuningChanged)
     Q_PROPERTY(bool decoding READ decoding NOTIFY decodingChanged)
+
+    // === NATIVE SSTV ===
+    // SSTV is an in-process Decodium workspace backed by the existing RX
+    // audio source. It remains separate from bridge.mode so the weak-signal
+    // period scheduler and CAT mode mapping are not disturbed.
+    Q_PROPERTY(bool sstvAvailable READ sstvAvailable CONSTANT)
+    Q_PROPERTY(bool sstvRxRequested READ sstvRxRequested NOTIFY sstvRxStateChanged)
+    Q_PROPERTY(bool sstvRxActive READ sstvRxActive NOTIFY sstvRxStateChanged)
+    Q_PROPERTY(QString sstvRxSource READ sstvRxSource NOTIFY sstvRxStateChanged)
+    Q_PROPERTY(QString sstvRxState READ sstvRxState NOTIFY sstvRxStateChanged)
+    Q_PROPERTY(QString sstvDetectedMode READ sstvDetectedMode NOTIFY sstvRxSnapshotChanged)
+    Q_PROPERTY(QString sstvRxImageSource READ sstvRxImageSource NOTIFY sstvRxSnapshotChanged)
+    Q_PROPERTY(QVariantMap sstvRxDiagnostics READ sstvRxDiagnostics NOTIFY sstvRxSnapshotChanged)
+    Q_PROPERTY(QVariantMap sstvRxControls READ sstvRxControls NOTIFY sstvRxSnapshotChanged)
+    Q_PROPERTY(QVariantList sstvRxModeChoices READ sstvRxModeChoices CONSTANT)
+    Q_PROPERTY(bool sstvRxAudioJobBusy READ sstvRxAudioJobBusy NOTIFY sstvRxAudioJobChanged)
+    Q_PROPERTY(QString sstvRxAudioJobState READ sstvRxAudioJobState NOTIFY sstvRxAudioJobChanged)
+    Q_PROPERTY(QString sstvRxAudioJobError READ sstvRxAudioJobError NOTIFY sstvRxAudioJobChanged)
+    Q_PROPERTY(QString sstvRxRawAudioPath READ sstvRxRawAudioPath NOTIFY sstvRxAudioJobChanged)
+    Q_PROPERTY(bool sstvStorageReady READ sstvStorageReady NOTIFY sstvStorageStateChanged)
+    Q_PROPERTY(bool sstvRxAutoSaveEnabled READ sstvRxAutoSaveEnabled WRITE setSstvRxAutoSaveEnabled NOTIFY sstvRxAutoSaveChanged)
+    Q_PROPERTY(QString sstvRxSaveState READ sstvRxSaveState NOTIFY sstvRxSaveStateChanged)
+    Q_PROPERTY(QString sstvRxSaveError READ sstvRxSaveError NOTIFY sstvRxSaveStateChanged)
+    Q_PROPERTY(bool sstvWavReplayActive READ sstvWavReplayActive NOTIFY sstvWavReplayChanged)
+    Q_PROPERTY(QString sstvWavReplayState READ sstvWavReplayState NOTIFY sstvWavReplayChanged)
+    Q_PROPERTY(double sstvWavReplayProgress READ sstvWavReplayProgress NOTIFY sstvWavReplayChanged)
+    Q_PROPERTY(QString sstvWavReplayFileName READ sstvWavReplayFileName NOTIFY sstvWavReplayChanged)
+    Q_PROPERTY(QString sstvWavReplayError READ sstvWavReplayError NOTIFY sstvWavReplayChanged)
+    Q_PROPERTY(QObject* sstvStudio READ sstvStudio CONSTANT)
+    Q_PROPERTY(QObject* sstvGallery READ sstvGallery CONSTANT)
+    Q_PROPERTY(QObject* sstvShare READ sstvShare CONSTANT)
+    Q_PROPERTY(QObject* sstvDigital READ sstvDigital CONSTANT)
+    Q_PROPERTY(QObject* sstvDiagnostics READ sstvDiagnostics CONSTANT)
+    Q_PROPERTY(bool sstvTxCanStart READ sstvTxCanStart NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(QVariantMap sstvTxDiagnostics READ sstvTxDiagnostics NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(bool sstvTxActive READ sstvTxActive NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(QString sstvTxState READ sstvTxState NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(double sstvTxProgress READ sstvTxProgress NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(QString sstvTxError READ sstvTxError NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(int sstvPttLeadMs READ sstvPttLeadMs WRITE setSstvPttLeadMs NOTIFY sstvTxTimingChanged)
+    Q_PROPERTY(int sstvPttTailMs READ sstvPttTailMs WRITE setSstvPttTailMs NOTIFY sstvTxTimingChanged)
+    Q_PROPERTY(int sstvPttReleaseRetryMs READ sstvPttReleaseRetryMs WRITE setSstvPttReleaseRetryMs NOTIFY sstvTxTimingChanged)
+    Q_PROPERTY(int sstvVoxPreKeyMs READ sstvVoxPreKeyMs WRITE setSstvVoxPreKeyMs NOTIFY sstvTxTimingChanged)
+    Q_PROPERTY(int sstvVoxHangMs READ sstvVoxHangMs WRITE setSstvVoxHangMs NOTIFY sstvTxTimingChanged)
+    Q_PROPERTY(double sstvVoxToneFrequencyHz READ sstvVoxToneFrequencyHz WRITE setSstvVoxToneFrequencyHz NOTIFY sstvTxTimingChanged)
+    Q_PROPERTY(double sstvVoxToneLevel READ sstvVoxToneLevel WRITE setSstvVoxToneLevel NOTIFY sstvTxTimingChanged)
 
     // === AUDIO FREQUENCIES ===
     Q_PROPERTY(int rxFrequency READ rxFrequency WRITE setRxFrequency NOTIFY rxFrequencyChanged)
@@ -630,6 +708,101 @@ public:
     bool pttConfirmed() const { return m_pttConfirmed; }
     bool tuning() const { return m_tuning; }
     bool decoding() const;
+
+    // Native analog SSTV RX. Starting the workspace reuses the active
+    // Decodium monitor, or starts it and records ownership so stopSstvRx()
+    // only stops monitoring when SSTV was the component that started it.
+    bool sstvAvailable() const;
+    bool sstvRxRequested() const;
+    bool sstvRxActive() const;
+    QString sstvRxSource() const;
+    QString sstvRxState() const;
+    QString sstvDetectedMode() const;
+    QString sstvRxImageSource() const;
+    QVariantMap sstvRxDiagnostics() const;
+    QVariantMap sstvRxControls() const;
+    QVariantList sstvRxModeChoices() const;
+    bool sstvRxAudioJobBusy() const noexcept;
+    QString sstvRxAudioJobState() const;
+    QString sstvRxAudioJobError() const;
+    QString sstvRxRawAudioPath() const;
+    bool sstvStorageReady() const noexcept;
+    bool sstvRxAutoSaveEnabled() const noexcept;
+    void setSstvRxAutoSaveEnabled(bool enabled);
+    QString sstvRxSaveState() const;
+    QString sstvRxSaveError() const;
+    bool sstvWavReplayActive() const;
+    QString sstvWavReplayState() const;
+    double sstvWavReplayProgress() const noexcept;
+    QString sstvWavReplayFileName() const;
+    QString sstvWavReplayError() const;
+    QObject* sstvStudio() const;
+    QObject* sstvGallery() const;
+    QObject* sstvShare() const;
+    QObject* sstvDigital() const;
+    QObject* sstvDiagnostics() const;
+    bool sstvTxCanStart() const;
+    QVariantMap sstvTxDiagnostics() const;
+    bool sstvTxActive() const;
+    QString sstvTxState() const;
+    double sstvTxProgress() const noexcept;
+    QString sstvTxError() const;
+    int sstvPttLeadMs() const;
+    void setSstvPttLeadMs(int value);
+    int sstvPttTailMs() const;
+    void setSstvPttTailMs(int value);
+    int sstvPttReleaseRetryMs() const;
+    void setSstvPttReleaseRetryMs(int value);
+    int sstvVoxPreKeyMs() const;
+    void setSstvVoxPreKeyMs(int value);
+    int sstvVoxHangMs() const;
+    void setSstvVoxHangMs(int value);
+    double sstvVoxToneFrequencyHz() const;
+    void setSstvVoxToneFrequencyHz(double value);
+    double sstvVoxToneLevel() const;
+    void setSstvVoxToneLevel(double value);
+#if DECODIUM_HAS_SSTV
+    // QQmlEngine owns the provider. The bridge and model retain guarded,
+    // non-owning pointers so engine teardown can happen before bridge teardown.
+    void setSstvThumbnailProvider(
+        decodium::sstv::SstvThumbnailProvider* provider);
+#endif
+    // Native-only renderer handoff. The shared immutable snapshot can be read
+    // from Qt Quick's asynchronous image-loading thread without copying pixel
+    // storage or retaining a lock owned by the DSP worker.
+    std::shared_ptr<const decodium::sstv::SstvImageSnapshot>
+    sstvRxImageSnapshot() const noexcept;
+    std::shared_ptr<const QImage> sstvTxSourceImageSnapshot() const noexcept;
+    std::shared_ptr<const QImage> sstvTxPreparedImageSnapshot() const noexcept;
+    Q_INVOKABLE bool startSstvRx();
+    Q_INVOKABLE void stopSstvRx();
+    Q_INVOKABLE bool resetSstvRx();
+    Q_INVOKABLE bool abortSstvRxFrame();
+    Q_INVOKABLE bool updateSstvRxControls(const QVariantMap& controls);
+    Q_INVOKABLE void resetSstvRxAfc();
+    Q_INVOKABLE void resetSstvRxSlant();
+    Q_INVOKABLE bool redecodeRecentSstv(
+        const QVariantMap& parameters = {});
+    Q_INVOKABLE bool saveSstvRxRawAudio();
+    Q_INVOKABLE void cancelSstvRxAudioJob();
+    Q_INVOKABLE bool saveSstvRxImage();
+    // Bounded view of the active native logbook for the explicit Gallery
+    // "associate existing QSO" workflow. Each returned row includes the
+    // deterministic local qsoId; no attachment data is exported to ADIF.
+    Q_INVOKABLE QVariantList sstvExistingQsoChoices(
+        const QString& search = {}, int maximumRows = 50);
+    // Starts an explicit, two-stage native operation: preflight the Gallery
+    // record on its storage worker, then either append a validated MODE=SSTV
+    // QSO or use a QSO selected from sstvExistingQsoChoices(), and finally
+    // persist the local image association. The returned map contains
+    // accepted/requestId/error; completion is reported asynchronously by
+    // sstvQsoLogFinished(). No local file path is accepted by this API.
+    Q_INVOKABLE QVariantMap logSstvQso(const QVariantMap& request);
+    Q_INVOKABLE bool startSstvWavReplay(const QUrl& localFile);
+    Q_INVOKABLE void cancelSstvWavReplay();
+    Q_INVOKABLE bool startSstvTx(const QString& fskId = QString());
+    Q_INVOKABLE bool startSstvCalibrationTone(const QString& toneId);
+    Q_INVOKABLE void cancelSstvTx();
 
     // Audio frequencies
     int rxFrequency() const { return m_rxFrequency; }
@@ -1667,6 +1840,22 @@ signals:
     void pttConfirmedChanged();
     void tuningChanged();
     void decodingChanged();
+    void sstvRxStateChanged();
+    void sstvRxSnapshotChanged();
+    void sstvRxAudioJobChanged();
+    void sstvStorageStateChanged();
+    void sstvRxAutoSaveChanged();
+    void sstvRxSaveStateChanged();
+    void sstvWavReplayChanged();
+    void sstvTxStateChanged();
+    void sstvTxTimingChanged();
+    void sstvVisDetected(QString mode, int rawVis, bool valid, double confidence);
+    void sstvQsoLogFinished(QString requestToken,
+                            QString imageRecordId,
+                            bool qsoCreated,
+                            bool associationStored,
+                            QString qsoId,
+                            QString error);
     void rxFrequencyChanged();
     void txFrequencyChanged();
     void audioLevelChanged();
@@ -2302,6 +2491,97 @@ private:
     // Retry finiti e distanziati: nessun loop infinito.
     int m_startupCatRetryCount {0};
     bool m_monitoring {false};
+    bool m_sstvRxRequested {false};
+    bool m_sstvOwnsMonitoring {false};
+#if DECODIUM_HAS_SSTV
+    // The object address is stable for the bridge lifetime. Its worker and DSP
+    // pipeline remain lazy and run only between startSstvRx()/stopSstvRx().
+    // Stable ownership also makes the direct bounded audio relay safe across
+    // normal capture restarts; destruction happens after RX source teardown.
+    std::unique_ptr<decodium::sstv::SstvRxRuntime> m_sstvRxRuntime;
+    decodium::sstv::SstvWavReplayController* m_sstvWavReplayController {nullptr};
+    decodium::sstv::SstvRxAudioJobController* m_sstvRxAudioJobController {nullptr};
+    quint64 m_sstvWavReplaySession {0U};
+    bool m_sstvWavReplayRestoreLive {false};
+    std::uint8_t m_sstvWavReplayRestoreKind {0U};
+    quint32 m_sstvWavReplayRestoreStreamId {0U};
+    QVariantMap m_sstvRedecodeRestoreControls;
+    bool m_sstvRedecodeActive {false};
+    QString m_sstvRxRawAudioPath;
+    quint64 m_sstvRxRawAudioAcquisitionId {0U};
+    quint64 m_sstvRxStartAcquisitionId {0U};
+    QDateTime m_sstvRxStartUtc;
+    decodium::sstv::SstvStudioController* m_sstvStudioController {nullptr};
+    decodium::sstv::SstvGalleryModel* m_sstvGalleryModel {nullptr};
+    decodium::sstv::SstvShareController* m_sstvShareController {nullptr};
+    decodium::sstv::SstvDiagnosticsController*
+        m_sstvDiagnosticsController {nullptr};
+#if DECODIUM_HAS_HAMDRM
+    decodium::sstv::hamdrm::HamDrmController* m_hamDrmController {nullptr};
+    std::shared_ptr<decodium::sstv::hamdrm::waveform::HamDrmNativeRxBackend>
+        m_hamDrmRxBackend;
+    std::shared_ptr<decodium::sstv::hamdrm::waveform::HamDrmNativeTxBackend>
+        m_hamDrmTxBackend;
+    bool m_hamDrmRxRequested {false};
+    bool m_hamDrmOwnsMonitoring {false};
+    std::uint8_t m_hamDrmRxSourceKind {0U};
+    quint32 m_hamDrmRxStreamId {0U};
+#endif
+    QThread* m_sstvStorageThread {nullptr};
+    QPointer<decodium::sstv::SstvStorageWorker> m_sstvStorageWorker;
+    QPointer<decodium::sstv::SstvThumbnailProvider> m_sstvThumbnailProvider;
+    quint64 m_sstvStorageRequestId {1};
+    bool m_sstvStorageReady {false};
+    bool m_sstvRxAutoSaveEnabled {false};
+    QString m_sstvRxSaveState {QStringLiteral("idle")};
+    QString m_sstvRxSaveError;
+    QHash<quint64, QString> m_sstvRxSaveRequests;
+    // QSO workflow request IDs use a dedicated high-bit namespace so the
+    // worker's shared completion signal cannot collide with GalleryModel's
+    // independent request counter. Values contain only validated scalar log
+    // input and workflow state, never image/audio paths.
+    quint64 m_sstvQsoStorageSerial {1};
+    QHash<quint64, QVariantMap> m_sstvQsoLogRequests;
+    QSet<QString> m_sstvIssuedExistingQsoIds;
+    quint64 m_sstvIssuedExistingQsoGeneration {0};
+    // A validated remote handoff remains owned by sharing until Gallery has
+    // committed it.  Keep only the small versioned map here so transient
+    // storage failures can be retried without rereading untrusted metadata or
+    // acknowledging the provider.  Image bytes remain in the private staging
+    // file and never enter the GUI thread.
+    QHash<QString, QVariantMap> m_sstvIncomingImportHandoffs;
+    QHash<QString, int> m_sstvIncomingImportRetryCounts;
+    QSet<QString> m_sstvRxPendingSaveKeys;
+    QSet<QString> m_sstvRxSavedKeys;
+    QQueue<QString> m_sstvRxSavedKeyOrder;
+    std::unique_ptr<decodium::sstv::SstvTxCoordinator> m_sstvTxCoordinator;
+    QPointer<decodium::sstv::SstvTxAudioDevice> m_sstvTxAudioDevice;
+    // A resolved local output is pinned before the coordinator can acquire
+    // PTT and remains immutable for the complete session. Configuration
+    // changes or resolver fallbacks cannot silently reroute on-air audio.
+    QAudioDevice m_sstvTxOutputDevice;
+    unsigned m_sstvTxOutputChannels {0U};
+    bool m_sstvTxOutputPinned {false};
+    QTimer* m_sstvTxTimer {nullptr};
+    QElapsedTimer m_sstvTxClock;
+    quint64 m_sstvTxSessionId {0};
+    QString m_sstvTxState {QStringLiteral("Disabled")};
+    QString m_sstvTxError;
+    double m_sstvTxProgress {0.0};
+    quint64 m_sstvTxUnderruns {0U};
+    bool m_sstvOwnsBridgeTx {false};
+    bool m_sstvTxShuttingDown {false};
+    // Every producer tap captures one immutable route token.  Connections are
+    // rebound at each generation boundary, and the shared relay drains any
+    // DirectConnection callback already in flight before runtime shutdown.
+    std::shared_ptr<DecodiumSstvAudioRelay> m_sstvAudioRelay;
+    QMetaObject::Connection m_sstvLocalAudioTap;
+    QMetaObject::Connection m_sstvLegacyAudioTap;
+    QMetaObject::Connection m_sstvTciAudioTap;
+    QMetaObject::Connection m_sstvDecoPortAudioTap;
+    QMetaObject::Connection m_sstvRtlPcmTap;
+    QMetaObject::Connection m_sstvRtlAudioTap;
+#endif
     QDateTime m_monitoringSince;  // IU8LMC: inizio ascolto (autodiagnosi banda morta)
     bool m_monitorRequested {false};
     bool m_transmitting {false};
@@ -3499,7 +3779,7 @@ private:
     QString m_adifImportStatus;
     void invalidateQsoSearchCache();
     void setAdifImportProgress(int progress, const QString& status);
-    void appendAdifRecord(const QString& dxCall, const QString& dxGrid,
+    bool appendAdifRecord(const QString& dxCall, const QString& dxGrid,
                           double freqHz, const QString& mode,
                           const QDateTime& timeOnUtc,
                           const QDateTime& timeOffUtc,
@@ -3881,6 +4161,65 @@ private:
     QStringList parseWsprRow(const QString& row) const;
     QStringList parseJt65Row(const QString& row) const;
     void ensureAudioSink();
+    void initialiseSstvRuntime();
+    void initialiseSstvStorage();
+    void initialiseSstvTx();
+    void shutdownSstvRuntime();
+    void refreshSstvDiagnosticsSnapshot();
+    void shutdownSstvStorage();
+    void shutdownSstvTx();
+    void tickSstvTx();
+    void releaseSstvTxBridgeOwnership();
+    bool sstvTxGlobalPreflightReady() const;
+    std::uint64_t sstvTxNowMs() const noexcept;
+    bool sstvTxUsesVoxPtt() const;
+    bool sstvTxCanControlPtt() const;
+    bool sstvTxPttActive() const;
+    void setSstvTxPtt(bool on);
+    bool applySstvTxTimingSettings();
+#if DECODIUM_HAS_SSTV && DECODIUM_HAS_HAMDRM
+    decodium::sstv::hamdrm::HamDrmStatus activateHamDrmRxTap();
+    void deactivateHamDrmRxTap();
+    decodium::sstv::SstvTxCoordinatorResult startHamDrmPreparedAudio(
+        std::unique_ptr<decodium::sstv::SstvPcm16Source> source,
+        std::string mode);
+    bool cancelHamDrmPreparedAudio(std::uint64_t coordinatorSessionId);
+#endif
+#if DECODIUM_HAS_SSTV
+    // Queues an already atomically stored path-only record onto the SQLite
+    // owner thread. A successful insert emits recordChanged and therefore
+    // updates the Gallery model incrementally without polling.
+    quint64 enqueueSstvStoredRecord(
+        decodium::sstv::SstvImageRecord record);
+    bool queueSstvIncomingImport(const QString& transferId);
+    bool queueSstvRxImageSave(bool automatic);
+    void maybeAutoSaveSstvRxImage();
+    void setSstvRxSaveStatus(QString state, QString error = {});
+    bool queueSstvQsoAssociation(quint64 requestId,
+                                 const QString& imageRecordId,
+                                 const QString& qsoId);
+    bool isSstvExistingQsoChoiceCurrent(const QString& qsoId) const;
+    void finishSstvQsoLog(quint64 requestId,
+                          bool associationStored,
+                          const QString& error = {});
+    bool commitSstvNewQso(
+        const decodium::sstv::SstvQsoLogRequest& request,
+        QString* associationId,
+        QString* error);
+#endif
+    void stopSstvRxForMonitorStop();
+    void refreshSstvProducerTaps();
+    void disconnectSstvProducerTaps();
+    void disableSstvProducerTaps();
+    void finishSstvWavReplay(bool completed,
+                             bool cancelled,
+                             quint64 sessionId);
+    bool restoreSstvLiveAfterReplay();
+    decodium::sstv::SstvAudioSourceKind currentSstvAudioSourceKind() const;
+    quint32 currentSstvAudioStreamId(decodium::sstv::SstvAudioSourceKind kind) const;
+    void selectSstvRxSource(decodium::sstv::SstvAudioSourceKind kind,
+                            quint32 streamId,
+                            bool resetExistingStream = false);
     void startAudioCapture(bool watchdogRecovery = false);
     void stopAudioCapture();
     void scheduleAudioDeviceRefresh(int delayMs = 250, bool verboseLog = false);
