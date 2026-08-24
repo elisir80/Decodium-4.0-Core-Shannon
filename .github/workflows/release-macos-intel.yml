@@ -28,6 +28,7 @@ env:
   BOOST_VERSION_UNDERSCORE: "1_85_0"
   FFTW_VERSION: "3.3.10"
   LIBUSB_VERSION: "1.0.27"
+  OPENJPEG_VERSION: "2.5.4"
   SOURCE_DEPS_ROOT: ".ci/cache/macos-intel-source-deps"
 
 concurrency:
@@ -78,7 +79,7 @@ jobs:
           if [[ "${{ matrix.source_deps }}" == "true" ]]; then
             packages+=(autoconf automake libtool)
           else
-            packages+=(fftw libusb boost)
+            packages+=(fftw libusb boost openjpeg)
           fi
           brew install "${packages[@]}"
 
@@ -90,6 +91,9 @@ jobs:
           fi
           echo "FC=${GFORTRAN}" >> "$GITHUB_ENV"
           "${GFORTRAN}" --version
+          if [[ "${{ matrix.source_deps }}" != "true" ]]; then
+            echo "OPENJPEG_PREFIX=$(brew --prefix openjpeg)" >> "$GITHUB_ENV"
+          fi
 
       - name: Restore Ventura source dependency cache
         id: source-deps-cache
@@ -97,7 +101,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.SOURCE_DEPS_ROOT }}-${{ matrix.compat_macos }}
-          key: macos-intel-source-deps-${{ matrix.compat_macos }}-boost-${{ env.BOOST_VERSION }}-fftw-${{ env.FFTW_VERSION }}-libusb-${{ env.LIBUSB_VERSION }}-v1
+          key: macos-intel-source-deps-${{ matrix.compat_macos }}-boost-${{ env.BOOST_VERSION }}-fftw-${{ env.FFTW_VERSION }}-libusb-${{ env.LIBUSB_VERSION }}-openjpeg-${{ env.OPENJPEG_VERSION }}-v2
 
       - name: Build Ventura source dependencies
         if: matrix.source_deps == true && steps.source-deps-cache.outputs.cache-hit != 'true'
@@ -129,6 +133,23 @@ jobs:
           ./configure --prefix="${DEPS_PREFIX}" --disable-static --enable-shared --disable-dependency-tracking
           make -j"${JOBS}"
           make install
+
+          cd "${RUNNER_TEMP}/source-deps"
+          curl -fsSL -o "openjpeg-${OPENJPEG_VERSION}.tar.gz" \
+            "https://github.com/uclouvain/openjpeg/archive/refs/tags/v${OPENJPEG_VERSION}.tar.gz"
+          tar -xzf "openjpeg-${OPENJPEG_VERSION}.tar.gz"
+          cmake -S "openjpeg-${OPENJPEG_VERSION}" \
+            -B "openjpeg-${OPENJPEG_VERSION}/build-decodium" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET}" \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_CODEC=OFF \
+            -DBUILD_TESTING=OFF
+          cmake --build "openjpeg-${OPENJPEG_VERSION}/build-decodium" \
+            --parallel "${JOBS}"
+          cmake --install "openjpeg-${OPENJPEG_VERSION}/build-decodium"
 
           cd "${RUNNER_TEMP}/source-deps"
           curl -fsSL -o "fftw-${FFTW_VERSION}.tar.gz" \
@@ -168,7 +189,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ env.SOURCE_DEPS_ROOT }}-${{ matrix.compat_macos }}
-          key: macos-intel-source-deps-${{ matrix.compat_macos }}-boost-${{ env.BOOST_VERSION }}-fftw-${{ env.FFTW_VERSION }}-libusb-${{ env.LIBUSB_VERSION }}-v1
+          key: macos-intel-source-deps-${{ matrix.compat_macos }}-boost-${{ env.BOOST_VERSION }}-fftw-${{ env.FFTW_VERSION }}-libusb-${{ env.LIBUSB_VERSION }}-openjpeg-${{ env.OPENJPEG_VERSION }}-v2
 
       - name: Restore Qt 6.11 cache
         id: qt-cache
@@ -211,7 +232,11 @@ jobs:
           echo "${QT_PREFIX}/bin" >> "$GITHUB_PATH"
           echo "QT_PREFIX=${QT_PREFIX}" >> "$GITHUB_ENV"
           echo "QMAKE=${QMAKE_PATH}" >> "$GITHUB_ENV"
-          echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "$GITHUB_ENV"
+          if [[ -n "${OPENJPEG_PREFIX:-}" ]]; then
+            echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${OPENJPEG_PREFIX}" >> "$GITHUB_ENV"
+          else
+            echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "$GITHUB_ENV"
+          fi
           "${QMAKE_PATH}" -v
 
       - name: Use Ventura source dependency prefix
@@ -271,7 +296,7 @@ jobs:
             echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${SOURCE_DEPS_PREFIX};${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
             echo "DYLD_FALLBACK_LIBRARY_PATH=${HAMLIB_PREFIX}/lib:${SOURCE_DEPS_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           else
-            echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
+            echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${OPENJPEG_PREFIX};${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
           fi
           echo "Hamlib_INCLUDE_DIR=${HAMLIB_PREFIX}/include" >> "$GITHUB_ENV"
           echo "Hamlib_LIBRARY=${HAMLIB_LIBRARY}" >> "$GITHUB_ENV"

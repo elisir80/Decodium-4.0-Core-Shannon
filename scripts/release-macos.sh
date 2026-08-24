@@ -217,6 +217,13 @@ verify_app_identity() {
     echo "error: missing Qt Quick Controls QML plugin in app bundle"
     return 1
   fi
+  for required_image_plugin in \
+    libqgif.dylib libqjpeg.dylib libqtiff.dylib libqwebp.dylib; do
+    if [[ ! -f "${app_bundle}/Contents/PlugIns/imageformats/${required_image_plugin}" ]]; then
+      echo "error: missing Qt image plugin in app bundle: ${required_image_plugin}"
+      return 1
+    fi
+  done
   if ! find "${app_bundle}/Contents/PlugIns/tls" -maxdepth 1 \( -type f -o -type l \) -name '*.dylib' -print -quit 2>/dev/null | grep -q .; then
     echo "warning: missing Qt TLS plugins in app bundle"
   fi
@@ -545,6 +552,24 @@ case "${DECODIUM_REQUIRE_RTLSDR:-OFF}" in
     echo "RTL-SDR runtime bundled and linked"
     ;;
 esac
+
+if grep -Fxq 'DECODIUM_ENABLE_HAMDRM:BOOL=ON' "${BUILD_DIR}/CMakeCache.txt"; then
+  if ! find "${STAGED_APP_ABS}/Contents/Frameworks" -maxdepth 1 \
+      -type f -name 'libopenjp2*.dylib' -print -quit | grep -q .; then
+    echo "error: HAMDRM OpenJPEG runtime library was not bundled"
+    exit 1
+  fi
+  if ! otool -L "${STAGED_APP_ABS}/Contents/MacOS/Decodium4" \
+      | awk 'NR>1 {print $1}' | grep -Eq '^@rpath/libopenjp2'; then
+    echo "error: Decodium4 is not linked to the bundled OpenJPEG runtime"
+    exit 1
+  fi
+  if [[ ! -f "${STAGED_APP_ABS}/Contents/Resources/doc/wsjtx/THIRD_PARTY_LICENSES_OPENJPEG.md" ]]; then
+    echo "error: OpenJPEG third-party notice is missing from the app bundle"
+    exit 1
+  fi
+  echo "HAMDRM OpenJPEG runtime and notice bundled"
+fi
 
 if [[ "$SKIP_COMPAT_CHECK" -eq 0 ]]; then
   echo "[5/7] Checking bundle compatibility target macOS ${COMPAT_MACOS}..."

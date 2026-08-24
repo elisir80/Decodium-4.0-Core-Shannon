@@ -124,6 +124,7 @@ jobs:
             libgl1-mesa-dev \
             libglib2.0-dev \
             libopengl-dev \
+            libopenjp2-7-dev \
             libpulse-dev \
             libreadline-dev \
             libswresample-dev \

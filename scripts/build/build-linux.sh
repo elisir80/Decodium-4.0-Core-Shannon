@@ -51,6 +51,7 @@ sudo apt-get install -y -qq \
     libboost-log-dev \
     libboost-filesystem-dev \
     libboost-thread-dev \
+    libopenjp2-7-dev \
     portaudio19-dev \
     libreadline-dev \
     texinfo \
@@ -160,6 +161,7 @@ sudo apt-get install -y -qq \
     libboost-log1.74.0 \
     libboost-filesystem1.74.0 \
     libportaudio2 \
+    libopenjp2-7 \
     libgfortran5 \
     libgomp1
 echo "Done. Run ./wsjtx.sh to start."

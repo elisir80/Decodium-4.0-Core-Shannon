@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libusb-1.0-0-dev \
     libudev-dev \
     libboost-log-dev \
+    libopenjp2-7-dev \
     qt6-base-dev \
     qt6-base-private-dev \
     qt6-base-dev-tools \
@@ -29,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     qt6-5compat-dev \
     qt6-svg-dev \
     qt6-declarative-dev \
+    qt6-image-formats-plugins \
     qt6-shadertools-dev \
     qml6-module-qtcore \
     qml6-module-qtqml \

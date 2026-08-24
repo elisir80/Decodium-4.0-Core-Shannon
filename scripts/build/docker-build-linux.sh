@@ -27,6 +27,7 @@ apt-get install -y -qq \
   libhamlib-dev \
   libhamlib-utils \
   libboost-log-dev \
+  libopenjp2-7-dev \
   libusb-1.0-0-dev \
   libudev-dev \
   > /dev/null 2>&1
@@ -154,6 +155,7 @@ sudo apt-get install -y \
   libhamlib4 \
   libhamlib-utils \
   libboost-log1.74.0 \
+  libopenjp2-7 \
   libusb-1.0-0 \
   libgomp1 \
   libgfortran5

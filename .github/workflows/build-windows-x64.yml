@@ -62,6 +62,7 @@ jobs:
             mingw-w64-x86_64-fftw
             mingw-w64-x86_64-libusb
             mingw-w64-x86_64-portaudio
+            mingw-w64-x86_64-openjpeg2
 
       - name: Validate repository contract
         run: scripts/ci/validate-repository-layout.sh
@@ -112,7 +113,7 @@ jobs:
             -confirm-license \
             -nomake tests \
             -nomake examples \
-            -submodules qtbase,qt5compat,qtdeclarative,qtmultimedia,qtserialport,qtsvg,qtshadertools,qttools,qttranslations,qtwebsockets
+            -submodules qtbase,qt5compat,qtdeclarative,qtimageformats,qtmultimedia,qtserialport,qtsvg,qtshadertools,qttools,qttranslations,qtwebsockets
           cmake --build . --parallel "$(nproc)"
           cmake --install .
 
@@ -282,7 +283,10 @@ jobs:
                "$(sha256sum "${DIST}/cty.dat" | awk '{print $1}')"
           cp -R sounds "${DIST}/sounds"
           cp -R Palettes "${DIST}/Palettes"
-          cp COPYING doc/THIRD_PARTY_LICENSES_RTLSDR.md "${DIST}/"
+          cp COPYING \
+             doc/THIRD_PARTY_LICENSES_RTLSDR.md \
+             doc/THIRD_PARTY_LICENSES_OPENJPEG.md \
+             "${DIST}/"
 
           WINDEPLOYQT="${WINDEPLOYQT}"
           QT_SHARE_BIN="${QT_PREFIX}/bin"
@@ -461,6 +465,11 @@ jobs:
 
           echo "Qt runtime ABI verified: $(tr '\n' ' ' <<< "${core_private_abis}")"
           test -f "${DIST}/librtlsdr.dll"
+          test -f "${DIST}/libopenjp2-7.dll"
+          test -f "${DIST}/imageformats/qgif.dll"
+          test -f "${DIST}/imageformats/qjpeg.dll"
+          test -f "${DIST}/imageformats/qtiff.dll"
+          test -f "${DIST}/imageformats/qwebp.dll"
 
           printf '%s\n' "Runtime DLLs bundled:" > "${DIST}/runtime-dll-report.txt"
           find "${DIST}" -maxdepth 1 -type f -iname '*.dll' -printf '%f\n' | sort -fu >> "${DIST}/runtime-dll-report.txt"

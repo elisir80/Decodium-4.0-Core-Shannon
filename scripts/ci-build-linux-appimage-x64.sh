@@ -95,25 +95,6 @@ if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrive
   fi
 fi
 
-stash_optional_qt_plugin() {
-  local plugin_subdir="$1"
-  local plugin_name="$2"
-  local disabled_subdir="${plugin_subdir}-disabled"
-
-  if [[ -z "${QT_PLUGIN_DIR_FOR_BUILD}" ]]; then
-    return
-  fi
-  if [[ -f "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}/${plugin_name}" ]]; then
-    if ! qt_plugin_subdir_writable "${plugin_subdir}"; then
-      echo "Skipping optional Qt plugin stash for ${plugin_subdir}/${plugin_name}: Qt plugin dir is not writable"
-      return
-    fi
-    mkdir -p "${QT_PLUGIN_DIR_FOR_BUILD}/${disabled_subdir}"
-    mv -f "${QT_PLUGIN_DIR_FOR_BUILD}/${plugin_subdir}/${plugin_name}" \
-      "${QT_PLUGIN_DIR_FOR_BUILD}/${disabled_subdir}/${plugin_name}"
-  fi
-}
-
 ensure_linuxdeploy_qt_plugin_dirs() {
   local plugin_subdir
 
@@ -272,6 +253,11 @@ log "Assemble AppDir"
 mkdir -p "${APPDIR}/usr/share/applications"
 mkdir -p "${APPDIR}/usr/share/icons/hicolor/256x256/apps"
 cmake --install "${BUILD_DIR}" --prefix "${APPDIR}/usr"
+if ! find "${APPDIR}/usr/share/doc" -type f \
+    -name 'THIRD_PARTY_LICENSES_OPENJPEG.md' -print -quit | grep -q .; then
+  echo "error: OpenJPEG third-party notice is missing from AppDir" >&2
+  exit 1
+fi
 mkdir -p "${APPDIR}/usr/lib"
 # Keep the SONAME aliases as real files inside AppDir: copying a symlink alone
 # would leave it pointing outside the AppImage after packaging.
@@ -296,7 +282,16 @@ DESKTOP
 
 log "Prepare linuxdeploy"
 mkdir -p "${TOOLS_DIR}"
-stash_optional_qt_plugin imageformats libqtiff.so
+# TIFF is an accepted SSTV Studio/inbox format.  Keep its Qt image plugin in
+# the tree inspected by linuxdeploy so the plugin and its native dependencies
+# are copied into the AppImage.  Older packaging temporarily stashed it and
+# never restored it before image creation, which made the final payload check
+# fail deterministically.
+if [[ -z "${QT_PLUGIN_DIR_FOR_BUILD}" \
+      || ! -f "${QT_PLUGIN_DIR_FOR_BUILD}/imageformats/libqtiff.so" ]]; then
+  echo "error: required Qt TIFF image plugin is unavailable before linuxdeploy" >&2
+  exit 1
+fi
 ensure_linuxdeploy_qt_plugin_dirs
 if [[ -n "${QT_PLUGIN_DIR_FOR_BUILD}" && -d "${QT_PLUGIN_DIR_FOR_BUILD}/sqldrivers" ]]; then
   if qt_plugin_subdir_writable sqldrivers; then
@@ -730,12 +725,29 @@ require_appimage_file "usr/bin/qml/QtQuick/Controls/Material/impl/libqtquickcont
 require_appimage_file "usr/qml/QtQuick/Controls/Material/qmldir"
 require_appimage_file "usr/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.so"
 require_appimage_file "usr/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.so"
+for image_plugin in libqgif.so libqjpeg.so libqtiff.so libqwebp.so; do
+  if ! find "${EXTRACTED_APPDIR}" -type f \
+      -path "*/imageformats/${image_plugin}" -print -quit | grep -q .; then
+    echo "error: final AppImage is missing Qt image plugin ${image_plugin}" >&2
+    exit 1
+  fi
+done
 verify_qml_plugin_dependencies "final AppImage" \
   "${EXTRACTED_APPDIR}/usr/bin/qml" \
   "${EXTRACTED_APPDIR}/usr/lib"
 rtlsdr_library="$(find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'librtlsdr.so*' -print -quit)"
 if [[ -z "${rtlsdr_library}" ]]; then
   echo "error: final AppImage does not contain librtlsdr" >&2
+  exit 1
+fi
+openjpeg_library="$(find "${EXTRACTED_APPDIR}/usr/lib" -maxdepth 1 -name 'libopenjp2.so*' -print -quit)"
+if [[ -z "${openjpeg_library}" ]]; then
+  echo "error: final AppImage does not contain libopenjp2 for HAMDRM" >&2
+  exit 1
+fi
+if ! find "${EXTRACTED_APPDIR}/usr/share/doc" -type f \
+    -name 'THIRD_PARTY_LICENSES_OPENJPEG.md' -print -quit | grep -q .; then
+  echo "error: final AppImage does not contain the OpenJPEG notice" >&2
   exit 1
 fi
 
@@ -748,6 +760,11 @@ decodium_ldd_output="$(
 )"
 if ! grep -q 'librtlsdr.so' <<<"${decodium_ldd_output}"; then
   echo "error: final AppImage executable is not linked to bundled librtlsdr" >&2
+  printf '%s\n' "${decodium_ldd_output}" >&2
+  exit 1
+fi
+if ! grep -q 'libopenjp2.so' <<<"${decodium_ldd_output}"; then
+  echo "error: final AppImage executable is not linked to bundled OpenJPEG" >&2
   printf '%s\n' "${decodium_ldd_output}" >&2
   exit 1
 fi

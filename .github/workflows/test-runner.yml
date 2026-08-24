@@ -72,10 +72,10 @@ jobs:
         run: |
           set -euo pipefail
           brew update
-          brew install qt gcc fftw libusb boost hamlib pkg-config libomp
+          brew install qt gcc fftw libusb boost hamlib openjpeg pkg-config libomp
 
           echo "$(brew --prefix qt)/bin" >> "${GITHUB_PATH}"
-          echo "CMAKE_PREFIX_PATH=$(brew --prefix qt);$(brew --prefix hamlib);$(brew --prefix libomp)" >> "${GITHUB_ENV}"
+          echo "CMAKE_PREFIX_PATH=$(brew --prefix qt);$(brew --prefix hamlib);$(brew --prefix openjpeg);$(brew --prefix libomp)" >> "${GITHUB_ENV}"
 
       - name: Configure
         run: |
@@ -127,6 +127,7 @@ jobs:
             libfftw3-dev \
             libhamlib-dev \
             libomp-dev \
+            libopenjp2-7-dev \
             libreadline-dev \
             libusb-1.0-0-dev \
             portaudio19-dev \
@@ -137,6 +138,7 @@ jobs:
             libxkbcommon-dev \
             qt6-declarative-dev \
             qt6-declarative-dev-tools \
+            qt6-image-formats-plugins \
             qt6-multimedia-dev \
             qt6-serialport-dev \
             qt6-shadertools-dev \
@@ -197,12 +199,14 @@ jobs:
             mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-libusb
             mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-openjpeg2
             mingw-w64-x86_64-pkgconf
             mingw-w64-x86_64-portaudio
             mingw-w64-x86_64-qt6-5compat
             mingw-w64-x86_64-qt6-activeqt
             mingw-w64-x86_64-qt6-base
             mingw-w64-x86_64-qt6-declarative
+            mingw-w64-x86_64-qt6-imageformats
             mingw-w64-x86_64-qt6-multimedia
             mingw-w64-x86_64-qt6-serialport
             mingw-w64-x86_64-qt6-svg

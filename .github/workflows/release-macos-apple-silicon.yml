@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install qt gcc fftw libusb boost pkg-config create-dmg dylibbundler
+          brew install qt gcc fftw libusb boost openjpeg pkg-config create-dmg dylibbundler
 
           GCC_PREFIX="$(brew --prefix gcc)"
           GFORTRAN="$(ls "${GCC_PREFIX}"/bin/gfortran-* 2>/dev/null | head -1 || true)"
@@ -71,9 +71,11 @@ jobs:
           "${GFORTRAN}" --version
 
           QT_PREFIX="$(brew --prefix qt)"
+          OPENJPEG_PREFIX="$(brew --prefix openjpeg)"
           echo "${QT_PREFIX}/bin" >> "$GITHUB_PATH"
           echo "QT_PREFIX=${QT_PREFIX}" >> "$GITHUB_ENV"
-          echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "$GITHUB_ENV"
+          echo "OPENJPEG_PREFIX=${OPENJPEG_PREFIX}" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${OPENJPEG_PREFIX}" >> "$GITHUB_ENV"
           qmake6 -v
 
       - name: Build and install Hamlib
@@ -99,7 +101,7 @@ jobs:
           echo "${HAMLIB_PREFIX}/bin" >> "$GITHUB_PATH"
           echo "HAMLIB_PREFIX=${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
           echo "PKG_CONFIG_PATH=${HAMLIB_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> "$GITHUB_ENV"
-          echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${OPENJPEG_PREFIX};${HAMLIB_PREFIX}" >> "$GITHUB_ENV"
           echo "Hamlib_INCLUDE_DIR=${HAMLIB_PREFIX}/include" >> "$GITHUB_ENV"
           echo "Hamlib_LIBRARY=${HAMLIB_LIBRARY}" >> "$GITHUB_ENV"
           echo "RIGCTL_EXE=${HAMLIB_PREFIX}/bin/rigctl" >> "$GITHUB_ENV"
@@ -122,7 +124,7 @@ jobs:
           echo "RTLSDR_PREFIX=${RTLSDR_PREFIX}" >> "$GITHUB_ENV"
           echo "RtlSdr_INCLUDE_DIR=${RTLSDR_PREFIX}/include" >> "$GITHUB_ENV"
           echo "RtlSdr_LIBRARY=${RTLSDR_LIBRARY}" >> "$GITHUB_ENV"
-          echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${HAMLIB_PREFIX};${RTLSDR_PREFIX}" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=${QT_PREFIX};${OPENJPEG_PREFIX};${HAMLIB_PREFIX};${RTLSDR_PREFIX}" >> "$GITHUB_ENV"
           echo "DYLD_FALLBACK_LIBRARY_PATH=${RTLSDR_PREFIX}/lib:${HAMLIB_PREFIX}/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
 
       - name: Build release assets
