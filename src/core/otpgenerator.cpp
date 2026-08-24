@@ -92,7 +92,11 @@ QByteArray OTPGenerator::fromBase32(const QString &input)
 {
   QByteArray result;
   result.reserve((input.length() * 5 + 7) / 8);
-  int buffer = 0;
+  // Keep only the undecoded tail in an unsigned buffer.  The previous signed
+  // accumulator retained every decoded byte, so a sufficiently long Base32
+  // secret eventually performed an overflowing left shift even though only
+  // the at-most seven pending bits are relevant.
+  quint32 buffer = 0;
   int bitsLeft = 0;
   for (int i = 0; i < input.length(); i++) {
     int ch = input[i].toLatin1();
@@ -103,11 +107,12 @@ QByteArray OTPGenerator::fromBase32(const QString &input)
       value = 26 + ch - '2';
     else
       continue;
-    buffer = (buffer << 5) | value;
+    buffer = (buffer << 5) | static_cast<quint32>(value);
     bitsLeft += 5;
     if (bitsLeft >= 8) {
-      result.append(buffer >> (bitsLeft - 8));
+      result.append(static_cast<char>((buffer >> (bitsLeft - 8)) & 0xffu));
       bitsLeft -= 8;
+      buffer &= (quint32{1} << bitsLeft) - 1u;
     }
   }
   return result;

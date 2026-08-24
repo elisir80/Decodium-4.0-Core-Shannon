@@ -2630,6 +2630,18 @@ private:
     }
   }
 
+  Q_SLOT void totp_base32_decoder_handles_long_secret ()
+  {
+    OTPGenerator generator;
+    QByteArray const rawSecret {"1234567890123456789012345678901234567890"};
+    QString const base32Secret {
+      "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
+      "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"};
+
+    QCOMPARE (generator.generateHOTP (base32Secret, 123456789u, 8),
+              QString::fromLatin1 (generator.generateHOTP (rawSecret, 123456789u, 8)));
+  }
+
   Q_SLOT void totp_rfc_6238_sha256_vectors ()
   {
     OTPGenerator generator;
