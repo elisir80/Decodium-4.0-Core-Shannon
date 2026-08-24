@@ -5,6 +5,7 @@
 #include <QtTest/QtTest>
 
 #include <QFile>
+#include <QImage>
 #include <QSet>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -177,6 +178,42 @@ public:
         sink = nullptr;
         target->hamDrmTxFinished(session, std::move(status));
     }
+};
+
+class CountingJpeg2000Backend final : public hamdrm::HamDrmJpeg2000Backend
+{
+public:
+    explicit CountingJpeg2000Backend(
+        std::shared_ptr<hamdrm::HamDrmJpeg2000Backend> delegate)
+        : delegate_(std::move(delegate))
+    {
+    }
+
+    hamdrm::HamDrmJpeg2000Capability capability() const override
+    {
+        return delegate_->capability();
+    }
+
+    hamdrm::HamDrmValueResult<hamdrm::HamDrmRgbaImage> decode(
+        const std::uint8_t* data,
+        std::size_t size,
+        const hamdrm::HamDrmLimits& limits) const override
+    {
+        ++decodeCalls;
+        return delegate_->decode(data, size, limits);
+    }
+
+    hamdrm::HamDrmValueResult<std::vector<std::uint8_t>> encodeLossless(
+        const hamdrm::HamDrmRgbaImage& image,
+        const hamdrm::HamDrmLimits& limits) const override
+    {
+        return delegate_->encodeLossless(image, limits);
+    }
+
+    mutable int decodeCalls {0};
+
+private:
+    std::shared_ptr<hamdrm::HamDrmJpeg2000Backend> delegate_;
 };
 
 hamdrm::HamDrmControllerBackends backends(
@@ -383,6 +420,9 @@ private slots:
         auto tx = std::make_shared<FakeTxBackend>();
         hamdrm::HamDrmController controller(
             {}, backends({}, tx, jpeg));
+        QSignalSpy imageAccepted(
+            &controller, &hamdrm::HamDrmController::txImageAccepted);
+        QVERIFY(imageAccepted.isValid());
         const QVariantList profiles = controller.profiles();
         const QString chosenId = profiles.at(37).toMap()
                                      .value(QStringLiteral("id")).toString();
@@ -397,6 +437,16 @@ private slots:
         QVERIFY(!tx->object->bodyGroups.empty());
         QVERIFY(controller.lastImageValidation()
                     .value(QStringLiteral("jpeg2000Decoded")).toBool());
+        QCOMPARE(imageAccepted.size(), 1);
+        const QList<QVariant> accepted = imageAccepted.takeFirst();
+        const QImage galleryImage = accepted.at(0).value<QImage>();
+        QVERIFY(!galleryImage.isNull());
+        QCOMPARE(galleryImage.size(), QSize(12, 9));
+        QCOMPARE(galleryImage.format(), QImage::Format_RGBA8888);
+        QCOMPARE(accepted.at(1).toString(), chosenId);
+        QCOMPARE(accepted.at(2).toInt(),
+                 profiles.at(37).toMap()
+                     .value(QStringLiteral("bandwidthHz")).toInt());
 
         tx->progress(0.45);
         QCOMPARE(controller.txProgress(), 0.45);
@@ -409,11 +459,14 @@ private slots:
         auto noCodecTx = std::make_shared<FakeTxBackend>();
         hamdrm::HamDrmController noCodec(
             {}, backends({}, noCodecTx));
+        QSignalSpy noCodecAccepted(
+            &noCodec, &hamdrm::HamDrmController::txImageAccepted);
         QVERIFY(noCodec.validateTxImage(imageUrl));
         QVERIFY(!noCodec.lastImageValidation()
                      .value(QStringLiteral("jpeg2000Decoded")).toBool());
         QVERIFY(!noCodec.startTx(imageUrl));
         QCOMPARE(noCodecTx->starts, 0);
+        QCOMPARE(noCodecAccepted.size(), 0);
         QVERIFY(noCodec.error().contains(
             QStringLiteral("decode adapter"), Qt::CaseInsensitive));
 
@@ -421,6 +474,110 @@ private slots:
         QVERIFY(!controller.validateTxImage(remote));
         QVERIFY(controller.error().contains(
             QStringLiteral("local file"), Qt::CaseInsensitive));
+    }
+
+    void txRejectsOutOfBoundsImageBeforeGallerySnapshot()
+    {
+        QTemporaryDir temporary;
+        QVERIFY(temporary.isValid());
+
+        const auto jpeg = hamdrm::makeNativeHamDrmJpeg2000Backend();
+        QVERIFY(jpeg);
+        hamdrm::HamDrmRgbaImage source;
+        source.width = 12U;
+        source.height = 9U;
+        source.rgba.resize(
+            static_cast<std::size_t>(source.width) * source.height * 4U,
+            0x7fU);
+        for (std::size_t index = 3U; index < source.rgba.size(); index += 4U) {
+            source.rgba[index] = 0xffU;
+        }
+        const auto encodedJp2 = jpeg->encodeLossless(source, {});
+        QVERIFY2(encodedJp2.ok(), encodedJp2.status.detail.c_str());
+        const QUrl imageUrl = writeFixture(
+            temporary.filePath(QStringLiteral("oversized-for-policy.jp2")),
+            *encodedJp2.value);
+        QVERIFY(imageUrl.isValid());
+
+        hamdrm::HamDrmControllerConfig config;
+        config.limits.maximumImageDimension = 8U;
+        config.limits.maximumImagePixels = 64U;
+        auto tx = std::make_shared<FakeTxBackend>();
+        hamdrm::HamDrmController controller(
+            config, backends({}, tx, jpeg));
+        QSignalSpy imageAccepted(
+            &controller, &hamdrm::HamDrmController::txImageAccepted);
+        QVERIFY(!controller.startTx(imageUrl));
+        QCOMPARE(tx->starts, 0);
+        QCOMPARE(imageAccepted.size(), 0);
+        QVERIFY(controller.error().contains(
+            QStringLiteral("dimensions exceed"), Qt::CaseInsensitive));
+    }
+
+    void txRejectsStructurallyValidImageWithoutGallerySnapshot()
+    {
+        QTemporaryDir temporary;
+        QVERIFY(temporary.isValid());
+        // The MOT image validator deliberately only needs a bounded JPEG
+        // structure.  This fixture has such a header but no decodable scan;
+        // the TX path must reject it before the waveform backend can accept
+        // an image that Gallery cannot snapshot.
+        const QUrl imageUrl = writeFixture(
+            temporary.filePath(QStringLiteral("header-only.jpg")),
+            jpegFixture(12U, 9U));
+        QVERIFY(imageUrl.isValid());
+
+        auto tx = std::make_shared<FakeTxBackend>();
+        hamdrm::HamDrmController controller({}, backends({}, tx));
+        QSignalSpy imageAccepted(
+            &controller, &hamdrm::HamDrmController::txImageAccepted);
+        QVERIFY(!controller.startTx(imageUrl));
+        QCOMPARE(tx->starts, 0);
+        QCOMPARE(imageAccepted.size(), 0);
+        QVERIFY(controller.error().contains(
+            QStringLiteral("Gallery snapshot"), Qt::CaseInsensitive));
+    }
+
+    void txRejectsGalleryIncompatibleImageBeforeJpeg2000Decode()
+    {
+        QTemporaryDir temporary;
+        QVERIFY(temporary.isValid());
+        const auto native = hamdrm::makeNativeHamDrmJpeg2000Backend();
+        QVERIFY(native);
+
+        hamdrm::HamDrmLimits expandedLimits;
+        expandedLimits.maximumImageDimension = 8'193U;
+        expandedLimits.maximumImagePixels = 16'386U;
+        hamdrm::HamDrmRgbaImage source;
+        source.width = 8'193U;
+        source.height = 2U;
+        source.rgba.resize(
+            static_cast<std::size_t>(source.width) * source.height * 4U,
+            0x5aU);
+        for (std::size_t index = 3U; index < source.rgba.size(); index += 4U) {
+            source.rgba[index] = 0xffU;
+        }
+        const auto encodedJp2 = native->encodeLossless(source, expandedLimits);
+        QVERIFY2(encodedJp2.ok(), encodedJp2.status.detail.c_str());
+        const QUrl imageUrl = writeFixture(
+            temporary.filePath(QStringLiteral("gallery-too-wide.jp2")),
+            *encodedJp2.value);
+        QVERIFY(imageUrl.isValid());
+
+        auto counting = std::make_shared<CountingJpeg2000Backend>(native);
+        auto tx = std::make_shared<FakeTxBackend>();
+        hamdrm::HamDrmControllerConfig config;
+        config.limits = expandedLimits;
+        hamdrm::HamDrmController controller(
+            config, backends({}, tx, counting));
+        QSignalSpy imageAccepted(
+            &controller, &hamdrm::HamDrmController::txImageAccepted);
+        QVERIFY(!controller.startTx(imageUrl));
+        QCOMPARE(counting->decodeCalls, 0);
+        QCOMPARE(tx->starts, 0);
+        QCOMPARE(imageAccepted.size(), 0);
+        QVERIFY(controller.error().contains(
+            QStringLiteral("Gallery snapshot"), Qt::CaseInsensitive));
     }
 };
 

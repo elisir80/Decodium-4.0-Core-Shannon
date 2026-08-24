@@ -5,15 +5,18 @@
 #include "HamDrmBsrCodec.h"
 #include "src/sstv/diagnostics/SstvDiagnosticLogging.h"
 
+#include <QBuffer>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QImageReader>
 #include <QMetaObject>
 #include <QStringList>
 #include <QThread>
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <stdexcept>
 #include <utility>
@@ -50,6 +53,106 @@ namespace {
 constexpr std::size_t kMaximumControllerInboxObjects = 4'096U;
 constexpr std::size_t kMaximumControllerErrorCharacters = 65'536U;
 constexpr std::size_t kMaximumMissingTextItems = 256U;
+// Match the default Gallery decoded-image allowance.  The archive snapshot
+// must not turn a structurally valid HAMDRM object into a larger, unbounded
+// Qt decoder allocation.
+constexpr std::uint32_t kMaximumGallerySnapshotDimension = 8'192U;
+constexpr std::uint64_t kMaximumGallerySnapshotPixels =
+    32ULL * 1024ULL * 1024ULL;
+constexpr std::uint64_t kMaximumGallerySnapshotBytes =
+    128ULL * 1024ULL * 1024ULL;
+
+bool gallerySnapshotWithinLimits(std::uint32_t width,
+                                 std::uint32_t height,
+                                 const HamDrmLimits& limits) noexcept
+{
+    if (width == 0U || height == 0U
+        || width > limits.maximumImageDimension
+        || height > limits.maximumImageDimension
+        || width > kMaximumGallerySnapshotDimension
+        || height > kMaximumGallerySnapshotDimension) {
+        return false;
+    }
+    const std::uint64_t pixels = static_cast<std::uint64_t>(width)
+        * static_cast<std::uint64_t>(height);
+    return pixels <= limits.maximumImagePixels
+        && pixels <= kMaximumGallerySnapshotPixels
+        && pixels <= std::numeric_limits<std::uint64_t>::max() / 4U
+        && pixels * 4U <= kMaximumGallerySnapshotBytes
+        && pixels * 4U
+            <= static_cast<std::uint64_t>(
+                std::numeric_limits<qsizetype>::max());
+}
+
+QImage decodeGalleryImage(const QByteArray& bytes,
+                          const HamDrmImageInfo& info,
+                          const HamDrmLimits& limits)
+{
+    if (bytes.isEmpty()
+        || info.width == 0U || info.height == 0U
+        || info.width > static_cast<std::uint32_t>(
+            std::numeric_limits<int>::max())
+        || info.height > static_cast<std::uint32_t>(
+            std::numeric_limits<int>::max())
+        // This is deliberately checked before QImageReader::read(): the
+        // native allocation-free validator and this Gallery copy share the
+        // same dimension/pixel policy, plus the Gallery decoded-byte cap.
+        || !gallerySnapshotWithinLimits(info.width, info.height, limits)) {
+        return {};
+    }
+    QBuffer input;
+    input.setData(bytes);
+    if (!input.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    QImageReader reader(&input);
+    reader.setAutoTransform(false);
+    const QSize expected(static_cast<int>(info.width),
+                         static_cast<int>(info.height));
+    if (reader.size() != expected) {
+        return {};
+    }
+    const QImage decoded = reader.read();
+    if (decoded.isNull() || decoded.size() != expected) {
+        return {};
+    }
+    const QImage normalized = decoded.convertToFormat(QImage::Format_RGBA8888);
+    if (normalized.isNull() || normalized.sizeInBytes() <= 0
+        || static_cast<std::uint64_t>(normalized.sizeInBytes())
+            > kMaximumGallerySnapshotBytes) {
+        return {};
+    }
+    return normalized;
+}
+
+QImage galleryImageFromRgba(const HamDrmRgbaImage& decoded,
+                            const HamDrmLimits& limits)
+{
+    if (decoded.width == 0U || decoded.height == 0U
+        || decoded.width > static_cast<std::uint32_t>(
+            std::numeric_limits<int>::max())
+        || decoded.height > static_cast<std::uint32_t>(
+            std::numeric_limits<int>::max())
+        || !gallerySnapshotWithinLimits(decoded.width, decoded.height,
+                                        limits)) {
+        return {};
+    }
+    const std::uint64_t pixels = static_cast<std::uint64_t>(decoded.width)
+        * static_cast<std::uint64_t>(decoded.height);
+    if (pixels > std::numeric_limits<std::size_t>::max() / 4U
+        || decoded.rgba.size() != static_cast<std::size_t>(pixels * 4U)) {
+        return {};
+    }
+    QImage image(static_cast<int>(decoded.width),
+                 static_cast<int>(decoded.height),
+                 QImage::Format_RGBA8888);
+    if (image.isNull()
+        || image.sizeInBytes() != static_cast<qsizetype>(pixels * 4U)) {
+        return {};
+    }
+    std::memcpy(image.bits(), decoded.rgba.data(), decoded.rgba.size());
+    return image;
+}
 
 class NativeJpeg2000Backend final : public HamDrmJpeg2000Backend
 {
@@ -882,6 +985,18 @@ HamDrmController::readTxImage(const QUrl& localImage,
     candidate.metadata = *canonicalMetadata.value;
     candidate.imageInfo = *image.value;
     candidate.canonicalPath = canonicalPath;
+    // This guard is intentionally before either OpenJPEG or QImageReader.
+    // The persisted Gallery uses the same 8192 px / 32 MiB-pixel / 128 MiB
+    // decoded-image envelope, so an otherwise valid HAMDRM object cannot
+    // make the decoder allocate an image that the archive must later reject.
+    if (!gallerySnapshotWithinLimits(candidate.imageInfo.width,
+                                     candidate.imageInfo.height,
+                                     config_.limits)) {
+        return {std::nullopt,
+                HamDrmStatus::failure(
+                    HamDrmErrorCode::LimitExceeded,
+                    "HAMDRM TX image exceeds bounded Gallery snapshot limits")};
+    }
     if (candidate.imageInfo.format == HamDrmImageFormat::Jpeg2000) {
         const HamDrmJpeg2000Capability capability = jpegCapability();
         if (!capability.decodeAvailable || !backends_.jpeg2000) {
@@ -918,7 +1033,13 @@ HamDrmController::readTxImage(const QUrl& localImage,
                             "JPEG2000 decoded dimensions differ from JP2 metadata")};
             }
             candidate.jpeg2000Decoded = true;
+            candidate.galleryImage = galleryImageFromRgba(*decoded.value,
+                                                          config_.limits);
         }
+    } else {
+        candidate.galleryImage = decodeGalleryImage(candidate.bytes,
+                                                    candidate.imageInfo,
+                                                    config_.limits);
     }
     return {std::move(candidate), HamDrmStatus::success()};
 }
@@ -1003,6 +1124,14 @@ bool HamDrmController::startTx(const QUrl& localImage)
     }
     lastImageValidation_ = imageValidationMap(*candidate.value);
     emit imageValidationChanged();
+    // The accepted TX must have an exact, bounded Gallery snapshot.  Do this
+    // before the waveform backend sees any object: a structurally valid image
+    // that Qt cannot decode must not become an unarchived on-air TX.
+    if (candidate.value->galleryImage.isNull()) {
+        setTxState(OperationState::Error, 0.0);
+        return reject(QStringLiteral("tx"),
+                      tr("HAMDRM TX image cannot be archived as a bounded Gallery snapshot"));
+    }
 
     const auto encoded = encodeHamDrmObject(
         candidate.value->metadata,
@@ -1045,6 +1174,10 @@ bool HamDrmController::startTx(const QUrl& localImage)
         && txState_ == OperationState::Starting) {
         setTxState(OperationState::Active, 0.0);
     }
+    emit txImageAccepted(
+        candidate.value->galleryImage,
+        QString::fromStdString(profile->id),
+        static_cast<int>(profile->occupiedBandwidthHz));
     return true;
 }
 

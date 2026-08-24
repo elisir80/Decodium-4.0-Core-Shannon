@@ -40,6 +40,44 @@ QObject* requiredObject(QObject* root, const char* objectName)
     return object;
 }
 
+class WorkspaceCloseEngineFixture final : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(bool sstvRxRequested READ sstvRxRequested CONSTANT)
+    Q_PROPERTY(bool sstvTxActive READ sstvTxActive
+               NOTIFY sstvTxActiveChanged)
+    Q_PROPERTY(bool sstvRxActive READ sstvRxActive CONSTANT)
+    Q_PROPERTY(bool sstvAvailable READ sstvAvailable CONSTANT)
+    Q_PROPERTY(QObject* sstvDigital READ sstvDigital CONSTANT)
+
+public:
+    bool sstvRxRequested() const noexcept { return true; }
+    bool sstvTxActive() const noexcept { return m_sstvTxActive; }
+    bool sstvRxActive() const noexcept { return false; }
+    bool sstvAvailable() const noexcept { return true; }
+    QObject* sstvDigital() const noexcept { return nullptr; }
+    QStringList calls() const { return m_calls; }
+
+    Q_INVOKABLE void stopSstvRx()
+    {
+        m_calls.append(QStringLiteral("stop-rx"));
+    }
+
+    Q_INVOKABLE void cancelSstvTx()
+    {
+        m_calls.append(QStringLiteral("cancel-tx"));
+        m_sstvTxActive = false;
+        emit sstvTxActiveChanged();
+    }
+
+signals:
+    void sstvTxActiveChanged();
+
+private:
+    bool m_sstvTxActive {true};
+    QStringList m_calls;
+};
+
 } // namespace
 
 class TestSstvDigitalQml final : public QObject
@@ -199,6 +237,35 @@ private slots:
                  "Rendered SSTV workspace lacks meaningful visual content");
         QVERIFY2(runtimeWarnings.isEmpty(),
                  qPrintable(runtimeWarnings.join(QLatin1Char('\n'))));
+    }
+
+    void workspaceCloseCancelsActiveAnalogTxBeforeHiding()
+    {
+        WorkspaceCloseEngineFixture bridge;
+        QQmlEngine engine;
+        const QString sourcePath = QString::fromUtf8(
+            DECODIUM_SSTV_WORKSPACE_QML_SOURCE);
+        QQmlComponent component(&engine,
+                                QUrl::fromLocalFile(sourcePath),
+                                QQmlComponent::PreferSynchronous);
+        QVERIFY2(component.isReady(), qPrintable(qmlErrors(component.errors())));
+        QVariantMap initial;
+        initial.insert(QStringLiteral("engine"),
+                       QVariant::fromValue(static_cast<QObject*>(&bridge)));
+        QScopedPointer<QObject> object(
+            component.createWithInitialProperties(initial));
+        QVERIFY2(object, qPrintable(qmlErrors(component.errors())));
+        auto* window = qobject_cast<QQuickWindow*>(object.data());
+        QVERIFY(window);
+
+        window->show();
+        QTRY_VERIFY_WITH_TIMEOUT(window->isVisible(), 2'000);
+        QVERIFY(window->close());
+        QTRY_VERIFY_WITH_TIMEOUT(!window->isVisible(), 2'000);
+        QCOMPARE(bridge.calls(),
+                 QStringList({QStringLiteral("stop-rx"),
+                              QStringLiteral("cancel-tx")}));
+        QVERIFY(!bridge.sstvTxActive());
     }
 };
 

@@ -4,25 +4,23 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
-Item {
+SstvPage {
     id: root
 
     required property var engine
-    property color primaryTextColor: "#e5edf3"
-    property color secondaryTextColor: "#91a0ab"
-    property color accentColor: "#24c9ee"
-    property color borderColor: "#273946"
     readonly property var gallery: root.engine ? root.engine.sstvGallery : null
     property bool filtersExpanded: false
     property bool deletePending: false
     property bool deleteFilesPending: false
     property bool exportPending: false
+    property bool metadataUpdatePending: false
     property bool retentionPending: false
     property bool gridViewMode: true
     property string exportRecordId: ""
     property string noticeText: ""
     property bool noticeIsError: false
     property var selectedMetadata: ({})
+    property string metadataEditRecordId: ""
     readonly property int visibleRecordCount: root.gridViewMode
                                                ? galleryView.count
                                                : galleryListView.count
@@ -170,6 +168,50 @@ Item {
         root.selectedMetadata = record
     }
 
+    function editableTags(text) {
+        return text.split(",").map(function(value) {
+            return value.trim()
+        }).filter(function(value) {
+            return value.length > 0
+        })
+    }
+
+    function editUserMetadata(record) {
+        if (!record || !record.recordId || root.metadataUpdatePending)
+            return false
+        root.metadataEditRecordId = record.recordId
+        metadataTagsField.text = record.tags && record.tags.length > 0
+                ? record.tags.join(", ") : ""
+        metadataNoteField.text = record.note || ""
+        metadataEditDialog.open()
+        return true
+    }
+
+    function submitUserMetadata() {
+        if (!root.gallery || root.metadataEditRecordId.length === 0)
+            return false
+        const requestId = root.gallery.updateUserMetadata(
+            root.metadataEditRecordId, metadataNoteField.text,
+            root.editableTags(metadataTagsField.text))
+        if (requestId === 0) {
+            root.showNotice(qsTr("The Gallery metadata update could not be queued."), true)
+            return false
+        }
+        root.metadataUpdatePending = true
+        return true
+    }
+
+    function updateSelectedUserMetadata(recordId, note, tags) {
+        if (!root.selectedMetadata || root.selectedMetadata.recordId !== recordId)
+            return
+        const updated = {}
+        for (const key in root.selectedMetadata)
+            updated[key] = root.selectedMetadata[key]
+        updated.note = note
+        updated.tags = tags
+        root.selectedMetadata = updated
+    }
+
     function qualityText(metrics, key, digits, suffix) {
         if (!metrics || metrics[key] === undefined
                 || !Number.isFinite(Number(metrics[key])))
@@ -227,6 +269,12 @@ Item {
             text: qsTr("Save / export PNG...")
             enabled: !root.exportPending
             onTriggered: root.exportRecord(actionsMenu.record.recordId)
+        }
+        MenuItem {
+            objectName: "sstvGalleryEditMetadataAction"
+            text: qsTr("Edit notes and tags...")
+            enabled: root.gallery && !root.metadataUpdatePending
+            onTriggered: root.editUserMetadata(actionsMenu.record)
         }
         MenuItem {
             text: qsTr("Prepare retransmission in Studio")
@@ -340,6 +388,20 @@ Item {
                                                   : qsTr("Favourite update failed."), true)
         }
 
+        function onUserMetadataUpdateFinished(requestId, recordId, note,
+                                              tags, ok, error) {
+            root.metadataUpdatePending = false
+            if (!ok) {
+                root.showNotice(error.length > 0 ? error
+                                                  : qsTr("Gallery metadata update failed."), true)
+                return
+            }
+            root.updateSelectedUserMetadata(recordId, note, tags)
+            if (root.metadataEditRecordId === recordId)
+                metadataEditDialog.close()
+            root.showNotice(qsTr("Gallery notes and tags saved."), false)
+        }
+
         function onRetentionPreviewFinished(requestId, ok, error) {
             root.retentionPending = false
             if (!ok) {
@@ -389,6 +451,97 @@ Item {
                 root.showNotice(qsTr("The Gallery export request could not be queued."), true)
             } else {
                 root.exportPending = true
+            }
+        }
+    }
+
+    Popup {
+        id: metadataEditDialog
+        objectName: "sstvGalleryEditMetadataDialog"
+        anchors.centerIn: parent
+        width: Math.min(560, root.width - 40)
+        height: 390
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
+        padding: 16
+        background: Rectangle {
+            color: "#111c25"
+            border.color: root.accentColor
+            border.width: 1
+            radius: 8
+        }
+        contentItem: ColumnLayout {
+            spacing: 9
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Edit Gallery notes and tags")
+                color: root.accentColor
+                font.pixelSize: 16
+                font.bold: true
+            }
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Tags are local Gallery metadata. They do not change the image, radio reception data or a remote transfer.")
+                color: root.secondaryTextColor
+                wrapMode: Text.WordWrap
+            }
+            Label {
+                text: qsTr("Tags")
+                color: root.secondaryTextColor
+            }
+            TextField {
+                id: metadataTagsField
+                objectName: "sstvGalleryMetadataTags"
+                Layout.fillWidth: true
+                enabled: !root.metadataUpdatePending
+                maximumLength: 2079
+                selectByMouse: true
+                placeholderText: qsTr("Comma separated")
+                Accessible.name: qsTr("Gallery tags")
+            }
+            Label {
+                text: qsTr("Note")
+                color: root.secondaryTextColor
+            }
+            TextArea {
+                id: metadataNoteField
+                objectName: "sstvGalleryMetadataNote"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                enabled: !root.metadataUpdatePending
+                wrapMode: TextEdit.Wrap
+                selectByMouse: true
+                placeholderText: qsTr("Optional operator note")
+                onTextChanged: {
+                    if (text.length > 4096)
+                        text = text.slice(0, 4096)
+                }
+                Accessible.name: qsTr("Gallery note")
+            }
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Up to 32 tags of 64 characters and a 4096-character note.")
+                color: root.secondaryTextColor
+                font.pixelSize: 10
+                wrapMode: Text.WordWrap
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Item { Layout.fillWidth: true }
+                Button {
+                    text: qsTr("Cancel")
+                    enabled: !root.metadataUpdatePending
+                    onClicked: metadataEditDialog.close()
+                }
+                Button {
+                    objectName: "sstvGallerySaveMetadata"
+                    text: qsTr("Save metadata")
+                    enabled: !root.metadataUpdatePending
+                             && root.metadataEditRecordId.length > 0
+                    highlighted: true
+                    onClicked: root.submitUserMetadata()
+                }
             }
         }
     }
@@ -929,6 +1082,13 @@ Item {
                         font.bold: true
                         elide: Text.ElideRight
                     }
+                    ToolButton {
+                        objectName: "sstvGalleryEditSelectedMetadata"
+                        text: qsTr("Edit")
+                        enabled: root.gallery && !root.metadataUpdatePending
+                        onClicked: root.editUserMetadata(root.selectedMetadata)
+                        Accessible.name: qsTr("Edit notes and tags")
+                    }
                     Label {
                         text: root.selectedMetadata.complete
                               ? qsTr("COMPLETE") : qsTr("PARTIAL %1%").arg(
@@ -1076,6 +1236,7 @@ Item {
                     required property bool remote
                     required property string uploadStateName
                     required property var tags
+                    required property string note
                     required property bool selected
                     required property string imagePath
                     required property int imageWidth
@@ -1105,6 +1266,7 @@ Item {
                         "remote": card.remote,
                         "uploadStateName": card.uploadStateName,
                         "tags": card.tags,
+                        "note": card.note,
                         "imagePath": card.imagePath,
                         "imageWidth": card.imageWidth,
                         "imageHeight": card.imageHeight,
@@ -1383,6 +1545,7 @@ Item {
                     required property bool remote
                     required property string uploadStateName
                     required property var tags
+                    required property string note
                     required property bool selected
                     required property string imagePath
                     required property int imageWidth
@@ -1412,6 +1575,7 @@ Item {
                         "remote": listCard.remote,
                         "uploadStateName": listCard.uploadStateName,
                         "tags": listCard.tags,
+                        "note": listCard.note,
                         "imagePath": listCard.imagePath,
                         "imageWidth": listCard.imageWidth,
                         "imageHeight": listCard.imageHeight,

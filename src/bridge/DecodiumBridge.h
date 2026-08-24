@@ -2554,6 +2554,12 @@ private:
     QSet<QString> m_sstvRxPendingSaveKeys;
     QSet<QString> m_sstvRxSavedKeys;
     QQueue<QString> m_sstvRxSavedKeyOrder;
+    // A preparation revision is immutable once handed to the storage worker.
+    // Keep the dedupe key in the bridge so a worker that becomes ready after
+    // Studio preparation still archives exactly one Draft for that revision.
+    quint64 m_sstvStudioPreparedGeneration {0U};
+    quint64 m_sstvStudioDraftQueuedGeneration {0U};
+    QHash<quint64, QString> m_sstvTxGallerySaveRequests;
     std::unique_ptr<decodium::sstv::SstvTxCoordinator> m_sstvTxCoordinator;
     QPointer<decodium::sstv::SstvTxAudioDevice> m_sstvTxAudioDevice;
     // A resolved local output is pinned before the coordinator can acquire
@@ -4180,6 +4186,9 @@ private:
 #if DECODIUM_HAS_SSTV && DECODIUM_HAS_HAMDRM
     decodium::sstv::hamdrm::HamDrmStatus activateHamDrmRxTap();
     void deactivateHamDrmRxTap();
+    void queueHamDrmTransmittedImage(QImage image,
+                                     QString profileId,
+                                     int occupiedBandwidthHz);
     decodium::sstv::SstvTxCoordinatorResult startHamDrmPreparedAudio(
         std::unique_ptr<decodium::sstv::SstvPcm16Source> source,
         std::string mode);
@@ -4193,6 +4202,12 @@ private:
         decodium::sstv::SstvImageRecord record);
     bool queueSstvIncomingImport(const QString& transferId);
     bool queueSstvRxImageSave(bool automatic);
+    void handleSstvStudioPreparedChanged();
+    void queueSstvStudioDraftImage();
+    void queueSstvStudioTransmittedImage(
+        std::shared_ptr<const QImage> prepared,
+        QString fskId,
+        quint64 sessionId);
     void maybeAutoSaveSstvRxImage();
     void setSstvRxSaveStatus(QString state, QString error = {});
     bool queueSstvQsoAssociation(quint64 requestId,

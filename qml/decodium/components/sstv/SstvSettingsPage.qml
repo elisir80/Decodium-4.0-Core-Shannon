@@ -3,15 +3,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-Item {
+SstvPage {
     id: root
     required property var engine
-    property color primaryTextColor: "#e5edf3"
-    property color secondaryTextColor: "#91a0ab"
-    property color accentColor: "#24c9ee"
-    property color borderColor: "#273946"
-    property color successColor: "#43d17b"
-    property color warningColor: "#ffb454"
     readonly property var sharing: root.engine ? root.engine.sstvShare : null
     readonly property var digital: root.engine ? root.engine.sstvDigital : null
     readonly property var gallery: root.engine ? root.engine.sstvGallery : null

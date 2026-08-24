@@ -4,17 +4,10 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
-Item {
+SstvPage {
     id: root
 
     required property var engine
-    property color panelColor: "#111c25"
-    property color borderColor: "#273946"
-    property color primaryTextColor: "#e5edf3"
-    property color secondaryTextColor: "#91a0ab"
-    property color accentColor: "#24c9ee"
-    property color successColor: "#43d17b"
-    property color warningColor: "#ffb454"
     property string feedback: ""
     property string imageViewMode: "fit"
     property real imageZoom: 1.0

@@ -4,16 +4,12 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
-Item {
+SstvPage {
     id: root
     objectName: "sstvDigitalPage"
 
     required property var controller
-    property color primaryTextColor: "#e5edf3"
-    property color secondaryTextColor: "#91a0ab"
-    property color accentColor: "#24c9ee"
-    property color borderColor: "#273946"
-    property color panelColor: "#081017"
+    panelColor: "#081017"
     property url selectedTxImage: ""
     readonly property var capability: root.controller
                                       ? root.controller.capabilities : ({})

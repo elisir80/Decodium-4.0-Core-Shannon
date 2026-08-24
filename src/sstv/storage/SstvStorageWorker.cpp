@@ -147,6 +147,20 @@ QString tagsJson(const QStringList& tags)
         QJsonDocument(array).toJson(QJsonDocument::Compact));
 }
 
+void normalizeUserMetadata(QString* note, QStringList* tags)
+{
+    Q_ASSERT(note);
+    Q_ASSERT(tags);
+    // Notes intentionally keep their whitespace and line breaks. Tags are
+    // canonicalized just like Gallery query tags so the indexed, sidecar and
+    // visible spellings agree. SstvImageRecord::validate remains the
+    // authoritative bound/control-character/duplicate check.
+    *note = note->normalized(QString::NormalizationForm_C);
+    for (QString& tag : *tags) {
+        tag = tag.trimmed().normalized(QString::NormalizationForm_C);
+    }
+}
+
 bool parseTagsJson(const QString& encoded, QStringList* tags, QString* error)
 {
     if (!tags) {
@@ -3581,6 +3595,127 @@ void SstvStorageWorker::associateWithQso(QString imageId,
     }
     m_retentionPlan.reset();
     emit operationFinished(requestId, SstvStorageOperation::AssociateQso,
+                           true, {});
+    emit recordChanged(updated);
+}
+
+void SstvStorageWorker::updateUserMetadata(QString imageId,
+                                            QString note,
+                                            QStringList tags,
+                                            quint64 requestId)
+{
+    const auto reject = [this, requestId](const QString& error) {
+        emitOperationFailure(requestId,
+                             SstvStorageOperation::UpdateUserMetadata,
+                             error);
+    };
+    if (!requireOwnerThread(QStringLiteral("updateUserMetadata"))) {
+        reject(QStringLiteral(
+            "metadata update called outside the storage owner thread"));
+        return;
+    }
+    if (!m_initialized.load(std::memory_order_acquire)) {
+        reject(QStringLiteral("SSTV storage is not initialized"));
+        return;
+    }
+    if (!canonicalUuid(imageId)) {
+        reject(QStringLiteral("invalid SSTV record UUID"));
+        return;
+    }
+    normalizeUserMetadata(&note, &tags);
+
+    QSqlDatabase database = QSqlDatabase::database(m_connectionName, false);
+    QSqlQuery fetch(database);
+    fetch.prepare(QStringLiteral(
+        "SELECT %1 FROM sstv_images WHERE id=:id").arg(recordColumns()));
+    fetch.bindValue(QStringLiteral(":id"), imageId);
+    SstvImageRecord previous;
+    QString error;
+    const SstvImageStore store(m_layout, m_limits);
+    if (!fetch.exec() || !fetch.next()
+        || !readRecord(fetch, m_limits, &previous, &error)
+        || !store.verify(previous, true, &error)) {
+        reject(!error.isEmpty() ? error
+            : fetch.lastError().isValid()
+                ? queryFailure(QStringLiteral("fetch metadata record"), fetch)
+                : QStringLiteral("SSTV record was not found"));
+        return;
+    }
+    if (previous.note == note && previous.tags == tags) {
+        emit operationFinished(requestId,
+                               SstvStorageOperation::UpdateUserMetadata,
+                               true, {});
+        emit recordChanged(previous);
+        return;
+    }
+
+    SstvImageRecord updated = previous;
+    updated.note = std::move(note);
+    updated.tags = std::move(tags);
+    const QDateTime now = QDateTime::currentDateTimeUtc();
+    updated.updatedAtUtc = now > previous.updatedAtUtc
+        ? now : previous.updatedAtUtc.addMSecs(1);
+    if (!updated.validate(m_limits, &error)
+        || !store.updateMetadata(updated, &error)) {
+        reject(error.isEmpty()
+            ? QStringLiteral("could not update Gallery metadata sidecar")
+            : error);
+        return;
+    }
+
+    const auto restoreSidecar = [&]() {
+        QString restoreError;
+        if (!store.updateMetadata(previous, &restoreError)) {
+            error += QStringLiteral(
+                "; original sidecar restoration failed: %1")
+                .arg(restoreError);
+        }
+    };
+    if (!database.transaction()) {
+        error = databaseFailure(
+            QStringLiteral("begin Gallery metadata update"), database);
+        restoreSidecar();
+        reject(error);
+        return;
+    }
+    QSqlQuery update(database);
+    if (!update.prepare(QStringLiteral(
+            "UPDATE sstv_images SET note=:note,tags_json=:tags_json,"
+            "updated_at_ms=:updated WHERE id=:id "
+            "AND updated_at_ms=:previous_updated"))) {
+        error = queryFailure(QStringLiteral("prepare Gallery metadata update"),
+                             update);
+        database.rollback();
+        restoreSidecar();
+        reject(error);
+        return;
+    }
+    update.bindValue(QStringLiteral(":note"), updated.note);
+    update.bindValue(QStringLiteral(":tags_json"), tagsJson(updated.tags));
+    update.bindValue(QStringLiteral(":updated"),
+                     updated.updatedAtUtc.toMSecsSinceEpoch());
+    update.bindValue(QStringLiteral(":id"), imageId);
+    update.bindValue(QStringLiteral(":previous_updated"),
+                     previous.updatedAtUtc.toMSecsSinceEpoch());
+    if (!update.exec() || update.numRowsAffected() != 1
+        || !replaceTags(database, updated, &error) || !database.commit()) {
+        if (error.isEmpty()) {
+            error = update.lastError().isValid()
+                ? queryFailure(QStringLiteral("update Gallery metadata"), update)
+                : database.lastError().isValid()
+                    ? databaseFailure(
+                        QStringLiteral("commit Gallery metadata update"),
+                        database)
+                    : QStringLiteral("Gallery record changed concurrently");
+        }
+        database.rollback();
+        restoreSidecar();
+        reject(error);
+        return;
+    }
+    m_retentionPlan.reset();
+    emit operationFinished(requestId,
+                           SstvStorageOperation::UpdateUserMetadata,
                            true, {});
     emit recordChanged(updated);
 }

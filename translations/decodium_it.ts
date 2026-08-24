@@ -2749,6 +2749,18 @@ Premi Monitor per iniziare</translation>
         <translation>TX HAMDRM accettata dal controllo audio/PTT di Decodium</translation>
     </message>
     <message>
+        <source>HAMDRM TX was accepted, but Gallery storage is not ready; the transmitted image was not archived</source>
+        <translation>La TX HAMDRM è stata accettata, ma l&apos;archivio della Galleria non è pronto; l&apos;immagine trasmessa non è stata archiviata</translation>
+    </message>
+    <message>
+        <source>The accepted HAMDRM TX image could not be archived</source>
+        <translation>Impossibile archiviare l&apos;immagine TX HAMDRM accettata</translation>
+    </message>
+    <message>
+        <source>Could not queue the accepted HAMDRM TX image for Gallery storage</source>
+        <translation>Impossibile mettere in coda l&apos;immagine TX HAMDRM accettata per l&apos;archiviazione nella Galleria</translation>
+    </message>
+    <message>
         <location line="+34"/>
         <source>Native SSTV TX is unavailable</source>
         <translation>La TX SSTV nativa non è disponibile</translation>
@@ -2794,6 +2806,18 @@ Premi Monitor per iniziare</translation>
         <translation>TX SSTV accettata: %1</translation>
     </message>
     <message>
+        <source>SSTV TX was accepted, but Gallery storage is not ready; the transmitted image was not archived</source>
+        <translation>La TX SSTV è stata accettata, ma l&apos;archivio della Galleria non è pronto; l&apos;immagine trasmessa non è stata archiviata</translation>
+    </message>
+    <message>
+        <source>The accepted SSTV TX image could not be archived</source>
+        <translation>Impossibile archiviare l&apos;immagine TX SSTV accettata</translation>
+    </message>
+    <message>
+        <source>Could not queue the accepted SSTV TX image for Gallery storage</source>
+        <translation>Impossibile mettere in coda l&apos;immagine TX SSTV accettata per l&apos;archiviazione nella Galleria</translation>
+    </message>
+    <message>
         <location line="+5"/>
         <location line="+1216"/>
         <source>This Decodium build has no native SSTV support</source>
@@ -2833,6 +2857,30 @@ Premi Monitor per iniziare</translation>
         <location line="+1"/>
         <source>SSTV image save failed: %1</source>
         <translation>Salvataggio dell&apos;immagine SSTV non riuscito: %1</translation>
+    </message>
+    <message>
+        <source>Prepared SSTV Studio image saved in Gallery: %1</source>
+        <translation>Immagine preparata in SSTV Studio salvata nella Galleria: %1</translation>
+    </message>
+    <message>
+        <source>Transmitted SSTV image saved in Gallery: %1</source>
+        <translation>Immagine SSTV trasmessa salvata nella Galleria: %1</translation>
+    </message>
+    <message>
+        <source>Prepared SSTV Studio image save failed: %1</source>
+        <translation>Salvataggio dell&apos;immagine preparata in SSTV Studio non riuscito: %1</translation>
+    </message>
+    <message>
+        <source>Transmitted SSTV image save failed: %1</source>
+        <translation>Salvataggio dell&apos;immagine SSTV trasmessa non riuscito: %1</translation>
+    </message>
+    <message>
+        <source>The prepared SSTV Studio image could not be archived</source>
+        <translation>Impossibile archiviare l&apos;immagine preparata in SSTV Studio</translation>
+    </message>
+    <message>
+        <source>Could not queue the prepared SSTV Studio image for Gallery storage</source>
+        <translation>Impossibile mettere in coda l&apos;immagine preparata in SSTV Studio per l&apos;archiviazione nella Galleria</translation>
     </message>
     <message>
         <location line="+22"/>
@@ -8888,6 +8936,11 @@ Clic destro: disconnetti</translation>
     <message>
         <source>DECØMETER - RF Meter - Decodium</source>
         <translation>DECØMETER - Misuratore RF - Decodium</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/Main.qml" line="12369"/>
+        <source>SSTV - image radio... (BETA)</source>
+        <translation>SSTV - image radio... (BETA)</translation>
     </message>
 </context>
 <context>
@@ -30398,6 +30451,62 @@ VUCC: %2</translation>
         <translation>Il flusso di lavoro QSO SSTV nativo non è disponibile.</translation>
     </message>
     <message>
+        <source>The Gallery metadata update could not be queued.</source>
+        <translation>Impossibile mettere in coda l&apos;aggiornamento dei metadati della Galleria.</translation>
+    </message>
+    <message>
+        <source>Edit notes and tags...</source>
+        <translation>Modifica note e tag...</translation>
+    </message>
+    <message>
+        <source>Gallery metadata update failed.</source>
+        <translation>Aggiornamento dei metadati della Galleria non riuscito.</translation>
+    </message>
+    <message>
+        <source>Gallery notes and tags saved.</source>
+        <translation>Note e tag della Galleria salvati.</translation>
+    </message>
+    <message>
+        <source>Edit Gallery notes and tags</source>
+        <translation>Modifica note e tag della Galleria</translation>
+    </message>
+    <message>
+        <source>Tags are local Gallery metadata. They do not change the image, radio reception data or a remote transfer.</source>
+        <translation>I tag sono metadati locali della Galleria. Non modificano l&apos;immagine, i dati di ricezione radio o un trasferimento remoto.</translation>
+    </message>
+    <message>
+        <source>Gallery tags</source>
+        <translation>Tag della Galleria</translation>
+    </message>
+    <message>
+        <source>Note</source>
+        <translation>Nota</translation>
+    </message>
+    <message>
+        <source>Optional operator note</source>
+        <translation>Nota facoltativa dell&apos;operatore</translation>
+    </message>
+    <message>
+        <source>Gallery note</source>
+        <translation>Nota della Galleria</translation>
+    </message>
+    <message>
+        <source>Up to 32 tags of 64 characters and a 4096-character note.</source>
+        <translation>Fino a 32 tag di 64 caratteri e una nota di 4096 caratteri.</translation>
+    </message>
+    <message>
+        <source>Save metadata</source>
+        <translation>Salva metadati</translation>
+    </message>
+    <message>
+        <source>Edit</source>
+        <translation>Modifica</translation>
+    </message>
+    <message>
+        <source>Edit notes and tags</source>
+        <translation>Modifica note e tag</translation>
+    </message>
+    <message>
         <location line="+29"/>
         <source>Frequency filters must be valid MHz values.</source>
         <translation>I filtri di frequenza devono avere valori MHz validi.</translation>
@@ -35120,6 +35229,10 @@ VUCC: %2</translation>
         <location line="+52"/>
         <source>HAMDRM waveform TX backend reported invalid progress</source>
         <translation>Il backend TX della forma d&apos;onda HAMDRM ha segnalato un avanzamento non valido</translation>
+    </message>
+    <message>
+        <source>HAMDRM TX image cannot be archived as a bounded Gallery snapshot</source>
+        <translation>Impossibile archiviare l&apos;immagine TX HAMDRM come istantanea della Galleria entro i limiti</translation>
     </message>
 </context>
 <context>

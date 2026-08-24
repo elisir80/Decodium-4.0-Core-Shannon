@@ -3,6 +3,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 import QtQuick.Window
 
@@ -21,6 +22,16 @@ Window {
     readonly property color warning: theme ? theme.warningColor : "#ffb454"
     readonly property color rxStateColor: win.engine && win.engine.sstvRxActive
                                            ? win.success : win.textSecondary
+
+    // This is a separate top-level Window, so it does not inherit Main.qml's
+    // Material palette.  Keep the window controls on the same readable dark
+    // palette as the SSTV pages instead of falling back to host light controls.
+    Material.theme: win.theme && win.theme.isLightTheme
+                    ? Material.Light : Material.Dark
+    Material.accent: win.accent
+    Material.primary: win.accent
+    Material.foreground: win.textPrimary
+    Material.background: win.bg
 
     property int pageIndex: 0
     readonly property var pageLabels: [
@@ -48,6 +59,10 @@ Window {
         // Closing the workspace still owns an explicit stop for that session.
         if (win.engine && win.engine.sstvRxRequested)
             win.engine.stopSstvRx()
+        // Never hide the dedicated SSTV TX cancellation control while the
+        // shared audio/PTT coordinator still owns an analog transmission.
+        if (win.engine && win.engine.sstvTxActive)
+            win.engine.cancelSstvTx()
         if (win.engine && win.engine.sstvDigital)
             win.engine.sstvDigital.cancelAll()
         close.accepted = true

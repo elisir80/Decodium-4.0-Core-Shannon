@@ -4,13 +4,9 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
-Item {
+SstvPage {
     id: root
     required property var engine
-    property color primaryTextColor: "#e5edf3"
-    property color secondaryTextColor: "#91a0ab"
-    property color accentColor: "#24c9ee"
-    property color borderColor: "#273946"
     readonly property var studio: root.engine ? root.engine.sstvStudio : null
     readonly property var txDiagnostics: root.engine
                                                  ? root.engine.sstvTxDiagnostics

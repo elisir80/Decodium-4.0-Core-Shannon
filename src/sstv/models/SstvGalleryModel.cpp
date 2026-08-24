@@ -6,6 +6,7 @@
 #include "../storage/SstvStorageWorker.h"
 
 #include <QMetaObject>
+#include <QSet>
 #include <QTimeZone>
 #include <QVariant>
 
@@ -17,6 +18,99 @@ namespace decodium::sstv {
 namespace {
 
 constexpr qsizetype kMaximumPendingQsoAssociations = 64;
+constexpr qsizetype kMaximumPendingUserMetadataUpdates = 64;
+constexpr qsizetype kMaximumUserMetadataNoteCharacters = 4096;
+constexpr qsizetype kMaximumUserMetadataTags = 32;
+
+QString normalizedUserNote(const QString& value)
+{
+    // Preserve meaningful leading/trailing whitespace and new lines in a
+    // free-form note.  NFC only gives the sidecar and SQLite a stable spelling
+    // for canonically equivalent Unicode input.
+    return value.normalized(QString::NormalizationForm_C);
+}
+
+QStringList normalizedUserTags(QStringList values)
+{
+    for (QString& value : values) {
+        value = value.trimmed().normalized(QString::NormalizationForm_C);
+    }
+    return values;
+}
+
+bool validUserMetadataText(const QString& value,
+                           qsizetype maximumCharacters,
+                           bool allowEmpty,
+                           bool allowLineBreaks,
+                           const QString& field,
+                           QString* error)
+{
+    if (!allowEmpty && value.trimmed().isEmpty()) {
+        if (error) {
+            *error = field + QStringLiteral(" must not be empty");
+        }
+        return false;
+    }
+    if (value.size() > maximumCharacters) {
+        if (error) {
+            *error = field + QStringLiteral(" exceeds its length limit");
+        }
+        return false;
+    }
+    for (QChar character : value) {
+        const ushort code = character.unicode();
+        if (code == 0U || code == 0x7fU
+            || (code < 0x20U
+                && !(allowLineBreaks
+                     && (code == '\n' || code == '\r' || code == '\t')))) {
+            if (error) {
+                *error = field + QStringLiteral(" contains control characters");
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
+bool validateUserMetadata(const QString& note,
+                          const QStringList& tags,
+                          QString* error)
+{
+    if (!validUserMetadataText(note, kMaximumUserMetadataNoteCharacters,
+                               true, true, QStringLiteral("SSTV note"),
+                               error)) {
+        return false;
+    }
+    if (tags.size() > kMaximumUserMetadataTags) {
+        if (error) {
+            *error = QStringLiteral("SSTV record contains too many tags");
+        }
+        return false;
+    }
+    QSet<QString> foldedTags;
+    for (const QString& tag : tags) {
+        if (!validUserMetadataText(tag, 64, false, false,
+                                   QStringLiteral("SSTV tag"), error)) {
+            return false;
+        }
+        const QString folded = tag.toCaseFolded();
+        if (folded.size() > 64) {
+            if (error) {
+                *error = QStringLiteral(
+                    "SSTV case-folded tag exceeds its length limit");
+            }
+            return false;
+        }
+        if (foldedTags.contains(folded)) {
+            if (error) {
+                *error = QStringLiteral("SSTV record contains duplicate tags");
+            }
+            return false;
+        }
+        foldedTags.insert(folded);
+    }
+    return true;
+}
 
 quint8 categoryFlag(SstvImageCategory category)
 {
@@ -302,6 +396,16 @@ void SstvGalleryModel::setStorageWorker(SstvStorageWorker* worker)
             QStringLiteral(
                 "storage worker changed; QSO association outcome is unknown"));
     }
+    const auto abandonedUserMetadata = m_userMetadataRequests;
+    m_userMetadataRequests.clear();
+    for (auto iterator = abandonedUserMetadata.cbegin();
+         iterator != abandonedUserMetadata.cend(); ++iterator) {
+        emit userMetadataUpdateFinished(
+            iterator.key(), iterator.value().imageId,
+            iterator.value().note, iterator.value().tags, false,
+            QStringLiteral(
+                "storage worker changed; metadata update outcome is unknown"));
+    }
     clearRetentionState(QStringLiteral(
         "storage worker changed; retention outcome is unknown"));
     m_worker = worker;
@@ -384,6 +488,16 @@ void SstvGalleryModel::setStorageWorker(SstvStorageWorker* worker)
                 iterator.value().qsoId, false,
                 QStringLiteral(
                     "storage worker was destroyed; QSO association outcome is unknown"));
+        }
+        const auto pendingUserMetadata = m_userMetadataRequests;
+        m_userMetadataRequests.clear();
+        for (auto iterator = pendingUserMetadata.cbegin();
+             iterator != pendingUserMetadata.cend(); ++iterator) {
+            emit userMetadataUpdateFinished(
+                iterator.key(), iterator.value().imageId,
+                iterator.value().note, iterator.value().tags, false,
+                QStringLiteral(
+                    "storage worker was destroyed; metadata update outcome is unknown"));
         }
         clearRetentionState(QStringLiteral(
             "storage worker was destroyed; retention outcome is unknown"));
@@ -1179,6 +1293,17 @@ void SstvGalleryModel::handleOperationFinished(
     bool ok,
     const QString& error)
 {
+    if (operation == SstvStorageOperation::UpdateUserMetadata) {
+        const auto pending = m_userMetadataRequests.find(requestId);
+        if (pending != m_userMetadataRequests.end()) {
+            const PendingUserMetadata metadata = pending.value();
+            m_userMetadataRequests.erase(pending);
+            emit userMetadataUpdateFinished(
+                requestId, metadata.imageId, metadata.note, metadata.tags,
+                ok, error);
+        }
+        return;
+    }
     if (operation == SstvStorageOperation::SetFavorite) {
         const auto pending = m_favoriteRequests.find(requestId);
         if (pending != m_favoriteRequests.end()) {
@@ -1320,6 +1445,53 @@ quint64 SstvGalleryModel::toggleFavorite(int row)
     }
     const SstvImageRecord& record = m_records.at(row);
     return setFavorite(record.id, !record.favorite);
+}
+
+quint64 SstvGalleryModel::updateUserMetadata(const QString& imageId,
+                                             const QString& note,
+                                             const QStringList& tags)
+{
+    const int row = indexOfId(imageId);
+    if (!m_acceptingResults || !m_worker || row < 0) {
+        return 0;
+    }
+    const QString normalizedNote = normalizedUserNote(note);
+    const QStringList normalizedTags = normalizedUserTags(tags);
+    QString validationError;
+    if (!validateUserMetadata(normalizedNote, normalizedTags,
+                              &validationError)) {
+        setErrorString(validationError);
+        return 0;
+    }
+    for (auto iterator = m_userMetadataRequests.cbegin();
+         iterator != m_userMetadataRequests.cend(); ++iterator) {
+        if (iterator.value().imageId == imageId) {
+            return 0;
+        }
+    }
+    if (m_userMetadataRequests.size() >= kMaximumPendingUserMetadataUpdates) {
+        setErrorString(QStringLiteral(
+            "too many SSTV metadata updates are already pending"));
+        return 0;
+    }
+
+    const quint64 requestId = nextRequestId();
+    m_userMetadataRequests.insert(
+        requestId, PendingUserMetadata {imageId, normalizedNote,
+                                        normalizedTags});
+    if (!m_worker->enqueueDatabaseOperation(
+            [imageId, normalizedNote, normalizedTags, requestId](
+                SstvStorageWorker& storage) {
+                storage.updateUserMetadata(imageId, normalizedNote,
+                                           normalizedTags, requestId);
+            })) {
+        m_userMetadataRequests.remove(requestId);
+        emit userMetadataUpdateFinished(
+            requestId, imageId, normalizedNote, normalizedTags, false,
+            QStringLiteral("could not queue SSTV metadata update"));
+        return 0;
+    }
+    return requestId;
 }
 
 quint64 SstvGalleryModel::associateWithQso(const QString& imageId,
@@ -1751,6 +1923,16 @@ void SstvGalleryModel::shutdown()
             iterator.value().qsoId, false,
             QStringLiteral(
                 "gallery model shut down; QSO association outcome is unknown"));
+    }
+    const auto pendingUserMetadata = m_userMetadataRequests;
+    m_userMetadataRequests.clear();
+    for (auto iterator = pendingUserMetadata.cbegin();
+         iterator != pendingUserMetadata.cend(); ++iterator) {
+        emit userMetadataUpdateFinished(
+            iterator.key(), iterator.value().imageId,
+            iterator.value().note, iterator.value().tags, false,
+            QStringLiteral(
+                "gallery model shut down; metadata update outcome is unknown"));
     }
     clearRetentionState(QStringLiteral(
         "gallery model shut down; retention outcome is unknown"));

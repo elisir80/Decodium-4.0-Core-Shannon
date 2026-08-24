@@ -10,6 +10,7 @@
 #include "HamDrmProfileRegistry.h"
 
 #include <QByteArray>
+#include <QImage>
 #include <QObject>
 #include <QString>
 #include <QUrl>
@@ -255,6 +256,12 @@ signals:
     void selectedObjectChanged();
     void bsrChanged();
     void imageValidationChanged();
+    // Emitted only after the waveform backend has accepted a validated TX
+    // object. The image is an in-memory normalized snapshot; no caller path
+    // crosses this boundary.
+    void txImageAccepted(QImage image,
+                         QString profileId,
+                         int occupiedBandwidthHz);
     void objectCompleted(quint16 transportId, const QString& filename);
     void operationRejected(const QString& operation, const QString& detail);
 
@@ -267,6 +274,7 @@ private:
         HamDrmImageInfo imageInfo;
         QString canonicalPath;
         bool jpeg2000Decoded {false};
+        QImage galleryImage;
     };
 
     static QVariantMap profileMap(const HamDrmProfile& profile);

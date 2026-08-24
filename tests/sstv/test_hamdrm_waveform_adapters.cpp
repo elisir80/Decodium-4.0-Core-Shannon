@@ -7,7 +7,9 @@
 #include "../../src/sstv/digital/waveform/HamDrmWaveformCodec.h"
 
 #include <QCoreApplication>
+#include <QColor>
 #include <QFile>
+#include <QImage>
 #include <QTemporaryDir>
 #include <QUrl>
 
@@ -85,27 +87,23 @@ std::vector<std::uint8_t> makeGroup()
 
 QUrl writeJpegFixture(const QString& path)
 {
-    std::vector<std::uint8_t> bytes {
-        0xffU, 0xd8U,
-        0xffU, 0xc0U, 0x00U, 0x11U, 0x08U,
-        0x00U, 0x09U,
-        0x00U, 0x0cU,
-        0x03U,
-        0x01U, 0x11U, 0x00U,
-        0x02U, 0x11U, 0x00U,
-        0x03U, 0x11U, 0x00U,
-        0xffU, 0xd9U,
-    };
-    bytes.resize(160U, 0U);
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly)
-        || file.write(reinterpret_cast<const char*>(bytes.data()),
-                      static_cast<qint64>(bytes.size()))
-            != static_cast<qint64>(bytes.size())
-        || !file.flush()) {
+    // The controller now requires a bounded, decodable Gallery snapshot
+    // before it permits waveform TX.  Use a real JPEG rather than a
+    // header-only structural fixture, which belongs in the rejection tests.
+    QImage image(12, 9, QImage::Format_RGB32);
+    if (image.isNull()) {
         return {};
     }
-    file.close();
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
+            image.setPixelColor(x, y, QColor::fromRgb(
+                (x * 31) % 256, (y * 43) % 256,
+                ((x + y) * 17) % 256));
+        }
+    }
+    if (!image.save(path, "JPG", 90)) {
+        return {};
+    }
     return QUrl::fromLocalFile(path);
 }
 

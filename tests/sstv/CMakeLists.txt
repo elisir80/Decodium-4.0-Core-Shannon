@@ -358,6 +358,28 @@ set_tests_properties (test_sstv_storage PROPERTIES
   ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
   )
 
+add_executable (test_sstv_tx_gallery_archive
+  test_sstv_tx_gallery_archive.cpp)
+target_link_libraries (test_sstv_tx_gallery_archive
+  PRIVATE
+    Decodium::SstvStorage
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Test
+  )
+set_target_properties (test_sstv_tx_gallery_archive PROPERTIES
+  AUTOMOC ON
+  CXX_EXTENSIONS OFF
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  )
+add_test (NAME test_sstv_tx_gallery_archive
+  COMMAND $<TARGET_FILE:test_sstv_tx_gallery_archive>)
+set_tests_properties (test_sstv_tx_gallery_archive PROPERTIES
+  LABELS "sstv;storage;gallery;tx"
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+  )
+
 add_executable (test_sstv_incoming_gallery_import
   test_sstv_incoming_gallery_import.cpp)
 target_link_libraries (test_sstv_incoming_gallery_import

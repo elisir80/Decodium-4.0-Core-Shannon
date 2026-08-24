@@ -232,6 +232,8 @@ add_library (decodium_sstv_storage STATIC
   storage/SstvGalleryQuery.h
   storage/SstvImageStorage.cpp
   storage/SstvImageStorage.h
+  storage/SstvTxGalleryArchive.cpp
+  storage/SstvTxGalleryArchive.h
   storage/SstvStorageWorker.cpp
   storage/SstvStorageWorker.h
   )

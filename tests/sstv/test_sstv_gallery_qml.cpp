@@ -147,6 +147,7 @@ SstvImageSaveRequest makeImageRequest()
     };
     request.record.slantCorrectionPpm = 12.5;
     request.record.tags = {QStringLiteral("rendered")};
+    request.record.note = QStringLiteral("Initial Gallery UI note");
     request.image = QImage(320, 256, QImage::Format_RGB32);
     for (int y = 0; y < request.image.height(); ++y) {
         for (int x = 0; x < request.image.width(); ++x) {
@@ -292,6 +293,16 @@ private slots:
             QStringLiteral("sstvGalleryListMode"));
         QObject* metadataPanel = page->findChild<QObject*>(
             QStringLiteral("sstvGalleryMetadataPanel"));
+        QObject* metadataEditButton = page->findChild<QObject*>(
+            QStringLiteral("sstvGalleryEditSelectedMetadata"));
+        QObject* metadataDialog = page->findChild<QObject*>(
+            QStringLiteral("sstvGalleryEditMetadataDialog"));
+        QObject* metadataTags = page->findChild<QObject*>(
+            QStringLiteral("sstvGalleryMetadataTags"));
+        QObject* metadataNote = page->findChild<QObject*>(
+            QStringLiteral("sstvGalleryMetadataNote"));
+        QObject* saveMetadata = page->findChild<QObject*>(
+            QStringLiteral("sstvGallerySaveMetadata"));
         QObject* gridView = page->findChild<QObject*>(
             QStringLiteral("sstvGalleryView"));
         QObject* listView = page->findChild<QObject*>(
@@ -309,6 +320,11 @@ private slots:
         QVERIFY(gridMode);
         QVERIFY(listMode);
         QVERIFY(metadataPanel);
+        QVERIFY(metadataEditButton);
+        QVERIFY(metadataDialog);
+        QVERIFY(metadataTags);
+        QVERIFY(metadataNote);
+        QVERIFY(saveMetadata);
         QVERIFY(gridView);
         QVERIFY(listView);
         QVERIFY(page->property("gridViewMode").toBool());
@@ -330,6 +346,33 @@ private slots:
         QVERIFY(QMetaObject::invokeMethod(favoriteToggle, "click"));
         QTRY_VERIFY_WITH_TIMEOUT(!model.data(
             model.index(0), SstvGalleryModel::FavoriteRole).toBool(), 5'000);
+        QVERIFY(QMetaObject::invokeMethod(metadataEditButton, "click"));
+        QTRY_VERIFY_WITH_TIMEOUT(metadataDialog->property("visible").toBool(),
+                                 2'000);
+        QCOMPARE(metadataTags->property("text").toString(),
+                 QStringLiteral("rendered"));
+        QCOMPARE(metadataNote->property("text").toString(),
+                 QStringLiteral("Initial Gallery UI note"));
+        metadataTags->setProperty("text", QStringLiteral(" portable, field-day "));
+        metadataNote->setProperty("text", QStringLiteral("Operator note"));
+        QVERIFY(QMetaObject::invokeMethod(saveMetadata, "click"));
+        QTRY_COMPARE_WITH_TIMEOUT(
+            model.data(model.index(0), SstvGalleryModel::NoteRole).toString(),
+            QStringLiteral("Operator note"), 5'000);
+        QTRY_COMPARE_WITH_TIMEOUT(
+            model.data(model.index(0), SstvGalleryModel::TagsRole).toStringList(),
+            QStringList({QStringLiteral("portable"),
+                         QStringLiteral("field-day")}), 5'000);
+        QTRY_VERIFY_WITH_TIMEOUT(
+            !metadataDialog->property("visible").toBool(), 5'000);
+        QVERIFY(!page->property("metadataUpdatePending").toBool());
+        const QVariantMap selectedMetadata =
+            page->property("selectedMetadata").toMap();
+        QCOMPARE(selectedMetadata.value(QStringLiteral("note")).toString(),
+                 QStringLiteral("Operator note"));
+        QCOMPARE(selectedMetadata.value(QStringLiteral("tags")).toStringList(),
+                 QStringList({QStringLiteral("portable"),
+                              QStringLiteral("field-day")}));
         search->setProperty("text", QStringLiteral("Martin"));
         QVERIFY(QMetaObject::invokeMethod(page, "applyFilterControls"));
         QTRY_VERIFY_WITH_TIMEOUT(!model.loading(), 5'000);

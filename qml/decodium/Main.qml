@@ -12366,7 +12366,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         MenuItem {
-            text: qsTr("SSTV - image radio...")
+            text: qsTr("SSTV - image radio... (BETA)")
             icon.source: ""
             enabled: bridge.sstvAvailable
             onTriggered: mainWindow.openSstvWorkspace()

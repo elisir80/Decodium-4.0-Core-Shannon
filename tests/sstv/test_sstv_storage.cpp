@@ -430,6 +430,31 @@ QList<QVariant> associateWithQsoAndWait(SstvStorageWorker* worker,
     return {};
 }
 
+QList<QVariant> updateUserMetadataAndWait(SstvStorageWorker* worker,
+                                          const QString& imageId,
+                                          const QString& note,
+                                          const QStringList& tags,
+                                          quint64 requestId)
+{
+    QSignalSpy spy(worker, &SstvStorageWorker::operationFinished);
+    const bool queued = QMetaObject::invokeMethod(
+        worker,
+        [worker, imageId, note, tags, requestId]() {
+            worker->updateUserMetadata(imageId, note, tags, requestId);
+        }, Qt::QueuedConnection);
+    if (!queued || (spy.isEmpty() && !spy.wait(5'000))) {
+        return {};
+    }
+    for (const QList<QVariant>& result : spy) {
+        if (result.at(0).toULongLong() == requestId
+            && result.at(1).value<SstvStorageOperation>()
+                == SstvStorageOperation::UpdateUserMetadata) {
+            return result;
+        }
+    }
+    return {};
+}
+
 QList<QVariant> fetchRecordAndWait(SstvStorageWorker* worker,
                                    const QString& imageId,
                                    quint64 requestId)
@@ -481,6 +506,51 @@ bool executeStandaloneSql(const QString& databasePath,
     return ok;
 }
 
+bool readStoredTags(const QString& databasePath,
+                    const QString& imageId,
+                    QStringList* tags,
+                    QString* error)
+{
+    if (!tags) {
+        if (error) {
+            *error = QStringLiteral("tag output is required");
+        }
+        return false;
+    }
+    const QString connectionName = uniqueConnectionName(
+        QStringLiteral("sstv_test_read_tags"));
+    bool ok = false;
+    {
+        QSqlDatabase database = QSqlDatabase::addDatabase(
+            QStringLiteral("QSQLITE"), connectionName);
+        database.setDatabaseName(databasePath);
+        if (!database.open()) {
+            if (error) {
+                *error = database.lastError().text();
+            }
+        } else {
+            QSqlQuery query(database);
+            query.prepare(QStringLiteral(
+                "SELECT tag FROM sstv_image_tags WHERE image_id=:id "
+                "ORDER BY tag_folded"));
+            query.bindValue(QStringLiteral(":id"), imageId);
+            ok = query.exec();
+            if (ok) {
+                tags->clear();
+                while (query.next()) {
+                    tags->append(query.value(0).toString());
+                }
+            } else if (error) {
+                *error = query.lastError().text();
+            }
+            database.close();
+        }
+        database = QSqlDatabase();
+    }
+    QSqlDatabase::removeDatabase(connectionName);
+    return ok;
+}
+
 } // namespace
 
 class TestSstvStorage final : public QObject
@@ -503,6 +573,7 @@ private slots:
     void deletionJournalRecoversBeforeAndAfterDatabaseCommit();
     void favoritePersistsInSchemaSidecarAndRestart();
     void qsoAssociationPersistsAndProtectsRetention();
+    void userMetadataPersistsAndRestoresOnDatabaseFailure();
     void quotaRetentionProtectionManualApplyAndAutoOptIn();
     void migratesVersionOneNonDestructively();
     void migratesVersionThreeAndResumesPartialSchema();
@@ -1836,6 +1907,138 @@ void TestSstvStorage::qsoAssociationPersistsAndProtectsRetention()
         unprotectedResult.at(1).value<SstvRetentionPlan>();
     QCOMPARE(unprotectedPlan.recordIds, QStringList {saved.record.id});
     QCOMPARE(unprotectedPlan.protectedQsoCount, 0);
+}
+
+void TestSstvStorage::userMetadataPersistsAndRestoresOnDatabaseFailure()
+{
+    QTemporaryDir temporary;
+    QVERIFY(temporary.isValid());
+    const SstvStorageLayout layout(
+        QDir(temporary.path()).absoluteFilePath(QStringLiteral("gallery")));
+    QString error;
+    QVERIFY2(layout.ensure(&error), qPrintable(error));
+    SstvImageStore store(layout);
+    SstvImageSaveRequest request = makeRequest(
+        SstvImageCategory::Received, QDateTime::currentDateTimeUtc());
+    request.record.note = QStringLiteral("initial Gallery note");
+    request.record.tags = {QStringLiteral("initial"),
+                           QStringLiteral("remove")};
+    const SstvImageSaveResult saved = store.save(request);
+    QVERIFY2(saved.ok, qPrintable(saved.error));
+
+    WorkerSession session(layout.databasePath(), layout.rootPath());
+    QVERIFY2(session.start(&error), qPrintable(error));
+    QSignalSpy inserted(session.worker,
+                        &SstvStorageWorker::operationFinished);
+    QVERIFY(QMetaObject::invokeMethod(
+        session.worker,
+        [worker = session.worker, record = saved.record]() {
+            worker->insertRecord(record, 670);
+        }, Qt::QueuedConnection));
+    QTRY_COMPARE_WITH_TIMEOUT(inserted.count(), 1, 5'000);
+    QVERIFY2(inserted.takeFirst().at(2).toBool(), "fixture insert failed");
+
+    const QString expectedNote = QStringLiteral("Portable operator note\n"
+                                                "with a line break");
+    const QString expectedAccent = QString::fromUtf8("M\xC3\xA1laga");
+    const QList<QVariant> updated = updateUserMetadataAndWait(
+        session.worker, saved.record.id, expectedNote,
+        {QStringLiteral(" portable "),
+         QString::fromUtf8("Ma\xCC\x81laga")}, 671);
+    QVERIFY(!updated.isEmpty());
+    QCOMPARE(updated.at(1).value<SstvStorageOperation>(),
+             SstvStorageOperation::UpdateUserMetadata);
+    QVERIFY2(updated.at(2).toBool(), qPrintable(updated.at(3).toString()));
+
+    SstvImageRecord sidecar;
+    QVERIFY2(SstvImageStore::loadMetadata(
+                 saved.record.metadataPath, &sidecar, &error),
+             qPrintable(error));
+    QCOMPARE(sidecar.note, expectedNote);
+    QCOMPARE(sidecar.tags,
+             QStringList({QStringLiteral("portable"), expectedAccent}));
+    QVERIFY(sidecar.updatedAtUtc > saved.record.updatedAtUtc);
+
+    QList<QVariant> fetched = fetchRecordAndWait(
+        session.worker, saved.record.id, 672);
+    QVERIFY(!fetched.isEmpty());
+    QVERIFY2(fetched.at(1).toBool(), qPrintable(fetched.at(3).toString()));
+    QCOMPARE(fetched.at(2).value<SstvImageRecord>(), sidecar);
+
+    QStringList indexedTags;
+    QVERIFY2(readStoredTags(layout.databasePath(), saved.record.id,
+                             &indexedTags, &error),
+             qPrintable(error));
+    QCOMPARE(indexedTags,
+             QStringList({expectedAccent, QStringLiteral("portable")}));
+
+    const QList<QPair<QString, QStringList>> invalidInputs {
+        {QString(4'097, QLatin1Char('n')), {}},
+        {expectedNote, {QStringLiteral("Field"), QStringLiteral("field")}}
+    };
+    quint64 invalidRequestId = 673;
+    for (const auto& invalid : invalidInputs) {
+        const QList<QVariant> rejected = updateUserMetadataAndWait(
+            session.worker, saved.record.id, invalid.first, invalid.second,
+            invalidRequestId++);
+        QVERIFY(!rejected.isEmpty());
+        QVERIFY(!rejected.at(2).toBool());
+        QVERIFY(!rejected.at(3).toString().isEmpty());
+    }
+    const QList<QVariant> invalidId = updateUserMetadataAndWait(
+        session.worker, QStringLiteral("not-a-canonical-uuid"), expectedNote,
+        {QStringLiteral("portable")}, invalidRequestId++);
+    QVERIFY(!invalidId.isEmpty());
+    QVERIFY(!invalidId.at(2).toBool());
+
+    QVERIFY2(SstvImageStore::loadMetadata(
+                 saved.record.metadataPath, &sidecar, &error),
+             qPrintable(error));
+    QCOMPARE(sidecar.note, expectedNote);
+    QCOMPARE(sidecar.tags,
+             QStringList({QStringLiteral("portable"), expectedAccent}));
+    fetched = fetchRecordAndWait(session.worker, saved.record.id,
+                                 invalidRequestId++);
+    QVERIFY(!fetched.isEmpty());
+    QVERIFY(fetched.at(1).toBool());
+    QCOMPARE(fetched.at(2).value<SstvImageRecord>(), sidecar);
+
+    QVERIFY2(executeStandaloneSql(
+                 layout.databasePath(),
+                 QStringLiteral(
+                     "CREATE TRIGGER sstv_test_fail_user_metadata_update "
+                     "BEFORE UPDATE OF note ON sstv_images "
+                     "BEGIN SELECT RAISE(ABORT,'forced metadata update failure'); "
+                     "END"),
+                 &error),
+             qPrintable(error));
+    const QList<QVariant> databaseRejected = updateUserMetadataAndWait(
+        session.worker, saved.record.id, QStringLiteral("must not persist"),
+        {QStringLiteral("rejected")}, invalidRequestId++);
+    QVERIFY(!databaseRejected.isEmpty());
+    QVERIFY(!databaseRejected.at(2).toBool());
+    QVERIFY2(executeStandaloneSql(
+                 layout.databasePath(),
+                 QStringLiteral("DROP TRIGGER sstv_test_fail_user_metadata_update"),
+                 &error),
+             qPrintable(error));
+
+    QVERIFY2(SstvImageStore::loadMetadata(
+                 saved.record.metadataPath, &sidecar, &error),
+             qPrintable(error));
+    QCOMPARE(sidecar.note, expectedNote);
+    QCOMPARE(sidecar.tags,
+             QStringList({QStringLiteral("portable"), expectedAccent}));
+    fetched = fetchRecordAndWait(session.worker, saved.record.id,
+                                 invalidRequestId++);
+    QVERIFY(!fetched.isEmpty());
+    QVERIFY(fetched.at(1).toBool());
+    QCOMPARE(fetched.at(2).value<SstvImageRecord>(), sidecar);
+    QVERIFY2(readStoredTags(layout.databasePath(), saved.record.id,
+                             &indexedTags, &error),
+             qPrintable(error));
+    QCOMPARE(indexedTags,
+             QStringList({expectedAccent, QStringLiteral("portable")}));
 }
 
 void TestSstvStorage::quotaRetentionProtectionManualApplyAndAutoOptIn()

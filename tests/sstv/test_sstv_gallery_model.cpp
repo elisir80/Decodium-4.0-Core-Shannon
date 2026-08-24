@@ -270,6 +270,7 @@ private slots:
     void incrementalUpdateSelectionAndExplicitIndexDelete();
     void favoriteQuotaRetentionModelApiIsTypedAndFailClosed();
     void qsoAssociationModelApiIsBoundedAndObservable();
+    void userMetadataModelApiIsBoundedAndObservable();
     void thumbnailProviderRequestsAreReentrant();
     void thumbnailsAreBoundedCachedInvalidatedAndLifecycleSafe();
 };
@@ -948,6 +949,93 @@ void TestSstvGalleryModel::qsoAssociationModelApiIsBoundedAndObservable()
         model.data(model.index(0),
                    SstvGalleryModel::RelatedQsoIdRole).toString().isEmpty(),
         5'000);
+    model.shutdown();
+}
+
+void TestSstvGalleryModel::userMetadataModelApiIsBoundedAndObservable()
+{
+    QTemporaryDir temporary;
+    QVERIFY(temporary.isValid());
+    const SstvStorageLayout layout(
+        QDir(temporary.path()).absoluteFilePath(QStringLiteral("gallery")));
+    QString error;
+    QVERIFY2(layout.ensure(&error), qPrintable(error));
+    SstvImageStore store(layout);
+    SstvImageSaveRequest request = makeRealRequest(
+        9, utcDateTime(QDate(2026, 8, 24), QTime(10, 12, 13)));
+    request.record.note = QStringLiteral("initial Gallery note");
+    request.record.tags = {QStringLiteral("initial")};
+    const SstvImageSaveResult saved = store.save(request);
+    QVERIFY2(saved.ok, qPrintable(saved.error));
+
+    WorkerSession session(layout);
+    QVERIFY2(session.start(&error), qPrintable(error));
+    QSignalSpy inserted(session.worker,
+                        &SstvStorageWorker::operationFinished);
+    QVERIFY(QMetaObject::invokeMethod(
+        session.worker,
+        [worker = session.worker, record = saved.record]() {
+            worker->insertRecord(record, 960);
+        }, Qt::QueuedConnection));
+    QTRY_COMPARE_WITH_TIMEOUT(inserted.count(), 1, 5'000);
+    QVERIFY2(inserted.takeFirst().at(2).toBool(), "fixture insert failed");
+
+    SstvGalleryModel model;
+    QAbstractItemModelTester tester(
+        &model, QAbstractItemModelTester::FailureReportingMode::QtTest);
+    model.setStorageWorker(session.worker);
+    waitForModelIdle(model);
+    QCOMPARE(model.rowCount(), 1);
+    QCOMPARE(model.roleNames().value(SstvGalleryModel::TagsRole),
+             QByteArrayLiteral("tags"));
+    QCOMPARE(model.roleNames().value(SstvGalleryModel::NoteRole),
+             QByteArrayLiteral("note"));
+    QCOMPARE(model.data(model.index(0), SstvGalleryModel::NoteRole).toString(),
+             request.record.note);
+
+    QSignalSpy finished(&model,
+                        &SstvGalleryModel::userMetadataUpdateFinished);
+    QCOMPARE(model.updateUserMetadata(
+                 saved.record.id, QString(4'097, QLatin1Char('n')), {}),
+             quint64(0));
+    QCOMPARE(model.updateUserMetadata(
+                 saved.record.id, QStringLiteral("too many tags"),
+                 QStringList(33, QStringLiteral("tag"))), quint64(0));
+    QCOMPARE(model.updateUserMetadata(
+                 saved.record.id, QStringLiteral("duplicate tags"),
+                 {QStringLiteral("Field"), QStringLiteral("field")}),
+             quint64(0));
+    QCOMPARE(model.updateUserMetadata(
+                 saved.record.id, QStringLiteral("invalid tag"),
+                 {QStringLiteral("line\nbreak")}), quint64(0));
+    QCOMPARE(finished.count(), 0);
+    QVERIFY(!model.errorString().isEmpty());
+
+    const QString expectedNote = QStringLiteral("Field day operator note\n"
+                                                "kept locally");
+    const QString expectedAccent = QString::fromUtf8("M\xC3\xA1laga");
+    const quint64 requestId = model.updateUserMetadata(
+        saved.record.id, expectedNote,
+        {QStringLiteral(" portable "),
+         QString::fromUtf8("Ma\xCC\x81laga")});
+    QVERIFY(requestId != 0);
+    QCOMPARE(model.updateUserMetadata(
+                 saved.record.id, QStringLiteral("second request"),
+                 {QStringLiteral("second")}), quint64(0));
+    QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 1, 5'000);
+    const QList<QVariant> result = finished.takeFirst();
+    QCOMPARE(result.at(0).toULongLong(), requestId);
+    QCOMPARE(result.at(1).toString(), saved.record.id);
+    QCOMPARE(result.at(2).toString(), expectedNote);
+    QCOMPARE(result.at(3).toStringList(),
+             QStringList({QStringLiteral("portable"), expectedAccent}));
+    QVERIFY2(result.at(4).toBool(), qPrintable(result.at(5).toString()));
+    QTRY_COMPARE_WITH_TIMEOUT(
+        model.data(model.index(0), SstvGalleryModel::NoteRole).toString(),
+        expectedNote, 5'000);
+    QTRY_COMPARE_WITH_TIMEOUT(
+        model.data(model.index(0), SstvGalleryModel::TagsRole).toStringList(),
+        QStringList({QStringLiteral("portable"), expectedAccent}), 5'000);
     model.shutdown();
 }
 

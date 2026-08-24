@@ -189,6 +189,12 @@ public:
     Q_INVOKABLE void clearSelection();
     Q_INVOKABLE quint64 setFavorite(const QString& id, bool favorite);
     Q_INVOKABLE quint64 toggleFavorite(int row);
+    // Bounded, local-only edit path for free-form operator metadata.  It
+    // accepts neither paths nor a complete record; the storage worker fetches
+    // the authoritative record before changing only note and tags.
+    Q_INVOKABLE quint64 updateUserMetadata(const QString& imageId,
+                                           const QString& note,
+                                           const QStringList& tags);
     // Associates only by indexed image UUID and opaque QSO identifier. The
     // empty identifier explicitly disassociates; paths are never accepted.
     Q_INVOKABLE quint64 associateWithQso(const QString& imageId,
@@ -239,6 +245,12 @@ signals:
                                 QString qsoId,
                                 bool ok,
                                 QString error);
+    void userMetadataUpdateFinished(quint64 requestId,
+                                    QString imageId,
+                                    QString note,
+                                    QStringList tags,
+                                    bool ok,
+                                    QString error);
     void retentionSettingsFinished(quint64 requestId,
                                    bool ok,
                                    QString error);
@@ -294,6 +306,13 @@ private:
         QString qsoId;
     };
 
+    struct PendingUserMetadata final
+    {
+        QString imageId;
+        QString note;
+        QStringList tags;
+    };
+
     void requestNextPage();
     void setLoading(bool value);
     void setHasMore(bool value);
@@ -322,6 +341,7 @@ private:
     QHash<quint64, QString> m_exportRequests;
     QHash<quint64, QString> m_favoriteRequests;
     QHash<quint64, PendingQsoAssociation> m_qsoAssociationRequests;
+    QHash<quint64, PendingUserMetadata> m_userMetadataRequests;
     QSet<quint64> m_retentionSettingsRequests;
     QSet<quint64> m_quotaRequests;
     QSet<quint64> m_retentionPreviewRequests;

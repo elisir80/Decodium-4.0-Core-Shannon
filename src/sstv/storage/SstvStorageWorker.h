@@ -35,7 +35,11 @@ enum class SstvStorageOperation : quint8
     UpdateRetentionSettings = 9,
     CalculateQuota = 10,
     PreviewRetention = 11,
-    AssociateQso = 12
+    AssociateQso = 12,
+    // Deliberately narrower than Update: this is the only Gallery-facing
+    // mutation that accepts operator-authored free text.  It can never alter
+    // paths, integrity fields, radio metadata or sharing state.
+    UpdateUserMetadata = 13
 };
 
 enum class SstvSharedRetentionPolicy : quint8
@@ -273,6 +277,14 @@ public slots:
     void associateWithQso(QString imageId,
                           QString qsoId,
                           quint64 requestId);
+    // Updates only operator-authored note and tags. The worker reloads and
+    // revalidates the indexed record itself, atomically publishes the exact
+    // sidecar, then commits a guarded SQLite projection and normalized tags.
+    // QML must not construct or submit a whole SstvImageRecord.
+    void updateUserMetadata(QString imageId,
+                            QString note,
+                            QStringList tags,
+                            quint64 requestId);
     void removeRecord(QString id, quint64 requestId);
     // Explicit, index-only bulk removal.  Image and sidecar files are never
     // unlinked here and there is deliberately no automatic orphan cleanup.
