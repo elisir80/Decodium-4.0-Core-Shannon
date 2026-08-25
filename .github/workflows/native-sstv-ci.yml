@@ -56,6 +56,13 @@ on:
 permissions:
   contents: read
 
+# Qt 6.11 come negli altri workflow. I pacchetti qt6-* di Ubuntu 24.04 sono
+# Qt 6.4, dove QTimeZone::UTC non esiste ancora: con quelli i job Linux non
+# possono compilare questo albero.
+env:
+  QT_VERSION: "6.11.0"
+  QT_CACHE_ROOT: ".ci/cache/qt-linux-6.11.0"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -160,30 +167,40 @@ jobs:
         include:
           - name: x86_64-full-release
             runner: ubuntu-24.04
+            qt_host: linux
+            qt_arch: linux_gcc_64
             build_type: Release
             sstv: 'ON'
             hamdrm: 'ON'
             sanitizer: false
           - name: x86_64-analog-release
             runner: ubuntu-24.04
+            qt_host: linux
+            qt_arch: linux_gcc_64
             build_type: Release
             sstv: 'ON'
             hamdrm: 'OFF'
             sanitizer: false
           - name: x86_64-feature-off-release
             runner: ubuntu-24.04
+            qt_host: linux
+            qt_arch: linux_gcc_64
             build_type: Release
             sstv: 'OFF'
             hamdrm: 'OFF'
             sanitizer: false
           - name: x86_64-full-debug-asan-ubsan
             runner: ubuntu-24.04
+            qt_host: linux
+            qt_arch: linux_gcc_64
             build_type: Debug
             sstv: 'ON'
             hamdrm: 'ON'
             sanitizer: true
           - name: arm64-full-release
             runner: ubuntu-24.04-arm
+            qt_host: linux_arm64
+            qt_arch: linux_gcc_arm64
             build_type: Release
             sstv: 'ON'
             hamdrm: 'ON'
@@ -214,21 +231,49 @@ jobs:
             libxkbcommon-dev \
             ninja-build \
             pkg-config \
-            portaudio19-dev \
-            qt6-5compat-dev \
-            qt6-base-dev \
-            qt6-base-dev-tools \
-            qt6-base-private-dev \
-            qt6-declarative-dev \
-            qt6-declarative-dev-tools \
-            qt6-image-formats-plugins \
-            qt6-multimedia-dev \
-            qt6-serialport-dev \
-            qt6-shadertools-dev \
-            qt6-tools-dev \
-            qt6-tools-dev-tools \
-            libqt6svg6-dev \
-            libqt6websockets6-dev
+            portaudio19-dev
+
+      - name: Restore Qt 6.11 cache
+        id: qt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.QT_CACHE_ROOT }}
+          key: sstv-${{ matrix.qt_arch }}-qt-${{ env.QT_VERSION }}-v1
+
+      - name: Install Qt 6.11
+        env:
+          QT_HOST: ${{ matrix.qt_host }}
+          QT_ARCH: ${{ matrix.qt_arch }}
+        run: |
+          set -euo pipefail
+          QT_INSTALL_ROOT="${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}"
+          QT_PREFIX="${QT_INSTALL_ROOT}/${QT_VERSION}/${QT_ARCH#linux_}"
+
+          if [[ ! -x "${QT_PREFIX}/bin/qmake6" ]]; then
+            rm -rf "${QT_INSTALL_ROOT}"
+            python3 -m venv "${RUNNER_TEMP}/aqt-venv"
+            "${RUNNER_TEMP}/aqt-venv/bin/python" -m pip install --upgrade pip aqtinstall
+            "${RUNNER_TEMP}/aqt-venv/bin/python" -m aqt install-qt "${QT_HOST}" desktop "${QT_VERSION}" "${QT_ARCH}" \
+              -O "${QT_INSTALL_ROOT}" \
+              -m qt5compat qtimageformats qtmultimedia qtserialport qtshadertools qtwebsockets
+          fi
+
+          # aqt nomina la cartella come l'architettura senza il prefisso host,
+          # ma se un giorno cambiasse convenzione meglio trovare qmake6 che
+          # fallire su un percorso indovinato.
+          if [[ ! -x "${QT_PREFIX}/bin/qmake6" ]]; then
+            found_qmake="$(find "${QT_INSTALL_ROOT}" -type f -name qmake6 -perm -u+x | head -n1 || true)"
+            if [[ -n "${found_qmake}" ]]; then
+              QT_PREFIX="$(dirname "$(dirname "${found_qmake}")")"
+            fi
+          fi
+
+          test -x "${QT_PREFIX}/bin/qmake6"
+          echo "${QT_PREFIX}/bin" >> "${GITHUB_PATH}"
+          echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "${GITHUB_ENV}"
+          # Se la versione non e' quella attesa il resto del job non ha senso:
+          # meglio fermarsi qui che scoprirlo fra mille righe di compilazione.
+          test "$("${QT_PREFIX}/bin/qmake6" -query QT_VERSION)" = "${QT_VERSION}"
 
       - name: Configure native SSTV variant
         env:
@@ -341,21 +386,34 @@ jobs:
             libxkbcommon-dev \
             ninja-build \
             pkg-config \
-            portaudio19-dev \
-            qt6-5compat-dev \
-            qt6-base-dev \
-            qt6-base-dev-tools \
-            qt6-base-private-dev \
-            qt6-declarative-dev \
-            qt6-declarative-dev-tools \
-            qt6-image-formats-plugins \
-            qt6-multimedia-dev \
-            qt6-serialport-dev \
-            qt6-shadertools-dev \
-            qt6-tools-dev \
-            qt6-tools-dev-tools \
-            libqt6svg6-dev \
-            libqt6websockets6-dev
+            portaudio19-dev
+
+      - name: Restore Qt 6.11 cache
+        id: qt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.QT_CACHE_ROOT }}
+          key: sstv-linux_gcc_64-qt-${{ env.QT_VERSION }}-v1
+
+      - name: Install Qt 6.11
+        run: |
+          set -euo pipefail
+          QT_INSTALL_ROOT="${GITHUB_WORKSPACE}/${QT_CACHE_ROOT}"
+          QT_PREFIX="${QT_INSTALL_ROOT}/${QT_VERSION}/gcc_64"
+
+          if [[ ! -x "${QT_PREFIX}/bin/qmake6" ]]; then
+            rm -rf "${QT_INSTALL_ROOT}"
+            python3 -m venv "${RUNNER_TEMP}/aqt-venv"
+            "${RUNNER_TEMP}/aqt-venv/bin/python" -m pip install --upgrade pip aqtinstall
+            "${RUNNER_TEMP}/aqt-venv/bin/python" -m aqt install-qt linux desktop "${QT_VERSION}" linux_gcc_64 \
+              -O "${QT_INSTALL_ROOT}" \
+              -m qt5compat qtimageformats qtmultimedia qtserialport qtshadertools qtwebsockets
+          fi
+
+          test -x "${QT_PREFIX}/bin/qmake6"
+          echo "${QT_PREFIX}/bin" >> "${GITHUB_PATH}"
+          echo "CMAKE_PREFIX_PATH=${QT_PREFIX}" >> "${GITHUB_ENV}"
+          test "$("${QT_PREFIX}/bin/qmake6" -query QT_VERSION)" = "${QT_VERSION}"
 
       - name: Configure the instrumented parser targets
         run: |
