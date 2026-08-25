@@ -1152,7 +1152,7 @@ bool HamDrmController::startTx(const QUrl& localImage)
     HamDrmStatus status;
     try {
         status = backends_.waveformTx->start(
-            *profile, std::move(*encoded.value), session, *this);
+            *profile, *encoded.value, session, *this);
     } catch (const std::exception& exception) {
         status = HamDrmStatus::failure(HamDrmErrorCode::IoFailure,
                                        exception.what());
@@ -1650,7 +1650,7 @@ bool HamDrmController::resumePartial(int transportId)
     auto record = std::make_unique<InboxRecord>(
         static_cast<std::uint16_t>(transportId), config_.limits);
     record->assembler = std::make_unique<HamDrmObjectAssembler>(
-        std::move(*loaded.value));
+        *loaded.value);
     record->persisted = true;
     const HamDrmStatus rebuilt = rebuildRecordMetadata(*record);
     if (!rebuilt.ok()) {

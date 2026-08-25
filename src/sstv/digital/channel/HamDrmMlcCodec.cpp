@@ -169,7 +169,7 @@ HamDrmValueResult<std::vector<phy::HamDrmComplex>> hamDrmEncodeMscCells(
         if (!encoded.ok()) {
             return {std::nullopt, encoded.status};
         }
-        levels[level] = std::move(*encoded.value);
+        levels[level] = *encoded.value;
         if (profile.bitInterleaverT0[level] != 0U) {
             try {
                 levels[level] = hamDrmBitInterleave(
