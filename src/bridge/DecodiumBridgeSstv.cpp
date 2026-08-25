@@ -1737,7 +1737,7 @@ void DecodiumBridge::queueHamDrmTransmittedImage(
     const quint64 requestId = m_sstvStorageRequestId++;
     const auto archiveImage = std::make_shared<const QImage>(
         std::move(image));
-    decodium::sstv::SstvImageSaveRequest request = std::move(*archive);
+    decodium::sstv::SstvImageSaveRequest request = *archive;
     if (!worker->enqueueDatabaseOperation(
             [archiveImage, request = std::move(request), requestId](
                 decodium::sstv::SstvStorageWorker& storage) mutable {
@@ -3698,7 +3698,7 @@ void DecodiumBridge::queueSstvStudioDraftImage()
         m_sstvStorageRequestId = 1U;
     }
     const quint64 requestId = m_sstvStorageRequestId++;
-    decodium::sstv::SstvImageSaveRequest request = std::move(*archive);
+    decodium::sstv::SstvImageSaveRequest request = *archive;
     if (!worker->enqueueDatabaseOperation(
             [prepared, request = std::move(request), requestId](
                 decodium::sstv::SstvStorageWorker& storage) mutable {
@@ -3766,7 +3766,7 @@ void DecodiumBridge::queueSstvStudioTransmittedImage(
         m_sstvStorageRequestId = 1U;
     }
     const quint64 requestId = m_sstvStorageRequestId++;
-    decodium::sstv::SstvImageSaveRequest request = std::move(*archive);
+    decodium::sstv::SstvImageSaveRequest request = *archive;
     if (!worker->enqueueDatabaseOperation(
             [prepared, request = std::move(request), requestId](
                 decodium::sstv::SstvStorageWorker& storage) mutable {
