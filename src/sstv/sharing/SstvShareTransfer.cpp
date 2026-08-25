@@ -742,7 +742,7 @@ SstvShareTransferRestoreResult restoreSstvShareTransfer(
     SstvShareTransferState state;
     SstvShareTransferState retryResume;
     SstvShareTransferState pausedResume;
-    SstvShareProviderFailure lastFailure;
+    SstvShareProviderFailure lastFailure {SstvShareProviderFailure::None};
     if (!parseTransferState(bounded.object.value(QStringLiteral("state")).toString(), state)
         || !parseTransferState(
             bounded.object.value(QStringLiteral("retryResumeState")).toString(),
