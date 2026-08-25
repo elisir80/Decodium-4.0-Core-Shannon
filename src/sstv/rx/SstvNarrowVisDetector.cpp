@@ -47,7 +47,6 @@ SstvNarrowVisDetector::SstvNarrowVisDetector(
     : config_(config)
 {
     validateConfig(config_);
-    symbols_.reserve(SymbolCount);
 }
 
 void SstvNarrowVisDetector::saturatingAdd(

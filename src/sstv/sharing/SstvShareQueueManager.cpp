@@ -2556,7 +2556,7 @@ struct SstvShareQueueManager::Impl final
         if (!restored.ok()) {
             return false;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         if (!transfer.handleFailure(result.category(), now(),
                                     result.retryAfterMs())) {
             transfer.expireIfNeeded(now());
@@ -2686,7 +2686,7 @@ struct SstvShareQueueManager::Impl final
             driveAgain();
             return;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         if (transfer.snapshot().state == SstvShareTransferState::Preparing
             && transfer.manifest().encryption.mode
                 == SstvShareEncryptionMode::EndToEnd
@@ -2727,7 +2727,7 @@ struct SstvShareQueueManager::Impl final
                 const auto restored = restoreSstvShareTransfer(
                     record->transferPersistenceJson, now(), false);
                 if (restored.ok()) {
-                    SstvShareTransfer transfer = std::move(*restored.transfer);
+                    SstvShareTransfer transfer = *restored.transfer;
                     if (!transfer.handleFailure(
                             SstvShareProviderFailure::Cancelled, now())) {
                         transfer.cancel();
@@ -2790,7 +2790,7 @@ struct SstvShareQueueManager::Impl final
             driveAgain();
             return;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         if (!transfer.recordProgress(result.handle().committedBytes, now())) {
             return;
         }
@@ -2829,7 +2829,7 @@ struct SstvShareQueueManager::Impl final
             driveAgain();
             return;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         const quint64 newlyCommitted = expectedCommitted - record->byteOffset;
         if (!transfer.recordProgress(expectedCommitted, now())) {
             return;
@@ -2879,7 +2879,7 @@ struct SstvShareQueueManager::Impl final
             driveAgain();
             return;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         if (!transfer.markCompleted(record->idempotencyKey,
                                     result.handle().opaqueId, now())) {
             return;
@@ -2934,7 +2934,7 @@ struct SstvShareQueueManager::Impl final
         if (!restored.ok()) {
             return;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         if (!transfer.handleFailure(
                 SstvShareProviderFailure::Cancelled, now())) {
             transfer.cancel();
@@ -3259,7 +3259,7 @@ struct SstvShareQueueManager::Impl final
         if (!restored.ok()) {
             return false;
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         if (transfer.expireIfNeeded(now())) {
             saveUpload(record, transfer);
             return false;
@@ -3515,7 +3515,7 @@ struct SstvShareQueueManager::Impl final
             if (!restored.ok()) {
                 return false;
             }
-            SstvShareTransfer transfer = std::move(*restored.transfer);
+            SstvShareTransfer transfer = *restored.transfer;
             if (!transfer.handleFailure(
                     SstvShareProviderFailure::Cancelled, now())) {
                 transfer.cancel();
@@ -3546,7 +3546,7 @@ struct SstvShareQueueManager::Impl final
             const auto restored = restoreSstvShareTransfer(
                 record.transferPersistenceJson, now(), false);
             if (restored.ok()) {
-                SstvShareTransfer transfer = std::move(*restored.transfer);
+                SstvShareTransfer transfer = *restored.transfer;
                 if (!transfer.handleFailure(
                         SstvShareProviderFailure::Cancelled, now())) {
                     transfer.cancel();
@@ -3763,7 +3763,7 @@ bool SstvShareQueueManager::initialize(QString* error)
             if (!restored.ok()) {
                 return fail(error, QStringLiteral("could not recover upload state"));
             }
-            SstvShareTransfer transfer = std::move(*restored.transfer);
+            SstvShareTransfer transfer = *restored.transfer;
             if (!transfer.snapshot().providerUploadId.isEmpty()
                 && !isTerminalShareTransferState(transfer.snapshot().state)
                 && !(record.cancelRequested && record.cancelDispatched)) {
@@ -4758,7 +4758,7 @@ bool SstvShareQueueManager::pauseTransfer(const QString& transferId,
         if (!restored.ok()) {
             return fail(error, QStringLiteral("could not restore upload state"));
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         const SstvShareTransferState previous = transfer.snapshot().state;
         if (!transfer.pause(m_impl->now())) {
             // pause() may have observed expiry; persist that terminal state so
@@ -4811,7 +4811,7 @@ bool SstvShareQueueManager::resumeTransfer(const QString& transferId,
         if (!restored.ok()) {
             return fail(error, QStringLiteral("could not restore paused upload state"));
         }
-        SstvShareTransfer transfer = std::move(*restored.transfer);
+        SstvShareTransfer transfer = *restored.transfer;
         const SstvShareTransferState target =
             transfer.snapshot().pausedResumeState;
         if (!transfer.resume(m_impl->now())) {
