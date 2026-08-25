@@ -20,6 +20,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QThread>
+#include <QTimeZone>
 #include <QUuid>
 
 #include <algorithm>
