@@ -1943,9 +1943,12 @@ void HamlibTransceiver::reset_qmx_swr_filter (bool tx_active, QString const& rea
     << "reason=" << reason;
 }
 
+// I due parametri del filtro QMX servono solo dentro #if HAVE_HAMLIB_SEND_RAW:
+// con una Hamlib priva di rig_send_raw quel blocco sparisce e restano
+// inutilizzati, che con -Werror=unused-parameter ferma la build.
 void HamlibTransceiver::poll_transmit_telemetry (bool force_signal,
-                                                 bool ignore_qmx_swr_sample,
-                                                 int scheduled_delay_ms)
+                                                 [[maybe_unused]] bool ignore_qmx_swr_sample,
+                                                 [[maybe_unused]] int scheduled_delay_ms)
 {
   auto * rig = m_->rig_.data ();
   if (!rig || !rig->caps)
