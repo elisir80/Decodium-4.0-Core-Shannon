@@ -47,9 +47,6 @@ Window {
     title: qsTr("SSTV - Decodium")
     width: 1120
     height: 740
-    // The transmit studio keeps two exact-resolution previews and the safety
-    // controls visible together; enforce the smallest layout verified by the
-    // offscreen render test instead of allowing controls to be clipped.
     minimumWidth: 1040
     minimumHeight: 700
     color: bg

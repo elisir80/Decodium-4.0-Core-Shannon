@@ -18338,7 +18338,13 @@ void DecodiumBridge::syncAudioDeviceSettingsToLegacyIni()
 
 void DecodiumBridge::applyAudioInputRuntimeChange(const QString& reason)
 {
-    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
+    bool nativeSstvCapture = false;
+#if DECODIUM_HAS_SSTV
+    nativeSstvCapture = nativeSstvRxForcesDedicatedAudioCapture();
+#endif
+    if (usingLegacyBackendForRx()
+        && !useModernSpectrumFeedWithLegacy()
+        && !nativeSstvCapture) {
         bridgeLog(QStringLiteral("audio input runtime change handled by legacy backend (%1)").arg(reason));
         return;
     }
@@ -22158,6 +22164,41 @@ void DecodiumBridge::startRx()
     }
 
     if (usingLegacyBackendForRx()) {
+        // Native SSTV owns the RX capture for the lifetime of its session.
+        // Do not start the legacy backend first and then open a second
+        // AudioQueue on the same BlackHole/USB endpoint: on macOS the second
+        // queue can stay active while delivering no PCM at all.  SSTV still
+        // keeps Decodium's monitor state coherent, but the legacy decoder is
+        // deliberately quiesced until stopSstvRx() restores the normal path.
+#if DECODIUM_HAS_SSTV
+        if (nativeSstvRxForcesDedicatedAudioCapture()) {
+            m_periodTimer->stop();
+            m_asyncDecodeTimer->stop();
+            m_asyncDecodePending = false;
+            m_legacyPcmSpectrumFeed = false;
+            if (m_legacyBackend && m_legacyBackend->monitoring()) {
+                m_legacyBackend->setMonitoring(false);
+            }
+            m_monitoring = true;
+            emit monitoringChanged();
+            m_decoding = false;
+            emit decodingChanged();
+            resetRxPeriodAccumulation(true);
+            m_spectrumBuf.clear();
+            m_wfRingPos = 0;
+            m_lastPanadapterData.clear();
+            m_driftFrameCount = 0;
+            m_driftExpectedFrames = 0;
+            m_driftClock.restart();
+            m_spectrumTimer->start();
+            startAudioCapture();
+            emit statusMessage(QStringLiteral("RX avviato via capture nativo SSTV - %1")
+                                   .arg(m_mode));
+            bridgeLog(QStringLiteral(
+                "startRx: native SSTV exclusive capture active; legacy RX quiesced"));
+            return;
+        }
+#endif
         bridgeLog("startRx: delegating monitoring to legacy backend");
         m_periodTimer->stop();
         m_asyncDecodeTimer->stop();
@@ -22166,8 +22207,15 @@ void DecodiumBridge::startRx()
         syncLegacyBackendTxState();
         m_legacyBackend->setMonitoring(true);
         syncLegacyBackendState();
-        if (useModernSpectrumFeedWithLegacy()) {
-            bool const dedicatedModernCapture = useDedicatedModernAudioCaptureWithLegacy();
+        bool const nativeSstvCapture =
+#if DECODIUM_HAS_SSTV
+            nativeSstvRxForcesDedicatedAudioCapture();
+#else
+            false;
+#endif
+        if (useModernSpectrumFeedWithLegacy() || nativeSstvCapture) {
+            bool const dedicatedModernCapture = nativeSstvCapture
+                || useDedicatedModernAudioCaptureWithLegacy();
             m_legacyPcmSpectrumFeed = !dedicatedModernCapture;
             updatePeriodTicksMax();
             resetRxPeriodAccumulation(true);
@@ -22184,7 +22232,7 @@ void DecodiumBridge::startRx()
                 m_lastLegacyPcmSampleMs = 0;
             }
             m_spectrumTimer->start();
-            bridgeLog(QStringLiteral("startRx: modern FFT panadapter feed active source=%1 alongside legacy RX")
+            bridgeLog(QStringLiteral("startRx: modern FFT/SSTV feed active source=%1 alongside legacy RX")
                           .arg(dedicatedModernCapture
                                ? QStringLiteral("dedicated_modern_qaudio")
                                : QStringLiteral("legacy_pcm_tap_single_capture")));
@@ -48621,7 +48669,8 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
     }
     if (usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
-        && !useDedicatedModernAudioCaptureWithLegacy()) {
+        && !useDedicatedModernAudioCaptureWithLegacy()
+        && !nativeSstvRxForcesDedicatedAudioCapture()) {
 #if DECODIUM_HAS_SSTV
         auto const source = decodium::sstv::SstvAudioSourceKind::LegacyBackend;
         selectSstvRxSource(source, currentSstvAudioStreamId(source));

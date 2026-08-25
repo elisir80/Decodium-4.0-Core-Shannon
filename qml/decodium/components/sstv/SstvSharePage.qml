@@ -144,6 +144,7 @@ SstvPage {
         fileMode: FileDialog.OpenFile
         nameFilters: [qsTr("SSTV images (*.png *.jpg *.jpeg)")]
         currentFolder: root.sharing && root.sharing.storageFolder.length > 0
+                       && typeof root.sharing.localFileUrl === "function"
                        ? root.sharing.localFileUrl(root.sharing.storageFolder)
                        : ""
         onAccepted: root.selectedUpload = selectedFile

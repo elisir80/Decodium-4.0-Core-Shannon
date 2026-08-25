@@ -11,6 +11,7 @@ SstvPage {
     readonly property var txDiagnostics: root.engine
                                                  ? root.engine.sstvTxDiagnostics
                                                  : ({})
+    readonly property bool compactLayout: width < 1200
 
     function overlay(kind, text) {
         return {
@@ -232,15 +233,16 @@ SstvPage {
             }
         }
 
-            RowLayout {
+            Item {
+            id: previewArea
             Layout.fillWidth: true
             Layout.preferredHeight: 180
-            spacing: 10
 
             Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumWidth: 0
+                x: 0
+                y: 0
+                width: Math.max(0, (previewArea.width - 10) / 2)
+                height: previewArea.height
                 color: "#05090d"
                 border.color: root.borderColor
                 border.width: 1
@@ -296,9 +298,10 @@ SstvPage {
             }
 
             Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumWidth: 0
+                x: Math.max(0, (previewArea.width + 10) / 2)
+                y: 0
+                width: Math.max(0, (previewArea.width - 10) / 2)
+                height: previewArea.height
                 color: "#05090d"
                 border.color: root.studio && root.studio.preparedReady
                               ? root.accentColor : root.borderColor
@@ -365,9 +368,11 @@ SstvPage {
             Layout.fillWidth: true
             spacing: 4
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 4 : 8
+                columnSpacing: 7
+                rowSpacing: 5
                 Label { text: qsTr("Mode"); color: root.secondaryTextColor }
                 ComboBox {
                     id: modeSelector
@@ -415,9 +420,11 @@ SstvPage {
                 }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 4 : 9
+                columnSpacing: 7
+                rowSpacing: 5
                 Label { text: qsTr("Geometry"); color: root.secondaryTextColor }
                 ComboBox {
                     id: resizeMode
@@ -475,9 +482,11 @@ SstvPage {
                 Item { Layout.fillWidth: true }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 5 : 10
+                columnSpacing: 7
+                rowSpacing: 5
                 Label { text: qsTr("Crop %"); color: root.secondaryTextColor; Layout.preferredWidth: 62 }
                 Label { text: qsTr("X"); color: root.secondaryTextColor }
                 SpinBox { id: cropX; objectName: "sstvCropX"; from: 0; to: 99; value: 0; editable: true }
@@ -496,9 +505,11 @@ SstvPage {
                 }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 9
+                columns: root.compactLayout ? 2 : 5
+                columnSpacing: 9
+                rowSpacing: 5
                 Label {
                     text: qsTr("Adjustments")
                     color: root.secondaryTextColor
@@ -530,9 +541,11 @@ SstvPage {
                 }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 9
+                columns: root.compactLayout ? 2 : 6
+                columnSpacing: 9
+                rowSpacing: 5
                 Label {
                     text: qsTr("Colour/detail")
                     color: root.secondaryTextColor
@@ -565,9 +578,11 @@ SstvPage {
                 }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 5 : 15
+                columnSpacing: 7
+                rowSpacing: 5
                 Label {
                     text: qsTr("Overlay")
                     color: root.secondaryTextColor
@@ -615,18 +630,22 @@ SstvPage {
                 SpinBox { id: overlayMargin; objectName: "sstvOverlayMargin"; from: 0; to: 64; value: 8; editable: true }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 2 : 4
+                columnSpacing: 7
+                rowSpacing: 5
                 Label { text: qsTr("Overlay text"); color: root.secondaryTextColor; Layout.preferredWidth: 62 }
                 TextField { id: customOverlayText; objectName: "sstvCustomOverlayText"; Layout.fillWidth: true; maximumLength: 512; placeholderText: qsTr("Custom message") }
                 TextField { id: reportOverlayText; objectName: "sstvReportOverlayText"; Layout.preferredWidth: 130; maximumLength: 512; placeholderText: qsTr("Signal report") }
                 TextField { id: watermarkOverlayText; objectName: "sstvWatermarkOverlayText"; Layout.preferredWidth: 150; maximumLength: 512; placeholderText: qsTr("Watermark") }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 4 : 8
+                columnSpacing: 7
+                rowSpacing: 5
                 Label {
                     text: qsTr("Frame/TX")
                     color: root.secondaryTextColor
@@ -694,9 +713,11 @@ SstvPage {
                 }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 7
+                columns: root.compactLayout ? 3 : 6
+                columnSpacing: 7
+                rowSpacing: 5
                 Label { text: qsTr("Templates"); color: root.secondaryTextColor; Layout.preferredWidth: 62 }
                 TextField {
                     id: templateName

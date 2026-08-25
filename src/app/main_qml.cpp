@@ -31,6 +31,7 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 #include <QLibraryInfo>
 #include <QMessageBox>
 #include <QRegularExpression>
@@ -1983,6 +1984,43 @@ int main(int argc, char* argv[])
         QStringList {} << "lab-monitor-ms",
         QStringLiteral("Delay before starting RX monitor in a runtime lab session."),
         QStringLiteral("ms"));
+    QCommandLineOption const labSstvRxMsOption(
+        QStringList {} << "lab-sstv-rx-ms",
+        QStringLiteral("Delay before starting native SSTV RX in a runtime lab session."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labSstvRxModeOption(
+        QStringList {} << "lab-sstv-rx-mode",
+        QStringLiteral("Manual native SSTV RX mode used by the runtime lab session."),
+        QStringLiteral("mode"));
+    QCommandLineOption const labSstvRxReadyFileOption(
+        QStringList {} << "lab-sstv-rx-ready-file",
+        QStringLiteral("Write this file when native SSTV RX is running and its capture worker has processed audio."),
+        QStringLiteral("path"));
+    QCommandLineOption const labSstvTxMsOption(
+        QStringList {} << "lab-sstv-tx-ms",
+        QStringLiteral("Delay before preparing and transmitting a native SSTV calibration image."),
+        QStringLiteral("ms"));
+    QCommandLineOption const labSstvTxWaitFileOption(
+        QStringList {} << "lab-sstv-tx-wait-file",
+        QStringLiteral("Do not start native SSTV TX until this lab readiness file exists."),
+        QStringLiteral("path"));
+    QCommandLineOption const labSstvTxWaitTimeoutOption(
+        QStringList {} << "lab-sstv-tx-wait-timeout-ms",
+        QStringLiteral("Maximum wait for --lab-sstv-tx-wait-file; zero means wait until the lab quits."),
+        QStringLiteral("ms"),
+        QStringLiteral("60000"));
+    QCommandLineOption const labSstvModeOption(
+        QStringList {} << "lab-sstv-mode",
+        QStringLiteral("Native SSTV mode used by --lab-sstv-tx-ms."),
+        QStringLiteral("mode"),
+        QStringLiteral("martin-m1"));
+    QCommandLineOption const labSstvImageOption(
+        QStringList {} << "lab-sstv-image",
+        QStringLiteral("Local image used by --lab-sstv-tx-ms; omitted means calibration pattern."),
+        QStringLiteral("path"));
+    QCommandLineOption const labSstvVoxOption(
+        QStringList {} << "lab-sstv-vox",
+        QStringLiteral("Use audio-only VOX PTT for a native SSTV lab TX without CAT."));
     QCommandLineOption const labBcastMsOption(
         QStringList {} << "lab-bcast-ms",
         QStringLiteral("Delay before sending an armed FT2-Link broadcast in a runtime lab session."),
@@ -2311,6 +2349,15 @@ int main(int argc, char* argv[])
     parser.addOption(labNoMonitorOption);
     parser.addOption(labReapplyMsOption);
     parser.addOption(labMonitorMsOption);
+    parser.addOption(labSstvRxMsOption);
+    parser.addOption(labSstvRxModeOption);
+    parser.addOption(labSstvRxReadyFileOption);
+    parser.addOption(labSstvTxMsOption);
+    parser.addOption(labSstvTxWaitFileOption);
+    parser.addOption(labSstvTxWaitTimeoutOption);
+    parser.addOption(labSstvModeOption);
+    parser.addOption(labSstvImageOption);
+    parser.addOption(labSstvVoxOption);
     parser.addOption(labBcastMsOption);
     parser.addOption(labBcastTextOption);
     parser.addOption(labBeaconMsOption);
@@ -2511,6 +2558,16 @@ int main(int argc, char* argv[])
     };
     int const labReapplyMs = parseLabDelayMs(labReapplyMsOption, 6500);
     int const labMonitorMs = parseLabDelayMs(labMonitorMsOption, 8000);
+    int const labSstvRxMs = parseLabDelayMs(labSstvRxMsOption, 0);
+    int const labSstvTxMs = parseLabDelayMs(labSstvTxMsOption, 0);
+    int const labSstvTxWaitTimeoutMs = parseLabDelayMs(
+        labSstvTxWaitTimeoutOption, 60'000);
+    QString const labSstvMode = parser.value(labSstvModeOption).trimmed();
+    QString const labSstvRxMode = parser.value(labSstvRxModeOption).trimmed();
+    QString const labSstvRxReadyFile = parser.value(labSstvRxReadyFileOption).trimmed();
+    QString const labSstvTxWaitFile = parser.value(labSstvTxWaitFileOption).trimmed();
+    QString const labSstvImage = parser.value(labSstvImageOption).trimmed();
+    bool const labSstvVox = parser.isSet(labSstvVoxOption);
     int const labBcastMs = parseLabDelayMs(labBcastMsOption, 14000);
     int const labDigiMs = parseLabDelayMs(labDigiMsOption, 14000);
     int const labQuitMs = parseLabDelayMs(labQuitMsOption, 0);
@@ -2939,6 +2996,220 @@ int main(int argc, char* argv[])
     } else if (parser.isSet(labMonitorMsOption) && labNoMonitor) {
         qInfo() << "[LAB] --lab-monitor-ms ignored because --lab-no-monitor is set";
     }
+#if DECODIUM_HAS_SSTV
+    auto writeLabSstvReadyFile = [](const QString& path,
+                                    const QVariantMap& diagnostics) {
+        if (path.isEmpty()) {
+            return false;
+        }
+        QSaveFile readyFile(QFileInfo(path).absoluteFilePath());
+        if (!readyFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            qWarning() << "[LAB][SSTV] cannot open RX readiness file"
+                       << readyFile.fileName() << readyFile.errorString();
+            return false;
+        }
+        QVariantMap payload = diagnostics;
+        payload.insert(QStringLiteral("readyUtc"),
+                       QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs));
+        const QByteArray json = QJsonDocument::fromVariant(payload).toJson(
+            QJsonDocument::Compact);
+        if (readyFile.write(json) != json.size() || !readyFile.commit()) {
+            qWarning() << "[LAB][SSTV] cannot commit RX readiness file"
+                       << readyFile.fileName() << readyFile.errorString();
+            return false;
+        }
+        qInfo().noquote() << "[LAB][SSTV] RX readiness file written"
+                          << readyFile.fileName();
+        return true;
+    };
+    if (parser.isSet(labSstvRxMsOption)) {
+        QTimer::singleShot(labSstvRxMs, &bridge,
+                           [&bridge,
+                            labSstvRxMode,
+                            labSstvRxReadyFile,
+                            writeLabSstvReadyFile]() {
+            if (!labSstvRxMode.isEmpty()) {
+                const bool controlsAccepted = bridge.updateSstvRxControls(
+                    {{QStringLiteral("modeControl"), QStringLiteral("manual")},
+                     {QStringLiteral("manualMode"), labSstvRxMode}});
+                qInfo().noquote()
+                    << "[LAB][SSTV] RX manual mode requested mode="
+                    << labSstvRxMode << "accepted=" << controlsAccepted;
+            }
+            const bool accepted = bridge.startSstvRx();
+            qInfo().noquote()
+                << "[LAB][SSTV] RX requested accepted=" << accepted
+                << "state=" << bridge.sstvRxState()
+                << "source=" << bridge.sstvRxSource();
+
+            if (!labSstvRxReadyFile.isEmpty()) {
+                // Running only proves that the state machine was armed.  Wait
+                // for at least one callback from the dedicated capture worker
+                // before releasing the TX side of an A/B test.  This avoids
+                // declaring readiness while a stale BlackHole AudioQueue is
+                // still being replaced.
+                auto* readyTimer = new QTimer(&bridge);
+                readyTimer->setInterval(200);
+                auto readyElapsed = std::make_shared<QElapsedTimer>();
+                readyElapsed->start();
+                QObject::connect(
+                    readyTimer, &QTimer::timeout, &bridge,
+                    [readyTimer,
+                     readyElapsed,
+                     &bridge,
+                     labSstvRxReadyFile,
+                     writeLabSstvReadyFile]() mutable {
+                    const QVariantMap diagnostics = bridge.sstvRxDiagnostics();
+                    const bool active = diagnostics.value(QStringLiteral("active"))
+                                            .toBool();
+                    const bool workerRunning = diagnostics.value(
+                        QStringLiteral("workerRunning")).toBool();
+                    const qulonglong chunks = diagnostics.value(
+                        QStringLiteral("chunksProcessed")).toULongLong();
+                    if (active && workerRunning && chunks > 0U) {
+                        writeLabSstvReadyFile(labSstvRxReadyFile, diagnostics);
+                        readyTimer->stop();
+                        readyTimer->deleteLater();
+                        return;
+                    }
+                    if (readyElapsed->elapsed() >= 10'000) {
+                        qWarning().noquote()
+                            << "[LAB][SSTV] RX readiness timed out"
+                            << QJsonDocument::fromVariant(diagnostics)
+                                   .toJson(QJsonDocument::Compact);
+                        readyTimer->stop();
+                        readyTimer->deleteLater();
+                    }
+                });
+                readyTimer->start();
+            }
+        });
+        auto* sstvRxTraceTimer = new QTimer(&bridge);
+        sstvRxTraceTimer->setInterval(5'000);
+        QObject::connect(sstvRxTraceTimer, &QTimer::timeout, &bridge,
+                         [&bridge]() {
+            const QVariantMap diagnostics = bridge.sstvRxDiagnostics();
+            qInfo().noquote()
+                << "[LAB][SSTV] RX diagnostics"
+                << QJsonDocument::fromVariant(diagnostics)
+                       .toJson(QJsonDocument::Compact);
+        });
+        sstvRxTraceTimer->start();
+    }
+    if (parser.isSet(labSstvTxMsOption)) {
+        QTimer::singleShot(labSstvTxMs, &bridge,
+                           [&bridge,
+                            labSstvMode,
+                            labSstvImage,
+                            labSstvVox,
+                            labSstvTxWaitFile,
+                            labSstvTxWaitTimeoutMs]() {
+            auto startTxPreparation = [&bridge,
+                                       labSstvMode,
+                                       labSstvImage,
+                                       labSstvVox]() {
+            auto* studio = qobject_cast<decodium::sstv::SstvStudioController*>(
+                bridge.sstvStudio());
+            if (!studio) {
+                qWarning() << "[LAB][SSTV] TX unavailable: studio controller missing";
+                return;
+            }
+            if (labSstvVox) {
+                if (QObject* cat = bridge.catManagerObj()) {
+                    cat->setProperty("pttMethod",
+                                     QStringLiteral("VOX"));
+                    qInfo() << "[LAB][SSTV] VOX PTT forced on active CAT manager";
+                }
+            }
+            studio->setModeId(labSstvMode.isEmpty()
+                              ? QStringLiteral("martin-m1") : labSstvMode);
+            const auto txStarted = std::make_shared<bool>(false);
+            QObject::connect(
+                studio, &decodium::sstv::SstvStudioController::sourceChanged,
+                &bridge, [studio]() {
+                    if (studio->sourceReady() && !studio->busy()) {
+                        const bool accepted = studio->prepareImage();
+                        qInfo() << "[LAB][SSTV] image preparation requested accepted="
+                                << accepted;
+                    }
+                });
+            QObject::connect(
+                studio, &decodium::sstv::SstvStudioController::preparedChanged,
+                &bridge, [&bridge, studio, txStarted]() {
+                    if (*txStarted || !studio->preparedReady() || studio->busy()) {
+                        return;
+                    }
+                    *txStarted = true;
+                    qInfo().noquote()
+                        << "[LAB][SSTV] TX preflight snapshot canStart="
+                        << bridge.sstvTxCanStart()
+                        << "legacy=" << bridge.legacyBackendActive()
+                        << "transmitting=" << bridge.transmitting()
+                        << "txRequested=" << bridge.txRequested()
+                        << "pttPending=" << bridge.pttPending()
+                        << "pttConfirmed=" << bridge.pttConfirmed()
+                        << "output=" << bridge.audioOutputDevice();
+                    const bool accepted = bridge.startSstvTx();
+                    qInfo().noquote()
+                        << "[LAB][SSTV] TX requested accepted=" << accepted
+                        << "mode=" << studio->modeId()
+                        << "output=" << bridge.audioOutputDevice();
+                });
+
+            bool accepted = false;
+            if (!labSstvImage.isEmpty()) {
+                accepted = studio->loadSource(
+                    QUrl::fromLocalFile(QFileInfo(labSstvImage).absoluteFilePath()));
+            } else {
+                accepted = studio->generateCalibrationPattern();
+            }
+            qInfo().noquote()
+                << "[LAB][SSTV] TX source requested accepted=" << accepted
+                << "mode=" << studio->modeId()
+                << "image=" << (labSstvImage.isEmpty()
+                                  ? QStringLiteral("calibration-pattern")
+                                  : labSstvImage);
+            };
+
+            if (labSstvTxWaitFile.isEmpty()) {
+                startTxPreparation();
+                return;
+            }
+
+            auto* waitTimer = new QTimer(&bridge);
+            waitTimer->setInterval(200);
+            auto waitElapsed = std::make_shared<QElapsedTimer>();
+            waitElapsed->start();
+            QObject::connect(
+                waitTimer, &QTimer::timeout, &bridge,
+                [waitTimer,
+                 waitElapsed,
+                 labSstvTxWaitFile,
+                 labSstvTxWaitTimeoutMs,
+                 startTxPreparation]() mutable {
+                if (QFileInfo::exists(labSstvTxWaitFile)) {
+                    qInfo().noquote() << "[LAB][SSTV] RX readiness observed; releasing TX"
+                                      << labSstvTxWaitFile;
+                    waitTimer->stop();
+                    waitTimer->deleteLater();
+                    startTxPreparation();
+                    return;
+                }
+                if (labSstvTxWaitTimeoutMs > 0
+                    && waitElapsed->elapsed() >= labSstvTxWaitTimeoutMs) {
+                    qWarning().noquote()
+                        << "[LAB][SSTV] TX readiness wait timed out"
+                        << labSstvTxWaitFile;
+                    waitTimer->stop();
+                    waitTimer->deleteLater();
+                }
+            });
+            qInfo().noquote() << "[LAB][SSTV] TX waiting for RX readiness file"
+                              << labSstvTxWaitFile;
+            waitTimer->start();
+        });
+    }
+#endif
     if (parser.isSet(labSendTxMsOption)) {
         QTimer::singleShot(labSendTxMs, &bridge, [&bridge,
                                                   applyLabRuntimeOverrides,

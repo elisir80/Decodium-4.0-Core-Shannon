@@ -772,6 +772,10 @@ struct SstvRxRuntime::WorkerPipeline final
     std::uint64_t nominalLinePeriodSamples {0U};
     std::uint64_t retainedAcquisitionId {0U};
     std::uint64_t lastCompletedAcquisitionId {0U};
+    // A completed frame is followed by a tail of 1200 Hz/stop audio.  Do not
+    // let that tail be mistaken for the leader of a second frame and replace
+    // a valid image with a tiny partial acquisition.
+    std::uint64_t suppressNativeAcquisitionUntilSample {0U};
     std::uint64_t currentChunkEndNs {0U};
     std::uint64_t progressiveUpdates {0U};
     std::uint64_t firstProgressiveUpdateNs {0U};
@@ -789,6 +793,17 @@ struct SstvRxRuntime::WorkerPipeline final
         return martinM1Session || scottieSession || robotSession
             || sequentialRgbSession || pdSession || avtSession
             || mmsstvSession;
+    }
+
+    void holdOffNativeAcquisition(std::uint64_t imageEndSample) noexcept
+    {
+        constexpr std::uint64_t kHoldOffSamples =
+            (static_cast<std::uint64_t>(SstvResampler::kOutputSampleRate)
+             * 1'000U) / 1'000U;
+        const std::uint64_t until = saturatingUnsignedAdd(
+            imageEndSample, kHoldOffSamples);
+        suppressNativeAcquisitionUntilSample = std::max(
+            suppressNativeAcquisitionUntilSample, until);
     }
 
     void resetSignalPath(std::uint32_t rate, std::uint64_t epochUs)
@@ -1779,8 +1794,8 @@ bool SstvRxRuntime::processChunk(WorkerPipeline& pipeline,
         return false;
     }
 
-    applyControlSnapshot(pipeline);
     pipeline.source = chunk.source;
+    applyControlSnapshot(pipeline);
 
     qint64 chunkEndNs = 0;
     if (!blockEndTimestamp(chunk.startTime.count(),
@@ -1821,6 +1836,14 @@ bool SstvRxRuntime::processChunk(WorkerPipeline& pipeline,
         saturatingAdd(m_snapshot.processingFailures);
         return false;
     } else if (discontinuity) {
+        if (qEnvironmentVariableIsSet("DECODIUM_SSTV_TRACE_TIMELINE")) {
+            qInfo().noquote()
+                << "[SSTV][TIMELINE] discontinuity"
+                << "gap_ns=" << gapNs
+                << "sequence=" << chunk.sequence
+                << "previous_sequence=" << pipeline.lastSequence
+                << "native_session=" << pipeline.hasNativeSession();
+        }
         // Preserve VIS/state-machine acquisition history so the first new tone
         // carries the actual timeline gap into SstvVisDetector.  Reset every
         // continuous-signal component to prevent FIR/phase state from bridging
@@ -1869,6 +1892,9 @@ bool SstvRxRuntime::processChunk(WorkerPipeline& pipeline,
         static_cast<std::uint64_t>(chunk.startTime.count()) / 1'000'000U;
     const std::uint64_t chunkEndMs =
         static_cast<std::uint64_t>(chunkEndNs) / 1'000'000U;
+    const std::uint64_t chunkEndSample = sampleIndexAtUs(
+        pipeline.toneEpochUs,
+        static_cast<std::uint64_t>(chunkEndNs) / 1'000U).value_or(0U);
     pipeline.currentChunkEndNs = static_cast<std::uint64_t>(chunkEndNs);
     pipeline.stateMachine->dispatch(nowMs, SstvRxTick {});
 
@@ -1896,7 +1922,8 @@ bool SstvRxRuntime::processChunk(WorkerPipeline& pipeline,
     } else if (pipeline.robotSession) {
         const std::uint64_t imageEnd =
             pipeline.robotSession->imageEndSample();
-        consumeRobotObservations(pipeline, frequencies, chunkEndMs);
+        consumeRobotObservations(
+            pipeline, frequencies, chunkEndMs, chunkEndSample);
         if (!pipeline.robotSession) {
             resumeToneAtSample = imageEnd;
         }
@@ -2263,7 +2290,8 @@ bool SstvRxRuntime::processChunk(WorkerPipeline& pipeline,
     if (!retainedNativeSession) {
         consumeMartinM1Observations(pipeline, frequencies, chunkEndMs);
         consumeScottieObservations(pipeline, frequencies, chunkEndMs);
-        consumeRobotObservations(pipeline, frequencies, chunkEndMs);
+        consumeRobotObservations(
+            pipeline, frequencies, chunkEndMs, chunkEndSample);
         consumeSequentialRgbObservations(pipeline, frequencies, chunkEndMs);
         consumePdObservations(pipeline, frequencies, chunkEndMs);
         consumeAvtObservations(pipeline, frequencies, chunkEndMs);
@@ -2578,6 +2606,7 @@ void SstvRxRuntime::resetWorkerPipeline(WorkerPipeline& pipeline,
     pipeline.nominalLinePeriodSamples = 0U;
     pipeline.retainedAcquisitionId = 0U;
     pipeline.currentChunkEndNs = 0U;
+    pipeline.suppressNativeAcquisitionUntilSample = 0U;
     pipeline.progressiveUpdates = 0U;
     pipeline.firstProgressiveUpdateNs = 0U;
     pipeline.lastProgressiveUpdateNs = 0U;
@@ -2677,9 +2706,33 @@ void SstvRxRuntime::applyControlSnapshot(WorkerPipeline& pipeline)
                     : std::nullopt));
             static_cast<void>(pipeline.stateMachine->setNoVisFallbackMode(
                 std::nullopt));
+
         }
         static_cast<void>(m_retainedAudio.setRetentionSeconds(
             next.settings.replayRetentionSeconds));
+    }
+
+    // A manual mode is an explicit operator choice and must not be routed
+    // through VIS/fallback discovery.  This applies both when the control is
+    // changed during an active stream and when it was already selected before
+    // the worker pipeline was created (in which case revisionChanged is false
+    // on the first chunk).
+    if (pipeline.stateMachine
+        && !pipeline.stateMachine->hasActiveSession()
+        && next.settings.modeControl == SstvRxModeControl::Manual
+        && pipeline.stateMachine->state() == SstvRxState::SearchingLeader
+        && SstvRxControlPolicy::modeNameIsValid(next.settings.manualMode)) {
+        const std::uint64_t eventMs = std::max(
+            pipeline.currentChunkEndNs / 1'000'000U,
+            pipeline.stateMachine->metrics().lastEventAtMs);
+        pipeline.stateMachine->dispatch(
+            eventMs, SstvRxManualMode {next.settings.manualMode});
+        if (pipeline.stateMachine->state() == SstvRxState::ModeDetected) {
+            pipeline.stateMachine->dispatch(eventMs, SstvRxModeReady {});
+        }
+        // The mode is armed here; the native session is instantiated by the
+        // first validated sync pulse below so its image offset is aligned to
+        // the live waveform rather than sample zero.
     }
 }
 
@@ -2786,6 +2839,10 @@ void SstvRxRuntime::updateSyncFallbackAndFsk(
         if (pipeline.fallbackResult.retainedPulses.empty()) {
             return;
         }
+        if (pipeline.fallbackResult.retainedPulses.front().startSample
+            < pipeline.suppressNativeAcquisitionUntilSample) {
+            return;
+        }
         if (pipeline.stateMachine->state() != SstvRxState::SearchingLeader
             && !isTerminalRxState(pipeline.stateMachine->state())) {
             return;
@@ -2874,6 +2931,24 @@ void SstvRxRuntime::updateSyncFallbackAndFsk(
         } else {
             pipeline.fallbackResult =
                 pipeline.fallbackDetector->consume(pulse);
+            if (pipeline.controls.settings.modeControl
+                    == SstvRxModeControl::Manual
+                && pipeline.stateMachine->state()
+                    == SstvRxState::WaitingForSync
+                && SstvRxControlPolicy::modeNameIsValid(
+                       pipeline.controls.settings.manualMode)) {
+                if (pulse.startSample
+                    < pipeline.suppressNativeAcquisitionUntilSample) {
+                    return;
+                }
+                static_cast<void>(beginNativeSessionByModeId(
+                    pipeline,
+                    pipeline.controls.settings.manualMode,
+                    pulse.startSample,
+                    eventMs,
+                    0.0));
+                return;
+            }
             if (pipeline.fallbackResult.status
                     == SstvFallbackStatus::Unique
                 && !pipeline.fallbackUniqueLogged) {
@@ -3433,6 +3508,8 @@ bool SstvRxRuntime::beginNativeSessionByModeId(
             pipeline.frequencyDemodulator->config().hopSamples);
         config.clockErrorPpm = clock;
         config.frequencyOffsetHz = 0.0;
+        config.preserveTerminalGuard = true;
+        config.allowTerminalRowRecovery = true;
         pipeline.robotSession =
             std::make_unique<SstvRobotRxSession>(config);
         pipeline.robotLinesReported = 0U;
@@ -3747,6 +3824,8 @@ bool SstvRxRuntime::beginRobotSession(
         pipeline.frequencyDemodulator->config().hopSamples);
     config.clockErrorPpm = roundedClockErrorPpm(clockError);
     config.frequencyOffsetHz = 0.0;
+    config.preserveTerminalGuard = true;
+    config.allowTerminalRowRecovery = true;
     pipeline.robotSession = std::make_unique<SstvRobotRxSession>(config);
     pipeline.robotLinesReported = 0U;
     pipeline.nominalLinePeriodSamples = samplesForPicoseconds(
@@ -4364,7 +4443,8 @@ void SstvRxRuntime::publishScottieImage(WorkerPipeline& pipeline,
 void SstvRxRuntime::consumeRobotObservations(
     WorkerPipeline& pipeline,
     const std::vector<SstvFrequencyObservation>& observations,
-    std::uint64_t eventMs)
+    std::uint64_t eventMs,
+    std::uint64_t inputEndSample)
 {
     if (!pipeline.robotSession || observations.empty()) {
         return;
@@ -4398,6 +4478,50 @@ void SstvRxRuntime::consumeRobotObservations(
 
     const SstvRobotRxSessionState sessionState =
         pipeline.robotSession->state();
+    if (sessionState == SstvRobotRxSessionState::Receiving
+        && inputEndSample >= pipeline.robotSession->imageEndSample()) {
+        // The demodulator intentionally emits no frequency observations for
+        // the silent/tail portion after the final scanline.  Without an
+        // explicit stream-end check the Robot session remains Receiving
+        // forever and the decoder never flushes its final sync predictions.
+        // Close only after the whole input chunk has been consumed, so the
+        // last valid observations still reach the image accumulator.
+        finishRobotAtImageEnd(pipeline, eventMs);
+        return;
+    }
+    if (qEnvironmentVariableIsSet("DECODIUM_SSTV_TRACE_FRAME")
+        && sessionState != SstvRobotRxSessionState::Receiving) {
+        const SstvImageSnapshot snapshot = pipeline.robotSession->snapshot();
+        std::uint32_t firstIncomplete = snapshot.height;
+        while (firstIncomplete != 0U
+               && !snapshot.isScanlineComplete(firstIncomplete - 1U)) {
+            --firstIncomplete;
+        }
+        std::uint32_t firstIncompleteFromTop = snapshot.height;
+        std::uint32_t incompleteRows = 0U;
+        for (std::uint32_t row = 0U; row < snapshot.height; ++row) {
+            if (!snapshot.isScanlineComplete(row)) {
+                firstIncompleteFromTop = std::min(
+                    firstIncompleteFromTop, row);
+                ++incompleteRows;
+            }
+        }
+        qInfo().noquote()
+            << "[SSTV][FRAME] robot terminal state="
+            << static_cast<int>(sessionState)
+            << "lines=" << pipeline.robotSession->decoderMetrics().linesPublished
+            << "coverage=" << pipeline.robotSession->imageFrame().coverage()
+            << "image_start_sample=" << pipeline.robotSession->imageStartSample()
+            << "image_end_sample=" << pipeline.robotSession->imageEndSample()
+            << "tail_first_incomplete=" << firstIncomplete
+            << "first_incomplete_from_top=" << firstIncompleteFromTop
+            << "incomplete_rows=" << incompleteRows
+            << "tail_prev_complete="
+            << (firstIncomplete > 0U
+                && snapshot.isScanlineComplete(firstIncomplete - 1U))
+            << "terminal_row_recovery="
+            << pipeline.robotSession->config().allowTerminalRowRecovery;
+    }
     if (sessionState == SstvRobotRxSessionState::Receiving) {
         if (imageChanged) {
             publishRobotImage(pipeline, false);
@@ -4407,6 +4531,8 @@ void SstvRxRuntime::consumeRobotObservations(
     const bool usablePartial =
         pipeline.robotSession->imageFrame().coverage() > 0.0;
     if (sessionState == SstvRobotRxSessionState::Complete) {
+        pipeline.holdOffNativeAcquisition(
+            pipeline.robotSession->imageEndSample());
         const std::uint64_t lines =
             pipeline.robotSession->decoderMetrics().linesPublished;
         pipeline.stateMachine->dispatch(
@@ -4416,6 +4542,73 @@ void SstvRxRuntime::consumeRobotObservations(
                     lines,
                     std::numeric_limits<std::uint32_t>::max()))});
     } else if (sessionState == SstvRobotRxSessionState::Partial) {
+        // A late stop/tail can leave only a few terminal Robot lines missing.
+        // Keep that useful bounded partial image visible and suppress the
+        // immediate tail-induced false VIS instead of replacing it with a
+        // fresh 1–2 line acquisition.
+        if (pipeline.robotSession->imageFrame().coverage() >= 0.75) {
+            pipeline.holdOffNativeAcquisition(
+                pipeline.robotSession->imageEndSample());
+        }
+        pipeline.stateMachine->dispatch(
+            eventMs, SstvRxInputEnded {usablePartial});
+    } else {
+        pipeline.stateMachine->dispatch(eventMs, SstvRxCancel {});
+    }
+    publishRobotImage(pipeline, true);
+    pipeline.robotSession.reset();
+}
+
+void SstvRxRuntime::finishRobotAtImageEnd(
+    WorkerPipeline& pipeline,
+    std::uint64_t eventMs)
+{
+    if (!pipeline.robotSession) {
+        return;
+    }
+    const SstvRobotRxSessionState sessionState =
+        pipeline.robotSession->finish();
+    if (qEnvironmentVariableIsSet("DECODIUM_SSTV_TRACE_FRAME")) {
+        const SstvRobotDecoderMetrics metrics =
+            pipeline.robotSession->decoderMetrics();
+        qInfo().noquote()
+            << "[SSTV][FRAME] robot terminal state="
+            << static_cast<int>(sessionState)
+            << "lines=" << metrics.linesPublished
+            << "coverage=" << pipeline.robotSession->imageFrame().coverage()
+            << "image_start_sample=" << pipeline.robotSession->imageStartSample()
+            << "image_end_sample=" << pipeline.robotSession->imageEndSample()
+            << "sync_inputs=" << metrics.syncInputs
+            << "sync_observed=" << metrics.observedSyncs
+            << "sync_predicted=" << metrics.predictedSyncs
+            << "sync_rejected=" << metrics.rejectedSyncs
+            << "stored_anchors=" << metrics.storedSyncAnchors
+            << "observations=" << metrics.observationInputs
+            << "accepted=" << metrics.acceptedObservations
+            << "unanchored=" << metrics.unanchoredObservations
+            << "non_pixel=" << metrics.nonPixelObservations
+            << "out_of_line=" << metrics.outOfLineObservations
+            << "terminal_row_recovery="
+            << pipeline.robotSession->config().allowTerminalRowRecovery;
+    }
+    const bool usablePartial =
+        pipeline.robotSession->imageFrame().coverage() > 0.0;
+    if (sessionState == SstvRobotRxSessionState::Complete) {
+        pipeline.holdOffNativeAcquisition(
+            pipeline.robotSession->imageEndSample());
+        const std::uint64_t lines =
+            pipeline.robotSession->decoderMetrics().linesPublished;
+        pipeline.stateMachine->dispatch(
+            eventMs,
+            SstvRxFrameCompleted {
+                static_cast<std::uint32_t>(std::min<std::uint64_t>(
+                    lines,
+                    std::numeric_limits<std::uint32_t>::max()))});
+    } else if (sessionState == SstvRobotRxSessionState::Partial) {
+        if (pipeline.robotSession->imageFrame().coverage() >= 0.75) {
+            pipeline.holdOffNativeAcquisition(
+                pipeline.robotSession->imageEndSample());
+        }
         pipeline.stateMachine->dispatch(
             eventMs, SstvRxInputEnded {usablePartial});
     } else {

@@ -966,12 +966,13 @@ void SoundOutput::handleStateChanged(QAudio::State newState)
           trackedPlaybackStatus(m_trackedSessionId);
       if (!playback.drained
           && playback.sourceFrames < playback.expectedFrames) {
-        // Idle before the complete tracked source reached the sink is a real
-        // starvation event. Normal EOF is accepted as the drain barrier.
+        // CoreAudio virtual devices (notably BlackHole) can report Idle while
+        // their queue is being primed, even though no underrun error occurred.
+        // Treat the explicit Qt UnderrunError as the authoritative starvation
+        // signal; an error-free Idle transition is only a state notification
+        // and must not abort a valid long SSTV stream during startup.
         if (m_stream && m_stream->error() == QAudio::UnderrunError) {
           checkStream();
-        } else {
-          emitUnderrunMessage(tr("Audio TX output underrun: the tracked audio sink became idle before the complete session was delivered."));
         }
         break;
       }

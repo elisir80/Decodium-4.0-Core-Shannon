@@ -1002,8 +1002,18 @@ bool DecodiumBridge::sstvTxGlobalPreflightReady() const
         || m_txAudioSink || m_txPcmBuffer
         || (m_modulator && m_modulator->isActive())
         || (!sstvTxUsesVoxPtt() && sstvTxPttActive())
-        || m_decoPortUseRemote || usingTciAudioInput()
-        || usingLegacyBackendForTx()) {
+        || m_decoPortUseRemote || usingTciAudioInput()) {
+        return false;
+    }
+    // Do not gate the const UI preflight on the audio-device cache.  Runtime
+    // device changes intentionally invalidate that cache, and the authoritative
+    // start path resolves the selected output immediately before pinning it.
+    // Requiring a fresh cache here made a valid BlackHole/VOX route report
+    // “preflight not ready” until an unrelated audio refresh happened.
+    if (m_sstvTxOutputPinned
+        && (m_sstvTxOutputDevice.isNull()
+            || (m_sstvTxOutputChannels != 1U
+                && m_sstvTxOutputChannels != 2U))) {
         return false;
     }
     const decodium::sstv::SstvTxCoordinatorSnapshot snapshot
@@ -1011,7 +1021,24 @@ bool DecodiumBridge::sstvTxGlobalPreflightReady() const
     return snapshot.stateMachine.state != decodium::sstv::SstvTxState::Disabled
         && !snapshot.stateMachine.releaseRequired
         && !snapshot.audioLeaseRetained
-        && (sstvTxUsesVoxPtt() || sstvTxCanControlPtt());
+        && (sstvTxUsesVoxPtt() || sstvTxCanControlPtt()
+            || sstvTxAudioOnlyAllowed());
+#else
+    return false;
+#endif
+}
+
+bool DecodiumBridge::sstvTxAudioOnlyAllowed() const
+{
+#if DECODIUM_HAS_SSTV
+    // A disconnected CAT/PTT path is safe for a local BlackHole/WAV test:
+    // audio can still be rendered, but no radio can be keyed. Remote and TCI
+    // routes remain excluded because they have their own ownership model.
+    return !m_decoPortUseRemote
+        && !usingTciAudioInput()
+        && !sstvTxUsesVoxPtt()
+        && !sstvTxCanControlPtt()
+        && !sstvTxPttActive();
 #else
     return false;
 #endif
@@ -1373,19 +1400,22 @@ void DecodiumBridge::initialiseSstvTx()
     config.voxHangMs = static_cast<std::uint64_t>(sstvVoxHangMs());
     config.voxToneFrequencyHz = sstvVoxToneFrequencyHz();
     config.voxToneLevel = sstvVoxToneLevel();
+    config.voxEnvelopeEnabled = !qEnvironmentVariableIsSet(
+        "DECODIUM_LAB_SSTV_SILENT_VOX");
 
     decodium::sstv::SstvTxCoordinatorHooks hooks;
     hooks.queryPreflight = [this]() {
         decodium::sstv::SstvTxCoordinatorPreflight result;
         const bool vox = sstvTxUsesVoxPtt();
         const bool localAudioRoute = !m_decoPortUseRemote
-            && !usingTciAudioInput() && !usingLegacyBackendForTx();
+            && !usingTciAudioInput();
+        const bool audioOnly = sstvTxAudioOnlyAllowed();
         result.audioOutputReady = m_soundOutput && localAudioRoute
             && m_sstvTxOutputPinned
             && !m_sstvTxOutputDevice.isNull()
             && (m_sstvTxOutputChannels == 1U
                 || m_sstvTxOutputChannels == 2U);
-        result.pttPathReady = vox || sstvTxCanControlPtt();
+        result.pttPathReady = vox || sstvTxCanControlPtt() || audioOnly;
         result.weakSignalSequencerActive = m_txEnabled || m_autoCqRepeat
             || m_deferredManualSyncTx || m_txRequested || m_pttPending
             || m_pttConfirmed;
@@ -1401,7 +1431,7 @@ void DecodiumBridge::initialiseSstvTx()
             || (m_modulator && m_modulator->isActive())
             || (!vox && sstvTxPttActive())
             || m_shuttingDown || QCoreApplication::closingDown();
-        result.pttReleaseRequired = !vox;
+        result.pttReleaseRequired = !vox && !audioOnly;
         if (!localAudioRoute) {
             result.detail =
                 "SSTV TX currently requires Decodium's local SoundOutput route";
@@ -1426,7 +1456,8 @@ void DecodiumBridge::initialiseSstvTx()
             return false;
         }
         const bool vox = sstvTxUsesVoxPtt();
-        if (!vox && !sstvTxCanControlPtt()) {
+        const bool audioOnly = sstvTxAudioOnlyAllowed();
+        if (!vox && !sstvTxCanControlPtt() && !audioOnly) {
             return false;
         }
         if (!vox && sstvTxPttActive()) {
@@ -1464,13 +1495,21 @@ void DecodiumBridge::initialiseSstvTx()
                         sstvTxNowMs(), sessionId);
                 }
             });
-        } else {
+        } else if (sstvTxCanControlPtt()) {
             setSstvTxPtt(true);
+        } else {
+            QTimer::singleShot(0, this, [this, sessionId]() {
+                if (m_sstvTxCoordinator
+                    && m_sstvTxSessionId == sessionId) {
+                    m_sstvTxCoordinator->notifyPttConfirmed(
+                        sstvTxNowMs(), sessionId);
+                }
+            });
         }
         return true;
     };
     hooks.requestPttOff = [this](std::uint64_t sessionId) {
-        if (!sstvTxUsesVoxPtt()) {
+        if (!sstvTxUsesVoxPtt() && sstvTxCanControlPtt()) {
             setSstvTxPtt(false);
         }
         if (!sstvTxPttActive()) {
@@ -1888,6 +1927,7 @@ bool DecodiumBridge::startSstvCalibrationTone(const QString& toneId)
     m_sstvTxOutputPinned = true;
     m_sstvTxError.clear();
     m_sstvTxProgress = 0.0;
+    const bool audioOnly = sstvTxAudioOnlyAllowed();
     const decodium::sstv::SstvTxCoordinatorResult result
         = m_sstvTxCoordinator->startPrepared(
             sstvTxNowMs(), std::move(request));
@@ -1902,8 +1942,12 @@ bool DecodiumBridge::startSstvCalibrationTone(const QString& toneId)
     }
     m_sstvTxSessionId = static_cast<quint64>(result.sessionId);
     emit sstvTxStateChanged();
-    emit statusMessage(tr("SSTV calibration reference accepted: %1")
-                           .arg(QString::fromLatin1(spec.id)));
+    emit statusMessage(
+        audioOnly
+            ? tr("SSTV audio-only calibration accepted: %1")
+                  .arg(QString::fromLatin1(spec.id))
+            : tr("SSTV calibration reference accepted: %1")
+                  .arg(QString::fromLatin1(spec.id)));
     return true;
 #else
     Q_UNUSED(toneId)
@@ -1972,7 +2016,8 @@ bool DecodiumBridge::startSstvTx(const QString& fskId)
     }
     try {
         request.pixels
-            = decodium::sstv::SstvTxSourceBuilder::pixelsFromImage(*prepared);
+            = decodium::sstv::SstvTxSourceBuilder::pixelsFromImage(
+                *prepared, *mode);
     } catch (const std::exception& exception) {
         return reject(tr("Cannot prepare SSTV TX pixels: %1")
                           .arg(QString::fromUtf8(exception.what())));
@@ -1993,6 +2038,7 @@ bool DecodiumBridge::startSstvTx(const QString& fskId)
     m_sstvTxOutputPinned = true;
     m_sstvTxError.clear();
     m_sstvTxProgress = 0.0;
+    const bool audioOnly = sstvTxAudioOnlyAllowed();
     const decodium::sstv::SstvTxCoordinatorResult result
         = m_sstvTxCoordinator->start(sstvTxNowMs(), request);
     if (!result.accepted) {
@@ -2007,8 +2053,12 @@ bool DecodiumBridge::startSstvTx(const QString& fskId)
     m_sstvTxSessionId = static_cast<quint64>(result.sessionId);
     queueSstvStudioTransmittedImage(prepared, identifier, m_sstvTxSessionId);
     emit sstvTxStateChanged();
-    emit statusMessage(tr("SSTV TX accepted: %1")
-                           .arg(m_sstvStudioController->modeName()));
+    emit statusMessage(
+        audioOnly
+            ? tr("SSTV audio-only TX accepted: %1")
+                  .arg(m_sstvStudioController->modeName())
+            : tr("SSTV TX accepted: %1")
+                  .arg(m_sstvStudioController->modeName()));
     return true;
 #else
     Q_UNUSED(fskId)
@@ -4395,6 +4445,21 @@ decodium::sstv::SstvAudioSourceKind DecodiumBridge::currentSstvAudioSourceKind()
             || !usingTciAudioInput())) {
         return SstvAudioSourceKind::RtlSdr;
     }
+    // A live native SSTV session is deliberately independent from the
+    // application mode's legacy decoder.  In particular, FT8/FT2 normally
+    // expose only the legacy PCM tap and startAudioCapture() is skipped; that
+    // route is not a stable source for the bounded SSTV worker.  Once SSTV RX
+    // has been requested, prefer the Decodium-owned local capture (unless a
+    // higher-priority explicit source such as TCI/RTL/DecoPort was selected).
+#ifdef Q_OS_LINUX
+    if (m_audioInputDevice.startsWith(QStringLiteral("Pulse/PipeWire monitor: "),
+                                      Qt::CaseInsensitive)) {
+        return SstvAudioSourceKind::WebSdr;
+    }
+#endif
+    if (m_sstvRxRequested && !usingTciAudioInput()) {
+        return SstvAudioSourceKind::LocalSoundCard;
+    }
     if (usingLegacyBackendForRx()
         && (!useModernSpectrumFeedWithLegacy()
             || !useDedicatedModernAudioCaptureWithLegacy())) {
@@ -4403,15 +4468,24 @@ decodium::sstv::SstvAudioSourceKind DecodiumBridge::currentSstvAudioSourceKind()
     if (usingTciAudioInput()) {
         return SstvAudioSourceKind::Tci;
     }
-#ifdef Q_OS_LINUX
-    if (m_audioInputDevice.startsWith(QStringLiteral("Pulse/PipeWire monitor: "),
-                                      Qt::CaseInsensitive)) {
-        return SstvAudioSourceKind::WebSdr;
-    }
-#endif
     return SstvAudioSourceKind::LocalSoundCard;
 #else
     return static_cast<decodium::sstv::SstvAudioSourceKind>(0U);
+#endif
+}
+
+bool DecodiumBridge::nativeSstvRxForcesDedicatedAudioCapture() const
+{
+#if DECODIUM_HAS_SSTV
+    // The flag is intentionally narrow: it is only true while analog SSTV
+    // owns a live RX session.  HAMDRM and normal legacy/FT8 monitoring keep
+    // their existing source arbitration.
+    return m_sstvRxRequested
+        && !m_decoPortUseRemote
+        && !rtlSdrEnabled()
+        && !usingTciAudioInput();
+#else
+    return false;
 #endif
 }
 
@@ -4605,13 +4679,23 @@ bool DecodiumBridge::startSstvRx()
     const bool previousMonitoringOwnership = m_sstvOwnsMonitoring;
     const bool monitoringWasAlreadyRequested =
         m_monitoring || m_monitorRequested;
+    const bool legacyMonitorWasActive = usingLegacyBackendForRx()
+        && m_monitoring
+        && m_legacyBackend
+        && m_legacyBackend->monitoring();
     auto rollbackStart = [this](bool releaseOwnedMonitoring) {
+        const bool releaseDedicatedCapture =
+            m_sstvOwnsDedicatedAudioCapture;
+        const bool restoreLegacyMonitoring =
+            m_sstvRestoresLegacyMonitoring;
         m_sstvRxRequested = false;
         disableSstvProducerTaps();
         if (m_sstvRxRuntime) {
             m_sstvRxRuntime->stop();
         }
         m_sstvOwnsMonitoring = false;
+        m_sstvOwnsDedicatedAudioCapture = false;
+        m_sstvRestoresLegacyMonitoring = false;
 #if DECODIUM_HAS_HAMDRM
         if (m_hamDrmRxRequested && m_hamDrmRxBackend
             && m_hamDrmRxBackend->active()) {
@@ -4622,6 +4706,17 @@ bool DecodiumBridge::startSstvRx()
         emit sstvRxSnapshotChanged();
         if (releaseOwnedMonitoring && (m_monitoring || m_monitorRequested)) {
             setMonitoring(false);
+        } else if (releaseDedicatedCapture) {
+            stopAudioCapture();
+            if (usingLegacyBackendForRx() && m_legacyBackend) {
+                rearmLegacyPcmSpectrumFeed(
+                    QStringLiteral("SSTV RX start rollback"));
+            }
+        }
+        if (restoreLegacyMonitoring && m_legacyBackend) {
+            m_monitorRequested = true;
+            m_legacyBackend->setMonitoring(true);
+            syncLegacyBackendState();
         }
     };
 
@@ -4642,6 +4737,30 @@ bool DecodiumBridge::startSstvRx()
         }
     }
 
+    // If the user starts SSTV while the legacy FT8/FT2 monitor is already
+    // active, release that backend before opening the native capture.  The
+    // previous state is restored by stopSstvRx().
+    if (legacyMonitorWasActive) {
+        m_sstvRestoresLegacyMonitoring = true;
+        m_monitorRequested = false;
+        m_legacyBackend->setMonitoring(false);
+        // The legacy backend can leave its SoundInput object alive after the
+        // backend state changes to stopped. Native SSTV must reopen that
+        // endpoint on its own generation: reusing the old AudioQueue is
+        // especially unreliable with BlackHole, where it may remain active
+        // while delivering a permanent zero-RMS stream.
+        stopAudioCapture();
+        m_monitoring = false;
+        emit monitoringChanged();
+    }
+
+    // Publish the request before selecting the initial source.  This is the
+    // generation boundary that makes a manual/automatic SSTV session choose
+    // the native capture even when the application mode is FT8/FT2.
+    m_sstvRxRequested = true;
+    m_sstvOwnsDedicatedAudioCapture =
+        nativeSstvRxForcesDedicatedAudioCapture();
+
     const SstvAudioSourceKind initialKind = currentSstvAudioSourceKind();
     const quint32 initialStreamId = currentSstvAudioStreamId(initialKind);
     if (initialKind == SstvAudioSourceKind::Unknown || initialStreamId == 0U) {
@@ -4659,10 +4778,12 @@ bool DecodiumBridge::startSstvRx()
         return false;
     }
 
-    m_sstvRxRequested = true;
     m_sstvOwnsMonitoring = retryingRequestedSession
         ? previousMonitoringOwnership
         : !monitoringWasAlreadyRequested;
+    if (legacyMonitorWasActive) {
+        m_sstvOwnsMonitoring = true;
+    }
     refreshSstvProducerTaps();
     emit sstvRxStateChanged();
     emit sstvRxSnapshotChanged();
@@ -4676,6 +4797,14 @@ bool DecodiumBridge::startSstvRx()
         emit errorMessage(tr(
             "SSTV RX requires an active Decodium monitor"));
         return false;
+    }
+
+    // If the Decodium monitor was already running through the legacy backend,
+    // startRx() was not involved in this session.  Ensure the native capture
+    // exists before binding the local SSTV tap; startAudioCapture() is
+    // idempotent for an already-active endpoint.
+    if (nativeSstvRxForcesDedicatedAudioCapture()) {
+        startAudioCapture();
     }
 
     const SstvAudioSourceKind selectedKind = currentSstvAudioSourceKind();
@@ -4697,6 +4826,7 @@ void DecodiumBridge::stopSstvRx()
 #else
     constexpr bool digitalContinues = false;
 #endif
+    const bool stopDedicatedCapture = m_sstvOwnsDedicatedAudioCapture;
     const bool stopOwnedMonitor = m_sstvOwnsMonitoring
         && !digitalContinues && (m_monitoring || m_monitorRequested);
 #if DECODIUM_HAS_SSTV && DECODIUM_HAS_HAMDRM
@@ -4706,6 +4836,9 @@ void DecodiumBridge::stopSstvRx()
 #endif
     m_sstvRxRequested = false;
     m_sstvOwnsMonitoring = false;
+    m_sstvOwnsDedicatedAudioCapture = false;
+    const bool restoreLegacyMonitoring = m_sstvRestoresLegacyMonitoring;
+    m_sstvRestoresLegacyMonitoring = false;
 #if DECODIUM_HAS_SSTV
     if (sstvWavReplayActive()) {
         m_sstvWavReplayRestoreLive = false;
@@ -4724,6 +4857,19 @@ void DecodiumBridge::stopSstvRx()
 
     if (stopOwnedMonitor) {
         setMonitoring(false);
+    } else if (stopDedicatedCapture) {
+        // Return FT8/FT2 to its original single legacy PCM source after the
+        // native SSTV session releases its dedicated capture.
+        stopAudioCapture();
+        if (usingLegacyBackendForRx() && m_legacyBackend) {
+            rearmLegacyPcmSpectrumFeed(
+                QStringLiteral("SSTV RX stopped"));
+        }
+    }
+    if (restoreLegacyMonitoring && m_legacyBackend) {
+        m_monitorRequested = true;
+        m_legacyBackend->setMonitoring(true);
+        syncLegacyBackendState();
     }
     emit statusMessage(tr("SSTV RX stopped"));
 }
@@ -4741,6 +4887,8 @@ void DecodiumBridge::stopSstvRxForMonitorStop()
     }
     m_sstvRxRequested = false;
     m_sstvOwnsMonitoring = false;
+    m_sstvOwnsDedicatedAudioCapture = false;
+    m_sstvRestoresLegacyMonitoring = false;
 #if DECODIUM_HAS_SSTV
 #if DECODIUM_HAS_HAMDRM
     if (digitalActive) {

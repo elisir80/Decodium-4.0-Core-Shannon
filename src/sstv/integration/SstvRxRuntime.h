@@ -78,7 +78,11 @@ public:
         qint64 gapNs {0};
     };
 
-    explicit SstvMonotonicTimeline(qint64 jitterToleranceNs = 2'000'000);
+    // CoreAudio/AudioQueue callbacks are nominally 20 ms apart but can arrive
+    // a few milliseconds late under GUI/decoder load.  Treat that bounded
+    // scheduling jitter as continuous audio; larger gaps remain explicit
+    // discontinuities and still terminate the active frame safely.
+    explicit SstvMonotonicTimeline(qint64 jitterToleranceNs = 8'000'000);
 
     Candidate propose(qint64 observedLocalMonotonicNs,
                       std::size_t sampleCount,
@@ -110,7 +114,7 @@ public:
     struct Config final
     {
         SstvAudioIngress::Config ingress;
-        qint64 timestampJitterToleranceNs {2'000'000};
+        qint64 timestampJitterToleranceNs {8'000'000};
         std::uint32_t snapshotNotificationIntervalMs {100U};
         std::size_t maximumErrorCharacters {256U};
         std::size_t maximumDiagnosticScopePoints {256U};
@@ -526,9 +530,12 @@ private:
     void consumeRobotObservations(
         WorkerPipeline& pipeline,
         const std::vector<SstvFrequencyObservation>& observations,
-        std::uint64_t eventMs);
+        std::uint64_t eventMs,
+        std::uint64_t inputEndSample);
     void terminateRobotForDiscontinuity(WorkerPipeline& pipeline,
                                         std::uint64_t eventMs);
+    void finishRobotAtImageEnd(WorkerPipeline& pipeline,
+                               std::uint64_t eventMs);
     void publishRobotImage(WorkerPipeline& pipeline, bool force);
     void consumeSequentialRgbObservations(
         WorkerPipeline& pipeline,

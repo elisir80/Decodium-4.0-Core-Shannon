@@ -207,6 +207,10 @@ struct SstvTxCoordinatorConfig final
     std::uint64_t voxHangMs {500U};
     double voxToneFrequencyHz {1'900.0};
     double voxToneLevel {0.5};
+    // Audio-only VOX normally carries a pre-key/hang envelope so a real
+    // transmitter opens reliably.  The bounded lab loopback can disable that
+    // envelope explicitly to keep the 1900 Hz keying tone out of RX VIS/DSP.
+    bool voxEnvelopeEnabled {true};
     // A dispatched OFF command is not proof that RF has stopped.  Retry the
     // existing Decodium PTT adapter at this bounded cadence until its feedback
     // confirms release; the release barrier remains closed in the meantime.

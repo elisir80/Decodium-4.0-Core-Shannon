@@ -21,6 +21,11 @@ struct SstvRobotRxSessionConfig final
     std::int32_t clockErrorPpm {0};
     double frequencyOffsetHz {0.0};
     double minimumObservationConfidence {0.20};
+    // Keep the bounded Robot B/W 8 compatibility/tail guard in the live
+    // audio runtime.  Tests and deterministic replay retain the canonical
+    // image extent unless they explicitly opt in.
+    bool preserveTerminalGuard {false};
+    bool allowTerminalRowRecovery {false};
     std::size_t maximumPendingDirtyEvents {
         SstvImageFrame::kDefaultMaximumDirtyEvents};
 };

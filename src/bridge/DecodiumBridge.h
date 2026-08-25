@@ -2494,6 +2494,12 @@ private:
     bool m_sstvRxRequested {false};
     bool m_sstvOwnsMonitoring {false};
 #if DECODIUM_HAS_SSTV
+    // A native SSTV RX session may temporarily own a dedicated Qt audio
+    // capture while the selected Decodium mode is still backed by the legacy
+    // decoder.  The flag lets stopSstvRx() restore the legacy single-capture
+    // path without disturbing a capture that was already active beforehand.
+    bool m_sstvOwnsDedicatedAudioCapture {false};
+    bool m_sstvRestoresLegacyMonitoring {false};
     // The object address is stable for the bridge lifetime. Its worker and DSP
     // pipeline remain lazy and run only between startSstvRx()/stopSstvRx().
     // Stable ownership also makes the direct bounded audio relay safe across
@@ -4181,6 +4187,7 @@ private:
     bool sstvTxUsesVoxPtt() const;
     bool sstvTxCanControlPtt() const;
     bool sstvTxPttActive() const;
+    bool sstvTxAudioOnlyAllowed() const;
     void setSstvTxPtt(bool on);
     bool applySstvTxTimingSettings();
 #if DECODIUM_HAS_SSTV && DECODIUM_HAS_HAMDRM
@@ -4231,6 +4238,7 @@ private:
                              quint64 sessionId);
     bool restoreSstvLiveAfterReplay();
     decodium::sstv::SstvAudioSourceKind currentSstvAudioSourceKind() const;
+    bool nativeSstvRxForcesDedicatedAudioCapture() const;
     quint32 currentSstvAudioStreamId(decodium::sstv::SstvAudioSourceKind kind) const;
     void selectSstvRxSource(decodium::sstv::SstvAudioSourceKind kind,
                             quint32 streamId,

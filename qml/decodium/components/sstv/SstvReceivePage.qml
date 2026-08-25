@@ -12,9 +12,12 @@ SstvPage {
     property string imageViewMode: "fit"
     property real imageZoom: 1.0
 
-    readonly property var stats: engine ? engine.sstvRxDiagnostics : ({})
-    readonly property var controls: engine ? engine.sstvRxControls : ({})
-    readonly property var modeChoices: engine ? engine.sstvRxModeChoices : []
+    readonly property var stats: engine && engine.sstvRxDiagnostics
+                                 ? engine.sstvRxDiagnostics : ({})
+    readonly property var controls: engine && engine.sstvRxControls
+                                    ? engine.sstvRxControls : ({})
+    readonly property var modeChoices: engine && engine.sstvRxModeChoices
+                                       ? engine.sstvRxModeChoices : []
     readonly property bool imageAvailable: !!(stats && stats.imageAvailable
                                                && engine && engine.sstvRxImageSource)
     readonly property real imageCoverage: Math.max(0.0, Math.min(1.0,
@@ -318,7 +321,6 @@ SstvPage {
                     text: qsTr("%1%").arg((root.replayProgress * 100).toFixed(0))
                     color: root.primaryTextColor
                     font.pixelSize: 10
-                    font.family: "monospace"
                 }
             }
 
@@ -715,7 +717,6 @@ SstvPage {
                         text: qsTr("%1%").arg((root.imageZoom * 100).toFixed(0))
                         color: root.secondaryTextColor
                         font.pixelSize: 10
-                        font.family: "monospace"
                     }
                     Button {
                         objectName: "sstvRxImageZoomIn"

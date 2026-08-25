@@ -52,7 +52,8 @@ SstvRobotRxSession::SstvRobotRxSession(SstvRobotRxSessionConfig config)
                 config_.clockErrorPpm,
                 config_.frequencyOffsetHz,
                 config_.minimumObservationConfidence,
-                config_.maximumPendingDirtyEvents})
+                config_.maximumPendingDirtyEvents,
+                config_.allowTerminalRowRecovery})
 {
     const std::uint64_t canonicalImageSamples = mapper_.imageSampleCount();
     std::uint64_t receiverImageSamples = canonicalImageSamples;
@@ -71,6 +72,18 @@ SstvRobotRxSession::SstvRobotRxSession(SstvRobotRxSessionConfig config)
         receiverImageSamples = std::max(
             receiverImageSamples,
             compatibilityLineSamples * spec_.height);
+        // AudioQueue/BlackHole clock and callback scheduling can leave the
+        // final Robot B/W lines a little beyond the nominal 67 ms profile.
+        // Keep a small bounded terminal guard so a valid tail is not clipped;
+        // refineBw8ImageEndFromObservedSync() still contracts native 66 ms
+        // captures back to the canonical extent once slant is known.
+        const std::uint64_t terminalGuardSamples =
+            (static_cast<std::uint64_t>(config_.sampleRate) * 250U) / 1'000U;
+        if (receiverImageSamples
+            <= std::numeric_limits<std::uint64_t>::max()
+                - terminalGuardSamples) {
+            receiverImageSamples += terminalGuardSamples;
+        }
     }
     if (receiverImageSamples
         > std::numeric_limits<std::uint64_t>::max()
@@ -241,7 +254,14 @@ SstvRobotRxSessionState SstvRobotRxSession::finish()
     if (state_ != SstvRobotRxSessionState::Receiving) {
         return state_;
     }
-    applySyncEvents(syncTracker_.flush(lastSyncInputEndSample_), nullptr);
+    // Flush through the bounded image extent, not merely the last observed
+    // FFT window.  This lets the sync tracker emit its already-bounded
+    // terminal predictions when the final sync pulses are hidden by an audio
+    // callback boundary; pixel observations remain the authority for whether
+    // the resulting frame is complete.
+    applySyncEvents(syncTracker_.flush(
+                        std::max(lastSyncInputEndSample_, imageEndSample_)),
+                   nullptr);
     updateTerminalState(decoder_.finish());
     return state_;
 }
@@ -446,6 +466,7 @@ void SstvRobotRxSession::applySyncEvents(
 void SstvRobotRxSession::refineBw8ImageEndFromObservedSync()
 {
     if (spec_.mode != SstvRobotMode::Bw8
+        || config_.preserveTerminalGuard
         || imageEndSample_ == canonicalImageEndSample_) {
         return;
     }

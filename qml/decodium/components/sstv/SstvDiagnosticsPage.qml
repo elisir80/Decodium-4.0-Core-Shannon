@@ -23,26 +23,34 @@ SstvPage {
         return String(map[key])
     }
 
-    component ScalarRow: RowLayout {
+    component ScalarRow: Item {
+        id: scalarRow
         required property string label
         required property string value
         Layout.fillWidth: true
-        spacing: 8
+        implicitHeight: Math.max(metricLabel.implicitHeight,
+                                 metricValue.implicitHeight)
         Label {
-            Layout.fillWidth: true
-            text: parent.label
+            id: metricLabel
+            anchors.left: parent.left
+            anchors.top: parent.top
+            width: Math.max(0, parent.width * 0.52 - 4)
+            text: scalarRow.label
             color: root.secondaryTextColor
             elide: Text.ElideRight
             Accessible.ignored: true
         }
         Label {
-            Layout.maximumWidth: Math.max(120, root.width * 0.45)
-            text: parent.value
+            id: metricValue
+            anchors.left: metricLabel.right
+            anchors.leftMargin: 8
+            anchors.right: parent.right
+            anchors.top: parent.top
+            text: scalarRow.value
             color: root.primaryTextColor
-            font.family: "monospace"
-            horizontalAlignment: Text.AlignRight
-            elide: Text.ElideMiddle
-            Accessible.name: parent.label + ": " + parent.value
+            horizontalAlignment: Text.AlignLeft
+            wrapMode: Text.Wrap
+            Accessible.name: scalarRow.label + ": " + scalarRow.value
         }
     }
 
@@ -213,7 +221,7 @@ SstvPage {
 
                 GridLayout {
                     Layout.fillWidth: true
-                    columns: root.width < 800 ? 1 : 2
+                    columns: width < 760 ? 1 : 2
                     columnSpacing: 9
                     rowSpacing: 9
 

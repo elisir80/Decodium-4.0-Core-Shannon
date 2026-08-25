@@ -285,6 +285,7 @@ struct SstvRobotDecoderConfig final
     double minimumObservationConfidence {0.20};
     std::size_t maximumPendingDirtyEvents {
         SstvImageFrame::kDefaultMaximumDirtyEvents};
+    bool allowTerminalRowRecovery {false};
 };
 
 enum class SstvRobotDecodeState : std::uint8_t
@@ -388,6 +389,7 @@ private:
                               std::uint32_t maximumGap) noexcept;
     void fillBoundedCompatibilityEdges() noexcept;
     void fillBoundedTerminalSuffix() noexcept;
+    void fillBoundedTerminalRows();
     void publishCurrentLine();
     void publishMonochromeLine();
     void publishCs422Line();
@@ -424,6 +426,11 @@ private:
     std::uint32_t highestStoredAnchorLine_ {0U};
     std::uint32_t anchorCursorLine_ {0U};
     bool haveAnchorCursor_ {false};
+    // Robot B/W 8 can lose the final sync pulses when a virtual audio
+    // device closes its queue on an exact line boundary.  Keep a transient
+    // tail anchor for observations after the last real anchor; it is never
+    // counted as a stored sync and is only used for the bounded final tail.
+    Anchor syntheticTailAnchor_ {};
     std::uint64_t canonicalLineSamples_ {0U};
     std::uint64_t canonicalSyncSamples_ {0U};
     bool compatibilityBw8Observed_ {false};

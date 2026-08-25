@@ -11,7 +11,7 @@ SstvPage {
     readonly property var gallery: root.engine ? root.engine.sstvGallery : null
     readonly property var rxStats: root.engine
                                            ? root.engine.sstvRxDiagnostics : ({})
-    readonly property var rxControls: root.engine
+    readonly property var rxControls: root.engine && root.engine.sstvRxControls
                                       ? root.engine.sstvRxControls : ({})
 
     function updateRxControl(name, value) {
@@ -102,7 +102,7 @@ SstvPage {
                     }
                     GridLayout {
                         Layout.fillWidth: true
-                        columns: root.width >= 820 ? 6 : 4
+                        columns: width >= 1000 ? 6 : 2
                         columnSpacing: 10
                         rowSpacing: 7
 
@@ -307,7 +307,7 @@ SstvPage {
                     GridLayout {
                         objectName: "sstvRetentionSettingsGrid"
                         Layout.fillWidth: true
-                        columns: 4
+                        columns: width >= 900 ? 4 : 2
                         columnSpacing: 10
                         rowSpacing: 7
                         enabled: Boolean(root.gallery
@@ -408,7 +408,7 @@ SstvPage {
                     GridLayout {
                         objectName: "sstvTxTimingGrid"
                         Layout.fillWidth: true
-                        columns: 4
+                        columns: width >= 900 ? 4 : 2
                         columnSpacing: 10
                         rowSpacing: 7
                         enabled: !!(root.engine && !root.engine.sstvTxActive)
@@ -716,17 +716,17 @@ SstvPage {
                     GridLayout {
                         objectName: "sstvSettingsDiagnostics"
                         Layout.fillWidth: true
-                        columns: 4
+                        columns: width >= 900 ? 4 : 2
                         columnSpacing: 10
                         rowSpacing: 4
                         Label { text: qsTr("Queued samples"); color: root.secondaryTextColor }
-                        Label { text: String(root.rxStats.queuedSamples || 0); color: root.primaryTextColor; font.family: "monospace" }
+                        Label { text: String(root.rxStats.queuedSamples || 0); color: root.primaryTextColor }
                         Label { text: qsTr("Dropped samples"); color: root.secondaryTextColor }
-                        Label { text: String(root.rxStats.droppedSamples || 0); color: root.primaryTextColor; font.family: "monospace" }
+                        Label { text: String(root.rxStats.droppedSamples || 0); color: root.primaryTextColor }
                         Label { text: qsTr("DSP chunks"); color: root.secondaryTextColor }
-                        Label { text: String(root.rxStats.chunksProcessed || 0); color: root.primaryTextColor; font.family: "monospace" }
+                        Label { text: String(root.rxStats.chunksProcessed || 0); color: root.primaryTextColor }
                         Label { text: qsTr("Failures"); color: root.secondaryTextColor }
-                        Label { text: String(root.rxStats.processingFailures || 0); color: root.primaryTextColor; font.family: "monospace" }
+                        Label { text: String(root.rxStats.processingFailures || 0); color: root.primaryTextColor }
                     }
                     Label {
                         Layout.fillWidth: true

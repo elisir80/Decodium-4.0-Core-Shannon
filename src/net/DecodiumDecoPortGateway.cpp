@@ -203,7 +203,7 @@ Context DecodiumDecoPortGateway::buildContext() const
         // stesso posto — il bit resta spento — ed e' giusto cosi': per chi
         // guarda il quadrante non c'e' differenza fra una radio che il ROS non
         // lo misura e una che in questo istante non lo sa dire.
-        auto const misura = [this, &ctx](const std::function<bool(double&)>& leggi,
+        auto const misura = [&ctx](const std::function<bool(double&)>& leggi,
                                          void (Context::*posa)(double)) {
             double v = 0.0;
             if (leggi && leggi(v))

@@ -1931,7 +1931,7 @@ SstvTxCoordinator::BuiltAudio SstvTxCoordinator::buildAudio(
 
     std::uint64_t voxPreKeyFrames = 0U;
     std::uint64_t voxHangFrames = 0U;
-    if (voxAudioActivation) {
+    if (voxAudioActivation && config_.voxEnvelopeEnabled) {
         voxPreKeyFrames = framesForMilliseconds(
             source.sampleRate, config_.voxPreKeyMs);
         voxHangFrames = framesForMilliseconds(
@@ -1978,7 +1978,8 @@ SstvTxCoordinator::BuiltAudio SstvTxCoordinator::buildAudio(
     plan.voxHangFrames = voxHangFrames;
     plan.headroom = source.headroom;
     plan.fskIdPlanned = source.fskIdPlanned;
-    plan.voxEnvelopeEnabled = voxAudioActivation;
+    plan.voxEnvelopeEnabled = voxAudioActivation
+        && config_.voxEnvelopeEnabled;
     if (device->totalFrames() != plan.totalFrames
         || plan.protocolStartFrame > plan.headerFrames
         || plan.headerFrames >= plan.imageEndFrame
@@ -2005,7 +2006,7 @@ SstvTxCoordinator::BuiltAudio SstvTxCoordinator::buildPreparedAudio(
 
     std::uint64_t voxPreKeyFrames = 0U;
     std::uint64_t voxHangFrames = 0U;
-    if (voxAudioActivation) {
+    if (voxAudioActivation && config_.voxEnvelopeEnabled) {
         voxPreKeyFrames = framesForMilliseconds(
             sampleRate, config_.voxPreKeyMs);
         voxHangFrames = framesForMilliseconds(
@@ -2045,7 +2046,8 @@ SstvTxCoordinator::BuiltAudio SstvTxCoordinator::buildPreparedAudio(
     plan.voxPreKeyFrames = voxPreKeyFrames;
     plan.voxHangFrames = voxHangFrames;
     plan.headroom = request.headroom;
-    plan.voxEnvelopeEnabled = voxAudioActivation;
+    plan.voxEnvelopeEnabled = voxAudioActivation
+        && config_.voxEnvelopeEnabled;
     if (device->totalFrames() != plan.totalFrames
         || plan.protocolStartFrame > plan.headerFrames
         || plan.headerFrames >= plan.imageEndFrame

@@ -1173,6 +1173,47 @@ const SstvRobotDecoder::Anchor* SstvRobotDecoder::anchorFor(
         anchorCursorLine_ = line;
         haveAnchorCursor_ = true;
     }
+
+    // A BlackHole/CoreAudio queue can end immediately after the last few
+    // scanline syncs.  In that case the sync tracker has a contiguous tail
+    // through (for example) line 116, while the pixel observations for lines
+    // 117..119 are still present.  Do not discard those observations merely
+    // because their sync pulses were not observed: extrapolate a bounded
+    // Robot B/W 8 tail from the last real anchor using the canonical period.
+    // This deliberately does not mutate the anchor table, so interior gaps
+    // and non-Robot modes retain the strict observed/predicted-anchor rules.
+    if (spec_.mode == SstvRobotMode::Bw8
+        && metrics_.storedSyncAnchors >= 16U
+        && highestStoredAnchorLine_ >= 16U
+        && highestStoredAnchorLine_ + 1U < spec_.height
+        && anchors_[highestStoredAnchorLine_].present
+        && sample >= anchors_[highestStoredAnchorLine_].startSample) {
+        const std::uint64_t delta = sample
+            - anchors_[highestStoredAnchorLine_].startSample;
+        const std::uint64_t period = std::max<std::uint64_t>(
+            1U, canonicalLineSamples_);
+        const std::uint64_t advance = delta / period;
+        constexpr std::uint64_t kMaximumTailLines = 8U;
+        if (advance >= 1U && advance <= kMaximumTailLines) {
+            const std::uint64_t candidate =
+                static_cast<std::uint64_t>(highestStoredAnchorLine_)
+                + advance;
+            if (candidate < spec_.height) {
+                const std::uint64_t offset = advance * period;
+                if (offset <= std::numeric_limits<std::uint64_t>::max()
+                        - anchors_[highestStoredAnchorLine_].startSample) {
+                    syntheticTailAnchor_.startSample =
+                        anchors_[highestStoredAnchorLine_].startSample + offset;
+                    syntheticTailAnchor_.confidence =
+                        anchors_[highestStoredAnchorLine_].confidence;
+                    syntheticTailAnchor_.present = true;
+                    syntheticTailAnchor_.predicted = true;
+                    line = static_cast<std::uint32_t>(candidate);
+                    return &syntheticTailAnchor_;
+                }
+            }
+        }
+    }
     return found;
 }
 
@@ -1592,6 +1633,7 @@ SstvRobotDecodeState SstvRobotDecoder::finish()
     fillBoundedTerminalSuffix();
     publishCurrentLine();
     haveCurrentLine_ = false;
+    fillBoundedTerminalRows();
     state_ = frame_->isComplete()
         ? SstvRobotDecodeState::Complete
         : SstvRobotDecodeState::Partial;
@@ -1681,7 +1723,9 @@ void SstvRobotDecoder::fillBoundedCompatibilityEdges() noexcept
 
 void SstvRobotDecoder::fillBoundedTerminalSuffix() noexcept
 {
-    if (!haveCurrentLine_ || currentLine_ + 1U != spec_.height
+    constexpr std::uint32_t kMaximumTerminalRows = 3U;
+    if (!haveCurrentLine_
+        || currentLine_ + kMaximumTerminalRows < spec_.height
         || nonEmptyAccumulators_ == 0U) {
         return;
     }
@@ -1690,7 +1734,12 @@ void SstvRobotDecoder::fillBoundedTerminalSuffix() noexcept
     // transmitted samples, so an otherwise contiguous final scanline can
     // lose a tiny suffix at EOF.  Extrapolate only a bounded, gap-free suffix
     // from its immediately preceding pixel; never bridge an interior dropout.
-    constexpr std::uint32_t kMaximumLumaGap = 16U;
+    // The native 12 kHz FFT window can leave a longer suffix at the final
+    // virtual-audio callback boundary than a normal RF capture.  Keep this
+    // recovery bounded to one contiguous tail (never an interior dropout),
+    // but allow the observed BlackHole tail of up to 64 pixels to complete
+    // the final Robot B/W 8 scanline.
+    constexpr std::uint32_t kMaximumLumaGap = 64U;
     constexpr std::uint32_t kMaximumChromaGap = 8U;
     if (!spec_.colour) {
         static_cast<void>(fillTrailingComponent(
@@ -1718,6 +1767,78 @@ void SstvRobotDecoder::fillBoundedTerminalSuffix() noexcept
             ColourComponent::ChrominanceBlue,
             spec_.chromaWidth,
             kMaximumChromaGap));
+    }
+}
+
+void SstvRobotDecoder::fillBoundedTerminalRows()
+{
+    if (!config_.allowTerminalRowRecovery
+        || spec_.mode != SstvRobotMode::Bw8
+        || frame_->isComplete()) {
+        return;
+    }
+
+    // Only recover at most three sparse rows after a strong frame has
+    // already been assembled.  BlackHole/AudioQueue callback boundaries can
+    // leave a handful of rows with a few uncovered pixels even though the
+    // rest of the frame is valid.  Interior dropouts beyond this bounded
+    // allowance and low-coverage/noise frames remain partial.
+    constexpr std::uint32_t kMaximumTerminalRows = 3U;
+    const SstvImageSnapshot snapshot = frame_->snapshot();
+    if (snapshot.coverage() < 0.95) {
+        return;
+    }
+
+    std::array<std::uint32_t, kMaximumTerminalRows> missingRows {};
+    std::uint32_t missingCount = 0U;
+    for (std::uint32_t row = 0U; row < spec_.height; ++row) {
+        if (snapshot.isScanlineComplete(row)) {
+            continue;
+        }
+        if (missingCount == kMaximumTerminalRows) {
+            return;
+        }
+        missingRows[missingCount++] = row;
+    }
+    if (missingCount == 0U) {
+        return;
+    }
+
+    for (std::uint32_t missingIndex = 0U;
+         missingIndex < missingCount;
+         ++missingIndex) {
+        const std::uint32_t line = missingRows[missingIndex];
+        std::uint32_t sourceLine = spec_.height;
+        for (std::uint32_t distance = 1U;
+             distance < spec_.height && sourceLine == spec_.height;
+             ++distance) {
+            if (line >= distance
+                && snapshot.isScanlineComplete(line - distance)) {
+                sourceLine = line - distance;
+            } else if (line + distance < spec_.height
+                       && snapshot.isScanlineComplete(line + distance)) {
+                sourceLine = line + distance;
+            }
+        }
+        if (sourceLine == spec_.height) {
+            return;
+        }
+        for (std::uint32_t pixel = 0U; pixel < spec_.width; ++pixel) {
+            if (snapshot.coverageMask(pixel, line) == 0x07U) {
+                continue;
+            }
+            const SstvImageWriteResult result = frame_->writePixel(
+                pixel, line, snapshot.pixel(pixel, sourceLine));
+            if (result == SstvImageWriteResult::Cancelled) {
+                state_ = SstvRobotDecodeState::Cancelled;
+                return;
+            }
+            saturatingAdd(metrics_.componentsPublished, 3U);
+        }
+        if (frame_->isScanlineComplete(line)) {
+            metrics_.linesPublished = std::min<std::uint64_t>(
+                spec_.height, metrics_.linesPublished + 1U);
+        }
     }
 }
 

@@ -337,7 +337,6 @@ SstvPage {
             text: parent.value
             color: root.primaryTextColor
             font.pixelSize: 11
-            font.family: "monospace"
             elide: Text.ElideRight
             Accessible.name: parent.label + ": " + parent.value
         }
@@ -346,6 +345,7 @@ SstvPage {
     Connections {
         target: root.gallery
         enabled: root.gallery !== null
+        ignoreUnknownSignals: true
 
         function onQueryRejected(error) {
             root.showNotice(error, true)
@@ -1017,6 +1017,10 @@ SstvPage {
                 }
                 Button {
                     text: qsTr("Clear selection")
+                    font.pixelSize: 10
+                    implicitHeight: 30
+                    leftPadding: 8
+                    rightPadding: 8
                     enabled: root.gallery && root.gallery.selectedCount > 0
                              && !root.deletePending && !root.deleteFilesPending
                     onClicked: root.gallery.clearSelection()
@@ -1024,6 +1028,10 @@ SstvPage {
                 Button {
                     objectName: "sstvGalleryRemoveIndex"
                     text: root.deletePending ? qsTr("Removing...") : qsTr("Remove from index")
+                    font.pixelSize: 10
+                    implicitHeight: 30
+                    leftPadding: 8
+                    rightPadding: 8
                     enabled: root.gallery && root.gallery.selectedCount > 0
                              && !root.deletePending && !root.deleteFilesPending
                     onClicked: deleteDialog.open()
@@ -1034,6 +1042,10 @@ SstvPage {
                     text: root.deleteFilesPending
                           ? qsTr("Deleting...")
                           : qsTr("Delete files...")
+                    font.pixelSize: 10
+                    implicitHeight: 30
+                    leftPadding: 8
+                    rightPadding: 8
                     enabled: root.gallery && root.gallery.selectedCount > 0
                              && !root.deletePending && !root.deleteFilesPending
                     onClicked: deleteFilesDialog.open()
