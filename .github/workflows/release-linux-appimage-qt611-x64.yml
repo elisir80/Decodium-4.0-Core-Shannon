@@ -119,6 +119,18 @@ jobs:
             libpulse-dev
           sudo apt-get install -y -qq libfuse2t64 || sudo apt-get install -y -qq libfuse2
 
+          # Qt 6.11's prebuilt TIFF image plugin is linked against the
+          # libtiff5 ABI. Ubuntu 24.04 ships libtiff6, so provide the
+          # compatible Jammy runtime for linuxdeploy's dependency scanner.
+          if ! ldconfig -p | grep -q 'libtiff.so.5'; then
+            TIFF_DEB="${RUNNER_TEMP}/libtiff5_4.3.0-6ubuntu0.13_amd64.deb"
+            curl -fsSL -o "${TIFF_DEB}" \
+              "https://archive.ubuntu.com/ubuntu/pool/main/t/tiff/libtiff5_4.3.0-6ubuntu0.13_amd64.deb"
+            sudo dpkg -i "${TIFF_DEB}"
+            sudo ldconfig
+          fi
+          ldconfig -p | grep -q 'libtiff.so.5'
+
       - name: Restore Qt 6.11 cache
         id: qt-cache
         uses: actions/cache@v4
