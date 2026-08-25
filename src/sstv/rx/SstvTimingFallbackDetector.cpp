@@ -8,6 +8,13 @@
 #include <stdexcept>
 #include <utility>
 
+#if defined(__GNUC__) && !defined(__clang__)
+// GCC 13's libstdc++ optional move diagnostics can report a false positive
+// for the value-initialized optional<string> member in SstvFallbackResult.
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 namespace decodium::sstv {
 
 SstvTimingFallbackDetector::SstvTimingFallbackDetector(
@@ -359,3 +366,7 @@ SstvFallbackResult SstvTimingFallbackDetector::evaluateUnlocked() const
 }
 
 } // namespace decodium::sstv
+
+#if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic pop
+#endif
