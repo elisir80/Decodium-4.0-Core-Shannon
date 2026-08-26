@@ -442,9 +442,11 @@ void MessageClient::impl::start ()
       // A fixed port allows external programs (JTAlert, DecoAlert) to
       // reliably send commands to Decodium without heartbeat discovery.
       bool bound {false};
+      bool fixed_port {false};
       if (listen_port_ > 0)
         {
           bound = bind (interface_addr, listen_port_, ShareAddress | ReuseAddressHint);
+          fixed_port = bound;
           if (!bound)
             {
               Q_EMIT self_->error (
@@ -457,8 +459,30 @@ void MessageClient::impl::start ()
         {
           bound = bind (interface_addr);
         }
+      // 1.0.588 - la riga di log dice porta, interfaccia e modo del bind. Serve
+      // a rendere verificabili i report sulla 2237: senza sapere se il socket e'
+      // su porta fissa condivisa o su porta effimera non si distingue un
+      // conflitto di porta da un problema di rete.
       qInfo ().noquote () << log_prefix () + QStringLiteral (": bound")
-                          << "local=" << localAddress ().toString () + QStringLiteral (":") + QString::number (localPort ());
+                          << "local=" << localAddress ().toString () + QStringLiteral (":") + QString::number (localPort ())
+                          << "requested=" << (listen_port_ > 0 ? QString::number (listen_port_) : QStringLiteral ("ephemeral"))
+                          << "mode=" << (fixed_port ? QStringLiteral ("fixed-shared") : QStringLiteral ("ephemeral"))
+                          << "interface=" << (interface_addr == QHostAddress {QHostAddress::AnyIPv4}
+                                              ? QStringLiteral ("any-ipv4") : interface_addr.toString ());
+
+      // Su Windows ShareAddress vale SO_REUSEADDR: un secondo programma riesce
+      // a legarsi alla stessa porta, ma i datagrammi unicast vanno a uno solo
+      // dei due, senza che nessuno riceva un errore. Se la porta d'ascolto e'
+      // la stessa a cui gli altri programmi (GridTracker, JTAlert, Log4OM) si
+      // aspettano di ricevere i decode, il sintomo e' che "la 2237 non arriva
+      // piu'" - e va detto qui, perche' a valle non lo dira' nessuno.
+      if (fixed_port && listen_port_ == server_port_)
+        {
+          qWarning ().noquote ()
+            << log_prefix () + QStringLiteral (": listen port equals the server port")
+            << "port=" << QString::number (listen_port_)
+            << "note=" << QStringLiteral ("other UDP consumers on this port may stop receiving; set the listen port to 0 for an automatic one");
+        }
 
       // set multicast TTL to limit scope when sending to multicast
       // group addresses
