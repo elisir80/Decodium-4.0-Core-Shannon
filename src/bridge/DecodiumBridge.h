@@ -4183,6 +4183,15 @@ private:
     void tickSstvTx();
     void releaseSstvTxBridgeOwnership();
     bool sstvTxGlobalPreflightReady() const;
+    // Alzato fra il pin della rotta audio e il ritorno di start()/startPrepared():
+    // impedisce che la notifica di stato della sessione PRECEDENTE smonti la
+    // rotta appena fissata per quella nuova.
+    bool m_sstvTxStartInProgress {false};
+    // Le condizioni del preflight che in questo momento bloccano il TX SSTV,
+    // ognuna col suo nome; vuota significa pronto. Il messaggio mostrato
+    // all'operatore si costruisce da qui.
+    QStringList sstvTxPreflightBlockers() const;
+    QString sstvTxPreflightRejection() const;
     std::uint64_t sstvTxNowMs() const noexcept;
     bool sstvTxUsesVoxPtt() const;
     bool sstvTxCanControlPtt() const;

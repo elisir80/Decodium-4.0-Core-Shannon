@@ -986,43 +986,101 @@ bool DecodiumBridge::sstvTxCanStart() const
 #endif
 }
 
+QString DecodiumBridge::sstvTxPreflightRejection() const
+{
+    QStringList const blockers = sstvTxPreflightBlockers();
+    if (blockers.isEmpty()) {
+        // Il preflight e' passato fra il controllo e questo messaggio: raro,
+        // ma dire "non pronto: nulla" sarebbe peggio che dirlo genericamente.
+        return tr("SSTV TX preflight is not ready; stop any other TX and verify audio/CAT or VOX");
+    }
+    return tr("SSTV TX preflight is not ready: %1")
+        .arg(blockers.join(QStringLiteral("; ")));
+}
+
+// 1.0.588: il preflight ha venticinque condizioni e ne riportava una sola,
+// sempre la stessa: "non pronto, verifica audio/CAT o VOX". Chi la leggeva non
+// poteva sapere quale delle venticinque fosse, e le piu' comuni - il TX di un
+// altro modo ancora armato, il sink audio non ancora rilasciato - con audio,
+// CAT e VOX non c'entrano nulla. Ora le condizioni stanno scritte una volta
+// sola, ognuna col suo nome, e di qui vengono sia la risposta booleana sia il
+// messaggio all'operatore.
+QStringList DecodiumBridge::sstvTxPreflightBlockers() const
+{
+    QStringList blockers;
+#if DECODIUM_HAS_SSTV
+    auto const blocks = [&blockers](bool condition, char const* label) {
+        if (condition) {
+            blockers << QString::fromLatin1(label);
+        }
+    };
+
+    blocks(!m_sstvTxCoordinator, "SSTV TX coordinator missing");
+    blocks(!m_soundOutput, "audio output not initialised");
+    blocks(m_sstvTxShuttingDown || m_shuttingDown
+           || QCoreApplication::closingDown(), "application is shutting down");
+    blocks(m_sstvOwnsBridgeTx, "an SSTV transmission already owns the TX path");
+    blocks(m_transmitting, "another mode is transmitting");
+    blocks(m_tuning, "the tune tone is active");
+    blocks(m_txEnabled, "Enable TX is armed for another mode");
+    blocks(m_autoCqRepeat, "Auto CQ is running");
+    blocks(m_deferredManualSyncTx || m_txRequested,
+           "a transmission is already requested");
+    blocks(m_pttPending || m_pttConfirmed, "PTT is already engaged");
+    blocks(m_bridgeAudioLegacyTxActive, "the legacy TX audio path is active");
+    blocks(m_ft2LinkTxActive, "FT2-Link is transmitting");
+    blocks(m_cwTxActive, "CW transmission is active");
+    blocks(m_manualTxHold, "manual TX hold is engaged");
+    blocks(m_bridgeAudioTuneActive || m_legacyBridgeAudioTxStartPending,
+           "the TX audio path is starting up");
+    blocks(m_txPlaybackReleasePending || m_txAudioRestartPending
+           || m_txPlaybackHoldUntilMs != 0 || m_txPlaybackHardDeadlineMs != 0,
+           "the previous transmission has not released the audio device yet");
+    blocks(m_txAudioSink || m_txPcmBuffer,
+           "the TX audio sink is still allocated");
+    blocks(m_modulator && m_modulator->isActive(), "the modulator is running");
+    blocks(!sstvTxUsesVoxPtt() && sstvTxPttActive(),
+           "the radio is already keyed");
+    blocks(m_decoPortUseRemote, "DecoPort is driving a remote radio");
+    blocks(usingTciAudioInput(), "audio is coming from TCI");
+
+    blocks(m_sstvTxOutputPinned
+           && (m_sstvTxOutputDevice.isNull()
+               || (m_sstvTxOutputChannels != 1U
+                   && m_sstvTxOutputChannels != 2U)),
+           "the pinned SSTV output device is no longer valid");
+
+    if (m_sstvTxCoordinator) {
+        const decodium::sstv::SstvTxCoordinatorSnapshot snapshot
+            = m_sstvTxCoordinator->snapshot();
+        blocks(snapshot.stateMachine.state
+                   == decodium::sstv::SstvTxState::Disabled,
+               "the SSTV TX state machine is disabled");
+        blocks(snapshot.stateMachine.releaseRequired,
+               "the previous SSTV transmission still needs releasing");
+        blocks(snapshot.audioLeaseRetained,
+               "the SSTV audio lease is still held");
+    }
+
+    blocks(!sstvTxUsesVoxPtt() && !sstvTxCanControlPtt()
+               && !sstvTxAudioOnlyAllowed(),
+           "no way to key the radio: no CAT PTT, no VOX");
+#endif
+    return blockers;
+}
+
 bool DecodiumBridge::sstvTxGlobalPreflightReady() const
 {
 #if DECODIUM_HAS_SSTV
-    if (!m_sstvTxCoordinator || !m_soundOutput || m_sstvTxShuttingDown
-        || m_shuttingDown || QCoreApplication::closingDown()
-        || m_sstvOwnsBridgeTx || m_transmitting || m_tuning
-        || m_txEnabled || m_autoCqRepeat || m_deferredManualSyncTx
-        || m_txRequested || m_pttPending || m_pttConfirmed
-        || m_bridgeAudioLegacyTxActive || m_ft2LinkTxActive
-        || m_cwTxActive || m_manualTxHold || m_bridgeAudioTuneActive
-        || m_legacyBridgeAudioTxStartPending
-        || m_txPlaybackReleasePending || m_txAudioRestartPending
-        || m_txPlaybackHoldUntilMs != 0 || m_txPlaybackHardDeadlineMs != 0
-        || m_txAudioSink || m_txPcmBuffer
-        || (m_modulator && m_modulator->isActive())
-        || (!sstvTxUsesVoxPtt() && sstvTxPttActive())
-        || m_decoPortUseRemote || usingTciAudioInput()) {
+    if (!sstvTxPreflightBlockers().isEmpty()) {
         return false;
     }
-    // Do not gate the const UI preflight on the audio-device cache.  Runtime
-    // device changes intentionally invalidate that cache, and the authoritative
-    // start path resolves the selected output immediately before pinning it.
-    // Requiring a fresh cache here made a valid BlackHole/VOX route report
-    // “preflight not ready” until an unrelated audio refresh happened.
-    if (m_sstvTxOutputPinned
-        && (m_sstvTxOutputDevice.isNull()
-            || (m_sstvTxOutputChannels != 1U
-                && m_sstvTxOutputChannels != 2U))) {
-        return false;
-    }
-    const decodium::sstv::SstvTxCoordinatorSnapshot snapshot
-        = m_sstvTxCoordinator->snapshot();
-    return snapshot.stateMachine.state != decodium::sstv::SstvTxState::Disabled
-        && !snapshot.stateMachine.releaseRequired
-        && !snapshot.audioLeaseRetained
-        && (sstvTxUsesVoxPtt() || sstvTxCanControlPtt()
-            || sstvTxAudioOnlyAllowed());
+    // La cache dei dispositivi audio non entra nel preflight della UI: un
+    // cambio di dispositivo la invalida di proposito, e il percorso di avvio
+    // vero risolve l'uscita subito prima di fissarla. Pretenderla fresca qui
+    // faceva dire "non pronto" a un instradamento VOX perfettamente valido
+    // finche' non capitava un aggiornamento audio per altri motivi.
+    return true;
 #else
     return false;
 #endif
@@ -1063,6 +1121,9 @@ QVariantMap DecodiumBridge::sstvTxDiagnostics() const
                   static_cast<qulonglong>(snapshot.clippedFrames));
     result.insert(QStringLiteral("clipping"),
                   snapshot.clippedFrames != 0U);
+    QStringList const blockers = sstvTxPreflightBlockers();
+    result.insert(QStringLiteral("preflightReady"), blockers.isEmpty());
+    result.insert(QStringLiteral("preflightBlockers"), blockers);
 #endif
     return result;
 }
@@ -1436,7 +1497,26 @@ void DecodiumBridge::initialiseSstvTx()
             result.detail =
                 "SSTV TX currently requires Decodium's local SoundOutput route";
         } else if (!result.audioOutputReady) {
-            result.detail = "Decodium TX audio output is unavailable";
+            // 1.0.588: "audio output is unavailable" e' la congiunzione di
+            // quattro cose diverse, e l'operatore che la legge non puo' sapere
+            // quale manchi: il dispositivo scollegato si riconnette, un
+            // dispositivo mai fissato e' un difetto di sequenza nostro, e un
+            // numero di canali fuori da 1/2 e' un driver che ha risposto male.
+            // Dirlo qui costa una riga e risparmia un'indagine.
+            if (!m_soundOutput) {
+                result.detail =
+                    "Decodium TX audio output is unavailable: no SoundOutput";
+            } else if (!m_sstvTxOutputPinned) {
+                result.detail =
+                    "Decodium TX audio output is unavailable: the output device was not pinned for this session";
+            } else if (m_sstvTxOutputDevice.isNull()) {
+                result.detail =
+                    "Decodium TX audio output is unavailable: the pinned output device is gone";
+            } else {
+                result.detail =
+                    "Decodium TX audio output is unavailable: unsupported channel count "
+                    + std::to_string(m_sstvTxOutputChannels);
+            }
         } else if (!result.pttPathReady) {
             result.detail = "Decodium CAT/PTT or VOX is not ready";
         } else if (result.weakSignalSequencerActive) {
@@ -1603,7 +1683,16 @@ void DecodiumBridge::initialiseSstvTx()
         m_sstvTxProgress = progress;
         m_sstvTxSessionId = static_cast<quint64>(
             snapshot.stateMachine.currentSessionId);
-        if (terminalSstvTxState(snapshot.stateMachine.state)
+        // 1.0.588: non smontare la rotta audio mentre ne stiamo montando una
+        // nuova. publishState() notifica a ogni passaggio, anche quando lo
+        // stato e' ancora quello TERMINALE della sessione precedente, e start()
+        // /startPrepared() pubblicano prima di arrivare al proprio preflight:
+        // il rilascio cancellava il dispositivo appena fissato e il preflight
+        // rifiutava con "the output device was not pinned for this session".
+        // Effetto per l'operatore: la prima trasmissione parte, tutte le
+        // successive no, finche' non si riavvia il programma.
+        if (!m_sstvTxStartInProgress
+            && terminalSstvTxState(snapshot.stateMachine.state)
             && !snapshot.audioLeaseRetained
             && (!snapshot.stateMachine.releaseRequired
                 || snapshot.pttReleased)) {
@@ -1808,6 +1897,13 @@ DecodiumBridge::startHamDrmPreparedAudio(
         request.channelRoute = decodium::sstv::SstvTxChannelRoute::Right;
     }
 
+    // 1.0.588: come per SSTV analogico, la sessione precedente va fatta
+    // scadere prima del pin: il tick interno di startPrepared() rilascerebbe
+    // il route appena fissato.
+    if (m_sstvTxCoordinator) {
+        static_cast<void>(m_sstvTxCoordinator->tick(sstvTxNowMs()));
+    }
+
     // Pin the exact route before the coordinator runs its shared preflight.
     // The same release barrier used by analog SSTV clears this lease.
     m_sstvTxOutputDevice = output;
@@ -1815,9 +1911,11 @@ DecodiumBridge::startHamDrmPreparedAudio(
     m_sstvTxOutputPinned = true;
     m_sstvTxError.clear();
     m_sstvTxProgress = 0.0;
+    m_sstvTxStartInProgress = true;
     const SstvTxCoordinatorResult result =
         m_sstvTxCoordinator->startPrepared(
             sstvTxNowMs(), std::move(request));
+    m_sstvTxStartInProgress = false;
     if (!result.accepted) {
         m_sstvTxOutputDevice = QAudioDevice {};
         m_sstvTxOutputChannels = 0U;
@@ -1870,7 +1968,7 @@ bool DecodiumBridge::startSstvCalibrationTone(const QString& toneId)
         return reject(tr("Native SSTV TX is unavailable"));
     }
     if (!sstvTxGlobalPreflightReady()) {
-        return reject(tr("SSTV TX preflight is not ready; stop any other TX and verify audio/CAT or VOX"));
+        return reject(sstvTxPreflightRejection());
     }
     if (!checkSwrAllowsTransmission(QStringLiteral("sstv-tx"))) {
         return reject(tr("SSTV TX was blocked by the Decodium SWR safety check"));
@@ -1920,6 +2018,17 @@ bool DecodiumBridge::startSstvCalibrationTone(const QString& toneId)
     request.headroom = decodium::sstv::kDefaultSstvTxHeadroom;
     request.source = std::move(source);
 
+    // 1.0.588: far scadere QUI la sessione precedente, prima di fissare il
+    // dispositivo. start()/startPrepared() cominciano con un tick del
+    // coordinatore: se la sessione di prima e' in uno stato terminale, quel
+    // tick emette stateChanged, il nostro gancio chiama
+    // releaseSstvTxBridgeOwnership() e cancella il pin appena messo. Il
+    // preflight che segue trovava il dispositivo non fissato e rifiutava, cosi'
+    // la prima trasmissione riusciva e ogni successiva no.
+    if (m_sstvTxCoordinator) {
+        static_cast<void>(m_sstvTxCoordinator->tick(sstvTxNowMs()));
+    }
+
     // Resolve and pin exactly once before the coordinator's shared preflight,
     // just like an image TX.  The normal release barrier clears this route.
     m_sstvTxOutputDevice = output;
@@ -1928,9 +2037,11 @@ bool DecodiumBridge::startSstvCalibrationTone(const QString& toneId)
     m_sstvTxError.clear();
     m_sstvTxProgress = 0.0;
     const bool audioOnly = sstvTxAudioOnlyAllowed();
+    m_sstvTxStartInProgress = true;
     const decodium::sstv::SstvTxCoordinatorResult result
         = m_sstvTxCoordinator->startPrepared(
             sstvTxNowMs(), std::move(request));
+    m_sstvTxStartInProgress = false;
     if (!result.accepted) {
         m_sstvTxOutputDevice = QAudioDevice {};
         m_sstvTxOutputChannels = 0U;
@@ -1978,7 +2089,7 @@ bool DecodiumBridge::startSstvTx(const QString& fskId)
         return reject(tr("Prepare an SSTV image before transmitting"));
     }
     if (!sstvTxCanStart()) {
-        return reject(tr("SSTV TX preflight is not ready; stop any other TX and verify audio/CAT or VOX"));
+        return reject(sstvTxPreflightRejection());
     }
     if (!checkSwrAllowsTransmission(QStringLiteral("sstv-tx"))) {
         return reject(tr("SSTV TX was blocked by the Decodium SWR safety check"));
@@ -2030,6 +2141,17 @@ bool DecodiumBridge::startSstvTx(const QString& fskId)
         request.fskId = std::move(plan);
     }
 
+    // 1.0.588: far scadere QUI la sessione precedente, prima di fissare il
+    // dispositivo. start()/startPrepared() cominciano con un tick del
+    // coordinatore: se la sessione di prima e' in uno stato terminale, quel
+    // tick emette stateChanged, il nostro gancio chiama
+    // releaseSstvTxBridgeOwnership() e cancella il pin appena messo. Il
+    // preflight che segue trovava il dispositivo non fissato e rifiutava, cosi'
+    // la prima trasmissione riusciva e ogni successiva no.
+    if (m_sstvTxCoordinator) {
+        static_cast<void>(m_sstvTxCoordinator->tick(sstvTxNowMs()));
+    }
+
     // Resolve exactly once, before any PTT ownership is acquired. The value
     // object and channel plan stay pinned until the coordinator releases this
     // session; later settings changes cannot redirect an in-flight TX.
@@ -2039,8 +2161,10 @@ bool DecodiumBridge::startSstvTx(const QString& fskId)
     m_sstvTxError.clear();
     m_sstvTxProgress = 0.0;
     const bool audioOnly = sstvTxAudioOnlyAllowed();
+    m_sstvTxStartInProgress = true;
     const decodium::sstv::SstvTxCoordinatorResult result
         = m_sstvTxCoordinator->start(sstvTxNowMs(), request);
+    m_sstvTxStartInProgress = false;
     if (!result.accepted) {
         m_sstvTxOutputDevice = QAudioDevice {};
         m_sstvTxOutputChannels = 0U;
