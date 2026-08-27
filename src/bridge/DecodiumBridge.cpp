@@ -1,4 +1,5 @@
 #include "DecodiumBridge.h"
+#include "AdifExportSanitizer.h"
 
 #if DECODIUM_HAS_SSTV
 #include "src/sstv/integration/SstvQsoLog.h"
@@ -3315,7 +3316,8 @@ static bool writeAdifDocument(QString const& path, ParsedAdifDocument const& doc
     }
 
     auto writeField = [&ts](QString const& tag, QString const& value) {
-        if (!tag.isEmpty() && !value.isNull() && !value.isEmpty()) {
+        if (!tag.isEmpty() && !value.isNull() && !value.isEmpty()
+            && !decodium::adif::isInvalidUnsetValue(tag, value)) {
             ts << '<' << tag << ':' << value.toUtf8().size() << '>' << value << ' ';
         }
     };
@@ -53815,6 +53817,9 @@ static QString bandFromFreqHz(double hz) {
 
 static QString bridgeAdifField(const QString& tag, const QString& value)
 {
+    if (decodium::adif::isInvalidUnsetValue(tag, value)) {
+        return {};
+    }
     return QStringLiteral("<%1:%2>%3 ")
         .arg(tag)
         .arg(value.toUtf8().size())
@@ -55581,12 +55586,30 @@ bool DecodiumBridge::exportToAdif(const QString& filename)
         return false;
     }
 
-    QFile::remove(filename);
-    bool const copied = QFile::copy(effectiveAdifLogPath(), filename);
-    if (!copied) {
+    QFile source(effectiveAdifLogPath());
+    if (!source.open(QIODevice::ReadOnly)) {
         emit errorMessage(QStringLiteral("Impossibile esportare ADIF: %1").arg(filename));
+        return false;
     }
-    return copied;
+
+    // Export through a save file so a legacy log containing
+    // <MY_IOTA:4>NONE is cleaned in the exported copy without mutating the
+    // active logbook.  TQSL requires an unset MY_IOTA field to be omitted.
+    QByteArray const data = decodium::adif::sanitizeExport(source.readAll());
+    source.close();
+
+    QSaveFile destination(filename);
+    if (!destination.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        emit errorMessage(QStringLiteral("Impossibile esportare ADIF: %1")
+                              .arg(destination.errorString()));
+        return false;
+    }
+    if (destination.write(data) != data.size() || !destination.commit()) {
+        emit errorMessage(QStringLiteral("Impossibile esportare ADIF: %1")
+                              .arg(destination.errorString()));
+        return false;
+    }
+    return true;
 }
 
 bool DecodiumBridge::deleteQso(const QString& call, const QString& dateTime)

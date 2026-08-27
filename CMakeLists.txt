@@ -511,6 +511,8 @@ set (wsjtx_CXXSRCS
   src/net/DecoPortRigDriver.cpp
   src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
+  src/bridge/AdifExportSanitizer.cpp
+  src/bridge/AdifExportSanitizer.h
   src/bridge/DecodiumBridgeSstv.cpp
   src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp
@@ -1925,6 +1927,8 @@ add_executable (decodium_qml
   src/net/DecoPortRigDriver.cpp
   src/net/DecodiumDecoPortGateway.h
   src/bridge/DecodiumBridge.cpp
+  src/bridge/AdifExportSanitizer.cpp
+  src/bridge/AdifExportSanitizer.h
   src/bridge/DecodiumBridgeSstv.cpp
   src/bridge/DecodiumBridge.h
   Sequencer/QsoSequencerRules.cpp

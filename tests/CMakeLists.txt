@@ -97,6 +97,13 @@ add_executable (test_decodium_update_support test_decodium_update_support.cpp)
 target_link_libraries (test_decodium_update_support Qt6::Test Qt6::Core)
 add_test (NAME test_decodium_update_support COMMAND $<TARGET_FILE:test_decodium_update_support>)
 
+add_executable (test_adif_export_sanitizer
+  test_adif_export_sanitizer.cpp
+  ../src/bridge/AdifExportSanitizer.cpp
+  ../src/bridge/AdifExportSanitizer.h)
+target_link_libraries (test_adif_export_sanitizer Qt6::Test Qt6::Core)
+add_test (NAME test_adif_export_sanitizer COMMAND $<TARGET_FILE:test_adif_export_sanitizer>)
+
 add_executable (test_jt4_roundtrip test_jt4_roundtrip.cpp)
 target_link_libraries (test_jt4_roundtrip wsjt_qt wsjt_cxx Qt6::Core)
 add_test (NAME test_jt4_roundtrip COMMAND $<TARGET_FILE:test_jt4_roundtrip>)
