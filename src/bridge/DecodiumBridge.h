@@ -131,6 +131,12 @@ class RemoteCommandServer;
 class DecodeHistoryWorker;  // 1.0.238 Phase 5.2 perf roadmap: write-behind SQLite
 class QSqlDatabase;          // 1.0.268 Phase 5.3 query API (forward decl)
 
+// Detector/fastldpc/decodium_bridge.cpp: accende o spegne il decoder LDPC
+// veloce per FT2. Il decoder gira nel thread di FT2DecodeWorker, la funzione
+// scrive una variabile atomica.
+extern "C" void fastldpc_set_enabled_c(int on);
+extern "C" int  fastldpc_is_enabled_c();
+
 class DecodiumBridge : public QObject
 {
     Q_OBJECT
@@ -382,6 +388,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool   coherentAvgEnabled   READ coherentAvgEnabled   WRITE setCoherentAvgEnabled   NOTIFY coherentAvgEnabledChanged)
     Q_PROPERTY(bool   neuralSyncEnabled    READ neuralSyncEnabled    WRITE setNeuralSyncEnabled    NOTIFY neuralSyncEnabledChanged)
     Q_PROPERTY(bool   turboFeedbackEnabled READ turboFeedbackEnabled WRITE setTurboFeedbackEnabled NOTIFY turboFeedbackEnabledChanged)
+    Q_PROPERTY(bool   fastLdpcEnabled     READ fastLdpcEnabled     WRITE setFastLdpcEnabled     NOTIFY fastLdpcEnabledChanged)
     // AUTO master: quando ON, le 3 feature si attivano in base a condizioni runtime
     // (decode count rolling, SNR Q65) ignorando i toggle manuali sopra.
     Q_PROPERTY(bool   advAutoModeEnabled   READ advAutoModeEnabled   WRITE setAdvAutoModeEnabled   NOTIFY advAutoModeEnabledChanged)
@@ -1069,6 +1076,8 @@ public:
     void   setNeuralSyncEnabled(bool v)  { if (m_neuralSyncEnabled != v)  { m_neuralSyncEnabled = v;  emit neuralSyncEnabledChanged(); } }
     bool   turboFeedbackEnabled() const { return m_turboFeedbackEnabled; }
     void   setTurboFeedbackEnabled(bool v) { if (m_turboFeedbackEnabled != v) { m_turboFeedbackEnabled = v; emit turboFeedbackEnabledChanged(); } }
+    bool   fastLdpcEnabled() const { return m_fastLdpcEnabled; }
+    void   setFastLdpcEnabled(bool v) { if (m_fastLdpcEnabled != v) { m_fastLdpcEnabled = v; fastldpc_set_enabled_c(v ? 1 : 0); emit fastLdpcEnabledChanged(); } }
     bool   advAutoModeEnabled()   const { return m_advAutoModeEnabled; }
     void   setAdvAutoModeEnabled(bool v);
     bool   advNeuralSyncActive()  const { return m_advNeuralSyncActive; }
@@ -2003,6 +2012,7 @@ signals:
     void coherentAvgEnabledChanged();
     void neuralSyncEnabledChanged();
     void turboFeedbackEnabledChanged();
+    void fastLdpcEnabledChanged();
     void advAutoModeEnabledChanged();
     void advNeuralSyncActiveChanged();
     void advTurboFeedbackActiveChanged();
@@ -2981,6 +2991,7 @@ private:
     bool   m_coherentAvgEnabled {false};
     bool   m_neuralSyncEnabled {false};
     bool   m_turboFeedbackEnabled {false};
+    bool   m_fastLdpcEnabled {true};   // decoder LDPC veloce per FT2, acceso di serie
     bool   m_advAutoModeEnabled {true};
     bool   m_advNeuralSyncActive {false};
     bool   m_advTurboFeedbackActive {false};

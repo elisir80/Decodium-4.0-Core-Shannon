@@ -5176,6 +5176,45 @@ ApplicationWindow {
                                 ToolTip.visible: gallagerMA.containsMouse
                                 ToolTip.text: qsTr("Gallager — deep dig for weak signals.\nEnables a second decoding pass (LDPC subpass\nparallelized across cores, named after R. Gallager, father of LDPC)\nthat recovers near-noise stations missed by the normal decode.\nRequires a multi-core CPU: on old PCs it may burden the audio\n→ in that case leave it off.")
                             }
+
+                            // fastldpc — decoder LDPC vettorizzato AVX2 per FT2
+                            Rectangle {
+                                Layout.preferredWidth: 38
+                                Layout.preferredHeight: 16
+                                color: bridge.fastLdpcEnabled ? Qt.rgba(0.98, 0.68, 0.20, 0.18) : Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.9)
+                                border.color: bridge.fastLdpcEnabled ? "#f0ae33" : glassBorder
+                                border.width: 1
+                                radius: 2
+
+                                Row {
+                                    anchors.centerIn: parent
+                                    spacing: 2
+                                    Text {
+                                        text: "⚡"
+                                        font.pixelSize: 8
+                                        color: bridge.fastLdpcEnabled ? "#ffd48a" : secondaryCyan
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Text {
+                                        text: "LDPC"
+                                        font.pixelSize: 7
+                                        font.bold: true
+                                        color: bridge.fastLdpcEnabled ? "#ffd48a" : textPrimary
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: fastLdpcMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: bridge.fastLdpcEnabled = !bridge.fastLdpcEnabled
+                                }
+
+                                ToolTip.visible: fastLdpcMA.containsMouse
+                                ToolTip.text: qsTr("Fast LDPC — vectorized FT2 decoder (AVX2).\nDecodes the same words far quicker than the original decoder,\nfreeing CPU for the rest of the cycle. Falls back to the original\ndecoder automatically on CPUs without AVX2.\nTurn it off if you see decodes that look wrong.")
+                            }
                         }
                     }
                 } // End Sliders Item

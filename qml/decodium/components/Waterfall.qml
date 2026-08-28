@@ -1653,11 +1653,18 @@ Item {
                             acceptedButtons: Qt.LeftButton
                             propagateComposedEvents: true
                             cursorShape: Qt.PointingHandCursor
-                            // 1.0.337: il left-click SEMPLICE passa all'item C++ (imposta TX);
-                            // solo Ctrl+click chiama la stazione (engage).
-                            onPressed: function(mouse) { mouse.accepted = !!(mouse.modifiers & Qt.ControlModifier) }
+                            // Click sul NOMINATIVO = chiama quella stazione. Fino alla
+                            // 1.0.337 serviva Ctrl+click e il click semplice si limitava
+                            // a spostare la frequenza TX, cosa che non si indovina: chi
+                            // vede un call sul waterfall si aspetta di poterlo chiamare
+                            // cliccandolo. Per la sola frequenza restano il click sul
+                            // waterfall fuori dall'etichetta e Ctrl+click sull'etichetta,
+                            // che non viene accettato qui e passa all'item C++.
+                            onPressed: function(mouse) { mouse.accepted = !(mouse.modifiers & Qt.ControlModifier) }
                             onClicked: function(mouse) {
-                                if ((mouse.modifiers & Qt.ControlModifier) && waterfallPanel.isValidClickableAudioFreq(modelData.freq))
+                                if (mouse.modifiers & Qt.ControlModifier)
+                                    return
+                                if (waterfallPanel.isValidClickableAudioFreq(modelData.freq))
                                     bridge.engageDxClusterSpot(modelData.call, modelData.freq)
                             }
                         }

@@ -32665,6 +32665,7 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("coherentAvgEnabled",   m_coherentAvgEnabled);
     s.setValue("neuralSyncEnabled",    m_neuralSyncEnabled);
     s.setValue("turboFeedbackEnabled", m_turboFeedbackEnabled);
+    s.setValue("fastLdpcEnabled", m_fastLdpcEnabled);
     s.setValue("advAutoModeEnabled",   m_advAutoModeEnabled);
     s.setValue("FT8AP",             m_ft8ApEnabled);
     s.setValue("asyncDecodeEnabled",m_asyncDecodeEnabled);
@@ -38825,6 +38826,8 @@ void DecodiumBridge::loadSettings()
         m_coherentAvgEnabled   = s.value("coherentAvgEnabled",   false).toBool();
         m_neuralSyncEnabled    = s.value("neuralSyncEnabled",    false).toBool();
         m_turboFeedbackEnabled = s.value("turboFeedbackEnabled", false).toBool();
+        m_fastLdpcEnabled = s.value("fastLdpcEnabled", true).toBool();
+        fastldpc_set_enabled_c(m_fastLdpcEnabled ? 1 : 0);
         m_advAutoModeEnabled   = s.value("advAutoModeEnabled",   true).toBool();
     }
     m_singleDecode = getSetting(QStringLiteral("SingleDecode"), false).toBool();

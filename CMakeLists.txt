@@ -407,6 +407,7 @@ set (wsjt_qt_CXXSRCS
   widgets/CheckableItemComboBox.cpp
   widgets/BandComboBox.cpp
   Detector/FtxFt2Stage7.cpp
+  Detector/fastldpc/decodium_bridge.cpp
   Detector/FtxQ65Core.cpp
   Detector/FtxQ65Decoder.cpp
   Detector/FtxQ65Frontend.cpp
@@ -432,6 +433,20 @@ set (wsjt_qt_CXXSRCS
   Modulator/WsprLegacyCompat.cpp
   src/core/otpgenerator.cpp
   )
+
+# fastldpc: il min-sum lavora su 16 int16 per registro AVX2, quindi questo
+# file va compilato con -mavx2 -O3 anche quando il resto del programma e' per
+# x86-64 generico (qui la build e' MinSizeRel, -Os). Il binario resta
+# eseguibile su CPU senza AVX2: decodium_bridge.cpp verifica a runtime e in
+# quel caso richiama il decoder originale ftx_decode174_91_c.
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+    PROPERTIES COMPILE_OPTIONS "-O3;-mavx2;-mfma")
+elseif (MSVC)
+  set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+    PROPERTIES COMPILE_OPTIONS "/O2;/arch:AVX2")
+endif ()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set_source_files_properties (Detector/LegacyDspIoHelpers.cpp PROPERTIES COMPILE_FLAGS "-Wno-error=stringop-overflow -Wno-error=stringop-overread")
   # GCC 15 misdiagnoses std::atomic increments in inlined Qt functor wrappers.
@@ -2324,12 +2339,22 @@ add_dependencies (decodium_qml sync_decodium_qml sync_decodium_assets)
 add_custom_target (decodium_app
   DEPENDS decodium_qml sync_decodium_qml sync_decodium_assets
 )
+# Stessa trappola gia' disinnescata per sync_decodium_qml qui sopra: in una
+# compilazione dentro i sorgenti CMAKE_BINARY_DIR e la cartella dei sorgenti
+# coincidono, e questo passo cancellava qml/ per poi ricopiarla da se stessa,
+# cioe' cancellava gli 88 .qml del progetto a ogni build di decodium_qml.
+if (NOT "${CMAKE_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+  add_custom_command (TARGET decodium_qml POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory
+      "${CMAKE_BINARY_DIR}/qml"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+      "${CMAKE_BINARY_DIR}/qml"
+    COMMENT "Syncing QML files after decodium_qml build"
+  )
+endif ()
+
 add_custom_command (TARGET decodium_qml POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E remove_directory
-    "${CMAKE_BINARY_DIR}/qml"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_CURRENT_SOURCE_DIR}/qml"
-    "${CMAKE_BINARY_DIR}/qml"
   COMMAND ${CMAKE_COMMAND} -E make_directory
     "$<TARGET_FILE_DIR:decodium_qml>/artwork/maps"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different

@@ -99,6 +99,19 @@ extern "C"
   void ftx_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
                            signed char const* apmask, signed char* message91, signed char* cw,
                            int* ntype, int* nharderror, float* dmin);
+  // fastldpc (Detector/fastldpc/): stessa firma, ~160x piu' veloce a parita'
+  // di decodifiche. Ricade da solo su ftx_decode174_91_c se la CPU non ha
+  // AVX2 o se Keff != 91.
+  void fastldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
+                                signed char const* apmask, signed char* message91, signed char* cw,
+                                int* ntype, int* nharderror, float* dmin);
+  // Versione a blocco: decodifica n candidati in una volta, cosi' il min-sum
+  // riempie le 16 corsie del registro AVX2 invece di sprecarne quindici.
+  // llr e apmask sono [n][174] contigui, le uscite [n] o [n][...].
+  void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
+                                      int Keff, int maxosd, int norder,
+                                      signed char* message91, signed char* cw,
+                                      int* ntype, int* nharderror, float* dmin);
   void ftx_twkfreq1_c (Complex const* ca, int const* npts, float const* fsample,
                        float const* a, Complex* cb);
   int ftx_ft2_message77_to_itone_c (signed char const* message77, int* itone_out);
@@ -1525,6 +1538,23 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
   // The legacy FT2 decoder intentionally reuses the previous AP mask when an
   // AP pass resolves to iaptype=0. Weak-signal cases rely on that quirk, so
   // the stage-7 port keeps the same mask state within a single decode attempt.
+  // Le passate AP sono indipendenti fra loro: llr e apmask non dipendono
+  // dall'esito di quelle precedenti (per ipass 1..5 sono vettori gia' pronti,
+  // dalla 6 li costruisce prepare_ap_pass a partire dallo stato del QSO). Si
+  // possono quindi preparare tutte, decodificarle in un blocco solo e poi
+  // scorrere i risultati nell'ordine originale: la semantica resta quella del
+  // ciclo sequenziale, ma il min-sum lavora a 16 parole per registro invece
+  // che con quindici corsie vuote su sedici.
+  struct PreparedPass
+  {
+    std::array<float, kFt2Codeword> llr {};
+    std::array<signed char, kFt2Codeword> apmask {};
+    int ipass {0};
+    int iaptype {0};
+  };
+  std::vector<PreparedPass> prepared;
+  prepared.reserve (static_cast<size_t> (npasses));
+
   std::array<signed char, kFt2Codeword> apmask {};
   for (int ipass = 1; ipass <= npasses; ++ipass)
     {
@@ -1565,27 +1595,84 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
           continue;
         }
 
-      std::array<signed char, kFt2Message91> message91 {};
-      std::array<signed char, kFt2Codeword> cw {};
-      int ntype = 0;
-      int nharderror = -1;
-      float dmin = 0.0f;
-
-      int maxosd = 3;
-      if (!doosd)
-        {
-          maxosd = -1;
-        }
-
       stage7_debug_log_llr_state (ipass, iaptype, f_for_ap, llr, apmask);
-      ftx_decode174_91_c (llr.data (), 91, maxosd, 3, apmask.data (), message91.data (),
-                          cw.data (), &ntype, &nharderror, &dmin);
+      PreparedPass entry;
+      entry.llr = llr;
+      entry.apmask = apmask;
+      entry.ipass = ipass;
+      entry.iaptype = iaptype;
+      prepared.push_back (entry);
+    }
+
+  if (prepared.empty ())
+    {
+      return result;
+    }
+
+  int maxosd = 3;
+  if (!doosd)
+    {
+      maxosd = -1;
+    }
+
+  int const nprep = static_cast<int> (prepared.size ());
+  std::vector<float> batch_llr (static_cast<size_t> (nprep) * kFt2Codeword);
+  std::vector<signed char> batch_apmask (static_cast<size_t> (nprep) * kFt2Codeword);
+  for (int k = 0; k < nprep; ++k)
+    {
+      std::copy (prepared[static_cast<size_t> (k)].llr.begin (),
+                 prepared[static_cast<size_t> (k)].llr.end (),
+                 batch_llr.begin () + static_cast<size_t> (k) * kFt2Codeword);
+      std::copy (prepared[static_cast<size_t> (k)].apmask.begin (),
+                 prepared[static_cast<size_t> (k)].apmask.end (),
+                 batch_apmask.begin () + static_cast<size_t> (k) * kFt2Codeword);
+    }
+  std::vector<signed char> batch_msg (static_cast<size_t> (nprep) * kFt2Message91);
+  std::vector<signed char> batch_cw (static_cast<size_t> (nprep) * kFt2Codeword);
+  std::vector<int> batch_ntype (static_cast<size_t> (nprep));
+  std::vector<int> batch_nhard (static_cast<size_t> (nprep));
+  std::vector<float> batch_dmin (static_cast<size_t> (nprep));
+
+  fastldpc_decode174_91_batch_c (nprep, batch_llr.data (), batch_apmask.data (),
+                                 91, maxosd, 3,
+                                 batch_msg.data (), batch_cw.data (),
+                                 batch_ntype.data (), batch_nhard.data (),
+                                 batch_dmin.data ());
+
+  for (int k = 0; k < nprep; ++k)
+    {
+      if (stage7_should_cancel ())
+        {
+          return result;
+        }
+      int const ipass = prepared[static_cast<size_t> (k)].ipass;
+      int const iaptype = prepared[static_cast<size_t> (k)].iaptype;
+      std::array<signed char, kFt2Message91> message91 {};
+      std::copy_n (batch_msg.begin () + static_cast<size_t> (k) * kFt2Message91,
+                   kFt2Message91, message91.begin ());
+      int const ntype = batch_ntype[static_cast<size_t> (k)];
+      int const nharderror = batch_nhard[static_cast<size_t> (k)];
+      float const dmin = batch_dmin[static_cast<size_t> (k)];
+      (void) ntype;
       stage7_debug_logf ("pass=%d iaptype=%d maxosd=%d nharderror=%d dmin=%.3f",
                         ipass, iaptype, maxosd, nharderror, dmin);
       if (!any_message_bits (message91))
         {
           continue;
         }
+
+      // Il gate anti-fantasma che stava qui e' stato consolidato dentro il
+      // decoder, in Detector/FtxLdpc.cpp (ldpc174_reject_by_nd): li' agisce
+      // sul CANDIDATO invece che sul risultato finale, quindi l'OSD puo'
+      // ancora cercarne uno migliore, e vale anche per FT8 e FT4, che usano
+      // lo stesso decoder. Include entrambi i criteri sviluppati qui -- nd
+      // e numero di bit ribaltati -- piu' l'esclusione dei bit noti per
+      // ipotesi a priori dal calcolo di nd, senza la quale il loro |LLR|
+      // grande gonfia il denominatore e disattiva il gate proprio quando
+      // l'AP e' attivo.
+      //
+      // Soglie: DECODIUM_LDPC_ND_MAX (0,075) e DECODIUM_LDPC_MAX_HARD (30).
+      // I vecchi nomi DECODIUM_FT2_LDPC_* restano riconosciuti.
       if (nharderror < 0)
         {
           continue;
@@ -1617,6 +1704,15 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
 
       stage7_debug_logf ("pass=%d decoded=\"%s\" nharderror=%d dmin=%.3f",
                          ipass, decoded.constData (), nharderror, dmin);
+
+      // Traccia il messaggio accanto al suo nharderror: serve a tarare la
+      // soglia del gate sul traffico vero invece che sul rumore sintetico.
+      if (std::getenv ("DECODIUM_FT2_LDPC_ND_LOG"))
+        {
+          std::fprintf (stderr, "[NDMSG] nharderror=%d dmin=%.2f msg=\"%s\"\n",
+                        nharderror, static_cast<double> (dmin), decoded.constData ());
+          std::fflush (stderr);
+        }
       result.ok = true;
       result.message_fixed = decoded;
       result.bits = message77;
