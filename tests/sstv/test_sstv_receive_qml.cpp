@@ -312,6 +312,16 @@ private slots:
                      .value(QStringLiteral("receiveWithoutVis")).toBool(),
                  true);
 
+        const int updatesBeforeLock = fixture.controlUpdateCount;
+        QVERIFY(QMetaObject::invokeMethod(lock, "click"));
+        QTRY_COMPARE(fixture.controlUpdateCount, updatesBeforeLock + 1);
+        QCOMPARE(fixture.sstvRxControls()
+                     .value(QStringLiteral("modeLockEnabled")).toBool(),
+                 true);
+        QCOMPARE(fixture.sstvRxControls()
+                     .value(QStringLiteral("lockedMode")).toString(),
+                 QStringLiteral("martin-m1"));
+
         fixture.simulateReplay(0.42);
         QTRY_COMPARE(open->property("enabled").toBool(), false);
         QTRY_COMPARE(cancel->property("visible").toBool(), true);

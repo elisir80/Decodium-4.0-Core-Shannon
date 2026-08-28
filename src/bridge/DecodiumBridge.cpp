@@ -9540,6 +9540,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
         m_activeRxInputDeviceName = QStringLiteral("RTL-SDR: %1").arg(device);
         m_activeRxInputDeviceId = QString::number(getSetting(QStringLiteral("RtlSdrDeviceIndex"), 0).toInt());
+        emit sstvRxSourceDeviceChanged();
         m_rxAudioStartupStartMs = QDateTime::currentMSecsSinceEpoch();
         m_pendingRxAudioStartupHealthLog = true;
         m_audioWatchdogIgnoreUntilMs = m_rxAudioStartupStartMs + 5000;
@@ -12531,11 +12532,18 @@ void DecodiumBridge::syncLegacyBackendState()
         || m_bridgeAudioLegacyTxActive
         || m_bridgeAudioTuneActive;
     bool const legacyMonitoringStartPending = m_legacyBackend->monitoringStartPending();
+    // Native analog SSTV deliberately quiesces the embedded legacy backend
+    // while keeping Decodium's monitor alive through the dedicated SoundInput.
+    // Treat that ownership as active here; otherwise this synchronisation poll
+    // mistakes the intentional legacy=false state for a dropped monitor and
+    // schedules startRx() repeatedly, starving the panadapter.
+    bool const nativeSstvMonitoring = nativeSstvRxForcesDedicatedAudioCapture();
     bool const ft2LinkLegacyRxRequested =
         isFt2LinkApplicationMode(m_mode)
         && m_monitorRequested
         && usingLegacyBackendForRx();
     bool const effectiveLegacyMonitoring = m_legacyBackend->monitoring()
+        || nativeSstvMonitoring
         || ft2LinkLegacyRxRequested
         || (m_monitorRequested
             && usingLegacyBackendForRx()
@@ -12896,7 +12904,10 @@ void DecodiumBridge::syncLegacyBackendState()
                 m_legacyBackend->setAudioInputChannel(qBound(0, m_audioInputChannel, 3));
             } else if (m_audioInputDevice.trimmed().isEmpty()) {
                 m_audioInputDeviceId.clear();
-                updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
+                updateString(m_audioInputDevice, legacyAudioInput, [this]() {
+                    emit audioInputDeviceChanged();
+                    emit sstvRxSourceDeviceChanged();
+                });
             }
         } else {
             QList<QAudioDevice> const inputs =
@@ -12922,7 +12933,10 @@ void DecodiumBridge::syncLegacyBackendState()
                 if (!audioDeviceNameExactMatches(m_audioInputDevice, legacyAudioInput)) {
                     m_audioInputDeviceId.clear();
                 }
-                updateString(m_audioInputDevice, legacyAudioInput, [this]() { emit audioInputDeviceChanged(); });
+                updateString(m_audioInputDevice, legacyAudioInput, [this]() {
+                    emit audioInputDeviceChanged();
+                    emit sstvRxSourceDeviceChanged();
+                });
             }
         }
     }
@@ -18278,6 +18292,7 @@ void DecodiumBridge::rememberAudioInputDeviceIdentity(QAudioDevice const& device
             m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
         }
         emit audioInputDeviceChanged();
+        emit sstvRxSourceDeviceChanged();
     }
 }
 
@@ -18450,6 +18465,7 @@ void DecodiumBridge::setAudioInputDevice(const QString& v) {
         }
         s.sync();
         emit audioInputDeviceChanged();
+        emit sstvRxSourceDeviceChanged();
         applyAudioInputRuntimeChange(QStringLiteral("device %1 -> %2")
                                          .arg(audioDeviceSelectionForLog(previous, previousId),
                                               audioDeviceSelectionForLog(m_audioInputDevice, m_audioInputDeviceId)));
@@ -22475,7 +22491,9 @@ void DecodiumBridge::resumeRxAudioAfterTx(const QString& reason)
         return;
     }
 
-    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx()
+        && !useModernSpectrumFeedWithLegacy()
+        && !nativeSstvRxForcesDedicatedAudioCapture()) {
         rearmLegacyPcmSpectrumFeed(QStringLiteral("post-TX %1").arg(reason));
         scheduleLegacyPcmSpectrumRearm(QStringLiteral("post-TX %1").arg(reason));
         return;
@@ -39246,6 +39264,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit audioInputDevicesChanged();
     emit audioOutputDevicesChanged();
     emit audioInputDeviceChanged();
+    emit sstvRxSourceDeviceChanged();
     emit audioOutputDeviceChanged();
     emit audioInputChannelChanged();
     emit audioOutputChannelChanged();
@@ -47034,7 +47053,16 @@ void DecodiumBridge::onSpectrumTimer()
         lastThrottleMinMs = -1;
     });
 
-    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy() && !m_legacyPcmSpectrumFeed) return;
+    // Native SSTV uses the dedicated DecodiumAudioSink while the embedded
+    // legacy backend is intentionally quiescent.  Keep the visual spectrum
+    // fed from m_audioBuffer instead of treating legacyPcmSpectrumFeed=false
+    // as "no panadapter source".
+    if (usingLegacyBackendForRx()
+        && !useModernSpectrumFeedWithLegacy()
+        && !m_legacyPcmSpectrumFeed
+        && !nativeSstvRxForcesDedicatedAudioCapture()) {
+        return;
+    }
     if (!m_monitoring) return;
     if (m_transmitting || m_tuning) return;
     maybeDispatchBridgeOwnedJtDecodeFallback();
@@ -47135,10 +47163,14 @@ void DecodiumBridge::onSpectrumTimer()
         int usable = qMin(wfAvail, fftLen);
         if (usable >= 512) {
             highResAvailable = true;
-            // Visual-only workload: the GPU-direct legacy path has negligible
-            // timer cost and can honor the configured FPS cap. CPU fallback
-            // keeps the conservative cadence used by slower systems.
-            bool const directVisualFastFeed = useModernSpectrumFeedWithLegacy();
+            // Visual-only workload: a dedicated PCM capture can hand frames
+            // straight to the visual FFT without waiting for the legacy
+            // decoder path. Native SSTV is such a capture while it owns RX;
+            // do not apply the conservative legacy/start-up throttle there or
+            // the panadapter visibly drops to roughly 10 fps for 30 seconds.
+            bool const directVisualFastFeed =
+                useModernSpectrumFeedWithLegacy()
+                || nativeSstvRxForcesDedicatedAudioCapture();
             metricDirectVisual = directVisualFastFeed;
             // 1.0.186 — FPS cap configurabile (15/20/30 fps). Default 20 fps
             // (50ms interval) bilancia fluidita' UI con frame budget main thread.
@@ -47165,9 +47197,13 @@ void DecodiumBridge::onSpectrumTimer()
                 m_gpuPanadapterRetryNotBeforeMs = 0;
                 m_gpuPanadapterStableSinceMs = 0;
             }
-            bool const acceleratedLegacyVisual =
-                !directVisualFastFeed
-                && m_legacyPcmSpectrumFeed
+            // Both the legacy PCM tap and the native SSTV capture can use
+            // the same GPU-direct visual path.  Keep one predicate for the
+            // source and the GPU readiness; using the legacy-only predicate
+            // below made SSTV enter the 100–500 ms safety throttles even
+            // though Metal was ready to consume its PCM frames.
+            bool const acceleratedVisual =
+                (directVisualFastFeed || m_legacyPcmSpectrumFeed)
                 && !panadapterNeedsCpuSpectrumHistory
                 && !m_lowCpuModeEnabled
                 && !m_gpuPanadapterFftStallGuard.load()
@@ -47179,17 +47215,17 @@ void DecodiumBridge::onSpectrumTimer()
                       deepDecodeVisualLoad,
                       cpuPressureActive(),
                       cpuPressureSevereActive(),
-                      acceleratedLegacyVisual,
+                      acceleratedVisual,
                       static_cast<int>(cappedIntervalMs));
             qint64 const monitoringAgeMs =
                 m_monitoringSince.isValid()
                     ? m_monitoringSince.msecsTo(QDateTime::currentDateTimeUtc())
                     : std::numeric_limits<qint64>::max();
             bool const visualStartupWarmup = monitoringAgeMs >= 0 && monitoringAgeMs < 30000;
-            if (visualStartupWarmup && !acceleratedLegacyVisual)
+            if (visualStartupWarmup && !acceleratedVisual)
                 minPanadapterIntervalMs = qMax<qint64>(minPanadapterIntervalMs, 100);
             if ((cpuPressureActive() || cpuPressureSevereActive())
-                && !acceleratedLegacyVisual) {
+                && !acceleratedVisual) {
                 minPanadapterIntervalMs = qMax<qint64>(
                     minPanadapterIntervalMs,
                     cpuPressureSevereActive() ? 500 : 250);
@@ -47203,7 +47239,7 @@ void DecodiumBridge::onSpectrumTimer()
             // cadence instead of polling every 20 ms and discarding ticks.
             // With a 33 ms cap the old polling pattern delivered on alternating
             // 20/40 ms boundaries, limiting the visible result to ~25 fps.
-            if (acceleratedLegacyVisual && m_spectrumTimer) {
+            if (acceleratedVisual && m_spectrumTimer) {
                 int const preciseInterval =
                     qBound(10, static_cast<int>(minPanadapterIntervalMs), 750);
                 if (m_spectrumTimer->interval() != preciseInterval) {
@@ -48661,7 +48697,9 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
             return;
         }
     }
-    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx()
+        && !useModernSpectrumFeedWithLegacy()
+        && !nativeSstvRxForcesDedicatedAudioCapture()) {
 #if DECODIUM_HAS_SSTV
         auto const source = decodium::sstv::SstvAudioSourceKind::LegacyBackend;
         selectSstvRxSource(source, currentSstvAudioStreamId(source));
@@ -48837,6 +48875,7 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
         m_lastAudioCaptureStartMs = nowMs;
         m_activeRxInputDeviceName = selectedDevice.description().trimmed();
         m_activeRxInputDeviceId = selectedDeviceId;
+        emit sstvRxSourceDeviceChanged();
 #if DECODIUM_HAS_SSTV
         auto sstvSource = decodium::sstv::SstvAudioSourceKind::LocalSoundCard;
 #ifdef Q_OS_LINUX
@@ -48888,6 +48927,7 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
     m_lastAudioCaptureStartMs = nowMs;
     m_activeRxInputDeviceName = selectedDevice.description().trimmed();
     m_activeRxInputDeviceId = selectedDeviceId;
+    emit sstvRxSourceDeviceChanged();
 #if DECODIUM_HAS_SSTV
     auto sstvSource = decodium::sstv::SstvAudioSourceKind::LocalSoundCard;
 #ifdef Q_OS_LINUX
@@ -49390,14 +49430,17 @@ void DecodiumBridge::restartAudioCaptureFromWatchdog(const QString& reason)
         return;
     }
 
-    if (usingLegacyBackendForRx() && !useModernSpectrumFeedWithLegacy()) {
+    if (usingLegacyBackendForRx()
+        && !useModernSpectrumFeedWithLegacy()
+        && !nativeSstvRxForcesDedicatedAudioCapture()) {
         rearmLegacyPcmSpectrumFeed(QStringLiteral("watchdog %1").arg(reason));
         return;
     }
 
     if (usingLegacyBackendForRx()
         && useModernSpectrumFeedWithLegacy()
-        && !useDedicatedModernAudioCaptureWithLegacy()) {
+        && !useDedicatedModernAudioCaptureWithLegacy()
+        && !nativeSstvRxForcesDedicatedAudioCapture()) {
         bridgeLog(QStringLiteral("Audio watchdog: rearming legacy PCM tap for Direct Visual (%1)").arg(reason));
         m_legacyPcmSpectrumFeed = true;
         m_lastLegacyPcmSampleMs = 0;
