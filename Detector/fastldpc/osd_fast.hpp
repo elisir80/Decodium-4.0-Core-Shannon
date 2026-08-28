@@ -54,6 +54,7 @@
 #pragma once
 #include "decoder.hpp"
 #include "bits.hpp"
+#include "plausible.hpp"
 #include <array>
 #include <climits>
 #include <cassert>
@@ -80,6 +81,11 @@ public:
     static constexpr int NCRC  = 91;    // bit coperti dalla CRC-14: 77 messaggio + 14
 
     float nd_max = 0.085f;              // vedi OsdDecoder::nd_max
+
+    // Maschera dei tipi di messaggio i3 ammessi: 0 spegne il controllo,
+    // plaus::kTuttiDefiniti non scarta niente di valido, plaus::kSoloUsati
+    // stringe ai tipi che un QSO usa davvero. Vedi cpp/plausible.hpp.
+    uint32_t tipi_ammessi = 0;
 
     // Ricerca a coppie mirata, sul modello del passo npre2 di WSJT-X
     // (osd174_91). Invece di provare tutte le C(K,2) coppie di bit
@@ -482,6 +488,7 @@ private:
         for (int r = 0; r < M; ++r)
             tmp_[pivcol_[r]] = (uint8_t)(hard_[pivcol_[r]] ^ ((d[r >> 6] >> (r & 63)) & 1));
         assert(crc14_ok(tmp_.data()) && "sindrome CRC incrementale incoerente");
+        if (!plausibile(tmp_.data())) return;
         best_score_ = score; found_ = true; best_ = tmp_;
     }
 
@@ -495,7 +502,25 @@ private:
         for (int r = 0; r < M; ++r)                    // par[r] = hard[pivcol[r]] ^ d[r]
             tmp_[pivcol_[r]] = (uint8_t)(hard_[pivcol_[r]] ^ ((d[r >> 6] >> (r & 63)) & 1));
         assert(crc14_ok(tmp_.data()) && "sindrome CRC incrementale incoerente");
+        if (!plausibile(tmp_.data())) return;
         best_score_ = score; found_ = true; best_ = tmp_;
+    }
+
+    // Il candidato ha passato la CRC-14: descrive anche un messaggio possibile?
+    //
+    // La CRC lascia passare un candidato sbagliato ogni 16384, e con la ricerca
+    // larga se ne provano ~21400 per parola: e' il motivo per cui allargarla
+    // non pagava. Il controllo di struttura del messaggio aggiunge da 1,1 a 2,2
+    // bit di filtro (misurati) e non scarta MAI un messaggio vero.
+    //
+    // Sta QUI dentro e non dopo: se un candidato falso passa la CRC ma non e'
+    // un messaggio, l'enumerazione prosegue e puo' ancora trovare quello giusto.
+    // Applicato dopo, si limiterebbe a buttare via la parola lasciando il buco.
+    //
+    // Costa quasi niente: lo vedono solo i candidati che hanno gia' passato la
+    // CRC, cioe' uno su 16384.
+    inline bool plausibile(const uint8_t* cw) const {
+        return tipi_ammessi == 0 || plaus::message77_ok(cw, tipi_ammessi);
     }
 
     const Code& c_;

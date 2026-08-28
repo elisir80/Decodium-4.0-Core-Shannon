@@ -347,6 +347,12 @@ extern "C"
                            signed char const* apmask_in, signed char* message91_out,
                            signed char* cw_out, int* ntype_out, int* nharderror_out,
                            float* dmin_out);
+  // Detector/fastldpc/: stessa firma, min-sum vettorizzato AVX2. Ricade da
+  // solo su ftx_decode174_91_c se la CPU non ha AVX2 o Keff != 91.
+  void fastldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
+                                signed char const* apmask, signed char* message91,
+                                signed char* cw, int* ntype, int* nharderror, float* dmin);
+  void fastldpc_set_ft8_mode_c (int on);
   int ftx_ft8_validate_candidate_meta_c (signed char const* message77, signed char const* cw,
                                          int nharderrors, int unpack_ok, int quirky, int ncontest);
   int ftx_ft8_compute_snr_c (float const* s8, int rows, int cols, int const* itone,
@@ -383,6 +389,44 @@ extern "C"
                  float* plog, char* msgbest,
                  size_t, size_t, size_t, size_t);
 }
+namespace {
+
+// Quale decoder LDPC usa FT8. ACCESO di default dal 28/08/2026.
+// Attenzione, la differenza non e' solo di velocita': con maxosd=3 e
+// norder=4 il decoder originale usa il BP ESATTO, mentre fastldpc e' sempre
+// min-sum, che ne e' un'approssimazione. Il confronto appaiato sugli stessi
+// wav (18 prove fra -20 e -22 dB) non ha mostrato perdite -- una sola
+// discordanza, a favore di fastldpc, con p=1,00 al test dei segni -- ma non
+// ha nemmeno dimostrato un guadagno: campione troppo piccolo per concludere.
+// Si spegne con DECODIUM_FT8_FASTLDPC=0 senza ricompilare.
+bool ft8_use_fastldpc ()
+{
+  static bool const on = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_FASTLDPC");
+    return !raw || (raw[0] != '0' && raw[0] != 0);
+  }();
+  return on;
+}
+
+void ft8_ldpc_decode (float const* llr, int Keff, int maxosd, int norder,
+                      signed char const* apmask, signed char* message91,
+                      signed char* cw, int* ntype, int* nharderror, float* dmin)
+{
+  if (ft8_use_fastldpc ())
+    {
+      // Tiene tutti i tipi di messaggio: i formati da contest che FT2 esclude
+      // in FT8 esistono, e filtrarli via renderebbe il decoder cieco a quelli.
+      fastldpc_set_ft8_mode_c (1);
+      fastldpc_decode174_91_c (llr, Keff, maxosd, norder, apmask, message91, cw,
+                               ntype, nharderror, dmin);
+    }
+  else
+    ftx_decode174_91_c (llr, Keff, maxosd, norder, apmask, message91, cw,
+                        ntype, nharderror, dmin);
+}
+
+}  // namespace
+
 
 template <size_t N>
 using FixedChars = std::array<char, N>;
@@ -7151,7 +7195,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
           int ntype = 0;
           int pass_nharderrors = -1;
           float pass_dmin = 0.0f;
-          ftx_decode174_91_c (llrz.data (), Keff, maxosd, norder, apmask_bits.data (),
+          ft8_ldpc_decode (llrz.data (), Keff, maxosd, norder, apmask_bits.data (),
                               message91.data (), cw.data (), &ntype,
                               &pass_nharderrors, &pass_dmin);
           bool const can_retry_local_cq_history_osd =
@@ -7171,7 +7215,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                             nsync, cq_signature_score) != nullptr;
           if (can_retry_local_cq_history_osd)
             {
-              ftx_decode174_91_c (llrz.data (), Keff, 3, 4, apmask_bits.data (),
+              ft8_ldpc_decode (llrz.data (), Keff, 3, 4, apmask_bits.data (),
                                   message91.data (), cw.data (), &ntype,
                                   &pass_nharderrors, &pass_dmin);
             }
@@ -7192,7 +7236,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
             {
               // A narrow CQ-only OSD rescue recovers strong sync-search CQ
               // candidates that BP misses, without making the full pass OSD-heavy.
-              ftx_decode174_91_c (llrz.data (), Keff, 3, 4, apmask_bits.data (),
+              ft8_ldpc_decode (llrz.data (), Keff, 3, 4, apmask_bits.data (),
                                   message91.data (), cw.data (), &ntype,
                                   &pass_nharderrors, &pass_dmin);
             }
@@ -7234,7 +7278,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                   int generic_ntype = 0;
                   int generic_hard = -1;
                   float generic_dmin = 0.0f;
-                  ftx_decode174_91_c (generic_llrz.data (), Keff, 3, 4,
+                  ft8_ldpc_decode (generic_llrz.data (), Keff, 3, 4,
                                       generic_apmask_bits.data (),
                                       generic_message91.data (), generic_cw.data (),
                                       &generic_ntype, &generic_hard, &generic_dmin);

@@ -139,17 +139,57 @@ const Code& shared_code () {
 // osservate in FT2 il 27/08/2026, sparite spegnendo fastldpc.
 //
 // Qui la corrispondenza segue la tabella originale.
+// FT8 e FT4 ammettono tipi di messaggio che FT2 non usa: i formati da contest
+// i3 = 2, 3 e 5. Con la maschera di FT2 (kSoloUsati) quei messaggi non
+// verrebbero decodificati MAI, quindi la modalita' FT8 tiene tutti i tipi
+// definiti. Costa meta' del potere filtrante del controllo di plausibilita',
+// ed e' il prezzo giusto: un filtro non deve rendere cieco il decoder.
+static thread_local bool g_modo_ft8 = false;
+
+extern "C" void fastldpc_set_ft8_mode_c (int on) { g_modo_ft8 = on != 0; }
+
 Ft2Decoder& decoder_for_preset (int ndeep) {
     static thread_local std::unique_ptr<Ft2Decoder> ord1, ord2, ord3;
+    static thread_local std::unique_ptr<Ft2Decoder> ord1_ft8, ord2_ft8, ord3_ft8;
+    std::unique_ptr<Ft2Decoder>& slot1 = g_modo_ft8 ? ord1_ft8 : ord1;
+    std::unique_ptr<Ft2Decoder>& slot2 = g_modo_ft8 ? ord2_ft8 : ord2;
+    std::unique_ptr<Ft2Decoder>& slot3 = g_modo_ft8 ? ord3_ft8 : ord3;
 
     if (ndeep <= 3) {                       // preset 1..3 -> nord=1 nell'originale
-        if (!ord1) {
+        if (!slot1) {
             Ft2Config c = Ft2Decoder::conservativo();
             // L'originale a ndeep=3 non fa "ordine 1 e basta": fa ordine 1 piu'
             // due passi euristici (npre1, npre2) che cercano le coppie di bit
             // capaci di azzerare i bit di parita' piu' affidabili. Sono molto
             // efficaci, e senza di essi qui si decodificava il 15% in meno.
             // pair_search riproduce quel meccanismo (vedi OsdFast).
+            // Sulla ricerca larga (ordine 3, span 91/48), provata e ritirata:
+            // al banco sembrava vincere su entrambi i fronti -- su 20000 parole
+            // a Eb/N0=1 dB e 100000 candidati di rumore, a soglia 0,065, dava
+            // 16821 decodifiche e 6 fantasmi contro 16168 e 10 della stretta
+            // senza filtro. Sul traffico vero non ha retto: vedi sotto.
+            // RICERCA STRETTA. La larga (ordine 3, span 91/48) e' stata
+            // provata dal vivo il 28/08/2026 e va tolta: prova ~21400
+            // candidati per parola contro ~600, e la CRC-14 ne ammette
+            // uno ogni 16384, cioe' ~1,3 falsi attesi per parola. Il
+            // controllo di plausibilita' vale 1,9 bit, divide per ~3,7 e
+            // ne lascia ~0,35: moltiplicati per le parole che un ciclo
+            // FT2 accetta fanno 2,8 nominativi fantasma per ciclo, misurati
+            // sul traffico reale (113 decode in 10 minuti, 102 su 106 mai
+            // ripetuti). Il filtro paga ~2 bit, l'allargamento ne costa ~5:
+            // non lo copre. Il banco non lo vedeva perche' contava i falsi
+            // su un numero fisso di candidati di rumore, non sul ritmo con
+            // cui FT2 chiama davvero il decoder.
+            // Il controllo di plausibilita' RESTA: con la ricerca stretta
+            // i suoi bit si sommano a un tasso di falsi gia' basso.
+            // RICERCA STRETTA. La larga (ordine 3, span 91/48) e' stata provata
+            // due volte il 28/08/2026 e ritirata due volte. La seconda con i
+            // controlli strutturali completi: sei minuti a zero fantasmi
+            // sembravano assolverla, ma su una banda senza trasmissioni FT2
+            // sei minuti non dimostrano niente, e con piu' tempo i fantasmi
+            // sono tornati copiosi. Prova ~21400 candidati per parola contro
+            // ~600: la CRC-14 ne ammette uno ogni 16384 e i filtri strutturali
+            // pagano ~2 bit contro i ~5 che costa l'allargamento.
             c.osd_order = 2;
             c.span2 = 32;
             c.span3 = 0;
@@ -162,29 +202,79 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             // a 0,065 contro 0,42 a 0,070 e 1,30 a 0,075. Il decoder originale
             // sta a 0,33. Costa il 2,6% di decodifiche senza AP e lo 0,9% con.
             c.nd_max = 0.065f;
+
+            // I tipi di messaggio ammessi dal controllo di plausibilita'.
+            // kSoloUsati tiene standard, testo libero e nominativi non
+            // standard, e lascia fuori i tre formati da contest (EU VHF, ARRL
+            // RTTY): in FT2 non si vedono, e tenerli fuori vale la meta' del
+            // filtro. E' una POLITICA, non un test di formato: un messaggio di
+            // quei tipi non verrebbe mai decodificato. Con FASTLDPC_TIPI=tutti
+            // si torna a non escludere niente, al prezzo di piu' fantasmi.
+            {
+                char const* env = std::getenv ("FASTLDPC_TIPI");
+                c.tipi_ammessi = (g_modo_ft8 || (env && std::string (env) == "tutti"))
+                                     ? plaus::kTuttiDefiniti
+                                     : plaus::kSoloUsati;
+            }
             c.batch = 16;                   // una parola per chiamata: batch minimo
-            ord1.reset (new Ft2Decoder (shared_code(), c));
+            slot1.reset (new Ft2Decoder (shared_code(), c));
         }
-        return *ord1;
+        return *slot1;
     }
     if (ndeep <= 5) {                       // preset 4..5 -> nord=2
-        if (!ord2) {
+        if (!slot2) {
             Ft2Config c = Ft2Decoder::conservativo();
             c.batch = 16;
-            ord2.reset (new Ft2Decoder (shared_code(), c));
+            slot2.reset (new Ft2Decoder (shared_code(), c));
         }
-        return *ord2;
+        return *slot2;
     }
     // preset >= 6 -> nord=4 nell'originale; qui l'ordine massimo e' 3.
-    if (!ord3) {
+    if (!slot3) {
         Ft2Config c = Ft2Decoder::sensibile();
         c.batch = 16;
-        ord3.reset (new Ft2Decoder (shared_code(), c));
+        slot3.reset (new Ft2Decoder (shared_code(), c));
     }
-    return *ord3;
+    return *slot3;
 }
 
 }  // namespace
+
+// Soglia sui bit ribaltati, condivisa fra la via singola e quella batch.
+// Coerenza con l'ipotesi AP: ACCESO di default. Se una passata AP impone dei
+// bit e il decoder li ribalta lo stesso, la parola contraddice l'ipotesi che
+// l'ha prodotta. E' un test strutturale, quindi non penalizza i segnali
+// deboli come fa una soglia: per questo si tiene insieme al gate sui bit
+// ribaltati invece che al suo posto.
+// Da verificare con banda aperta: l'AP e' un'ipotesi soft e il decoder ha il
+// diritto di contraddirla, quindi in teoria il test puo' scartare decodifiche
+// vere. Con DECODIUM_LDPC_AP_CHECK=0 si spegne senza ricompilare.
+static bool fastldpc_ap_check () {
+    static bool const v = [] {
+        char const* raw = std::getenv ("DECODIUM_LDPC_AP_CHECK");
+        return !raw || (raw[0] != '0' && raw[0] != 0);
+    }();
+    return v;
+}
+
+// Traccia cosa i gate stanno scartando: DECODIUM_LDPC_GATE_LOG=1.
+static bool fastldpc_gate_log () {
+    static bool const v = [] {
+        char const* raw = std::getenv ("DECODIUM_LDPC_GATE_LOG");
+        return raw && raw[0] != '0' && raw[0] != 0;
+    }();
+    return v;
+}
+
+static int fastldpc_max_hard () {
+    static int const v = [] {
+        char const* raw = std::getenv ("DECODIUM_LDPC_MAX_HARD");
+        if (!raw) raw = std::getenv ("DECODIUM_FT2_LDPC_MAX_HARD");
+        int const n = raw ? std::atoi (raw) : 0;
+        return (n > 0 && n <= kN) ? n : 22;
+    }();
+    return v;
+}
 
 extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxosd, int norder,
                                          signed char const* apmask_in, signed char* message91_out,
@@ -249,6 +339,29 @@ extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxo
         const int hdec = llr_in[i] >= 0.0f ? 1 : 0;
         if ((hdec ^ bit) != 0) { ++nhard; dmin += std::fabs (llr_in[i]); }
     }
+    // Gate sui bit ribaltati. Con fastldpc attivo il percorso NON passa da
+    // ftx_decode174_91_c, quindi ldpc174_reject_by_nd non viene mai
+    // applicato: senza questo controllo l'unico filtro resta nd, e nd non
+    // basta perche' pesa i bit per il loro |LLR| e nel rumore vero gli LLR
+    // sono deboli -- ribaltarne quaranta costa poco e nd resta basso.
+    //
+    // Tarato sul traffico reale del 28/08/2026: su 74 decodifiche di
+    // stazioni ripetute (UX5HY, RV3ZN, F5PBG, QSO IK7VKC/F5PBG, da +11 a
+    // -26 dB) nharderror aveva mediana 1, p99 16, massimo 20; i fantasmi
+    // partivano da 23, con una valle netta fra 19 e 22. Stessa variabile
+    // d'ambiente del gate consolidato, cosi' i due percorsi si regolano
+    // insieme.
+    {
+        if (nhard > fastldpc_max_hard ()) {
+            if (message91_out) std::memset (message91_out, 0, 91);
+            if (cw_out) std::memset (cw_out, 0, kN);
+            if (ntype_out) *ntype_out = 0;
+            if (nharderror_out) *nharderror_out = -1;
+            if (dmin_out) *dmin_out = 0.0f;
+            return;
+        }
+    }
+
     if (nharderror_out) *nharderror_out = nhard;
     if (dmin_out) *dmin_out = dmin;
 }
@@ -335,6 +448,52 @@ extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llr_in,
             const int hdec = src[i] >= 0.0f ? 1 : 0;
             if ((b[i] ? 1 : 0) != hdec) { ++nhard; dmin += std::fabs (src[i]); }
         }
+
+        // I due controlli qui sotto mancavano sulla via BATCH, che e' quella
+        // che FT2 usa davvero: nharderror veniva calcolato e riportato al
+        // chiamante, ma non filtrava niente. Il 28/08/2026 arrivavano in lista
+        // decode con 31, 36, 38, 40, 41 e 43 bit ribaltati.
+
+        // 1) bit ribaltati. Su 74 decodifiche vere di stazioni ripetute, da
+        //    +11 a -26 dB: mediana 1, p99 16, massimo 20. I fantasmi partivano
+        //    da 23, con una valle netta fra 19 e 22.
+        if (nhard > fastldpc_max_hard ()) {
+            if (fastldpc_gate_log ())
+                std::fprintf (stderr, "[GATE] scartata: bit ribaltati %d > %d\n",
+                              nhard, fastldpc_max_hard ());
+            if (msg) std::memset (msg, 0, 91);
+            if (cw) std::memset (cw, 0, kN);
+            if (ntype_out) ntype_out[w] = 0;
+            continue;
+        }
+
+        // 2) coerenza con l'ipotesi a priori: se una passata AP ha imposto
+        //    dei bit e il decoder li ha ribaltati lo stesso, la parola
+        //    contraddice l'ipotesi che l'ha prodotta.
+        //
+        //    ATTENZIONE, da verificare con banda aperta: l'AP e' un'ipotesi
+        //    SOFT e il decoder ha il diritto di contraddirla quando il
+        //    segnale lo richiede, quindi questo test puo' scartare decodifiche
+        //    vere deboli. Qui tiene fuori molti fantasmi, ma il bilancio sui
+        //    segnali veri non e' stato misurato: la banda era ferma.
+        if (fastldpc_ap_check ()) {
+            const signed char* apm = apmask_in + (size_t) w * kN;
+            bool coerente = true;
+            for (int i = 0; i < kN && coerente; ++i) {
+                if (!apm[i]) continue;
+                const int atteso = src[i] >= 0.0f ? 1 : 0;
+                if ((b[i] ? 1 : 0) != atteso) coerente = false;
+            }
+            if (!coerente) {
+                if (fastldpc_gate_log ())
+                    std::fprintf (stderr, "[GATE] scartata: bit AP contraddetti\n");
+                if (msg) std::memset (msg, 0, 91);
+                if (cw) std::memset (cw, 0, kN);
+                if (ntype_out) ntype_out[w] = 0;
+                continue;
+            }
+        }
+
         if (nharderror_out) nharderror_out[w] = nhard;
         if (dmin_out) dmin_out[w] = dmin;
     }

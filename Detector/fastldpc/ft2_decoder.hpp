@@ -29,6 +29,9 @@ struct Ft2Config {
     int   span2     = 91;       // bit d'informazione esplorati a coppie
     int   span3     = 48;       // ... e a terne
     float nd_max    = 0.075f;   // gate anti-false-decode; 1.0 lo disattiva
+    // Tipi di messaggio i3 ammessi dal controllo di plausibilita' dentro
+    // l'OSD: 0 lo spegne. Vedi cpp/plausible.hpp.
+    uint32_t tipi_ammessi = 0;
     // Limite sui |LLR| in ingresso, in multipli della media della parola.
     // 0 = disattivato. Un LLR molto piu' grande della media e' quasi sempre un
     // artefatto (interferenza impulsiva) e non informazione: un solo LLR
@@ -68,6 +71,7 @@ public:
           bits_((size_t)cfg.batch * code.N), ok_(cfg.batch), iters_(cfg.batch),
           buf_((size_t)cfg.batch * code.N), word_(code.N) {
         osd_.nd_max = cfg.nd_max;
+        osd_.tipi_ammessi = cfg.tipi_ammessi;
         osd_.pair_search = cfg.pair_search;
         osd_.ntau = cfg.ntau;
     }
