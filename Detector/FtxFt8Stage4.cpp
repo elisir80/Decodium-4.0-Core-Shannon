@@ -353,6 +353,10 @@ extern "C"
                                 signed char const* apmask, signed char* message91,
                                 signed char* cw, int* ntype, int* nharderror, float* dmin);
   void fastldpc_set_ft8_mode_c (int on);
+  void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
+                                      int Keff, int maxosd, int norder,
+                                      signed char* message91, signed char* cw,
+                                      int* ntype, int* nharderror, float* dmin);
   int ftx_ft8_validate_candidate_meta_c (signed char const* message77, signed char const* cw,
                                          int nharderrors, int unpack_ok, int quirky, int ncontest);
   int ftx_ft8_compute_snr_c (float const* s8, int rows, int cols, int const* itone,
@@ -403,6 +407,17 @@ bool ft8_use_fastldpc ()
 {
   static bool const on = [] {
     char const* raw = std::getenv ("DECODIUM_FT8_FASTLDPC");
+    return !raw || (raw[0] != '0' && raw[0] != 0);
+  }();
+  return on;
+}
+
+// Decodifica a BLOCCHI delle passate FT8: acceso di default quando fastldpc e'
+// attivo, si spegne con DECODIUM_FT8_BATCH=0 per tornare passata per passata.
+bool ft8_batch_passes ()
+{
+  static bool const on = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_BATCH");
     return !raw || (raw[0] != '0' && raw[0] != 0);
   }();
   return on;
@@ -5355,6 +5370,20 @@ int ft8_candidate_sync_threshold (int imetric, Ft8Request const& request)
     {
       syncmin = std::min (syncmin, request.lft8subpass ? 4 : 5);
     }
+  // La soglia di aggancio NON si abbassa. Provato il 28/08/2026 e ritirato:
+  // il decoder vettorizzato lascia il tempo per accettare candidati piu'
+  // deboli, ma quei candidati non contengono nulla da decodificare.
+  //
+  // Su tre finestre di sette minuti di traffico reale la soglia 3 sembrava
+  // valere +10% di decodifiche e ottanta nominativi nuovi, tutti autentici e
+  // ripetuti fra i cicli. Era un'illusione da finestre diverse: rimisurato
+  // sugli STESSI 19 slot registrati dall'aria, soglia 6, 3 e 1 danno lo
+  // stesso identico esito -- 275 messaggi distinti e 486 decodifiche -- con
+  // il tempo che sale del 15% scendendo. La banda cambia abbastanza fra due
+  // finestre da simulare un guadagno del 10% che non esiste.
+  //
+  // Chi vuole riprovare ha DECODIUM_FT8_DECODE_SYNCMIN qui sotto, ma la
+  // misura va fatta appaiata su registrazioni, non su finestre consecutive.
   {
     int const ov = ft8_decode_syncmin_override ();
     if (ov >= 0) syncmin = std::min (syncmin, ov);
@@ -7091,6 +7120,146 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       float const* active_llrd = llr_attempt == 0 ? llrd.data () : history_llrd.data ();
       float const* active_llre = llr_attempt == 0 ? llre.data () : history_llre.data ();
 
+      // ---- Precalcolo a BLOCCHI delle passate di questo tentativo LLR.
+      //
+      // Il decoder vettorizzato lavora su sedici parole per volta, una per
+      // corsia del registro. Decodificando una passata alla volta quindici
+      // corsie girano a vuoto: in FT8 misurati 604 ms per passata contro i 382
+      // del decoder originale, cioe' il contrario di FT2, dove la via a blocchi
+      // c'e' gia' e i tempi crollano di due ordini di grandezza.
+      //
+      // La preparazione di una passata non dipende dall'esito delle altre,
+      // quindi si possono preparare tutte in anticipo e decodificarle insieme.
+      // Le terne (Keff, maxosd, norder) pero' cambiano da passata a passata e
+      // la chiamata a blocchi ne accetta una sola: le passate vengono percio'
+      // raggruppate per terna, un blocco per gruppo.
+      //
+      // Il ciclo sotto resta identico: se trova il risultato gia' pronto lo usa,
+      // altrimenti decodifica come prima. Le passate oltre la prima riuscita
+      // vengono decodificate senza essere usate -- lavoro che prima si
+      // risparmiava, ma che a corsie piene non costa piu' di una sola parola.
+      struct PassoPronto
+      {
+        int pass_index {0};
+        std::array<signed char, 91> message91 {};
+        std::array<signed char, 174> cw {};
+        int ntype {0};
+        int nharderrors {-1};
+        float dmin {0.0f};
+      };
+      std::vector<PassoPronto> passi_pronti;
+      if (ft8_use_fastldpc () && ft8_batch_passes ())
+        {
+          struct PassoDaFare
+          {
+            int pass_index;
+            int Keff, maxosd, norder;
+            std::array<float, 174> llrz;
+            std::array<signed char, 174> apmask_bits;
+          };
+          std::vector<PassoDaFare> da_fare;
+          for (int pi = pass_first; pi <= pass_last; ++pi)
+            {
+              std::array<float, 174> pre_llrz {};
+              std::array<int, 174> pre_apmask {};
+              int pre_iaptype = 0;
+              int pre_ready = 0;
+              bool const pre_generic = live_cq_ap_candidate && pi == 7;
+              if ((live_full_ap || live_cq_ap_candidate) && pi >= 6 && pi <= 8)
+                {
+                  if (pre_generic)
+                    pre_ready = ftx_ft8_prepare_decode_pass_c (
+                        pi, request.nqsoprogress, request.lapcqonly, request.ncontest,
+                        request.nfqso, request.nftx, f1, request.napwid, apsym.data (),
+                        aph10.data (), active_llra, active_llrb, active_llrc, active_llrd,
+                        active_llre, pre_llrz.data (), pre_apmask.data (), &pre_iaptype);
+                  else
+                    pre_ready = ftx_ft8_prepare_cq_ap_pass_c (
+                        pi, request.nqsoprogress, request.lapcqonly, request.ncontest,
+                        request.nfqso, request.nftx, f1, request.napwid, apsym.data (),
+                        aph10.data (), active_llra, active_llrb, active_llrc,
+                        pre_llrz.data (), pre_apmask.data (), &pre_iaptype);
+                }
+              else
+                {
+                  pre_ready = ftx_ft8_prepare_decode_pass_c (
+                      pi, request.nqsoprogress, request.lapcqonly, request.ncontest,
+                      request.nfqso, request.nftx, f1, request.napwid, apsym.data (),
+                      aph10.data (), active_llra, active_llrb, active_llrc, active_llrd,
+                      active_llre, pre_llrz.data (), pre_apmask.data (), &pre_iaptype);
+                }
+              if (pre_ready == 0) continue;
+              if (cq_only_decode && pre_iaptype != 1) continue;
+              if (request.nzhsym >= 50 && pre_iaptype == 1 && !request.supplemental
+                  && cq_signature_score < 3.1f) continue;
+
+              PassoDaFare voce;
+              voce.pass_index = pi;
+              voce.Keff = 91; voce.maxosd = 2; voce.norder = 2;
+              plan_ft8_ldpc_decode (request, f1, sync, pre_iaptype,
+                                    voce.Keff, voce.maxosd, voce.norder);
+              voce.llrz = pre_llrz;
+              std::transform (pre_apmask.begin (), pre_apmask.end (),
+                              voce.apmask_bits.begin (), [] (int value) {
+                                return static_cast<signed char> (value != 0 ? 1 : 0);
+                              });
+              da_fare.push_back (voce);
+            }
+
+          std::vector<bool> fatto (da_fare.size (), false);
+          for (size_t i = 0; i < da_fare.size (); ++i)
+            {
+              if (fatto[i]) continue;
+              std::vector<size_t> gruppo;
+              for (size_t j = i; j < da_fare.size (); ++j)
+                {
+                  if (fatto[j]) continue;
+                  if (da_fare[j].Keff == da_fare[i].Keff
+                      && da_fare[j].maxosd == da_fare[i].maxosd
+                      && da_fare[j].norder == da_fare[i].norder)
+                    {
+                      gruppo.push_back (j);
+                      fatto[j] = true;
+                    }
+                }
+              int const n = static_cast<int> (gruppo.size ());
+              std::vector<float> blocco_llr (static_cast<size_t> (n) * 174);
+              std::vector<signed char> blocco_ap (static_cast<size_t> (n) * 174);
+              for (int k = 0; k < n; ++k)
+                {
+                  PassoDaFare const& v = da_fare[gruppo[static_cast<size_t> (k)]];
+                  std::copy (v.llrz.begin (), v.llrz.end (),
+                             blocco_llr.begin () + static_cast<size_t> (k) * 174);
+                  std::copy (v.apmask_bits.begin (), v.apmask_bits.end (),
+                             blocco_ap.begin () + static_cast<size_t> (k) * 174);
+                }
+              std::vector<signed char> blocco_msg (static_cast<size_t> (n) * 91);
+              std::vector<signed char> blocco_cw (static_cast<size_t> (n) * 174);
+              std::vector<int> blocco_ntype (static_cast<size_t> (n));
+              std::vector<int> blocco_hard (static_cast<size_t> (n));
+              std::vector<float> blocco_dmin (static_cast<size_t> (n));
+              fastldpc_set_ft8_mode_c (1);
+              fastldpc_decode174_91_batch_c (n, blocco_llr.data (), blocco_ap.data (),
+                                             da_fare[i].Keff, da_fare[i].maxosd,
+                                             da_fare[i].norder, blocco_msg.data (),
+                                             blocco_cw.data (), blocco_ntype.data (),
+                                             blocco_hard.data (), blocco_dmin.data ());
+              for (int k = 0; k < n; ++k)
+                {
+                  PassoPronto out;
+                  out.pass_index = da_fare[gruppo[static_cast<size_t> (k)]].pass_index;
+                  std::copy_n (blocco_msg.begin () + static_cast<size_t> (k) * 91, 91,
+                               out.message91.begin ());
+                  std::copy_n (blocco_cw.begin () + static_cast<size_t> (k) * 174, 174,
+                               out.cw.begin ());
+                  out.ntype = blocco_ntype[static_cast<size_t> (k)];
+                  out.nharderrors = blocco_hard[static_cast<size_t> (k)];
+                  out.dmin = blocco_dmin[static_cast<size_t> (k)];
+                  passi_pronti.push_back (out);
+                }
+            }
+        }
+
       for (int pass_index = pass_first; pass_index <= pass_last; ++pass_index)
         {
           if (stage4_should_cancel ())
@@ -7195,9 +7364,26 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
           int ntype = 0;
           int pass_nharderrors = -1;
           float pass_dmin = 0.0f;
-          ft8_ldpc_decode (llrz.data (), Keff, maxosd, norder, apmask_bits.data (),
-                              message91.data (), cw.data (), &ntype,
-                              &pass_nharderrors, &pass_dmin);
+          PassoPronto const* pronto = nullptr;
+          for (PassoPronto const& pp : passi_pronti)
+            {
+              if (pp.pass_index == pass_index) { pronto = &pp; break; }
+            }
+          if (pronto != nullptr)
+            {
+              // Gia' decodificata nel blocco: nessuna chiamata al decoder.
+              message91 = pronto->message91;
+              cw = pronto->cw;
+              ntype = pronto->ntype;
+              pass_nharderrors = pronto->nharderrors;
+              pass_dmin = pronto->dmin;
+            }
+          else
+            {
+              ft8_ldpc_decode (llrz.data (), Keff, maxosd, norder, apmask_bits.data (),
+                                  message91.data (), cw.data (), &ntype,
+                                  &pass_nharderrors, &pass_dmin);
+            }
           bool const can_retry_local_cq_history_osd =
               (pass_nharderrors < 0 || pass_nharderrors > kFt8MaxHardErrors)
               && call_grid_history_state
@@ -7942,6 +8128,12 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           syncmin *= threshold_scale;
         }
       syncmin *= ft8_syncmin_scale_override ();
+      // Traccia diagnostica: soglia effettiva e candidati trovati, per capire
+      // se abbassarla fa davvero entrare piu' segnali. DECODIUM_FT8_CAND_LOG=1.
+      static bool const cand_log = [] {
+        char const* raw = std::getenv ("DECODIUM_FT8_CAND_LOG");
+        return raw && raw[0] != '0' && raw[0] != 0;
+      }();
       if (run_pass == 0)
         {
           if (shifted_pass)
@@ -7958,6 +8150,12 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                                  ft8_main_candidate_budget (request, ifa, ifb, ipass),
                                  ipass, request.ncandthin, candidate.data (), &ncand,
                                  sbase.data ());
+      if (cand_log)
+        {
+          std::fprintf (stderr, "[CAND] ipass=%d syncmin=%.3f ncand=%d\n",
+                        ipass, static_cast<double> (syncmin), ncand);
+          std::fflush (stderr);
+        }
       append_ft8_hint_candidates (&state.a7[static_cast<size_t> (jseq)], request,
                                   ifa, ifb, candidate.data (), ncand);
       append_known_cq_candidates (known_call_grid_history (), request, ifa, ifb,
