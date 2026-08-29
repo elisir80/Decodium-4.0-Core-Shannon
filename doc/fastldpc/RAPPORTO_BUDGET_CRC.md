@@ -1,5 +1,7 @@
 # Il budget della CRC
 
+**Italiano** · [English](CRC_BUDGET_REPORT.md) · [Español](INFORME_PRESUPUESTO_CRC.md)
+
 > Misure sul decodificatore LDPC(174,91) di FT2 e FT8: perché ad allargare la
 > ricerca non si guadagna, e che cosa si guadagna invece rafforzando il test di
 > accettazione.
