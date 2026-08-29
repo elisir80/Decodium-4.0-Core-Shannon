@@ -132,12 +132,43 @@ sbilanciato verso il decodificatore: è il rapporto giusto per la parte LDPC, no
 il tempo dell'applicazione intera. Ed è comunque il pezzo che nei cicli
 affollati decide se il ciclo chiude in tempo.
 
-Il numero che conta davvero per FT8, però, non è il tempo ma la **soglia al
-50%**: la SNR a cui si decodifica metà dei segnali, misurata con segnale
-piantato a SNR nota nella banda di riferimento di 2500 Hz. Il conteggio totale
-dei decode non è una metrica — è gonfiato dai segnali facili. Il banco che
-misura la soglia sta in `decode_bench/`; dopo queste modifiche **non è stato
-rimisurato**, ed è la prima cosa da fare.
+### La soglia in dB, che è la metrica vera
+
+Il numero che conta davvero per FT8 non è il tempo ma la **soglia al 50%**: la
+SNR a cui si decodifica metà dei segnali, con segnale piantato a SNR nota nella
+banda di riferimento di 2500 Hz. Il conteggio totale dei decode non è una
+metrica — è gonfiato dai segnali facili.
+
+Misurata con `decode_bench/`, che genera i segnali con `ft8sim` di WSJT-X e
+quindi ha verità di terra. Sette punti da −19 a −25 dB, 25 realizzazioni di
+rumore ciascuno, profilo deep, messaggio `K1ABC W9XYZ EN37` a 1500 Hz:
+
+| SNR | con `fastldpc` | decoder originale | `jt9` deep |
+|---:|---:|---:|---:|
+| −19 dB | 25/25 | 25/25 | 25/25 |
+| −20 dB | 24/25 | 23/25 | 23/25 |
+| −21 dB | **11/25** | 7/25 | 9/25 |
+| −22 dB | **6/25** | 3/25 | 7/25 |
+| −23 dB | 0/25 | 0/25 | 0/25 |
+
+| | soglia al 50% |
+|---|---:|
+| Decodium con **`fastldpc`** | **−20,88 dB** |
+| Decodium con decoder originale | −20,66 dB |
+| `jt9` di WSJT-X, profilo deep | −20,75 dB |
+
+**Il fattore 7,7 di velocità non costa sensibilità.** `fastldpc` risulta 0,22 dB
+più sensibile del decodificatore originale e 0,13 dB più di `jt9`.
+
+Sulla forza statistica va detto il vero: i due punti informativi sono −21 dB
+(11/25 contro 7/25) e −22 dB (6/25 contro 3/25), ciascuno a circa 1,2 sigma, che
+combinati fanno circa 1,7. Suggestivo, non conclusivo. **Quello che si può
+affermare senza riserve è che fastldpc non costa sensibilità**; per stabilire il
++0,2 dB servirebbero un centinaio di realizzazioni per punto invece di
+venticinque.
+
+Vale anche la lettura opposta, ed è la più utile: Decodium sta **alla pari con
+`jt9` in profilo deep**. I decibel, su FT8, non stanno più nel decodificatore.
 
 ---
 
@@ -399,8 +430,9 @@ della diagnosi «limite di ricerca o limite del codice» come criterio per decid
 - Il confronto quantistico è ora su `sinter`, ma il vantaggio di accuratezza
   resta a 1-2 sigma: servono più shot per renderlo solido. Sui codici BB il
   confronto non è ancora stato rifatto sul banco standard.
-- La soglia FT8 in dB, che è la metrica che conta per quel modo, non è stata
-  rimisurata dopo queste modifiche.
+- La soglia FT8 in dB è ora misurata (sezione 03), ma su 25 realizzazioni per
+  punto: il vantaggio di 0,2 dB sta a 1,7 sigma e non è stabilito. Serve un
+  campione quattro volte più grande.
 
 ---
 

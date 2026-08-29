@@ -133,13 +133,46 @@ una carga sesgada hacia el decodificador: es la relación correcta para la parte
 LDPC, no el tiempo de la aplicación completa. Aun así es la pieza que, en los
 ciclos cargados, decide si el ciclo cierra a tiempo.
 
-El número que de verdad cuenta para FT8, sin embargo, no es el tiempo sino el
-**umbral al 50%**: la SNR a la que se decodifica la mitad de las señales, medida
-con señal implantada a SNR conocida en el ancho de banda de referencia de 2500
-Hz. El recuento total de decodificaciones no es una métrica: está inflado por
-las señales fáciles. El banco que mide el umbral está en `decode_bench/`;
-después de estos cambios **no se ha vuelto a medir**, y es lo primero que hay
-que hacer.
+### El umbral en dB, que es la métrica de verdad
+
+El número que de verdad cuenta para FT8 no es el tiempo sino el **umbral al
+50%**: la SNR a la que se decodifica la mitad de las señales, con señal
+implantada a SNR conocida en el ancho de banda de referencia de 2500 Hz. El
+recuento total de decodificaciones no es una métrica: está inflado por las
+señales fáciles.
+
+Medido con `decode_bench/`, que genera las señales con `ft8sim` de WSJT-X y por
+tanto tiene verdad de referencia. Siete puntos de −19 a −25 dB, 25
+realizaciones de ruido cada uno, perfil deep, mensaje `K1ABC W9XYZ EN37` a
+1500 Hz:
+
+| SNR | con `fastldpc` | decodificador original | `jt9` deep |
+|---:|---:|---:|---:|
+| −19 dB | 25/25 | 25/25 | 25/25 |
+| −20 dB | 24/25 | 23/25 | 23/25 |
+| −21 dB | **11/25** | 7/25 | 9/25 |
+| −22 dB | **6/25** | 3/25 | 7/25 |
+| −23 dB | 0/25 | 0/25 | 0/25 |
+
+| | umbral al 50% |
+|---|---:|
+| Decodium con **`fastldpc`** | **−20,88 dB** |
+| Decodium con el decodificador original | −20,66 dB |
+| `jt9` de WSJT-X, perfil deep | −20,75 dB |
+
+**El factor 7,7 de velocidad no cuesta sensibilidad.** `fastldpc` resulta 0,22 dB
+más sensible que el decodificador original y 0,13 dB más que `jt9`.
+
+Sobre la fuerza estadística hay que decir la verdad: los dos puntos informativos
+son −21 dB (11/25 frente a 7/25) y −22 dB (6/25 frente a 3/25), cada uno a unos
+1,2 sigma, que combinados dan alrededor de 1,7. Sugerente, no concluyente. **Lo
+que puede afirmarse sin reservas es que fastldpc no cuesta sensibilidad**; para
+establecer los +0,2 dB harían falta un centenar de realizaciones por punto en
+lugar de veinticinco.
+
+También vale la lectura opuesta, y es la más útil: Decodium está **a la par con
+`jt9` en perfil deep**. En FT8, los decibelios ya no están en el
+decodificador.
 
 ---
 
@@ -402,8 +435,9 @@ de invertirlo.
 - La comparación cuántica se ejecuta ahora sobre `sinter`, pero la ventaja de
   exactitud está a 1-2 sigma: hacen falta más disparos para consolidarla. Sobre
   códigos BB la comparación aún no se ha rehecho en el banco estándar.
-- El umbral de FT8 en dB, que es la métrica que cuenta para ese modo, no se ha
-  vuelto a medir tras estos cambios.
+- El umbral de FT8 en dB ya está medido (sección 03), pero sobre 25
+  realizaciones por punto: la ventaja de 0,2 dB está a 1,7 sigma y no queda
+  establecida. Hace falta una muestra cuatro veces mayor.
 
 ---
 

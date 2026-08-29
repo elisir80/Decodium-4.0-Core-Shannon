@@ -36,6 +36,7 @@
 | Sensitivity against min-sum alone | **+1.3 dB** at equal false-decode rate |
 | Plausibility filter, at unchanged search and threshold | **phantoms halved**, decodes unchanged |
 | Failures irrecoverable by any decoder, at 1 dB | **1.1%** |
+| FT8 50% threshold, deep profile | **-20.88 dB** with fastldpc · -20.66 without · -20.75 for jt9 |
 
 ---
 

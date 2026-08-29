@@ -130,12 +130,43 @@ workload skewed towards the decoder: it is the right ratio for the LDPC part,
 not the time of the whole application. It is nevertheless the piece that, in
 crowded cycles, decides whether the cycle closes in time.
 
-The number that really matters for FT8, though, is not time but the **50%
-threshold**: the SNR at which half the signals are decoded, measured with a
-signal planted at known SNR in the 2500 Hz reference bandwidth. Total decode
-count is not a metric — it is inflated by easy signals. The bench that measures
-the threshold is in `decode_bench/`; after these changes it has **not been
-re-measured**, and that is the first thing to do.
+### The threshold in dB, which is the real metric
+
+The number that really matters for FT8 is not time but the **50% threshold**:
+the SNR at which half the signals are decoded, with a signal planted at known
+SNR in the 2500 Hz reference bandwidth. Total decode count is not a metric — it
+is inflated by easy signals.
+
+Measured with `decode_bench/`, which generates the signals with WSJT-X's
+`ft8sim` and therefore has ground truth. Seven points from −19 to −25 dB, 25
+noise realisations each, deep profile, message `K1ABC W9XYZ EN37` at 1500 Hz:
+
+| SNR | with `fastldpc` | original decoder | `jt9` deep |
+|---:|---:|---:|---:|
+| −19 dB | 25/25 | 25/25 | 25/25 |
+| −20 dB | 24/25 | 23/25 | 23/25 |
+| −21 dB | **11/25** | 7/25 | 9/25 |
+| −22 dB | **6/25** | 3/25 | 7/25 |
+| −23 dB | 0/25 | 0/25 | 0/25 |
+
+| | 50% threshold |
+|---|---:|
+| Decodium with **`fastldpc`** | **−20.88 dB** |
+| Decodium with the original decoder | −20.66 dB |
+| WSJT-X `jt9`, deep profile | −20.75 dB |
+
+**The factor of 7.7 in speed costs no sensitivity.** `fastldpc` comes out 0.22 dB
+more sensitive than the original decoder and 0.13 dB more than `jt9`.
+
+On statistical strength the truth must be told: the two informative points are
+−21 dB (11/25 against 7/25) and −22 dB (6/25 against 3/25), each at about 1.2
+sigma, combining to roughly 1.7. Suggestive, not conclusive. **What can be
+stated without reservation is that fastldpc costs no sensitivity**; establishing
+the +0.2 dB would need a hundred realisations per point rather than twenty-five.
+
+The opposite reading also holds, and is the more useful one: Decodium is **on par
+with `jt9` in deep profile**. On FT8, the decibels are no longer in the
+decoder.
 
 ---
 
@@ -393,8 +424,9 @@ before spending it.
 - The quantum comparison now runs on `sinter`, but the accuracy advantage sits
   at 1-2 sigma: more shots are needed to make it solid. On BB codes the
   comparison has not yet been redone on the standard harness.
-- The FT8 threshold in dB, which is the metric that matters for that mode, has
-  not been re-measured after these changes.
+- The FT8 threshold in dB is now measured (section 03), but over 25 realisations
+  per point: the 0.2 dB advantage sits at 1.7 sigma and is not established. A
+  sample four times larger is needed.
 
 ---
 
