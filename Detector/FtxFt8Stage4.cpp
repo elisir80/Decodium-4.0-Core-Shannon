@@ -414,6 +414,30 @@ bool ft8_use_fastldpc ()
 
 // Decodifica a BLOCCHI delle passate FT8: acceso di default quando fastldpc e'
 // attivo, si spegne con DECODIUM_FT8_BATCH=0 per tornare passata per passata.
+// Forza il decoder classico per la chiamata in corso, ignorando fastldpc.
+// Serve alla seconda passata di recupero: vedi il commento al suo punto d'uso.
+thread_local bool g_ft8_forza_classico = false;
+
+// Quanti recuperi col decoder classico si concedono per ciclo. Ognuno costa
+// come un intero slot del decoder lento, quindi il tetto evita che una banda
+// piena di candidati sterili se li mangi tutti. 0 disattiva il recupero.
+int ft8_classic_rescue_budget ()
+{
+  static int const n = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_CLASSIC_RESCUE");
+    if (!raw) return 12;
+    int const v = std::atoi (raw);
+    return (v >= 0 && v <= 200) ? v : 12;
+  }();
+  return n;
+}
+
+int& ft8_classic_rescue_used ()
+{
+  static thread_local int used = 0;
+  return used;
+}
+
 bool ft8_batch_passes ()
 {
   static bool const on = [] {
@@ -427,7 +451,7 @@ void ft8_ldpc_decode (float const* llr, int Keff, int maxosd, int norder,
                       signed char const* apmask, signed char* message91,
                       signed char* cw, int* ntype, int* nharderror, float* dmin)
 {
-  if (ft8_use_fastldpc ())
+  if (ft8_use_fastldpc () && !g_ft8_forza_classico)
     {
       // Tiene tutti i tipi di messaggio: i formati da contest che FT2 esclude
       // in FT8 esistono, e filtrarli via renderebbe il decoder cieco a quelli.
@@ -7148,7 +7172,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
         float dmin {0.0f};
       };
       std::vector<PassoPronto> passi_pronti;
-      if (ft8_use_fastldpc () && ft8_batch_passes ())
+      if (ft8_use_fastldpc () && ft8_batch_passes () && !g_ft8_forza_classico)
         {
           struct PassoDaFare
           {
@@ -8335,6 +8359,61 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
                     << " expected_match="
                     << (ft8_expected_message_matches (*attempt_target, trim_fixed (msg37)) ? 1 : 0);
               });
+            }
+
+          // Seconda passata di recupero col decoder classico.
+          //
+          // I due decoder non si battono sempre allo stesso modo, misurato su
+          // registrazioni off-air il 29/08/2026, 19 slot per banda:
+          //   40 m, banda piena : fastldpc 250 messaggi distinti, classico 198.
+          //     Il classico impiega ~16 s per slot contro una scadenza di 8,
+          //     viene troncato a meta' della lista dei candidati e perde cio'
+          //     che non ha raggiunto.
+          //   80 m, banda scarica : fastldpc 52, classico 56. Qui il tempo
+          //     basta a entrambi, e la propagazione ESATTA del classico batte
+          //     l'approssimazione min-sum sui segnali marginali. Le quattro in
+          //     piu' erano stazioni vere (DO8JB/YU1LD, PE1NAO/M7XRI,
+          //     RA3VME/CT3MD, W3UCA/DA6IT), e il classico non perdeva nulla di
+          //     quanto trovava fastldpc: era un sovrainsieme.
+          //
+          // Non c'e' un criterio a priori per scegliere: dipende da quante
+          // stazioni ci sono da trovare, e non si sa prima di cercarle. Il
+          // numero di candidati non discrimina (mediana 717 in 40 m contro 751
+          // in 80 m: la banda scarica ne produce di piu', perche' il sync
+          // aggancia rumore).
+          //
+          // Quindi si prendono entrambi: fastldpc arriva in fondo alla lista e
+          // garantisce di non perdere nulla per scadenza, e sul candidato che
+          // non ha dato nulla si spende il tempo risparmiato per un secondo
+          // tentativo col BP esatto. Il tetto per ciclo evita che una banda
+          // piena di candidati sterili consumi il margine.
+          if (nbadcrc != 0
+              && ft8_use_fastldpc ()
+              && ft8_classic_rescue_budget () > 0
+              && ft8_classic_rescue_used () < ft8_classic_rescue_budget ()
+              && stage4_remaining_ms () >= 1200
+              && !stage4_should_cancel ())
+            {
+              ++ft8_classic_rescue_used ();
+              g_ft8_forza_classico = true;
+              decode_main_candidate_cpp (fp_dd, &pass_newdat,
+                                         *active_candidate_request, ipass,
+                                         use_var_downsample, equalized_pipeline, imetric, lsubtract, apsym, aph10,
+                                         candidate.data () + icand * 4,
+                                         candidate[static_cast<size_t> (icand * 4 + 3)],
+                                         sbase.data (),
+                                         kFt8Nh1, sync, f1, xdt, xbase, nharderrors,
+                                         dmin, nbadcrc, candidate_pass, iaptype,
+                                         msg37, xsnr, itone, message77,
+                                         &fp_a7_ref[static_cast<size_t> (jseq)],
+                                         &fp_cq_ref, &fp_cg_ref, jseq);
+              g_ft8_forza_classico = false;
+              if (nbadcrc == 0)
+                {
+                  xdt -= 0.5f;
+                  ftx_ft8_finalize_main_result_c (xsnr, xdt, request.emedelay, nharderrors,
+                                                  dmin, &nsnr, &callback_dt, &qual);
+                }
             }
 
           bool const can_retry_cq_companion =
