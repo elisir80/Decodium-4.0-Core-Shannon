@@ -45718,7 +45718,16 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         // La soglia torna al valore che la teneva spenta finche' il difetto non
         // e' individuato. Chi vuole indagare la abbassi e riproduca: il crash
         // arriva in un paio di minuti di ricezione FT8.
-        static constexpr int kFt8DeepMinUsefulBudgetMs = 7000;
+        // Regolabile a runtime per indagare il difetto descritto sopra.
+        // Per risolvere gli stack dei minidump serve una build non strippata:
+        // lo strip e' applicato da CMakeLists.txt riga ~1226
+        // (CMAKE_EXE_LINKER_FLAGS_RELEASE ... -Wl,-s), non solo dal blocco
+        // "Ottimizzazione dimensione" piu' in alto, che da solo non basta.
+        static int const kFt8DeepMinUsefulBudgetMs = [] {
+          char const* raw = std::getenv ("DECODIUM_FT8_DEEP_MIN_BUDGET");
+          int const v = raw ? std::atoi (raw) : 0;
+          return (v > 0 && v <= 20000) ? v : 7000;
+        }();
         qint64 const correctedNowMs = correctedUtcEpochMs();
         int const budgetMs =
             qBound(0,
@@ -49955,7 +49964,8 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
                           .arg(microStallCleanPeriods));
         }
     }
-    req.supplemental = !adaptiveFt8Pressure && !txAudioActive && boundedDepth >= 4;
+    req.supplemental = !adaptiveFt8Pressure && !txAudioActive && boundedDepth >= 4
+        && qEnvironmentVariableIsEmpty("DECODIUM_FT8_NO_SUPPLEMENTAL");
     req.subpass = !adaptiveFt8Pressure && subpassRequested && !txAudioActive && boundedDepth >= 4;  // F1: solo l'harvest chiede subpass
     req.coherentAvgEnabled = !adaptiveFt8Pressure && !txAudioActive && m_coherentAvgEnabled;
     req.neuralSyncEnabled = !adaptiveFt8Pressure && !txAudioActive && m_neuralSyncEnabled;
