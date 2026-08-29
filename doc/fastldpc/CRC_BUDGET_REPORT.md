@@ -325,11 +325,37 @@ adopted preserves the code distance.
 |---|---|
 | Little-trodden ground, and 100 to 600 times faster than the reference. | A crowded, fast-moving field. **The library used as reference already contains the fast decoder**, *Localized Statistics Decoding*, created for exactly this problem: the comparison had been made against the slow one. |
 
-Re-measured against BP+LSD on a surface code d=5 at p=0.003, 50,000 shots: 98
-logical errors against 128, 33 µs against 2823 per shot. The comparison holds,
-*but* it goes through per-shot Python calls, and an honest comparison must be
-C++ to C++. Until that is done, the quantum branch is **a good reimplementation
-in a field where others have already arrived**, not a new contribution.
+The comparison was therefore redone on **`sinter`**, the field's standard
+harness: batched, multi-process, the same infrastructure for every decoder, and
+reproducible by anyone without our code. Surface code d=5, 50,000 shots per
+point, six workers:
+
+| p | fastldpc | BP+LSD | BP+OSD-7 | pymatching |
+|---:|---:|---:|---:|---:|
+| 0.001 | 3 err · 190 µs | 4 · 1107 µs | 1 · 1039 µs | 7 · 0.9 µs |
+| 0.002 | **17** · 119 µs | 30 · 2001 µs | 29 · 2570 µs | 59 · 1.5 µs |
+| 0.003 | **86** · 141 µs | 124 · 3268 µs | 97 · 4485 µs | 153 · 2.1 µs |
+
+**8 to 32 times faster than BP+LSD and BP+OSD, with fewer errors than either**,
+and the speed advantage is understated: our timing includes the whole round trip
+— DEM parsing in Python, file writing, process spawn — while the others run
+in-process.
+
+On accuracy the statistical strength must be stated: at p=0.002, 17 against 29
+sits at 1.8 sigma; at p=0.003, 86 against 97 at 0.8. Taken one at a time they
+are not conclusive; being below at all three points is more so. On par or
+slightly better, with speed as the solid advantage.
+
+> **The standard harness immediately caught a bug that three days of in-house
+> measurement had missed.** The first sinter run gave 768 errors where the
+> in-house bench gave 98: a factor of eight. sinter hands decoders the
+> **decomposed** model, where one instruction is split by `^`, and an observable
+> appearing in two components **cancels** in GF(2). Collecting targets into a
+> list instead of by parity marked 86 instructions out of 1953 as flipping the
+> observable when they do not. A silent error: weights, priors and total
+> probability mass were all unchanged. It surfaced only because the new
+> integration failed to reproduce a number already known — and that is the check
+> that should have come first.
 
 The sliding-window decoding implemented to make the cost linear in the number of
 rounds is a standard technique, and the depth-7 schedule was already in Bravyi et
@@ -364,9 +390,9 @@ before spending it.
 - Restricting to the message types actually used is a **policy**, not a format
   test: a message of an excluded type would never be decoded. In FT8 it is not
   applied, precisely for this reason.
-- The quantum comparison against BP+LSD goes through a Python interface and is
-  not conclusive. The comparison on BB codes is not concluded at all: at half a
-  second per shot the reference does not gather enough events.
+- The quantum comparison now runs on `sinter`, but the accuracy advantage sits
+  at 1-2 sigma: more shots are needed to make it solid. On BB codes the
+  comparison has not yet been redone on the standard harness.
 - The FT8 threshold in dB, which is the metric that matters for that mode, has
   not been re-measured after these changes.
 

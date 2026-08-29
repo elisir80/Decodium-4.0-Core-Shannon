@@ -332,12 +332,37 @@ siete existen 236 válidos, y el adoptado conserva la distancia del código.
 |---|---|
 | Terreno poco transitado, y de 100 a 600 veces más rápido que la referencia. | Campo concurrido y en movimiento. **La biblioteca usada como referencia ya contiene el decodificador rápido**, *Localized Statistics Decoding*, creado precisamente para este problema: se había medido contra el lento. |
 
-Vuelto a medir contra BP+LSD sobre surface code d=5 a p=0,003, 50 000 disparos:
-98 errores lógicos frente a 128, 33 µs frente a 2823 por disparo. La comparación
-se sostiene, *pero* pasa por llamadas a Python una por disparo, y una
-comparación honesta debe hacerse de C++ a C++. Mientras no se haga, la rama
-cuántica es **una buena reimplementación en un campo donde otros ya han
-llegado**, no una aportación nueva.
+La comparación se rehízo entonces sobre **`sinter`**, el banco estándar del
+campo: por lotes, multiproceso, la misma infraestructura para todos los
+decodificadores, y reproducible por cualquiera sin tener nuestro código. Surface
+code d=5, 50 000 disparos por punto, seis procesos:
+
+| p | fastldpc | BP+LSD | BP+OSD-7 | pymatching |
+|---:|---:|---:|---:|---:|
+| 0,001 | 3 err · 190 µs | 4 · 1107 µs | 1 · 1039 µs | 7 · 0,9 µs |
+| 0,002 | **17** · 119 µs | 30 · 2001 µs | 29 · 2570 µs | 59 · 1,5 µs |
+| 0,003 | **86** · 141 µs | 124 · 3268 µs | 97 · 4485 µs | 153 · 2,1 µs |
+
+**De 8 a 32 veces más rápido que BP+LSD y BP+OSD, con menos errores que ambos**,
+y la ventaja de velocidad está infravalorada: nuestro tiempo incluye toda la
+vuelta — análisis del modelo en Python, escritura de ficheros, arranque del
+proceso — mientras que los demás se ejecutan en el mismo proceso.
+
+Sobre la exactitud hay que declarar la fuerza estadística: a p=0,002 el 17 frente
+a 29 está a 1,8 sigma; a p=0,003 el 86 frente a 97 a 0,8. Tomados de uno en uno
+no son concluyentes; estar por debajo en los tres puntos lo es más. A la par o
+ligeramente mejor, con la velocidad como ventaja sólida.
+
+> **El banco estándar detectó de inmediato un fallo que tres días de mediciones
+> internas no habían visto.** La primera medición con sinter daba 768 errores
+> donde el banco interno daba 98: factor ocho. sinter entrega a los
+> decodificadores el modelo **descompuesto**, donde una instrucción se parte con
+> `^`, y un observable presente en dos componentes **se anula** en GF(2).
+> Recogiendo los objetivos en una lista en vez de por paridad, 86 instrucciones
+> de 1953 quedaban marcadas como si volcaran el observable. Un error silencioso:
+> pesos, probabilidades previas y masa total no cambiaban. Sólo salió a la luz
+> porque la integración nueva no reproducía un número ya conocido — y ésa es la
+> comprobación que debía haber sido la primera.
 
 La ventana deslizante implementada para hacer lineal el coste con el número de
 rondas es técnica estándar, y la profundidad 7 del calendario ya estaba en el
@@ -374,9 +399,9 @@ de invertirlo.
 - Restringir a los tipos de mensaje realmente usados es una **política**, no una
   prueba de formato: un mensaje de un tipo excluido no se decodificaría nunca.
   En FT8 no se aplica, precisamente por eso.
-- La comparación cuántica contra BP+LSD pasa por una interfaz Python y no es
-  concluyente. La comparación sobre códigos BB no es concluyente en absoluto: a
-  medio segundo por disparo la referencia no reúne suficientes eventos.
+- La comparación cuántica se ejecuta ahora sobre `sinter`, pero la ventaja de
+  exactitud está a 1-2 sigma: hacen falta más disparos para consolidarla. Sobre
+  códigos BB la comparación aún no se ha rehecho en el banco estándar.
 - El umbral de FT8 en dB, que es la métrica que cuenta para ese modo, no se ha
   vuelto a medir tras estos cambios.
 
