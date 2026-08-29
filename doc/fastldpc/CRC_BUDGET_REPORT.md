@@ -164,6 +164,40 @@ sigma, combining to roughly 1.7. Suggestive, not conclusive. **What can be
 stated without reservation is that fastldpc costs no sensitivity**; establishing
 the +0.2 dB would need a hundred realisations per point rather than twenty-five.
 
+### The control: it is not the deadline
+
+The bench imposes a deadline per decode, and the original decoder is 7.7 times
+slower: the obvious suspicion is that the gap is not quality but time running
+out. That is a testable hypothesis, and it must be tested, because it completely
+changes what is being measured.
+
+Two points (−21 and −22 dB), 40 realisations, deep profile:
+
+| | threshold | −21 dB | −22 dB | total time |
+|---|---:|---:|---:|---:|
+| `fastldpc`, 8 s deadline | **−21.29 dB** | 24/40 | 10/40 | 547 s |
+| original, 8 s deadline | −21.00 dB | 20/40 | 5/40 | 647 s |
+| original, **40 s** deadline | −21.05 dB | 21/40 | 1/40 | **3208 s** |
+
+**Giving the original decoder five times more time changes nothing**: −21.05
+against −21.00. The deadline was not the constraint, and the hypothesis was
+wrong. The gap is decoder quality, not exhausted time — consistent with the
+chain described above: speed does not hand out decibels by itself, it makes a
+higher search order *affordable*, and that is what hands them out.
+
+Two remarks on robustness. This run gives a 0.29 dB gap, the previous one 0.22:
+two independent samples agreeing in direction and magnitude, together bringing
+the signal to roughly 2.4 sigma. And the absolute threshold swings by 0.4 dB
+between two runs of the same configuration (−20.88 and −21.29), a reminder of
+how little twenty-five or forty realisations per point weigh: it is the paired
+comparisons that hold, not the absolute values.
+
+One detail is worth noting without pushing it: at −22 dB the original decoder
+given more time does **worse**, 1/40 against 5/40. The numbers are small and the
+difference sits at 1.7 sigma, so little can be concluded — but the direction is
+exactly that of this report's thesis: more time means more candidates tried, and
+more candidates means more CRC false positives crowding out the right one.
+
 The opposite reading also holds, and is the more useful one: Decodium is **on par
 with `jt9` in deep profile**. On FT8, the decibels are no longer in the
 decoder.

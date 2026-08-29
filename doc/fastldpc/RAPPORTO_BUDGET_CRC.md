@@ -167,6 +167,41 @@ affermare senza riserve è che fastldpc non costa sensibilità**; per stabilire 
 +0,2 dB servirebbero un centinaio di realizzazioni per punto invece di
 venticinque.
 
+### Il controllo: non è la scadenza
+
+Il banco impone una scadenza per decodifica, e il decodificatore originale è 7,7
+volte più lento: il sospetto ovvio è che il divario non sia qualità ma tempo
+scaduto. È un'ipotesi che si verifica, e va verificata, perché cambia
+completamente che cosa si sta misurando.
+
+Due punti (−21 e −22 dB), 40 realizzazioni, profilo deep:
+
+| | soglia | −21 dB | −22 dB | tempo totale |
+|---|---:|---:|---:|---:|
+| `fastldpc`, scadenza 8 s | **−21,29 dB** | 24/40 | 10/40 | 547 s |
+| originale, scadenza 8 s | −21,00 dB | 20/40 | 5/40 | 647 s |
+| originale, scadenza **40 s** | −21,05 dB | 21/40 | 1/40 | **3208 s** |
+
+**Dando al decodificatore originale cinque volte più tempo non cambia niente**:
+−21,05 contro −21,00. La scadenza non era il vincolo, e l'ipotesi era sbagliata.
+Il divario è qualità del decodificatore, non tempo esaurito — coerente con la
+catena descritta sopra: la velocità non regala decibel da sola, permette di
+*permettersi* un ordine di ricerca più alto, e sono quelli a darli.
+
+Due osservazioni sulla solidità. Questa corsa dà un divario di 0,29 dB, la
+precedente 0,22: due campioni indipendenti concordi in direzione e ampiezza, che
+insieme portano il segnale a circa 2,4 sigma. E la soglia assoluta oscilla di
+0,4 dB fra due corse della stessa configurazione (−20,88 e −21,29), il che
+ricorda quanto poco pesino venticinque o quaranta realizzazioni per punto: sono
+i confronti appaiati a reggere, non i valori assoluti.
+
+C'è infine un dettaglio che vale la pena notare senza forzarlo: a −22 dB il
+decodificatore originale con più tempo fa **peggio**, 1/40 contro 5/40. I numeri
+sono piccoli e la differenza sta a 1,7 sigma, quindi non se ne può concludere
+molto — ma la direzione è esattamente quella della tesi di questo rapporto: più
+tempo significa più candidati provati, e più candidati significa più falsi
+positivi della CRC che soffocano quello giusto.
+
 Vale anche la lettura opposta, ed è la più utile: Decodium sta **alla pari con
 `jt9` in profilo deep**. I decibel, su FT8, non stanno più nel decodificatore.
 
