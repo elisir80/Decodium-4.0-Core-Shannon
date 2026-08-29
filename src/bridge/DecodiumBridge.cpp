@@ -45701,7 +45701,24 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         // 2500 ms e' il costo osservato di un decode profondo col decoder
         // vettorizzato piu' un margine: la soglia originale era tarata su un
         // decoder che impiegava una decina di secondi per slot.
-        static constexpr int kFt8DeepMinUsefulBudgetMs = 2500;
+        // RIMESSA A 7000 il 29/08/2026, che di fatto DISATTIVA il follow-up
+        // profondo: il budget massimo ottenibile e' 6550 ms (fine slot +
+        // kFt8DeepLatestOverrunMs 6800, meno 250 di sicurezza), quindi la
+        // condizione non e' mai vera.
+        //
+        // Abbassarla a 2500 aveva riacceso lo stadio profondo -- che non girava
+        // piu' da quando la soglia e' stata introdotta -- e con esso un difetto
+        // di memoria latente: l'applicazione muore entro due minuti con
+        // corruzione dello heap (0xc0000374 in ntdll), sistematicamente subito
+        // dopo la riga FT8DISPATCH che lancia il follow-up, sia col decoder
+        // vettorizzato sia con quello originale. Non e' quindi il decoder: e'
+        // la fase profonda in se', rimasta ferma abbastanza a lungo da andare
+        // alla deriva rispetto al resto del codice.
+        //
+        // La soglia torna al valore che la teneva spenta finche' il difetto non
+        // e' individuato. Chi vuole indagare la abbassi e riproduca: il crash
+        // arriva in un paio di minuti di ricezione FT8.
+        static constexpr int kFt8DeepMinUsefulBudgetMs = 7000;
         qint64 const correctedNowMs = correctedUtcEpochMs();
         int const budgetMs =
             qBound(0,
