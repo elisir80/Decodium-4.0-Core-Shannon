@@ -171,6 +171,17 @@ más lejos habrá que trabajar en otra parte de la cadena.
 | 🇬🇧 English | [**The CRC budget**](CRC_BUDGET_REPORT.md) |
 | 🇪🇸 Español | [**El presupuesto del CRC**](INFORME_PRESUPUESTO_CRC.md) |
 
+## Cronologia e misure · History and measurements
+
+Che cosa è stato introdotto dalla v1.0.590 alla v1.0.596, che cosa è stato
+ritirato e perché, con i numeri di ogni decisione: velocità misurata per modo,
+sensibilità a confronto appaiato, i nominativi fantasma, e le tre strade
+provate e abbandonate.
+
+| Lingua | Documento |
+|---|---|
+| 🇮🇹 Italiano / 🇬🇧 English | [**Cronologia e misure**](CHANGELOG.md) |
+
 ## The code · Il codice · El código
 
 | Path | Content |
