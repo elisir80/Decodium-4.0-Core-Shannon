@@ -5,7 +5,9 @@
     gate      CRC-14 (poly 0x2757, identica a WSJT-X) + distanza soft normalizzata
 
 Header-only, GPL-3.0, si integra in DECODIUM includendo `cpp/ft2_decoder.hpp`.
-Tabelle H/G e CRC estratte e verificate contro ft8_lib/WSJT-X.
+Scritto ex novo: non e' un adattamento del decoder di WSJT-X. Opera pero' sul
+codice LDPC(174,91) e sulla CRC-14 del protocollo FT8, usati **senza
+modifiche** (vedi "Provenienza e attribuzione" in fondo).
 
 Rispetto alla prima versione del progetto: **+0,35 dB** rispetto alla
 configurazione OSD-2/span32 di partenza e **+1,3 dB** rispetto al solo min-sum,
@@ -361,7 +363,45 @@ conservativo, contro 8,8). `bits.hpp` copre anche MSVC.
     tools/gen_test.py     vettori AWGN/BPSK + riferimento BP float
     tools/crc14.py        CRC-14, confrontata con la versione a byte di ft8_lib
 
-## Provenienza
+## Provenienza e attribuzione
 
-Tabelle H, G e CRC del codice LDPC(174,91) da WSJT-X (GPL-3.0) via
-ft8_lib. Decoder: GPL-3.0.
+Quattro livelli, di cui solo l'ultimo e' opera di questo progetto. Vale la pena
+tenerli distinti, perche' confonderli e' un errore che in questa comunita' viene
+notato subito.
+
+**La classe di codici.** I codici LDPC sono di Robert Gallager, tesi di dottorato
+al MIT, 1962, riscoperti da MacKay e Neal negli anni Novanta. Non sono di
+WSJT-X, non sono di nessuno di noi.
+
+**Gli algoritmi di decodifica.** Il min-sum normalizzato e' di Chen e Fossorier,
+l'ordered statistics decoding di Fossorier e Lin: letteratura consolidata degli
+anni Novanta. La ricerca a coppie (`pair_search`) e' invece modellata sui passi
+npre1/npre2 di `osd174_91` di WSJT-X — l'idea e' loro, l'implementazione e la
+chiave lineare che la rende praticabile sono nostre.
+
+**Il codice specifico.** Le 83 righe di parita' del LDPC(174,91), la matrice
+generatrice e la CRC-14 con polinomio 0x2757 appartengono al protocollo FT8,
+progettato da Steve Franke K9AN e Joe Taylor K1JT e pubblicato su QEX
+("The FT4 and FT8 Communication Protocols"). Sono estratte da `constants.c` di
+ft8_lib e verificate bit per bit. **Non vanno cambiate**: cambiarle romperebbe
+la compatibilita' con qualunque altra stazione.
+
+**Il decodificatore.** `fastldpc` e' scritto da zero. Sono originali il min-sum
+vettorizzato AVX2 a sedici parole per registro, l'eliminazione di Gauss senza
+salti condizionati, la sindrome CRC incrementale ottenuta sfruttando la
+linearita' della CRC-14 con bit-slicing, la potatura per limite inferiore, il
+gate `nd` anti-fantasma, il controllo di plausibilita' del messaggio dentro il
+ciclo di accettazione e l'interfaccia a blocco — e con essi tutte le misure di
+questo README.
+
+Formula breve, se serve citarlo:
+
+> `fastldpc` e' un decodificatore scritto ex novo per Decodium 4.0 Core Shannon.
+> Implementa algoritmi noti — codici LDPC (Gallager, 1962), min-sum normalizzato,
+> ordered statistics decoding — con vettorizzazione AVX2 e ottimizzazioni
+> originali. Opera sul codice LDPC(174,91) e sulla CRC-14 del protocollo FT8
+> (Franke K9AN, Taylor K1JT), usati senza modifiche per garantire compatibilita'
+> bit-a-bit. GPL-3.0.
+
+Tutto il progetto e' GPL-3.0, come WSJT-X e ft8_lib da cui provengono le
+tabelle.
