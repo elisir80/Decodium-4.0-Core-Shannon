@@ -27,6 +27,7 @@
 #include "src/sstv/storage/SstvStorageWorker.h"
 #include "src/sstv/storage/SstvTxGalleryArchive.h"
 #include "SecureSettings.hpp"
+#include "DecodiumProfileSettings.h"
 #if DECODIUM_HAS_HAMDRM
 #include "src/sstv/digital/HamDrmController.h"
 #include "src/sstv/digital/waveform/HamDrmWaveformAdapters.h"
@@ -39,6 +40,7 @@
 #include <QImage>
 #include <QMetaObject>
 #include <QMutexLocker>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QThread>
 #include <QTimer>
@@ -358,6 +360,46 @@ bool sstvRxSettingsFromMap(const QVariantMap& values,
     return true;
 }
 
+void persistSstvRxControls(const SstvRxControlSettings& settings)
+{
+    // Keep the whole SSTV RX control snapshot in one QSettings transaction.
+    // Calling DecodiumBridge::setSetting() once per field forces a synchronous
+    // sync() for every field, which can pause the GUI while FT8/panadapter are
+    // active (Lock used to trigger that path twice in succession).
+    QSettings store(QSettings::IniFormat,
+                    QSettings::UserScope,
+                    QStringLiteral("Decodium"),
+                    QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(store);
+    store.setValue(QStringLiteral("SSTV/RxModeControl"),
+                   sstvRxModeControlName(settings.modeControl));
+    store.setValue(QStringLiteral("SSTV/RxManualMode"),
+                   QString::fromStdString(settings.manualMode));
+    store.setValue(QStringLiteral("SSTV/RxModeLockEnabled"),
+                   settings.modeLockEnabled);
+    store.setValue(QStringLiteral("SSTV/RxLockedMode"),
+                   QString::fromStdString(settings.lockedMode));
+    store.setValue(QStringLiteral("SSTV/RxWithoutVis"),
+                   settings.receiveWithoutVis);
+    store.setValue(QStringLiteral("SSTV/RxTimingFallbackEnabled"),
+                   settings.timingFallbackEnabled);
+    store.setValue(QStringLiteral("SSTV/RxAfcMode"),
+                   sstvRxAfcModeName(settings.afcMode));
+    store.setValue(QStringLiteral("SSTV/RxManualFrequencyCorrectionHz"),
+                   settings.manualFrequencyCorrectionHz);
+    store.setValue(QStringLiteral("SSTV/RxSlantMode"),
+                   sstvRxSlantModeName(settings.slantMode));
+    store.setValue(QStringLiteral("SSTV/RxManualClockErrorPpm"),
+                   settings.manualClockErrorPpm);
+    store.setValue(QStringLiteral("SSTV/RxReplayRetentionSeconds"),
+                   settings.replayRetentionSeconds);
+    store.setValue(QStringLiteral("SSTV/RxRetainRawAudio"),
+                   settings.retainRawAudio);
+    store.setValue(QStringLiteral("SSTV/RxDiagnosticScopeEnabled"),
+                   settings.diagnosticScopeEnabled);
+    store.sync();
+}
+
 QString sstvSourceName(SstvAudioSourceKind kind)
 {
     switch (kind) {
@@ -572,6 +614,39 @@ QString DecodiumBridge::sstvRxSource() const
 #else
     return QStringLiteral("Unavailable");
 #endif
+}
+
+QString DecodiumBridge::sstvRxSourceDevice() const
+{
+#if DECODIUM_HAS_SSTV
+    if (!m_sstvRxRuntime) {
+        return {};
+    }
+
+    const auto kind = m_sstvRxRuntime->routeToken().source.kind;
+    switch (kind) {
+    case SstvAudioSourceKind::LocalSoundCard:
+    case SstvAudioSourceKind::WebSdr: {
+        // While a native session is live, report the QAudioDevice opened by
+        // SoundInput. Before capture starts, report the configured selection.
+        if (m_sstvRxRequested && !m_activeRxInputDeviceName.trimmed().isEmpty()) {
+            return m_activeRxInputDeviceName.trimmed();
+        }
+        const QString configured = m_audioInputDevice.trimmed();
+        return configured.isEmpty()
+            ? tr("System default input") : configured;
+    }
+    case SstvAudioSourceKind::RtlSdr:
+        return m_activeRxInputDeviceName.trimmed();
+    case SstvAudioSourceKind::DecoPort:
+    case SstvAudioSourceKind::Tci:
+    case SstvAudioSourceKind::LegacyBackend:
+    case SstvAudioSourceKind::Replay:
+    case SstvAudioSourceKind::Unknown:
+        break;
+    }
+#endif
+    return {};
 }
 
 QString DecodiumBridge::sstvRxState() const
@@ -2442,6 +2517,7 @@ QVariantMap DecodiumBridge::sstvRxDiagnostics() const
     result.insert(QStringLiteral("active"), sstvRxActive());
     result.insert(QStringLiteral("state"), sstvRxState());
     result.insert(QStringLiteral("source"), sstvRxSource());
+    result.insert(QStringLiteral("sourceDevice"), sstvRxSourceDevice());
 
 #if DECODIUM_HAS_SSTV
     if (!m_sstvRxRuntime) {
@@ -4772,6 +4848,7 @@ void DecodiumBridge::selectSstvRxSource(
     }
     if (changed) {
         emit sstvRxStateChanged();
+        emit sstvRxSourceDeviceChanged();
         emit sstvRxSnapshotChanged();
     }
 #else
@@ -4838,9 +4915,16 @@ bool DecodiumBridge::startSstvRx()
             }
         }
         if (restoreLegacyMonitoring && m_legacyBackend) {
-            m_monitorRequested = true;
-            m_legacyBackend->setMonitoring(true);
-            syncLegacyBackendState();
+            // Rebuild the complete legacy RX generation after a failed SSTV
+            // start as well. Restoring only the backend boolean would leave
+            // the dashboard timers/audio feed stopped in the same way as a
+            // normal SSTV close.
+            m_monitorRequested = false;
+            if (m_monitoring) {
+                m_monitoring = false;
+                emit monitoringChanged();
+            }
+            startRx();
         }
     };
 
@@ -4991,9 +5075,27 @@ void DecodiumBridge::stopSstvRx()
         }
     }
     if (restoreLegacyMonitoring && m_legacyBackend) {
-        m_monitorRequested = true;
-        m_legacyBackend->setMonitoring(true);
-        syncLegacyBackendState();
+        if (!digitalContinues) {
+            // SSTV temporarily stopped the legacy monitor and took ownership
+            // of the audio endpoint.  Merely setting the backend flag back to
+            // true leaves the spectrum/period timers and PCM feed stopped,
+            // which makes the dashboard panadapter appear frozen until the
+            // user toggles Monitor OFF/ON manually.  Re-enter the normal RX
+            // start path so audio capture, timers and visual feed are rebuilt
+            // as one coherent generation.
+            m_monitorRequested = false;
+            if (m_monitoring) {
+                m_monitoring = false;
+                emit monitoringChanged();
+            }
+            startRx();
+        } else {
+            // HAMDRM may still own the shared monitor.  Do not tear down its
+            // active generation; only restore the legacy backend mirror.
+            m_monitorRequested = true;
+            m_legacyBackend->setMonitoring(true);
+            syncLegacyBackendState();
+        }
     }
     emit statusMessage(tr("SSTV RX stopped"));
 }
@@ -5097,33 +5199,7 @@ bool DecodiumBridge::updateSstvRxControls(const QVariantMap& controls)
         return false;
     }
 
-    setSetting(QStringLiteral("SSTV/RxModeControl"),
-               sstvRxModeControlName(parsed.modeControl));
-    setSetting(QStringLiteral("SSTV/RxManualMode"),
-               QString::fromStdString(parsed.manualMode));
-    setSetting(QStringLiteral("SSTV/RxModeLockEnabled"),
-               parsed.modeLockEnabled);
-    setSetting(QStringLiteral("SSTV/RxLockedMode"),
-               QString::fromStdString(parsed.lockedMode));
-    setSetting(QStringLiteral("SSTV/RxWithoutVis"),
-               parsed.receiveWithoutVis);
-    setSetting(QStringLiteral("SSTV/RxTimingFallbackEnabled"),
-               parsed.timingFallbackEnabled);
-    setSetting(QStringLiteral("SSTV/RxAfcMode"),
-               sstvRxAfcModeName(parsed.afcMode));
-    setSetting(QStringLiteral("SSTV/RxManualFrequencyCorrectionHz"),
-               parsed.manualFrequencyCorrectionHz);
-    setSetting(QStringLiteral("SSTV/RxSlantMode"),
-               sstvRxSlantModeName(parsed.slantMode));
-    setSetting(QStringLiteral("SSTV/RxManualClockErrorPpm"),
-               parsed.manualClockErrorPpm);
-    setSetting(QStringLiteral("SSTV/RxReplayRetentionSeconds"),
-               parsed.replayRetentionSeconds);
-    setSetting(QStringLiteral("SSTV/RxRetainRawAudio"),
-               parsed.retainRawAudio);
-    setSetting(QStringLiteral("SSTV/RxDiagnosticScopeEnabled"),
-               parsed.diagnosticScopeEnabled);
-    emit sstvRxSnapshotChanged();
+    persistSstvRxControls(parsed);
     return true;
 #else
     Q_UNUSED(controls)

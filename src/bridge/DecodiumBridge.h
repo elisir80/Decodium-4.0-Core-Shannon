@@ -166,6 +166,8 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool sstvRxRequested READ sstvRxRequested NOTIFY sstvRxStateChanged)
     Q_PROPERTY(bool sstvRxActive READ sstvRxActive NOTIFY sstvRxStateChanged)
     Q_PROPERTY(QString sstvRxSource READ sstvRxSource NOTIFY sstvRxStateChanged)
+    Q_PROPERTY(QString sstvRxSourceDevice READ sstvRxSourceDevice
+               NOTIFY sstvRxSourceDeviceChanged)
     Q_PROPERTY(QString sstvRxState READ sstvRxState NOTIFY sstvRxStateChanged)
     Q_PROPERTY(QString sstvDetectedMode READ sstvDetectedMode NOTIFY sstvRxSnapshotChanged)
     Q_PROPERTY(QString sstvRxImageSource READ sstvRxImageSource NOTIFY sstvRxSnapshotChanged)
@@ -723,6 +725,7 @@ public:
     bool sstvRxRequested() const;
     bool sstvRxActive() const;
     QString sstvRxSource() const;
+    QString sstvRxSourceDevice() const;
     QString sstvRxState() const;
     QString sstvDetectedMode() const;
     QString sstvRxImageSource() const;
@@ -1850,6 +1853,7 @@ signals:
     void tuningChanged();
     void decodingChanged();
     void sstvRxStateChanged();
+    void sstvRxSourceDeviceChanged();
     void sstvRxSnapshotChanged();
     void sstvRxAudioJobChanged();
     void sstvStorageStateChanged();

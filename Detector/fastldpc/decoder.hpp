@@ -94,7 +94,9 @@ public:
                     const int16_t* __restrict__ Lv = &L_[(size_t)c_.col_idx[e0 + j] * B];
                     const int16_t* __restrict__ Re = &R_[(size_t)(e0 + j) * B];
                     int16_t* __restrict__ qj = q + (size_t)j * B;
+#if defined(__GNUC__) && !defined(__clang__)
                     #pragma GCC ivdep
+#endif
                     for (int b = 0; b < B; ++b) {
                         int x = Lv[b] - Re[b];
                         x = x > LLR_MAX ? LLR_MAX : (x < -LLR_MAX ? -LLR_MAX : x);
@@ -113,7 +115,9 @@ public:
                     int16_t* __restrict__ Lv = &L_[(size_t)c_.col_idx[e0 + j] * B];
                     int16_t* __restrict__ Re = &R_[(size_t)(e0 + j) * B];
                     const int16_t* __restrict__ qj = q + (size_t)j * B;
+#if defined(__GNUC__) && !defined(__clang__)
                     #pragma GCC ivdep
+#endif
                     for (int b = 0; b < B; ++b) {
                         int16_t x = qj[b];
                         int16_t mag = (i1[b] == (int16_t)j) ? m2[b] : m1[b];

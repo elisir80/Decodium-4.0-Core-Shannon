@@ -434,17 +434,22 @@ set (wsjt_qt_CXXSRCS
   src/core/otpgenerator.cpp
   )
 
-# fastldpc: il min-sum lavora su 16 int16 per registro AVX2, quindi questo
-# file va compilato con -mavx2 -O3 anche quando il resto del programma e' per
-# x86-64 generico (qui la build e' MinSizeRel, -Os). Il binario resta
-# eseguibile su CPU senza AVX2: decodium_bridge.cpp verifica a runtime e in
-# quel caso richiama il decoder originale ftx_decode174_91_c.
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
-    PROPERTIES COMPILE_OPTIONS "-O3;-mavx2;-mfma")
-elseif (MSVC)
-  set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
-    PROPERTIES COMPILE_OPTIONS "/O2;/arch:AVX2")
+# fastldpc: il min-sum lavora su 16 int16 per registro AVX2. Compiliamo
+# questo file con AVX2 solo per target x86: Apple Silicon e Windows-on-ARM
+# usano il fallback scalare selezionato a runtime in decodium_bridge.cpp.
+set (DECODIUM_FASTLDPC_X86_TARGET OFF)
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i[3-6]86)$"
+    OR CMAKE_OSX_ARCHITECTURES MATCHES "(^|;)x86_64(;|$)")
+  set (DECODIUM_FASTLDPC_X86_TARGET ON)
+endif ()
+if (DECODIUM_FASTLDPC_X86_TARGET)
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+      PROPERTIES COMPILE_OPTIONS "-O3;-mavx2;-mfma")
+  elseif (MSVC)
+    set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+      PROPERTIES COMPILE_OPTIONS "/O2;/arch:AVX2")
+  endif ()
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

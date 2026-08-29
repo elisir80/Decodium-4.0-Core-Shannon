@@ -1,101 +1,125 @@
 # Decodium 4 FT2 v1.0.591
 
-This release finishes the phantom-decode work started in v1.0.590, whose FT2
-decoder settings turned out to produce false callsigns, and extends the
-vectorised LDPC decoder to FT8.
+This fork release carries the changes made after v1.0.589: upstream FT2
+decoder improvements from v1.0.590, plus the native SSTV and Apple Silicon
+stability work completed locally for v1.0.591.
 
 ## English (British)
 
-### v1.0.591: phantom decodes fixed for real, and FT8 on the vectorised decoder
+### v1.0.590: FT2 decoding, decode integrity and waterfall interaction
 
-- Fixed the FT2 phantom callsigns that v1.0.590 shipped. That release used a
-  wide OSD search (order 3, spans 91/48) which tries about 21400 candidates per
-  word against roughly 600 for the narrow one. A 14-bit CRC admits one wrong
-  candidate in 16384, so the wide search bought correct and false decodes in the
-  same proportion: on air it produced about 2.8 invented callsigns per cycle.
-  The search is back to narrow.
-- Added the checks that were missing on the BATCH decode path, which is the one
-  FT2 actually uses. `nharderror` was computed and returned but never used to
-  reject anything, so words that flipped 31, 36, 40 and more bits reached the
-  decode list; every threshold tuned so far lived in the single-word function
-  that nothing calls any more. The batch path now rejects on flipped bits and on
-  coherence with the a-priori hypothesis: when an AP pass imposes bits and the
-  decoder overturns them, the word contradicts the hypothesis that produced it.
-  Both are adjustable at runtime through `DECODIUM_LDPC_MAX_HARD` and
-  `DECODIUM_LDPC_AP_CHECK`, and `DECODIUM_LDPC_GATE_LOG=1` shows what is being
-  rejected and why.
-- Added a structural plausibility test on the 77-bit payload inside the OSD
-  acceptance loop: message type, callsign structure, token position and field
-  ranges. These are certain constraints, not statistical thresholds, and they
-  add filtering bits to the CRC where it matters.
-- Extended the vectorised decoder to FT8, behind a runtime switch
-  (`DECODIUM_FT8_FASTLDPC=0` returns to the original decoder). FT8 admits the
-  contest message types that FT2 never sees, so the FT8 mode keeps every defined
-  type: filtering them out would have made the decoder blind to contest traffic.
-- Measured on air over two comparable windows of live FT8 traffic, the
-  vectorised decoder is neither better nor worse for sensitivity: 711 decodes
-  from 123 distinct callsigns against 663 from 122. It is however slower per
-  pass in FT8 (median 604 ms against 382 ms), because FT8 still decodes one word
-  at a time while the vectoriser works on sixteen lanes at once. Converting FT8
-  to batch decoding, which is what would make the lanes pay, is not part of this
-  release.
+- Added the `fastldpc` vectorised LDPC path for FT2.  The AVX2 min-sum kernel
+  is selected only where supported; other CPUs retain the original decoder
+  path at run time.
+- Added the Fast LDPC toolbar control and persistence for its state.
+- Added a false-decode gate for candidates that satisfy an LDPC syndrome by
+  chance.  The gate compares the received soft information with the decoded
+  word and exposes the `DECODIUM_LDPC_ND_MAX` and
+  `DECODIUM_LDPC_MAX_HARD` thresholds for careful weak-signal tuning.
+- Corrected the sign in the shared LDPC min-sum branch.
+- Clicking a decoded callsign on the waterfall now calls that station; a click
+  away from a callsign, or Ctrl+click, still sets the transmit frequency.
+- Fixed the in-source QML synchronisation safeguard and two Qt 6.11
+  `QFile::open` diagnostics in MAP65 builds.
 
-### Packaging and compatibility
+### v1.0.591: stable native SSTV monitoring and portable FT2 builds
+
+- Reworked native SSTV receive ownership of the shared audio route.  When SSTV
+  uses Decodium's dedicated `SoundInput`, the quiescent legacy backend is no
+  longer mistaken for a failed monitor, preventing repeated RX re-arming that
+  could starve the panadapter.
+- Restored the normal RX start generation after SSTV closes or an SSTV start
+  fails.  The dashboard's spectrum timers, PCM feed and monitor now return as
+  one coherent state instead of requiring a manual Monitor OFF/ON cycle.
+- Kept the panadapter's visual path supplied while native SSTV owns RX, and
+  allow the existing accelerated visual path to be used when its GPU and
+  pressure guards permit it.  The conservative CPU protections remain active
+  when those guards require them.
+- Batched SSTV receiver-control persistence into one profile-aware settings
+  transaction.  Locking a receive mode now sends the related control values in
+  one update instead of performing multiple synchronous settings writes on the
+  GUI path.
+- Added the selected SSTV receive-device name to the receiver and Settings
+  views.  Long device names are safely elided, while the full name remains
+  available as a tooltip in the receive view.
+- Made the new FT2 `fastldpc` integration build correctly on Apple Silicon and
+  other non-x86 targets.  AVX2 compile options and CPU probing are now limited
+  to x86; ARM builds use the existing scalar fallback, and GCC-only loop
+  pragmas are not passed to Clang under `-Werror`.
+- Added QML coverage that verifies mode locking performs one atomic receiver
+  controls update.  On macOS Apple Silicon, the application and focused SSTV
+  receive, runtime and ingress tests pass for this source tree.
+
+### Distribution and validation boundary
 
 - GitHub's generated source archives for tag `v1.0.591` are the codebase
   downloads for this release.
-- The AVX2 decoder is selected at runtime, so the published binaries remain
-  usable on CPUs without AVX2, where the original decoder is used instead.
-- The FT2 decode gate has been calibrated against live traffic and synthetic
-  vectors, but not across a full range of weak-signal conditions. If marginal
-  decodes appear to be missing, raise `DECODIUM_LDPC_MAX_HARD` or set
-  `DECODIUM_LDPC_AP_CHECK=0`, and report which value restores them.
+- The release publishes the unsigned Windows x64 installer, Linux Qt 6.11
+  AppImages for x86_64 and aarch64, and the macOS DMGs produced by the Apple
+  Silicon and Intel runner matrices, with SHA-256 files where produced by the
+  workflows.
+- Native SSTV/HAMDRM remains the documented in-tree subsystem.  This release
+  does not claim universal over-the-air interoperability with every
+  QSSTV/EasyPal mode and does not replace live radio, audio-device or RF
+  validation.
 
 ## Italiano
 
-### v1.0.591: decodifiche fantasma risolte davvero, e FT8 sul decoder vettorizzato
+### v1.0.590: decodifica FT2, integrità dei decode e interazione waterfall
 
-- Corretti i nominativi fantasma in FT2 che la v1.0.590 ha pubblicato. Quella
-  release usava una ricerca OSD larga (ordine 3, span 91/48) che prova circa
-  21400 candidati per parola contro i circa 600 della stretta. Un CRC a 14 bit
-  ne lascia passare uno sbagliato ogni 16384, quindi la ricerca larga comprava
-  decodifiche giuste e false nella stessa proporzione: sull'aria produceva circa
-  2,8 nominativi inventati per ciclo. La ricerca è tornata stretta.
-- Aggiunti i controlli che mancavano sulla via di decodifica BATCH, che è quella
-  che FT2 usa davvero. `nharderror` veniva calcolato e restituito ma non
-  filtrava nulla, quindi arrivavano in lista parole che ribaltavano 31, 36, 40 e
-  più bit; ogni soglia tarata fino a quel momento viveva nella funzione a parola
-  singola, che non chiama più nessuno. La via batch ora rifiuta sui bit
-  ribaltati e sulla coerenza con l'ipotesi a priori: se una passata AP impone
-  dei bit e il decoder li ribalta, la parola contraddice l'ipotesi che l'ha
-  prodotta. Entrambi si regolano a runtime con `DECODIUM_LDPC_MAX_HARD` e
-  `DECODIUM_LDPC_AP_CHECK`, e `DECODIUM_LDPC_GATE_LOG=1` mostra cosa viene
-  scartato e perché.
-- Aggiunto un test strutturale di plausibilità sui 77 bit del payload dentro il
-  ciclo di accettazione dell'OSD: tipo di messaggio, struttura dei nominativi,
-  posizione dei token e intervalli dei campi. Sono vincoli certi, non soglie
-  statistiche, e aggiungono bit di filtro al CRC dove serve.
-- Esteso il decoder vettorizzato a FT8, dietro un interruttore a runtime
-  (`DECODIUM_FT8_FASTLDPC=0` torna al decoder originale). FT8 ammette i tipi di
-  messaggio da contest che in FT2 non si vedono, quindi la modalità FT8 tiene
-  tutti i tipi definiti: escluderli avrebbe reso il decoder cieco al traffico di
-  contest.
-- Misurato sull'aria su due finestre confrontabili di traffico FT8 reale, il
-  decoder vettorizzato non è né migliore né peggiore quanto a sensibilità: 711
-  decodifiche da 123 nominativi distinti contro 663 da 122. È però più lento per
-  passata in FT8 (mediana 604 ms contro 382), perché FT8 decodifica ancora una
-  parola alla volta mentre il vettorizzatore lavora su sedici corsie insieme.
-  La conversione di FT8 alla decodifica a blocchi, che è ciò che ripagherebbe le
-  corsie, non fa parte di questa release.
+- Aggiunto il percorso LDPC vettorizzato `fastldpc` per FT2. Il kernel min-sum
+  AVX2 viene scelto solo dove supportato; sulle altre CPU il programma conserva
+  a runtime il decoder originale.
+- Aggiunto il controllo Fast LDPC nella barra strumenti con memorizzazione
+  dello stato.
+- Aggiunto un filtro per i falsi decode che azzerano una sindrome LDPC per
+  caso. Il filtro confronta l'informazione soft ricevuta con la parola
+  decodificata e rende disponibili le soglie `DECODIUM_LDPC_ND_MAX` e
+  `DECODIUM_LDPC_MAX_HARD` per una regolazione prudente sui segnali deboli.
+- Corretto il segno del ramo min-sum nel decoder LDPC condiviso.
+- Un clic su un nominativo decodificato nel waterfall ora chiama quella
+  stazione; il clic lontano da un nominativo, oppure Ctrl+clic, continua a
+  impostare la frequenza di trasmissione.
+- Corretta la protezione della sincronizzazione QML nelle build in-source e
+  due diagnostiche `QFile::open` di Qt 6.11 nelle build MAP65.
 
-### Packaging e compatibilità
+### v1.0.591: monitoraggio SSTV nativo stabile e build FT2 portabili
+
+- Rielaborata la proprieta' della rotta audio condivisa in ricezione SSTV
+  nativa. Quando SSTV usa `SoundInput` dedicato di Decodium, il backend legacy
+  quiescente non viene piu' scambiato per un monitor caduto: sono cosi'
+  evitati ripetuti riavvii RX che potevano affamare il panadapter.
+- Ripristinata la normale generazione di avvio RX dopo la chiusura SSTV o dopo
+  un avvio SSTV fallito. Timer dello spettro, feed PCM e monitor della dashboard
+  tornano insieme a uno stato coerente, senza dover premere manualmente
+  Monitor OFF/ON.
+- Mantenuto alimentato il percorso visuale del panadapter mentre SSTV nativo
+  possiede RX, permettendo l'uso del percorso accelerato esistente quando GPU e
+  protezioni di carico lo consentono. Le protezioni CPU conservative restano
+  attive quando sono necessarie.
+- Raggruppato il salvataggio dei controlli RX SSTV in un'unica transazione di
+  impostazioni compatibile con il profilo. Il blocco del modo invia ora i
+  valori correlati in un solo aggiornamento, invece di piu' scritture sincrone
+  sul percorso GUI.
+- Aggiunto il nome del dispositivo di ricezione SSTV selezionato nelle pagine
+  Receive e Settings. I nomi lunghi vengono abbreviati in sicurezza e il nome
+  completo resta visibile come tooltip nella pagina Receive.
+- Resa corretta la compilazione dell'integrazione FT2 `fastldpc` su Apple
+  Silicon e sugli altri target non-x86. Opzioni AVX2 e rilevamento CPU sono ora
+  limitati a x86; le build ARM usano il fallback scalare esistente e le pragma
+  specifiche GCC non vengono passate a Clang con `-Werror`.
+- Aggiunta copertura QML che verifica che il blocco del modo effettui un unico
+  aggiornamento atomico dei controlli RX. Su macOS Apple Silicon l'applicazione
+  e i test SSTV mirati di receive, runtime e ingress passano per questo tree.
+
+### Distribuzione e limite della validazione
 
 - Gli archivi sorgente generati da GitHub per il tag `v1.0.591` costituiscono i
   download del codebase di questa release.
-- Il decoder AVX2 viene scelto a runtime, quindi i binari pubblicati restano
-  utilizzabili su CPU senza AVX2, dove viene usato il decoder originale.
-- Il filtro dei decode FT2 è stato tarato su traffico reale e su vettori
-  sintetici, ma non su tutta la gamma di condizioni di segnale debole. Se
-  dovessero mancare decodifiche marginali, alzare `DECODIUM_LDPC_MAX_HARD`
-  oppure impostare `DECODIUM_LDPC_AP_CHECK=0`, e segnalare quale valore le
-  ripristina.
+- La release pubblica l'installer Windows x64 non firmato, le AppImage Linux
+  Qt 6.11 x86_64 e aarch64 e i DMG macOS prodotti dalle matrici runner Apple
+  Silicon e Intel, con file SHA-256 dove generati dai workflow.
+- SSTV/HAMDRM nativi restano il sottosistema documentato nel tree. Questa
+  release non dichiara interoperabilita' in aria universale con ogni modo
+  QSSTV/EasyPal e non sostituisce le prove live con radio, dispositivo audio o
+  RF.

@@ -92,10 +92,15 @@ extern "C" int fastldpc_is_enabled_c () {
 }
 
 static bool cpu_has_avx2 () {
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__i386__) || defined(__x86_64__)) \
+    && (defined(__GNUC__) || defined(__clang__))
     static const bool ok = __builtin_cpu_supports ("avx2");
-#else
+#elif defined(_M_IX86) || defined(_M_X64)
     static const bool ok = true;   // MSVC: usare /arch:AVX2 sul solo file
+#else
+    // Il file viene compilato anche su ARM per mantenere la stessa API
+    // pubblica; MinSumV3 e' allora l'alias scalare MinSumV2.
+    static const bool ok = false;
 #endif
     return ok;
 }

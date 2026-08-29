@@ -26,12 +26,26 @@ SstvPage {
     readonly property real replayProgress: Math.max(0.0, Math.min(1.0,
                                                     Number(engine && engine.sstvWavReplayProgress || 0)))
     readonly property bool audioJobBusy: !!(engine && engine.sstvRxAudioJobBusy)
+    readonly property string sourceType: engine && engine.sstvRxSource
+                                         ? String(engine.sstvRxSource)
+                                         : qsTr("Unavailable")
+    readonly property string sourceDevice: engine && engine.sstvRxSourceDevice
+                                           ? String(engine.sstvRxSourceDevice) : ""
+    readonly property string sourceDisplay: sourceDevice.length > 0
+                                            ? qsTr("%1 — %2").arg(sourceType).arg(sourceDevice)
+                                            : sourceType
 
     function applyControl(name, value) {
         if (!root.engine)
             return false
         const update = ({})
         update[name] = value
+        return root.applyControls(update)
+    }
+
+    function applyControls(update) {
+        if (!root.engine)
+            return false
         const accepted = root.engine.updateSstvRxControls(update)
         if (!accepted)
             root.feedback = qsTr("Receiver control was rejected")
@@ -404,13 +418,14 @@ SstvPage {
                             enabled: root.modeChoices.length > 0
                             Accessible.name: qsTr("Lock receive mode")
                             onToggled: {
+                                const update = ({modeLockEnabled: checked})
                                 if (checked) {
                                     const selected = root.selectedModeId(manualMode)
                                     if (selected.length === 0)
                                         return
-                                    root.applyControl("lockedMode", selected)
+                                    update.lockedMode = selected
                                 }
-                                root.applyControl("modeLockEnabled", checked)
+                                root.applyControls(update)
                             }
                         }
                         Switch {
@@ -758,20 +773,35 @@ SstvPage {
                 }
 
                 Rectangle {
+                    id: sourceBadge
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
                     anchors.margins: 10
-                    implicitWidth: sourceLabel.implicitWidth + 18
+                    width: Math.min(sourceLabel.implicitWidth + 18,
+                                    Math.max(0, parent.width - 20))
                     implicitHeight: 24
                     radius: 12
                     color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.12)
                     border.color: root.borderColor
                     Label {
                         id: sourceLabel
-                        anchors.centerIn: parent
-                        text: qsTr("Source: %1").arg(root.engine ? root.engine.sstvRxSource : qsTr("Unavailable"))
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 9
+                        anchors.rightMargin: 9
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Source: %1").arg(root.sourceDisplay)
                         color: root.secondaryTextColor
                         font.pixelSize: 10
+                        elide: Text.ElideRight
+                    }
+                    ToolTip.visible: sourceMouse.containsMouse && root.sourceDevice.length > 0
+                    ToolTip.delay: 500
+                    ToolTip.text: qsTr("Audio device: %1").arg(root.sourceDevice)
+                    MouseArea {
+                        id: sourceMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
                     }
                 }
 

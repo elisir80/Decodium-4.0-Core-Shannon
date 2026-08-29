@@ -13,6 +13,15 @@ SstvPage {
                                            ? root.engine.sstvRxDiagnostics : ({})
     readonly property var rxControls: root.engine && root.engine.sstvRxControls
                                       ? root.engine.sstvRxControls : ({})
+    readonly property string rxSourceType: root.engine && root.engine.sstvRxSource
+                                           ? String(root.engine.sstvRxSource)
+                                           : qsTr("Unavailable")
+    readonly property string rxSourceDevice: root.engine && root.engine.sstvRxSourceDevice
+                                             ? String(root.engine.sstvRxSourceDevice) : ""
+    readonly property string rxSourceDisplay: root.rxSourceDevice.length > 0
+                                              ? qsTr("%1 — %2").arg(root.rxSourceType)
+                                                    .arg(root.rxSourceDevice)
+                                              : root.rxSourceType
 
     function updateRxControl(name, value) {
         if (!root.engine)
@@ -545,10 +554,13 @@ SstvPage {
                         }
                         Label {
                             objectName: "sstvSettingsRxSource"
-                            text: root.engine ? root.engine.sstvRxSource
-                                              : qsTr("Unavailable")
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                            text: root.rxSourceDisplay
                             color: root.primaryTextColor
                             font.bold: true
+                            elide: Text.ElideRight
+                            horizontalAlignment: Text.AlignRight
                         }
                     }
                     RowLayout {
