@@ -7196,6 +7196,7 @@ void DecodiumBridge::setFt2Conservative(bool v)
     if (m_ft2Conservative == v) return;
     m_ft2Conservative = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2Conservative"), v);
     emit ft2ConservativeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Conservative mode %1").arg(v ? "ON" : "OFF"));
@@ -7530,6 +7531,7 @@ void DecodiumBridge::setFt2FullDecodeInAutoCq(bool v)
     if (m_ft2FullDecodeInAutoCq == v) return;
     m_ft2FullDecodeInAutoCq = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2FullDecodeInAutoCq"), v);
     emit ft2FullDecodeInAutoCqChanged();
     bridgeLog(QStringLiteral("[FT2WS] Full decode in AutoCQ %1").arg(v ? "ON" : "OFF"));
@@ -7540,6 +7542,7 @@ void DecodiumBridge::setFt2QuickGiveUpStrong(bool v)
     if (m_ft2QuickGiveUpStrong == v) return;
     m_ft2QuickGiveUpStrong = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2QuickGiveUpStrong"), v);
     emit ft2QuickGiveUpStrongChanged();
     bridgeLog(QStringLiteral("[FT2WS] Quick give-up strong partner %1").arg(v ? "ON" : "OFF"));
@@ -7550,6 +7553,7 @@ void DecodiumBridge::setFt2AdaptiveDecode(bool v)
     if (m_ft2AdaptiveDecode == v) return;
     m_ft2AdaptiveDecode = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2AdaptiveDecode"), v);
     emit ft2AdaptiveDecodeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Adaptive decode %1").arg(v ? "ON" : "OFF"));
@@ -7570,6 +7574,7 @@ void DecodiumBridge::setFt2ApHashCache(bool v)
     if (m_ft2ApHashCache == v) return;
     m_ft2ApHashCache = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2ApHashCache"), v);
     emit ft2ApHashCacheChanged();
     bridgeLog(QStringLiteral("[FT2WS] AP hashed-callsign cache %1 (Phase 1: cache-confirmed borderline decodes; rescued rows are display-only for AutoSeq/TX)")
@@ -7615,6 +7620,7 @@ void DecodiumBridge::setFt8SubpassHarvest(bool v)
     if (m_ft8SubpassHarvest == v) return;
     m_ft8SubpassHarvest = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft8SubpassHarvest"), v);
     emit ft8SubpassHarvestChanged();
     bridgeLog(QStringLiteral("[FT8] Subpass harvest %1").arg(v ? "ON" : "OFF"));
@@ -7792,7 +7798,11 @@ void DecodiumBridge::setFt2PartnerMemoryEnabled(bool v)
 {
     if (m_ft2PartnerMemoryEnabled == v) return;
     m_ft2PartnerMemoryEnabled = v;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("Ft2PartnerMemoryEnabled"), v);
+    {
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("Ft2PartnerMemoryEnabled"), v);
+    }
     if (!v) {
         m_partnerMemory.clear();  // se disattivo, svuota cache
         clearPendingAutoSeqTx(QStringLiteral("PartnerMemory OFF"));
@@ -23053,6 +23063,7 @@ void DecodiumBridge::setMamMultiStream(bool on)
     }
     // FASE 3: persisti nello store canonico Decodium3 (come i toggle FT2).
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("MamMultiStream"), on);
     emit mamMultiStreamChanged();
     emit mamActiveSlotsChanged();
@@ -23071,6 +23082,7 @@ void DecodiumBridge::setMamMaxStreams(int v)
     }
     m_mamMaxStreams = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("MamMaxStreams"), m_mamMaxStreams);
     emit mamMaxStreamsChanged();
     bridgeLog(QStringLiteral("MAM max streams set: %1").arg(m_mamMaxStreams));
@@ -23086,6 +23098,7 @@ void DecodiumBridge::setMamCqSlots(bool on)
     }
     m_mamCqSlots = on;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("MamCqSlots"), on);
     emit mamCqSlotsChanged();
     bridgeLog(QStringLiteral("MAM parallel CQ slots toggled: %1").arg(on ? 1 : 0));
@@ -38694,7 +38707,7 @@ void DecodiumBridge::loadSettings()
     m_hideGhostDecodes = s.value("hideGhostDecodes", true).toBool();  // 1.0.145 default ON
     m_decodeShowPeriodSeparator = s.value("decodeShowPeriodSeparator", true).toBool();
     // 1.0.174 — FT2 Weak-Signal Pack: master flag (default OFF, opt-in)
-    m_ft2Conservative = s.value(QStringLiteral("Ft2Conservative"), false).toBool();
+    m_ft2Conservative = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2Conservative"), false).toBool();
     // 1.0.311 — cap ripetizioni 73/RR73 FT2 (default 4; era hardcoded 8). Range 1-8.
     m_ft2SignoffRetryCap = qBound(1, s.value(QStringLiteral("Ft2SignoffRetryCap"), 4).toInt(), 8);
     // 1.0.314 — opt-in TX immediato al click (stile 1.0.283), default OFF = upstream sicuro.
@@ -38739,22 +38752,22 @@ void DecodiumBridge::loadSettings()
     // 1.0.367 — finestra TX FT2 async conservativa. Default ON = stabilità (no frame troncati).
     m_ft2ConservativeTiming = s.value(QStringLiteral("Ft2ConservativeTiming"), true).toBool();
     // 1.0.187 — FT2 Weak-Signal Pack F v2 / G
-    m_ft2PartnerMemoryEnabled = s.value(QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
+    m_ft2PartnerMemoryEnabled = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2PartnerMemoryEnabled"), false).toBool();
     m_ft2Tx2ResendOnStall     = s.value(QStringLiteral("Ft2Tx2ResendOnStall"),     true).toBool();
     // 1.0.289 — FT2 enhancement toggles (opt-in, default OFF = comportamento 1.0.288)
-    m_ft2FullDecodeInAutoCq = s.value(QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
-    m_ft2QuickGiveUpStrong  = s.value(QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
-    m_ft2AdaptiveDecode     = s.value(QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
-    m_ft2ApHashCache        = s.value(QStringLiteral("Ft2ApHashCache"),        false).toBool();
+    m_ft2FullDecodeInAutoCq = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2FullDecodeInAutoCq"), false).toBool();
+    m_ft2QuickGiveUpStrong  = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2QuickGiveUpStrong"),  false).toBool();
+    m_ft2AdaptiveDecode     = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2AdaptiveDecode"),     false).toBool();
+    m_ft2ApHashCache        = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft2ApHashCache"),        false).toBool();
     // 1.0.355 — skip decode sync di fine-slot quando l'async ha gia' coperto lo slot
     m_ft2AsyncSkipRedundantSyncDecode = s.value(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), false).toBool();
     // 1.0.364+ - MAM multi-stream (MSHV) FASE 3 (default OFF; cap 2..5, default 3)
-    m_mamMultiStream = s.value(QStringLiteral("MamMultiStream"), false).toBool();
-    m_mamMaxStreams  = qBound(1, s.value(QStringLiteral("MamMaxStreams"), 3).toInt(), 10);
-    m_mamCqSlots     = s.value(QStringLiteral("MamCqSlots"), true).toBool();
+    m_mamMultiStream = decodium::profiledSettingsValue(QString(), QStringLiteral("MamMultiStream"), false).toBool();
+    m_mamMaxStreams  = qBound(1, decodium::profiledSettingsValue(QString(), QStringLiteral("MamMaxStreams"), 3).toInt(), 10);
+    m_mamCqSlots     = decodium::profiledSettingsValue(QString(), QStringLiteral("MamCqSlots"), true).toBool();
     // 1.0.299 — Deep decode anche in TX (decode-list-only), opt-in default OFF
     m_ft8DeepDecodeInTx     = s.value(QStringLiteral("Ft8DeepDecodeInTx"),     false).toBool();
-    m_ft8SubpassHarvest     = s.value(QStringLiteral("Ft8SubpassHarvest"),     false).toBool();
+    m_ft8SubpassHarvest     = decodium::profiledSettingsValue(QString(), QStringLiteral("Ft8SubpassHarvest"),     false).toBool();
     // 1.0.304 (#9) — resume-on-reply, opt-in default OFF
     m_resumeQsoOnReply      = s.value(QStringLiteral("ResumeQsoOnReply"),      false).toBool();
     // 1.0.262 — CALL feature settings persistence (fork-only iu8lmc)
@@ -45657,7 +45670,19 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     if (!pendingDeep.audio.isEmpty()) {
         static constexpr int kFt8DeepDispatchSafetyMs = 250;
         static constexpr int kFt8DeepMaxLiveBudgetMs = 10500;
-        static constexpr int kFt8DeepMinUsefulBudgetMs = 7000;
+        // 29/08/2026: era 7000, cioe' PIU' del budget massimo ottenibile.
+        // Il budget e' latestCompleteMs - adesso - 250, e latestCompleteMs e'
+        // la fine dello slot + kFt8DeepLatestOverrunMs (6800): il massimo
+        // teorico e' 6550 ms, con dispatch istantaneo. La soglia non poteva
+        // mai essere raggiunta, quindi il follow-up profondo veniva SEMPRE
+        // scartato, e lo scarto veniva letto come backlog del worker facendo
+        // scattare il cooldown di 6 slot. Effetto: AP, profondita' 4 e subpass
+        // non venivano mai eseguiti in FT8, col pulsante GAL acceso a vuoto.
+        //
+        // 2500 ms e' il costo osservato di un decode profondo col decoder
+        // vettorizzato piu' un margine: la soglia originale era tarata su un
+        // decoder che impiegava una decina di secondi per slot.
+        static constexpr int kFt8DeepMinUsefulBudgetMs = 2500;
         qint64 const correctedNowMs = correctedUtcEpochMs();
         int const budgetMs =
             qBound(0,
