@@ -153,12 +153,46 @@ static thread_local bool g_modo_ft8 = false;
 
 extern "C" void fastldpc_set_ft8_mode_c (int on) { g_modo_ft8 = on != 0; }
 
+// Manopole per misurare in FT8 quanto costa ciascun filtro tarato su FT2.
+// Si applicano a TUTTI i preset e SOLO in modalita' FT8: la taratura FT2
+// resta quella che tiene i nominativi fantasma a zero, qualunque cosa si
+// misuri qui. Senza variabili impostate non cambia nulla.
+void manopole_ft8 (Ft2Config& c) {
+    if (!g_modo_ft8) return;
+    if (char const* e = std::getenv ("DECODIUM_LDPC_OSD_ORDER")) {
+        int const n = std::atoi (e);
+        if (n >= -1 && n <= 3) c.osd_order = n;
+    }
+    if (char const* e = std::getenv ("DECODIUM_LDPC_SPAN2")) {
+        int const n = std::atoi (e);
+        if (n > 0 && n <= 91) c.span2 = n;
+    }
+    if (char const* e = std::getenv ("DECODIUM_LDPC_SPAN3")) {
+        int const n = std::atoi (e);
+        if (n >= 0 && n <= 91) c.span3 = n;
+    }
+    if (char const* e = std::getenv ("DECODIUM_LDPC_ND_MAX")) {
+        float const v = static_cast<float> (std::atof (e));
+        if (v > 0.0f && v <= 1.0f) c.nd_max = v;
+    }
+    if (char const* e = std::getenv ("DECODIUM_LDPC_LLR_CLIP")) {
+        float const v = static_cast<float> (std::atof (e));
+        if (v >= 0.0f) c.llr_clip = v;      // 0 = nessun taglio
+    }
+    if (char const* e = std::getenv ("DECODIUM_LDPC_PAIR_SEARCH")) {
+        c.pair_search = (e[0] != '0');
+    }
+}
+
 Ft2Decoder& decoder_for_preset (int ndeep) {
-    static thread_local std::unique_ptr<Ft2Decoder> ord1, ord2, ord3;
-    static thread_local std::unique_ptr<Ft2Decoder> ord1_ft8, ord2_ft8, ord3_ft8;
-    std::unique_ptr<Ft2Decoder>& slot1 = g_modo_ft8 ? ord1_ft8 : ord1;
-    std::unique_ptr<Ft2Decoder>& slot2 = g_modo_ft8 ? ord2_ft8 : ord2;
-    std::unique_ptr<Ft2Decoder>& slot3 = g_modo_ft8 ? ord3_ft8 : ord3;
+    // Anche i decoder per thread sono perdite volute, per lo stesso motivo:
+    // il distruttore di Ft2Decoder libererebbe memoria da dentro
+    // LdrShutdownThread.
+    static thread_local Ft2Decoder* ord1 = nullptr, *ord2 = nullptr, *ord3 = nullptr;
+    static thread_local Ft2Decoder* ord1_ft8 = nullptr, *ord2_ft8 = nullptr, *ord3_ft8 = nullptr;
+    Ft2Decoder*& slot1 = g_modo_ft8 ? ord1_ft8 : ord1;
+    Ft2Decoder*& slot2 = g_modo_ft8 ? ord2_ft8 : ord2;
+    Ft2Decoder*& slot3 = g_modo_ft8 ? ord3_ft8 : ord3;
 
     if (ndeep <= 3) {                       // preset 1..3 -> nord=1 nell'originale
         if (!slot1) {
@@ -222,7 +256,8 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
                                      : plaus::kSoloUsati;
             }
             c.batch = 16;                   // una parola per chiamata: batch minimo
-            slot1.reset (new Ft2Decoder (shared_code(), c));
+            manopole_ft8 (c);
+            slot1 = new Ft2Decoder (shared_code(), c);
         }
         return *slot1;
     }
@@ -230,7 +265,8 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
         if (!slot2) {
             Ft2Config c = Ft2Decoder::conservativo();
             c.batch = 16;
-            slot2.reset (new Ft2Decoder (shared_code(), c));
+            manopole_ft8 (c);
+            slot2 = new Ft2Decoder (shared_code(), c);
         }
         return *slot2;
     }
@@ -238,7 +274,8 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
     if (!slot3) {
         Ft2Config c = Ft2Decoder::sensibile();
         c.batch = 16;
-        slot3.reset (new Ft2Decoder (shared_code(), c));
+        manopole_ft8 (c);
+        slot3 = new Ft2Decoder (shared_code(), c);
     }
     return *slot3;
 }
@@ -271,14 +308,26 @@ static bool fastldpc_gate_log () {
     return v;
 }
 
+// Soglia sui bit ribaltati, TARATA PER MODO.
+// FT2 resta a 22: e' la calibrazione dei nominativi fantasma, dove ogni
+// accettazione di troppo diventa un falso visibile in UI e in LiveMap.
+// FT8 sale a 58, cioe' esattamente il limite del decoder originale
+// (kFt8MaxHardErrors in FtxFt8Stage4.cpp). In FT8 il nemico non e' il falso
+// ma la sensibilita': un segnale debole si decodifica correggendo molti piu'
+// di 22 bit, e tagliare a 22 buttava via decodifiche valide proprio nella
+// zona in cui la sensibilita' conta. Non si diventa piu' permissivi
+// dell'originale: lo stadio 4 applica comunque a valle 58 per i messaggi
+// standard e 36 per i non standard.
+// DECODIUM_LDPC_MAX_HARD forza il valore per entrambi i modi.
 static int fastldpc_max_hard () {
-    static int const v = [] {
+    static int const forzato = [] {
         char const* raw = std::getenv ("DECODIUM_LDPC_MAX_HARD");
         if (!raw) raw = std::getenv ("DECODIUM_FT2_LDPC_MAX_HARD");
         int const n = raw ? std::atoi (raw) : 0;
-        return (n > 0 && n <= kN) ? n : 22;
+        return (n > 0 && n <= kN) ? n : 0;
     }();
-    return v;
+    if (forzato) return forzato;
+    return g_modo_ft8 ? 58 : 22;
 }
 
 extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxosd, int norder,
@@ -319,8 +368,9 @@ extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxo
         // non si puo', quindi si accetta solo cio' che chiude il min-sum
         Ft2Config c = Ft2Decoder::veloce();
         c.batch = 16;
-        static thread_local std::unique_ptr<Ft2Decoder> solo_bp;
-        if (!solo_bp) solo_bp.reset (new Ft2Decoder (shared_code(), c));
+        // perdita voluta, come gli altri decoder per thread
+        static thread_local Ft2Decoder* solo_bp = nullptr;
+        if (!solo_bp) solo_bp = new Ft2Decoder (shared_code(), c);
         solo_bp->decode_batch (llr, 1, bits, &accepted, nullptr, apmask);
         if (!accepted) return;
         if (ntype_out) *ntype_out = 1;
@@ -413,8 +463,18 @@ extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llr_in,
 
     Ft2Decoder& dec = decoder_for_preset (norder);
 
-    static thread_local std::vector<float> llr;
-    static thread_local std::vector<uint8_t> apmask, bits, accepted;
+    // I buffer di lavoro per thread NON si distruggono alla morte del
+    // thread, e la perdita e' voluta. Il loro distruttore girerebbe dentro
+    // LdrShutdownThread, quando la memoria per-thread e' gia' smontata:
+    // con PageHeap si vede il segfault dentro ~vector<unsigned char> da
+    // run_dtor_list, e senza PageHeap la stessa free corrompe lo heap in
+    // silenzio, facendolo esplodere piu' tardi altrove. E' lo stesso motivo
+    // per cui planner_mutex e gli spazi di lavoro del downsample sono
+    // dichiarati come perdite volute.
+    static thread_local std::vector<float>& llr = *new std::vector<float>;
+    static thread_local std::vector<uint8_t>& apmask = *new std::vector<uint8_t>;
+    static thread_local std::vector<uint8_t>& bits = *new std::vector<uint8_t>;
+    static thread_local std::vector<uint8_t>& accepted = *new std::vector<uint8_t>;
     llr.resize ((size_t) n * kN);
     apmask.resize ((size_t) n * kN);
     bits.resize ((size_t) n * kN);

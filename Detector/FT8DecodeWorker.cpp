@@ -91,11 +91,31 @@ namespace
   constexpr int kHashSeedPriorityMonths {6};
   [[maybe_unused]] constexpr int kMaxDecodeThreads {24};
 
+  // Il numero di thread OpenMP si imposta UNA VOLTA SOLA e non si cambia piu'.
+  // Con libgomp, cambiarlo distrugge e ricrea il pool: i thread che muoiono
+  // portano con se' i propri oggetti thread_local, i cui distruttori girano
+  // dentro LdrShutdownThread quando heap e loader sono gia' in smontaggio.
+  // Da li' nascevano la corruzione dello heap (0xc0000374), il segfault sui
+  // contatori di riferimento e lo stallo sul loader lock che tenevano spenta
+  // la fase profonda di FT8.
+  //
+  // Si fissa al valore piu' alto che il chiamante possa chiedere: le passate
+  // che ne vogliono meno lo ottengono con la clausola num_threads sulla
+  // singola regione parallela, che NON ridimensiona il pool.
+  extern "C" void ftx_ft8_set_thread_budget_c (int n);
+
   void apply_decode_thread_limit (int threads)
   {
 #ifdef _OPENMP
-    omp_set_dynamic (0);
-    omp_set_num_threads (std::max (1, std::min (threads, kMaxDecodeThreads)));
+    static bool const fissato = [] {
+      omp_set_dynamic (0);
+      omp_set_num_threads (kMaxDecodeThreads);
+      return true;
+    } ();
+    (void) fissato;
+    // Il limite richiesto viaggia in una variabile che la regione parallela
+    // legge con num_threads: rispetta il carico voluto senza ridimensionare.
+    ftx_ft8_set_thread_budget_c (std::max (1, std::min (threads, kMaxDecodeThreads)));
 #else
     (void) threads;
 #endif

@@ -6642,6 +6642,108 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
     if (entry.value(QStringLiteral("isB4")).toBool()) return false;
     if (entry.value(QStringLiteral("dxIsWorked")).toBool()) return false;
 
+    // CONFERMA PER I SEGNALI ESTREMI.
+    // Sotto i -23 dB il decodificatore prova moltissime ipotesi, e la CRC-14
+    // ne lascia passare una ogni 16384 per puro caso: piu' candidati esamini,
+    // piu' falsi accetti. E' il prezzo della fase profonda, non un difetto.
+    // A quel livello si accetta un nominativo solo se e' gia' stato sentito
+    // con segnale affidabile in questa sessione (o e' gia' lavorato, gestito
+    // dalle uscite qui sopra): una stazione vera a -25 dB quasi sempre e'
+    // gia' passata piu' forte, o si ripetera'; un falso da CRC compare una
+    // volta sola. Misurato in aria: col solo decode normale i nominativi visti
+    // una volta sola erano il 19%, con la fase profonda sono saliti al 44%.
+    {
+        static QSet<QString> sentitiForte;
+        bool snrLetto = false;
+        int const snr = entry.value(QStringLiteral("db")).toString().trimmed().toInt(&snrLetto);
+        QString testo = entry.value(QStringLiteral("displayMessage")).toString().trimmed();
+        if (testo.isEmpty()) {
+            testo = entry.value(QStringLiteral("message")).toString().trimmed();
+        }
+        const QStringList parole =
+            testo.toUpper().split(QLatin1Char(' '), Qt::SkipEmptyParts);
+        auto sembraNominativo = [](QString const& w) {
+            if (w.size() < 3 || w.size() > 11) return false;
+            if (w == QStringLiteral("CQ") || w == QStringLiteral("DE")
+                || w == QStringLiteral("73") || w == QStringLiteral("RR73")
+                || w == QStringLiteral("RRR") || w == QStringLiteral("TU")) return false;
+            static const QRegularExpression locatore {QStringLiteral("^[A-R]{2}[0-9]{2}$")};
+            if (locatore.match(w).hasMatch()) return false;
+            bool cifra = false, lettera = false;
+            for (QChar const c : w) {
+                if (c.isDigit()) cifra = true;
+                else if (c.isLetter()) lettera = true;
+                else if (c != QLatin1Char('/') && c != QLatin1Char('<')
+                         && c != QLatin1Char('>')) return false;
+            }
+            return cifra && lettera;
+        };
+        if (snrLetto && snr >= -20) {
+            // segnale affidabile: da qui in poi questi nominativi sono noti
+            for (QString const& w : parole) {
+                if (sembraNominativo(w)) sentitiForte.insert(w);
+            }
+        } else if (snrLetto && snr <= -23) {
+            bool confermato = false;
+            for (QString const& w : parole) {
+                if (sembraNominativo(w) && sentitiForte.contains(w)) { confermato = true; break; }
+            }
+            if (!confermato) return true;
+        }
+    }
+
+    // NOMINATIVO STRUTTURALMENTE IMPOSSIBILE.
+    // Un nominativo vero ha la forma ITU: prefisso, UN blocco di cifre, e un
+    // suffisso di sole lettere. La spazzatura che la CRC-14 lascia passare per
+    // caso ha invece cifre sparse ovunque (2YJZ88IZ5Q, RFCJ5R218, K89M/T29D4P).
+    // E' un test di FORMA, non una soglia: non penalizza i segnali deboli.
+    //
+    // Misurato su 1062004 nominativi d'archivio: ne boccia 518, lo 0,049%, e
+    // sono TUTTI falsi. Passano i prefissi con cifra (4L7T, 9A6NTK, 3B8GL) e i
+    // nominativi speciali da evento (EN35UKR, LZ123RF, HB10GBT, R1996A), che
+    // usano fino a quattro cifre. Una versione piu' stretta, provata prima,
+    // bocciava il 4,7% dei veri: quella e' la trappola da evitare.
+    {
+        static const QRegularExpression formaItu {
+            QStringLiteral("^(?:[A-Z]{1,2}|[0-9][A-Z]|[A-Z][0-9])[0-9]{1,4}[A-Z]{1,5}$")};
+        QString testoForma =
+            entry.value(QStringLiteral("displayMessage")).toString().trimmed();
+        if (testoForma.isEmpty()) {
+            testoForma = entry.value(QStringLiteral("message")).toString().trimmed();
+        }
+        static const QRegularExpression locatoreForma {
+            QStringLiteral("^[A-R]{2}[0-9]{2}([A-X]{2})?$")};
+        for (QString token : testoForma.toUpper().split(QLatin1Char(' '), Qt::SkipEmptyParts)) {
+            if (token.size() < 3 || token.size() > 13) continue;
+            if (token == QStringLiteral("CQ") || token == QStringLiteral("DE")
+                || token == QStringLiteral("DX") || token == QStringLiteral("QRZ")
+                || token == QStringLiteral("73") || token == QStringLiteral("RR73")
+                || token == QStringLiteral("RRR") || token == QStringLiteral("TU")) continue;
+            if (locatoreForma.match(token).hasMatch()) continue;
+            if (token.startsWith(QStringLiteral("R-")) || token.startsWith(QStringLiteral("R+"))
+                || token.startsWith(QLatin1Char('-')) || token.startsWith(QLatin1Char('+'))) continue;
+            // senza cifre non e' un nominativo ma una parola di testo libero
+            bool haCifra = false;
+            for (QChar const c : token) { if (c.isDigit()) { haCifra = true; break; } }
+            if (!haCifra) continue;
+
+            token.remove(QLatin1Char('<')); token.remove(QLatin1Char('>'));
+            int const barre = token.count(QLatin1Char('/'));
+            if (barre > 1 || token.startsWith(QLatin1Char('/'))
+                || token.endsWith(QLatin1Char('/'))) return true;
+            QString base = token;
+            if (barre == 1) {
+                QString const a = token.section(QLatin1Char('/'), 0, 0);
+                QString const b = token.section(QLatin1Char('/'), 1, 1);
+                QString const affisso = a.size() >= b.size() ? b : a;
+                base = a.size() >= b.size() ? a : b;
+                if (affisso.isEmpty() || affisso.size() > 4) return true;
+                for (QChar const c : affisso) { if (!c.isLetterOrNumber()) return true; }
+            }
+            if (!formaItu.match(base).hasMatch()) return true;
+        }
+    }
+
     // FT2: un singolo token esadecimale lungo (es. 31ED17795E04339455)
     // e' payload telemetry/hash non risolto, non una stazione radio. Se
     // arriva fino al modello UI trattalo come ghost strutturale, a prescindere

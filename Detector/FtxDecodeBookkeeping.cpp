@@ -119,8 +119,12 @@ struct Ft8A8SearchFft
 
 Ft8A8SearchFft& ft8_a8_fft ()
 {
-  thread_local Ft8A8SearchFft instance;
-  return instance;
+  // Stessa ragione di ComplexFft32 in FtxBitmetrics.cpp: il distruttore
+  // girerebbe dentro LdrShutdownThread alla morte del thread, quando heap e
+  // loader sono gia' in smontaggio, e liberare un piano FFTW da li' corrompe
+  // lo heap o blocca il thread sul loader lock. Perdita voluta.
+  static thread_local auto* instance = new Ft8A8SearchFft;
+  return *instance;
 }
 
 inline void set_value_range (float* dst, int first, int last, float value)

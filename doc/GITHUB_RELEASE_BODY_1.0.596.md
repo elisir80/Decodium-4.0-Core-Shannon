@@ -1,86 +1,164 @@
 # Decodium 4 FT2 v1.0.596
 
-Urgent fix: v1.0.595 crashes within about two minutes of FT8 reception. Please
-replace it with this release.
+Questa release chiude la serie v1.0.590 → v1.0.596, che ha riscritto il
+decodificatore LDPC di FT2 e FT8. **Sostituisce la v1.0.595, che è stata
+ritirata perché va in crash dopo circa due minuti di ricezione FT8.**
 
-## English (British)
+📖 **Cronologia completa con tutte le misure:**
+[doc/fastldpc/CHANGELOG.md](https://github.com/iu8lmc/Decodium-4.0-Core-Shannon/blob/v1.0.596/doc/fastldpc/CHANGELOG.md)
 
-### v1.0.596: fixes the v1.0.595 crash
-
-- v1.0.595 lowered a threshold that had been keeping the FT8 deep follow-up
-  decode switched off. The intent was sound — the threshold demanded a budget of
-  7000 ms while the maximum obtainable is 6550 ms by construction, so the deep
-  stage could never run and a-priori decoding at depth 4 had never executed. But
-  re-enabling it also re-enabled a latent memory fault in that path, which had
-  not been exercised since the threshold was introduced: the application dies
-  with heap corruption (`0xc0000374` in ntdll) within roughly two minutes of FT8
-  reception, always immediately after the follow-up is dispatched.
-- The threshold is restored to its previous value, which switches that stage off
-  again. Verified with nine minutes of continuous reception without a crash,
-  against under two minutes before.
-- Everything else from v1.0.595 is unaffected and remains in place: the FT2
-  phantom-decode fixes, the vectorised decoder on FT8 with batch decoding and the
-  recovery pass, the waterfall click-to-call, and the ten settings that were
-  written to one place and read from another.
-
-### About the fault, for whoever investigates it
-
-- It is not the decoder. The same deep configuration — depth 4, a-priori
-  decoding, supplemental — run offline over recorded slots produces no crash at
-  all. It is the application path that dispatches it.
-- It appears to be a concurrency problem: the crash occurs when the deep
-  follow-up is queued while the first decode is still in flight. FT8 stage 4
-  holds global state and static buffers behind a single-flight mutex that
-  evidently does not cover everything the two requests share.
-- To reproduce: lower `kFt8DeepMinUsefulBudgetMs` in `DecodiumBridge.cpp` to
-  2500 and receive FT8 for a couple of minutes. The comment at that constant
-  records the details.
-
-### Packaging and compatibility
-
-- GitHub's generated source archives for tag `v1.0.596` are the codebase
-  downloads for this release.
-- The AVX2 decoder is selected at runtime, so the published binaries remain
-  usable on CPUs without AVX2, where the original decoder is used instead.
+---
 
 ## Italiano
 
-### v1.0.596: corregge il crash della v1.0.595
+### Il nuovo decodificatore LDPC (fastldpc)
 
-- La v1.0.595 abbassava una soglia che teneva spento il decode profondo di
-  recupero in FT8. L'intento era corretto: la soglia pretendeva un budget di
-  7000 ms mentre il massimo ottenibile è 6550 ms per costruzione, quindi lo
-  stadio profondo non poteva mai partire e la decodifica a priori a profondità 4
-  non era mai stata eseguita. Riattivandolo però si è riattivato anche un
-  difetto di memoria latente in quel percorso, rimasto inutilizzato da quando la
-  soglia è stata introdotta: l'applicazione muore con corruzione dello heap
-  (`0xc0000374` in ntdll) entro circa due minuti di ricezione FT8, sempre subito
-  dopo il lancio del follow-up.
-- La soglia è riportata al valore precedente, che disattiva di nuovo quello
-  stadio. Verificato con nove minuti di ricezione continua senza cadute, contro
-  i meno di due di prima.
-- Tutto il resto della v1.0.595 non è toccato e resta al suo posto: le
-  correzioni ai nominativi fantasma in FT2, il decoder vettorizzato su FT8 con
-  decodifica a blocchi e passata di recupero, il clic sul waterfall che chiama
-  la stazione, e le dieci impostazioni che venivano scritte in un posto e lette
-  in un altro.
+Il nucleo min-sum è stato riscritto con istruzioni AVX2 esplicite e lavora su
+**sedici parole di codice per volta**. Il guadagno è di **velocità**, non di
+sensibilità: a parità di ciò che cerca, trova le stesse stazioni molto più in
+fretta.
 
-### Sul difetto, per chi vorrà indagarlo
+| | originale | fastldpc |
+|---|---|---|
+| FT8, per file a −21 dB | 16128 ms | **785 ms** |
 
-- Non è il decoder. La stessa configurazione profonda — profondità 4, decodifica
-  a priori, supplemental — eseguita offline su slot registrati non produce
-  nessun crash. È il percorso applicativo che la lancia.
-- Sembra un problema di concorrenza: il crash avviene quando il follow-up
-  profondo viene accodato mentre il primo decode è ancora in volo. Lo stadio 4
-  di FT8 mantiene stato globale e buffer statici dietro un mutex single-flight
-  che evidentemente non copre tutto ciò che le due richieste si scambiano.
-- Per riprodurlo: abbassare `kFt8DeepMinUsefulBudgetMs` in `DecodiumBridge.cpp`
-  a 2500 e ricevere FT8 per un paio di minuti. Il commento accanto alla costante
-  riporta i dettagli.
+La scelta avviene **a runtime**: su CPU senza AVX2 si torna automaticamente al
+decodificatore originale, quindi i binari pubblicati restano utilizzabili
+ovunque.
 
-### Packaging e compatibilità
+### Dove la velocità diventa stazioni in più
 
-- Gli archivi sorgente generati da GitHub per il tag `v1.0.596` costituiscono i
-  download del codebase di questa release.
-- Il decoder AVX2 viene scelto a runtime, quindi i binari pubblicati restano
-  utilizzabili su CPU senza AVX2, dove viene usato il decoder originale.
+Su 19 slot registrati fuori onda, la differenza si vede solo quando la banda è
+piena e il decodificatore originale non fa in tempo ad arrivare in fondo alla
+lista dei candidati:
+
+| banda | originale | fastldpc |
+|---|---|---|
+| 40 m, affollata | 198 stazioni distinte in 306 s | **250 in 75 s** |
+| 80 m, scarica | 56 distinte in 306 s | 52 in 61 s |
+
+In banda scarica il tempo basta a entrambi, e la propagazione esatta batte
+l'approssimazione min-sum sui segnali marginali. Per questo la v1.0.593 ha
+introdotto la **passata di recupero**: fastldpc arriva in fondo alla lista, e il
+tempo risparmiato si spende per un secondo tentativo col decodificatore esatto
+sui candidati rimasti a vuoto. Recupera tre delle quattro stazioni marginali in
+banda scarica e non toglie nulla al vantaggio in banda piena, restando tre volte
+più rapido dell'originale.
+
+### Correzione del segno nel min-sum
+
+Il ramo min-sum produceva messaggi di segno opposto rispetto al ramo esatto.
+È l'unico intervento della serie che aggiunge **sensibilità** anziché velocità:
+
+| | decodifiche corrette su 2000 |
+|---|---|
+| senza la correzione | 1929 |
+| con la correzione | **1986** (+3,0%) |
+
+### Nominativi fantasma in FT2
+
+Sono stati azzerati: da 2,8 per ciclo a zero, misurati sul traffico reale.
+La ricerca OSD larga è stata provata due volte e ritirata due volte — prova
+~21400 candidati per parola contro ~600, e la CRC-14 ne ammette uno ogni 16384.
+Il filtro di plausibilità paga circa 2 bit, l'allargamento ne costa 5: non li
+copre. Restano attivi il gate sui bit ribaltati, il controllo di coerenza con
+l'ipotesi a priori e i controlli strutturali sul messaggio.
+
+### Altre correzioni della serie
+
+- **Clic sul waterfall**: cliccando il nominativo di una stazione ora la si
+  chiama, come dalla lista dei decodificati.
+- **Dieci impostazioni** che venivano scritte in un posto e lette da un altro,
+  e quindi non avevano alcun effetto, ora funzionano.
+- **Crash della v1.0.595**: quella release abbassava una soglia che teneva
+  spento il decode profondo di recupero in FT8, riattivando un difetto di
+  memoria latente in quel percorso (corruzione dello heap, `0xc0000374`, entro
+  circa due minuti di ricezione). La soglia è stata riportata al valore
+  precedente. Il difetto sottostante resta aperto ed è documentato nel
+  changelog per chi vorrà indagarlo.
+
+### Interruttori a runtime
+
+Il comportamento si può cambiare senza ricompilare — l'elenco completo è nel
+changelog. I principali:
+
+| variabile | effetto |
+|---|---|
+| `DECODIUM_FT8_FASTLDPC=0` | torna al decodificatore originale in FT8 |
+| `DECODIUM_FT2_DISABLE_FASTLDPC=1` | idem per FT2 |
+| `DECODIUM_FT8_CLASSIC_RESCUE` | numero di recuperi per ciclo (0 disattiva) |
+
+### Avvertenza sulle misure
+
+I confronti su finestre temporali diverse non sono affidabili sotto il 10%: la
+banda cambia da sola più di quanto cambi il decodificatore. Tutti i numeri qui
+sopra vengono da confronti appaiati sugli stessi segnali. Tre miglioramenti
+apparenti sono stati attribuiti per errore a modifiche che si sono poi rivelate
+ininfluenti, e il changelog li documenta insieme alle tre strade misurate e
+abbandonate.
+
+---
+
+## English
+
+### The new LDPC decoder (fastldpc)
+
+The min-sum core has been rewritten with explicit AVX2 intrinsics and processes
+**sixteen codewords at a time**. The gain is in **speed**, not sensitivity: for
+the same search, it finds the same stations far faster (16128 ms → **785 ms**
+per FT8 file at −21 dB). Selection happens **at runtime**, so the published
+binaries remain usable on CPUs without AVX2, where the original decoder is used.
+
+### Where speed becomes extra stations
+
+Across 19 off-air recorded slots, the difference appears only when the band is
+busy and the original decoder cannot reach the end of the candidate list in
+time: on a crowded 40 m, 198 distinct stations in 306 s against **250 in 75 s**.
+On a quiet 80 m both have enough time, and exact propagation beats the min-sum
+approximation on marginal signals (56 against 52). Hence the **rescue pass**
+added in v1.0.593: fastldpc reaches the end of the list, and the time saved is
+spent on a second attempt with the exact decoder over the candidates that came
+up empty. It recovers three of the four marginal stations on a quiet band while
+keeping the advantage on a busy one, and remains three times faster than the
+original.
+
+### Sign correction in the min-sum branch
+
+The min-sum branch produced messages of opposite sign to the exact branch. This
+is the only change in the series that adds **sensitivity** rather than speed:
+1929 → **1986** correct decodes out of 2000 (+3.0%), paired comparison.
+
+### Phantom callsigns in FT2
+
+Reduced to zero, from 2.8 per cycle, measured on live traffic. The wide OSD
+search was tried twice and withdrawn twice: it tries ~21400 candidates per word
+against ~600, and CRC-14 admits one in 16384. The plausibility filter is worth
+about 2 bits while widening costs 5 — it does not cover them.
+
+### Other fixes in the series
+
+- **Waterfall click**: clicking a station's callsign now calls it.
+- **Ten settings** that were written to one place and read from another, and so
+  had no effect, now work.
+- **v1.0.595 crash**: that release lowered a threshold which had been keeping
+  the FT8 deep rescue decode switched off, re-enabling a latent memory fault in
+  that path (heap corruption, `0xc0000374`, within about two minutes of
+  reception). The threshold has been restored. The underlying fault remains open
+  and is documented in the changelog.
+
+### A note on measurement
+
+Comparisons across different time windows are unreliable below 10%: the band
+changes more on its own than the decoder does. Every number above comes from
+paired comparisons on identical signals. Three apparent improvements were
+mistakenly credited to changes that later proved to make no difference; the
+changelog records them, along with three measured dead ends.
+
+---
+
+### Packaging
+
+- The AVX2 decoder is selected at runtime, so these binaries work on CPUs
+  without AVX2, where the original decoder is used instead.
+- GitHub's generated source archives for tag `v1.0.596` are the codebase
+  downloads for this release.

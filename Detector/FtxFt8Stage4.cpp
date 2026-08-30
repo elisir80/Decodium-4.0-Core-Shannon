@@ -57,6 +57,16 @@ constexpr int kFt8KnownCqCallMemory {512};
 constexpr int kFt8KnownCallGridMaxAgeSeconds {3 * 3600};
 constexpr int kFt8KnownCallGridMinFastReplayHits {3};
 constexpr int kFt8KnownCallGridFastReplayMaxAgeSeconds {150};
+// Regolabile per misura: DECODIUM_FT8_KNOWNCQ_AGE (secondi).
+inline int ft8_knowncq_fast_age ()
+{
+  static int const v = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_KNOWNCQ_AGE");
+    int const n = raw ? std::atoi (raw) : 0;
+    return (n > 0 && n <= 3 * 3600) ? n : kFt8KnownCallGridFastReplayMaxAgeSeconds;
+  }();
+  return v;
+}
 constexpr float kFt8KnownCallGridFastReplayMaxFreqDelta {2.5f};
 constexpr float kFt8KnownCallGridFastReplayMaxDtDelta {0.10f};
 constexpr float kFt8KnownCallGridFastReplayMinCqScore {3.0f};
@@ -84,6 +94,21 @@ constexpr int kFt8PhaseTableSize {65536};
 constexpr float kFt8A8Bt {2.0f};
 constexpr float kFt8TwoPi {6.28318530717958647692f};
 constexpr float kFt8BitMetricScale {2.83f};
+
+// Quanti thread deve usare la regione parallela dello stadio 4. Si applica con
+// la clausola num_threads, che NON ridimensiona il pool OpenMP: cambiarne la
+// dimensione fa morire i thread, ed e' da li' che nascevano la corruzione dello
+// heap e gli stalli (vedi il commento in FT8DecodeWorker.cpp).
+std::atomic<int>& ft8_thread_budget ()
+{
+  static std::atomic<int> budget {1};
+  return budget;
+}
+
+extern "C" void ftx_ft8_set_thread_budget_c (int n)
+{
+  ft8_thread_budget ().store (n > 0 ? n : 1);
+}
 
 std::atomic<bool>& stage4_cancel_requested ()
 {
@@ -793,6 +818,33 @@ bool is_standard_ft8_exchange_tail (std::string const& word)
 std::vector<std::string> split_words (std::string const& text);
 bool is_packable_cq_call_message (std::string const& call);
 bool is_ft8_call_word (std::string const& word);
+
+// Nominativo strutturalmente impossibile: barra iniziale, finale o doppia.
+// Nessun nominativo valido ha quella forma. E' un test di FORMA, non una
+// soglia, quindi non costa nulla ai segnali deboli: su 649836 decodifiche
+// d'archivio ne compaiono due in tutto ("CQ M8K0DSOHIW/" a -15 dB e
+// "CQ X6NJ9B3WZY/" a -23 dB), entrambe false. Un criterio piu' severo sulla
+// struttura prefisso/cifra/suffisso e' stato provato e scartato: avrebbe
+// respinto il 4% dei nominativi veri (4L7T, 2E1HAT, 9A6NTK, 7Z1FF, 3B8GL...),
+// che hanno la cifra dentro il prefisso.
+bool has_malformed_call_word (FixedChars<kFt8DecodedChars> const& decoded)
+{
+  for (std::string const& word : split_words (trim_fixed (decoded)))
+    {
+      size_t const first = word.find ('/');
+      if (first == std::string::npos)
+        {
+          continue;
+        }
+      if (first == 0
+          || first + 1 >= word.size ()
+          || word.find ('/', first + 1) != std::string::npos)
+        {
+          return true;
+        }
+    }
+  return false;
+}
 
 bool is_strict_standard_ft8_message (FixedChars<kFt8DecodedChars> const& decoded)
 {
@@ -4300,8 +4352,19 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
         float const candidate_cq = candidate[static_cast<size_t> (index * 4 + 3)];
         float const freq_delta = std::fabs (candidate_freq - entry.freq);
         float const dt_delta = std::fabs (candidate_dt - entry.dt);
+        // Soglia di evidenza per riproporre un nominativo gia' sentito.
+        // Sotto i -23 dB il sync sta spesso sotto 0,32 e il replay non parte
+        // affatto: e' qui che JTDX, con Aggressive=1, continua a vedere
+        // stazioni che noi perdiamo. Abbassarla e' mirato, non e' una
+        // ricerca cieca: vale solo entro 5,5 Hz e 0,35 s da dove quella
+        // stessa stazione era stata decodificata poco prima.
+        static float const sync_floor = [] {
+          char const* raw = std::getenv ("DECODIUM_FT8_KNOWNCQ_SYNC");
+          float const v = raw ? static_cast<float> (std::atof (raw)) : 0.0f;
+          return (v > 0.0f && v <= 5.0f) ? v : 0.32f;
+        }();
         bool const has_signal_evidence =
-            candidate_sync >= 0.32f || candidate_cq >= 1.0f;
+            candidate_sync >= sync_floor || candidate_cq >= 1.0f;
         if (!has_signal_evidence || freq_delta > 5.5f || dt_delta > 0.35f)
           {
             continue;
@@ -4344,7 +4407,7 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
             }
           continue;
         }
-      if (age_seconds > kFt8KnownCallGridFastReplayMaxAgeSeconds)
+      if (age_seconds > ft8_knowncq_fast_age ())
         {
           continue;
         }
@@ -6462,7 +6525,7 @@ int collect_known_cq_call_matches (Ft8KnownCqCallState const& state,
         {
           continue;
         }
-      if (age_seconds > kFt8KnownCallGridFastReplayMaxAgeSeconds)
+      if (age_seconds > ft8_knowncq_fast_age ())
         {
           continue;
         }
@@ -7619,8 +7682,11 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
           candidate_msg = fixed_from_chars<kFt8DecodedChars> (checked_msg.data ());
           candidate_msg = normalize_resolved_hash_call_tokens (candidate_msg);
         }
-	      if (pass_nharderrors > kFt8StrictHardErrors
-	          && !is_strict_standard_ft8_message (candidate_msg))
+	      // Il nominativo malformato si scarta sempre, quale che sia il numero
+	      // di bit ribaltati: e' una forma impossibile, non un segnale debole.
+	      if (has_malformed_call_word (candidate_msg)
+	          || (pass_nharderrors > kFt8StrictHardErrors
+	              && !is_strict_standard_ft8_message (candidate_msg)))
 	        {
               if (trace_target)
                 {
@@ -8804,7 +8870,8 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               fp_dd_bins[static_cast<size_t> (fp_b)] = std::move (fp_dd_bin);
             }
         };
-#pragma omp parallel for schedule (dynamic) if (fp_isolate)
+      int const fp_threads = std::max (1, ft8_thread_budget ().load ());
+#pragma omp parallel for schedule (dynamic) if (fp_isolate) num_threads (fp_threads)
       for (int fp_b = 0; fp_b < fp_nbins; ++fp_b)
         fp_process_bin (fp_b);
       if (fp_isolate)

@@ -72,8 +72,12 @@ struct RealFftBuffers
 
 RealFftBuffers& fft_buffers ()
 {
-  thread_local RealFftBuffers instance;
-  return instance;
+  // Stessa ragione di ComplexFft32 in FtxBitmetrics.cpp: il distruttore
+  // girerebbe dentro LdrShutdownThread alla morte del thread, quando heap e
+  // loader sono gia' in smontaggio, e liberare un piano FFTW da li' corrompe
+  // lo heap o blocca il thread sul loader lock. Perdita voluta.
+  static thread_local auto* instance = new RealFftBuffers;
+  return *instance;
 }
 
 std::vector<float> make_ft8_window ()

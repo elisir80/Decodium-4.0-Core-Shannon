@@ -29,7 +29,8 @@ namespace
 // call visti in banda, settato dal worker (ftx_ft2_set_ap_hash_cache_c) PRIMA del
 // decode. Confronto post-decode: se una call del messaggio decodificato è in cache,
 // il decode borderline (nharderror 49..60) viene promosso invece di scartato.
-thread_local std::vector<quint32> g_ft2ApHashCache;
+// Perdita voluta, come sopra: vive quanto il processo.
+thread_local std::vector<quint32>& g_ft2ApHashCache = *new std::vector<quint32>;
 
 // Vero se almeno una call del messaggio decodificato è nella cache band-wide.
 // USA ft2MessageCallHashes (CallsignHash28.h), IDENTICA al seed del bridge → match garantito.
@@ -99,6 +100,11 @@ extern "C"
   void ftx_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
                            signed char const* apmask, signed char* message91, signed char* cw,
                            int* ntype, int* nharderror, float* dmin);
+  // Sceglie la taratura del decoder: FT2 (0) o FT8 (1). E' thread_local e
+  // resta impostata fino alla chiamata successiva, quindi va dichiarata
+  // esplicitamente anche qui: un thread che avesse gia' decodificato FT8
+  // lascerebbe altrimenti a FT2 le soglie larghe di FT8.
+  void fastldpc_set_ft8_mode_c (int on);
   // fastldpc (Detector/fastldpc/): stessa firma, ~160x piu' veloce a parita'
   // di decodifiche. Ricade da solo su ftx_decode174_91_c se la CPU non ha
   // AVX2 o se Keff != 91.
@@ -614,14 +620,18 @@ struct Stage7State
 
 Stage7State& stage7_state ()
 {
-  thread_local Stage7State state;
-  return state;
+  // Perdita voluta: il distruttore girerebbe dentro LdrShutdownThread alla
+  // morte del thread, quando heap e loader sono gia' in smontaggio.
+  static thread_local auto* state = new Stage7State;
+  return *state;
 }
 
 Ft2EmitState& ft2_emit_state ()
 {
-  thread_local Ft2EmitState state;
-  return state;
+  // Perdita voluta: il distruttore girerebbe dentro LdrShutdownThread alla
+  // morte del thread, quando heap e loader sono gia' in smontaggio.
+  static thread_local auto* state = new Ft2EmitState;
+  return *state;
 }
 
 std::atomic<bool>& stage7_cancel_requested ()
@@ -1633,6 +1643,8 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
   std::vector<int> batch_nhard (static_cast<size_t> (nprep));
   std::vector<float> batch_dmin (static_cast<size_t> (nprep));
 
+  // Taratura FT2: soglia stretta sui bit ribaltati, contro i fantasmi.
+  fastldpc_set_ft8_mode_c (0);
   fastldpc_decode174_91_batch_c (nprep, batch_llr.data (), batch_apmask.data (),
                                  91, maxosd, 3,
                                  batch_msg.data (), batch_cw.data (),

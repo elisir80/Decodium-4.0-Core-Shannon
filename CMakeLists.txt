@@ -166,7 +166,14 @@ if (NOT is_debug_build)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdata-sections -ffunction-sections")
   endif ()
   if (NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections -Wl,-s -Wl,--strip-all")
+    # DECODIUM_KEEP_SYMBOLS=ON conserva la tabella dei simboli: serve a gdb e
+    # a Dr. Memory per risolvere gli stack. Spenta per default: i binari
+    # pubblicati restano strippati come prima.
+    if (DECODIUM_KEEP_SYMBOLS)
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
+    else ()
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections -Wl,-s -Wl,--strip-all")
+    endif ()
   endif ()
 endif ()
 
@@ -1220,7 +1227,11 @@ endif ()
 # Linker setup
 #
 if (NOT APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-  set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections -Wl,-s")
+  if (DECODIUM_KEEP_SYMBOLS)
+    set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections -g")
+  else ()
+    set (CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--gc-sections -Wl,-s")
+  endif ()
   set (CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL} -Wl,--gc-sections")
 endif ()
 
