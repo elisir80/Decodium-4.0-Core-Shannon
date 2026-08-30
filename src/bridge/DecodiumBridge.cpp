@@ -45791,44 +45791,39 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     if (!pendingDeep.audio.isEmpty()) {
         static constexpr int kFt8DeepDispatchSafetyMs = 250;
         static constexpr int kFt8DeepMaxLiveBudgetMs = 10500;
-        // 29/08/2026: era 7000, cioe' PIU' del budget massimo ottenibile.
-        // Il budget e' latestCompleteMs - adesso - 250, e latestCompleteMs e'
-        // la fine dello slot + kFt8DeepLatestOverrunMs (6800): il massimo
-        // teorico e' 6550 ms, con dispatch istantaneo. La soglia non poteva
-        // mai essere raggiunta, quindi il follow-up profondo veniva SEMPRE
-        // scartato, e lo scarto veniva letto come backlog del worker facendo
-        // scattare il cooldown di 6 slot. Effetto: AP, profondita' 4 e subpass
-        // non venivano mai eseguiti in FT8, col pulsante GAL acceso a vuoto.
+        // La fase profonda di FT8 e' ACCESA: la soglia e' 2500 ms, che il
+        // budget reale raggiunge (osservato fra 5500 e 6150 ms sul campo).
         //
-        // 2500 ms e' il costo osservato di un decode profondo col decoder
-        // vettorizzato piu' un margine: la soglia originale era tarata su un
-        // decoder che impiegava una decina di secondi per slot.
-        // RIMESSA A 7000 il 29/08/2026, che di fatto DISATTIVA il follow-up
-        // profondo: il budget massimo ottenibile e' 6550 ms (fine slot +
-        // kFt8DeepLatestOverrunMs 6800, meno 250 di sicurezza), quindi la
-        // condizione non e' mai vera.
+        // Storia, perche' non si ripeta. La soglia nasce a 7000 ms, cioe' PIU'
+        // del massimo ottenibile: il budget e' latestCompleteMs - adesso - 250,
+        // e latestCompleteMs e' la fine dello slot piu' kFt8DeepLatestOverrunMs
+        // (6800), quindi il tetto e' 6550 ms con dispatch istantaneo. La
+        // condizione non poteva mai essere vera: il follow-up profondo veniva
+        // sempre scartato, lo scarto veniva letto come backlog del worker e
+        // faceva scattare il cooldown di 6 slot. AP, profondita' 4 e subpass
+        // non giravano mai in FT8, col pulsante GAL acceso a vuoto.
         //
-        // Abbassarla a 2500 aveva riacceso lo stadio profondo -- che non girava
-        // piu' da quando la soglia e' stata introdotta -- e con esso un difetto
-        // di memoria latente: l'applicazione muore entro due minuti con
-        // corruzione dello heap (0xc0000374 in ntdll), sistematicamente subito
-        // dopo la riga FT8DISPATCH che lancia il follow-up, sia col decoder
-        // vettorizzato sia con quello originale. Non e' quindi il decoder: e'
-        // la fase profonda in se', rimasta ferma abbastanza a lungo da andare
-        // alla deriva rispetto al resto del codice.
+        // Abbassarla nella 1.0.595 riaccese lo stadio e con esso un difetto
+        // che dormiva da quando la soglia era stata introdotta: l'applicazione
+        // moriva entro due minuti con corruzione dello heap (0xc0000374).
+        // La 1.0.596 la rimise a 7000 per spegnere tutto.
         //
-        // La soglia torna al valore che la teneva spenta finche' il difetto non
-        // e' individuato. Chi vuole indagare la abbassi e riproduca: il crash
-        // arriva in un paio di minuti di ricezione FT8.
-        // Regolabile a runtime per indagare il difetto descritto sopra.
-        // Per risolvere gli stack dei minidump serve una build non strippata:
-        // lo strip e' applicato da CMakeLists.txt riga ~1226
-        // (CMAKE_EXE_LINKER_FLAGS_RELEASE ... -Wl,-s), non solo dal blocco
-        // "Ottimizzazione dimensione" piu' in alto, che da solo non basta.
+        // La 1.0.597 ha trovato la causa, che NON era la fase profonda: era il
+        // ridimensionamento del pool OpenMP in FT8DecodeWorker.cpp. Cambiare il
+        // numero di thread a ogni decodifica distrugge e ricrea il pool, e i
+        // thread che muoiono eseguono i distruttori dei propri oggetti
+        // thread_local dentro LdrShutdownThread, con heap e loader gia' in
+        // smontaggio. La fase profonda raddoppiava soltanto il ricambio di
+        // thread, rendendo sistematico un difetto altrimenti raro. Corretto
+        // quello, verificato in aria: 23 minuti, 138 lanci, zero crash,
+        // memoria stabile.
+        //
+        // DECODIUM_FT8_DEEP_MIN_BUDGET rialza la soglia per spegnere lo stadio
+        // (un valore sopra 6550 lo disattiva del tutto).
         static int const kFt8DeepMinUsefulBudgetMs = [] {
           char const* raw = std::getenv ("DECODIUM_FT8_DEEP_MIN_BUDGET");
           int const v = raw ? std::atoi (raw) : 0;
-          return (v > 0 && v <= 20000) ? v : 7000;
+          return (v > 0 && v <= 20000) ? v : 2500;
         }();
         qint64 const correctedNowMs = correctedUtcEpochMs();
         int const budgetMs =
