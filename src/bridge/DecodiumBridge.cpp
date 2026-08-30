@@ -41458,10 +41458,18 @@ void DecodiumBridge::showLogQsoPromptDialog()
         return;
     }
 
+    // Keep the emergency QWidget fallback in the same translation context as
+    // the themed QML prompt.  The fallback used QStringLiteral throughout, so
+    // a delayed/missed QML acknowledgement made the second QSO appear to
+    // switch back to English even though UILanguage was still unchanged.
+    auto const promptTr = [](const char* sourceText) {
+        return QCoreApplication::translate("TxPanel", sourceText);
+    };
+
     auto* dialog = new QDialog(QApplication::activeWindow());
     m_logQsoPromptDialog = dialog;
     dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowTitle(QStringLiteral("Confirm Log QSO"));
+    dialog->setWindowTitle(promptTr("Confirm QSO logging"));
     dialog->setModal(false);
     dialog->setMinimumWidth(420);
     dialog->setProperty("decodiumAccepted", false);
@@ -41473,31 +41481,31 @@ void DecodiumBridge::showLogQsoPromptDialog()
     auto* form = new QFormLayout();
     form->setLabelAlignment(Qt::AlignRight);
     form->setFormAlignment(Qt::AlignLeft | Qt::AlignTop);
-    form->addRow(QStringLiteral("Call:"), new QLabel(call, dialog));
-    form->addRow(QStringLiteral("Grid:"), new QLabel(preview.value(QStringLiteral("grid")).toString().trimmed(), dialog));
-    form->addRow(QStringLiteral("Report:"), new QLabel(QStringLiteral("%1 / %2")
+    form->addRow(promptTr("Call:"), new QLabel(call, dialog));
+    form->addRow(promptTr("Grid:"), new QLabel(preview.value(QStringLiteral("grid")).toString().trimmed(), dialog));
+    form->addRow(promptTr("Report:"), new QLabel(QStringLiteral("%1 / %2")
                                                            .arg(preview.value(QStringLiteral("sent")).toString().trimmed(),
                                                                 preview.value(QStringLiteral("rcvd")).toString().trimmed()), dialog));
-    form->addRow(QStringLiteral("Mode:"), new QLabel(preview.value(QStringLiteral("mode")).toString().trimmed(), dialog));
+    form->addRow(promptTr("Mode:"), new QLabel(preview.value(QStringLiteral("mode")).toString().trimmed(), dialog));
     double const freqHz = preview.value(QStringLiteral("freq")).toDouble();
-    form->addRow(QStringLiteral("Freq:"), new QLabel(freqHz > 0.0
+    form->addRow(promptTr("Freq:"), new QLabel(freqHz > 0.0
                                                         ? QStringLiteral("%1 Hz").arg(freqHz, 0, 'f', 0)
                                                         : QStringLiteral("-"), dialog));
 
     auto* timeOnEdit = new QLineEdit(preview.value(QStringLiteral("timeOn")).toString(), dialog);
     timeOnEdit->setClearButtonEnabled(false);
     timeOnEdit->setPlaceholderText(QStringLiteral("YYYY-MM-DD HH:MM:SS UTC"));
-    form->addRow(QStringLiteral("Start UTC:"), timeOnEdit);
+    form->addRow(promptTr("Start UTC:"), timeOnEdit);
 
     auto* timeOffEdit = new QLineEdit(preview.value(QStringLiteral("timeOff")).toString(), dialog);
     timeOffEdit->setClearButtonEnabled(false);
     timeOffEdit->setPlaceholderText(QStringLiteral("YYYY-MM-DD HH:MM:SS UTC"));
-    form->addRow(QStringLiteral("End UTC:"), timeOffEdit);
+    form->addRow(promptTr("End UTC:"), timeOffEdit);
 
     auto* commentEdit = new QLineEdit(preview.value(QStringLiteral("comment")).toString().trimmed(),
                                       dialog);
     commentEdit->setClearButtonEnabled(true);
-    form->addRow(QStringLiteral("Comment:"), commentEdit);
+    form->addRow(promptTr("Comment:"), commentEdit);
 
     auto* satelliteCombo = new QComboBox(dialog);
     satelliteCombo->addItems(satelliteOptions());
@@ -41510,7 +41518,7 @@ void DecodiumBridge::showLogQsoPromptDialog()
             }
         }
     }
-    form->addRow(QStringLiteral("Satellite:"), satelliteCombo);
+    form->addRow(promptTr("Satellite:"), satelliteCombo);
 
     auto* satModeCombo = new QComboBox(dialog);
     satModeCombo->addItems(satModeOptions());
@@ -41524,24 +41532,24 @@ void DecodiumBridge::showLogQsoPromptDialog()
             [satModeCombo](const QString& text) {
         satModeCombo->setEnabled(!satelliteCodeFromDisplayText(text).isEmpty());
     });
-    form->addRow(QStringLiteral("Sat Mode:"), satModeCombo);
+    form->addRow(promptTr("Sat Mode:"), satModeCombo);
 
     bool const clusterAvailable = dxClusterConnected();
     auto* spotCheck = new QCheckBox(clusterAvailable
-                                        ? QStringLiteral("Spot on DX Cluster")
-                                        : QStringLiteral("DX Cluster not connected"), dialog);
+                                        ? promptTr("Spot to cluster")
+                                        : promptTr("Cluster not connected"), dialog);
     spotCheck->setEnabled(clusterAvailable);
     spotCheck->setChecked(clusterAvailable && m_autoSpotEnabled);
-    form->addRow(QStringLiteral("DX Cluster:"), spotCheck);
+    form->addRow(promptTr("DX Cluster:"), spotCheck);
 
     layout->addLayout(form);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, dialog);
     if (auto* okButton = buttons->button(QDialogButtonBox::Ok)) {
-        okButton->setText(QStringLiteral("Add"));
+        okButton->setText(promptTr("Add"));
     }
     if (auto* cancelButton = buttons->button(QDialogButtonBox::Cancel)) {
-        cancelButton->setText(QStringLiteral("Skip"));
+        cancelButton->setText(promptTr("Skip"));
     }
     layout->addWidget(buttons);
 

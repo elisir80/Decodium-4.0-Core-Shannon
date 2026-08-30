@@ -25053,6 +25053,10 @@ Pressione prolungata: modifica messaggio</translation>
         <translation>Nominativo:</translation>
     </message>
     <message>
+        <source>Grid:</source>
+        <translation>Locator:</translation>
+    </message>
+    <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/TxPanel.qml" line="2192"/>
         <source>Report:</source>
         <translation>Rapporto:</translation>

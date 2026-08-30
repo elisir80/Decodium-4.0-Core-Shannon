@@ -197,13 +197,17 @@ Item {
         // QML sono sincroni, quindi arriva comunque entro il mezzo secondo di
         // attesa del bridge e la doppia conferma non si ripresenta.
         var hostWindow = txPanel.Window.window
+        var hostWasMaximized = false
         if (hostWindow) {
             if (!hostWindow.visible)
                 return
+            hostWasMaximized = hostWindow.visibility === Window.Maximized
             if (hostWindow.visibility === Window.Minimized && hostWindow.showNormal)
                 hostWindow.showNormal()
-            else if (hostWindow.show)
-                hostWindow.show()
+            // The host is already visible. Calling show() again is not a
+            // harmless activation operation on Windows: QWindow may leave the
+            // maximised state and restore its normal geometry, shrinking the
+            // entire dashboard as soon as the logging dialog appears.
             if (hostWindow.raise)
                 hostWindow.raise()
             if (hostWindow.requestActivate)
@@ -218,6 +222,18 @@ Item {
         logTimeOnField.text = logPreviewTimeOn
         logTimeOffField.text = logPreviewTimeOff
         logConfirmPopup.open()
+        // A native transient dialog should not alter its parent state. Keep a
+        // deferred guard for Windows window managers that report the state
+        // transition only after the dialog has been shown.
+        if (hostWasMaximized) {
+            Qt.callLater(function() {
+                if (hostWindow && hostWindow.visible
+                        && hostWindow.visibility !== Window.Maximized
+                        && hostWindow.showMaximized) {
+                    hostWindow.showMaximized()
+                }
+            })
+        }
     }
 
     // Convenience aliases
@@ -675,6 +691,8 @@ Item {
                 Rectangle {
                     id: bandSelectorBar
                     visible: txPanel.showBandBar
+                             || (!txPanel.isFt2LinkMode
+                                 && txPanel.workingFrequencyOptions.length > 0)
                     Layout.fillWidth: true
                     Layout.rightMargin: txPanel.showAsyncIcon ? 36 : 0
                     Layout.preferredHeight: visible ? 28 : 0
@@ -686,8 +704,17 @@ Item {
 
                     Flickable {
                         id: bandButtonsFlickable
-                        anchors.fill: parent
-                        anchors.margins: 1
+                        visible: txPanel.showBandBar
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.left: workingFrequencyFrame.visible
+                                      ? workingFrequencyFrame.right
+                                      : parent.left
+                        anchors.topMargin: 1
+                        anchors.bottomMargin: 1
+                        anchors.rightMargin: 1
+                        anchors.leftMargin: 1
                         contentWidth: Math.max(bandButtonsRow.implicitWidth, bandButtonsRow.childrenRect.width)
                         contentHeight: Math.max(bandButtonsRow.implicitHeight, bandButtonsRow.childrenRect.height)
                         flickableDirection: Flickable.HorizontalFlick
@@ -842,10 +869,19 @@ Item {
 
                         Rectangle {
                             id: workingFrequencyFrame
+                            // Keep the dial selector on the band row, directly
+                            // before 160 m.  Although declared with the other
+                            // controls, its visual parent is the upper band bar
+                            // so it no longer consumes space beside FT8.
+                            parent: bandSelectorBar
                             visible: !txPanel.isFt2LinkMode
                                      && txPanel.workingFrequencyOptions.length > 0
+                            // Leave the 16 px dock drag handle unobstructed.
+                            x: 22
+                            y: 1
+                            z: 2
                             width: visible ? txPanel.toolbarFrequencyWidth : 0
-                            height: visible ? txPanel.toolbarButtonHeight : 0
+                            height: visible ? Math.max(0, bandSelectorBar.height - 2) : 0
                             radius: 5
                             color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.08)
                             border.color: workingFrequencySelector.popup.visible
@@ -2459,7 +2495,7 @@ Item {
                 Text { text: qsTr("Call:"); color: textSecondary; font.pixelSize: 13 }
                 Text { text: logPreviewCall || "-"; color: textPrimary; font.pixelSize: 14; font.bold: true }
 
-                Text { text: "Grid:"; color: textSecondary; font.pixelSize: 13 }
+                Text { text: qsTr("Grid:"); color: textSecondary; font.pixelSize: 13 }
                 DecoTextField {
                     id: logGridField
                     Layout.fillWidth: true
