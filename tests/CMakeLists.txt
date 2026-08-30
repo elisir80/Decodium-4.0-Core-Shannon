@@ -185,6 +185,15 @@ add_executable (test_civ_address_settings
 target_link_libraries (test_civ_address_settings Qt6::Test Qt6::Core Qt6::SerialPort)
 add_test (NAME test_civ_address_settings COMMAND $<TARGET_FILE:test_civ_address_settings>)
 
+add_executable (test_decoport_rig_driver_thread
+  test_decoport_rig_driver_thread.cpp
+  ../src/net/DecoPortRigDriver.cpp
+  ../src/net/DecoPortRigDriver.h)
+target_link_libraries (test_decoport_rig_driver_thread
+  Qt6::Test Qt6::Core Hamlib::Hamlib)
+add_test (NAME test_decoport_rig_driver_thread
+  COMMAND $<TARGET_FILE:test_decoport_rig_driver_thread>)
+
 add_executable (test_udp_client_id test_udp_client_id.cpp)
 target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
@@ -204,6 +213,32 @@ set_tests_properties (test_ft8_hinted_decode_very_deep PROPERTIES
 add_executable (test_ft2_qso_sim test_ft2_qso_sim.cpp)
 target_link_libraries (test_ft2_qso_sim wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_ft2_qso_sim COMMAND $<TARGET_FILE:test_ft2_qso_sim>)
+
+if (DECODIUM_FASTLDPC_ARM64_TARGET)
+  add_executable (test_fastldpc_neon test_fastldpc_neon.cpp)
+  set_target_properties (test_fastldpc_neon PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON)
+  add_test (NAME test_fastldpc_neon COMMAND $<TARGET_FILE:test_fastldpc_neon>)
+endif ()
+
+if (DECODIUM_FASTLDPC_ARM64_TARGET OR DECODIUM_FASTLDPC_X86_TARGET)
+  add_executable (test_fastldpc_dispatch
+    test_fastldpc_dispatch.cpp
+    ../Detector/fastldpc/decodium_dispatch.cpp)
+  set_target_properties (test_fastldpc_dispatch PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON)
+  if (DECODIUM_FASTLDPC_ARM64_TARGET)
+    target_compile_definitions (test_fastldpc_dispatch
+      PRIVATE DECODIUM_FASTLDPC_NEON_BUILT=1)
+  else ()
+    target_compile_definitions (test_fastldpc_dispatch
+      PRIVATE DECODIUM_FASTLDPC_AVX2_BUILT=1)
+  endif ()
+  add_test (NAME test_fastldpc_dispatch
+    COMMAND $<TARGET_FILE:test_fastldpc_dispatch>)
+endif ()
 
 add_executable (test_secure_settings test_secure_settings.cpp)
 target_link_libraries (test_secure_settings wsjt_qt wsjt_cxx Qt6::Test)
@@ -372,6 +407,7 @@ set (_decodium_regression_test_targets
   test_rotator_service
   test_cat4om_manager
   test_civ_address_settings
+  test_decoport_rig_driver_thread
   test_udp_client_id
   test_ftx_weak_decode
   test_ft2_qso_sim
@@ -393,6 +429,12 @@ set (_decodium_regression_test_targets
   test_rtlsdr_tuning_plan
   test_ft2link_qml_adapter
   )
+if (TARGET test_fastldpc_neon)
+  list (APPEND _decodium_regression_test_targets test_fastldpc_neon)
+endif ()
+if (TARGET test_fastldpc_dispatch)
+  list (APPEND _decodium_regression_test_targets test_fastldpc_dispatch)
+endif ()
 foreach (_decodium_regression_test_target IN LISTS
     _decodium_regression_test_targets)
   add_dependencies (decodium_regression_test_binaries

@@ -1,6 +1,6 @@
-# fastldpc — decoder a due stadi per LDPC(174,91) di FT2 (solo PC, ciclo 3,75 s invariato)
+# fastldpc — decoder SIMD a due stadi per LDPC(174,91) di FT2
 
-    stadio 1  min-sum normalizzato, layered, int16, 16 parole per registro AVX2
+    stadio 1  min-sum normalizzato, layered, int16, AVX2 su x86 o NEON su ARM64
     stadio 2  OSD di ordine 0..3 SOLO sulle parole che lo stadio 1 non chiude
     gate      CRC-14 (poly 0x2757, identica a WSJT-X) + distanza soft normalizzata
 
@@ -319,9 +319,10 @@ Preset: `veloce()` (solo min-sum, nessuna falsa decodifica), `conservativo()`
 (OSD-2/span32, come WSJT-X), `sensibile()` (OSD-3, il default). Oppure una
 `Ft2Config` esplicita — ordine, span2, span3 e `nd_max` sono indipendenti.
 
-Senza AVX2 tutto compila e gira lo stesso: `MinSumV3` diventa un alias di
-`MinSumV2` e si perde solo la velocità (misurato: 150 µs/parola col preset
-conservativo, contro 8,8). `bits.hpp` copre anche MSVC.
+In Decodium il dispatcher seleziona AVX2/FMA su x86, NEON su ARM64 e usa il
+decoder originale generico quando il backend richiesto non è disponibile. Il
+fallback resta compilato per la CPU minima, quindi l'assenza di una estensione
+SIMD non impedisce l'avvio. `bits.hpp` copre anche MSVC.
 
     make            # tutti i binari
     make test       # CRC, equivalenza con l'implementazione di riferimento, i tre preset
@@ -349,7 +350,8 @@ conservativo, contro 8,8). `bits.hpp` copre anche MSVC.
 ## File
 
     cpp/ft2_decoder.hpp   API pubblica: Ft2Decoder + preset. E' l'unico da includere.
-    cpp/minsum_avx2.hpp   MinSumV3, stadio 1 con intrinsics AVX2
+    minsum_avx2.hpp       selezione MinSumV3 e stadio 1 con intrinsics AVX2
+    minsum_neon.hpp       stadio 1 MinSumV3 con intrinsics ARM NEON
     cpp/osd_fast.hpp      OsdFast, stadio 2: CRC incrementale, Gauss branchless, pruning
     cpp/decoder.hpp       CRC-14 e sindrome, MinSumV2 e OsdDecoder (riferimento scalare)
     cpp/minsum.hpp        Code (lettura di H) + MinSumDecoder, prima versione

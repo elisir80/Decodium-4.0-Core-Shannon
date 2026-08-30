@@ -532,6 +532,9 @@ SettingsPageScroll {
                         leftPadding: 8
                         rightPadding: 8
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        validator: RegularExpressionValidator {
+                            regularExpression: /^[-+]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/
+                        }
                         Layout.preferredWidth: 146
                         implicitHeight: controlHeight
                         background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
@@ -555,6 +558,7 @@ SettingsPageScroll {
                     Button {
                         id: addStationFrequencyButton
                         text: qsTr("Add")
+                        enabled: stationOffsetField.acceptableInput
                         implicitHeight: controlHeight
                         Layout.preferredWidth: 86
                         onClicked: dialog.addStationFrequencyFromEditor()
@@ -565,6 +569,7 @@ SettingsPageScroll {
                         id: updateStationFrequencyButton
                         text: qsTr("Update")
                         enabled: dialog.selectedStationFrequencyIndex >= 0
+                                 && stationOffsetField.acceptableInput
                         implicitHeight: controlHeight
                         Layout.preferredWidth: 96
                         onClicked: dialog.updateStationFrequencyFromEditor()

@@ -79,8 +79,8 @@ struct DecoPortRigDriver::Impl
     RIG* rig {nullptr};
 };
 
-DecoPortRigDriver::DecoPortRigDriver(QObject* parent)
-    : QObject(parent)
+DecoPortRigDriver::DecoPortRigDriver()
+    : QObject(nullptr)
     , d(new Impl)
 {
     // Il thread nasce con l'oggetto: aprire una seriale, e ancora di piu'
@@ -95,8 +95,19 @@ DecoPortRigDriver::DecoPortRigDriver(QObject* parent)
 DecoPortRigDriver::~DecoPortRigDriver()
 {
     if (m_thread) {
-        QMetaObject::invokeMethod(this, [this]() { doClose(); },
-                                  Qt::BlockingQueuedConnection);
+        QThread* const ownerThread = QThread::currentThread();
+        if (thread() == ownerThread) {
+            doClose();
+        } else if (m_thread->isRunning()) {
+            // Close Hamlib on the worker that owns it, then return this object
+            // (and its stopped timer child) to the deleting thread.  This
+            // keeps both QObject destruction and serial teardown on valid
+            // thread affinities.
+            QMetaObject::invokeMethod(this, [this, ownerThread]() {
+                doClose();
+                moveToThread(ownerThread);
+            }, Qt::BlockingQueuedConnection);
+        }
         m_thread->quit();
         if (!m_thread->wait(5000))
             m_thread->terminate();
@@ -168,18 +179,30 @@ int DecoPortRigDriver::resolveModel(const QString& rigLabel,
 
 bool DecoPortRigDriver::open(const QString& port, int baudRate, int civAddress, int model)
 {
+    if (model == 0 || port.trimmed().isEmpty())
+        return false;
+    {
+        QMutexLocker lock(&m_stateMutex);
+        // startDecoPortGateway() can be requested more than once while a slow
+        // Hamlib rig_open() is still pending.  Coalesce those requests rather
+        // than queueing another full serial timeout behind the first one.
+        if (m_open || m_opening)
+            return true;
+        m_opening = true;
+    }
     QMetaObject::invokeMethod(this, [this, port, baudRate, civAddress, model]() {
         doOpen(port, baudRate, civAddress, model);
     }, Qt::QueuedConnection);
-    return model != 0 && !port.trimmed().isEmpty();
+    return true;
 }
 
 void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress, int model)
 {
-    doClose();
+    doClose(false);
     if (model == 0 || port.trimmed().isEmpty()) {
         QMutexLocker lock(&m_stateMutex);
         m_lastError = tr("no radio model resolved");
+        m_opening = false;
         return;
     }
 
@@ -187,9 +210,14 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
     rig_load_all_backends();
     d->rig = rig_init(static_cast<rig_model_t>(model));
     if (!d->rig) {
-        QMutexLocker lock(&m_stateMutex);
-        m_lastError = tr("Hamlib refused model %1").arg(model);
-        emit failed(m_lastError);
+        QString reason;
+        {
+            QMutexLocker lock(&m_stateMutex);
+            m_lastError = tr("Hamlib refused model %1").arg(model);
+            m_opening = false;
+            reason = m_lastError;
+        }
+        emit failed(reason);
         return;
     }
 
@@ -212,9 +240,14 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
         QString const why = QString::fromLatin1(rigerror(rc)).trimmed();
         rig_cleanup(d->rig);
         d->rig = nullptr;
-        QMutexLocker lock(&m_stateMutex);
-        m_lastError = tr("cannot open %1: %2").arg(port, why);
-        emit failed(m_lastError);
+        QString reason;
+        {
+            QMutexLocker lock(&m_stateMutex);
+            m_lastError = tr("cannot open %1: %2").arg(port, why);
+            m_opening = false;
+            reason = m_lastError;
+        }
+        emit failed(reason);
         return;
     }
 
@@ -229,6 +262,8 @@ void DecoPortRigDriver::doOpen(const QString& port, int baudRate, int civAddress
         QMutexLocker lock(&m_stateMutex);
         m_rigName = name;
         m_lastError.clear();
+        m_open = true;
+        m_opening = false;
     }
 
     if (!m_pollTimer) {
@@ -246,12 +281,17 @@ void DecoPortRigDriver::close()
     QMetaObject::invokeMethod(this, [this]() { doClose(); }, Qt::QueuedConnection);
 }
 
-void DecoPortRigDriver::doClose()
+void DecoPortRigDriver::doClose(bool clearOpening)
 {
     if (m_pollTimer)
         m_pollTimer->stop();
-    if (!d->rig)
+    if (!d->rig) {
+        if (clearOpening) {
+            QMutexLocker lock(&m_stateMutex);
+            m_opening = false;
+        }
         return;
+    }
     // Chiudere lasciando il PTT su sarebbe il modo peggiore di andarsene.
     rig_set_ptt(d->rig, RIG_VFO_CURR, RIG_PTT_OFF);
     rig_close(d->rig);
@@ -263,13 +303,17 @@ void DecoPortRigDriver::doClose()
         m_modeName.clear();
         m_ptt = false;
         m_rigName.clear();
+        m_open = false;
+        if (clearOpening)
+            m_opening = false;
     }
     emit closed();
 }
 
 bool DecoPortRigDriver::isOpen() const
 {
-    return d && d->rig != nullptr;
+    QMutexLocker lock(&m_stateMutex);
+    return m_open;
 }
 
 void DecoPortRigDriver::poll()

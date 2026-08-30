@@ -414,7 +414,7 @@ set (wsjt_qt_CXXSRCS
   widgets/CheckableItemComboBox.cpp
   widgets/BandComboBox.cpp
   Detector/FtxFt2Stage7.cpp
-  Detector/fastldpc/decodium_bridge.cpp
+  Detector/fastldpc/decodium_dispatch.cpp
   Detector/FtxQ65Core.cpp
   Detector/FtxQ65Decoder.cpp
   Detector/FtxQ65Frontend.cpp
@@ -441,15 +441,40 @@ set (wsjt_qt_CXXSRCS
   src/core/otpgenerator.cpp
   )
 
-# fastldpc: il min-sum lavora su 16 int16 per registro AVX2. Compiliamo
-# questo file con AVX2 solo per target x86: Apple Silicon e Windows-on-ARM
-# usano il fallback scalare selezionato a runtime in decodium_bridge.cpp.
+# fastldpc: dispatcher e fallback restano sempre compilati per la CPU minima.
+# Il backend min-sum e' una translation unit separata: AVX2/FMA su x86 e NEON
+# su ARM64. Il dispatcher entra nel backend soltanto dopo il controllo runtime
+# delle capacita' richieste dall'architettura.
 set (DECODIUM_FASTLDPC_X86_TARGET OFF)
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64|i[3-6]86)$"
     OR CMAKE_OSX_ARCHITECTURES MATCHES "(^|;)x86_64(;|$)")
   set (DECODIUM_FASTLDPC_X86_TARGET ON)
 endif ()
-if (DECODIUM_FASTLDPC_X86_TARGET)
+
+set (DECODIUM_FASTLDPC_ARM64_TARGET OFF)
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64|AARCH64)$"
+    OR CMAKE_OSX_ARCHITECTURES MATCHES "(^|;)(arm64|aarch64)(;|$)")
+  set (DECODIUM_FASTLDPC_ARM64_TARGET ON)
+endif ()
+
+# I runner di release producono slice architetturali distinte. Se viene
+# richiesto eccezionalmente un universal binary, privilegiamo il backend NEON:
+# la slice x86 resta comunque sicura e usa il fallback generico.
+if (DECODIUM_FASTLDPC_ARM64_TARGET)
+  list (APPEND wsjt_qt_CXXSRCS Detector/fastldpc/decodium_bridge.cpp)
+  set_source_files_properties (Detector/fastldpc/decodium_dispatch.cpp
+    PROPERTIES COMPILE_DEFINITIONS "DECODIUM_FASTLDPC_NEON_BUILT=1")
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+      PROPERTIES COMPILE_OPTIONS "-O3")
+  elseif (MSVC)
+    set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+      PROPERTIES COMPILE_OPTIONS "/O2")
+  endif ()
+elseif (DECODIUM_FASTLDPC_X86_TARGET)
+  list (APPEND wsjt_qt_CXXSRCS Detector/fastldpc/decodium_bridge.cpp)
+  set_source_files_properties (Detector/fastldpc/decodium_dispatch.cpp
+    PROPERTIES COMPILE_DEFINITIONS "DECODIUM_FASTLDPC_AVX2_BUILT=1")
   if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
       PROPERTIES COMPILE_OPTIONS "-O3;-mavx2;-mfma")

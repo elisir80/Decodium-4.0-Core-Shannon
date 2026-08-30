@@ -8,25 +8,15 @@
  */
 
 import QtQuick
-import QtQuick.Controls
 
-Dialog {
+Item {
     id: decometerWindow
-    // DECOMETER draws its own complete instrument face.  The stock Dialog
-    // header would otherwise add a separate white "RF Meter" strip on macOS
-    // and steal height from the gauge.
-    title: ""
-    header: null
-    footer: null
-    popupType: Popup.Item
-    modal: false
-    padding: 0
-    spacing: 0
-    closePolicy: Popup.CloseOnEscape
+    // The component is the content of Main.qml's real desktop Window.  Keeping
+    // it as a plain Item avoids a second Dialog/Overlay scene-graph layer,
+    // which can crash Qt 6.11's threaded Metal renderer when the host window is
+    // exposed, and also removes the Material dialog's internal top padding.
 
-    // When hosted by Main.qml in a real top-level Window, x/y belong to that
-    // Window rather than to this Popup.  This is what lets the instrument cross
-    // monitor boundaries on macOS, Windows and Linux.
+    // The host owns desktop geometry; this item only fills its content area.
     property var nativeHostWindow: null
 
     readonly property int faceWidth: 900
@@ -38,7 +28,7 @@ Dialog {
     readonly property real hostWidth: parent ? parent.width : faceWidth
     readonly property real hostHeight: parent ? parent.height : faceHeight
 
-    // una sola cornice: la disegna il frontalino, non il Dialog
+    // una sola cornice: la disegna il frontalino
     width: nativeHostWindow && parent
            ? parent.width
            : Math.min(faceWidth, Math.max(320, hostWidth - 24))
@@ -61,17 +51,6 @@ Dialog {
         y = Math.max(0, Math.min(y, parent.height - height))
     }
 
-    function startNativeHostMove() {
-        if (!nativeHostWindow || typeof nativeHostWindow.startSystemMove !== "function")
-            return false
-        try {
-            return nativeHostWindow.startSystemMove()
-        } catch (error) {
-            console.log("Decometer startSystemMove failed: " + error)
-        }
-        return false
-    }
-
     function finishNativeHostMove() {
         if (nativeHostWindow && typeof nativeHostWindow.finishDesktopMove === "function")
             nativeHostWindow.finishDesktopMove()
@@ -82,7 +61,7 @@ Dialog {
             nativeHostWindow.hideHostedWindow()
             return
         }
-        close()
+        visible = false
     }
 
     // ---- tavolozza dello strumento (fissa: e' un frontalino, non un tema) ----
@@ -307,18 +286,21 @@ Dialog {
     readonly property real rMin: 50 / Math.max(1, rawSwr)
     readonly property real rMax: 50 * Math.max(1, rawSwr)
 
-    onVisibleChanged: {
-        if (visible) {
-            ensureTelemetryPolling()
-            if (!placed) centerOnHost()
-            else clampToHost()
-            clock = 0
-            txSeconds = 0
-            pepW = 0
-            if (typeof bridge !== "undefined")
-                preferAmp = !!bridge.getSetting("DecometerPreferAmp", false)
-            face.forceActiveFocus()
-        }
+    function activateHostedPanel() {
+        ensureTelemetryPolling()
+        if (!placed) centerOnHost()
+        else clampToHost()
+        clock = 0
+        txSeconds = 0
+        pepW = 0
+        if (typeof bridge !== "undefined")
+            preferAmp = !!bridge.getSetting("DecometerPreferAmp", false)
+        face.forceActiveFocus()
+    }
+
+    onNativeHostWindowChanged: {
+        if (nativeHostWindow && nativeHostWindow.visible)
+            activateHostedPanel()
     }
 
     Component.onCompleted: refreshTelemetryPolling()
@@ -338,15 +320,6 @@ Dialog {
             if (decometerWindow.telemetryEnableDeferred && !bridge.tuning)
                 decometerWindow.ensureTelemetryPolling()
         }
-    }
-
-    // Sfondo trasparente: il pannello resta l'unica cornice visibile. Non usare
-    // null, perche' lo stile Material di Qt legge comunque background.radius e
-    // su macOS produce un TypeError quando il Dialog viene aperto.
-    background: Rectangle {
-        color: "transparent"
-        border.width: 0
-        radius: 0
     }
 
     // riga di misura riusata dalle tre schermate del display
@@ -399,7 +372,9 @@ Dialog {
     Timer {
         id: engine
         interval: (decometerWindow.rfActive || decometerWindow.settling) ? 40 : 200
-        running: decometerWindow.visible
+        running: decometerWindow.nativeHostWindow
+                 ? decometerWindow.nativeHostWindow.visible
+                 : decometerWindow.visible
         repeat: true
         onTriggered: decometerWindow.tick(interval / 1000)
     }
@@ -460,8 +435,9 @@ Dialog {
         rangeIdx = i
     }
 
-    contentItem: Item {
+    Item {
         id: faceHolder
+        anchors.fill: parent
         clip: true
 
         // il frontalino ha proporzioni fisse: si adatta scalando, non deformando
@@ -510,7 +486,12 @@ Dialog {
                         pressGlobalPos = mapToGlobal(mouse.x, mouse.y)
                         pressWindowPos = Qt.point(decometerWindow.nativeHostWindow.x,
                                                   decometerWindow.nativeHostWindow.y)
-                        nativeMoveActive = decometerWindow.startNativeHostMove()
+                        // macOS reserves a visible title-bar-sized gutter for
+                        // startSystemMove(), even on a frameless window.  That
+                        // made this panel spring back before it could reach an
+                        // edge.  Use the explicit global-coordinate move below
+                        // so all screen corners remain reachable on every OS.
+                        nativeMoveActive = false
                     }
                 }
                 onPositionChanged: function (mouse) {

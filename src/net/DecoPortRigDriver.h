@@ -30,7 +30,10 @@ class DecoPortRigDriver : public QObject
     Q_OBJECT
 
 public:
-    explicit DecoPortRigDriver(QObject* parent = nullptr);
+    // The driver deliberately has no QObject parent: it owns a dedicated
+    // worker thread and must be movable to it.  The bridge keeps the pointer
+    // and deletes it explicitly during shutdown.
+    explicit DecoPortRigDriver();
     ~DecoPortRigDriver() override;
 
     // Il catalogo Hamlib, cosi' com'e' a runtime: numero, costruttore, modello,
@@ -44,9 +47,9 @@ public:
                             const QString& rigToken,
                             QString* matchedName = nullptr);
 
-    // Apre la radio. Non fa nulla e restituisce false se manca il modello o se
-    // la porta non si apre: il chiamante resta libero di ripiegare sui ganci
-    // verso l'applicazione.
+    // Accoda l'apertura della radio sul worker. Restituisce false solo se la
+    // richiesta e' incompleta; l'esito reale arriva poi tramite opened/failed,
+    // senza trattenere il thread grafico durante il timeout seriale.
     bool open(const QString& port, int baudRate, int civAddress, int model);
     void close();
     bool isOpen() const;
@@ -79,7 +82,7 @@ private:
     Impl* d;
 
     void doOpen(const QString& port, int baudRate, int civAddress, int model);
-    void doClose();
+    void doClose(bool clearOpening = true);
 
     mutable QMutex m_stateMutex;
     double  m_frequencyHz {0.0};
@@ -87,6 +90,8 @@ private:
     bool    m_ptt {false};
     QString m_rigName;
     QString m_lastError;
+    bool    m_open {false};
+    bool    m_opening {false};
     QTimer* m_pollTimer {nullptr};
     QThread* m_thread {nullptr};
 };

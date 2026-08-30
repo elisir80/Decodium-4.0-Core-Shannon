@@ -105,14 +105,14 @@ extern "C"
   // esplicitamente anche qui: un thread che avesse gia' decodificato FT8
   // lascerebbe altrimenti a FT2 le soglie larghe di FT8.
   void fastldpc_set_ft8_mode_c (int on);
-  // fastldpc (Detector/fastldpc/): stessa firma, ~160x piu' veloce a parita'
-  // di decodifiche. Ricade da solo su ftx_decode174_91_c se la CPU non ha
-  // AVX2 o se Keff != 91.
+  // fastldpc (Detector/fastldpc/): stessa firma, backend AVX2/FMA su x86 o
+  // NEON su ARM64. Ricade da solo su ftx_decode174_91_c se il backend SIMD
+  // richiesto non e' disponibile o se Keff != 91.
   void fastldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
                                 signed char const* apmask, signed char* message91, signed char* cw,
                                 int* ntype, int* nharderror, float* dmin);
-  // Versione a blocco: decodifica n candidati in una volta, cosi' il min-sum
-  // riempie le 16 corsie del registro AVX2 invece di sprecarne quindici.
+  // Versione a blocco: decodifica n candidati in una volta, cosi' il min-sum
+  // riempie le corsie SIMD AVX2 o NEON invece di lasciarle inutilizzate.
   // llr e apmask sono [n][174] contigui, le uscite [n] o [n][...].
   void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
                                       int Keff, int maxosd, int norder,

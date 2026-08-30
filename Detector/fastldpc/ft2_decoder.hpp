@@ -1,7 +1,7 @@
 // ft2_decoder.hpp — l'unico header che serve includere per usare fastldpc.
 //
-// Incapsula la catena completa: min-sum AVX2 su un batch di candidati, OSD sui
-// non convergenti, CRC-14 e gate sulla distanza soft. Gestisce da solo il
+// Incapsula la catena completa: min-sum SIMD (AVX2 o NEON) su un batch di
+// candidati, OSD sui non convergenti, CRC-14 e gate sulla distanza soft. Gestisce da solo il
 // riempimento del batch, quindi si puo' chiamare con un numero qualsiasi di
 // parole.
 //

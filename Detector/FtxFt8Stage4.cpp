@@ -372,8 +372,9 @@ extern "C"
                            signed char const* apmask_in, signed char* message91_out,
                            signed char* cw_out, int* ntype_out, int* nharderror_out,
                            float* dmin_out);
-  // Detector/fastldpc/: stessa firma, min-sum vettorizzato AVX2. Ricade da
-  // solo su ftx_decode174_91_c se la CPU non ha AVX2 o Keff != 91.
+  // Detector/fastldpc/: stessa firma, min-sum SIMD (AVX2/FMA su x86, NEON su
+  // ARM64). Ricade da solo su ftx_decode174_91_c se il backend richiesto non
+  // e' disponibile o Keff != 91.
   void fastldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
                                 signed char const* apmask, signed char* message91,
                                 signed char* cw, int* ntype, int* nharderror, float* dmin);

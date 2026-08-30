@@ -10469,9 +10469,18 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             if (m_shuttingDown) return;
             if (useLegacyRigControlFallback(m_legacyBackend, m_catBackend) && backend == QStringLiteral("hamlib")) return;
             if (!catSignalMatchesBackend(m_catBackend, backend)) return;
-            double f = catProp("frequency").toDouble();
+            double const rigFrequency = catProp("frequency").toDouble();
+            QString resolvedBand;
+            Radio::FrequencyDelta resolvedOffsetHz = 0;
+            double const f = logicalFrequencyFromCatDial(rigFrequency,
+                                                         &resolvedBand,
+                                                         &resolvedOffsetHz);
             if (f > 0.0 && shouldIgnoreCatFrequencyDuringLocalQsy(f, backend)) {
                 return;
+            }
+            if (f > 0.0) {
+                m_currentCatLogicalBand = resolvedBand;
+                m_currentCatStationOffsetHz = resolvedOffsetHz;
             }
             if (f > 0 && m_frequency != f) {
                 bool const monitorShouldStayActive = m_monitoring || m_monitorRequested;
@@ -10628,7 +10637,12 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     if (!catProp("connected").toBool()) {
                         return;
                     }
-                    double const rigFrequency = catProp("frequency").toDouble();
+                    double const physicalRigFrequency = catProp("frequency").toDouble();
+                    QString resolvedBand;
+                    Radio::FrequencyDelta resolvedOffsetHz = 0;
+                    double const rigFrequency = logicalFrequencyFromCatDial(physicalRigFrequency,
+                                                                            &resolvedBand,
+                                                                            &resolvedOffsetHz);
                     if (rigFrequency <= 0.0) {
                         return;
                     }
@@ -10637,9 +10651,15 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     }
                     bool const differsFromBridge =
                         !qFuzzyCompare(m_frequency + 1.0, rigFrequency + 1.0);
+                    m_currentCatLogicalBand = resolvedBand;
+                    m_currentCatStationOffsetHz = resolvedOffsetHz;
                     if (differsFromBridge || m_startupModeAutoPending) {
-                        bridgeLog(QStringLiteral("startup CAT sync: using rig frequency %1 Hz from %2")
-                                      .arg(QString::number(rigFrequency, 'f', 0), backend));
+                        bridgeLog(QStringLiteral("startup CAT sync: using logical frequency %1 Hz "
+                                                 "from %2 (rig=%3 Hz offset=%4 Hz)")
+                                      .arg(QString::number(rigFrequency, 'f', 0),
+                                           backend,
+                                           QString::number(physicalRigFrequency, 'f', 0),
+                                           QString::number(resolvedOffsetHz)));
                         setFrequency(rigFrequency);
                         maybeApplyStartupModeFromRigFrequency(rigFrequency, true);
                         syncActiveCatTxSplitFrequency(QStringLiteral("startup-frequency"));
@@ -11094,6 +11114,13 @@ DecodiumBridge::~DecodiumBridge()
     }
     safeQuitThread(m_decoPortTxOutThread, "decoPortTxOut");
     m_decoPortTxOut = nullptr;
+    // DecoPortRigDriver is intentionally parentless so it can live on its
+    // dedicated Hamlib thread.  Stop network callbacks before deleting it;
+    // its destructor closes the rig on that worker and joins the thread.
+    if (m_decoPortGateway)
+        m_decoPortGateway->stop();
+    delete m_decoPortRig;
+    m_decoPortRig = nullptr;
 }
 
 QObject * DecodiumBridge::propagationManager() const
@@ -16073,6 +16100,12 @@ void DecodiumBridge::setFrequency(double v) {
             clearDecodeWindowsForBandChange(oldFreq, v, QStringLiteral("set-frequency"));
         }
     }
+    if (v > 0.0) {
+        Bands bands;
+        m_currentCatLogicalBand = bands.find(static_cast<Radio::Frequency>(std::llround(v)));
+        m_currentCatStationOffsetHz =
+            static_cast<Radio::FrequencyDelta>(std::llround(stationOffsetForFrequencyHz(v)));
+    }
     // A legacy mode switch can retune its own band selector while the bridge
     // already holds the requested dial frequency. Reassert the dial in that
     // case as well, otherwise UI and decoder can silently use different bands.
@@ -16462,6 +16495,22 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
         return;
     }
 
+    // Resolve and validate the physical rig/IF dial before publishing the
+    // logical QSY.  A large negative transverter offset can otherwise turn a
+    // valid on-air frequency into an invalid CAT request with no useful UI
+    // explanation.
+    double const dialHz = applyFrequencyCalibration(hz);
+    if (m_catConnected && dialHz <= 0.0) {
+        emit errorMessage(QStringLiteral("Cannot tune %1 Hz: the configured station/transverter offset produces an invalid CAT dial (%2 Hz)")
+                              .arg(QString::number(hz, 'f', 0),
+                                   QString::number(dialHz, 'f', 0)));
+        bridgeLog(QStringLiteral("CAT local QSY rejected by %1: logical=%2 Hz physical=%3 Hz")
+                      .arg(reason,
+                           QString::number(hz, 'f', 0),
+                           QString::number(dialHz, 'f', 0)));
+        return;
+    }
+
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     m_localCatFrequencyPreviousHz = m_frequency;
     m_localCatFrequencyTargetHz = hz;
@@ -16475,9 +16524,6 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
         return;
     }
 
-    // 1.0.192 — applica Frequency Calibration prima di scrivere al rig.
-    // Compensa drift conoscuto: hz_corrected = hz + slope_ppm*hz*1e-6 + intercept_Hz.
-    double const dialHz = applyFrequencyCalibration(hz);
     if (isHamlibFamilyBackend(m_catBackend)) {
         activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend, dialHz, m_omniRigCat, m_legacyBackend);
         schedulePostQsyCatSettledSync(hz, reason);
@@ -16525,7 +16571,8 @@ void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& rea
             return;
         }
 
-        double const reportedHz = m_hamlibCat->frequency();
+        double const physicalReportedHz = m_hamlibCat->frequency();
+        double const reportedHz = logicalFrequencyFromCatDial(physicalReportedHz);
         bool const qsyStillCurrent =
             (m_localCatFrequencyTargetHz > 0.0
              && std::abs(m_localCatFrequencyTargetHz - hz) <= 1.0)
@@ -16535,9 +16582,10 @@ void DecodiumBridge::schedulePostQsyCatSettledSync(double hz, const QString& rea
             && reportedHz > 0.0
             && std::abs(reportedHz - hz) > 1.0) {
             int const nextAttempt = retryAttempt + 1;
-            bridgeLog(QStringLiteral("CAT post-QSY retry %1/2: requested=%2 Hz rig=%3 Hz (%4)")
+            bridgeLog(QStringLiteral("CAT post-QSY retry %1/2: requested=%2 Hz rig=%3 Hz logical=%4 Hz (%5)")
                           .arg(nextAttempt)
                           .arg(QString::number(hz, 'f', 0),
+                               QString::number(physicalReportedHz, 'f', 0),
                                QString::number(reportedHz, 'f', 0),
                                reason));
             activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend,
@@ -16622,24 +16670,10 @@ double DecodiumBridge::catSplitTxDialFrequencyHz() const
         return 0.0;
     }
 
-    double dialHz = 0.0;
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-    bool const localQsyGuardActive =
-        m_localCatFrequencyTargetHz > 0.0
-        && m_localCatFrequencyGuardUntilMs > 0
-        && nowMs <= m_localCatFrequencyGuardUntilMs;
-    if (localQsyGuardActive) {
-        dialHz = m_frequency;
-    }
-    if (dialHz <= 0.0 && isHamlibFamilyBackend(m_catBackend) && m_hamlibCat) {
-        dialHz = m_hamlibCat->frequency();
-    }
-    if (dialHz <= 0.0 && m_catBackend == QStringLiteral("cat4om") && m_cat4OmCat) {
-        dialHz = m_cat4OmCat->frequency();
-    }
-    if (dialHz <= 0.0) {
-        dialHz = m_frequency;
-    }
+    // m_frequency is always the logical/on-air dial.  CAT manager frequency
+    // properties contain the physical rig/IF dial and must not be calibrated
+    // a second time when the split TX VFO is derived.
+    double const dialHz = m_frequency;
     if (dialHz <= 0.0) {
         return 0.0;
     }
@@ -20183,7 +20217,7 @@ void DecodiumBridge::decoPortEnsureRigDriver()
         return;
 
     if (!m_decoPortRig) {
-        m_decoPortRig = new DecoPortRigDriver(this);
+        m_decoPortRig = new DecoPortRigDriver;
         connect(m_decoPortRig, &DecoPortRigDriver::opened, this, [](const QString& name) {
             bridgeLog(QStringLiteral("DecoPort rig driver: %1 open, talking to the radio directly")
                           .arg(name));
@@ -30028,6 +30062,12 @@ Radio::FrequencyDelta parseFrequencyOffsetHzValue(const QVariant& value, bool* o
     } else {
         hz = numeric;
     }
+    if (!std::isfinite(hz)
+        || hz < static_cast<double>(std::numeric_limits<Radio::FrequencyDelta>::min())
+        || hz > static_cast<double>(std::numeric_limits<Radio::FrequencyDelta>::max())) {
+        if (ok) *ok = false;
+        return 0;
+    }
     if (ok) *ok = true;
     return static_cast<Radio::FrequencyDelta>(std::llround(hz));
 }
@@ -30397,32 +30437,47 @@ double DecodiumBridge::workingFrequencyForBandMode(const QString& bandLambda, co
     ensureDefaultWorkingFrequencies(items);
 
     Bands bands;
-    auto matches = [&](WorkingFrequencyItem const& item) {
+    auto itemBandAndMode = [&](WorkingFrequencyItem const& item,
+                               QString* itemModeOut = nullptr) {
         QString const itemBand = bands.find(item.frequency_);
         QString const itemMode = QString::fromLatin1(Modes::name(item.mode_)).trimmed().toUpper();
+        if (itemModeOut) {
+            *itemModeOut = itemMode;
+        }
         return item.frequency_ > 0
-            && itemBand.compare(targetBand, Qt::CaseInsensitive) == 0
-            && itemMode == targetMode;
+            && itemBand.compare(targetBand, Qt::CaseInsensitive) == 0;
     };
 
-    Radio::Frequency firstAllRegion = 0;
-    Radio::Frequency firstAnyRegion = 0;
+    Radio::Frequency preferredAllMode = 0;
+    Radio::Frequency firstExactAllRegion = 0;
+    Radio::Frequency firstExactAnyRegion = 0;
     for (WorkingFrequencyItem const& item : std::as_const(items)) {
-        if (!matches(item)) {
+        QString itemMode;
+        if (!itemBandAndMode(item, &itemMode)) {
             continue;
         }
-        if (item.preferred_) {
+        if (itemMode == targetMode && item.preferred_) {
             return static_cast<double>(item.frequency_);
         }
-        if (item.region_ == IARURegions::ALL && firstAllRegion <= 0) {
-            firstAllRegion = item.frequency_;
+        // Satellite/cross-band entries are intentionally stored as mode ALL.
+        // When the operator marks one preferred it becomes the quick band QSY
+        // for the currently selected digital mode too.
+        if (itemMode == QStringLiteral("ALL") && item.preferred_ && preferredAllMode <= 0) {
+            preferredAllMode = item.frequency_;
         }
-        if (firstAnyRegion <= 0) {
-            firstAnyRegion = item.frequency_;
+        if (itemMode == targetMode) {
+            if (item.region_ == IARURegions::ALL && firstExactAllRegion <= 0) {
+                firstExactAllRegion = item.frequency_;
+            }
+            if (firstExactAnyRegion <= 0) {
+                firstExactAnyRegion = item.frequency_;
+            }
         }
     }
 
-    Radio::Frequency const fallback = firstAllRegion > 0 ? firstAllRegion : firstAnyRegion;
+    Radio::Frequency const fallback = preferredAllMode > 0
+        ? preferredAllMode
+        : (firstExactAllRegion > 0 ? firstExactAllRegion : firstExactAnyRegion);
     return fallback > 0 ? static_cast<double>(fallback) : 0.0;
 }
 
@@ -30628,7 +30683,7 @@ bool DecodiumBridge::saveWorkingFrequenciesFile(const QString& path)
 
 // 1.0.195 — QSY rapido a un preset Working Frequencies. Risolve l'index nella
 // lista corrente (rispetta filtri/sorting di workingFrequencyRows), legge
-// frequency_ + mode_ e chiama setFrequency + setMode in sequenza. Log audit.
+// frequency_ + mode_ e comanda il normale percorso QSY bridge/CAT. Log audit.
 void DecodiumBridge::qsyToWorkingFrequency(int index)
 {
     QVariantList const rows = workingFrequencyRows();
@@ -30667,7 +30722,7 @@ void DecodiumBridge::qsyToWorkingFrequency(int index)
                   .arg(mode.isEmpty() ? requestedMode : mode)
                   .arg(band)
                   .arg(desc.isEmpty() ? QStringLiteral("-") : desc));
-    setFrequency(static_cast<double>(freqHz));
+    requestRigFrequencyFromBridge(static_cast<double>(freqHz), QStringLiteral("working-frequency"));
     if (!mode.isEmpty() && mode != m_mode) {
         setMode(mode);
     }
@@ -30722,10 +30777,27 @@ bool DecodiumBridge::addStationFrequencyRow(const QString& band,
     }
     QVariant const raw = readSettingFromLegacyIni(QStringLiteral("stations"));
     StationList::Stations stations = raw.isValid() ? raw.value<StationList::Stations>() : StationList::Stations {};
-    stations << StationList::Station {cleanBand, offsetHz, antennaDescription.trimmed()};
+    bool replacedExistingBand = false;
+    for (StationList::Station& station : stations) {
+        if (station.band_name_.compare(cleanBand, Qt::CaseInsensitive) == 0) {
+            station = StationList::Station {cleanBand, offsetHz, antennaDescription.trimmed()};
+            replacedExistingBand = true;
+            break;
+        }
+    }
+    if (!replacedExistingBand) {
+        stations << StationList::Station {cleanBand, offsetHz, antennaDescription.trimmed()};
+    }
     syncSettingToLegacyIni(QStringLiteral("stations"), QVariant::fromValue(stations));
     emit settingValueChanged(QStringLiteral("stations"), QVariant::fromValue(stations));
-    emit statusMessage(QStringLiteral("Station information added for %1").arg(cleanBand));
+    if (m_currentCatLogicalBand.compare(cleanBand, Qt::CaseInsensitive) == 0) {
+        m_currentCatStationOffsetHz = offsetHz;
+    }
+    emit statusMessage(QStringLiteral("Station information %1 for %2: offset %3 MHz")
+                           .arg(replacedExistingBand ? QStringLiteral("updated")
+                                                     : QStringLiteral("added"),
+                                cleanBand,
+                                QString::number(static_cast<double>(offsetHz) / 1000000.0, 'f', 6)));
     return true;
 }
 
@@ -30760,10 +30832,18 @@ bool DecodiumBridge::updateStationFrequencyRow(int index,
         emit errorMessage(QStringLiteral("Invalid station information selection"));
         return false;
     }
+    QString const previousBand = stations.at(index).band_name_;
     stations[index] = StationList::Station {cleanBand, offsetHz, antennaDescription.trimmed()};
     syncSettingToLegacyIni(QStringLiteral("stations"), QVariant::fromValue(stations));
     emit settingValueChanged(QStringLiteral("stations"), QVariant::fromValue(stations));
-    emit statusMessage(QStringLiteral("Station information updated for %1").arg(cleanBand));
+    if (m_currentCatLogicalBand.compare(previousBand, Qt::CaseInsensitive) == 0
+        || m_currentCatLogicalBand.compare(cleanBand, Qt::CaseInsensitive) == 0) {
+        m_currentCatStationOffsetHz = static_cast<Radio::FrequencyDelta>(
+            std::llround(stationOffsetForFrequencyHz(m_frequency)));
+    }
+    emit statusMessage(QStringLiteral("Station information updated for %1: offset %2 MHz")
+                           .arg(cleanBand,
+                                QString::number(static_cast<double>(offsetHz) / 1000000.0, 'f', 6)));
     return true;
 }
 
@@ -30787,6 +30867,10 @@ bool DecodiumBridge::deleteStationFrequencyRow(int index)
     stations.removeAt(index);
     syncSettingToLegacyIni(QStringLiteral("stations"), QVariant::fromValue(stations));
     emit settingValueChanged(QStringLiteral("stations"), QVariant::fromValue(stations));
+    if (m_currentCatLogicalBand.compare(removedBand, Qt::CaseInsensitive) == 0) {
+        m_currentCatStationOffsetHz = static_cast<Radio::FrequencyDelta>(
+            std::llround(stationOffsetForFrequencyHz(m_frequency)));
+    }
     emit statusMessage(QStringLiteral("Station information deleted for %1").arg(removedBand));
     return true;
 }
@@ -30837,6 +30921,93 @@ double DecodiumBridge::stationOffsetForFrequencyHz(double hz) const
         }
     }
     return 0.0;
+}
+
+double DecodiumBridge::logicalFrequencyFromCatDial(
+    double rigHz,
+    QString* resolvedBand,
+    qint64* resolvedOffsetHz) const
+{
+    if (resolvedBand) {
+        resolvedBand->clear();
+    }
+    if (resolvedOffsetHz) {
+        *resolvedOffsetHz = 0;
+    }
+    if (rigHz <= 0.0) {
+        return 0.0;
+    }
+
+    double const scale = 1.0 + frequencyCalibrationSlopePpm() * 1e-6;
+    if (qFuzzyIsNull(scale)) {
+        return 0.0;
+    }
+    double const uncalibratedRigHz =
+        (rigHz - frequencyCalibrationInterceptHz()) / scale;
+    if (uncalibratedRigHz <= 0.0) {
+        return 0.0;
+    }
+
+    Bands bands;
+    auto acceptCandidate = [&](QString const& expectedBand,
+                               Radio::FrequencyDelta offsetHz,
+                               double* logicalHzOut) {
+        double const logicalHz = uncalibratedRigHz - static_cast<double>(offsetHz);
+        if (logicalHz <= 0.0
+            || logicalHz > static_cast<double>(std::numeric_limits<Radio::Frequency>::max())) {
+            return false;
+        }
+        QString const candidateBand =
+            bands.find(static_cast<Radio::Frequency>(std::llround(logicalHz)));
+        if (candidateBand.isEmpty()
+            || (!expectedBand.isEmpty()
+                && candidateBand.compare(expectedBand, Qt::CaseInsensitive) != 0)) {
+            return false;
+        }
+        if (logicalHzOut) {
+            *logicalHzOut = logicalHz;
+        }
+        if (resolvedBand) {
+            *resolvedBand = candidateBand;
+        }
+        if (resolvedOffsetHz) {
+            *resolvedOffsetHz = offsetHz;
+        }
+        return true;
+    };
+
+    // Preserve the active transverter mapping while the operator tunes within
+    // the same logical band.  This makes CAT polling a true inverse of the
+    // preceding local QSY instead of allowing the IF frequency to overwrite
+    // the displayed on-air frequency.
+    double logicalHz = 0.0;
+    if (!m_currentCatLogicalBand.isEmpty()
+        && acceptCandidate(m_currentCatLogicalBand,
+                           m_currentCatStationOffsetHz,
+                           &logicalHz)) {
+        return logicalHz;
+    }
+
+    // On startup there may be no active mapping yet.  Infer one only when a
+    // configured station offset maps the physical rig dial into that exact
+    // ADIF band; otherwise the report is an ordinary non-transverter dial.
+    QVariant const raw = readSettingFromLegacyIni(QStringLiteral("stations"));
+    StationList::Stations const stations =
+        raw.isValid() ? raw.value<StationList::Stations>() : StationList::Stations {};
+    for (StationList::Station const& station : stations) {
+        if (acceptCandidate(station.band_name_, station.offset_, &logicalHz)) {
+            return logicalHz;
+        }
+    }
+
+    if (uncalibratedRigHz > static_cast<double>(std::numeric_limits<Radio::Frequency>::max())) {
+        return 0.0;
+    }
+    if (resolvedBand) {
+        *resolvedBand = bands.find(
+            static_cast<Radio::Frequency>(std::llround(uncalibratedRigHz)));
+    }
+    return uncalibratedRigHz;
 }
 
 // 1.0.192/194 — Completamento Frequency Calibration + Station Offset chain:
@@ -41837,12 +42008,24 @@ void DecodiumBridge::logQsoNow()
         : defaultLogCommentForQso(logMode, logRptSent, logRptRcvd, logDxGrid);
     bool const saveSatellite = getSetting(QStringLiteral("SaveSatellite"), false).toBool();
     bool const saveSatMode = getSetting(QStringLiteral("SaveSatMode"), false).toBool();
+    bool const saveFreqRx = getSetting(QStringLiteral("SaveFreqRx"), false).toBool();
     if (saveSatellite) {
         logSatellite = getSetting(QStringLiteral("Satellite"), QString()).toString().trimmed();
         if (!logSatellite.isEmpty()) {
             logPropMode = QStringLiteral("SAT");
             if (saveSatMode) {
                 logSatMode = getSetting(QStringLiteral("SatMode"), QString()).toString().trimmed();
+            }
+            if (saveFreqRx) {
+                bool freqRxOk = false;
+                Radio::Frequency const freqRxHz = parseFrequencyHzValue(
+                    getSetting(QStringLiteral("FreqRx"), QString()), &freqRxOk);
+                if (freqRxOk && freqRxHz > 0) {
+                    logFreqRx = QString::number(
+                        static_cast<double>(freqRxHz) / 1000000.0, 'f', 6);
+                } else {
+                    bridgeLog(QStringLiteral("QSO log: invalid saved satellite RX frequency omitted"));
+                }
             }
         }
     }
@@ -54099,7 +54282,17 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
     QString const cleanPropMode = propMode.trimmed();
     QString const cleanSatellite = satellite.trimmed();
     QString const cleanSatMode = satMode.trimmed();
-    QString const cleanFreqRx = freqRx.trimmed();
+    QString cleanFreqRx;
+    QString cleanBandRx;
+    bool freqRxOk = false;
+    Radio::Frequency const freqRxHz = parseFrequencyHzValue(freqRx.trimmed(), &freqRxOk);
+    if (freqRxOk && freqRxHz > 0) {
+        cleanFreqRx = QString::number(static_cast<double>(freqRxHz) / 1000000.0, 'f', 6);
+        QString const candidateBandRx = bandFromFreqHz(static_cast<double>(freqRxHz));
+        if (candidateBandRx != QStringLiteral("OOB")) {
+            cleanBandRx = candidateBandRx;
+        }
+    }
     if (!cleanPropMode.isEmpty()) {
         record += bridgeAdifField(QStringLiteral("prop_mode"), cleanPropMode);
     }
@@ -54108,6 +54301,9 @@ static QString bridgeAdifRecordText(const QString& dxCall, const QString& dxGrid
     }
     if (!cleanSatMode.isEmpty()) {
         record += bridgeAdifField(QStringLiteral("sat_mode"), cleanSatMode);
+    }
+    if (!cleanBandRx.isEmpty()) {
+        record += bridgeAdifField(QStringLiteral("band_rx"), cleanBandRx);
     }
     if (!cleanFreqRx.isEmpty()) {
         record += bridgeAdifField(QStringLiteral("freq_rx"), cleanFreqRx);

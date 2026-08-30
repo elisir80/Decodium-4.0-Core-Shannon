@@ -36,6 +36,9 @@ Item {
         target: engine
         function onSettingValueChanged(key, value) {
             if (key === "uiDisabledBands") txPanel.bandDisabledCsv = String(value || "")
+            if (key === "FrequenciesForRegionModes_v2"
+                    || key === "FrequenciesForRegionModes")
+                txPanel.refreshWorkingFrequencyOptions()
         }
     }
     readonly property bool txVisualActive: !!(engine && (engine.transmitting || engine.tuning))
@@ -107,8 +110,48 @@ Item {
         refreshLogSatelliteChoices()
         if (!engine)
             return
-        setComboText(satelliteCombo, satelliteDisplayForCode(engine.getSetting("Satellite", "")))
+        var savedSatellite = String(engine.getSetting("Satellite", "") || "").trim()
+        setComboText(satelliteCombo, satelliteDisplayForCode(savedSatellite))
         setComboText(satModeCombo, engine.getSetting("SatMode", ""))
+        logFreqRxField.text = suggestedLogFreqRx(satelliteCodeFromDisplay(satelliteCombo.currentText))
+    }
+
+    function qo100DownlinkFrequencyMHz() {
+        if (!engine || typeof engine.workingFrequencyRows !== "function")
+            return "10489.540000"
+        var rows = engine.workingFrequencyRows()
+        for (var i = 0; rows && i < rows.length; ++i) {
+            var row = rows[i]
+            var description = row ? String(row.description || "").toUpperCase() : ""
+            if (description.indexOf("QO-100") >= 0
+                    && description.indexOf("DOWNLINK") >= 0) {
+                var hz = Number(row.frequencyHz || 0)
+                if (isFinite(hz) && hz > 0)
+                    return (hz / 1000000.0).toFixed(6)
+            }
+        }
+        return "10489.540000"
+    }
+
+    function suggestedLogFreqRx(satelliteCode) {
+        var code = String(satelliteCode || "").trim().toUpperCase()
+        if (code.length === 0 || !engine)
+            return ""
+        var savedSatellite = String(engine.getSetting("Satellite", "") || "").trim().toUpperCase()
+        var savedFreqRx = String(engine.getSetting("FreqRx", "") || "").trim()
+        if (savedSatellite === code
+                && engine.getSetting("SaveFreqRx", false)
+                && savedFreqRx.length > 0)
+            return savedFreqRx
+        return code === "QO-100" ? qo100DownlinkFrequencyMHz() : ""
+    }
+
+    function normalizedLogFreqRx() {
+        var text = String(logFreqRxField.text || "").trim().replace(",", ".")
+        if (text.length === 0)
+            return ""
+        var mhz = Number(text)
+        return isFinite(mhz) && mhz > 0 ? mhz.toFixed(6) : ""
     }
 
     function openTxMessageEditor(txNum, currentMessage) {
@@ -389,6 +432,8 @@ Item {
 
     readonly property bool isFt2LinkMode: displayModeName(engine ? engine.mode : "") === "FT2-Link"
     readonly property string normalizedOperatingMode: String(engine ? engine.mode : "").trim().toUpperCase()
+    property var workingFrequencyOptions: []
+    readonly property int toolbarFrequencyWidth: Math.max(84, Math.round(88 * toolbarScale))
     readonly property bool isWsprBeaconMode: normalizedOperatingMode === "WSPR"
                                                || normalizedOperatingMode === "FST4W"
                                                || normalizedOperatingMode.indexOf("FST4W-") === 0
@@ -423,6 +468,77 @@ Item {
         var idx = modeSelector.model.indexOf(mode)
         modeSelector.currentIndex = idx >= 0 ? idx : 0
     }
+
+    function canonicalWorkingFrequencyMode(mode) {
+        var normalized = String(mode || "").trim().toUpperCase()
+        if (normalized.indexOf("FST4W-") === 0)
+            return "FST4W"
+        if (normalized === "FT2-LINK" || normalized === "FT2LINK")
+            return "FT2"
+        return normalized
+    }
+
+    function formatWorkingFrequencyMHz(frequencyHz) {
+        var hz = Number(frequencyHz || 0)
+        return isFinite(hz) && hz > 0 ? (hz / 1000000.0).toFixed(6) : "--.------"
+    }
+
+    function compactWorkingFrequencyText() {
+        var hz = engine ? Number(engine.frequency || 0) : 0
+        if (hz <= 0)
+            return qsTr("Freq")
+        return (hz / 1000000.0).toFixed(6).replace(/0+$/, "").replace(/\.$/, "")
+    }
+
+    function refreshWorkingFrequencyOptions() {
+        if (!engine || typeof engine.workingFrequencyRows !== "function") {
+            workingFrequencyOptions = []
+            return
+        }
+
+        var targetMode = canonicalWorkingFrequencyMode(engine.mode)
+        var rows = engine.workingFrequencyRows()
+        var filtered = []
+        for (var i = 0; rows && i < rows.length; ++i) {
+            var row = rows[i]
+            var rowMode = row ? canonicalWorkingFrequencyMode(row.mode) : ""
+            if (!row || (rowMode !== targetMode && rowMode !== "ALL"))
+                continue
+            var hz = Number(row.frequencyHz || 0)
+            if (!isFinite(hz) || hz <= 0)
+                continue
+            filtered.push({
+                "workingIndex": Number(row.index),
+                "frequencyHz": Math.round(hz),
+                "frequencyMHz": formatWorkingFrequencyMHz(hz),
+                "band": String(row.band || "OOB"),
+                "preferred": !!row.preferred,
+                "description": String(row.description || ""),
+                "region": String(row.region || "")
+            })
+        }
+        workingFrequencyOptions = filtered
+        Qt.callLater(syncWorkingFrequencySelector)
+    }
+
+    function workingFrequencyIndexForCurrentDial() {
+        var dialHz = engine ? Math.round(Number(engine.frequency || 0)) : 0
+        if (dialHz <= 0)
+            return -1
+        for (var i = 0; i < workingFrequencyOptions.length; ++i) {
+            if (Math.abs(Number(workingFrequencyOptions[i].frequencyHz) - dialHz) <= 1)
+                return i
+        }
+        return -1
+    }
+
+    function syncWorkingFrequencySelector() {
+        if (typeof workingFrequencySelector === "undefined" || !workingFrequencySelector)
+            return
+        workingFrequencySelector.currentIndex = workingFrequencyIndexForCurrentDial()
+    }
+
+    Component.onCompleted: refreshWorkingFrequencyOptions()
 
     function wsprPowerDbmFromLabel(label) {
         var parsed = parseInt(String(label || ""), 10)
@@ -701,6 +817,10 @@ Item {
                                     target: engine
                                     function onModeChanged() {
                                         txPanel.syncModeSelector()
+                                        txPanel.refreshWorkingFrequencyOptions()
+                                    }
+                                    function onFrequencyChanged() {
+                                        txPanel.syncWorkingFrequencySelector()
                                     }
                                     function onFt2LinkAccessChanged() {
                                         txPanel.syncModeSelector()
@@ -717,6 +837,167 @@ Item {
                                 bottomPadding: 4
                                 bgColor: "transparent"
                                 borderColor: "transparent"
+                            }
+                        }
+
+                        Rectangle {
+                            id: workingFrequencyFrame
+                            visible: !txPanel.isFt2LinkMode
+                                     && txPanel.workingFrequencyOptions.length > 0
+                            width: visible ? txPanel.toolbarFrequencyWidth : 0
+                            height: visible ? txPanel.toolbarButtonHeight : 0
+                            radius: 5
+                            color: Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.08)
+                            border.color: workingFrequencySelector.popup.visible
+                                          ? secondaryCyan : glassBorder
+                            border.width: workingFrequencySelector.popup.visible ? 2 : 1
+
+                            ComboBox {
+                                id: workingFrequencySelector
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                model: txPanel.workingFrequencyOptions
+                                currentIndex: -1
+                                leftPadding: 4
+                                rightPadding: 10
+                                topPadding: 3
+                                bottomPadding: 3
+
+                                onActivated: function(index) {
+                                    if (!engine || index < 0
+                                            || index >= txPanel.workingFrequencyOptions.length)
+                                        return
+                                    var row = txPanel.workingFrequencyOptions[index]
+                                    if (row && row.workingIndex >= 0)
+                                        engine.qsyToWorkingFrequency(row.workingIndex)
+                                }
+
+                                contentItem: Text {
+                                    text: txPanel.compactWorkingFrequencyText()
+                                    color: workingFrequencySelector.currentIndex >= 0
+                                           ? secondaryCyan : textPrimary
+                                    font.family: decodiumMonoFontFamily
+                                    font.pixelSize: Math.max(10, Math.round(10 * txPanel.toolbarScale))
+                                    font.bold: workingFrequencySelector.currentIndex >= 0
+                                    horizontalAlignment: Text.AlignLeft
+                                    verticalAlignment: Text.AlignVCenter
+                                    elide: Text.ElideRight
+                                    leftPadding: workingFrequencySelector.leftPadding
+                                    rightPadding: workingFrequencySelector.rightPadding
+                                    renderType: Text.QtRendering
+                                }
+
+                                indicator: Text {
+                                    x: workingFrequencySelector.width - width - 2
+                                    y: Math.round((workingFrequencySelector.height - height) / 2)
+                                    text: "\u25BE"
+                                    color: secondaryCyan
+                                    font.family: decodiumMonoFontFamily
+                                    font.pixelSize: 12
+                                    renderType: Text.QtRendering
+                                }
+
+                                background: Rectangle { color: "transparent" }
+
+                                delegate: ItemDelegate {
+                                    id: frequencyOptionDelegate
+                                    required property int index
+                                    readonly property var optionRow: txPanel.workingFrequencyOptions[index]
+                                    readonly property bool isCurrent: engine
+                                                                      && optionRow
+                                                                      && Math.abs(Number(engine.frequency || 0)
+                                                                                  - Number(optionRow.frequencyHz || 0)) <= 1
+                                    width: ListView.view ? ListView.view.width : workingFrequencySelector.popup.width - 8
+                                    height: 36
+                                    highlighted: workingFrequencySelector.highlightedIndex === index
+
+                                    contentItem: RowLayout {
+                                        spacing: 7
+                                        Text {
+                                            text: frequencyOptionDelegate.optionRow
+                                                  && frequencyOptionDelegate.optionRow.preferred ? "\u2605" : " "
+                                            color: accentGreen
+                                            font.pixelSize: 12
+                                            Layout.preferredWidth: 14
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+                                        Text {
+                                            text: frequencyOptionDelegate.optionRow
+                                                  ? frequencyOptionDelegate.optionRow.frequencyMHz + " MHz" : ""
+                                            color: frequencyOptionDelegate.isCurrent ? secondaryCyan : textPrimary
+                                            font.family: decodiumMonoFontFamily
+                                            font.pixelSize: 11
+                                            font.bold: frequencyOptionDelegate.isCurrent
+                                            Layout.preferredWidth: 112
+                                        }
+                                        Text {
+                                            text: frequencyOptionDelegate.optionRow
+                                                  ? frequencyOptionDelegate.optionRow.band : ""
+                                            color: secondaryCyan
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            Layout.preferredWidth: 42
+                                        }
+                                        Text {
+                                            text: {
+                                                if (!frequencyOptionDelegate.optionRow)
+                                                    return ""
+                                                var description = frequencyOptionDelegate.optionRow.description
+                                                var region = frequencyOptionDelegate.optionRow.region
+                                                if (description.length > 0 && region.length > 0)
+                                                    return description + "  ·  " + region
+                                                return description.length > 0 ? description : region
+                                            }
+                                            color: textSecondary
+                                            font.pixelSize: 10
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+
+                                    background: Rectangle {
+                                        color: frequencyOptionDelegate.highlighted
+                                               ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.30)
+                                               : (frequencyOptionDelegate.isCurrent
+                                                  ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.13)
+                                                  : "transparent")
+                                        radius: 4
+                                    }
+                                }
+
+                                popup: Popup {
+                                    id: workingFrequencyPopup
+                                    width: Math.max(workingFrequencySelector.width,
+                                                    Math.min(390, Math.max(260, txPanel.width - 24)))
+                                    height: Math.min(workingFrequencyPopupList.contentHeight + 8, 360)
+                                    x: 0
+                                    y: -height - 2
+                                    padding: 4
+                                    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                                    contentItem: ListView {
+                                        id: workingFrequencyPopupList
+                                        clip: true
+                                        model: workingFrequencySelector.popup.visible
+                                               ? workingFrequencySelector.delegateModel : null
+                                        currentIndex: workingFrequencySelector.highlightedIndex
+                                        highlightMoveDuration: 0
+                                        boundsBehavior: Flickable.StopAtBounds
+                                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                                    }
+
+                                    background: Rectangle {
+                                        color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.99)
+                                        border.color: secondaryCyan
+                                        border.width: 1
+                                        radius: 6
+                                    }
+                                }
+
+                                ToolTip.visible: hovered
+                                ToolTip.delay: 500
+                                ToolTip.text: qsTr("Select a %1 working frequency; starred entries are preferred")
+                                                  .arg(txPanel.displayModeName(engine ? engine.mode : ""))
                             }
                         }
 
@@ -2027,7 +2308,7 @@ Item {
         title: qsTr("Confirm QSO logging")
         color: "transparent"
         width: 570
-        height: 560
+        height: 602
 
         // Geometria di uno schermo con le proprieta' che QML espone davvero.
         // Gli elementi di Qt.application.screens sono QQuickScreenInfo e NON
@@ -2417,6 +2698,10 @@ Item {
                     Layout.preferredHeight: 34
                     font.pixelSize: 12
                     popupMinWidth: 320
+                    onActivated: {
+                        logFreqRxField.text = txPanel.suggestedLogFreqRx(
+                                    txPanel.satelliteCodeFromDisplay(currentText))
+                    }
                 }
 
                 Text { text: qsTr("Sat Mode:"); color: textSecondary; font.pixelSize: 13 }
@@ -2428,6 +2713,31 @@ Item {
                     font.pixelSize: 12
                     popupMinWidth: 120
                     enabled: txPanel.satelliteCodeFromDisplay(satelliteCombo.currentText).length > 0
+                }
+
+                Text { text: qsTr("RX / downlink MHz:"); color: textSecondary; font.pixelSize: 13 }
+                DecoTextField {
+                    id: logFreqRxField
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    enabled: txPanel.satelliteCodeFromDisplay(satelliteCombo.currentText).length > 0
+                    color: textPrimary
+                    selectedTextColor: bgDeep
+                    selectionColor: accentGreen
+                    font.pixelSize: 13
+                    font.family: decodiumMonoFontFamily
+                    selectByMouse: true
+                    placeholderText: qsTr("e.g. 10489.540000")
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    validator: RegularExpressionValidator {
+                        regularExpression: /^(?:$|\d+(?:[.,]\d{0,6})?)$/
+                    }
+                    background: Rectangle {
+                        radius: 4
+                        color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.08)
+                        border.color: logFreqRxField.activeFocus ? accentGreen : glassBorder
+                        border.width: 1
+                    }
                 }
 
                 Text { text: qsTr("DX Cluster:"); color: textSecondary; font.pixelSize: 13 }
@@ -2497,11 +2807,14 @@ Item {
                         if (engine) {
                             var satCode = txPanel.satelliteCodeFromDisplay(satelliteCombo.currentText)
                             var satMode = satCode.length > 0 ? String(satModeCombo.currentText || "").trim() : ""
+                            var freqRx = satCode.length > 0 ? txPanel.normalizedLogFreqRx() : ""
                             engine.setSetting("Satellite", satCode)
                             engine.setSetting("SatMode", satMode)
+                            engine.setSetting("FreqRx", freqRx)
                             engine.setSetting("PropMode", satCode.length > 0 ? "SAT" : "")
                             engine.setSetting("SaveSatellite", satCode.length > 0)
                             engine.setSetting("SaveSatMode", satCode.length > 0 && satMode.length > 0)
+                            engine.setSetting("SaveFreqRx", satCode.length > 0 && freqRx.length > 0)
                             engine.setSetting("SavePropMode", satCode.length > 0)
                             if (engine.setNextLogComment)
                                 engine.setNextLogComment(logCommentField.text)

@@ -1,5 +1,10 @@
-// decodium_bridge.cpp — fastldpc dietro la stessa firma del decoder LDPC di
-// Decodium 4, per poterlo sostituire cambiando una riga sola.
+// decodium_bridge.cpp — backend SIMD del decoder fastldpc.
+//
+// Questo file e' intenzionalmente una translation unit separata, compilata
+// con AVX2/FMA sui target x86-64 oppure con NEON sui target ARM64. Le API
+// pubbliche, il rilevamento CPU e il fallback generico vivono in
+// decodium_dispatch.cpp, che chiama questo backend soltanto dopo aver
+// verificato tutte le capacita' richieste dall'architettura in uso.
 //
 // In Detector/FtxFt2Stage7.cpp:
 //     ftx_decode174_91_c (llr.data (), 91, maxosd, 3, apmask.data (), ...);
@@ -22,8 +27,8 @@
 //  * Keff diverso da 91 non e' supportato: si ricade sul decoder originale.
 //
 //  * UNA PAROLA PER CHIAMATA E' LO SPRECO PRINCIPALE. Il min-sum lavora su 16
-//    parole per registro AVX2, quindi con una sola parola utile si buttano 15
-//    corsie. Se il chiamante puo' raccogliere i candidati e decodificarli
+//    parole per registro AVX2 oppure 8 per registro NEON; con una sola parola
+//    utile quasi tutte le corsie restano vuote. Se il chiamante puo' raccogliere i candidati e decodificarli
 //    insieme (Ft2Decoder::decode_batch), il costo per parola cala di circa un
 //    ordine di grandezza. Con kFt2MaxCand = 300 candidati per passata, e' la
 //    differenza fra ~100 us e ~14 us a candidato.
@@ -31,7 +36,6 @@
 //  * Un'istanza per thread (thread_local): FT2DecodeWorker decodifica in
 //    parallelo e il decoder ha stato interno.
 #include "ft2_decoder.hpp"
-#include <atomic>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -39,71 +43,6 @@
 #include <string>
 
 extern "C" void ftx_ldpc174_91_tables_c (int* Mn_out, int* Nm_out, int* nrw_out, int* ncw_out);
-
-// Il decoder originale di Decodium: e' la via di fuga se la CPU non ha AVX2.
-extern "C" void ftx_decode174_91_c (float const*, int, int, int, signed char const*,
-                                    signed char*, signed char*, int*, int*, float*);
-
-// Questo file va compilato con -mavx2 anche quando il resto del programma e'
-// per x86-64 generico, altrimenti MinSumV3 diventa un alias della versione
-// scalare e si perde tutto il guadagno. Il binario resta pero' eseguibile su
-// CPU senza AVX2: la scelta si fa a runtime, una volta sola.
-// Interruttore a runtime, per confrontare i due decoder sulla stessa banda
-// senza ricompilare:
-//     DECODIUM_FT2_DISABLE_FASTLDPC=1   -> torna al decoder originale
-// Letto una volta sola, come le altre variabili del Detector: per alternare
-// va riavviato il programma. All'avvio la scelta viene stampata su stderr,
-// cosi' non si resta in dubbio su quale decoder sta girando.
-// -1 = nessuna scelta dall'interfaccia, vale la variabile d'ambiente.
-// 0/1 = l'utente ha deciso dalle impostazioni. Atomica perche' il decoder gira
-// nel thread di FT2DecodeWorker mentre l'interruttore si muove in quello della
-// GUI.
-static std::atomic<int> g_enabled_from_ui {-1};
-
-// Chiamata da DecodiumBridge quando si tocca l'interruttore nelle impostazioni.
-extern "C" void fastldpc_set_enabled_c (int on) {
-    g_enabled_from_ui.store (on ? 1 : 0, std::memory_order_relaxed);
-    std::fputs (on ? "[fastldpc] decoder FT2: fastldpc (da impostazioni)\n"
-                   : "[fastldpc] decoder FT2: originale (da impostazioni)\n", stderr);
-}
-
-// Quale decoder e' attivo in questo momento: serve alla GUI per mostrare lo
-// stato giusto anche quando la scelta viene dalla variabile d'ambiente.
-extern "C" int fastldpc_is_enabled_c ();
-
-static bool fastldpc_disabled () {
-    const int ui = g_enabled_from_ui.load (std::memory_order_relaxed);
-    if (ui >= 0) return ui == 0;
-    static const bool off = [] {
-        char const* raw = std::getenv ("DECODIUM_FT2_DISABLE_FASTLDPC");
-        const bool v = raw && std::atoi (raw) != 0;
-        std::fputs (v ? "[fastldpc] decoder FT2: originale"
-                        " (fastldpc disattivato da variabile d'ambiente)\n"
-                      : "[fastldpc] decoder FT2: fastldpc\n", stderr);
-        return v;
-    }();
-    return off;
-}
-
-static bool cpu_has_avx2 ();
-
-extern "C" int fastldpc_is_enabled_c () {
-    return (!fastldpc_disabled () && cpu_has_avx2 ()) ? 1 : 0;
-}
-
-static bool cpu_has_avx2 () {
-#if (defined(__i386__) || defined(__x86_64__)) \
-    && (defined(__GNUC__) || defined(__clang__))
-    static const bool ok = __builtin_cpu_supports ("avx2");
-#elif defined(_M_IX86) || defined(_M_X64)
-    static const bool ok = true;   // MSVC: usare /arch:AVX2 sul solo file
-#else
-    // Il file viene compilato anche su ARM per mantenere la stessa API
-    // pubblica; MinSumV3 e' allora l'alias scalare MinSumV2.
-    static const bool ok = false;
-#endif
-    return ok;
-}
 
 namespace {
 
@@ -151,7 +90,7 @@ const Code& shared_code () {
 // ed e' il prezzo giusto: un filtro non deve rendere cieco il decoder.
 static thread_local bool g_modo_ft8 = false;
 
-extern "C" void fastldpc_set_ft8_mode_c (int on) { g_modo_ft8 = on != 0; }
+extern "C" void fastldpc_simd_set_ft8_mode_c (int on) { g_modo_ft8 = on != 0; }
 
 // Manopole per misurare in FT8 quanto costa ciascun filtro tarato su FT2.
 // Si applicano a TUTTI i preset e SOLO in modalita' FT8: la taratura FT2
@@ -330,26 +269,19 @@ static int fastldpc_max_hard () {
     return g_modo_ft8 ? 58 : 22;
 }
 
-extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxosd, int norder,
-                                         signed char const* apmask_in, signed char* message91_out,
-                                         signed char* cw_out, int* ntype_out,
-                                         int* nharderror_out, float* dmin_out)
+extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
+                                              int maxosd, int norder,
+                                              signed char const* apmask_in,
+                                              signed char* message91_out,
+                                              signed char* cw_out, int* ntype_out,
+                                              int* nharderror_out, float* dmin_out)
 {
     if (message91_out) std::memset (message91_out, 0, 91);
     if (cw_out) std::memset (cw_out, 0, kN);
     if (ntype_out) *ntype_out = 0;
     if (nharderror_out) *nharderror_out = -1;
     if (dmin_out) *dmin_out = 0.0f;
-    if (!llr_in || !apmask_in) return;
-
-    // Keff diverso da 91, CPU senza AVX2, o interruttore alzato: si torna al
-    // decoder originale, che resta linkato. Il chiamante non sa nulla di tutto
-    // questo e il comportamento e' identico a prima dell'innesto.
-    if (Keff != 91 || !cpu_has_avx2 () || fastldpc_disabled ()) {
-        ftx_decode174_91_c (llr_in, Keff, maxosd, norder, apmask_in, message91_out,
-                            cw_out, ntype_out, nharderror_out, dmin_out);
-        return;
-    }
+    if (!llr_in || !apmask_in || Keff != 91) return;
 
     Ft2Decoder& dec = decoder_for_preset (norder);
 
@@ -424,9 +356,9 @@ extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxo
 // ---------------------------------------------------------------------------
 // Versione a blocco.
 //
-// Il min-sum lavora su 16 parole per registro AVX2: con una parola per chiamata
-// quindici corsie su sedici restano vuote e si paga il batch intero per una
-// parola sola. FT2 prova fino a 6 ipotesi AP sullo stesso candidato, e sono
+// Il min-sum lavora su 16 parole per registro AVX2 o 8 per registro NEON: con
+// una parola per chiamata quasi tutte le corsie restano vuote e si paga il
+// batch intero per una parola sola. FT2 prova fino a 6 ipotesi AP sullo stesso candidato, e sono
 // indipendenti fra loro (llr e apmask non dipendono dall'esito delle
 // precedenti), quindi possono viaggiare insieme.
 //
@@ -438,28 +370,17 @@ extern "C" void fastldpc_decode174_91_c (float const* llr_in, int Keff, int maxo
 // llr_in, apmask_in: [n][174] contigui. Le uscite sono [n] o [n][...].
 // Il chiamante scorre poi i risultati nell'ordine originale e prende il primo
 // valido: la semantica resta quella del ciclo sequenziale.
-extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llr_in,
-                                               signed char const* apmask_in,
-                                               int Keff, int maxosd, int norder,
-                                               signed char* message91_out, signed char* cw_out,
-                                               int* ntype_out, int* nharderror_out,
-                                               float* dmin_out)
+extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
+                                                    signed char const* apmask_in,
+                                                    int Keff, int maxosd, int norder,
+                                                    signed char* message91_out,
+                                                    signed char* cw_out,
+                                                    int* ntype_out,
+                                                    int* nharderror_out,
+                                                    float* dmin_out)
 {
-    if (n <= 0 || !llr_in || !apmask_in) return;
-
-    // Fuori dai casi supportati si ricade sulla via singola, che a sua volta
-    // sa tornare al decoder originale.
-    if (Keff != 91 || !cpu_has_avx2 () || fastldpc_disabled ()) {
-        for (int w = 0; w < n; ++w)
-            fastldpc_decode174_91_c (llr_in + (size_t) w * kN, Keff, maxosd, norder,
-                                     apmask_in + (size_t) w * kN,
-                                     message91_out ? message91_out + (size_t) w * 91 : nullptr,
-                                     cw_out ? cw_out + (size_t) w * kN : nullptr,
-                                     ntype_out ? ntype_out + w : nullptr,
-                                     nharderror_out ? nharderror_out + w : nullptr,
-                                     dmin_out ? dmin_out + w : nullptr);
-        return;
-    }
+    if (n <= 0 || !llr_in || !apmask_in || Keff != 91) return;
+    (void) maxosd; // mantenuto nella firma pubblica per compatibilita' ABI
 
     Ft2Decoder& dec = decoder_for_preset (norder);
 

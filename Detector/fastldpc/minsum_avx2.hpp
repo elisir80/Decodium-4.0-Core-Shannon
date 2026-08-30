@@ -13,7 +13,11 @@
 #pragma once
 #include "decoder.hpp"   // Code, MinSumV2, crc14_ok
 
-#if defined(__AVX2__)
+#if defined(__ARM_NEON) || defined(__ARM_NEON__) || defined(_M_ARM64)
+
+#include "minsum_neon.hpp"
+
+#elif defined(__AVX2__)
 #include <immintrin.h>
 
 class MinSumV3 {

@@ -5177,7 +5177,7 @@ ApplicationWindow {
                                 ToolTip.text: qsTr("Gallager — deep dig for weak signals.\nEnables a second decoding pass (LDPC subpass\nparallelized across cores, named after R. Gallager, father of LDPC)\nthat recovers near-noise stations missed by the normal decode.\nRequires a multi-core CPU: on old PCs it may burden the audio\n→ in that case leave it off.")
                             }
 
-                            // fastldpc — decoder LDPC vettorizzato AVX2 per FT2
+                            // fastldpc — decoder LDPC SIMD per FT2 (AVX2 o NEON)
                             Rectangle {
                                 Layout.preferredWidth: 38
                                 Layout.preferredHeight: 16
@@ -5213,7 +5213,7 @@ ApplicationWindow {
                                 }
 
                                 ToolTip.visible: fastLdpcMA.containsMouse
-                                ToolTip.text: qsTr("Fast LDPC — vectorized FT2 decoder (AVX2).\nDecodes the same words far quicker than the original decoder,\nfreeing CPU for the rest of the cycle. Falls back to the original\ndecoder automatically on CPUs without AVX2.\nTurn it off if you see decodes that look wrong.")
+                                ToolTip.text: qsTr("Fast LDPC — vectorized FT2 decoder (NEON on Apple Silicon/ARM64, AVX2 on x86).\nDecodes the same words far quicker than the original decoder,\nfreeing CPU for the rest of the cycle. Falls back to the original\ndecoder automatically when the required SIMD backend is unavailable.\nTurn it off if you see decodes that look wrong.")
                             }
                         }
                     }
@@ -11347,25 +11347,6 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     }
 
     Loader {
-        id: decometerWindowLoader
-        // Riempie la finestra come astroWindowLoader: al Dialog servono
-        // coordinate della finestra per potersi centrare e spostare.
-        anchors.fill: parent
-        active: false
-        asynchronous: true
-        source: "components/DecometerWindow.qml"
-        property var pendingAction: null
-        onLoaded: {
-            console.log("Lazy component loaded: DecometerWindow")
-            if (pendingAction) {
-                var action = pendingAction
-                pendingAction = null
-                action(item)
-            }
-        }
-    }
-
-    Loader {
         id: satelliteWindowLoader
         // A Popup/Dialog must keep its own dimensions.  Filling the main
         // window here forces the loaded SatelliteWindow to become a giant
@@ -12150,6 +12131,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     Window {
         id: decometerFloatingWindow
         property bool contentRequested: false
+        property bool showPending: false
         readonly property real faceAspectRatio: 15 / 7
         readonly property int screenLimitedMaximumWidth: {
             if (!screen || !screen.availableGeometry)
@@ -12172,8 +12154,12 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         title: qsTr("DECØMETER - RF Meter - Decodium")
         color: "transparent"
 
-        x: mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
-        y: mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+        // Do not bind the desktop position to width/height.  A native move does
+        // not necessarily remove a QML binding, so the old centred bindings
+        // could move the instrument back whenever its proportional size was
+        // normalised after a drag or a resize.
+        x: 0
+        y: 0
 
         function finishDesktopMove() {
             mainWindow.finishFloatingWindowDrag(decometerFloatingWindow, faceAspectRatio)
@@ -12203,35 +12189,55 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             setProportionalWidth(900 * scale)
         }
 
-        function showHostedWindow() {
+        function presentHostedWindow() {
             normalizeProportionalSize()
-            contentRequested = true
             show()
             raise()
             requestActivate()
-            if (decometerFloatingLoader.item && !decometerFloatingLoader.item.visible)
-                decometerFloatingLoader.item.open()
+            if (decometerFloatingLoader.item)
+                decometerFloatingLoader.item.activateHostedPanel()
         }
 
-        function hideAfterDialogClosed() {
+        function showHostedWindow() {
+            // Build the relatively complex Canvas face while this native
+            // window is still hidden.  Exposing the window first and then
+            // attaching an asynchronously-created scene graph can race the
+            // Qt 6.11 Metal render thread (the crash is in
+            // QSGThreadedRenderLoop::update).  The Loader completes this
+            // request from onLoaded.
+            contentRequested = true
+            if (!decometerFloatingLoader.item) {
+                showPending = true
+                return
+            }
+            showPending = false
+            presentHostedWindow()
+        }
+
+        function hideHostedContent() {
+            showPending = false
             hide()
             mainWindow.scheduleWindowStateSave()
         }
 
         function hideHostedWindow() {
-            if (decometerFloatingLoader.item && decometerFloatingLoader.item.visible) {
-                decometerFloatingLoader.item.close()
-                return
-            }
-            hideAfterDialogClosed()
+            hideHostedContent()
         }
 
         Component.onCompleted: {
-            mainWindow.restoreFloatingWindowState(decometerFloatingWindow,
-                                                  "decometerFloatingWindow",
-                                                  "",
-                                                  "")
+            var restoredState = mainWindow.restoreFloatingWindowState(decometerFloatingWindow,
+                                                                       "decometerFloatingWindow",
+                                                                       "",
+                                                                       "")
             normalizeProportionalSize()
+            // A first launch has no saved geometry.  Centre it once, but leave
+            // x/y as ordinary values afterwards so every edge and corner of the
+            // active screen remains reachable.
+            if (!isFinite(Number(restoredState.x)) || !isFinite(Number(restoredState.y))) {
+                x = mainWindow.x + Math.max(24, Math.round((mainWindow.width - width) / 2))
+                y = mainWindow.y + Math.max(48, Math.round((mainWindow.height - height) / 2))
+                mainWindow.finishFloatingWindowDrag(decometerFloatingWindow, faceAspectRatio)
+            }
         }
         onXChanged: mainWindow.scheduleWindowStateSave()
         onYChanged: mainWindow.scheduleWindowStateSave()
@@ -12258,28 +12264,17 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
             source: "components/DecometerWindow.qml"
             onLoaded: {
                 item.nativeHostWindow = decometerFloatingWindow
-                if (decometerFloatingWindow.visible && !item.visible)
-                    item.open()
+                if (decometerFloatingWindow.showPending) {
+                    decometerFloatingWindow.showPending = false
+                    decometerFloatingWindow.presentHostedWindow()
+                }
             }
-        }
-
-        Connections {
-            target: decometerFloatingLoader.item
-            ignoreUnknownSignals: true
-            function onClosed() { decometerFloatingWindow.hideAfterDialogClosed() }
         }
 
         ProportionalResizeHandles {
             id: decometerResizeHandles
-            // Il contenuto della finestra e' un Dialog, e un Dialog vive
-            // nell'Overlay: l'overlay sta SOPRA i figli normali del
-            // contentItem qualunque sia il loro z, perche' e' un livello a
-            // parte e non un fratello. Le maniglie erano figlie del
-            // contentItem, quindi restavano sepolte sotto il quadrante e non
-            // ricevevano un solo click: la finestra risultava non
-            // ridimensionabile pur avendo gli angoli al loro posto.
-            // Mettendole nell'overlay tornano a essere la cosa piu' in alto.
-            parent: Overlay.overlay
+            // The face is now a normal Loader item, so z-ordering is sufficient
+            // and no cross-overlay reparenting is required.
             targetWindow: decometerFloatingWindow
             aspectRatio: decometerFloatingWindow.faceAspectRatio
             minWidth: decometerFloatingWindow.minimumWidth

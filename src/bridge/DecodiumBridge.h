@@ -131,9 +131,10 @@ class RemoteCommandServer;
 class DecodeHistoryWorker;  // 1.0.238 Phase 5.2 perf roadmap: write-behind SQLite
 class QSqlDatabase;          // 1.0.268 Phase 5.3 query API (forward decl)
 
-// Detector/fastldpc/decodium_bridge.cpp: accende o spegne il decoder LDPC
-// veloce per FT2. Il decoder gira nel thread di FT2DecodeWorker, la funzione
-// scrive una variabile atomica.
+// Detector/fastldpc/decodium_dispatch.cpp: accende o spegne il decoder LDPC
+// veloce per FT2. Il dispatcher seleziona NEON su ARM64, AVX2/FMA su x86 o il
+// fallback generico. Il decoder gira nel thread di FT2DecodeWorker e la
+// funzione scrive una variabile atomica.
 extern "C" void fastldpc_set_enabled_c(int on);
 extern "C" int  fastldpc_is_enabled_c();
 
@@ -1661,9 +1662,15 @@ public:
     // dalle Station Frequencies (antenna offsets, sub-band correction).
     // Ritorna 0 se la freq e' OOB o se non c'e' record per quella banda.
     double stationOffsetForFrequencyHz(double hz) const;
+    // Convert a physical CAT/IF dial report back to Decodium's logical
+    // on-air frequency.  This is the inverse of applyFrequencyCalibration()
+    // and keeps transverter offsets out of the user-facing dial/band state.
+    double logicalFrequencyFromCatDial(double rigHz,
+                                       QString* resolvedBand = nullptr,
+                                       qint64* resolvedOffsetHz = nullptr) const;
     // 1.0.195 — QSY rapido a un preset Working Frequencies (index nella tabella
-    // restituita da workingFrequencyRows()). Chiama setFrequency + setMode in
-    // sequenza. Log [QSY-Preset] su ogni invocazione (audit/diagnostic).
+    // restituita da workingFrequencyRows()). Usa il normale percorso QSY CAT
+    // e poi applica il modo. Log [QSY-Preset] su ogni invocazione.
     Q_INVOKABLE void qsyToWorkingFrequency(int index);
     Q_INVOKABLE QVariantMap pendingLogQsoPreview() const;
     Q_INVOKABLE QStringList satelliteOptions() const;
@@ -2973,6 +2980,8 @@ private:
     qint64 m_lastUiStallLogMs {0};
     double m_localCatFrequencyTargetHz {0.0};
     double m_localCatFrequencyPreviousHz {0.0};
+    QString m_currentCatLogicalBand;
+    qint64 m_currentCatStationOffsetHz {0};
     qint64 m_localCatFrequencyGuardUntilMs {0};
     quint64 m_catQsySettleSerial {0};
     qint64 m_catFrequencySettleUntilMs {0};
