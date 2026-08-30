@@ -8871,7 +8871,7 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
               fp_dd_bins[static_cast<size_t> (fp_b)] = std::move (fp_dd_bin);
             }
         };
-      int const fp_threads = std::max (1, ft8_thread_budget ().load ());
+      [[maybe_unused]] int const fp_threads = std::max (1, ft8_thread_budget ().load ());
 #pragma omp parallel for schedule (dynamic) if (fp_isolate) num_threads (fp_threads)
       for (int fp_b = 0; fp_b < fp_nbins; ++fp_b)
         fp_process_bin (fp_b);
