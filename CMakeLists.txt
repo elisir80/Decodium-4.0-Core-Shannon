@@ -218,6 +218,25 @@ if (DECODIUM_ENABLE_HAMDRM AND NOT DECODIUM_ENABLE_SSTV)
     "DECODIUM_ENABLE_HAMDRM requires DECODIUM_ENABLE_SSTV=ON; "
     "the analog target remains independent when HAMDRM is disabled")
 endif ()
+# DecoRTTY innestato: RTTY su VITA-49, FlexRadio diretto e FT-991A via
+# gateway. Vedi doc/PIANO_INTEGRAZIONE_DECORTTY.md.
+option (DECODIUM_ENABLE_RTTY
+  "Build the DecoRTTY subsystem (RTTY over VITA-49) inside Decodium" ON)
+set (DECORTTY_VERSION "0.7.2" CACHE STRING "DecoRTTY version stamped into the gateway")
+if (DECODIUM_ENABLE_RTTY)
+  # Opus serve solo alla trasmissione: senza, si riceve lo stesso.
+  find_package (PkgConfig QUIET)
+  if (PkgConfig_FOUND)
+    pkg_check_modules (DECORTTY_OPUS IMPORTED_TARGET opus)
+  endif ()
+  if (TARGET PkgConfig::DECORTTY_OPUS)
+    set (DECORTTY_OPUS_TARGET PkgConfig::DECORTTY_OPUS)
+    message (STATUS "DecoRTTY: Opus trovato, trasmissione disponibile")
+  else ()
+    set (DECORTTY_OPUS_TARGET "")
+    message (STATUS "DecoRTTY: Opus assente, sola ricezione")
+  endif ()
+endif ()
 option (DECODIUM_ENABLE_SSTV_FUZZING
   "Build Clang/libFuzzer SSTV parser targets (developer-only)" OFF)
 if (DECODIUM_ENABLE_SSTV_FUZZING)
@@ -1346,6 +1365,10 @@ set_target_properties (ft2link_core PROPERTIES
 
 if (DECODIUM_ENABLE_SSTV)
   add_subdirectory (src/sstv)
+endif ()
+
+if (DECODIUM_ENABLE_RTTY)
+  add_subdirectory (src/rtty)
 endif ()
 
 if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/tests AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
