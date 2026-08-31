@@ -1531,59 +1531,6 @@ SettingsPageScroll {
             }
         }
 
-        // ── Fonia in testo ──
-        // In SSB non c'e' niente da decodificare: c'e' una voce. Qui la si
-        // trascrive, e il testo entra nella lista dei decodificati con gli
-        // altri modi.
-        Text { text: qsTr("SPEECH TO TEXT (SSB)"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
-        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
-
-        Text { text: qsTr("Transcribe voice:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-        CheckBox {
-            id: voceAttiva
-            checked: !!bridge && bridge.voceAttiva
-            onToggled: if (bridge) bridge.voceAttiva = checked
-            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-            contentItem: Text { text: ""; leftPadding: 24 }
-        }
-        Text {
-            // Lo stato dice sempre cosa sta succedendo: manca il modello, lo
-            // sto scaricando e a che punto sono, in ascolto, o perche' non e'
-            // andata. Un interruttore acceso che non trascrive niente, senza
-            // spiegazione, e' il modo peggiore di presentare una funzione che
-            // ha bisogno di mezzo giga scaricato.
-            text: bridge ? bridge.statoVoce : ""
-            color: {
-                var s = bridge ? String(bridge.statoVoce) : ""
-                if (s.indexOf(qsTr("in ascolto")) === 0 || s.indexOf(qsTr("modello pronto")) === 0)
-                    return accentGreen
-                if (s.indexOf(qsTr("errore")) === 0 || s.indexOf(qsTr("scaricamento fallito")) === 0)
-                    return "#ff6b6b"
-                return textSecondary
-            }
-            font.pixelSize: 11
-            Layout.columnSpan: pageColumns - 2
-            elide: Text.ElideRight
-        }
-
-        Text { text: qsTr("Language:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
-        DecoComboBox {
-            id: voceLingua
-            model: ["English", "Italiano"]
-            Layout.preferredWidth: 130
-            implicitHeight: controlHeight
-            currentIndex: (bridge && String(bridge.getSetting("SpeechLanguage", "en")) === "it") ? 1 : 0
-            onActivated: if (bridge) bridge.setSetting("SpeechLanguage", currentIndex === 1 ? "it" : "en")
-        }
-        Text {
-            text: qsTr("The model is downloaded once, on first use: 465 MB. It is not in the installer — most stations never work phone.")
-            color: textSecondary
-            font.pixelSize: 11
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
-            Layout.columnSpan: pageColumns - 2
-        }
-
         // ── Amplificatore ──
         // Sorgente di misura indipendente dalla radio: il DECOMETER puo
         // mostrare i watt del PA invece di quelli dell'eccitatrice.

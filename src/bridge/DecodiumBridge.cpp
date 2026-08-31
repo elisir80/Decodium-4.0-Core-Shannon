@@ -138,10 +138,6 @@
 #include <QTimer>
 #include <QScopeGuard>
 #include <QThread>
-#if DECODIUM_HAS_SPEECH
-#include "speech/SpeechRecognizer.h"
-#include "speech/SpeechModelStore.h"
-#endif
 #include <QThreadPool>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrentRun>
@@ -8084,43 +8080,6 @@ void DecodiumBridge::setUiStyle(QString const& v)
     bridgeLog(QStringLiteral("[UI] Style = %1 (restart richiesto)").arg(norm));
 }
 
-
-void DecodiumBridge::aggiungiRigaVoce (QString const& testo,
-                                      QStringList const& nominativi,
-                                      QStringList const& incerti)
-{
-    if (testo.trimmed ().isEmpty ())
-        return;
-
-    QDateTime const adesso = QDateTime::currentDateTimeUtc ();
-    QVariantMap entry;
-    entry.insert (QStringLiteral ("mode"), QStringLiteral ("SSB"));
-    entry.insert (QStringLiteral ("time"), adesso.toString (QStringLiteral ("hhmmss")));
-    entry.insert (QStringLiteral ("utc"), adesso.toString (QStringLiteral ("hhmm")));
-    entry.insert (QStringLiteral ("timestamp"), adesso.toMSecsSinceEpoch ());
-
-    // I nominativi riconosciuti in testa alla riga: e' la prima cosa che si
-    // cerca leggendo, e nel mezzo di una frase trascritta si perderebbe.
-    // Quelli con una lettera dubbia restano com'erano — IU?LMC — perche'
-    // completare la cifra a caso darebbe un nominativo plausibile e sbagliato.
-    QString riga;
-    if (!nominativi.isEmpty ())
-        riga = nominativi.join (QStringLiteral (" ")) + QStringLiteral ("  ");
-    else if (!incerti.isEmpty ())
-        riga = incerti.join (QStringLiteral (" ")) + QStringLiteral ("  ");
-    riga += testo;
-
-    entry.insert (QStringLiteral ("message"), riga);
-    entry.insert (QStringLiteral ("displayMessage"), riga);
-    entry.insert (QStringLiteral ("freq"), qRound (m_frequency));
-    entry.insert (QStringLiteral ("isTx"), false);
-    entry.insert (QStringLiteral ("db"), QString ());
-    entry.insert (QStringLiteral ("dt"), QStringLiteral ("0.0"));
-
-    appendDecodeMapToList (entry);
-    if (!nominativi.isEmpty ())
-        bridgeLog (QStringLiteral ("[VOCE] %1 | %2").arg (nominativi.join (QStringLiteral (", ")), testo));
-}
 
 void DecodiumBridge::aggiungiRigaRtty (QString const& testo, double qualita,
                                       double frequenzaHz)
@@ -40611,119 +40570,6 @@ void DecodiumBridge::rttyMandaAudioTx(const QVector<short>& campioni12k)
     decoPortPlayTxAudio(campioni12k);
 }
 
-#if DECODIUM_HAS_SPEECH
-void DecodiumBridge::scaricaModelloVoce()
-{
-    if (!m_voceModello) {
-        auto* deposito = new decodium::speech::SpeechModelStore(this);
-        m_voceModello = deposito;
-        connect(deposito, &decodium::speech::SpeechModelStore::avanzamento, this,
-                [this](int pc, qint64 fatti, qint64 totali) {
-            m_statoVoce = tr("scarico il modello: %1% (%2 di %3 MB)")
-                              .arg(pc).arg(fatti).arg(totali);
-            emit statoVoceChanged();
-        });
-        connect(deposito, &decodium::speech::SpeechModelStore::finito, this,
-                [this](bool bene, const QString& messaggio) {
-            m_statoVoce = bene ? tr("modello pronto") : tr("scaricamento fallito: %1").arg(messaggio);
-            emit statoVoceChanged();
-            bridgeLog(QStringLiteral("[VOCE] scaricamento %1: %2")
-                          .arg(bene ? QStringLiteral("riuscito") : QStringLiteral("fallito"), messaggio));
-            // Se il modello e' arrivato mentre la funzione era gia' accesa, si
-            // riprova ad avviarla: chi ha acceso l'interruttore voleva la
-            // trascrizione, non un messaggio che dice di riaccenderlo.
-            if (bene && m_voceAttiva)
-                setVoceAttiva(true);
-        });
-    }
-    static_cast<decodium::speech::SpeechModelStore*>(m_voceModello)->scarica();
-}
-
-void DecodiumBridge::setVoceAttiva(bool v)
-{
-    if (m_voceAttiva == v && (!v || m_voceRiconoscitore))
-        return;
-    m_voceAttiva = v;
-
-    if (!v) {
-        // Spegnendo si smonta tutto: il modello occupa mezzo giga di memoria e
-        // tenerlo carico "per la prossima volta" vorrebbe dire farlo pagare
-        // anche a chi la funzione l'ha spenta.
-        if (m_voceThread) {
-            m_voceThread->quit();
-            m_voceThread->wait(3000);
-            m_voceThread->deleteLater();
-            m_voceThread = nullptr;
-            m_voceRiconoscitore = nullptr;   // distrutto col thread
-        }
-        m_statoVoce = tr("spenta");
-        emit voceAttivaChanged();
-        emit statoVoceChanged();
-        return;
-    }
-
-    if (!decodium::speech::SpeechModelStore::modelloPresente()) {
-        m_statoVoce = tr("manca il modello");
-        emit voceAttivaChanged();
-        emit statoVoceChanged();
-        scaricaModelloVoce();
-        return;
-    }
-
-    if (!m_voceThread) {
-        m_voceThread = new QThread(this);
-        m_voceThread->setObjectName(QStringLiteral("Trascrizione"));
-        auto* ric = new decodium::speech::SpeechRecognizer;
-        ric->moveToThread(m_voceThread);
-        m_voceRiconoscitore = ric;
-        connect(m_voceThread, &QThread::finished, ric, &QObject::deleteLater);
-
-        // L'audio arriva per coda: il riconoscitore non deve mai far aspettare
-        // il percorso audio, che ha una scadenza sua.
-        connect(this, &DecodiumBridge::campioniRxVoce,
-                ric, &decodium::speech::SpeechRecognizer::accumula,
-                Qt::QueuedConnection);
-
-        connect(ric, &decodium::speech::SpeechRecognizer::frase, this,
-                [this](const QString& testo, const QStringList& nominativi,
-                       const QStringList& incerti) {
-            aggiungiRigaVoce(testo, nominativi, incerti);
-        }, Qt::QueuedConnection);
-
-        connect(ric, &decodium::speech::SpeechRecognizer::modelloCaricato, this,
-                [this](bool bene, const QString& messaggio) {
-            m_statoVoce = bene ? tr("in ascolto") : tr("errore: %1").arg(messaggio);
-            emit statoVoceChanged();
-        }, Qt::QueuedConnection);
-
-        m_voceThread->start();
-
-        QString const percorso = decodium::speech::SpeechModelStore::percorsoModello();
-        QString const lingua = getSetting(QStringLiteral("SpeechLanguage"),
-                                          QStringLiteral("en")).toString();
-        QMetaObject::invokeMethod(ric, [ric, percorso, lingua]() {
-            ric->caricaModello(percorso, lingua);
-        }, Qt::QueuedConnection);
-        m_statoVoce = tr("carico il modello...");
-    }
-
-    emit voceAttivaChanged();
-    emit statoVoceChanged();
-}
-#else
-void DecodiumBridge::scaricaModelloVoce() {}
-void DecodiumBridge::setVoceAttiva(bool v)
-{
-    // Compilato senza la trascrizione: l'interruttore non fa nulla e lo dice,
-    // invece di fingere che sia acceso.
-    Q_UNUSED(v)
-    m_voceAttiva = false;
-    m_statoVoce = tr("non compilata in questa versione");
-    emit voceAttivaChanged();
-    emit statoVoceChanged();
-}
-#endif
-
 void DecodiumBridge::setRttyInAscolto(bool v)
 {
     if (m_rttyInAscolto == v)
@@ -49358,18 +49204,6 @@ void DecodiumBridge::ensureAudioSink()
             if (m_transmitting || m_tuning)
                 return;
             emit campioniRxRtty(samples);
-        });
-        // La fonia: lo stesso audio, quando la trascrizione e' accesa. Terzo
-        // rubinetto, e per la stessa ragione dei primi due — accendere la voce
-        // non deve dipendere dall'RTTY ne' da DecoPort, e spegnerla non deve
-        // toccarli.
-        connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
-                this, [this](QVector<short> samples) {
-            if (!m_voceAttiva || samples.isEmpty())
-                return;
-            if (m_transmitting || m_tuning)
-                return;   // in trasmissione l'ingresso non e' la radio
-            emit campioniRxVoce(samples);
         });
 
         connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,

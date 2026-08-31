@@ -226,13 +226,6 @@ endif ()
 # quella che il CAT dell'applicazione governa gia', e cercarla in rete non
 # poteva che non trovarla. Con quel trasporto se n'e' andata anche Opus, che
 # serviva solo a comprimere l'audio sul filo.
-# La trascrizione della fonia in SSB: whisper.cpp sulla CPU, con il modello
-# scaricato alla prima accensione invece che imbarcato nell'installer — sono
-# 465 MB contro i 67 di tutto il resto, e li scaricherebbe anche chi la fonia
-# non la fa.
-option (DECODIUM_ENABLE_SPEECH
-  "Build speech-to-text for SSB (whisper.cpp, CPU only)" ON)
-
 option (DECODIUM_ENABLE_RTTY
   "Build the DecoRTTY subsystem (RTTY on Decodium's own radio) inside Decodium" ON)
 set (DECORTTY_VERSION "0.7.2" CACHE STRING
@@ -1369,14 +1362,6 @@ endif ()
 
 if (DECODIUM_ENABLE_RTTY)
   add_subdirectory (src/rtty)
-
-# Prima la libreria di riconoscimento, poi chi la usa: whisper e' un albero
-# interno (third_party/whisper) e non una dipendenza di sistema, cosi' la
-# compilazione non chiede niente a nessuno.
-if (DECODIUM_ENABLE_SPEECH)
-  add_subdirectory (third_party/whisper)
-  add_subdirectory (src/speech)
-endif ()
 endif ()
 
 if (BUILD_TESTING AND EXISTS ${CMAKE_SOURCE_DIR}/tests AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
@@ -2220,15 +2205,6 @@ else ()
   target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SSTV=0)
 endif ()
 
-# Trascrizione della fonia: whisper.cpp (albero interno, solo CPU) piu' il
-# ricompositore radiantistico. Si spegne come tutto il resto, e spento non
-# porta dentro nemmeno un byte della libreria.
-if (DECODIUM_ENABLE_SPEECH)
-  target_link_libraries (decodium_qml decodium_speech)
-  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SPEECH=1)
-else ()
-  target_compile_definitions (decodium_qml PRIVATE DECODIUM_HAS_SPEECH=0)
-endif ()
 
 # DecoRTTY: la libreria di aggancio porta con se' tutte le altre.
 if (DECODIUM_ENABLE_RTTY)

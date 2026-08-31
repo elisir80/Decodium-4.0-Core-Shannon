@@ -541,14 +541,6 @@ class DecodiumBridge : public QObject
     // girare, perche' nessuno ne leggerebbe il risultato e il costo lo
     // pagherebbe la decodifica dei modi digitali, che gira sullo stesso PC.
     Q_PROPERTY(bool  rttyInAscolto       READ rttyInAscolto       WRITE setRttyInAscolto       NOTIFY rttyInAscoltoChanged)
-    // La trascrizione della fonia. Accesa, l'audio ricevuto passa anche al
-    // riconoscitore e le frasi entrano nella lista dei decodificati. Spenta —
-    // che e' come parte — non costa niente: il modello non viene nemmeno
-    // caricato, e sono mezzo giga di memoria.
-    Q_PROPERTY(bool  voceAttiva          READ voceAttiva          WRITE setVoceAttiva          NOTIFY voceAttivaChanged)
-    // Lo stato del modello, per l'interfaccia: "assente", "scarico 43%",
-    // "pronto", o il motivo per cui non e' andata.
-    Q_PROPERTY(QString statoVoce         READ statoVoce           NOTIFY statoVoceChanged)
 
     // === B6 — cty.dat AUTO-UPDATE ===
     Q_PROPERTY(bool    ctyDatUpdating  READ ctyDatUpdating  NOTIFY ctyDatUpdatingChanged)
@@ -1252,8 +1244,6 @@ public:
     void   setSpectrumDynRange(double v) { if (m_spectrumDynRange!=v){m_spectrumDynRange=v;emit spectrumDynRangeChanged();} }
     bool   spectrumVisible()     const { return m_spectrumVisible; }
     bool   rttyInAscolto()       const { return m_rttyInAscolto; }
-    bool   voceAttiva()          const { return m_voceAttiva; }
-    QString statoVoce()          const { return m_statoVoce; }
     // Vero quando il PTT e' stato alzato per conto di un client DecoPort o
     // della finestra RTTY. Non e' m_transmitting, che riguarda solo il
     // sequencer dei modi digitali: chi trasmette da qui deve poterlo sapere,
@@ -1270,9 +1260,6 @@ public:
     void   rttyMandaAudioTx(const QVector<short>& campioni12k);
     void   setSpectrumVisible(bool v);
     void   setRttyInAscolto(bool v);
-    void   setVoceAttiva(bool v);
-    // Comincia a scaricare il modello. Serve una volta sola.
-    Q_INVOKABLE void scaricaModelloVoce();
 
     // B6 — cty.dat
     bool ctyDatUpdating() const { return m_ctyDatUpdating; }
@@ -2110,10 +2097,6 @@ signals:
     void spectrumDynRangeChanged();
     void spectrumVisibleChanged();
     void rttyInAscoltoChanged();
-    void voceAttivaChanged();
-    void statoVoceChanged();
-    // I campioni per il riconoscitore, dallo stesso rubinetto degli altri.
-    void campioniRxVoce(QVector<short> const& campioni12k);
 
     // I campioni ricevuti, a 12 kHz, per il decodificatore RTTY. Stesso
     // rubinetto di DecoPort e per la stessa ragione: RTTY legge quello che la
@@ -3129,13 +3112,6 @@ private:
     double m_spectrumDynRange {70.0};
     bool   m_spectrumVisible {true};
     bool   m_rttyInAscolto {false};
-    bool     m_voceAttiva {false};
-    QString  m_statoVoce;
-    // Il riconoscitore gira su un thread suo: una trascrizione dura qualche
-    // secondo e sul thread dell'interfaccia bloccherebbe tutto.
-    QThread* m_voceThread {nullptr};
-    QObject* m_voceRiconoscitore {nullptr};
-    QObject* m_voceModello {nullptr};
 
     DecodiumThemeManager* m_themeManager  {nullptr};
     DecodiumPropagationManager* m_propagationManager {nullptr};
@@ -4280,12 +4256,6 @@ public slots:
     // nell'archivio come le altre decodifiche.
     void aggiungiRigaRtty (QString const& testo, double qualita, double frequenzaHz);
 
-    // Una frase trascritta dalla fonia, con i nominativi che il ricompositore
-    // ha riconosciuto. Entra nella lista dei decodificati come le altre righe,
-    // marcata SSB.
-    void aggiungiRigaVoce (QString const& testo,
-                           QStringList const& nominativi,
-                           QStringList const& incerti);
 
     // Alimenta il waterfall con l'audio che arriva dalla radio RTTY. Si passa
     // l'AUDIO e non uno spettro gia' fatto: cosi' il waterfall resta quello di
