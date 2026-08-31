@@ -215,6 +215,27 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             // 34% dei candidati, 16/64 costa -1,0% e ne toglie il 64%.
             c.ntau = 13;
             c.pair_span = 64;
+            // Le due manopole sono forzabili da ambiente, e a differenza di
+            // quelle in manopole_ft8() queste valgono ANCHE in FT2. E' una
+            // deroga voluta e circoscritta: il giudice di questa scelta e' il
+            // traffico vero, e senza un modo di tornare indietro riavviando, il
+            // confronto in aria costerebbe una ricompilazione per ogni
+            // passaggio. Le due ricerche larghe sono state ritirate proprio
+            // perche' il banco non le sapeva giudicare.
+            //
+            //   DECODIUM_LDPC_NTAU=14 DECODIUM_LDPC_PAIR_SPAN=0   com'era prima
+            //   DECODIUM_LDPC_NTAU=14 DECODIUM_LDPC_PAIR_SPAN=64  piu' prudente
+            //   DECODIUM_LDPC_NTAU=16 DECODIUM_LDPC_PAIR_SPAN=64  molto prudente
+            //
+            // Senza variabili impostate non cambia niente.
+            if (char const* e = std::getenv ("DECODIUM_LDPC_NTAU")) {
+                int const n = std::atoi (e);
+                if (n >= 4 && n <= 20) c.ntau = n;
+            }
+            if (char const* e = std::getenv ("DECODIUM_LDPC_PAIR_SPAN")) {
+                int const n = std::atoi (e);
+                if (n >= 0 && n <= 91) c.pair_span = n;   // 0 = tutti i 91 bit
+            }
             // Soglia del gate scelta sul RUMORE, non sulle parole vere: e' il
             // caso che domina in FT2, dove la maggior parte dei candidati non
             // contiene alcun segnale e ogni accettazione e' un nominativo
