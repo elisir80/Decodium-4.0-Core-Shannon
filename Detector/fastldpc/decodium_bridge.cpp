@@ -165,9 +165,23 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             // controlli strutturali completi: sei minuti a zero fantasmi
             // sembravano assolverla, ma su una banda senza trasmissioni FT2
             // sei minuti non dimostrano niente, e con piu' tempo i fantasmi
-            // sono tornati copiosi. Prova ~21400 candidati per parola contro
-            // ~600: la CRC-14 ne ammette uno ogni 16384 e i filtri strutturali
-            // pagano ~2 bit contro i ~5 che costa l'allargamento.
+            // sono tornati copiosi. Prova molti piu' candidati per parola:
+            // la CRC-14 ne ammette uno sbagliato ogni 16384 e i filtri
+            // strutturali pagano ~2 bit contro i ~5 che costa l'allargamento.
+            //
+            // I due numeri sono ora MISURATI (lab, cpp/candidati.cpp, contatore
+            // OSD_COUNT su ogni test di CRC): 6241 candidati per parola qui e
+            // 33295 con la ricerca larga, non ~600 e ~21400. La stima vecchia
+            // contava le coppie dello span ma non le liste della ricerca a
+            // coppie, che sono la voce dominante; il rapporto fra le due, 5,4x,
+            // reggeva, i valori assoluti no.
+            //
+            // Serve saperlo perche' il conteggio dei fantasmi al banco NON
+            // arbitra le configurazioni: su 150 000 candidati di rumore
+            // gaussiano la ricerca larga ritirata due volte da' 5 fantasmi
+            // esatti come questa. E' il motivo per cui il banco l'aveva
+            // assolta. I candidati per parola le separano di 5,4x, coerente
+            // con quello che ha fatto il traffico vero.
             c.osd_order = 2;
             c.span2 = 32;
             c.span3 = 0;
