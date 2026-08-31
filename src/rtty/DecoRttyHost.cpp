@@ -2,6 +2,7 @@
 
 #include <QQmlContext>
 #include <QSettings>
+#include <algorithm>
 
 namespace decortty {
 
@@ -87,6 +88,19 @@ void DecoRttyHost::avvia (QSettings& impostazioni)
 
     m_macro.load (impostazioni);
     m_motore.attachRadio (&m_radio);
+
+    // L'audio va al motore RTTY per la decodifica (lo fa attachRadio) e in
+    // copia al waterfall di Decodium. Sono due strade indipendenti: se il
+    // waterfall e' spento o in un altro modo, la decodifica non se ne accorge.
+    connect (&m_radio, &link::RadioHub::audioReady, this,
+             [this] (std::vector<float> const& campioni, int frames) {
+                 if (frames <= 0 || campioni.empty ())
+                     return;
+                 int const n = std::min (frames, static_cast<int> (campioni.size ()));
+                 QVector<float> copia (n);
+                 std::copy_n (campioni.begin (), n, copia.begin ());
+                 emit audioPerWaterfall (copia);
+             });
     collegaTestoRicevuto ();
 
     // Impostazioni del decodificatore, con gli stessi valori di partenza del

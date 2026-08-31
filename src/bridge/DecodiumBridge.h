@@ -4186,6 +4186,15 @@ public slots:
     // arrivano solo le righe chiuse, perche' finiscano nella cronologia e
     // nell'archivio come le altre decodifiche.
     void aggiungiRigaRtty (QString const& testo, double qualita, double frequenzaHz);
+
+    // Alimenta il waterfall con l'audio che arriva dalla radio RTTY. Si passa
+    // l'AUDIO e non uno spettro gia' fatto: cosi' il waterfall resta quello di
+    // Decodium, con la sua risoluzione e la sua resa, invece di dover
+    // convertire due formati diversi (512 bin contro 1024 a passo 3,9 Hz).
+    // I campioni arrivano a 24 kHz e vengono decimati a 12, che e' il passo
+    // del ring. Ha effetto solo quando il modo attivo e' RTTY: negli altri
+    // modi il ring resta alimentato dall'audio locale come sempre.
+    void alimentaWaterfallRtty (QVector<float> const& campioni24k);
 private:
 
     // 1.0.238 (Phase 5.2): write-behind persistence helpers.

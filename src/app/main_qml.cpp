@@ -4147,6 +4147,11 @@ int main(int argc, char* argv[])
         // dedicata, che e' il modo naturale di leggere un flusso.
         QObject::connect (&rttyHost, &decortty::DecoRttyHost::rigaDecodificata,
                           &bridge, &DecodiumBridge::aggiungiRigaRtty);
+        // E l'audio della radio alimenta il waterfall dell'applicazione:
+        // niente conversione di spettri, il waterfall resta quello di
+        // Decodium con la sua resa e i suoi comandi.
+        QObject::connect (&rttyHost, &decortty::DecoRttyHost::audioPerWaterfall,
+                          &bridge, &DecodiumBridge::alimentaWaterfallRtty);
         rttyHost.esponiAlQml (*engine.rootContext(),
                               QStringLiteral (FORK_RELEASE_VERSION));
         L("DecoRTTY: sottosistema RTTY avviato");

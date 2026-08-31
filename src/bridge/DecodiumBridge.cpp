@@ -8067,6 +8067,27 @@ void DecodiumBridge::setUiStyle(QString const& v)
 
 // 1.0.179 — Helper: append silenzioso (no emit) di un decode map nel modello
 // flat. Usato dal path "legacy" di onFt8DecodeReady quando smooth flow OFF.
+void DecodiumBridge::alimentaWaterfallRtty (QVector<float> const& campioni24k)
+{
+    // Solo in RTTY: negli altri modi il ring appartiene all'audio locale e
+    // mescolare le due sorgenti darebbe un waterfall senza senso.
+    if (m_mode.compare (QStringLiteral ("RTTY"), Qt::CaseInsensitive) != 0)
+        return;
+    if (campioni24k.isEmpty ())
+        return;
+
+    // Decimazione 2:1 da 24 kHz a 12, la frequenza del ring. Media dei due
+    // campioni invece di scartarne uno: costa nulla e toglie gran parte
+    // dell'alias che si vedrebbe come righe fantasma nel waterfall.
+    QMutexLocker locker (&m_audioBufferMutex);
+    int const coppie = campioni24k.size () / 2;
+    for (int i = 0; i < coppie; ++i) {
+        float const medio = 0.5f * (campioni24k[i * 2] + campioni24k[i * 2 + 1]);
+        m_wfRing[m_wfRingPos % WF_RING_SIZE] = medio;
+        ++m_wfRingPos;
+    }
+}
+
 void DecodiumBridge::aggiungiRigaRtty (QString const& testo, double qualita,
                                       double frequenzaHz)
 {

@@ -17,6 +17,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QString>
+#include <QVector>
 
 #include "app/GatewaySupervisor.h"
 #include "app/Language.h"
@@ -70,6 +71,11 @@ signals:
     // chiusa — da un ritorno a capo o da una pausa nel segnale. Senza questo
     // taglio la lista si riempirebbe di frammenti.
     void rigaDecodificata (QString const& testo, double qualita, double frequenzaHz);
+
+    // L'audio ricevuto dalla radio, a 24 kHz, per il waterfall di Decodium.
+    // Si passa l'audio e non uno spettro gia' calcolato: il waterfall resta
+    // quello dell'applicazione, con la sua resa e i suoi comandi.
+    void audioPerWaterfall (QVector<float> const& campioni24k);
 
 private:
     void collegaTestoRicevuto ();
