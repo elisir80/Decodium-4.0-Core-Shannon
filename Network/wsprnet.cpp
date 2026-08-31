@@ -75,8 +75,14 @@ with app.test_request_context ():
 };
 
 WSPRNet::WSPRNet (QNetworkAccessManager * manager, QObject *parent)
+  : WSPRNet {manager, QUrl {wsprNetUrl}, parent}
+{
+}
+
+WSPRNet::WSPRNet (QNetworkAccessManager * manager, QUrl const& post_url, QObject *parent)
   : QObject {parent}
   , network_manager_ {manager}
+  , post_url_ {post_url}
   , spots_to_send_ {0}
 {
   connect (network_manager_, &QNetworkAccessManager::finished, this, &WSPRNet::networkReply);
@@ -87,6 +93,7 @@ void WSPRNet::upload (QString const& call, QString const& grid, QString const& r
                       QString const& mode, float TR_period, QString const& tpct, QString const& dbm,
                       QString const& version, QString const& fileName)
 {
+  int const previous_queue_size = spot_queue_.size ();
   m_call = call;
   m_grid = grid;
   m_rfreq = rfreq;
@@ -126,14 +133,14 @@ void WSPRNet::upload (QString const& call, QString const& grid, QString const& r
             }
         }
     }
-  spots_to_send_ = spot_queue_.size ();
-  upload_timer_.start (200);
+  scheduleQueuedSpots (previous_queue_size);
 }
 
 void WSPRNet::post (QString const& call, QString const& grid, QString const& rfreq, QString const& tfreq,
                     QString const& mode, float TR_period, QString const& tpct, QString const& dbm,
                     QString const& version, QString const& decode_text)
 {
+  int const previous_queue_size = spot_queue_.size ();
   m_call = call;
   m_grid = grid;
   m_rfreq = rfreq;
@@ -203,6 +210,26 @@ void WSPRNet::post (QString const& call, QString const& grid, QString const& rfr
 	            }
 	        }
 	    }
+
+  // The native Decodium WSPR path calls post() once per decoded row.  Unlike
+  // upload(), this path used to enqueue the report without ever arming the
+  // worker timer, leaving every spot in memory until shutdown with no error.
+  scheduleQueuedSpots (previous_queue_size);
+}
+
+void WSPRNet::scheduleQueuedSpots (int previous_queue_size)
+{
+  int const added = spot_queue_.size () - previous_queue_size;
+  if (added <= 0)
+    {
+      return;
+    }
+
+  spots_to_send_ += added;
+  if (!upload_timer_.isActive ())
+    {
+      upload_timer_.start (200);
+    }
 }
 
 void WSPRNet::networkReply (QNetworkReply * reply)
@@ -212,7 +239,7 @@ void WSPRNet::networkReply (QNetworkReply * reply)
     {
       if (QNetworkReply::NoError != reply->error ())
         {
-          Q_EMIT uploadStatus (QString {"Error: %1"}.arg (reply->error ()));
+          Q_EMIT uploadStatus (QString {"Error: %1"}.arg (reply->errorString ()));
           // not clearing queue or halting queuing as it may be a
           // transient one off request error
         }
@@ -229,12 +256,13 @@ void WSPRNet::networkReply (QNetworkReply * reply)
                 }
             }
 
-          if (!spot_queue_.size ())
+          if (!spot_queue_.size () && m_outstandingRequests.isEmpty ())
             {
               Q_EMIT uploadStatus("done");
               QFile f {m_file};
               if (f.exists ()) f.remove ();
               upload_timer_.stop ();
+              spots_to_send_ = 0;
             }
         }
 
@@ -357,7 +385,7 @@ void WSPRNet::work()
         network_manager_->setNetworkAccessible (QNetworkAccessManager::Accessible);
       }
 #endif
-      QNetworkRequest request (QUrl {wsprNetUrl});
+      QNetworkRequest request (post_url_);
       request.setHeader (QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
       auto const& spot = spot_queue_.dequeue ();
       m_outstandingRequests << network_manager_->post (request, spot.query (QUrl::FullyEncoded).toUtf8 ());

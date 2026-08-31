@@ -533,7 +533,13 @@ SettingsPageScroll {
                         rightPadding: 8
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         validator: RegularExpressionValidator {
-                            regularExpression: /^[-+]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/
+                            // Accept pasted units and typographic minus signs;
+                            // the backend normalises and validates the value.
+                            regularExpression: /^\s*[-+\u2212\u2012\u2013\u2014\uFE63\uFF0D]?(?:\d+(?:[.,]\d*)?|[.,]\d+)\s*(?:MHz|Hz)?\s*$/i
+                        }
+                        onTextEdited: {
+                            dialog.stationFrequencyEditorStatus = ""
+                            dialog.stationFrequencyEditorError = false
                         }
                         Layout.preferredWidth: 146
                         implicitHeight: controlHeight
@@ -554,11 +560,18 @@ SettingsPageScroll {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 8
-                    Item { Layout.fillWidth: true }
+                    Text {
+                        Layout.fillWidth: true
+                        text: dialog.stationFrequencyEditorStatus
+                        color: dialog.stationFrequencyEditorError ? "#ff7777" : accentGreen
+                        font.pixelSize: 10
+                        elide: Text.ElideRight
+                        verticalAlignment: Text.AlignVCenter
+                    }
                     Button {
                         id: addStationFrequencyButton
                         text: qsTr("Add")
-                        enabled: stationOffsetField.acceptableInput
+                        enabled: String(stationOffsetField.text || "").trim().length > 0
                         implicitHeight: controlHeight
                         Layout.preferredWidth: 86
                         onClicked: dialog.addStationFrequencyFromEditor()
@@ -569,7 +582,7 @@ SettingsPageScroll {
                         id: updateStationFrequencyButton
                         text: qsTr("Update")
                         enabled: dialog.selectedStationFrequencyIndex >= 0
-                                 && stationOffsetField.acceptableInput
+                                 && String(stationOffsetField.text || "").trim().length > 0
                         implicitHeight: controlHeight
                         Layout.preferredWidth: 96
                         onClicked: dialog.updateStationFrequencyFromEditor()

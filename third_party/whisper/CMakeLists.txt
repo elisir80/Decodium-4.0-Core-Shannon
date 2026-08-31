@@ -1,18 +1,17 @@
-# whisper.cpp dentro Decodium — solo la libreria, solo la CPU.
+# whisper.cpp dentro Decodium — solo la libreria, con backend portabili.
 #
 # Non e' il CMakeLists del progetto originale: quello costruisce anche esempi,
 # prove e binding per altri linguaggi, e si ferma cercando un file dei binding
 # JavaScript che qui non c'e'. Serve una cosa sola — libwhisper.a — e questo
 # file la produce.
 #
-# I backend per GPU (CUDA, Vulkan, Metal, SYCL, OpenCL, Hexagon) non sono stati
-# nemmeno copiati: erano diciassette megabyte di sorgenti per acceleratori che
-# su una stazione radio non ci sono, e il riconoscimento gira comodo sulla CPU
-# — sui trentadue core di questa macchina il modello small sta ben dentro il
-# tempo reale.
+# La CPU resta disponibile su tutte le piattaforme. Su macOS ggml abilita inoltre
+# Accelerate/BLAS e Metal per impostazione predefinita; i relativi sorgenti fanno
+# parte del vendor import per evitare configurazioni Speech incomplete.
 #
-# Aggiornare: ricopiare src/, include/, ggml/{include,cmake,src/*.c*,ggml-cpu}
-# da https://github.com/ggml-org/whisper.cpp e lasciare questo file com'e'.
+# Aggiornare: ricopiare src/, include/ e i componenti ggml usati (inclusi
+# ggml-cpu, ggml-blas e ggml-metal) dallo stesso tag di
+# https://github.com/ggml-org/whisper.cpp, quindi aggiornare WHISPER_VERSION.
 # Licenza MIT, in LICENSE qui accanto.
 
 cmake_minimum_required (VERSION 3.16)
@@ -28,9 +27,25 @@ set (GGML_CCACHE   OFF CACHE BOOL "" FORCE)
 set (GGML_OPENMP   OFF CACHE BOOL "" FORCE)   # il pool OpenMP e' gia' quello dei decodificatori
 set (GGML_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
 set (GGML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set (GGML_ALL_WARNINGS   OFF CACHE BOOL "" FORCE)
+set (GGML_FATAL_WARNINGS OFF CACHE BOOL "" FORCE)
 set (BUILD_SHARED_LIBS   OFF CACHE BOOL "" FORCE)
 
 add_subdirectory (ggml)
+
+# Decodium compila il proprio codice con gli avvisi fatali. Non propagare tale
+# politica ai sorgenti ggml di terze parti: in particolare gli header recenti
+# di Accelerate annotano alcune API BLAS come macOS 13.3 anche se il deployment
+# target di Decodium resta macOS 13.0.
+foreach (ggml_target IN ITEMS ggml-base ggml ggml-cpu ggml-blas ggml-metal)
+  if (TARGET ${ggml_target})
+    if (MSVC)
+      target_compile_options (${ggml_target} PRIVATE /W0)
+    else ()
+      target_compile_options (${ggml_target} PRIVATE -w)
+    endif ()
+  endif ()
+endforeach ()
 
 # ── whisper ─────────────────────────────────────────────────────────────────
 add_library (whisper STATIC

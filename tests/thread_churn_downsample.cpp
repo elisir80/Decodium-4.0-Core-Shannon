@@ -14,6 +14,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <thread>
 #include <vector>
 
@@ -27,6 +28,17 @@ constexpr int kFiltNfft = 180000;
 // c0/c2/c3 partono da un offset di 800 dentro il buffer: la dimensione
 // giusta e' kFt8VarDownsampleSize di FtxFt8Stage4.cpp, non kFt8Nfft2.
 constexpr int kFt8VarSize = 4801;
+
+// fftwf_complex is a C array typedef (float[2]).  It cannot be the element
+// type of std::vector with libc++, because arrays are not destructible objects.
+// Keep FFTW's required allocation/alignment and make ownership exception-safe.
+using FftwComplexBuffer =
+  std::unique_ptr<fftwf_complex, decltype (&fftwf_free)>;
+
+FftwComplexBuffer make_complex_buffer (int size)
+{
+  return FftwComplexBuffer {fftwf_alloc_complex (size), &fftwf_free};
+}
 }
 
 extern "C"
@@ -72,16 +84,20 @@ int main (int argc, char* argv[])
             // Ogni thread crea i propri spazi di lavoro thread_local alla prima
             // chiamata, e li porta con se' quando muore: e' esattamente la
             // sequenza che nell'applicazione precede la corruzione.
-            std::vector<fftwf_complex> c1 (static_cast<size_t> (kFt8Nfft2));
+            auto c1 = make_complex_buffer (kFt8Nfft2);
+            if (!c1)
+              std::abort ();
             int newdat = 1;
             float const f0 = 1500.0f + static_cast<float> (k % 7) * 50.0f;
 
             if (solo == 0 || solo == 1)
-              ftx_ft8_downsample_c (dd.data (), &newdat, f0, c1.data ());
+              ftx_ft8_downsample_c (dd.data (), &newdat, f0, c1.get ());
 
-            std::vector<fftwf_complex> c0 (static_cast<size_t> (kFt8VarSize));
-            std::vector<fftwf_complex> c2 (static_cast<size_t> (kFt8VarSize));
-            std::vector<fftwf_complex> c3 (static_cast<size_t> (kFt8VarSize));
+            auto c0 = make_complex_buffer (kFt8VarSize);
+            auto c2 = make_complex_buffer (kFt8VarSize);
+            auto c3 = make_complex_buffer (kFt8VarSize);
+            if (!c0 || !c2 || !c3)
+              std::abort ();
             int const nqso = 0;
             int const lhighsens = 0;
             int lsubtracted = 0;
@@ -89,8 +105,8 @@ int main (int argc, char* argv[])
             float const freqsub = 0.0f;
             newdat = 1;
             if (solo == 0 || solo == 2)
-              ftx_ft8var_downsample_c (dd.data (), &newdat, &f0, &nqso, c0.data (),
-                                       c2.data (), c3.data (), &lhighsens,
+              ftx_ft8var_downsample_c (dd.data (), &newdat, &f0, &nqso, c0.get (),
+                                       c2.get (), c3.get (), &lhighsens,
                                        &lsubtracted, &npos, &freqsub);
 
             // Il filtro tiene due vettori thread_local a cui punta un piano FFTW

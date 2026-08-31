@@ -10515,7 +10515,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         refreshDecodeListDxcc();
     });
     connect(m_wsprUploader, &DecodiumWsprUploader::uploadStatus,
-            this, [this](const QString& msg) { emit statusMessage("WSPR: " + msg); });
+            this, [this](const QString& msg) {
+                QString const status = QStringLiteral("WSPR: ") + msg;
+                bridgeLog(status);
+                emit statusMessage(status);
+            });
 
     // Start drift reference clock
     m_driftClock.start();
@@ -30283,25 +30287,37 @@ Radio::FrequencyDelta parseFrequencyOffsetHzValue(const QVariant& value, bool* o
 {
     QString text = value.toString().trimmed();
     text.replace(QLatin1Char(','), QLatin1Char('.'));
+    // Copy/paste from formatted documents and some mobile keyboards produces
+    // a typographic minus rather than ASCII '-'.  Treat the common variants
+    // as a sign instead of accidentally parsing the following digits as a
+    // positive offset.
+    static QString const unicodeMinusCharacters =
+        QStringLiteral("\u2212\u2012\u2013\u2014\uFE63\uFF0D");
+    for (QChar const minus : unicodeMinusCharacters) {
+        text.replace(minus, QLatin1Char('-'));
+    }
     if (text.isEmpty()) {
         if (ok) *ok = true;
         return 0;
     }
-    bool explicitHz = text.contains(QStringLiteral("hz"), Qt::CaseInsensitive)
-                      && !text.contains(QStringLiteral("mhz"), Qt::CaseInsensitive);
-    bool explicitMHz = text.contains(QStringLiteral("mhz"), Qt::CaseInsensitive);
-    static QRegularExpression const numberRe(QStringLiteral("[-+]?\\d+(?:\\.\\d+)?"));
+    static QRegularExpression const numberRe {
+        QStringLiteral("^\\s*([-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+))\\s*(MHz|Hz)?\\s*$"),
+        QRegularExpression::CaseInsensitiveOption
+    };
     QRegularExpressionMatch const match = numberRe.match(text);
     if (!match.hasMatch()) {
         if (ok) *ok = false;
         return 0;
     }
     bool numberOk = false;
-    double numeric = match.captured(0).toDouble(&numberOk);
+    double numeric = match.captured(1).toDouble(&numberOk);
     if (!numberOk) {
         if (ok) *ok = false;
         return 0;
     }
+    QString const unit = match.captured(2);
+    bool const explicitMHz = unit.compare(QStringLiteral("MHz"), Qt::CaseInsensitive) == 0;
+    bool const explicitHz = unit.compare(QStringLiteral("Hz"), Qt::CaseInsensitive) == 0;
     double hz = 0.0;
     if (explicitMHz || (!explicitHz && std::abs(numeric) < 1000000.0)) {
         hz = numeric * 1000000.0;
@@ -31035,6 +31051,14 @@ bool DecodiumBridge::addStationFrequencyRow(const QString& band,
         stations << StationList::Station {cleanBand, offsetHz, antennaDescription.trimmed()};
     }
     syncSettingToLegacyIni(QStringLiteral("stations"), QVariant::fromValue(stations));
+    StationList::Stations const persistedStations =
+        readSettingFromLegacyIni(QStringLiteral("stations")).value<StationList::Stations>();
+    if (persistedStations != stations) {
+        bridgeLog(QStringLiteral("Station information save verification failed for band=%1 offset=%2 Hz")
+                      .arg(cleanBand, QString::number(offsetHz)));
+        emit errorMessage(QStringLiteral("Station information could not be saved; check that the Decodium settings file is writable"));
+        return false;
+    }
     emit settingValueChanged(QStringLiteral("stations"), QVariant::fromValue(stations));
     if (m_currentCatLogicalBand.compare(cleanBand, Qt::CaseInsensitive) == 0) {
         m_currentCatStationOffsetHz = offsetHz;
@@ -31081,6 +31105,14 @@ bool DecodiumBridge::updateStationFrequencyRow(int index,
     QString const previousBand = stations.at(index).band_name_;
     stations[index] = StationList::Station {cleanBand, offsetHz, antennaDescription.trimmed()};
     syncSettingToLegacyIni(QStringLiteral("stations"), QVariant::fromValue(stations));
+    StationList::Stations const persistedStations =
+        readSettingFromLegacyIni(QStringLiteral("stations")).value<StationList::Stations>();
+    if (persistedStations != stations) {
+        bridgeLog(QStringLiteral("Station information update verification failed for band=%1 offset=%2 Hz")
+                      .arg(cleanBand, QString::number(offsetHz)));
+        emit errorMessage(QStringLiteral("Station information could not be saved; check that the Decodium settings file is writable"));
+        return false;
+    }
     emit settingValueChanged(QStringLiteral("stations"), QVariant::fromValue(stations));
     if (m_currentCatLogicalBand.compare(previousBand, Qt::CaseInsensitive) == 0
         || m_currentCatLogicalBand.compare(cleanBand, Qt::CaseInsensitive) == 0) {
@@ -31112,6 +31144,14 @@ bool DecodiumBridge::deleteStationFrequencyRow(int index)
     QString const removedBand = stations.at(index).band_name_;
     stations.removeAt(index);
     syncSettingToLegacyIni(QStringLiteral("stations"), QVariant::fromValue(stations));
+    StationList::Stations const persistedStations =
+        readSettingFromLegacyIni(QStringLiteral("stations")).value<StationList::Stations>();
+    if (persistedStations != stations) {
+        bridgeLog(QStringLiteral("Station information delete verification failed for band=%1")
+                      .arg(removedBand));
+        emit errorMessage(QStringLiteral("Station information could not be deleted; check that the Decodium settings file is writable"));
+        return false;
+    }
     emit settingValueChanged(QStringLiteral("stations"), QVariant::fromValue(stations));
     if (m_currentCatLogicalBand.compare(removedBand, Qt::CaseInsensitive) == 0) {
         m_currentCatStationOffsetHz = static_cast<Radio::FrequencyDelta>(
@@ -31787,6 +31827,14 @@ void DecodiumBridge::syncSettingToLegacyIni(const QString& key, const QVariant& 
         ini.beginGroup(group);
         ini.setValue(key, value);
         ini.endGroup();
+    }
+    // Station/transverter edits are immediately read back by the QML page.
+    // Flush here so a write error cannot be reported as a successful save.
+    ini.sync();
+    if (ini.status() != QSettings::NoError) {
+        bridgeLog(QStringLiteral("Legacy setting write failed: key=%1 path=%2 status=%3")
+                      .arg(key, iniPath)
+                      .arg(static_cast<int>(ini.status())));
     }
 }
 
