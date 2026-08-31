@@ -6638,6 +6638,15 @@ bool DecodiumBridge::shouldDisplayEntryForBandActivity(
 // log → se SNR è weak è plausibile sia davvero loro).
 bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
 {
+    // RTTY porta testo libero, non messaggi strutturati: i criteri qui sotto
+    // sono tarati sui nominativi dei modi digitali e il controllo sulla forma
+    // ITU scarterebbe qualunque parola. Chi legge RTTY vede il testo com'e',
+    // errori compresi, ed e' proprio quello che serve.
+    if (entry.value(QStringLiteral("mode")).toString().compare(
+            QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+        return false;
+    }
+
     if (entry.value(QStringLiteral("isTx")).toBool()) return false;
     if (entry.value(QStringLiteral("isB4")).toBool()) return false;
     if (entry.value(QStringLiteral("dxIsWorked")).toBool()) return false;
@@ -8058,6 +8067,31 @@ void DecodiumBridge::setUiStyle(QString const& v)
 
 // 1.0.179 — Helper: append silenzioso (no emit) di un decode map nel modello
 // flat. Usato dal path "legacy" di onFt8DecodeReady quando smooth flow OFF.
+void DecodiumBridge::aggiungiRigaRtty (QString const& testo, double qualita,
+                                      double frequenzaHz)
+{
+    if (testo.trimmed ().isEmpty ())
+        return;
+
+    QDateTime const adesso = QDateTime::currentDateTimeUtc ();
+    QVariantMap entry;
+    entry.insert (QStringLiteral ("mode"), QStringLiteral ("RTTY"));
+    entry.insert (QStringLiteral ("time"), adesso.toString (QStringLiteral ("hhmmss")));
+    entry.insert (QStringLiteral ("utc"), adesso.toString (QStringLiteral ("hhmm")));
+    entry.insert (QStringLiteral ("timestamp"), adesso.toMSecsSinceEpoch ());
+    entry.insert (QStringLiteral ("message"), testo);
+    entry.insert (QStringLiteral ("displayMessage"), testo);
+    entry.insert (QStringLiteral ("freq"), qRound (frequenzaHz));
+    entry.insert (QStringLiteral ("isTx"), false);
+    // La certezza del decodificatore, da 0 a 1, diventa la colonna del
+    // rapporto: in RTTY non esiste un SNR come in FT8, e mostrare quanto il
+    // Viterbi ci creda dice all'operatore la stessa cosa utile.
+    entry.insert (QStringLiteral ("db"), QString::number (qRound (qualita * 100.0)));
+    entry.insert (QStringLiteral ("dt"), QStringLiteral ("0.0"));
+
+    appendDecodeMapToList (entry);
+}
+
 void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
 {
     m_decodeList.append(QVariant(entry));

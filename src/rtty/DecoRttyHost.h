@@ -15,6 +15,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
 #include <QString>
 
 #include "app/GatewaySupervisor.h"
@@ -63,8 +64,22 @@ public:
 signals:
     void attivoChanged ();
 
+    // Una riga di testo completa, pronta per la lista dei decodificati di
+    // Decodium. RTTY e' un flusso continuo: il testo scorre nella finestra
+    // dedicata carattere per carattere, mentre qui esce solo quando la riga e'
+    // chiusa — da un ritorno a capo o da una pausa nel segnale. Senza questo
+    // taglio la lista si riempirebbe di frammenti.
+    void rigaDecodificata (QString const& testo, double qualita, double frequenzaHz);
+
 private:
     void collegaTestoRicevuto ();
+    void accumulaCarattere (QString const& carattere, double qualita);
+    void chiudiRiga ();
+
+    QString m_rigaInCorso;
+    double  m_qualitaSomma {0.0};
+    int     m_qualitaConteggio {0};
+    QTimer* m_pausaRiga {nullptr};
 
     app::Language          m_lingua;
     link::RadioHub         m_radio;

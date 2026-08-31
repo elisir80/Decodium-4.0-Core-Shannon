@@ -4180,6 +4180,14 @@ private:
     bool isUiStallActive(int thresholdMs, int windowMs) const;
     void appendDecodeMapToList(QVariantMap const& entry);
 
+public slots:
+    // Una riga RTTY completa entra nella lista dei decodificati. RTTY e' un
+    // flusso continuo e il suo testo scorre nella finestra dedicata: qui
+    // arrivano solo le righe chiuse, perche' finiscano nella cronologia e
+    // nell'archivio come le altre decodifiche.
+    void aggiungiRigaRtty (QString const& testo, double qualita, double frequenzaHz);
+private:
+
     // 1.0.238 (Phase 5.2): write-behind persistence helpers.
     // startPersistenceWorker(): chiamato durante l'init del bridge, crea una
     //   riga in `sessions`, lancia il QThread worker e connette i signal.

@@ -4141,6 +4141,12 @@ int main(int argc, char* argv[])
         QSettings rttySettings {QSettings::IniFormat, QSettings::UserScope,
                                 QStringLiteral("Decodium"), QStringLiteral("Decodium")};
         rttyHost.avvia (rttySettings);
+        // Le righe RTTY complete entrano nella lista dei decodificati come
+        // le altre: cosi' finiscono nella cronologia e nell'archivio. Il
+        // testo continua a scorrere carattere per carattere nella finestra
+        // dedicata, che e' il modo naturale di leggere un flusso.
+        QObject::connect (&rttyHost, &decortty::DecoRttyHost::rigaDecodificata,
+                          &bridge, &DecodiumBridge::aggiungiRigaRtty);
         rttyHost.esponiAlQml (*engine.rootContext(),
                               QStringLiteral (FORK_RELEASE_VERSION));
         L("DecoRTTY: sottosistema RTTY avviato");

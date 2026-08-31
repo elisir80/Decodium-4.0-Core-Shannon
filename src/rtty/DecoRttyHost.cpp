@@ -12,6 +12,50 @@ DecoRttyHost::DecoRttyHost (QObject* parent)
 
 DecoRttyHost::~DecoRttyHost () = default;
 
+void DecoRttyHost::accumulaCarattere (QString const& carattere, double qualita)
+{
+    // Un ritorno a capo chiude la riga; il resto si accumula. La qualita' della
+    // riga e' la media di quelle dei suoi caratteri: un carattere dubbio in
+    // mezzo a venti buoni non deve far sembrare incerta tutta la riga.
+    // Confronto sui codici invece che su stringhe di escape: 0x0A e 0x0D
+    // sono il ritorno a capo e il ritorno carrello del flusso Baudot.
+    QChar const primo = carattere.at (0);
+    if (primo == QChar (0x0A) || primo == QChar (0x0D)) {
+        chiudiRiga ();
+        return;
+    }
+    m_rigaInCorso += carattere;
+    m_qualitaSomma += qualita;
+    ++m_qualitaConteggio;
+
+    // Una riga lunghissima senza ritorni a capo esiste: il traffico RTTY non e'
+    // sempre formattato. Si chiude d'ufficio per non tenerla in sospeso.
+    if (m_rigaInCorso.size () >= 120) {
+        chiudiRiga ();
+        return;
+    }
+    // Ogni carattere rimanda la chiusura per pausa: quando il segnale tace, la
+    // riga esce da sola invece di restare appesa fino al prossimo carattere.
+    m_pausaRiga->start ();
+}
+
+void DecoRttyHost::chiudiRiga ()
+{
+    m_pausaRiga->stop ();
+    QString const testo = m_rigaInCorso.trimmed ();
+    double const qualita = m_qualitaConteggio > 0
+                               ? m_qualitaSomma / m_qualitaConteggio
+                               : 0.0;
+    m_rigaInCorso.clear ();
+    m_qualitaSomma = 0.0;
+    m_qualitaConteggio = 0;
+
+    // Le righe di soli diddle o di rumore non meritano una riga in lista.
+    if (testo.size () < 3)
+        return;
+    emit rigaDecodificata (testo, qualita, m_motore.markHz ());
+}
+
 void DecoRttyHost::collegaTestoRicevuto ()
 {
     // Caratteri decodificati e trasmessi finiscono nella stessa finestra, cosi'
@@ -19,8 +63,10 @@ void DecoRttyHost::collegaTestoRicevuto ()
     // progetto originale e va mantenuto.
     connect (&m_motore, &app::RttyEngine::characterDecoded, &m_testoRicevuto,
              [this] (QString const& testo, double qualita, bool corretto) {
-                 if (!testo.isEmpty ())
-                     m_testoRicevuto.appendCharacter (testo.at (0), qualita, corretto);
+                 if (testo.isEmpty ())
+                     return;
+                 m_testoRicevuto.appendCharacter (testo.at (0), qualita, corretto);
+                 accumulaCarattere (testo, qualita);
              });
     connect (&m_motore, &app::RttyEngine::characterTransmitted, &m_testoRicevuto,
              [this] (QString const& testo) {
@@ -31,6 +77,14 @@ void DecoRttyHost::collegaTestoRicevuto ()
 
 void DecoRttyHost::avvia (QSettings& impostazioni)
 {
+    // Due secondi di silenzio chiudono la riga: a 45,45 baud sono circa nove
+    // caratteri, abbastanza perche' una pausa vera si distingua dallo spazio
+    // fra una parola e l'altra.
+    m_pausaRiga = new QTimer (this);
+    m_pausaRiga->setSingleShot (true);
+    m_pausaRiga->setInterval (2000);
+    connect (m_pausaRiga, &QTimer::timeout, this, &DecoRttyHost::chiudiRiga);
+
     m_macro.load (impostazioni);
     m_motore.attachRadio (&m_radio);
     collegaTestoRicevuto ();
