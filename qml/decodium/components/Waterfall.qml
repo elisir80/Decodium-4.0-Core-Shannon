@@ -1712,6 +1712,63 @@ Item {
                     Rectangle { x: 0; width: 1; height: parent.height; color: "#ffc8ff" }
                 }
 
+                // I due riferimenti dell'RTTY: mark e space, alle frequenze in cui
+                // il decodificatore li aspetta. Sono fissi — non seguono il
+                // segnale, e' il segnale che va portato sopra di loro, girando
+                // la sintonia finche' le due portanti ci si appoggiano. E' il
+                // modo in cui si accorda l'RTTY in ogni programma che lo fa, e
+                // senza questi due riferimenti il waterfall mostra dove sono i
+                // toni ma non dove dovrebbero essere.
+                //
+                // Compaiono solo in RTTY: negli altri modi sarebbero due righe
+                // in mezzo allo spettro senza alcun significato.
+                Repeater {
+                    id: rttyToneMarkers
+                    model: {
+                        if (typeof rtty === 'undefined' || !rtty) return []
+                        if (!bridge || String(bridge.mode).toUpperCase() !== "RTTY") return []
+                        var mark = Number(rtty.markHz)
+                        var shift = Number(rtty.shiftHz)
+                        if (!(mark > 0) || !(shift > 0)) return []
+                        // Il piu' basso e' lo space: nella convenzione di questo
+                        // decodificatore il mark sta in alto e lo shift si conta
+                        // verso il basso. REV scambia il significato dei due
+                        // toni ma non le loro frequenze, quindi le righe non si
+                        // spostano — ed e' giusto cosi': si accorda sulle stesse
+                        // due righe in un senso e nell'altro.
+                        return [{ hz: mark - shift, nome: "S" },
+                                { hz: mark,         nome: "M" }]
+                    }
+
+                    delegate: Item {
+                        required property var modelData
+                        readonly property real markerX: spectrumGpuOverlay.xForFreq(modelData.hz)
+                        x: Math.round(markerX)
+                        y: 0
+                        width: 1
+                        height: parent.height
+                        visible: markerX >= 0 && markerX < spectrumGpuOverlay.width
+                        z: 40
+
+                        // Un alone largo e tenue piu' una riga sottile e netta:
+                        // la riga dice dove, l'alone la rende visibile anche
+                        // sopra il giallo acceso di una portante forte.
+                        Rectangle { x: -3; width: 7; height: parent.height; color: "#ffb000"; opacity: 0.22 }
+                        Rectangle { x: 0;  width: 1; height: parent.height; color: "#ffd166"; opacity: 0.9 }
+
+                        // La lettera in cima, piccola: M e S si riconoscono a
+                        // colpo d'occhio e non rubano spazio allo spettro.
+                        Text {
+                            x: 3
+                            y: 2
+                            text: parent.modelData.nome
+                            color: "#ffd166"
+                            font.pixelSize: 9
+                            font.bold: true
+                        }
+                    }
+                }
+
                 // 1.0.365+ (fork) - MAM multi-stream: marker per ogni slot QSO
                 // attivo (modello Fox/hunter). Una linea verticale arancione +
                 // etichetta col call alla freq audio dello slot, mappata con la

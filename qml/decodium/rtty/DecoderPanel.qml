@@ -161,6 +161,72 @@ GlassPanel {
                 }
             }
 
+            // I quattro comandi dell'aggancio al segnale. Stavano nel pannello
+            // waterfall di DecoRTTY, che qui e' stato sostituito da quello di
+            // Decodium: sono rimasti fuori nel passaggio, ed erano proprio
+            // quelli che si toccano di continuo mentre si cerca di copiare.
+            Row {
+                width: parent.width
+                spacing: 4
+
+                GlassButton {
+                    text: "REV"
+                    minimumWidth: (controls.width - 12) / 4
+                    implicitHeight: 24
+                    font.pixelSize: 10
+                    armed: rtty.reverse
+                    accentColor: Theme.warning
+                    onClicked: rtty.reverse = !rtty.reverse
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 700
+                    ToolTip.text: qsTr("Swaps the two tones. When the other station is on the
+opposite sideband everything arrives as gibberish, and
+this is the one button that fixes it.")
+                }
+
+                GlassButton {
+                    text: "AFC"
+                    minimumWidth: (controls.width - 12) / 4
+                    implicitHeight: 24
+                    font.pixelSize: 10
+                    armed: rtty.afcEnabled
+                    accentColor: Theme.secondary
+                    onClicked: rtty.afcEnabled = !rtty.afcEnabled
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 700
+                    ToolTip.text: qsTr("Follows the drift of the signal already locked,
+within a few tens of hertz.")
+                }
+
+                GlassButton {
+                    text: "AUTO"
+                    minimumWidth: (controls.width - 12) / 4
+                    implicitHeight: 24
+                    font.pixelSize: 10
+                    armed: rtty.autoTuneEnabled
+                    accentColor: Theme.success
+                    onClicked: rtty.autoTuneEnabled = !rtty.autoTuneEnabled
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 700
+                    ToolTip.text: qsTr("Searches by itself whenever nothing is being
+copied, and tries the polarity too. While the
+decoder is locked it touches nothing.")
+                }
+
+                GlassButton {
+                    text: qsTr("CENTRE")
+                    minimumWidth: (controls.width - 12) / 4
+                    implicitHeight: 24
+                    font.pixelSize: 10
+                    accentColor: Theme.primary
+                    onClicked: rtty.centreOnSignal()
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 700
+                    ToolTip.text: qsTr("Finds the tone pair in the band and moves the
+tuning onto it. Once, now.")
+                }
+            }
+
             Row {
                 width: parent.width
                 spacing: 4

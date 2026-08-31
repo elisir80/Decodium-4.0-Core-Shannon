@@ -22,7 +22,6 @@ Item {
     // Chiamato quando la banda cambia davvero, per far ripartire il waterfall:
     // la coda di una banda sopra la testa di un'altra e' una figura che non e'
     // mai esistita in aria.
-    signal bandChanged()
 
     // La radio si lascia comandare? Vuol dire che il CAT di Decodium e'
     // connesso; da una scheda audio non lo e' mai, perche' li' si ascolta
@@ -53,45 +52,20 @@ no commands. Connect it in Decodium.")
         anchors.right: parent.right
         spacing: 3
 
-        Repeater {
-            model: radio.bands
-
-            GlassButton {
-                required property int index
-                required property var modelData
-
-                text: modelData.name.replace(" m", "")
-                enabled: root.live
-                armed: radio.currentBand === index
-                accentColor: Theme.primary
-                minimumWidth: 30
-                implicitHeight: 22
-                font.pixelSize: 10
-                onClicked: {
-                    if (radio.currentBand === index)
-                        return
-                    radio.tuneToBand(index)
-                    root.bandChanged()
-                }
-                ToolTip.visible: hovered
-                ToolTip.delay: 700
-                ToolTip.text: root.live
-                              ? qsTr("%1 — RTTY at %2 MHz").arg(modelData.name)
-                                                           .arg(modelData.mhz.toFixed(3))
-                              : root.whyIdle
-            }
-        }
-    }
-
-        // Uno stacco fra le bande e i modi: senza, in una fila unica non si
-        // capisce dove finiscono le une e cominciano gli altri.
-        Item { width: 14; height: 1 }
+        // I pulsanti delle bande stavano qui. Non ci sono piu': la banda si
+        // sceglie da Decodium, dove sta il selettore dei modi che porta la
+        // radio sul segmento RTTY. Sceglierla da due posti diversi vuol dire
+        // che prima o poi i due dicono cose diverse.
 
         // Il modo in cui sta la radio adesso, anche quando non e' fra i nostri
         // quattro: se qualcuno l'ha messa in CW bisogna vederlo, altrimenti si
         // resta a chiedersi perche' non si copia niente.
         Text {
-            anchors.verticalCenter: parent.verticalCenter
+            // Niente ancoraggi qui dentro: in un Flow li mette il
+            // posizionatore, e un anchor lo scavalca sovrapponendo gli
+            // elementi invece di metterli in fila.
+            height: 22
+            verticalAlignment: Text.AlignVCenter
             text: radio.mode
             color: Theme.warning
             font.pixelSize: 10
@@ -154,3 +128,4 @@ transmit from here.")
             }
         }
     }
+}

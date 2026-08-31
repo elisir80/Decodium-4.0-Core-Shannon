@@ -41,6 +41,25 @@ ApplicationWindow {
     onVisibleChanged: if (bridge) bridge.rttyInAscolto = visible
     Component.onDestruction: if (bridge) bridge.rttyInAscolto = false
 
+    // Cambiando banda il decodificatore deve dimenticare quello che ha
+    // imparato: il fondo di banda e l'auto-centratura si appoggiano a cio' che
+    // hanno visto, e cio' che hanno visto era un'altra banda.
+    //
+    // Si guarda la banda vera invece dei pulsanti di questa finestra, che non
+    // ci sono piu': cosi' l'azzeramento arriva da qualunque parte venga il
+    // cambio — il selettore di Decodium, il menu, o la manopola della radio,
+    // che prima non lo faceva scattare affatto.
+    property int ultimaBanda: -2
+    Connections {
+        target: radio
+        function onSliceChanged() {
+            if (radio.currentBand !== window.ultimaBanda) {
+                window.ultimaBanda = radio.currentBand
+                rtty.forgetBand()
+            }
+        }
+    }
+
 
     // A single quiet gradient behind everything, so the glass panels have
     // something to sit on rather than floating on flat black.
@@ -86,10 +105,32 @@ ApplicationWindow {
             // guarda il testo mentre si copia. E' lo stesso meccanismo con cui
             // Decodium divide il suo waterfall dai pannelli di decodifica, con
             // la stessa maniglia che si accende quando ci passi sopra.
-            SplitView {
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumWidth: 320
+                spacing: 6
+
+            // I modi della radio sopra il waterfall. Le bande no: quelle si
+            // scelgono da Decodium, che e' l'unico posto dove si sceglie una
+            // frequenza — due strade per la stessa cosa prima o poi dicono
+            // cose diverse, e il righello di sintonia di DecoRTTY sarebbe
+            // stata la terza.
+            BandBar {
+                Layout.fillWidth: true
+            }
+
+            // Il ponte di sintonia, appena sopra il waterfall: girando la
+            // manopola si guarda questo, non i numeri. Traversa dritta e
+            // colonne alte vuol dire segnale a posto.
+            TuningBridge {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 46
+            }
+
+            SplitView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 orientation: Qt.Vertical
 
                 handle: Rectangle {
@@ -129,6 +170,7 @@ ApplicationWindow {
                     SplitView.fillHeight: true
                     SplitView.minimumHeight: 90
                 }
+            }
             }
 
             ColumnLayout {
