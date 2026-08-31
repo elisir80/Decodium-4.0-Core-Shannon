@@ -11,6 +11,14 @@
 # la libreria, e se in futuro servira' l'eseguibile lo si aggiunge senza
 # toccare altro.
 
+# AUTOMOC acceso PRIMA di definire i target: Decodium lo attiva a meta' del
+# suo CMakeLists (riga ~1627) mentre questo sottoprogetto viene aggiunto prima
+# (riga ~1370) e non lo eredita. Impostarlo dopo, con set_target_properties,
+# non basta: le regole di generazione sono gia' state scritte e mocs_compilation
+# non viene prodotto. decortty_dsp lo spegne per conto suo piu' sotto: non
+# contiene oggetti Qt, come nell'originale.
+set (CMAKE_AUTOMOC ON)
+
 # ── DSP: demodulatore FSK, Baudot, Viterbi ──────────────────────────────────
 # Nessun oggetto Qt: AUTOMOC spento come nell'originale.
 add_library (decortty_dsp STATIC
@@ -55,6 +63,11 @@ add_library (decortty_flex STATIC
     link/GatewayLink.cpp        link/GatewayLink.h
     link/RadioHub.cpp           link/RadioHub.h
     link/SoundCardLink.cpp      link/SoundCardLink.h
+    # Il piano di banda e' un dato puro (solo QString e vector) ma RadioHub lo
+    # usa: sta qui e non in decortty_app, che dipende da questa libreria e non
+    # viceversa. Nel progetto originale la distinzione non serviva, perche'
+    # tutto finiva nello stesso eseguibile.
+    app/BandPlan.cpp            app/BandPlan.h
 )
 target_link_libraries (decortty_flex PUBLIC
     Qt6::Core Qt6::Network decortty_dsp decortty_audio)
@@ -87,13 +100,20 @@ add_library (decortty_app STATIC
     app/WaterfallItem.cpp       app/WaterfallItem.h
     app/MacroModel.cpp          app/MacroModel.h
     app/QsoLog.cpp              app/QsoLog.h
-    app/BandPlan.cpp            app/BandPlan.h
     app/GatewaySupervisor.cpp   app/GatewaySupervisor.h
     app/Language.cpp            app/Language.h
 )
 target_link_libraries (decortty_app PUBLIC
     Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Multimedia Qt6::SerialPort
     decortty_dsp decortty_flex decortty_gateway)
+
+# ── Il punto di aggancio a Decodium ─────────────────────────────────────────
+# Raccoglie gli oggetti che nel progetto originale vivevano in main.cpp, cosi'
+# il resto di Decodium ne vede uno solo. Vedi il passo 2 del piano.
+add_library (decortty_host STATIC
+    DecoRttyHost.cpp            DecoRttyHost.h
+)
+target_link_libraries (decortty_host PUBLIC decortty_app)
 
 # I warning restano fatali anche qui, come nel resto di Decodium.
 # La tentazione era di allentarli, visto che questo sottoprogetto va
@@ -109,7 +129,7 @@ target_link_libraries (decortty_app PUBLIC
 # Lo standard si alza sui soli target di questo sottoprogetto: il resto di
 # Decodium resta a 17, e nessun altro bersaglio cambia comportamento.
 foreach (bersaglio decortty_dsp decortty_audio decortty_flex
-                   decortty_gateway decortty_app)
+                   decortty_gateway decortty_app decortty_host)
   set_target_properties (${bersaglio} PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON)

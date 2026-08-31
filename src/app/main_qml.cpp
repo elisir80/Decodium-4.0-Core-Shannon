@@ -16,6 +16,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#if DECODIUM_HAS_RTTY
+#include "DecoRttyHost.h"
+#endif
 #if DECODIUM_HAS_SSTV
 #include <QImage>
 #include <QQuickImageProvider>
@@ -2764,6 +2767,13 @@ int main(int argc, char* argv[])
     L("bridge constructing");
     DecodiumBridge bridge;
     FT2LinkQmlAdapter ft2Link;
+#if DECODIUM_HAS_RTTY
+    // DecoRTTY: RTTY su VITA-49, FlexRadio diretto e FT-991A via gateway.
+    // Tiene la propria sorgente audio e non tocca il percorso di Decodium:
+    // FT8, FT4 e FT2 restano indipendenti da questo sottosistema.
+    // Vedi doc/PIANO_INTEGRAZIONE_DECORTTY.md.
+    decortty::DecoRttyHost rttyHost;
+#endif
     auto labDialOverrideActive = std::make_shared<bool>(labDialHz > 0);
     auto applyLabRuntimeOverrides =
         [&bridge,
@@ -4124,6 +4134,18 @@ int main(int argc, char* argv[])
     engine.rootContext()->setContextProperty("bridge", &bridge);
     engine.rootContext()->setContextProperty("appEngine", &bridge);
     engine.rootContext()->setContextProperty("ft2Link", &ft2Link);
+#if DECODIUM_HAS_RTTY
+    {
+        // Le impostazioni RTTY usano le stesse chiavi del progetto originale,
+        // cosi' chi viene da DecoRTTY ritrova la propria configurazione.
+        QSettings rttySettings {QSettings::IniFormat, QSettings::UserScope,
+                                QStringLiteral("Decodium"), QStringLiteral("Decodium")};
+        rttyHost.avvia (rttySettings);
+        rttyHost.esponiAlQml (*engine.rootContext(),
+                              QStringLiteral (FORK_RELEASE_VERSION));
+        L("DecoRTTY: sottosistema RTTY avviato");
+    }
+#endif
     // IU8LMC: aggiornamento automatico con avviso e conferma. Il checker
     // storico (DecodiumBridge::checkForUpdates) e' spento dalla 1.0.62 e non ha
     // mai avvisato nessuno: e' il motivo per cui i tester restano su release
