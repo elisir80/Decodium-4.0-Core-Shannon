@@ -43,6 +43,17 @@ add_executable (test_qso_sequencer_rules
 target_link_libraries (test_qso_sequencer_rules Qt6::Test Qt6::Core)
 add_test (NAME test_qso_sequencer_rules COMMAND $<TARGET_FILE:test_qso_sequencer_rules>)
 
+add_executable (test_radio_frequency_delta test_radio_frequency_delta.cpp)
+target_link_libraries (test_radio_frequency_delta
+  wsjt_qt wsjt_cxx wsjt_fort Qt6::Test Qt6::Core Qt6::Network)
+add_test (NAME test_radio_frequency_delta COMMAND $<TARGET_FILE:test_radio_frequency_delta>)
+
+add_executable (test_wsprnet_post
+  test_wsprnet_post.cpp
+  ../Network/wsprnet.cpp)
+target_link_libraries (test_wsprnet_post Qt6::Test Qt6::Core Qt6::Network)
+add_test (NAME test_wsprnet_post COMMAND $<TARGET_FILE:test_wsprnet_post>)
+
 add_executable (ft4_stage_compare ft4_stage_compare.cpp)
 target_link_libraries (ft4_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 

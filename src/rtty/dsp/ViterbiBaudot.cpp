@@ -10,7 +10,11 @@ namespace decortty::dsp {
 
 namespace {
 
-constexpr float kInf = std::numeric_limits<float>::infinity();
+// The target is compiled with fast-math, where IEEE infinity is not a valid
+// sentinel on Clang.  A finite maximum keeps the unreachable-state marker
+// portable to libc++, libstdc++ and MSVC, and reachable metrics are normalised
+// after every step so they never approach this value.
+constexpr float kUnreachableMetric = std::numeric_limits<float>::max();
 
 // What it costs the search to emit a shift character. LTRS and FIGS carry no
 // text, so without a price the decoder would happily explain every ambiguous
@@ -168,7 +172,7 @@ float ViterbiBaudot::bigramCost(int prevAlpha, int nextAlpha) const
 void ViterbiBaudot::reset()
 {
     m_history.clear();
-    m_metric.fill(kInf);
+    m_metric.fill(kUnreachableMetric);
     m_metric[static_cast<size_t>(stateIndex(0, 0))] = 0.0f;   // letters case, nothing seen
     m_primed = true;
 }
@@ -206,14 +210,14 @@ void ViterbiBaudot::push(const SoftFrame& frame,
     step.corrected.fill(0);
 
     std::array<float, kStates> next{};
-    next.fill(kInf);
+    next.fill(kUnreachableMetric);
 
     const float q = frame.quality();
     const float c = frame.certainty();
 
     for (int s = 0; s < kStates; ++s) {
         const float base = m_metric[static_cast<size_t>(s)];
-        if (base == kInf)
+        if (base == kUnreachableMetric)
             continue;
 
         const int shift     = s / kAlphabet;
@@ -267,12 +271,12 @@ void ViterbiBaudot::push(const SoftFrame& frame,
     }
 
     // Keep the metrics from drifting off to infinity over a long transmission.
-    float best = kInf;
+    float best = kUnreachableMetric;
     for (const float m : next)
         best = std::min(best, m);
-    if (best != kInf) {
+    if (best != kUnreachableMetric) {
         for (float& m : next)
-            if (m != kInf)
+            if (m != kUnreachableMetric)
                 m -= best;
     }
 
@@ -292,7 +296,7 @@ void ViterbiBaudot::emitOldest(const std::function<void(const DecodedChar&)>& ou
     // Trace the current best path back to the oldest step still in the window,
     // and commit whatever that step decided.
     int   bestState = -1;
-    float bestCost  = kInf;
+    float bestCost  = kUnreachableMetric;
     for (int s = 0; s < kStates; ++s) {
         if (m_metric[static_cast<size_t>(s)] < bestCost) {
             bestCost  = m_metric[static_cast<size_t>(s)];

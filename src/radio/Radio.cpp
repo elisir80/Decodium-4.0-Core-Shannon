@@ -91,8 +91,12 @@ namespace Radio
     value *= std::pow (10., scale);
     if (ok)
       {
-        if (value < static_cast<double>(std::numeric_limits<Frequency>::min ())
-            || value > static_cast<double>(std::numeric_limits<Frequency>::max ()))
+        // FrequencyDelta is signed.  Comparing against Frequency (quint64)
+        // made every negative transverter offset fail validation whenever the
+        // caller requested an `ok` result, even though the returned type can
+        // represent it correctly.
+        if (value < static_cast<double>(std::numeric_limits<FrequencyDelta>::min ())
+            || value > static_cast<double>(std::numeric_limits<FrequencyDelta>::max ()))
           {
             value = 0.;
             *ok = false;

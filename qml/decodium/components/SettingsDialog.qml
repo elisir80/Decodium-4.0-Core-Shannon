@@ -118,6 +118,8 @@ Dialog {
     property var frequencyBandOptions: bridge.frequencyBandOptions()
     property int selectedWorkingFrequencyIndex: -1
     property int selectedStationFrequencyIndex: -1
+    property string stationFrequencyEditorStatus: ""
+    property bool stationFrequencyEditorError: false
     property string qrzLogbookTestStatus: ""
     property bool qrzLogbookTestIsError: false
     property bool qrzLogbookTestBusy: false
@@ -499,6 +501,8 @@ Dialog {
         setComboText(stationBandCombo, row.band || "20m")
         stationOffsetField.text = row.offsetMHz || String(row.offset || "").replace(" MHz", "")
         stationAntennaField.text = row.antenna || ""
+        stationFrequencyEditorStatus = ""
+        stationFrequencyEditorError = false
     }
 
     function clearStationFrequencyEditor() {
@@ -506,12 +510,25 @@ Dialog {
         setComboText(stationBandCombo, "20m")
         stationOffsetField.text = "0.000000"
         stationAntennaField.text = ""
+        stationFrequencyEditorStatus = ""
+        stationFrequencyEditorError = false
     }
 
     function addStationFrequencyFromEditor() {
-        if (bridge.addStationFrequencyRow(stationBandCombo.currentText,
-                                          stationOffsetField.text,
-                                          stationAntennaField.text)) {
+        var offsetText = String(stationOffsetField.text || "").trim()
+        if (offsetText.length === 0) {
+            stationFrequencyEditorError = true
+            stationFrequencyEditorStatus = qsTr("Enter a valid offset, for example -2556 MHz")
+            return
+        }
+        var saved = bridge.addStationFrequencyRow(stationBandCombo.currentText,
+                                                  offsetText,
+                                                  stationAntennaField.text)
+        stationFrequencyEditorError = !saved
+        stationFrequencyEditorStatus = saved
+                ? qsTr("Offset saved and verified")
+                : qsTr("Offset was not saved; check the value and settings-file permissions")
+        if (saved) {
             refreshFrequencySettings()
         }
     }
@@ -519,10 +536,21 @@ Dialog {
     function updateStationFrequencyFromEditor() {
         if (selectedStationFrequencyIndex < 0)
             return
-        if (bridge.updateStationFrequencyRow(selectedStationFrequencyIndex,
-                                             stationBandCombo.currentText,
-                                             stationOffsetField.text,
-                                             stationAntennaField.text)) {
+        var offsetText = String(stationOffsetField.text || "").trim()
+        if (offsetText.length === 0) {
+            stationFrequencyEditorError = true
+            stationFrequencyEditorStatus = qsTr("Enter a valid offset, for example -2556 MHz")
+            return
+        }
+        var saved = bridge.updateStationFrequencyRow(selectedStationFrequencyIndex,
+                                                      stationBandCombo.currentText,
+                                                      offsetText,
+                                                      stationAntennaField.text)
+        stationFrequencyEditorError = !saved
+        stationFrequencyEditorStatus = saved
+                ? qsTr("Offset saved and verified")
+                : qsTr("Offset was not saved; check the value and settings-file permissions")
+        if (saved) {
             refreshFrequencySettings()
         }
     }

@@ -84,12 +84,13 @@ char ShiftState::feed(uint8_t code, FiguresSet set)
     return baudotToChar(code, m_shift, set);
 }
 
-std::basic_string<uint8_t> encodeBaudot(const std::string& text,
-                                        Shift  startShift,
-                                        Shift& endShift,
-                                        FiguresSet set)
+std::vector<uint8_t> encodeBaudot(const std::string& text,
+                                  Shift  startShift,
+                                  Shift& endShift,
+                                  FiguresSet set)
 {
-    std::basic_string<uint8_t> out;
+    std::vector<uint8_t> out;
+    out.reserve(text.size());
     Shift current = startShift;
 
     for (const char c : text) {

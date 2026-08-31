@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace decortty::dsp {
 
@@ -55,9 +56,9 @@ private:
 // inserting LTRS/FIGS shifts as required. Characters with no ITA2 form are
 // dropped. The stream always starts from `startShift` and leaves the caller's
 // shift in `endShift`.
-std::basic_string<uint8_t> encodeBaudot(const std::string& text,
-                                        Shift  startShift,
-                                        Shift& endShift,
-                                        FiguresSet set = FiguresSet::US);
+std::vector<uint8_t> encodeBaudot(const std::string& text,
+                                  Shift  startShift,
+                                  Shift& endShift,
+                                  FiguresSet set = FiguresSet::US);
 
 } // namespace decortty::dsp
