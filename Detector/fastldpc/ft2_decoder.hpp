@@ -32,6 +32,8 @@ struct Ft2Config {
     // Tipi di messaggio i3 ammessi dal controllo di plausibilita' dentro
     // l'OSD: 0 lo spegne. Vedi cpp/plausible.hpp.
     uint32_t tipi_ammessi = 0;
+    // Bit d'informazione ammessi nelle coppie; 0 = tutti. Vedi OsdFast.
+    int pair_span   = 0;
     // Limite sui |LLR| in ingresso, in multipli della media della parola.
     // 0 = disattivato. Un LLR molto piu' grande della media e' quasi sempre un
     // artefatto (interferenza impulsiva) e non informazione: un solo LLR
@@ -72,6 +74,7 @@ public:
           buf_((size_t)cfg.batch * code.N), word_(code.N) {
         osd_.nd_max = cfg.nd_max;
         osd_.tipi_ammessi = cfg.tipi_ammessi;
+        osd_.pair_span = cfg.pair_span;
         osd_.pair_search = cfg.pair_search;
         osd_.ntau = cfg.ntau;
     }
@@ -80,6 +83,14 @@ public:
     struct Stats { long words = 0, by_bp = 0, by_osd = 0, osd_tried = 0; };
     const Stats& stats() const { return st_; }
     void reset_stats() { st_ = Stats{}; }
+
+    // Candidati sottoposti alla CRC-14 (con -DOSD_COUNT; senza, resta zero).
+    // Diviso per le parole tentate da' i candidati per parola, cioe' il numero
+    // da cui dipendono i nominativi fantasma: la CRC ne ammette uno ogni 16384.
+    // E' strutturale e deterministico, quindi dice quello che il conteggio dei
+    // fantasmi su una piscina di rumore gaussiano non riesce a dire.
+    long crc_tests() const { return osd_.n_crc; }
+    void reset_crc_tests() { osd_.n_crc = 0; }
 
     // apmask (opzionale): [n][174], 1 sui bit gia' noti per ipotesi a priori.
     // Gli LLR di quei bit devono gia' portare il valore noto, come fa FT2

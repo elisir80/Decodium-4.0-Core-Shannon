@@ -186,7 +186,35 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             c.span2 = 32;
             c.span3 = 0;
             c.pair_search = true;
-            c.ntau = 14;                    // come l'originale a ndeep=3
+            // ntau 13 e coppie sui primi 64, non 14 e tutti i 91 come
+            // l'originale a ndeep=3. Le due manopole non erano mai state
+            // misurate, e nessuna delle due fa quello che sembra:
+            //
+            //   ntau e' la lunghezza della chiave della tabella delle coppie.
+            //   Piu' corta = piu' collisioni = liste piu' lunghe = piu'
+            //   candidati provati. NON e' una manopola di cache, e' ampiezza
+            //   di ricerca, e va nel verso opposto a quello che sembra.
+            //
+            //   pair_span limita le coppie ai bit meno affidabili. Le coppie
+            //   fra bit affidabili si costruiscono, si inseriscono, e poi il
+            //   taglio per limite inferiore le scarta: lavoro buttato.
+            //
+            // Accorciare la chiave allarga, stringere le coppie restringe. La
+            // combinazione 13/64 sta SOTTO 14/91 su tutti e tre gli assi che
+            // contano, misurata a 0,0 - 0,5 - 1,0 dB (lab, cpp/finale.cpp):
+            //
+            //   candidati alla CRC per parola   5629 contro 6241   (-10%)
+            //   microsecondi per candidato      60,6 contro 78,9   (-23%)
+            //   decodifiche a 1 dB             16216 contro 16170  (+46)
+            //
+            // Meno candidati significa meno falsi positivi della CRC, quindi
+            // questo cambiamento va nel verso OPPOSTO alle due ricerche larghe
+            // ritirate: quelle allargavano la ricerca, questa la stringe e
+            // decodifica lo stesso di piu'. Se il traffico vero dicesse che
+            // serve altro margine, 14/64 costa -0,2% di decodifiche e toglie il
+            // 34% dei candidati, 16/64 costa -1,0% e ne toglie il 64%.
+            c.ntau = 13;
+            c.pair_span = 64;
             // Soglia del gate scelta sul RUMORE, non sulle parole vere: e' il
             // caso che domina in FT2, dove la maggior parte dei candidati non
             // contiene alcun segnale e ogni accettazione e' un nominativo

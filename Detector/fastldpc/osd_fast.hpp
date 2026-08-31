@@ -74,6 +74,16 @@
 #define OSD_TSTART() do {} while (0)
 #endif
 
+// Conteggio dei candidati sottoposti alla CRC-14: -DOSD_COUNT lo accende,
+// altrimenti costo zero. Sta nei cicli piu' caldi del decoder, quindi non puo'
+// essere sempre attivo; ma e' la grandezza che predice i nominativi fantasma
+// (vedi il commento su n_crc piu' sotto).
+#ifdef OSD_COUNT
+#define OSD_C(k) (n_crc += (k))
+#else
+#define OSD_C(k) do {} while (0)
+#endif
+
 class OsdFast {
 public:
     static constexpr int RW    = 4;     // 174 bit -> 4 x uint64 = un registro YMM
@@ -97,6 +107,19 @@ public:
     // si calcola una volta per bit e ogni coppia costa uno XOR.
     bool pair_search = false;
     int  ntau = 14;                     // bit di parita' usati come chiave
+
+    // Quanti bit d'informazione entrano nelle COPPIE. 0 = tutti.
+    //
+    // build_pairs costruisce C(K,2) coppie, e con K=91 sono 4095, ognuna con
+    // sei scritture su una tabella da 16384 voci: misurato, e' il 77% del tempo
+    // dell'intero decoder. Ma le coppie fra bit molto affidabili vengono
+    // costruite, inserite, e poi SCARTATE al momento dell'uso dal taglio per
+    // limite inferiore, perche' la somma dei loro |LLR| supera gia' il migliore
+    // corrente. Costruirle e' lavoro buttato.
+    //
+    // info_ e' ordinato per affidabilita' crescente, quindi limitarsi ai primi
+    // pair_span significa tenere esattamente quelli dove gli errori stanno.
+    int  pair_span = 0;
 
     OsdFast(const Code& code, int order = 1, int span2 = 32, int span3 = 0)
         : c_(code), order_(order), span2_(span2), span3_(span3 > 0 ? span3 : span2 / 2),
@@ -213,12 +236,14 @@ public:
         // CRC (uno XOR e un test), e solo per i pochi candidati che la passano
         // lo score completo e la costruzione della parola.
         best_score_ = LONG_MAX; found_ = false;
+        OSD_C(1);
         if (syn0 == 0) eval(d0, -1, -1, 0);                             // OSD-0
         if (order_ >= 1) {
             const int lim2 = std::min(span2_, K), lim3 = std::min(span3_, K);
             for (int t = 0; t < K; ++t) {
                 const long a_t = absL_[info_[t]];
                 if (a_t >= best_score_) break;          // info_ ordinato: il resto e' peggio
+                OSD_C(1);
                 const uint16_t s1 = (uint16_t)(syn0 ^ dcrc_[t]);
                 if (s1 == 0) {
                     Mask d1 = d0; xorm(d1, colmask(t));
@@ -233,6 +258,7 @@ public:
                     const __m256i vs1 = _mm256_set1_epi16((short)s1);
                     const __m256i vz  = _mm256_setzero_si256();
                     for (; u + 16 <= umax; u += 16) {
+                        OSD_C(16);
                         const __m256i dv = _mm256_loadu_si256((const __m256i*)&dcrc_[u]);
                         unsigned mk = (unsigned)_mm256_movemask_epi8(
                                 _mm256_cmpeq_epi16(_mm256_xor_si256(dv, vs1), vz));
@@ -254,6 +280,7 @@ public:
                     for (; u < umax; ++u) {
                         const long lb = a_t + absL_[info_[u]];
                         if (lb >= best_score_) break;
+                        OSD_C(1);
                         if ((uint16_t)(s1 ^ dcrc_[u]) != 0) continue;
                         Mask d2 = d0; xorm(d2, colmask(t)); xorm(d2, colmask(u));
                         eval(d2, info_[t], info_[u], lb);
@@ -271,6 +298,7 @@ public:
                         for (int x = u + 1; x < xmax; ++x) {
                             const long lb3 = lb2 + absL_[info_[x]];
                             if (lb3 >= best_score_) break;
+                            OSD_C(1);
                             if ((uint16_t)(s2 ^ dcrc_[x]) != 0) continue;
                             Mask d3 = d0;
                             xorm(d3, colmask(t)); xorm(d3, colmask(u)); xorm(d3, colmask(x));
@@ -288,7 +316,8 @@ public:
         if (pair_search && K > 2) {
             const int tau = std::min (ntau, std::min (M, 20));
             pick_tau (M, tau);
-            build_pairs (K, tau);
+            const int Kp = (pair_span > 0 && pair_span < K) ? pair_span : K;
+            build_pairs (Kp, tau);
 
             // 1) dal candidato base, 2) da ciascun singolo flip: sono i punti
             //    di partenza da cui la coppia deve completare la correzione.
@@ -310,6 +339,7 @@ public:
                     if (i1 == st || i2 == st) continue;            // gia' flippato
                     const long lb = lb0 + absL_[info_[i1]] + absL_[info_[i2]];
                     if (lb >= best_score_) continue;
+                    OSD_C(1);
                     if ((uint16_t) (syn_base ^ dcrc_[i1] ^ dcrc_[i2]) != 0) continue;   // CRC: uno XOR
                     Mask d = dbase;
                     xorm (d, colmask (i1));
@@ -349,6 +379,18 @@ public:
     // Tempi cumulati per fase, in secondi (solo con -DOSD_PROFILE).
     double t_sort = 0, t_gauss = 0, t_pre = 0, t_crc = 0, t_enum = 0;
     long n_search = 0, n_elim = 0;
+
+    // Candidati sottoposti alla CRC-14 (contati solo con -DOSD_COUNT).
+    //
+    // E' LA grandezza che predice i nominativi fantasma, e per molto tempo non
+    // e' stata contata. La CRC ammette un candidato sbagliato ogni 16384:
+    // le false accettazioni attese per parola sono n_crc/16384, ridotte poi dai
+    // bit del controllo di plausibilita' e dal gate nd. Contare invece i
+    // fantasmi su un numero FISSO di candidati di rumore e' esattamente
+    // l'errore che fece sembrare buona la ricerca larga, ritirata poi due volte
+    // dal traffico vero: quel conteggio non vede quanti candidati per parola si
+    // stanno davvero sottoponendo alla CRC.
+    long n_crc = 0;
 
 private:
     struct alignas(32) Row { uint64_t w[RW]; };     // bitset su N
@@ -425,6 +467,15 @@ private:
 
     // Tabella delle coppie, una volta per parola. La generazione evita di
     // azzerare le 2^ntau teste a ogni chiamata.
+    //
+    // PROVATO E SCARTATO: l'incontro a meta' strada, cioe' indicizzare i K
+    // SINGOLI (91 inserimenti invece di 4095) e cercare il complemento
+    // want^chiave(i1) per ogni i1. Da' risultati IDENTICI parola per parola, ma
+    // e' ~10% piu' lento a ogni ampiezza provata: sostituisce 4095 scritture
+    // sequenziali con nstart*K letture CASUALI in una tabella da 128 KB, e le
+    // letture fuori dalla cache di primo livello costano piu' delle scritture
+    // sequenziali. Misurato: 71.8 us contro 67.3 a K pieno, 46.2 contro 40.9 a
+    // K=48.
     void build_pairs (int K, int tau) {
         const size_t nbox = (size_t) 1 << tau;
         if (box_head_.size () != nbox) { box_head_.assign (nbox, -1); box_gen_.assign (nbox, 0); }
