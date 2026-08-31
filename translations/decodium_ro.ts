@@ -21663,4 +21663,367 @@ VUCC: %2</translation>
         <translation>Deconectat</translation>
     </message>
 </context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Nicio stație conectată.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>CAT-ul Decodium nu este conectat, așa că stația nu
+acceptă comenzi. Conectează-l din Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY pe %2 MHz</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Date pe banda laterală superioară: modul pentru care
+este scris acest decodor.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Date pe banda laterală inferioară. Tonurile ies
+inversate — REV le pune la loc.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Bandă laterală fonie. RTTY se copiază la fel, dar
+filtrul stației este mai larg decât trebuie.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Trage pentru a muta stația; rotița acordează din 1 kHz —
+100 Hz cu Shift, 10 kHz cu Ctrl.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Corecție</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Oprită</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normală</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Profundă</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Revenire la litere la spațiu — recuperează un FIGS/LTRS pierdut,
+dar rupe grupurile lungi de cifre, cum sunt numerele de ordine.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Pregătește stația</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Pune stația în DIGU și îi îngustează filtrul
+în jurul tonurilor.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTRE</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Trece-bandă în jurul celor două tonuri: aruncă tot ce
+rămâne în afară, înainte de detector.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Scoate o frecvență. Ctrl+clic pe cascadă pentru a o
+pune pe purtătoarea care deranjează.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Anulator adaptiv: scoate singur purtătoarele fixe. La
+semnale slabe poate mânca și RTTY-ul — încearcă și
+ascultă.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>Lățime BPF</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>CADRU</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Biți</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>niciuna</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>pară</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>impară</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Tabelul cifrelor: US are BELL și apostrof acolo unde
+ITA2 le inversează.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Scrie și caracterele cu bitul de stop citit greșit:
+câteva caractere în plus pe semnalele distorsionate, în
+schimb câteva rânduri de gunoi.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>EMISIE</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Umple</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>oprit</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Ce să trimită între caractere în timp ce scrii
+în direct.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Așteptare caract.</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Setări</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n legătură</numerusform>
+            <numerusform>%n legături</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>RST TRIMIS</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>RST PRIMIT</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NUME</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Înregistrează</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Deja lucrat: %1 — ultima dată pe %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>Exportă ADIF</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Închide</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>RECEPȚIE</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Evidențiază indicativele. Clic pe unul pentru a-l pune
+în câmpul HIS CALL.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Urmărește</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copiază</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Curăță</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>la sfârșit ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>nicio stație</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DECODOR</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTRE</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>LIMBĂ</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>are efect imediat</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>STAȚIE</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>INDICATIVUL MEU</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NUME</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MACROURI</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Restabilește</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Închide</translation>
+    </message>
+</context>
+<context>
+    <name>StatusBar</name>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>stația Decodium</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Scrie aici — Enter trimite rândul</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Conectează o stație pentru a emite</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>ÎN EMISIE</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>EMITE</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Anulează</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Curăță</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Suficient de mare ca să miște ALC-ul — urmărește instrumentul.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>ACORD</translation>
+    </message>
+</context>
 </TS>

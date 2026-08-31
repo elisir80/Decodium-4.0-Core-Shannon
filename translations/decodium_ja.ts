@@ -23796,6 +23796,10 @@ QSO 中に余分な CPU を消費します。デフォルト: OFF。</translatio
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>Decodium の無線機</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29360,6 +29364,358 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>切断</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>無線機が接続されていません。</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>Decodium の CAT が未接続のため、無線機はコマンドを
+受け付けません。Decodium で接続してください。</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — %2 MHz の RTTY</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>上側波帯のデータ：このデコーダーが想定している
+モードです。</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>下側波帯のデータ。トーンが反転して出るので、
+REV で元に戻します。</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>音声側波帯。RTTY は同じように受信できますが、
+無線機のフィルターが必要より広くなります。</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>ドラッグで無線機を動かします。ホイールは 1 kHz 刻み —
+Shift で 100 Hz、Ctrl で 10 kHz。</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>訂正</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>オフ</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>標準</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>ディープ</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>スペースで文字に戻す — 失われた FIGS/LTRS を回復しますが、
+連番のような長い数字の並びは途切れます。</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>無線機を設定</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>無線機を DIGU にして、フィルターをトーンの
+周りに絞ります。</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>フィルター</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>2 つのトーンの周りの帯域通過：外側はすべて
+検波の前に捨てます。</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>1 つの周波数を取り除きます。ウォーターフォールを
+Ctrl+クリックで、邪魔な搬送波に合わせます。</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>適応型キャンセラー：定常的な搬送波を自動で
+取り除きます。弱い信号では RTTY まで消えることが
+あります — 試して聴いてください。</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF 幅</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>フレーム</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>ストップ</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>ビット</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>パリティ</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>偶数</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>奇数</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>数字表：US は BELL とアポストロフィが、
+ITA2 では入れ替わります。</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>ストップビットが誤って読まれた文字も表示します：
+歪んだ信号で数文字多く取れる代わりに、意味のない
+行が何行か出ます。</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>送信</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>埋める</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>オフ</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>ライブ入力中、文字と文字の間に送るもの。</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>文字間待ち</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>設定</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>ログ</translation>
+    </message>
+    <message>
+        <source>%n contact(s)</source>
+        <translation>%n 交信</translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>送信 RST</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>受信 RST</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>名前</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>記録する</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>交信済み：%1 — 前回は %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>ADIF を書き出す</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>閉じる</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>受信</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>コールサインを強調します。クリックすると
+HIS CALL 欄に入ります。</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>追従</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>コピー</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>消去</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>末尾へ ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>無線機なし</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>デコーダー</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>フィルター</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>言語</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>すぐに切り替わります</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>局</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>自局コール</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>名前</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>マクロ</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>初期値に戻す</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>閉じる</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>ここに入力 — Enter で行を送信</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>送信するには無線機を接続してください</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>送信中</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>送信</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>中止</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>消去</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>ALC が動く程度に — メーターを見てください。</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>同調</translation>
     </message>
 </context>
 </TS>

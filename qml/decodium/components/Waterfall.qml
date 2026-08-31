@@ -442,14 +442,31 @@ Item {
         spacing: 0
 
         Rectangle {
-            Layout.fillWidth: true; Layout.preferredHeight: waterfallPanel.controlsVisible ? 46 : 0
+            Layout.fillWidth: true
+            // L'altezza segue i comandi: quando vanno a capo la barra cresce,
+            // invece di restare alta 46 con le righe in piu' tagliate via.
+            Layout.preferredHeight: waterfallPanel.controlsVisible
+                                    ? Math.max(46, filaComandiWf.implicitHeight + 8) : 0
             Layout.bottomMargin: waterfallPanel.controlsVisible ? 6 : 0
             color: wfToolbarBg; visible: waterfallPanel.controlsVisible
             border.color: wfFrame; border.width: 1
             clip: true
-            RowLayout {
-                anchors.fill: parent; anchors.leftMargin: 6; anchors.rightMargin: 6
-                anchors.topMargin: 3; anchors.bottomMargin: 5
+
+            // I comandi vanno a capo quando non ci stanno. Dove il pannello e'
+            // largo — la finestra principale — restano su una riga sola come
+            // sempre: un Flow che ha spazio si comporta come una fila. Dove e'
+            // stretto, come nella finestra RTTY, si dispongono su quante righe
+            // servono invece di farsi tagliare a meta' dal bordo.
+            //
+            // Gli elementi qui dentro hanno larghezze e altezze proprie e non
+            // piu' quelle del layout a riga: in un Flow le proprieta' Layout.*
+            // non hanno effetto, e lasciarle avrebbe fatto collassare i comandi
+            // alle loro dimensioni naturali.
+            Flow {
+                id: filaComandiWf
+                x: 6
+                y: 3
+                width: parent.width - 12
                 spacing: 6
 
                 Text {
@@ -458,13 +475,11 @@ Item {
                     font.pixelSize: 10
                     font.bold: true
                     verticalAlignment: Text.AlignVCenter
-                    Layout.alignment: Qt.AlignVCenter
                 }
                 CheckBox {
                     id: showCallsCheck
-                    Layout.preferredWidth: 18
-                    Layout.preferredHeight: 18
-                    Layout.alignment: Qt.AlignVCenter
+                    width: 18
+                    height: 18
                     leftPadding: 0
                     rightPadding: 0
                     topPadding: 0
@@ -488,8 +503,7 @@ Item {
                 Text { text: qsTr("Font"); color: wfText; font.pixelSize: 10 }
                 Slider {
                     id: labelFontSlider
-                    Layout.preferredWidth: 70
-                    Layout.alignment: Qt.AlignVCenter
+                    width: 70
                     from: 6; to: 20; value: 8; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.labelFontSize = value
@@ -509,8 +523,7 @@ Item {
                 Text { text: qsTr("Gap"); color: wfText; font.pixelSize: 10 }
                 Slider {
                     id: labelSpacingSlider
-                    Layout.preferredWidth: 60
-                    Layout.alignment: Qt.AlignVCenter
+                    width: 60
                     from: 0; to: 20; value: 2; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.labelSpacing = value
@@ -550,9 +563,7 @@ Item {
                 Text { text: qsTr("Color"); color: wfText; font.pixelSize: 10 }
                 DecoComboBox {
                     id: labelColorCombo
-                    Layout.preferredWidth: 122
-                    Layout.minimumWidth: 122
-                    Layout.alignment: Qt.AlignVCenter
+                    width: 122
                     font.pixelSize: 10
                     model: waterfallPanel.labelColorPresets.map(function(p){ return p.name })
                     currentIndex: 0
@@ -662,7 +673,7 @@ Item {
                 Text { text: qsTr("Palette:"); color: wfText; font.pixelSize: 10 }
                 DecoComboBox {
                     id: paletteCombo
-                    Layout.preferredWidth: 142
+                    width: 142
                     model: waterfallDisplay.paletteNames
                     currentIndex: 0
                     font.pixelSize: 10
@@ -842,7 +853,7 @@ Item {
                 Slider {
                     id: traces3dSlider
                     visible: spectrum3dToggle.checked
-                    Layout.preferredWidth: 70
+                    width: 70
                     from: 8; to: 96; value: 28; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.spectrum3dTraces = value
@@ -867,7 +878,7 @@ Item {
                 Slider {
                     id: floor3dSlider
                     visible: spectrum3dToggle.checked
-                    Layout.preferredWidth: 70
+                    width: 70
                     from: 0; to: 30; value: 6; stepSize: 1
                     onValueChanged: {
                         waterfallDisplay.spectrum3dFloorDepth = value
@@ -930,13 +941,15 @@ Item {
                 }
                 Text { text: qsTr("Cluster"); color: dxClusterCheck.checked ? "#FFC800" : textSec; font.pixelSize: 10 }
 
-                Item { Layout.fillWidth: true }
+                // Lo spaziatore che spingeva a destra il pulsante di chiusura non
+                // serve piu': in una fila che va a capo l'ultimo elemento sta dove
+                // arriva, e uno spaziatore elastico lo spingerebbe da solo su una
+                // riga tutta sua.
 
                 Rectangle {
                     id: collapseControlsButton
-                    Layout.preferredWidth: 112
-                    Layout.preferredHeight: 28
-                    Layout.alignment: Qt.AlignVCenter
+                    width: 112
+                    height: 28
                     radius: 6
                     color: collapseControlsMA.containsMouse
                            ? Qt.rgba(accentGreen.r, accentGreen.g, accentGreen.b, 0.26)
@@ -1000,7 +1013,7 @@ Item {
                 Text { text: qsTr("Zoom"); color: wfText; font.pixelSize: 10 }
                 Slider {
                     id: zoomSlider
-                    Layout.preferredWidth: 70
+                    width: 70
                     from: 1; to: 8; value: bridge.uiZoomFactor > 0 ? bridge.uiZoomFactor : 1.0; stepSize: 0.5
                     onValueChanged: {
                         waterfallDisplay.zoomFactor = value

@@ -536,6 +536,11 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(double spectrumRefLevel    READ spectrumRefLevel    WRITE setSpectrumRefLevel    NOTIFY spectrumRefLevelChanged)
     Q_PROPERTY(double spectrumDynRange    READ spectrumDynRange    WRITE setSpectrumDynRange    NOTIFY spectrumDynRangeChanged)
     Q_PROPERTY(bool  spectrumVisible      READ spectrumVisible     WRITE setSpectrumVisible     NOTIFY spectrumVisibleChanged)
+    // Vero quando la finestra RTTY e' aperta. E' il rubinetto dell'audio verso
+    // il decodificatore RTTY: a finestra chiusa il demodulatore non deve
+    // girare, perche' nessuno ne leggerebbe il risultato e il costo lo
+    // pagherebbe la decodifica dei modi digitali, che gira sullo stesso PC.
+    Q_PROPERTY(bool  rttyInAscolto       READ rttyInAscolto       WRITE setRttyInAscolto       NOTIFY rttyInAscoltoChanged)
 
     // === B6 — cty.dat AUTO-UPDATE ===
     Q_PROPERTY(bool    ctyDatUpdating  READ ctyDatUpdating  NOTIFY ctyDatUpdatingChanged)
@@ -1229,7 +1234,23 @@ public:
     double spectrumDynRange()    const { return m_spectrumDynRange; }
     void   setSpectrumDynRange(double v) { if (m_spectrumDynRange!=v){m_spectrumDynRange=v;emit spectrumDynRangeChanged();} }
     bool   spectrumVisible()     const { return m_spectrumVisible; }
+    bool   rttyInAscolto()       const { return m_rttyInAscolto; }
+    // Vero quando il PTT e' stato alzato per conto di un client DecoPort o
+    // della finestra RTTY. Non e' m_transmitting, che riguarda solo il
+    // sequencer dei modi digitali: chi trasmette da qui deve poterlo sapere,
+    // altrimenti crede che la radio non sia in aria e smette subito.
+    bool   decoPortRemoteKeyed() const { return m_decoPortRemoteKeyed; }
+
+    // Il ponte per la trasmissione RTTY. Sotto ci sono i metodi di DecoPort,
+    // che sono privati e restano tali: RTTY ha bisogno di due cose sole —
+    // alzare il PTT e mandare l'audio — e le chiede con un nome che dice
+    // chi le sta chiedendo, invece di aprire tutta l'interfaccia del gateway.
+    // I ritegni sono quelli di DecoPort e valgono identici: niente audio e
+    // niente PTT mentre il sequencer dei modi digitali trasmette o accorda.
+    void   rttyAlzaPtt(bool on);
+    void   rttyMandaAudioTx(const QVector<short>& campioni12k);
     void   setSpectrumVisible(bool v);
+    void   setRttyInAscolto(bool v);
 
     // B6 — cty.dat
     bool ctyDatUpdating() const { return m_ctyDatUpdating; }
@@ -1395,6 +1416,20 @@ public slots:
     Q_INVOKABLE void halt();           // ferma TX e Tune immediatamente
     Q_INVOKABLE void haltWithReason(const QString& reason);
     Q_INVOKABLE void logQso();
+
+    // Il collegamento RTTY entra nel log di Decodium dalla stessa porta di
+    // tutti gli altri. Non scrive un archivio suo: compila i campi del QSO e
+    // chiama logQso(), cosi' eredita quello che c'e' gia' — l'archivio attivo
+    // fra i vari libri, il formato ADIF, la richiesta di conferma se e'
+    // accesa, e tutti gli instradamenti verso QRZ, eQSL, HRDLog, Club Log e
+    // PSK Reporter. Un secondo archivio parallelo sarebbe la cosa peggiore:
+    // due liste di collegamenti che divergono e nessuna delle due completa.
+    Q_INVOKABLE bool registraQsoRtty(const QString& nominativo,
+                                     const QString& rstInviato,
+                                     const QString& rstRicevuto,
+                                     const QString& nome,
+                                     const QString& qth,
+                                     const QString& locatore);
     Q_INVOKABLE QVariantMap uploadExternalAdif(const QString& dxCall,
                                                const QString& adifRecord,
                                                const QString& target);
@@ -2046,6 +2081,13 @@ signals:
     void spectrumRefLevelChanged();
     void spectrumDynRangeChanged();
     void spectrumVisibleChanged();
+    void rttyInAscoltoChanged();
+
+    // I campioni ricevuti, a 12 kHz, per il decodificatore RTTY. Stesso
+    // rubinetto di DecoPort e per la stessa ragione: RTTY legge quello che la
+    // radio ascolta, senza aprire una seconda sorgente audio sulla stessa
+    // scheda. Emesso solo con la finestra RTTY aperta.
+    void campioniRxRtty(QVector<short> const& campioni12k);
     void statusMessage(const QString& msg);
     void errorMessage(const QString& msg);
     void warningRaised(const QString& title, const QString& summary, const QString& details);
@@ -3043,6 +3085,7 @@ private:
     double m_spectrumRefLevel {-10.0};
     double m_spectrumDynRange {70.0};
     bool   m_spectrumVisible {true};
+    bool   m_rttyInAscolto {false};
 
     DecodiumThemeManager* m_themeManager  {nullptr};
     DecodiumPropagationManager* m_propagationManager {nullptr};
@@ -4194,7 +4237,6 @@ public slots:
     // I campioni arrivano a 24 kHz e vengono decimati a 12, che e' il passo
     // del ring. Ha effetto solo quando il modo attivo e' RTTY: negli altri
     // modi il ring resta alimentato dall'audio locale come sempre.
-    void alimentaWaterfallRtty (QVector<float> const& campioni24k);
 private:
 
     // 1.0.238 (Phase 5.2): write-behind persistence helpers.

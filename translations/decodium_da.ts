@@ -23796,6 +23796,10 @@ Koster ekstra CPU under QSO'er. Standard: OFF.</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>Decodiums radio</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29361,6 +29365,362 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Afbrudt</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Ingen radio forbundet.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>Decodiums CAT er ikke forbundet, så radioen tager
+ikke imod kommandoer. Forbind den i Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY på %2 MHz</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Data i det øvre sidebånd: den modulationsart denne
+dekoder er skrevet til.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Data i det nedre sidebånd. Tonerne kommer omvendt
+ud — REV vender dem tilbage.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Tale-sidebånd. RTTY læses lige så godt, men radioens
+filter er bredere end nødvendigt.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Træk for at flytte radioen; hjulet stemmer i 1 kHz —
+100 Hz med Skift, 10 kHz med Ctrl.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Rettelse</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Fra</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Dyb</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Tilbage til bogstaver ved mellemrum — henter et tabt FIGS/LTRS,
+men bryder lange talrækker som løbenumre.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Sæt radio</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Sætter radioen i DIGU og indsnævrer dens filter
+omkring tonerne.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTRE</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Båndpas omkring de to toner: kasserer alt udenfor,
+allerede før detektoren.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Fjerner én frekvens. Ctrl+klik på vandfaldet for at
+lægge den på den generende bærebølge.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Adaptiv undertrykker: fjerner faste bærebølger af sig
+selv. Ved svage signaler kan den også æde RTTY'en —
+prøv det og lyt.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF-bredde</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>RAMME</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Bits</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>ingen</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>lige</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>ulige</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Taltabel: US har BELL og apostrof, hvor ITA2
+bytter om på de to.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Skriver også tegn med forkert læst stopbit ud:
+nogle få tegn mere på forvrængede signaler, til
+gengæld nogle linjer vrøvl.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>SENDING</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Fyld</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>fra</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Hvad der sendes mellem tegnene, mens du
+skriver live.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Tegnpause</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Opsætning</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n forbindelse</numerusform>
+            <numerusform>%n forbindelser</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>RST SENDT</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>RST MODTAGET</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAVN</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Log den</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Allerede kørt: %1 — sidst den %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>Eksportér ADIF</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Luk</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>MODTAGELSE</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Fremhæver kaldesignaler. Klik på et for at sætte det
+i feltet HIS CALL.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Følg</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopiér</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Ryd</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>til slutningen ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>ingen radio</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DEKODER</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTRE</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>SPROG</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>virker straks</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>STATION</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>MIT KALD</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAVN</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MAKROER</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Nulstil</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Luk</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Skriv her — Enter sender linjen</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Forbind en radio for at sende</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>SENDER</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>SEND</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Afbryd</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Ryd</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Højt nok til at drive ALC'en — hold øje med måleren.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>AFSTEMNING</translation>
     </message>
 </context>
 </TS>

@@ -23796,6 +23796,10 @@ QSO 期間耗用額外 CPU。預設：OFF。</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>Decodium 的電台</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29359,6 +29363,356 @@ VUCC：%2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>已斷線</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>未連接電台。</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>Decodium 的 CAT 未連接，電台不接受指令。
+請在 Decodium 中連接。</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — %2 MHz 上的 RTTY</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>上旁波帶資料：本解碼器所針對的模式。</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>下旁波帶資料。音調會反相輸出 —
+REV 可以把它們轉回來。</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>話音旁波帶。RTTY 一樣可以抄收，但電台的
+濾波器比需要的更寬。</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>拖曳可移動電台；滾輪以 1 kHz 步進調諧 —
+Shift 為 100 Hz，Ctrl 為 10 kHz。</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>糾錯</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>普通</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>深度</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>空格回到字母 — 找回遺失的 FIGS/LTRS，
+但會打斷流水號這類長數字串。</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>設定電台</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>把電台設為 DIGU，並把濾波器收緊到
+兩個音調附近。</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>濾波器</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>圍繞兩個音調的帶通：在檢波之前
+丟掉外面的一切。</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>去掉一個頻率。Ctrl+點擊瀑布圖，
+把它放到礙事的載波上。</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>自適應對消：自動去掉穩定的載波。
+訊號弱時也可能把 RTTY 一起吃掉 —
+試試並仔細聽。</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF 頻寬</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>框架格式</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>停止位元</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>資料位元</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>同位</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>無</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>偶</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>奇</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>數字表：US 的 BELL 和撇號位置，
+在 ITA2 中互換。</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>也列印停止位元讀錯的字元：在失真訊號上
+多認出幾個字元，代價是幾行亂碼。</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>發射</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>填充</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>關閉</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>即時打字時，字元之間發送什麼。</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>字元間隔</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>設定</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>日誌</translation>
+    </message>
+    <message>
+        <source>%n contact(s)</source>
+        <translation>%n 次通聯</translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>發出 RST</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>收到 RST</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>姓名</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>記錄</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>已通聯過：%1 — 最近一次 %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>匯出 ADIF</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>接收</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>標示呼號。點擊一個即可填入
+HIS CALL 欄。</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>跟隨</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>複製</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>跳到結尾 ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>無電台</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>解碼器</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>濾波器</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>語言</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>立即生效</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>電台資訊</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>我的呼號</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>姓名</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>巨集</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>恢復預設</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>關閉</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>在此輸入 — Enter 發送該行</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>連接電台後才能發射</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>正在發射</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>發射</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>中止</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>高到剛好推動 ALC — 注意看錶。</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>調諧</translation>
     </message>
 </context>
 </TS>

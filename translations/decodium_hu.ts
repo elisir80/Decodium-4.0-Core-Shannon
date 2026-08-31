@@ -23666,6 +23666,10 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>a Decodium rádiója</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29226,6 +29230,362 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Lecsatlakozva</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Nincs csatlakoztatott rádió.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>A Decodium CAT-je nincs csatlakoztatva, így a rádió
+nem fogad parancsokat. Csatlakoztasd a Decodiumban.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY %2 MHz-en</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Adat a felső oldalsávon: ez az az üzemmód, amire ez
+a dekóder készült.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Adat az alsó oldalsávon. A hangok fordítva jönnek ki —
+a REV visszafordítja őket.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Beszéd-oldalsáv. Az RTTY ugyanúgy olvasható, de a rádió
+szűrője szélesebb a kelleténél.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Húzással mozgatod a rádiót; a görgő 1 kHz-enként hangol —
+100 Hz Shifttel, 10 kHz Ctrllel.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Javítás</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Ki</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normál</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Mély</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Szóközre betűváltás — visszahoz egy elveszett FIGS/LTRS-t,
+de szétvágja a hosszú számsorokat, például a sorszámokat.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Rádió beállítása</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>DIGU-ba teszi a rádiót, és leszűkíti a szűrőjét
+a hangok köré.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>SZŰRŐK</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Sávszűrő a két hang körül: mindent eldob, ami kívül
+esik, még a detektor előtt.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Egy frekvenciát vesz ki. Ctrl+kattintás a vízesésen,
+hogy a zavaró vivőre tedd.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Adaptív kioltó: magától eltünteti az állandó vivőket.
+Gyenge jeleknél az RTTY-t is megeheti — próbáld ki
+és hallgasd.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF szélesség</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>KERETEZÉS</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Bit</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>nincs</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>páros</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>páratlan</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Számjegytábla: az US-ben BELL és aposztróf van ott,
+ahol az ITA2 felcseréli a kettőt.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Kiírja azokat a karaktereket is, amelyek stopbitje hibás:
+néhány karakterrel több a torz jeleken, cserébe néhány
+sornyi zagyvaság.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>ADÁS</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Kitöltés</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>ki</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Mit küldjön a karakterek között, amíg élőben
+gépelsz.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Karakterszünet</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Beállítások</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n összeköttetés</numerusform>
+            <numerusform>%n összeköttetés</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>KÜLDÖTT RST</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>VETT RST</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NÉV</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Naplózás</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Már megvolt: %1 — utoljára %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>ADIF exportálás</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>VÉTEL</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Kiemeli a hívójeleket. Kattints egyre, hogy a HIS CALL
+mezőbe kerüljön.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Követés</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Másolás</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Törlés</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>a végére ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>nincs rádió</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DEKÓDER</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>SZŰRŐK</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>NYELV</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>azonnal érvényes</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>ÁLLOMÁS</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>HÍVÓJELEM</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NÉV</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MAKRÓK</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Alaphelyzet</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Írj ide — az Enter elküldi a sort</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Csatlakoztass rádiót az adáshoz</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>ADÁSBAN</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>ADÁS</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Megszakítás</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Törlés</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Elég magas ahhoz, hogy az ALC megmozduljon — nézd a műszert.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>HANGOLÁS</translation>
     </message>
 </context>
 </TS>

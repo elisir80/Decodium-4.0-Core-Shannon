@@ -2,7 +2,7 @@
 //
 // Owns the receive chain (stereo 24 kHz from the radio → mono 8 kHz → FSK
 // demodulator → soft-decision Baudot decoder → text) and the transmit chain
-// (text → Baudot → phase-continuous AFSK → Opus → VITA-49), plus the spectrum
+// (testo → Baudot → AFSK a fase continua), piu' lo spettro
 // the waterfall draws.
 //
 // Everything runs on the thread that owns this object. At 8 kHz the decoder

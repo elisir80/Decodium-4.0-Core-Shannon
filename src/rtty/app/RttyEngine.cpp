@@ -11,8 +11,9 @@ namespace decortty::app {
 namespace {
 constexpr int kRadioRate  = 24000;
 constexpr int kFftSize    = 2048;
-// Transmit audio is generated in 20 ms chunks, twice the 10 ms Opus frame, so
-// the encoder always has whole frames and the timer has slack.
+// L'audio di trasmissione si genera a pezzi di 20 ms: era il doppio del frame
+// Opus da 10 ms quando l'audio andava in rete compresso. Opus non c'e' piu', ma
+// la misura resta buona - da' respiro al timer senza allungare la latenza.
 constexpr int kTxChunkMs  = 20;
 constexpr int kTxChunkSamples = kRadioRate * kTxChunkMs / 1000;
 }

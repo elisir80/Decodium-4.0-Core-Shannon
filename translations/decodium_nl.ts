@@ -23808,6 +23808,10 @@ Kost extra CPU tijdens QSO's. Standaard: UIT.</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>de radio van Decodium</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29372,6 +29376,362 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Verbinding verbroken</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Geen radio verbonden.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>De CAT van Decodium is niet verbonden, dus de radio
+neemt geen commando's aan. Verbind hem in Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY op %2 MHz</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Data in de bovenste zijband: de mode waarvoor deze
+decoder geschreven is.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Data in de onderste zijband. De tonen komen omgekeerd
+eruit — REV zet ze terug.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Spraakzijband. RTTY wordt net zo goed gekopieerd, maar
+het filter van de radio is breder dan nodig.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Slepen verplaatst de radio; het wiel stemt per 1 kHz —
+100 Hz met Shift, 10 kHz met Ctrl.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Correctie</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Uit</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normaal</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Diep</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Terug naar letters bij spatie — haalt een verloren FIGS/LTRS terug,
+maar breekt lange cijferreeksen zoals volgnummers.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Radio instellen</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Zet de radio in DIGU en versmalt zijn filter
+rond de tonen.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTERS</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Banddoorlaat rond de twee tonen: gooit alles daarbuiten
+weg, nog voor de detector.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Verwijdert één frequentie. Ctrl+klik op de waterval
+om hem op de storende draaggolf te zetten.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Adaptieve onderdrukker: haalt vaste draaggolven er
+vanzelf uit. Bij zwakke signalen eet hij ook de RTTY
+op — probeer het en luister.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF-breedte</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>FRAME</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Bits</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>geen</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>even</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>oneven</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Cijfertabel: US heeft BELL en apostrof waar ITA2
+de twee omwisselt.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Drukt ook tekens af waarvan het stopbit fout gelezen is:
+wat meer tekens bij vervormde signalen, in ruil voor
+wat regels onzin.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>ZENDEN</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Vullen</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>uit</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Wat er tussen de tekens gestuurd wordt terwijl
+je live typt.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Tekenpauze</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Instellingen</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n verbinding</numerusform>
+            <numerusform>%n verbindingen</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>RST GEZONDEN</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>RST ONTVANGEN</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAAM</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Loggen</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Al gewerkt: %1 — laatst op %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>ADIF exporteren</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Sluiten</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>ONTVANGST</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Markeert roepletters. Klik erop om ze in het veld
+HIS CALL te zetten.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Volgen</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopiëren</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wissen</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>naar het eind ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>geen radio</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DECODER</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTERS</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>TAAL</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>werkt meteen</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>STATION</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>MIJN CALL</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAAM</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MACRO'S</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Herstellen</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Sluiten</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Typ hier — Enter stuurt de regel</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Verbind een radio om te zenden</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>IN DE LUCHT</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>ZENDEN</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Afbreken</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wissen</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Hoog genoeg om de ALC aan te sturen — kijk naar de meter.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>AFSTEMMING</translation>
     </message>
 </context>
 </TS>

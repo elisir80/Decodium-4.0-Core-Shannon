@@ -4140,18 +4140,56 @@ int main(int argc, char* argv[])
         // cosi' chi viene da DecoRTTY ritrova la propria configurazione.
         QSettings rttySettings {QSettings::IniFormat, QSettings::UserScope,
                                 QStringLiteral("Decodium"), QStringLiteral("Decodium")};
+        // La radio di RTTY e' quella di Decodium: frequenza, modo e PTT
+        // arrivano dal CAT dell'applicazione attraverso questi ganci, come
+        // gia' fa DecoPort. Il trasporto di rete del progetto originale —
+        // VITA-49 verso un FlexRadio, il gateway per una FT-991A altrove —
+        // e' stato tolto: cercava in rete una radio che qui sta su una porta
+        // seriale, e non poteva che non trovarla.
+        decortty::link::DecodiumLink::Ganci ganci;
+        ganci.connesso           = [&bridge] { return bridge.catConnected (); };
+        ganci.nomeRadio          = [&bridge] { return bridge.catRigName (); };
+        ganci.frequenzaHz        = [&bridge] { return bridge.frequency (); };
+        ganci.modo               = [&bridge] { return bridge.catMode (); };
+        // Comprende il PTT che RTTY stessa ha alzato: il motore ferma la
+        // trasmissione se la radio dice di non essere in aria, e transmitting()
+        // da solo riguarda il sequencer dei modi digitali, non questo PTT.
+        ganci.inTrasmissione     = [&bridge] {
+            return bridge.transmitting () || bridge.decoPortRemoteKeyed ();
+        };
+        // La trasmissione passa dalla stessa uscita che Decodium apre per
+        // l'audio dei client DecoPort: una sola strada verso la radio, con i
+        // ritegni gia' scritti — non suona nulla mentre il sequencer dei modi
+        // digitali sta trasmettendo o accordando, e il PTT viene rifiutato se
+        // il CAT non c'e'.
+        ganci.puoTrasmettere     = [&bridge] {
+            return bridge.catConnected () && !bridge.transmitting ();
+        };
+        ganci.impostaPtt         = [&bridge] (bool on) { bridge.rttyAlzaPtt (on); };
+        ganci.mandaAudioTx       = [&bridge] (QVector<short> const& c) {
+            bridge.rttyMandaAudioTx (c);
+        };
+        ganci.impostaFrequenzaHz = [&bridge] (double hz) { bridge.setFrequency (hz); };
+        ganci.impostaModo        = [&bridge] (QString const& m) { bridge.setMode (m); };
+        rttyHost.impostaGanciRadio (std::move (ganci));
+
         rttyHost.avvia (rttySettings);
+
+        // L'audio: quello che la radio ascolta, gia' a 12 kHz, dallo stesso
+        // rubinetto di DecoPort. L'host lo porta a 24 kHz per il motore RTTY.
+        QObject::connect (&bridge, &DecodiumBridge::campioniRxRtty,
+                          &rttyHost, [&rttyHost] (QVector<short> const& campioni) {
+            std::vector<float> f (static_cast<size_t> (campioni.size ()));
+            for (int i = 0; i < campioni.size (); ++i)
+                f[static_cast<size_t> (i)] = campioni[i] / 32768.0f;
+            rttyHost.consegnaAudio (f, campioni.size ());
+        });
         // Le righe RTTY complete entrano nella lista dei decodificati come
         // le altre: cosi' finiscono nella cronologia e nell'archivio. Il
         // testo continua a scorrere carattere per carattere nella finestra
         // dedicata, che e' il modo naturale di leggere un flusso.
         QObject::connect (&rttyHost, &decortty::DecoRttyHost::rigaDecodificata,
                           &bridge, &DecodiumBridge::aggiungiRigaRtty);
-        // E l'audio della radio alimenta il waterfall dell'applicazione:
-        // niente conversione di spettri, il waterfall resta quello di
-        // Decodium con la sua resa e i suoi comandi.
-        QObject::connect (&rttyHost, &decortty::DecoRttyHost::audioPerWaterfall,
-                          &bridge, &DecodiumBridge::alimentaWaterfallRtty);
         rttyHost.esponiAlQml (*engine.rootContext(),
                               QStringLiteral (FORK_RELEASE_VERSION));
         L("DecoRTTY: sottosistema RTTY avviato");

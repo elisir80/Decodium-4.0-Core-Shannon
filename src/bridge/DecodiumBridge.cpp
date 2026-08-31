@@ -208,6 +208,12 @@ extern "C" void ftx_ft8_stage4_seed_hash_call_c(char const* call);
 #include <fftw3.h>
 #endif
 #include <vector>
+#if DECODIUM_HAS_RTTY
+// Il piano di banda RTTY: una tabella sola per il menu, la finestra RTTY e
+// il QSY che accompagna il cambio di modo. Riscriverla qui vorrebbe dire
+// avere due elenchi che prima o poi discordano.
+#include "app/BandPlan.h"
+#endif
 
 // La porta dell'amplificatore non deve mai essere quella del CAT.
 static bool amplifierPortClashesWithCat(DecodiumTransceiverManager* cat,
@@ -4138,6 +4144,15 @@ static QString canonicalApplicationDecodeMode(QString mode)
     if (upperMode == QStringLiteral("ECHO")) {
         return QStringLiteral("Echo");
     }
+    // RTTY e' un modo dell'applicazione come gli altri, e va riconosciuto qui
+    // prima che isRadioOnlyModeLabel() lo scambi per il nome di un modo della
+    // radio: quella lista serve a non far commutare l'applicazione quando la
+    // radio riporta "RTTY" o "USB", ma quando e' l'operatore a sceglierlo dal
+    // selettore dei modi la richiesta e' un'altra cosa. Le due strade passano
+    // di qui in ordine, e questa viene prima.
+    if (upperMode == QStringLiteral("RTTY")) {
+        return QStringLiteral("RTTY");
+    }
     return {};
 }
 
@@ -8065,28 +8080,6 @@ void DecodiumBridge::setUiStyle(QString const& v)
     bridgeLog(QStringLiteral("[UI] Style = %1 (restart richiesto)").arg(norm));
 }
 
-// 1.0.179 — Helper: append silenzioso (no emit) di un decode map nel modello
-// flat. Usato dal path "legacy" di onFt8DecodeReady quando smooth flow OFF.
-void DecodiumBridge::alimentaWaterfallRtty (QVector<float> const& campioni24k)
-{
-    // Solo in RTTY: negli altri modi il ring appartiene all'audio locale e
-    // mescolare le due sorgenti darebbe un waterfall senza senso.
-    if (m_mode.compare (QStringLiteral ("RTTY"), Qt::CaseInsensitive) != 0)
-        return;
-    if (campioni24k.isEmpty ())
-        return;
-
-    // Decimazione 2:1 da 24 kHz a 12, la frequenza del ring. Media dei due
-    // campioni invece di scartarne uno: costa nulla e toglie gran parte
-    // dell'alias che si vedrebbe come righe fantasma nel waterfall.
-    QMutexLocker locker (&m_audioBufferMutex);
-    int const coppie = campioni24k.size () / 2;
-    for (int i = 0; i < coppie; ++i) {
-        float const medio = 0.5f * (campioni24k[i * 2] + campioni24k[i * 2 + 1]);
-        m_wfRing[m_wfRingPos % WF_RING_SIZE] = medio;
-        ++m_wfRingPos;
-    }
-}
 
 void DecodiumBridge::aggiungiRigaRtty (QString const& testo, double qualita,
                                       double frequenzaHz)
@@ -17464,6 +17457,34 @@ void DecodiumBridge::setMode(const QString& v) {
         }
 
         m_mode = normalizedMode;
+
+        // Entrando in RTTY si commuta la radio, perche' sceglierlo dal
+        // selettore dei modi e' una richiesta di lavorare in RTTY, non di
+        // guardarlo. La decodifica dei modi digitali si ferma da se': RTTY non
+        // e' fra i modi a slot, e dispatchTimeSyncDecodeWhenReady esce subito.
+        //
+        // Il modo della radio e' quello che l'operatore ha configurato per i
+        // dati (DATA-U di norma), non uno deciso qui: e' la stessa radio che
+        // usa per FT8, e imporle un modo diverso da quello che ha scelto
+        // sarebbe una sorpresa. La frequenza va sul segmento RTTY della banda
+        // in cui si trova gia', non su una banda decisa da noi.
+        if (normalizedMode == QStringLiteral("RTTY")) {
+            applyConfiguredCatRigMode(QStringLiteral("rtty-mode"));
+#if DECODIUM_HAS_RTTY
+            int const banda = decortty::app::bandAt(m_frequency / 1e6);
+            if (banda >= 0) {
+                double const rttyHz = decortty::app::bandPlan()[static_cast<size_t>(banda)].rttyMhz * 1e6;
+                bridgeLog(QStringLiteral("RTTY: QSY al segmento RTTY dei %1 -> %2 Hz")
+                              .arg(decortty::app::bandPlan()[static_cast<size_t>(banda)].name)
+                              .arg(rttyHz, 0, 'f', 0));
+                requestRigFrequencyFromBridge(rttyHz, QStringLiteral("rtty-mode"));
+            } else {
+                bridgeLog(QStringLiteral("RTTY: la radio non e' in una banda HF nota, "
+                                         "frequenza lasciata dov'e'"));
+            }
+#endif
+        }
+
         if (m_autoCallEnabled && !autoCallModeSupported()) {
             bridgeLog(QStringLiteral("[AUTOCALL] disabled by mode change to %1").arg(m_mode));
             setAutoCallEnabled(false);
@@ -40410,6 +40431,24 @@ void DecodiumBridge::reloadActiveLogbookState(const QString& reason)
                   .arg(reason, path));
 }
 
+void DecodiumBridge::rttyAlzaPtt(bool on)
+{
+    decoPortKeyLocalRig(on);
+}
+
+void DecodiumBridge::rttyMandaAudioTx(const QVector<short>& campioni12k)
+{
+    decoPortPlayTxAudio(campioni12k);
+}
+
+void DecodiumBridge::setRttyInAscolto(bool v)
+{
+    if (m_rttyInAscolto == v)
+        return;
+    m_rttyInAscolto = v;
+    emit rttyInAscoltoChanged();
+}
+
 void DecodiumBridge::setSpectrumVisible(bool v)
 {
     if (m_spectrumVisible == v) {
@@ -41332,6 +41371,51 @@ void DecodiumBridge::requestManualLogQso()
     }
 
     promptLogQso();
+}
+
+bool DecodiumBridge::registraQsoRtty(const QString& nominativo,
+                                    const QString& rstInviato,
+                                    const QString& rstRicevuto,
+                                    const QString& nome,
+                                    const QString& qth,
+                                    const QString& locatore)
+{
+    QString const call = nominativo.trimmed().toUpper();
+    if (call.isEmpty()) {
+        bridgeLog(QStringLiteral("RTTY: niente da registrare, manca il nominativo"));
+        return false;
+    }
+
+    // I campi del QSO sono quelli dell'applicazione: si compilano e si lascia
+    // fare al percorso normale. Il modo lo mette logQso() leggendo m_mode, che
+    // in RTTY vale "RTTY": nell'ADIF finisce MODE=RTTY senza doverlo dire qui.
+    setDxCall(call);
+    if (!locatore.trimmed().isEmpty())
+        setDxGrid(locatore.trimmed().toUpper());
+    setReportSent(rstInviato.trimmed().isEmpty() ? QStringLiteral("599") : rstInviato.trimmed());
+    setReportReceived(rstRicevuto.trimmed().isEmpty() ? QStringLiteral("599") : rstRicevuto.trimmed());
+
+    // Nome e QTH non hanno un campo proprio nel percorso di log: vanno nel
+    // commento, che e' dove l'operatore li ritrova rileggendo il collegamento.
+    QStringList note;
+    if (!nome.trimmed().isEmpty())
+        note << nome.trimmed();
+    if (!qth.trimmed().isEmpty())
+        note << qth.trimmed();
+    if (!note.isEmpty()) {
+        m_promptLogComment = note.join(QStringLiteral(", "));
+        m_promptLogCommentOverrideValid = true;
+    }
+
+    // Il fermo anti-doppio vale per il QSO che il sequencer ha appena chiuso:
+    // questo e' un collegamento diverso, fatto a mano in RTTY, e senza
+    // azzerarlo il primo registrato sarebbe anche l'ultimo.
+    m_qsoLogged = false;
+
+    bridgeLog(QStringLiteral("RTTY: registro il collegamento con %1 (%2/%3)")
+                  .arg(call, rstInviato, rstRicevuto));
+    logQso();
+    return true;
 }
 
 void DecodiumBridge::logQso()
@@ -48910,6 +48994,20 @@ void DecodiumBridge::ensureAudioSink()
                                               1);
             m_decoPortGateway->pushRxAudio(samples, decoport::nowUnixNs());
         });
+        // RTTY: lo stesso audio, quando la sua finestra e' aperta. Rubinetto a
+        // parte da quello di DecoPort perche' i due si accendono per ragioni
+        // diverse e nessuno dei due deve dipendere dall'altro. Prima riga ed
+        // esce quando la finestra e' chiusa, che e' quasi sempre.
+        connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
+                this, [this](QVector<short> samples) {
+            if (!m_rttyInAscolto || samples.isEmpty())
+                return;
+            // In trasmissione l'ingresso non e' la radio: dare quei campioni al
+            // demodulatore vorrebbe dire decodificare la propria coda.
+            if (m_transmitting || m_tuning)
+                return;
+            emit campioniRxRtty(samples);
+        });
 
         connect(m_audioSink, &DecodiumAudioSink::audioSamplesReady,
                 this, [this](QVector<short> samples) {
@@ -51590,7 +51688,9 @@ void DecodiumBridge::updatePeriodTicksMax()
 
 QStringList DecodiumBridge::availableModes() const
 {
-    return {"FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR"};
+    // RTTY in fondo: e' l'unico che non passa dai decodificatori a slot, e
+    // sceglierlo ferma la decodifica dei modi digitali invece di affiancarsi.
+    return {"FT8", "FT2", "FT2-Link", "FT4", "Q65", "MSK144", "JT65", "JT9", "JT4", "FST4", "FST4W", "WSPR", "RTTY"};
 }
 
 // Simple radix-2 in-place FFT (Cooley-Tukey)

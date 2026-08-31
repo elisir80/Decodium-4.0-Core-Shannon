@@ -76,6 +76,47 @@ void DecoRttyHost::collegaTestoRicevuto ()
              });
 }
 
+void DecoRttyHost::impostaGanciRadio (link::DecodiumLink::Ganci ganci)
+{
+    m_ganci = std::move (ganci);
+}
+
+void DecoRttyHost::consegnaAudio (const std::vector<float>& campioni12k, int frames)
+{
+    if (frames <= 0 || campioni12k.empty ())
+        return;
+
+    // Due conversioni, e nessuna delle due e' facoltativa.
+    //
+    // La prima e' la frequenza. Decodium lavora a 12 kHz, il motore RTTY vuole
+    // 24: dentro decima di 3 fino a 8 kHz, dove sta il demodulatore. Dandogli
+    // 12 kHz decimerebbe fino a 4, e il tono mark a 2125 Hz finirebbe sopra
+    // Nyquist — non "un po' peggio": irriconoscibile. Si raddoppia percio' con
+    // interpolazione lineare, che a 2 kHz su 24 attenua in modo trascurabile e
+    // le cui immagini cadono dove il filtro del decimatore le toglie.
+    //
+    // La seconda e' il formato: il motore legge stereo interlacciato e ne fa
+    // la media. Lo stesso campione va quindi su entrambi i canali.
+    int const n = std::min (frames, static_cast<int> (campioni12k.size ()));
+    if (n < 2)
+        return;
+    int const frames24 = n * 2;
+    m_audio24.resize (static_cast<size_t> (frames24) * 2);
+
+    for (int i = 0; i < n; ++i) {
+        float const a = campioni12k[i];
+        // Il campione interpolato sta a meta' fra questo e il successivo;
+        // sull'ultimo non c'e' un successivo e si tiene fermo il valore.
+        float const b = (i + 1 < n) ? campioni12k[i + 1] : a;
+        float const meta = 0.5f * (a + b);
+
+        size_t const j = static_cast<size_t> (i) * 4;
+        m_audio24[j + 0] = a;      m_audio24[j + 1] = a;
+        m_audio24[j + 2] = meta;   m_audio24[j + 3] = meta;
+    }
+    m_radio.consegnaAudioDecodium (m_audio24, frames24);
+}
+
 void DecoRttyHost::avvia (QSettings& impostazioni)
 {
     // Due secondi di silenzio chiudono la riga: a 45,45 baud sono circa nove
@@ -87,20 +128,34 @@ void DecoRttyHost::avvia (QSettings& impostazioni)
     connect (m_pausaRiga, &QTimer::timeout, this, &DecoRttyHost::chiudiRiga);
 
     m_macro.load (impostazioni);
+
+    // Un archivio nostro, con le stesse coordinate di quello che ci hanno
+    // passato: quello e' un riferimento a un oggetto che muore appena avvia()
+    // ritorna, e per salvare piu' tardi ce ne vuole uno che resti.
+    m_impostazioni = new QSettings (impostazioni.format (), impostazioni.scope (),
+                                    impostazioni.organizationName (),
+                                    impostazioni.applicationName (), this);
+
+    m_ritardoSalvataggio = new QTimer (this);
+    m_ritardoSalvataggio->setSingleShot (true);
+    m_ritardoSalvataggio->setInterval (1500);
+    connect (m_ritardoSalvataggio, &QTimer::timeout, this, &DecoRttyHost::salvaImpostazioni);
+
+    // Quello che l'operatore cambia va su disco da se'. I dati di stazione
+    // passano da qsoChanged; i parametri del decodificatore dai loro segnali.
+    connect (&m_macro, &app::MacroModel::qsoChanged, this, &DecoRttyHost::programmaSalvataggio);
+    connect (&m_macro, &app::MacroModel::modelReset, this, &DecoRttyHost::programmaSalvataggio);
+    connect (&m_motore, &app::RttyEngine::paramsChanged, this, &DecoRttyHost::programmaSalvataggio);
+    connect (&m_lingua, &app::Language::currentChanged, this, &DecoRttyHost::programmaSalvataggio);
+
     m_motore.attachRadio (&m_radio);
 
-    // L'audio va al motore RTTY per la decodifica (lo fa attachRadio) e in
-    // copia al waterfall di Decodium. Sono due strade indipendenti: se il
-    // waterfall e' spento o in un altro modo, la decodifica non se ne accorge.
-    connect (&m_radio, &link::RadioHub::audioReady, this,
-             [this] (std::vector<float> const& campioni, int frames) {
-                 if (frames <= 0 || campioni.empty ())
-                     return;
-                 int const n = std::min (frames, static_cast<int> (campioni.size ()));
-                 QVector<float> copia (n);
-                 std::copy_n (campioni.begin (), n, copia.begin ());
-                 emit audioPerWaterfall (copia);
-             });
+    // Ci si attacca subito alla radio dell'applicazione: non c'e' niente da
+    // cercare e niente da scegliere. Chi preferisce l'audio da un cavo
+    // virtuale cambia strada dalla finestra RTTY, e quella scelta sostituisce
+    // questa.
+    m_radio.collegaADecodium (m_ganci);
+
     collegaTestoRicevuto ();
 
     // Impostazioni del decodificatore, con gli stessi valori di partenza del
@@ -127,21 +182,50 @@ void DecoRttyHost::avvia (QSettings& impostazioni)
     m_motore.setDiddleMode        (impostazioni.value (QStringLiteral ("rtty/diddleMode"), 1).toInt ());
     m_motore.setCharacterWaitBits (impostazioni.value (QStringLiteral ("rtty/charWait"), 0.0).toDouble ());
 
-    // Il gateway FT-991A resta SPENTO per difetto dentro Decodium, al contrario
-    // del progetto originale dove si apriva con l'applicazione. Qui la radio e'
-    // gia' governata dal CAT di Decodium, e due programmi sulla stessa porta
-    // seriale se la contendono: chi vuole mettere la radio in rete lo accende
-    // di proposito, dopo aver liberato la porta.
-    m_gateway.setEnabled     (impostazioni.value (QStringLiteral ("gateway/enabled"), false).toBool ());
-    m_gateway.setCatPort     (impostazioni.value (QStringLiteral ("gateway/catPort"), QStringLiteral ("COM5")).toString ());
-    m_gateway.setAudioIn     (impostazioni.value (QStringLiteral ("gateway/audioIn"), QStringLiteral ("USB Audio CODEC")).toString ());
-    m_gateway.setAudioOut    (impostazioni.value (QStringLiteral ("gateway/audioOut"), QStringLiteral ("USB Audio CODEC")).toString ());
-    m_gateway.setUdpPort     (impostazioni.value (QStringLiteral ("gateway/udpPort"), 4993).toInt ());
-    m_gateway.setAutoConnect (impostazioni.value (QStringLiteral ("gateway/autoConnect"), false).toBool ());
-    m_gateway.setCallsign    (m_macro.myCall ());
-
     m_attivo = true;
     emit attivoChanged ();
+}
+
+void DecoRttyHost::programmaSalvataggio ()
+{
+    if (m_ritardoSalvataggio)
+        m_ritardoSalvataggio->start ();
+}
+
+void DecoRttyHost::salvaImpostazioni ()
+{
+    if (!m_impostazioni)
+        return;
+
+    QSettings& s = *m_impostazioni;
+    s.setValue (QStringLiteral ("rtty/markHz"),          m_motore.markHz ());
+    s.setValue (QStringLiteral ("rtty/shiftHz"),         m_motore.shiftHz ());
+    s.setValue (QStringLiteral ("rtty/baud"),            m_motore.baud ());
+    s.setValue (QStringLiteral ("rtty/reverse"),         m_motore.reverse ());
+    s.setValue (QStringLiteral ("rtty/usos"),            m_motore.unshiftOnSpace ());
+    s.setValue (QStringLiteral ("rtty/afc"),             m_motore.afcEnabled ());
+    s.setValue (QStringLiteral ("rtty/autoTune"),        m_motore.autoTuneEnabled ());
+    s.setValue (QStringLiteral ("rtty/squelchDb"),       m_motore.squelchDb ());
+    s.setValue (QStringLiteral ("rtty/correctionDepth"), m_motore.correctionDepth ());
+    s.setValue (QStringLiteral ("rtty/transmitLevel"),   m_motore.transmitLevel ());
+    s.setValue (QStringLiteral ("rtty/stopBits"),        m_motore.stopBits ());
+    s.setValue (QStringLiteral ("rtty/dataBits"),        m_motore.dataBits ());
+    s.setValue (QStringLiteral ("rtty/parity"),          m_motore.parity ());
+    s.setValue (QStringLiteral ("rtty/figuresSet"),      m_motore.figuresSet ());
+    s.setValue (QStringLiteral ("rtty/ignoreFraming"),   m_motore.ignoreFramingErrors ());
+    s.setValue (QStringLiteral ("rtty/bandpass"),        m_motore.bandpassEnabled ());
+    s.setValue (QStringLiteral ("rtty/bandpassWidth"),   m_motore.bandpassWidthHz ());
+    s.setValue (QStringLiteral ("rtty/lms"),             m_motore.lmsEnabled ());
+    s.setValue (QStringLiteral ("rtty/diddleMode"),      m_motore.diddleMode ());
+    s.setValue (QStringLiteral ("rtty/charWait"),        m_motore.characterWaitBits ());
+    s.setValue (QStringLiteral ("ui/language"),          m_lingua.current ());
+    m_macro.save (s);
+
+    // Scrittura immediata, non quando a QSettings pare: se l'applicazione si
+    // chiude male, la serata di regolazioni se ne andrebbe senza lasciare
+    // traccia. E' successo davvero nel progetto originale, e il commento che
+    // lo ricordava e' arrivato fin qui.
+    s.sync ();
 }
 
 void DecoRttyHost::esponiAlQml (QQmlContext& contesto, QString const& versione)
@@ -154,8 +238,12 @@ void DecoRttyHost::esponiAlQml (QQmlContext& contesto, QString const& versione)
     contesto.setContextProperty (QStringLiteral ("receiveText"), &m_testoRicevuto);
     contesto.setContextProperty (QStringLiteral ("macros"),      &m_macro);
     contesto.setContextProperty (QStringLiteral ("qsoLog"),      &m_logQso);
-    contesto.setContextProperty (QStringLiteral ("gateway"),     &m_gateway);
     contesto.setContextProperty (QStringLiteral ("language"),    &m_lingua);
+    // Nel progetto originale Theme e' il singleton di un modulo QML; qui e' una
+    // proprieta' di contesto come le altre, perche' Decodium carica il QML dal
+    // filesystem e non registra moduli. I file .qml continuano a scrivere
+    // Theme.bgDeep senza sapere da dove arriva.
+    contesto.setContextProperty (QStringLiteral ("Theme"),       &m_tema);
     contesto.setContextProperty (QStringLiteral ("appVersion"),  versione);
 }
 

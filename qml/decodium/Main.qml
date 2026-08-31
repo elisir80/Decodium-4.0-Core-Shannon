@@ -1731,6 +1731,43 @@ ApplicationWindow {
         }
     }
 
+    // Finestra RTTY (DecoRTTY innestato): stessa meccanica di DecoPort,
+    // creata alla prima apertura e non prima, perche' porta con se' il
+    // motore e i suoi pannelli.
+    function openRttyWindow() {
+        rttyWindowLoader.active = true
+        if (rttyWindowLoader.item) {
+            rttyWindowLoader.item.show()
+            rttyWindowLoader.item.raise()
+            rttyWindowLoader.item.requestActivate()
+        }
+    }
+
+    // Scegliere RTTY dal selettore dei modi apre la finestra: il modo e' attivo,
+    // la radio e' commutata, e senza la finestra non ci sarebbe niente da
+    // leggere ne' da scrivere. Non la chiude tornando a FT8 — chi ha una
+    // finestra aperta se la chiude da se', e chiudergliela sotto le mani mentre
+    // magari sta leggendo un collegamento sarebbe peggio che lasciarla li'.
+    Connections {
+        target: bridge
+        function onModeChanged() {
+            if (bridge.mode === "RTTY")
+                mainWindow.openRttyWindow()
+        }
+    }
+
+    Loader {
+        id: rttyWindowLoader
+        active: false
+        asynchronous: true
+        source: "rtty/RttyMain.qml"
+        onLoaded: {
+            item.show()
+            item.raise()
+            item.requestActivate()
+        }
+    }
+
     Loader {
         id: decoPortWindowLoader
         active: false
@@ -12413,6 +12450,28 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                 text: parent.text
                 font.pixelSize: 12
                 color: parent.enabled ? secondaryCyan : textSecondary
+                leftPadding: 10
+            }
+        }
+
+        // RTTY: la finestra. Le bande e le frequenze NON stanno qui — RTTY e'
+        // un modo come gli altri e si sceglie dal selettore dei modi, dove
+        // sceglierlo commuta la radio. Un secondo elenco di bande in un menu
+        // a parte sarebbe una seconda strada per fare la stessa cosa, e le due
+        // prima o poi direbbero cose diverse.
+        MenuItem {
+            text: qsTr("Open the RTTY window...")
+            icon.source: ""
+            onTriggered: mainWindow.openRttyWindow()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: textPrimary
                 leftPadding: 10
             }
         }

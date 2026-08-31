@@ -23798,6 +23798,10 @@ Verursacht zusätzliche CPU-Last während QSOs. Standard: AUS.</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>Funkgerät von Decodium</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29361,6 +29365,362 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Getrennt</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Kein Funkgerät verbunden.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>Das CAT von Decodium ist nicht verbunden, das Funkgerät nimmt
+keine Befehle an. Verbinde es in Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY auf %2 MHz</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Daten im oberen Seitenband: die Betriebsart, für die
+dieser Decoder geschrieben ist.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Daten im unteren Seitenband. Die Töne kommen vertauscht
+heraus — REV dreht sie zurück.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Sprach-Seitenband. RTTY wird genauso gelesen, aber das
+Filter des Geräts ist breiter als nötig.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Ziehen bewegt das Funkgerät; das Rad stimmt in 1-kHz-Schritten —
+100 Hz mit Umschalt, 10 kHz mit Strg.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Korrektur</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Aus</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Tief</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Bei Leerzeichen auf Buchstaben — holt ein verlorenes FIGS/LTRS zurück,
+zerlegt aber lange Ziffernfolgen wie laufende Nummern.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Gerät setzen</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Setzt das Funkgerät auf DIGU und verengt sein Filter
+um die Töne.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTER</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Bandpass um die beiden Töne: wirft alles ausserhalb
+weg, noch vor dem Detektor.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Entfernt eine Frequenz. Strg+Klick auf den Wasserfall
+setzt sie auf den störenden Träger.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Adaptiver Auslöscher: entfernt stehende Träger von
+selbst. Bei schwachen Signalen frisst er auch das
+RTTY — ausprobieren und hinhören.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF-Breite</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>RAHMEN</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stopp</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Bits</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>keine</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>gerade</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>ungerade</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Zifferntabelle: US hat BELL und Apostroph dort, wo
+ITA2 die beiden vertauscht.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Druckt auch Zeichen mit falsch gelesenem Stoppbit:
+ein paar Zeichen mehr bei verzerrten Signalen, dafür
+ein paar Zeilen Unsinn.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>SENDEN</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Füllen</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>aus</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Was zwischen den Zeichen gesendet wird, während
+du live tippst.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Zeichenpause</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Einstellungen</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n Verbindung</numerusform>
+            <numerusform>%n Verbindungen</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>RST GESENDET</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>RST EMPFANGEN</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAME</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Eintragen</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Schon gearbeitet: %1 — zuletzt am %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>ADIF exportieren</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Schliessen</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>EMPFANG</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Hebt Rufzeichen hervor. Ein Klick setzt es
+in das Feld HIS CALL.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Folgen</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopieren</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>ans Ende ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>kein Funkgerät</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DECODER</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTER</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>SPRACHE</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>wirkt sofort</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>STATION</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>RUFZEICHEN</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAME</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MAKROS</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Zurücksetzen</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Schliessen</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Hier tippen — Enter sendet die Zeile</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Funkgerät verbinden zum Senden</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>AUF SENDUNG</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>SENDEN</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Abbruch</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Hoch genug, um die ALC anzusteuern — Anzeige beobachten.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>ABSTIMMUNG</translation>
     </message>
 </context>
 </TS>

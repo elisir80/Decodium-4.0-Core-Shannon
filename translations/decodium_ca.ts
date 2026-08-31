@@ -23799,6 +23799,10 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>la ràdio de Decodium</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29363,6 +29367,362 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Desconnectat</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Cap ràdio connectada.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>El CAT de Decodium no està connectat, així que la ràdio
+no accepta ordres. Connecta'l des de Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY a %2 MHz</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Dades en banda lateral superior: el mode per al qual
+està escrit aquest descodificador.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Dades en banda lateral inferior. Els tons surten
+invertits — REV els torna al seu lloc.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Banda lateral de fonia. L'RTTY es copia igual, però el
+filtre de la ràdio és més ample del que cal.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Arrossega per moure la ràdio; la roda sintonitza d'1 kHz —
+100 Hz amb Maj, 10 kHz amb Ctrl.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Correcció</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Apagada</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Profunda</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Tornada a lletres amb l'espai: recupera un FIGS/LTRS perdut,
+però trenca els grups llargs de xifres com els números de sèrie.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Preparar ràdio</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Posa la ràdio en DIGU i estreny el seu filtre
+al voltant dels tons.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTRES</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Passabanda al voltant dels dos tons: llença tot el
+que queda fora, abans del detector.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Treu una freqüència. Ctrl+clic a la cascada per
+posar-la sobre la portadora que molesta.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Cancel·lador adaptatiu: treu les portadores fixes
+tot sol. Amb senyals febles pot menjar-se també
+l'RTTY — prova-ho i escolta.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>Amplada BPF</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>TRAMA</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Bits</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>cap</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>parell</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>senar</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Taula de xifres: la US té BELL i apòstrof on la
+ITA2 els intercanvia.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Imprimeix també els caràcters amb el bit de parada mal llegit:
+alguns caràcters més en senyals distorsionats, i a canvi
+alguna línia d'escombraries.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>TRANSMISSIÓ</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Omplir</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>apagat</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Què enviar entre un caràcter i l'altre mentre
+escrius en directe.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Espera caràct.</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Configuració</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n contacte</numerusform>
+            <numerusform>%n contactes</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>RST ENVIAT</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>RST REBUT</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NOM</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Registrar</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Ja treballat: %1 — l'última vegada el %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>Exportar ADIF</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Tancar</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>RECEPCIÓ</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Ressalta els indicatius. Fes clic en un per posar-lo
+al camp HIS CALL.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Seguir</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copiar</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Netejar</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>anar al final ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>cap ràdio</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DESCODIFICADOR</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTRES</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>IDIOMA</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>canvia a l'instant</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>ESTACIÓ</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>INDICATIU</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NOM</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MACROS</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Restaurar</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Tancar</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Escriu aquí — Retorn envia la línia</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Connecta una ràdio per transmetre</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>TRANSMETENT</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>TRANSMETRE</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Anul·lar</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Netejar</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Prou alt per moure l'ALC — mira l'indicador.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>SINTONIA</translation>
     </message>
 </context>
 </TS>

@@ -23810,6 +23810,10 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>трансивер Decodium</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29394,6 +29398,363 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Отключено</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>Трансивер не подключён.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>CAT Decodium не подключён, поэтому трансивер не
+принимает команды. Подключите его в Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY на %2 МГц</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Данные в верхней боковой полосе: режим, для которого
+написан этот декодер.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Данные в нижней боковой полосе. Тоны выходят
+перевёрнутыми — REV возвращает их на место.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Речевая боковая полоса. RTTY принимается так же, но
+фильтр трансивера шире, чем нужно.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Тяните, чтобы перестроить трансивер; колесо шагает по 1 кГц —
+100 Гц с Shift, 10 кГц с Ctrl.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Коррекция</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Выкл.</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Обычная</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Глубокая</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Возврат к буквам по пробелу — восстанавливает потерянный
+FIGS/LTRS, но ломает длинные группы цифр, например номера.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Настроить трансивер</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Переводит трансивер в DIGU и сужает его фильтр
+вокруг тонов.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>ФИЛЬТРЫ</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Полосовой фильтр вокруг двух тонов: отбрасывает всё
+остальное ещё до детектора.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Убирает одну частоту. Ctrl+щелчок по водопаду, чтобы
+поставить её на мешающую несущую.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Адаптивный подавитель: сам убирает постоянные несущие.
+На слабых сигналах может съесть и RTTY — попробуйте
+и послушайте.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>Ширина BPF</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>КАДР</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Стоп</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Биты</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Чётн.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>нет</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>чётный</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>нечётный</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Таблица цифр: в US стоят BELL и апостроф там, где
+ITA2 меняет их местами.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Печатает и символы с неверно прочитанным стоп-битом:
+несколько лишних символов на искажённых сигналах и
+несколько строк мусора взамен.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>ПЕРЕДАЧА</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Заполнение</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>выкл.</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>Что передавать между символами, пока вы
+печатаете вживую.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Пауза между симв.</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Настройки</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>ЖУРНАЛ</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n связь</numerusform>
+            <numerusform>%n связи</numerusform>
+            <numerusform>%n связей</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>ПЕРЕДАН RST</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>ПРИНЯТ RST</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>ИМЯ</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Записать</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Уже работали: %1 — последний раз %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>Экспорт ADIF</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>ПРИЁМ</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Выделяет позывные. Щёлкните по одному, чтобы
+поставить его в поле HIS CALL.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Следить</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Копировать</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>в конец ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>нет трансивера</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>ДЕКОДЕР</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>ФИЛЬТРЫ</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>ЯЗЫК</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>меняется сразу</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>СТАНЦИЯ</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>МОЙ ПОЗЫВНОЙ</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>ИМЯ</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>МАКРОСЫ</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Сбросить</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Пишите здесь — Enter отправляет строку</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Подключите трансивер для передачи</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>В ЭФИРЕ</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>ПЕРЕДАЧА</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Прервать</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>Достаточно, чтобы задействовать ALC — следите за прибором.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>НАСТРОЙКА</translation>
     </message>
 </context>
 </TS>

@@ -42,6 +42,18 @@ class DecodiumDecoPortGateway : public QObject {
     // davanti al PC di stazione per sapere cosa scrivere sull'altra macchina.
     Q_PROPERTY(QString primaryAddress READ primaryAddress NOTIFY runningChanged)
     Q_PROPERTY(QStringList addresses READ addresses NOTIFY runningChanged)
+    // Quanti datagrammi arrivano e come vanno a finire. Serve a distinguere i
+    // due guasti che da fuori si somigliano e non hanno nulla in comune: "non
+    // arriva niente" (rete, firewall, porta) e "arriva ma lo rifiuto"
+    // (password diversa, orologio sfasato). Senza questi numeri il gateway
+    // tace in entrambi i casi, e chi pubblica non ha modo di sapere quale dei
+    // due sta guardando.
+    //
+    // Sono contatori locali: il gateway continua a non rispondere NIENTE a chi
+    // sbaglia la firma. Confermare la ricezione direbbe a un estraneo che il
+    // pacchetto e' arrivato a destinazione, ed e' esattamente cio' che non si
+    // vuole dire. Qui si scrive per il proprietario, non per la rete.
+    Q_PROPERTY(QVariantMap traffico READ traffico NOTIFY trafficoChanged)
 
 public:
     // I ganci verso la radio. Tutti facoltativi: quelli non forniti fanno
@@ -111,11 +123,18 @@ public:
     // dimensione qualsiasi; qui vengono ricuciti in frame regolari da 10 ms.
     void pushRxAudio(const QVector<short>& samples, quint64 captureTsNs);
 
+    // Il conto dei datagrammi, pronto per il QML. Vedi la proprieta' traffico.
+    QVariantMap traffico() const;
+
 signals:
     void runningChanged();
     void radioChanged();
     void statusChanged();
     void clientsChanged();
+    // Emesso a cadenza dal timer del contesto, non a ogni pacchetto: sotto
+    // carico i datagrammi sono migliaia al secondo e un segnale per ciascuno
+    // costerebbe piu' del gateway stesso.
+    void trafficoChanged();
 
     // Il gateway consegna i campioni TX quando e' arrivato il loro istante di
     // riproduzione, non quando sono arrivati dalla rete. E' tutta qui la
@@ -169,6 +188,29 @@ private:
         qint64 blockedUntilMs {0};
     };
     QHash<QString, AuthFailures> m_authFailures;
+
+    // Il conto di cosa arriva sul socket di sessione. Tutti i datagrammi
+    // passano da una sola di queste voci, cosi' la somma delle respinte piu'
+    // le accettate torna sempre uguale ai ricevuti: se non torna, manca un
+    // ramo in onSessionDatagrams().
+    struct Traffico {
+        quint64 ricevuti {0};      // datagrammi arrivati, qualunque esito
+        quint64 accettati {0};     // firma buona e tempo buono: elaborati
+        quint64 daBloccati {0};    // mittente in castigo: nemmeno guardati
+        quint64 malformati {0};    // non e' roba nostra, o e' rovinata
+        quint64 firmaErrata {0};   // password diversa da quella del gateway
+        quint64 fuoriTempo {0};    // firma buona, timestamp fuori finestra
+        QString ultimoMittente;    // chi ha bussato per ultimo, respinto o no
+        qint64  ultimoMs {0};      // quando, per dire "3 minuti fa"
+    };
+    Traffico m_traffico;
+    // Vero quando m_traffico e' cambiato dall'ultimo trafficoChanged().
+    bool m_trafficoSporco {false};
+    // Quando si e' scritta l'ultima riga di traffico nel log: una al minuto.
+    qint64 m_traficoUltimoLogMs {0};
+    // Vero finche' i numeri correnti non sono finiti nel log. Distinto da
+    // m_trafficoSporco, che serve alla finestra e si azzera molto piu' spesso.
+    bool m_traficoDaRegistrare {false};
 
     QUdpSocket* m_session {nullptr};
     QUdpSocket* m_announce {nullptr};

@@ -1,11 +1,15 @@
 // DecoRTTY — what the application knows about a radio.
 //
-// Two very different things sit behind this interface: a FlexRadio, spoken to
-// over its own TCP command protocol, and an FT-991A behind the gateway, spoken
-// to with VITA-49 command packets. Above the seam they are the same object —
-// a dial frequency, a mode, a PTT, and a stream of audio — which is what lets
-// the decoder, the interface and the transmit path stay free of any knowledge
-// about which radio is connected.
+// Due cose molto diverse stanno dietro questa interfaccia: la radio che
+// Decodium governa dal suo CAT, e una scheda audio del PC su cui un altro
+// programma mette il suo audio. Sopra la cucitura sono lo stesso oggetto — una
+// frequenza, un modo, un PTT e un flusso di campioni — ed e' cio' che tiene il
+// decodificatore, l'interfaccia e il percorso di trasmissione liberi dal sapere
+// quale delle due sia collegata.
+//
+// Nel progetto originale le due cose erano un FlexRadio e una FT-991A dietro un
+// gateway, entrambe raggiunte in rete con VITA-49. Quel trasporto qui non c'e'
+// piu': la radio e' una sola e sta su una porta seriale.
 #pragma once
 
 #include <QObject>
@@ -25,8 +29,9 @@ public:
     virtual bool    isConnected() const = 0;
     virtual QString statusText() const = 0;
     // Il nome della stazione con cui si sta condividendo la radio, vuoto quando
-    // si lavora da soli. Riguarda solo i FlexRadio, dove piu' programmi possono
-    // usare lo stesso apparato insieme.
+    // si lavora da soli. Riguardava i FlexRadio, dove piu' programmi possono
+    // usare lo stesso apparato insieme: senza quelli resta sempre vuoto, e chi
+    // lo mostra sa gia' nasconderlo.
     virtual QString sharedWith() const { return {}; }
     virtual QString radioName() const = 0;
     virtual double  frequencyMhz() const = 0;
@@ -34,10 +39,10 @@ public:
     virtual bool    isTransmitting() const = 0;
     virtual bool    canTransmit() const = 0;
     // Vero quando i comandi di sintonia arrivano davvero all'apparato. Non e' la
-    // stessa cosa di canTransmit(): dietro il gateway servono entrambi la porta
-    // seriale, ma su un FlexRadio si puo' comandare la slice di una stazione con
-    // cui si condivide l'apparato senza avere il diritto di trasmettere. E da una
-    // scheda audio non si comanda niente: si ascolta e basta.
+    // stessa cosa di canTransmit(): con la radio di Decodium si comanda la
+    // sintonia ma non si trasmette, perche' il modulatore e' quello
+    // dell'applicazione. E da una scheda audio non si comanda niente: si
+    // ascolta e basta.
     virtual bool    canControl() const { return isConnected(); }
     virtual int     signalStrengthDbm() const = 0;
 

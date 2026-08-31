@@ -120,6 +120,14 @@ bool DecodiumDecoPortGateway::start(int sessionPort)
     connect(m_playoutTimer, &QTimer::timeout, this, &DecodiumDecoPortGateway::onPlayoutTick);
     m_playoutTimer->start();
 
+    // Il conto riparte da zero a ogni pubblicazione: i numeri di ieri non
+    // dicono niente su perche' oggi non si collega nessuno.
+    m_traffico = Traffico {};
+    m_trafficoSporco = false;
+    m_traficoDaRegistrare = false;
+    m_traficoUltimoLogMs = 0;   // la prima riga della nuova pubblicazione esce subito
+    emit trafficoChanged();
+
     m_running = true;
     emit runningChanged();
     onAnnounceTick();
@@ -313,10 +321,72 @@ void DecodiumDecoPortGateway::onAnnounceTick()
 void DecodiumDecoPortGateway::onContextTick()
 {
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+
+    // I contatori si pubblicano qui e non a ogni datagramma: sotto carico
+    // sarebbero migliaia di segnali al secondo. Sta prima del ritorno
+    // anticipato qui sotto, perche' il caso che interessa davvero e'
+    // proprio quello senza clienti — nessuno collegato, e i numeri che
+    // dicono se e' perche' non arriva niente o perche' li rifiutiamo tutti.
+    if (m_trafficoSporco) {
+        m_trafficoSporco = false;
+        m_traficoDaRegistrare = true;
+        emit trafficoChanged();
+
+        // Una riga nel log, al massimo una al minuto. La finestra mostra gli
+        // stessi numeri dal vivo, ma chi diagnostica dopo — o da lontano — ha
+        // solo il log: senza questa riga, "non si collega nessuno" resta
+        // indistinguibile da "arrivano e li rifiuto tutti" anche a posteriori.
+        // Al minuto e non a ogni cambiamento, perche' un client attivo manda
+        // decine di datagrammi al secondo e riempirebbe il log da solo.
+    }
+
+    // Il freno sul log rimanda la riga, non la butta via. Tenerlo insieme al
+    // flag della finestra faceva scrivere il conto del PRIMO datagramma e mai
+    // piu': una raffica di nove risultava "ricevuti 1" per sempre, e un numero
+    // falso nel log e' peggio di nessun numero. Percio' due flag distinti —
+    // quello della finestra si azzera a ogni aggiornamento, questo solo quando
+    // la riga e' stata scritta davvero.
+    if (m_traficoDaRegistrare) {
+        if (nowMs - m_traficoUltimoLogMs >= 60000) {
+            m_traficoDaRegistrare = false;
+            m_traficoUltimoLogMs = nowMs;
+            qInfo().noquote()
+                << "[DecoPort] traffico: ricevuti" << m_traffico.ricevuti
+                << "accettati" << m_traffico.accettati
+                << "- respinti: firma" << m_traffico.firmaErrata
+                << "tempo" << m_traffico.fuoriTempo
+                << "malformati" << m_traffico.malformati
+                << "bloccati" << m_traffico.daBloccati
+                << "- ultimo da" << (m_traffico.ultimoMittente.isEmpty()
+                                         ? QStringLiteral("nessuno")
+                                         : m_traffico.ultimoMittente);
+        }
+    }
+
     reapClients(nowMs);
     if (m_clients.isEmpty())
         return;
     broadcastToClients(Type::Context, encodeContextPayload(buildContext()), nowUnixNs());
+}
+
+QVariantMap DecodiumDecoPortGateway::traffico() const
+{
+    QVariantMap m;
+    m.insert(QStringLiteral("ricevuti"),    static_cast<qulonglong>(m_traffico.ricevuti));
+    m.insert(QStringLiteral("accettati"),   static_cast<qulonglong>(m_traffico.accettati));
+    m.insert(QStringLiteral("daBloccati"),  static_cast<qulonglong>(m_traffico.daBloccati));
+    m.insert(QStringLiteral("malformati"),  static_cast<qulonglong>(m_traffico.malformati));
+    m.insert(QStringLiteral("firmaErrata"), static_cast<qulonglong>(m_traffico.firmaErrata));
+    m.insert(QStringLiteral("fuoriTempo"),  static_cast<qulonglong>(m_traffico.fuoriTempo));
+    m.insert(QStringLiteral("ultimoMittente"), m_traffico.ultimoMittente);
+    // Secondi dall'ultimo datagramma, -1 se non ne e' mai arrivato uno. Si
+    // manda un'eta' e non un istante: il QML non deve sapere di orologi, e un
+    // "mai" deve restare distinguibile da "adesso".
+    m.insert(QStringLiteral("ultimoDaSecondi"),
+             m_traffico.ultimoMs > 0
+                 ? static_cast<qlonglong>((QDateTime::currentMSecsSinceEpoch() - m_traffico.ultimoMs) / 1000)
+                 : qlonglong {-1});
+    return m;
 }
 
 void DecodiumDecoPortGateway::reapClients(qint64 nowMs)
@@ -358,28 +428,45 @@ void DecodiumDecoPortGateway::onSessionDatagrams()
         QString const peerKey = from.toString();
         qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
 
-        if (isBlocked(peerKey, nowMs))
+        // Si conta prima di ogni giudizio: il numero che conta davvero e'
+        // quanti ne arrivano. Se resta a zero mentre il client sta provando,
+        // il problema e' prima del gateway — rete, firewall, porta — e nessuna
+        // password lo risolverebbe.
+        ++m_traffico.ricevuti;
+        m_traffico.ultimoMittente = peerKey;
+        m_traffico.ultimoMs = nowMs;
+        m_trafficoSporco = true;
+
+        if (isBlocked(peerKey, nowMs)) {
+            ++m_traffico.daBloccati;
             continue;   // in castigo: nemmeno si guarda cosa ha mandato
+        }
 
         Header h;
         QByteArray payload;
         bool authed = false;
-        if (!parsePacket(dg.data(), &h, &payload, m_authKey, &authed))
+        if (!parsePacket(dg.data(), &h, &payload, m_authKey, &authed)) {
+            ++m_traffico.malformati;
             continue;   // non e' roba nostra, o e' malformata
+        }
 
         // Firma assente o sbagliata: si conta e si tace. Rispondere qualcosa
         // direbbe a chi prova che il pacchetto e' arrivato a destinazione.
         if (!authed) {
+            ++m_traffico.firmaErrata;
             noteAuthFailure(peerKey, from, nowMs);
             continue;
         }
         // Firma giusta ma timestamp fuori finestra: e' un pacchetto registrato
         // e rigiocato. La firma da sola non protegge da questo.
         if (!timestampAcceptable(h)) {
+            ++m_traffico.fuoriTempo;
             qWarning().noquote() << "[DecoPort] scartato pacchetto fuori tempo da"
                                  << from.toString();
             continue;
         }
+
+        ++m_traffico.accettati;
 
         switch (h.type) {
         case Type::Hello:

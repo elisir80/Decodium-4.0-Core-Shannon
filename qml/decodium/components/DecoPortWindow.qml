@@ -21,6 +21,25 @@ Window {
     readonly property bool useRemote: !!(eng && eng.decoPortUseRemote)
     readonly property bool monitorOn: !!(eng && eng.decoPortMonitor)
 
+    // Il conto dei datagrammi arrivati al gateway. Si rilegge sia quando il
+    // gateway segnala di aver contato qualcosa, sia a tempo: l'eta' dell'ultimo
+    // pacchetto invecchia da sola anche quando non arriva piu' niente, ed e'
+    // proprio il caso in cui la si vuole guardare.
+    property var traf: null
+    function rileggiTraffico() { win.traf = win.gw ? win.gw.traffico : null }
+    Connections {
+        target: win.gw
+        function onTrafficoChanged() { win.rileggiTraffico() }
+        function onRunningChanged()  { win.rileggiTraffico() }
+    }
+    Timer {
+        interval: 2000
+        repeat: true
+        running: win.visible && !!(win.gw && win.gw.running)
+        onTriggered: win.rileggiTraffico()
+    }
+    Component.onCompleted: win.rileggiTraffico()
+
     readonly property var tm: eng ? eng.themeManager : null
     readonly property color cBg:      tm ? tm.bgDeep        : "#0a0f14"
     readonly property color cPanel:   tm ? tm.panelColor    : "#111a22"
@@ -333,6 +352,54 @@ Window {
                     color: win.cDim
                     font.pixelSize: 10
                     elide: Text.ElideRight
+                }
+
+                // Il conto dei datagrammi. Distingue i due guasti che da fuori
+                // si somigliano: non arriva niente, oppure arriva e lo
+                // rifiutiamo. Compare solo a radio pubblicata, perche' prima
+                // non c'e' niente da contare.
+                Text {
+                    id: contatoreTraffico
+                    Layout.fillWidth: true
+                    visible: !!(win.gw && win.gw.running)
+                    font.pixelSize: 10
+                    wrapMode: Text.WordWrap
+
+                    readonly property int ricevuti:  win.traf ? win.traf.ricevuti  : 0
+                    readonly property int accettati: win.traf ? win.traf.accettati : 0
+                    readonly property int eta:       win.traf ? win.traf.ultimoDaSecondi : -1
+
+                    color: ricevuti === 0 ? win.cWarn
+                                          : (accettati === 0 ? win.cWarn : win.cDim)
+
+                    text: {
+                        if (!win.traf)
+                            return ""
+                        if (ricevuti === 0)
+                            return qsTr("No packet has arrived: the client is not reaching this machine. Check network, firewall and port %1.")
+                                     .arg(win.gw ? win.gw.sessionPort : 0)
+                        var da = win.traf.ultimoMittente
+                        var quando = eta < 0 ? ""
+                                   : (eta < 60 ? qsTr("%1 s ago").arg(eta)
+                                               : qsTr("%1 min ago").arg(Math.floor(eta / 60)))
+                        if (accettati === 0) {
+                            // Arrivano ma li respingiamo tutti: qui il dettaglio
+                            // e' la diagnosi, perche' ogni voce ha una causa sua.
+                            var motivi = []
+                            if (win.traf.firmaErrata > 0)
+                                motivi.push(qsTr("%1 wrong password").arg(win.traf.firmaErrata))
+                            if (win.traf.fuoriTempo > 0)
+                                motivi.push(qsTr("%1 clock out of step").arg(win.traf.fuoriTempo))
+                            if (win.traf.malformati > 0)
+                                motivi.push(qsTr("%1 not DecoPort traffic").arg(win.traf.malformati))
+                            if (win.traf.daBloccati > 0)
+                                motivi.push(qsTr("%1 from a blocked sender").arg(win.traf.daBloccati))
+                            return qsTr("%1 packets from %2 (%3), all rejected: %4")
+                                     .arg(ricevuti).arg(da).arg(quando).arg(motivi.join(", "))
+                        }
+                        return qsTr("%1 packets received, %2 accepted - last from %3 (%4)")
+                                 .arg(ricevuti).arg(accettati).arg(da).arg(quando)
+                    }
                 }
             }
 

@@ -5,11 +5,11 @@
 # gli strumenti di prova) non servono qui, perche' il codice viene collegato
 # dentro Decodium.
 #
-# Il gateway FT-991A resta pero' un programma a se' anche nel progetto
-# originale, e per una ragione che vale ancora: gira sul PC a cui la radio e'
-# collegata, che non e' per forza quello che decodifica. Qui se ne costruisce
-# la libreria, e se in futuro servira' l'eseguibile lo si aggiunge senza
-# toccare altro.
+# Il trasporto di rete del progetto originale — VITA-49 verso i FlexRadio e il
+# gateway FT-991A — non c'e' piu': dentro Decodium cercava radio in rete che non
+# potevano esserci, perche' la radio e' quella dell'applicazione, su una porta
+# seriale sola. Chi risincronizza con DecoRTTY non le ritrovera' qui, ed e'
+# voluto: non sono state dimenticate.
 
 # AUTOMOC acceso PRIMA di definire i target: Decodium lo attiva a meta' del
 # suo CMakeLists (riga ~1627) mentre questo sottoprogetto viene aggiunto prima
@@ -40,56 +40,23 @@ else ()
   target_compile_options (decortty_dsp PRIVATE -Wall -Wextra -ffast-math)
 endif ()
 
-# ── Audio del codec ─────────────────────────────────────────────────────────
-# Aprire un dispositivo e portare i campioni a 24 kHz: lo stesso mestiere che
-# serve al gateway e all'applicazione quando l'audio arriva da una scheda
-# invece che dalla rete.
-add_library (decortty_audio STATIC
-    gateway/CodecAudio.cpp      gateway/CodecAudio.h
-)
-target_link_libraries (decortty_audio PUBLIC Qt6::Core Qt6::Multimedia decortty_dsp)
-
-# ── Trasporto FlexRadio: VITA-49, API SmartSDR, sorgenti radio ──────────────
-add_library (decortty_flex STATIC
-    flex/FlexTrace.cpp          flex/FlexTrace.h
-    flex/VitaPacket.cpp         flex/VitaPacket.h
-    flex/FlexDiscovery.cpp      flex/FlexDiscovery.h
-    flex/FlexApiClient.cpp      flex/FlexApiClient.h
-    flex/FlexVitaStream.cpp     flex/FlexVitaStream.h
-    flex/OpusCodec.cpp          flex/OpusCodec.h
-    flex/FlexRadioLink.cpp      flex/FlexRadioLink.h
-    vita/VitaContext.cpp        vita/VitaContext.h
+# ── I collegamenti alla radio ───────────────────────────────────────────────
+# Ne resta uno solo, e non passa dalla rete: la radio che Decodium governa. Il
+# trasporto VITA-49 verso i FlexRadio e il gateway FT-991A sono stati tolti
+# perche' dentro Decodium non trovavano mai nulla, e con loro se n'e' andata
+# anche la scheda audio: chi decide da dove arrivano audio e comandi e'
+# Decodium, in un posto solo, e RTTY non ha piu' niente da connettere.
+add_library (decortty_link STATIC
     link/RadioLink.h
-    link/GatewayLink.cpp        link/GatewayLink.h
+    link/DecodiumLink.cpp       link/DecodiumLink.h
     link/RadioHub.cpp           link/RadioHub.h
-    link/SoundCardLink.cpp      link/SoundCardLink.h
     # Il piano di banda e' un dato puro (solo QString e vector) ma RadioHub lo
     # usa: sta qui e non in decortty_app, che dipende da questa libreria e non
-    # viceversa. Nel progetto originale la distinzione non serviva, perche'
-    # tutto finiva nello stesso eseguibile.
+    # viceversa.
     app/BandPlan.cpp            app/BandPlan.h
 )
-target_link_libraries (decortty_flex PUBLIC
-    Qt6::Core Qt6::Network decortty_dsp decortty_audio)
-
-# Opus serve alla radio per l'audio che il client trasmette; senza, DecoRTTY
-# riceve lo stesso. La dipendenza resta quindi opzionale e viene riportata al
-# momento della configurazione, come nel progetto originale.
-if (DECORTTY_OPUS_TARGET)
-  target_link_libraries (decortty_flex PUBLIC ${DECORTTY_OPUS_TARGET})
-  target_compile_definitions (decortty_flex PUBLIC DECORTTY_HAVE_OPUS=1)
-endif ()
-
-# ── Gateway FT-991A: CAT e audio verso la rete ──────────────────────────────
-add_library (decortty_gateway STATIC
-    gateway/Ft991Cat.cpp        gateway/Ft991Cat.h
-    gateway/Ft991Gateway.cpp    gateway/Ft991Gateway.h
-)
-target_link_libraries (decortty_gateway PUBLIC
-    Qt6::Core Qt6::Network Qt6::Multimedia Qt6::SerialPort
-    decortty_audio decortty_flex)
-target_compile_definitions (decortty_gateway PUBLIC
-    DECORTTY_VERSION="${DECORTTY_VERSION}")
+target_link_libraries (decortty_link PUBLIC
+    Qt6::Core decortty_dsp)
 
 # ── Motore e modelli dell'applicazione ──────────────────────────────────────
 # Il waterfall e' un QQuickItem: qui serve perche' RttyEngine lo referenzia.
@@ -100,12 +67,21 @@ add_library (decortty_app STATIC
     app/WaterfallItem.cpp       app/WaterfallItem.h
     app/MacroModel.cpp          app/MacroModel.h
     app/QsoLog.cpp              app/QsoLog.h
-    app/GatewaySupervisor.cpp   app/GatewaySupervisor.h
     app/Language.cpp            app/Language.h
+    # Solo intestazione, ma con Q_OBJECT: sta fra i sorgenti perche' AUTOMOC lo
+    # veda. E' la tavolozza, condivisa con Decodium.
+    app/Theme.h
 )
 target_link_libraries (decortty_app PUBLIC
-    Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Multimedia Qt6::SerialPort
-    decortty_dsp decortty_flex decortty_gateway)
+    Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::Multimedia
+    decortty_dsp decortty_link)
+
+# La versione finisce nell'intestazione degli ADIF esportati: chi rilegge quel
+# file deve poter dire con che cosa e' stato scritto. La definiva la libreria
+# del gateway, che non c'e' piu'; il valore resta quello del progetto da cui
+# questo codice viene.
+target_compile_definitions (decortty_app PUBLIC
+    DECORTTY_VERSION="${DECORTTY_VERSION}")
 
 # ── Il punto di aggancio a Decodium ─────────────────────────────────────────
 # Raccoglie gli oggetti che nel progetto originale vivevano in main.cpp, cosi'
@@ -128,8 +104,8 @@ target_link_libraries (decortty_host PUBLIC decortty_app)
 # DecoRTTY e' scritto in C++20 (usa std::numbers), Decodium compila a C++17.
 # Lo standard si alza sui soli target di questo sottoprogetto: il resto di
 # Decodium resta a 17, e nessun altro bersaglio cambia comportamento.
-foreach (bersaglio decortty_dsp decortty_audio decortty_flex
-                   decortty_gateway decortty_app decortty_host)
+foreach (bersaglio decortty_dsp decortty_link
+                   decortty_app decortty_host)
   set_target_properties (${bersaglio} PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON)

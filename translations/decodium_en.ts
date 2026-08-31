@@ -23832,6 +23832,10 @@ Costs extra CPU during QSOs. Default: OFF.</translation>
         <source>Decodium 4.0</source>
         <translation>Decodium 4.0</translation>
     </message>
+    <message>
+        <source>Decodium's radio</source>
+        <translation>Decodium's radio</translation>
+    </message>
 </context>
 <context>
     <name>TCITransceiver</name>
@@ -29171,6 +29175,362 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="154"/>
         <source>Disconnected</source>
         <translation>Disconnected</translation>
+    </message>
+</context>
+<context>
+    <name>BandBar</name>
+    <message>
+        <source>No radio connected.</source>
+        <translation>No radio connected.</translation>
+    </message>
+    <message>
+        <source>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</source>
+        <translation>Decodium's CAT is not connected, so the radio takes
+no commands. Connect it in Decodium.</translation>
+    </message>
+    <message>
+        <source>%1 — RTTY at %2 MHz</source>
+        <translation>%1 — RTTY at %2 MHz</translation>
+    </message>
+    <message>
+        <source>Data on the upper sideband: the mode this
+decoder is written for.</source>
+        <translation>Data on the upper sideband: the mode this
+decoder is written for.</translation>
+    </message>
+    <message>
+        <source>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</source>
+        <translation>Data on the lower sideband. The tones come out
+reversed — REV puts them back.</translation>
+    </message>
+    <message>
+        <source>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</source>
+        <translation>Voice sideband. RTTY is copied just the same,
+but the radio's filter is wider than it needs.</translation>
+    </message>
+</context>
+<context>
+    <name>BandScale</name>
+    <message>
+        <source>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</source>
+        <translation>Drag to move the radio; the wheel tunes by 1 kHz —
+100 Hz with Shift, 10 kHz with Ctrl.</translation>
+    </message>
+</context>
+<context>
+    <name>DecoderPanel</name>
+    <message>
+        <source>Correction</source>
+        <translation>Correction</translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Off</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Normal</translation>
+    </message>
+    <message>
+        <source>Deep</source>
+        <translation>Deep</translation>
+    </message>
+    <message>
+        <source>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</source>
+        <translation>Unshift on space — recovers a lost FIGS/LTRS, but
+breaks long figure groups such as serial numbers.</translation>
+    </message>
+    <message>
+        <source>Set radio</source>
+        <translation>Set radio</translation>
+    </message>
+    <message>
+        <source>Puts the radio into DIGU and narrows its filter
+around the tones.</source>
+        <translation>Puts the radio into DIGU and narrows its filter
+around the tones.</translation>
+    </message>
+</context>
+<context>
+    <name>FilterPanel</name>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTERS</translation>
+    </message>
+    <message>
+        <source>Bandpass around the two tones: throws away
+everything outside before the detector.</source>
+        <translation>Bandpass around the two tones: throws away
+everything outside before the detector.</translation>
+    </message>
+    <message>
+        <source>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</source>
+        <translation>Removes one frequency. Ctrl+click the waterfall
+to drop it on the carrier that is in the way.</translation>
+    </message>
+    <message>
+        <source>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</source>
+        <translation>Adaptive canceller: removes steady carriers by
+itself. On weak signals it can eat the RTTY as
+well — try it and listen.</translation>
+    </message>
+    <message>
+        <source>BPF width</source>
+        <translation>BPF width</translation>
+    </message>
+    <message>
+        <source>FRAMING</source>
+        <translation>FRAMING</translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Bits</source>
+        <translation>Bits</translation>
+    </message>
+    <message>
+        <source>Par.</source>
+        <translation>Par.</translation>
+    </message>
+    <message>
+        <source>none</source>
+        <translation>none</translation>
+    </message>
+    <message>
+        <source>even</source>
+        <translation>even</translation>
+    </message>
+    <message>
+        <source>odd</source>
+        <translation>odd</translation>
+    </message>
+    <message>
+        <source>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</source>
+        <translation>Figures set: US has BELL and apostrophe where
+ITA2 swaps the two.</translation>
+    </message>
+    <message>
+        <source>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</source>
+        <translation>Prints characters whose stop bit read wrong too:
+a few more characters on distorted signals, some
+lines of rubbish in exchange.</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>TRANSMIT</translation>
+    </message>
+    <message>
+        <source>Fill</source>
+        <translation>Fill</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation>off</translation>
+    </message>
+    <message>
+        <source>What to send between characters while you
+type live.</source>
+        <translation>What to send between characters while you
+type live.</translation>
+    </message>
+    <message>
+        <source>Character wait</source>
+        <translation>Character wait</translation>
+    </message>
+</context>
+<context>
+    <name>HeaderBar</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>Setup</source>
+        <translation>Setup</translation>
+    </message>
+</context>
+<context>
+    <name>LogDialog</name>
+    <message>
+        <source>LOG</source>
+        <translation>LOG</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s)</source>
+        <translation>
+            <numerusform>%n contact</numerusform>
+            <numerusform>%n contacts</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>RST SENT</source>
+        <translation>RST SENT</translation>
+    </message>
+    <message>
+        <source>RST RCVD</source>
+        <translation>RST RCVD</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAME</translation>
+    </message>
+    <message>
+        <source>Log it</source>
+        <translation>Log it</translation>
+    </message>
+    <message>
+        <source>Worked before: %1 — last on %2</source>
+        <translation>Worked before: %1 — last on %2</translation>
+    </message>
+    <message>
+        <source>Export ADIF</source>
+        <translation>Export ADIF</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Close</translation>
+    </message>
+</context>
+<context>
+    <name>ReceivePanel</name>
+    <message>
+        <source>RECEIVE</source>
+        <translation>RECEIVE</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <source>Highlights callsigns. Click one to put it
+in the HIS CALL field.</source>
+        <translation>Highlights callsigns. Click one to put it
+in the HIS CALL field.</translation>
+    </message>
+    <message>
+        <source>Follow</source>
+        <translation>Follow</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copy</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <source>jump to end ↓</source>
+        <translation>jump to end ↓</translation>
+    </message>
+</context>
+<context>
+    <name>RttyMain</name>
+    <message>
+        <source>RTTY</source>
+        <translation>RTTY</translation>
+    </message>
+    <message>
+        <source>nessuna radio</source>
+        <translation>no radio</translation>
+    </message>
+    <message>
+        <source>DECODER</source>
+        <translation>DECODER</translation>
+    </message>
+    <message>
+        <source>FILTERS</source>
+        <translation>FILTERS</translation>
+    </message>
+</context>
+<context>
+    <name>SetupDialog</name>
+    <message>
+        <source>LANGUAGE</source>
+        <translation>LANGUAGE</translation>
+    </message>
+    <message>
+        <source>changes immediately</source>
+        <translation>changes immediately</translation>
+    </message>
+    <message>
+        <source>STATION</source>
+        <translation>STATION</translation>
+    </message>
+    <message>
+        <source>MY CALL</source>
+        <translation>MY CALL</translation>
+    </message>
+    <message>
+        <source>NAME</source>
+        <translation>NAME</translation>
+    </message>
+    <message>
+        <source>QTH</source>
+        <translation>QTH</translation>
+    </message>
+    <message>
+        <source>MACROS</source>
+        <translation>MACROS</translation>
+    </message>
+    <message>
+        <source>Restore defaults</source>
+        <translation>Restore defaults</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Close</translation>
+    </message>
+</context>
+<context>
+    <name>TransmitPanel</name>
+    <message>
+        <source>Type here — Enter sends the line</source>
+        <translation>Type here — Enter sends the line</translation>
+    </message>
+    <message>
+        <source>Connect a radio to transmit</source>
+        <translation>Connect a radio to transmit</translation>
+    </message>
+    <message>
+        <source>TRANSMITTING</source>
+        <translation>TRANSMITTING</translation>
+    </message>
+    <message>
+        <source>TRANSMIT</source>
+        <translation>TRANSMIT</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>Abort</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <source>High enough to drive the ALC — check the meter.</source>
+        <translation>High enough to drive the ALC — check the meter.</translation>
+    </message>
+</context>
+<context>
+    <name>TuningScope</name>
+    <message>
+        <source>TUNING</source>
+        <translation>TUNING</translation>
     </message>
 </context>
 </TS>

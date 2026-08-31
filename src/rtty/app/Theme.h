@@ -6,16 +6,21 @@
 // one edit.
 #pragma once
 
+// Nota per chi risincronizza con DecoRTTY: la' Theme e' il singleton di un
+// modulo QML (QML_ELEMENT + QML_SINGLETON) e include qqmlregistration.h. Qui
+// no: Decodium carica il QML dal filesystem, senza moduli, e passa gli oggetti
+// al QML come proprieta' di contesto — cosi' fanno gia' radio, rtty, macros e
+// tutte le altre. Theme e' la nona, esposta da DecoRttyHost::esponiAlQml. Le
+// due macro sono percio' tolte di proposito: lasciarle in un bersaglio che non
+// e' un modulo QML non registra nulla e confonde chi legge. I colori, che sono
+// la sostanza del file, restano identici a quelli del progetto originale.
 #include <QColor>
 #include <QObject>
-#include <QtQml/qqmlregistration.h>
 
 namespace decortty::app {
 
 class Theme : public QObject {
     Q_OBJECT
-    QML_ELEMENT
-    QML_SINGLETON
 
     Q_PROPERTY(QColor bgDeep       READ bgDeep       CONSTANT)
     Q_PROPERTY(QColor bgMedium     READ bgMedium     CONSTANT)
