@@ -16582,9 +16582,26 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
         return;
     }
 
-    applyConfiguredCatRigMode(reason + QStringLiteral("/mode"));
+    // In RTTY il modo giusto e' quello dell'RTTY, non quello dei modi digitali.
+    bool const inRtty = m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
+    if (inRtty)
+        applyRttyRigMode(reason + QStringLiteral("/mode"));
+    else
+        applyConfiguredCatRigMode(reason + QStringLiteral("/mode"));
     activeCatSetFreq(m_nativeCat, m_hamlibCat, m_catBackend, dialHz, m_omniRigCat, m_legacyBackend);
     syncActiveCatTxSplitFrequency(reason + QStringLiteral("/dial"));
+
+    // E ancora una volta dopo il salto. Molti apparati, la FT-991A fra questi,
+    // ricordano un modo diverso per ciascuna banda e ci tornano da soli appena
+    // ci si sposta: il modo impostato prima del QSY viene cancellato dal QSY
+    // stesso. Mezzo secondo basta perche' la radio abbia finito di cambiare
+    // banda; applyRttyRigMode non fa nulla se il modo e' gia' quello giusto o
+    // se nel frattempo si e' usciti da RTTY.
+    if (inRtty) {
+        QTimer::singleShot(500, this, [this, reason]() {
+            applyRttyRigMode(reason + QStringLiteral("/dopo-qsy"));
+        });
+    }
     bridgeLog(QStringLiteral("CAT local QSY requested by %1: %2 Hz via %3")
                   .arg(reason,
                        QString::number(hz, 'f', 0),
@@ -17469,7 +17486,7 @@ void DecodiumBridge::setMode(const QString& v) {
         // sarebbe una sorpresa. La frequenza va sul segmento RTTY della banda
         // in cui si trova gia', non su una banda decisa da noi.
         if (normalizedMode == QStringLiteral("RTTY")) {
-            applyConfiguredCatRigMode(QStringLiteral("rtty-mode"));
+            applyRttyRigMode(QStringLiteral("rtty-mode"));
 #if DECODIUM_HAS_RTTY
             int const banda = decortty::app::bandAt(m_frequency / 1e6);
             if (banda >= 0) {
@@ -20986,6 +21003,48 @@ static bool amplifierPortClashesWithCat(DecodiumTransceiverManager* cat, const Q
     QString const wanted = port.trimmed().toUpper();
     return wanted == cat->serialPort().trimmed().toUpper()
         || wanted == cat->pttPort().trimmed().toUpper();
+}
+
+QVariantMap DecodiumBridge::cercaAmplificatore()
+{
+    QVariantMap esito;
+
+    // Le porte da non toccare: quelle che il CAT dell'applicazione tiene
+    // aperte, e quella del PTT se e' su una seriale a parte.
+    QStringList escluse;
+    if (m_hamlibCat) {
+        escluse << m_hamlibCat->serialPort().trimmed();
+        escluse << m_hamlibCat->pttPort().trimmed();
+    }
+    if (m_nativeCat)
+        escluse << m_nativeCat->serialPort().trimmed();
+    escluse.removeAll(QString());
+
+    bridgeLog(QStringLiteral("[AMP] ricerca avviata; porte escluse: %1")
+                  .arg(escluse.isEmpty() ? QStringLiteral("nessuna") : escluse.join(QStringLiteral(", "))));
+
+    auto const trovati = DecodiumAmplifier::cerca(escluse);
+    if (trovati.isEmpty()) {
+        esito.insert(QStringLiteral("trovato"), false);
+        esito.insert(QStringLiteral("escluse"), escluse);
+        return esito;
+    }
+
+    auto const& t = trovati.first();
+    esito.insert(QStringLiteral("trovato"), true);
+    esito.insert(QStringLiteral("porta"), t.porta);
+    esito.insert(QStringLiteral("modello"), t.modello);
+    esito.insert(QStringLiteral("baud"), t.baud);
+    esito.insert(QStringLiteral("descrizione"), t.descrizione);
+
+    // Si configura da se': una ricerca che trova e poi lascia all'operatore il
+    // compito di ricopiare a mano quello che ha appena letto non ha fatto meta'
+    // del lavoro. In interrogazione attiva, non in ascolto passivo: l'apparato
+    // parla solo se interrogato, e il passivo sarebbe un'attesa senza fine.
+    configureAmplifier(true, t.porta, t.baud, false, 500);
+    bridgeLog(QStringLiteral("[AMP] configurato da se': %1 su %2 a %3 baud")
+                  .arg(t.modello, t.porta).arg(t.baud));
+    return esito;
 }
 
 void DecodiumBridge::configureAmplifier(bool enabled, const QString& port,
@@ -28680,6 +28739,76 @@ bool DecodiumBridge::configuredCatRigModeRequestsDataPacket() const
     bool ok = false;
     int const index = raw.toInt(&ok);
     return ok && index == 1;
+}
+
+QString DecodiumBridge::rttyRigMode() const
+{
+    // Il modo dell'RTTY vero, non quello dei dati. Su una FT-991A la differenza
+    // conta: in DATA-U l'apparato apre il passabanda dei modi digitali, in
+    // RTTY-U stringe attorno ai due toni ed e' quello che si vuole quando si
+    // copia RTTY. Chi trasmette in AFSK dall'audio deve invece restare sui
+    // dati, perche' nei modi RTTY l'apparato aspetta il tasto FSK e l'audio in
+    // ingresso non modula: per questo la scelta e' un'impostazione e non una
+    // decisione presa qui.
+    QVariant const raw = getSetting(QStringLiteral("RttyRigMode"),
+                                    QStringLiteral("RTTY-U"));
+    QString const testo = raw.toString().trimmed();
+    if (testo.compare(QStringLiteral("None"), Qt::CaseInsensitive) == 0)
+        return {};
+    return testo;
+}
+
+void DecodiumBridge::applyRttyRigMode(const QString& reason)
+{
+    if (m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0)
+        return;
+
+    QString const rigMode = rttyRigMode();
+    if (rigMode.isEmpty())
+        return;
+
+    // Durante l'assestamento di un QSY il comando andrebbe perso: si rimanda.
+    if (hamlibCatFrequencySettleActive(reason)) {
+        bridgeLog(QStringLiteral("RTTY: modo radio rimandato durante il QSY (%1): %2")
+                      .arg(reason, rigMode));
+        QTimer::singleShot(600, this, [this, reason, rigMode]() {
+            if (m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0)
+                applyRttyRigMode(reason + QStringLiteral("-ritardato"));
+        });
+        return;
+    }
+
+    if (!m_catMode.trimmed().isEmpty()
+        && m_catMode.compare(rigMode, Qt::CaseInsensitive) == 0) {
+        return;   // gia' nel modo giusto
+    }
+
+    if (m_catBackend == QStringLiteral("native")) {
+        if (m_nativeCat && m_nativeCat->connected()) {
+            bridgeLog(QStringLiteral("RTTY: modo radio (%1): native -> %2").arg(reason, rigMode));
+            m_nativeCat->setRigMode(rigMode);
+        }
+        return;
+    }
+    if (m_catBackend == QStringLiteral("cat4om")) {
+        if (m_cat4OmCat && m_cat4OmCat->connected()) {
+            bridgeLog(QStringLiteral("RTTY: modo radio (%1): cat4om -> %2").arg(reason, rigMode));
+            m_cat4OmCat->setRigMode(rigMode);
+        }
+        return;
+    }
+    if (isHamlibFamilyBackend(m_catBackend)) {
+        if (m_hamlibCat && m_hamlibCat->connected()) {
+            bridgeLog(QStringLiteral("RTTY: modo radio (%1): %2 -> %3")
+                          .arg(reason, m_catBackend, rigMode));
+            m_hamlibCat->setRigMode(rigMode);
+        }
+        return;
+    }
+    if (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->connected()) {
+        bridgeLog(QStringLiteral("RTTY: modo radio (%1): omnirig -> %2").arg(reason, rigMode));
+        m_omniRigCat->setRigMode(rigMode);
+    }
 }
 
 void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
@@ -41371,6 +41500,34 @@ void DecodiumBridge::requestManualLogQso()
     }
 
     promptLogQso();
+}
+
+void DecodiumBridge::impostaModoRadioRtty(const QString& modo)
+{
+    QString const scelto = modo.trimmed().toUpper();
+    if (scelto.isEmpty())
+        return;
+
+    // Si ricorda per prima cosa: applyRttyRigMode legge di qui, e vogliamo che
+    // legga il nuovo valore anche quando lo richiamera' dopo il prossimo QSY.
+    setSetting(QStringLiteral("RttyRigMode"), scelto);
+    bridgeLog(QStringLiteral("RTTY: modo radio scelto dall'operatore: %1").arg(scelto));
+
+    // In RTTY lo applica il percorso dell'RTTY, che sa anche rimandare durante
+    // l'assestamento di un QSY. Fuori da RTTY si comanda e basta: la scelta
+    // resta comunque salvata per quando ci si tornera'.
+    if (m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+        applyRttyRigMode(QStringLiteral("scelta-operatore"));
+        return;
+    }
+    if (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->connected())
+        m_nativeCat->setRigMode(scelto);
+    else if (m_catBackend == QStringLiteral("cat4om") && m_cat4OmCat && m_cat4OmCat->connected())
+        m_cat4OmCat->setRigMode(scelto);
+    else if (isHamlibFamilyBackend(m_catBackend) && m_hamlibCat && m_hamlibCat->connected())
+        m_hamlibCat->setRigMode(scelto);
+    else if (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->connected())
+        m_omniRigCat->setRigMode(scelto);
 }
 
 bool DecodiumBridge::registraQsoRtty(const QString& nominativo,

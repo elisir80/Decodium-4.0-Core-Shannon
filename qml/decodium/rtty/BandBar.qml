@@ -111,18 +111,42 @@ no commands. Connect it in Decodium.")
                 enabled: root.live
                 armed: radio.mode === modelData
                 // DIGU e' quello giusto per l'AFSK: si distingue dagli altri.
-                accentColor: modelData === "DIGU" ? Theme.success : Theme.textSecondary
-                minimumWidth: 40
+                // I due modi RTTY veri si distinguono: sono quelli in cui
+                // l'apparato stringe il filtro attorno ai toni.
+                accentColor: modelData.indexOf("RTTY") === 0 ? Theme.success
+                             : (modelData === "DIGU" ? Theme.secondary : Theme.textSecondary)
+                minimumWidth: 46
                 implicitHeight: 22
                 font.pixelSize: 10
-                onClicked: radio.setMode(modelData)
+                // Passa dal ponte, non da radio.setMode: li' il nome di un
+                // modo della radio verrebbe preso per un modo
+                // dell'applicazione e lasciato cadere. Cosi' invece la radio
+                // commuta davvero, e la scelta resta per il prossimo cambio
+                // di banda.
+                onClicked: {
+                    if (bridge)
+                        bridge.impostaModoRadioRtty(modelData)
+                    else
+                        radio.setMode(modelData)
+                }
                 ToolTip.visible: hovered
                 ToolTip.delay: 700
                 ToolTip.text: {
                     if (!root.live)
                         return root.whyIdle
+                    if (modelData === "RTTY-U")
+                        return qsTr("True RTTY, upper sideband: the radio narrows
+its filter around the tones. Best for copying — but
+the radio waits for FSK keying, so transmitting from
+here sends nothing.")
+                    if (modelData === "RTTY-L")
+                        return qsTr("True RTTY, lower sideband. Same as RTTY-U:
+receive only, the radio expects FSK keying to
+transmit.")
                     if (modelData === "DIGU")
-                        return qsTr("Data on the upper sideband: the mode this\ndecoder is written for.")
+                        return qsTr("Data on the upper sideband: wider filter, but the
+audio really modulates — use this one if you want to
+transmit from here.")
                     if (modelData === "DIGL")
                         return qsTr("Data on the lower sideband. The tones come out\nreversed — REV puts them back.")
                     return qsTr("Voice sideband. RTTY is copied just the same,\nbut the radio's filter is wider than it needs.")

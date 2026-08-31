@@ -1555,6 +1555,64 @@ SettingsPageScroll {
             font.pixelSize: controlFontSize
             onEditingFinished: applyAmplifier()
         }
+        // Cerca l'amplificatore invece di far ricopiare a mano il nome della
+        // porta: si chiede lo stato a ognuna delle porte libere e si guarda
+        // chi risponde nel protocollo SPE. Le porte del CAT restano fuori
+        // dalla ricerca, perche' aprirle strapperebbe la radio a chi la usa.
+        Button {
+            id: ampCerca
+            text: qsTr("Search")
+            Layout.preferredWidth: 96
+            implicitHeight: controlHeight
+            enabled: !!bridge && !ampCerca.inCorso
+            background: Rectangle {
+                color: ampCerca.enabled && ampCerca.hovered
+                       ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.22) : bgMedium
+                border.color: ampCerca.enabled ? primaryBlue : glassBorder
+                radius: 4
+            }
+            contentItem: Text {
+                text: ampCerca.text
+                color: ampCerca.enabled ? primaryBlue : textSecondary
+                font.pixelSize: 11; font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            property bool inCorso: false
+            property bool trovato: false
+            property string esito: ""
+            onClicked: {
+                if (!bridge) return
+                ampCerca.inCorso = true
+                ampCerca.esito = qsTr("searching...")
+                // Un giro di eventi prima di partire, cosi' la scritta cambia
+                // davvero: la ricerca apre le porte e blocca per qualche
+                // decimo di secondo, e senza questo l'operatore non vedrebbe
+                // nulla fino alla fine.
+                Qt.callLater(function() {
+                    var r = bridge.cercaAmplificatore()
+                    ampCerca.inCorso = false
+                    if (r && r.trovato) {
+                        ampPort.text = r.porta
+                        ampBaud.text = String(r.baud)
+                        ampPassive.checked = false
+                        ampEnabled.checked = true
+                        ampCerca.trovato = true
+                        ampCerca.esito = qsTr("found %1 on %2").arg(r.modello).arg(r.porta)
+                    } else {
+                        ampCerca.trovato = false
+                        ampCerca.esito = qsTr("no amplifier answered")
+                    }
+                })
+            }
+        }
+        Text {
+            text: ampCerca.esito
+            visible: ampCerca.esito.length > 0
+            color: ampCerca.trovato ? accentGreen : textSecondary
+            font.pixelSize: 11
+            Layout.columnSpan: 2
+        }
 
         // In ascolto la porta si apre in sola lettura: e' la sola via se il
         // software del costruttore deve restare aperto.

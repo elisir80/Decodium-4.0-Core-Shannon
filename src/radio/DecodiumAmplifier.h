@@ -23,6 +23,7 @@
 #include <QByteArray>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 class QSerialPort;
 class QTimer;
@@ -95,6 +96,27 @@ public:
     static QList<Reading> harvest(QByteArray& buffer);
 
     static QByteArray statusRequest();
+
+    // Cerca l'amplificatore sulle porte seriali del computer.
+    //
+    // Non si va per identita' USB: gli Expert montano convertitori diversi a
+    // seconda dell'anno e della porta usata, e una tabella di identita'
+    // invecchia male — riconoscerebbe il modello di ieri e non quello di
+    // domani. Si fa invece la prova che conta: si chiede lo stato con lo
+    // stesso pacchetto 0x90 della guida, e chi risponde con una trama SPE
+    // valida e' un SPE. Il modello lo dice lui stesso nel primo campo.
+    //
+    // Le porte in "daEscludere" non si toccano: sono quelle che il CAT
+    // dell'applicazione sta gia' usando. Aprirle per un istante, anche solo
+    // per chiedere, vorrebbe dire strappare la radio a chi la sta governando.
+    struct Trovato {
+        QString porta;      // "COM7"
+        QString modello;    // "20K", "13K"
+        int     baud {0};   // la velocita' a cui ha risposto
+        QString descrizione;
+    };
+    static QList<Trovato> cerca(const QStringList& daEscludere = {},
+                                int attesaMs = 400);
 
 signals:
     void configChanged();

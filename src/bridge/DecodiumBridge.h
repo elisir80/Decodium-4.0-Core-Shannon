@@ -1038,6 +1038,15 @@ public:
     Q_INVOKABLE int  decoPortConfiguredPort() const;
     QObject* spotShareObject() const;
     QObject* amplifierObject() const;
+    // Cerca l'amplificatore sulle porte libere e, se lo trova, lo configura da
+    // se': porta, velocita' e interrogazione attiva. Restituisce cosa ha
+    // trovato, perche' l'interfaccia possa dirlo invece di limitarsi a
+    // cambiare un campo sotto gli occhi dell'operatore.
+    //
+    // Le porte del CAT sono escluse dalla ricerca: aprirle anche solo per
+    // chiedere strapperebbe la radio a chi la sta governando.
+    Q_INVOKABLE QVariantMap cercaAmplificatore();
+
     Q_INVOKABLE void configureAmplifier(bool enabled, const QString& port,
                                         int baud, bool passive, int pollMs);
     Q_INVOKABLE void configureCatShare(bool enabled, int port,
@@ -1424,6 +1433,12 @@ public slots:
     // accesa, e tutti gli instradamenti verso QRZ, eQSL, HRDLog, Club Log e
     // PSK Reporter. Un secondo archivio parallelo sarebbe la cosa peggiore:
     // due liste di collegamenti che divergono e nessuna delle due completa.
+    // Il modo radio scelto per l'RTTY dai pulsanti sopra il waterfall. Fa due
+    // cose in una: commuta la radio adesso e ricorda la scelta, perche' al
+    // prossimo cambio di banda vada riapplicata — gli apparati che ricordano un
+    // modo per banda altrimenti la cancellerebbero al primo salto.
+    Q_INVOKABLE void impostaModoRadioRtty(const QString& modo);
+
     Q_INVOKABLE bool registraQsoRtty(const QString& nominativo,
                                      const QString& rstInviato,
                                      const QString& rstRicevuto,
@@ -2327,6 +2342,17 @@ private:
     QString configuredCatRigMode() const;
     bool configuredCatRigModeRequestsDataPacket() const;
     void applyConfiguredCatRigMode(const QString& reason);
+
+    // Il modo in cui va messa la radio quando si lavora in RTTY. Non e' quello
+    // dei modi digitali: su una FT-991A i dati stanno in DATA-U, ma l'RTTY vero
+    // ha il suo modo — RTTY-U — con il filtro stretto giusto attorno ai toni.
+    // Si legge dall'impostazione RttyRigMode; vuota vuol dire "non toccare il
+    // modo", per chi preferisce restare dov'e'.
+    QString rttyRigMode() const;
+    // Mette la radio nel modo RTTY. Va richiamata anche dopo ogni cambio di
+    // banda: molti apparati, la FT-991A compresa, ricordano un modo diverso per
+    // ciascuna banda e ci tornano da soli appena ci si sposta.
+    void applyRttyRigMode(const QString& reason);
     void updateRigTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
     void applyNtpSettings();
     void configureNtpClientForMode(const QString& mode);

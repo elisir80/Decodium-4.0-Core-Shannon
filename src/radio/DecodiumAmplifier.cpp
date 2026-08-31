@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QSerialPort>
+#include <QSerialPortInfo>
+#include <QElapsedTimer>
 #include <QStringList>
 #include <QTimer>
 #include <QtGlobal>
@@ -27,6 +29,78 @@ DecodiumAmplifier::DecodiumAmplifier(QObject* parent)
 DecodiumAmplifier::~DecodiumAmplifier()
 {
     configure(false, m_port, m_baud, m_passive, m_pollMs);
+}
+
+QList<DecodiumAmplifier::Trovato>
+DecodiumAmplifier::cerca(const QStringList& daEscludere, int attesaMs)
+{
+    QList<Trovato> trovati;
+
+    // Le velocita' da provare, dalla piu' probabile. La guida dice che
+    // l'apparato si adatta da se' fino a 115200: si parte da li' e si scende,
+    // cosi' nel caso normale si risponde alla prima.
+    static const QList<int> velocita = {115200, 57600, 38400, 19200, 9600};
+
+    QStringList escluse;
+    for (const QString& p : daEscludere)
+        escluse << p.trimmed().toUpper();
+
+    for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
+        QString const nome = info.portName();
+        if (escluse.contains(nome.toUpper())) {
+            qInfo().noquote() << "[AMP] ricerca: salto" << nome
+                              << "(la sta usando il CAT)";
+            continue;
+        }
+        // Se la porta e' in mano a un altro programma l'apertura fallisce da
+        // se', qualche riga piu' sotto: non serve chiederlo prima. (In Qt 6
+        // QSerialPortInfo::isBusy() non c'e' piu'.)
+
+        for (int baud : velocita) {
+            QSerialPort porta;
+            porta.setPort(info);
+            porta.setBaudRate(baud);
+            porta.setDataBits(QSerialPort::Data8);
+            porta.setParity(QSerialPort::NoParity);
+            porta.setStopBits(QSerialPort::OneStop);
+            porta.setFlowControl(QSerialPort::NoFlowControl);
+            if (!porta.open(QIODevice::ReadWrite))
+                break;   // se non si apre a una velocita' non si aprira' alle altre
+
+            porta.write(statusRequest());
+            porta.flush();
+
+            // Si aspetta finche' arriva una trama intera o scade il tempo. Un
+            // solo waitForReadyRead non basta: la risposta e' di ~75 byte e su
+            // una seriale lenta arriva a pezzi.
+            QByteArray risposta;
+            QElapsedTimer orologio;
+            orologio.start();
+            while (orologio.elapsed() < attesaMs) {
+                if (porta.waitForReadyRead(qMax(20, attesaMs / 4)))
+                    risposta.append(porta.readAll());
+                Reading const r = parseSpeStatus(risposta);
+                if (r.valid) {
+                    Trovato t;
+                    t.porta = nome;
+                    t.modello = r.model;
+                    t.baud = baud;
+                    t.descrizione = info.description();
+                    trovati.append(t);
+                    qInfo().noquote() << "[AMP] trovato" << r.model << "su" << nome
+                                      << "a" << baud << "baud";
+                    break;
+                }
+            }
+            porta.close();
+            if (!trovati.isEmpty() && trovati.last().porta == nome)
+                break;   // trovato su questa porta: le altre velocita' non servono
+        }
+    }
+
+    if (trovati.isEmpty())
+        qInfo().noquote() << "[AMP] ricerca: nessun amplificatore ha risposto";
+    return trovati;
 }
 
 QByteArray DecodiumAmplifier::statusRequest()

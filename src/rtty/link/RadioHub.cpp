@@ -53,10 +53,19 @@ QVariantList RadioHub::bands() const
 
 QStringList RadioHub::modes() const
 {
-    // DIGU per primo: e' quello giusto per l'AFSK, e chi non sa quale scegliere
-    // sceglie il primo.
-    return { QStringLiteral("DIGU"), QStringLiteral("DIGL"),
-             QStringLiteral("USB"),  QStringLiteral("LSB") };
+    // RTTY-U per primo: e' il modo dell'RTTY vero, quello in cui l'apparato
+    // stringe il filtro attorno ai due toni, ed e' li' che si copia meglio.
+    //
+    // Attenzione a cosa comporta in trasmissione, perche' i due gruppi non sono
+    // intercambiabili: nei modi RTTY l'apparato aspetta il tasto FSK e genera i
+    // toni per conto suo, quindi l'audio AFSK che manderemmo dalla scheda non
+    // esce. Chi vuole trasmettere da qui deve stare su DIGU o DIGL, dove il
+    // filtro e' piu' largo ma l'audio modula davvero. Il suggerimento di ogni
+    // pulsante lo dice, invece di lasciarlo scoprire premendo il tasto e non
+    // sentendo nulla in aria.
+    return { QStringLiteral("RTTY-U"), QStringLiteral("RTTY-L"),
+             QStringLiteral("DIGU"),   QStringLiteral("DIGL"),
+             QStringLiteral("USB"),    QStringLiteral("LSB") };
 }
 int     RadioHub::signalStrengthDbm() const { return m_link ? m_link->signalStrengthDbm() : -140; }
 
