@@ -35,6 +35,13 @@ public:
         if (batch % LANES) throw std::runtime_error("MinSumV3: batch deve essere multiplo di 16");
     }
 
+    // Fattore di normalizzazione del min-sum, in unita' di 1/65536.
+    // 49152 = 3/4, la costante storica di Chen-Fossorier: con quella il
+    // comportamento e' bit-identico a prima. Deve essere PARI, perche' il
+    // backend NEON lo dimezza per usare vqdmulhq_s16 e i due devono coincidere.
+    void set_alpha(unsigned w) { alpha_w_ = (uint16_t)(w & ~1u); }
+    unsigned alpha() const { return alpha_w_; }
+
     int batch() const { return B_; }
     int N() const { return c_.N; }
     const int16_t* posterior(int b) const { return &Lout_[(size_t)b * c_.N]; }
@@ -133,9 +140,11 @@ private:
             i1  = _mm256_blendv_epi8(i1, _mm256_set1_epi16((short)j), lt1);
             sgn = _mm256_xor_si256(sgn, sign_mask(x));
         }
-        const __m256i three = _mm256_set1_epi16(3);
-        const __m256i n1 = _mm256_srai_epi16(_mm256_mullo_epi16(m1, three), 2);   // alpha = 3/4
-        const __m256i n2 = _mm256_srai_epi16(_mm256_mullo_epi16(m2, three), 2);
+        // mulhi prende i 16 bit alti: (m * W) / 65536, senza traboccare e con
+        // un'istruzione in meno di mullo+srai. W = 49152 e' esattamente 3/4.
+        const __m256i AW = _mm256_set1_epi16((short)alpha_w_);
+        const __m256i n1 = _mm256_mulhi_epu16(m1, AW);
+        const __m256i n2 = _mm256_mulhi_epu16(m2, AW);
         for (int j = 0; j < DEG; ++j) {
             __m256i eq  = _mm256_cmpeq_epi16(i1, _mm256_set1_epi16((short)j));
             __m256i mag = _mm256_blendv_epi8(n1, n2, eq);
@@ -165,9 +174,9 @@ private:
             i1  = _mm256_blendv_epi8(i1, _mm256_set1_epi16((short)j), lt1);
             sgn = _mm256_xor_si256(sgn, sign_mask(x));
         }
-        const __m256i three = _mm256_set1_epi16(3);
-        const __m256i n1 = _mm256_srai_epi16(_mm256_mullo_epi16(m1, three), 2);
-        const __m256i n2 = _mm256_srai_epi16(_mm256_mullo_epi16(m2, three), 2);
+        const __m256i AW = _mm256_set1_epi16((short)alpha_w_);
+        const __m256i n1 = _mm256_mulhi_epu16(m1, AW);
+        const __m256i n2 = _mm256_mulhi_epu16(m2, AW);
         for (int j = 0; j < deg; ++j) {
             __m256i eq  = _mm256_cmpeq_epi16(i1, _mm256_set1_epi16((short)j));
             __m256i mag = _mm256_blendv_epi8(n1, n2, eq);
@@ -188,6 +197,7 @@ private:
     std::vector<int16_t> L_, Lout_, R_;
     std::vector<uint8_t> done_, gactive_;
     std::vector<int16_t> unsat_;
+    uint16_t alpha_w_ = 49152;      // 3/4 in 1/65536
 };
 
 #else   // niente AVX2: si ricade sulla versione portabile

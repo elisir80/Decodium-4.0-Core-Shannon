@@ -30,6 +30,11 @@ public:
             throw std::runtime_error("MinSumV3 NEON: batch deve essere multiplo di 8");
     }
 
+    // Vedi minsum_avx2.hpp: stessa semantica, stesso risultato bit per bit.
+    // vqdmulhq_s16(m, W/2) = (2*m*(W/2)) >> 16 = (m*W) >> 16 per W pari.
+    void set_alpha(unsigned w) { alpha_h_ = (int16_t)((w & ~1u) >> 1); }
+    unsigned alpha() const { return (unsigned)alpha_h_ << 1; }
+
     int batch() const { return B_; }
     int N() const { return c_.N; }
     const int16_t* posterior(int b) const { return &Lout_[(size_t)b * c_.N]; }
@@ -151,8 +156,8 @@ private:
             signs = veorq_s16(signs, signMask(value));
         }
 
-        const int16x8_t normalisedMin1 = vshrq_n_s16(vmulq_n_s16(min1, 3), 2);
-        const int16x8_t normalisedMin2 = vshrq_n_s16(vmulq_n_s16(min2, 3), 2);
+        const int16x8_t normalisedMin1 = vqdmulhq_n_s16(min1, alpha_h_);
+        const int16x8_t normalisedMin2 = vqdmulhq_n_s16(min2, alpha_h_);
         for (int edge = 0; edge < Degree; ++edge) {
             uint16x8_t isMinimum = vceqq_s16(minIndex, vdupq_n_s16((int16_t)edge));
             int16x8_t magnitude = vbslq_s16(isMinimum, normalisedMin2, normalisedMin1);
@@ -190,8 +195,8 @@ private:
             signs = veorq_s16(signs, signMask(value));
         }
 
-        const int16x8_t normalisedMin1 = vshrq_n_s16(vmulq_n_s16(min1, 3), 2);
-        const int16x8_t normalisedMin2 = vshrq_n_s16(vmulq_n_s16(min2, 3), 2);
+        const int16x8_t normalisedMin1 = vqdmulhq_n_s16(min1, alpha_h_);
+        const int16x8_t normalisedMin2 = vqdmulhq_n_s16(min2, alpha_h_);
         for (int edge = 0; edge < degree; ++edge) {
             uint16x8_t isMinimum = vceqq_s16(minIndex, vdupq_n_s16((int16_t)edge));
             int16x8_t magnitude = vbslq_s16(isMinimum, normalisedMin2, normalisedMin1);
@@ -220,4 +225,5 @@ private:
     std::vector<uint8_t> done_;
     std::vector<uint8_t> gactive_;
     std::vector<int16_t> unsat_;
+    int16_t alpha_h_ = 24576;       // 49152/2, cioe' 3/4
 };

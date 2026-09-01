@@ -45,6 +45,11 @@ struct Ft2Config {
     // tutte. E' il meccanismo che rende efficace l'OSD di WSJT-X a ordine 1.
     bool  pair_search = false;
     int   ntau        = 14;
+    // Fattore di normalizzazione del min-sum, in 1/65536. 49152 = 3/4, la
+    // costante classica; 37888 = 0,578 e' quella misurata su QUESTO codice.
+    // Vedi lab/README.md: 3/4 e' tarato per far convergere il min-sum, mentre
+    // qui il min-sum prepara i posteriori per l'OSD, che e' un altro mestiere.
+    unsigned alpha_w  = 49152;
 };
 
 class Ft2Decoder {
@@ -77,6 +82,7 @@ public:
         osd_.pair_span = cfg.pair_span;
         osd_.pair_search = cfg.pair_search;
         osd_.ntau = cfg.ntau;
+        ms_.set_alpha(cfg.alpha_w);
     }
 
     // Statistiche cumulate dall'ultima reset_stats().

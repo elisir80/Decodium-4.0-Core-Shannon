@@ -123,6 +123,46 @@ void manopole_ft8 (Ft2Config& c) {
     }
 }
 
+// Fattore di normalizzazione del min-sum, in unita' di 1/65536.
+//
+// 49152 = 3/4 e' la costante di Chen-Fossorier (2002), quella che usano tutti.
+// Su QUESTO codice non era mai stata verificata, e non e' il valore giusto: il
+// min-sum qui non e' un decoder ma il preprocessore soft dell'OSD, che usa i
+// suoi posteriori per ordinare il set d'informazione. 3/4 e' tarato per far
+// CONVERGERE il min-sum, che e' un altro mestiere -- e infatti alzandolo il
+// min-sum chiude piu' parole e il sistema ne decodifica di MENO.
+//
+// 37888 = 0,578, misurato sul preset di esercizio e validato su dati
+// indipendenti (seme diverso, tre SNR, entrambi i filtri). Confronto a parita'
+// di nominativi fantasma, su 2 000 000 di candidati di rumore per cella:
+//
+//   fantasmi     3/4    0,578
+//         38   11446    11417    -0,3%
+//        124   12194    12460    +2,2%
+//        315   12757    13146    +3,0%
+//       1478   13342    13866    +3,9%
+//
+// Al punto di lavoro (nd_max 0,065, cioe' ~84 fantasmi) il guadagno in
+// decodifiche e' +1,4% con incertezza +-0,8%: marginale, e non e' la ragione
+// per cui si adotta. Le ragioni sono le altre due, solide e indipendenti dalla
+// soglia: -16% di tempo e -60% di candidati sottoposti alla CRC-14 -- cioe'
+// meno esposizione ai falsi positivi, non piu'. Costa un'istruzione IN MENO
+// (mulhi al posto di mullo+srai).
+//
+// Con DECODIUM_LDPC_ALPHA si torna a 49152 senza ricompilare, per il confronto
+// appaiato in aria. Vale in entrambi i modi, come ntau e pair_span.
+unsigned alpha_scelto () {
+    static unsigned const v = [] {
+        unsigned w = 37888;
+        if (char const* e = std::getenv ("DECODIUM_LDPC_ALPHA")) {
+            int const n = std::atoi (e);
+            if (n >= 16384 && n <= 65535) w = (unsigned) n;
+        }
+        return w;
+    }();
+    return v;
+}
+
 Ft2Decoder& decoder_for_preset (int ndeep) {
     // Anche i decoder per thread sono perdite volute, per lo stesso motivo:
     // il distruttore di Ft2Decoder libererebbe memoria da dentro
@@ -258,6 +298,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
                                      : plaus::kSoloUsati;
             }
             c.batch = 16;                   // una parola per chiamata: batch minimo
+            c.alpha_w = alpha_scelto ();
             manopole_ft8 (c);
             slot1 = new Ft2Decoder (shared_code(), c);
         }
@@ -267,6 +308,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
         if (!slot2) {
             Ft2Config c = Ft2Decoder::conservativo();
             c.batch = 16;
+            c.alpha_w = alpha_scelto ();
             manopole_ft8 (c);
             slot2 = new Ft2Decoder (shared_code(), c);
         }
@@ -276,6 +318,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
     if (!slot3) {
         Ft2Config c = Ft2Decoder::sensibile();
         c.batch = 16;
+        c.alpha_w = alpha_scelto ();
         manopole_ft8 (c);
         slot3 = new Ft2Decoder (shared_code(), c);
     }
