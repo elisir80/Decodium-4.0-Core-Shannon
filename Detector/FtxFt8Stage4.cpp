@@ -3388,6 +3388,15 @@ struct AsyncCollector
       decodium::apstorico::registra_da_messaggio (
           decodium::apstorico::ciclo_corrente (), freq, msg);
     }
+
+    // E i 77 bit interi, che sono l'ipotesi forte: in FT8 chi chiama li ripete
+    // identici finche' non gli risponde qualcuno, quindi due slot dopo il
+    // decodificatore puo' VERIFICARLI invece di indovinare. Si registrano solo
+    // se i bit ci sono davvero: un messaggio senza bit non e' un'ipotesi.
+    if (message77)
+      {
+        decodium::apstorico::registra_messaggio (freq, message77);
+    }
   }
 
   void resolve_hash_placeholders ()

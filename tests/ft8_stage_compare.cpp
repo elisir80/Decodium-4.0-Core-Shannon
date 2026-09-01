@@ -32,6 +32,7 @@
 extern "C"
 {
   int ftx_ft8_ap_storico_tentativi_c ();
+  int ftx_ft8_ap_msg_tentativi_c ();
   void ftx_ft8_async_decode_stage4_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nftx,
                                       int* nutc, int* nfa, int* nfb, int* nzhsym, int* ndepth,
                                       float* emedelay, int* ncontest, int* nagain,
@@ -1207,6 +1208,34 @@ int main (int argc, char * argv[])
       // quella e' in un ramo che per questa invocazione non viene mai eseguito
       // -- verificato con una stampa incondizionata che non compariva mai.
       // L'a priori vero lo prepara il decodificatore al suo interno.
+      // Innesco per il tipo 8: il MESSAGGIO INTERO che si suppone sentito
+      // due slot fa a quella frequenza. Come per il tipo 7, il banco processa
+      // un file per invocazione e senza innesco l'elenco sarebbe vuoto: la
+      // misura direbbe "nessuna differenza" per il motivo sbagliato.
+      //
+      // I bit si ricavano codificando il messaggio, cioe' esattamente come
+      // farebbe una decodifica riuscita allo slot precedente.
+      if (char const* seed = std::getenv ("DECODIUM_AP_MSG_SEED"))
+        {
+          QByteArray const raw {seed};
+          int const sep = raw.lastIndexOf (':');
+          if (sep > 0)
+            {
+              QByteArray const testo = raw.left (sep);
+              float const hz = raw.mid (sep + 1).toFloat ();
+              QByteArray const campo = to_fortran_field (testo, kDecodedChars);
+              std::array<char, kDecodedChars> inviato {};
+              std::array<int, 79> toni {};
+              std::array<signed char, 174> parola {};
+              if (ftx_encode_ft8_candidate_c (campo.constData (), inviato.data (),
+                                              toni.data (), parola.data ()) != 0)
+                {
+                  // i primi 77 bit della parola di codice sono il messaggio
+                  decodium::apstorico::registra_messaggio (hz, parola.data ());
+                }
+            }
+        }
+
       if (char const* seed = std::getenv ("DECODIUM_AP_STORICO_SEED"))
         {
           QByteArray const raw {seed};
@@ -1755,7 +1784,9 @@ int main (int argc, char * argv[])
         {
           std::cout << "ap_storico: " << decodium::apstorico::quante ()
                     << " voci, ciclo " << decodium::apstorico::ciclo_corrente ()
-                    << ", tentativi tipo7 " << ftx_ft8_ap_storico_tentativi_c ()
+                    << ", tipo7 " << ftx_ft8_ap_storico_tentativi_c ()
+                    << ", tipo8 " << ftx_ft8_ap_msg_tentativi_c ()
+                    << ", messaggi " << decodium::apstorico::quanti_messaggi ()
                     << std::endl;
         }
 

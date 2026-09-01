@@ -130,6 +130,57 @@ inline bool ap_storico_attivo ()
   return v;
 }
 
+// L'a priori sul MESSAGGIO INTERO, 77 bit. E' l'ipotesi forte: in FT8 una
+// stazione che chiama ripete gli stessi 77 bit finche' non le risponde
+// qualcuno, quindi se e' stata sentita il decodificatore non deve indovinare,
+// deve VERIFICARE.
+//
+//   77 bit noti    5,92 dB     contro   29 bit    1,33 dB
+//   copertura      48,8%                          77%
+//   ipotesi/cand   1,02                           3
+//
+// Meno copertura ma quattro volte e mezzo il guadagno a un terzo del costo, e
+// il costo e' cio' che decide: l'ipotesi esiste solo dove una stazione e' stata
+// davvero sentita, quindi le chiamate al decoder in piu' sono ~45 per ciclo
+// invece di 354.
+//
+// Un'ipotesi sbagliata a 77 bit e' piu' pericolosa (8-13 accettate su 20000
+// contro 0-1 a 29 bit), ma sono venti volte meno numerose. E c'e' una
+// protezione che a 29 bit non c'era: con 77 bit imposti i 14 della CRC sono
+// determinati e resta UNA SOLA parola di codice compatibile -- o il segnale c'e'
+// o non c'e'.
+//
+// DECODIUM_FT8_AP_MSG=1 lo accende. Spento di default finche' non e' misurato.
+// La finestra temporale entro cui cercare il messaggio precedente. In aria
+// sono i due slot (25-35 s); al banco un file si decodifica un secondo dopo
+// l'innesco, quindi serve poterla allargare per misurare. Fuori misura non si
+// tocca.
+inline long long ap_msg_min_ms ()
+{
+  static long long const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT8_AP_MSG_MIN_MS");
+    return e ? std::atoll (e) : decodium::apstorico::kDueSlotMinMs;
+  }();
+  return v;
+}
+inline long long ap_msg_max_ms ()
+{
+  static long long const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT8_AP_MSG_MAX_MS");
+    return e ? std::atoll (e) : decodium::apstorico::kDueSlotMaxMs;
+  }();
+  return v;
+}
+
+inline bool ap_msg_attivo ()
+{
+  static bool const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT8_AP_MSG");
+    return e && e[0] != '0';
+  }();
+  return v;
+}
+
 inline bool ap_cq_in_qso ()
 {
   static bool const v = [] {
@@ -148,6 +199,8 @@ inline std::array<int, 6> const& ap_pass_counts ()
   static std::array<int, 6> const con {{2, 3, 3, 5, 5, 3}};
   static std::array<int, 6> const senza {{2, 2, 2, 4, 4, 3}};
   static std::array<int, 6> const con_storico {{5, 6, 6, 8, 8, 6}};
+  static std::array<int, 6> const con_msg {{3, 4, 4, 6, 6, 4}};
+  if (ap_msg_attivo () && !ap_storico_attivo ()) return con_msg;
   if (ap_storico_attivo ()) return con_storico;
   return ap_cq_in_qso () ? con : senza;
 }
@@ -170,6 +223,14 @@ inline std::array<std::array<int, 8>, 6> const& ap_types ()
     std::array<int, 8> {{3, 4, 5, 6, 0, 0, 0, 0}},
     std::array<int, 8> {{3, 1, 2, 0, 0, 0, 0, 0}}
   }};
+  static std::array<std::array<int, 8>, 6> const con_msg {{
+    std::array<int, 8> {{1, 2, 8, 0, 0, 0, 0, 0}},
+    std::array<int, 8> {{2, 3, 1, 8, 0, 0, 0, 0}},
+    std::array<int, 8> {{2, 3, 1, 8, 0, 0, 0, 0}},
+    std::array<int, 8> {{3, 4, 5, 6, 1, 8, 0, 0}},
+    std::array<int, 8> {{3, 4, 5, 6, 1, 8, 0, 0}},
+    std::array<int, 8> {{3, 1, 2, 8, 0, 0, 0, 0}}
+  }};
   static std::array<std::array<int, 8>, 6> const con_storico {{
     std::array<int, 8> {{1, 2, 7, 7, 7, 0, 0, 0}},
     std::array<int, 8> {{2, 3, 1, 7, 7, 7, 0, 0}},
@@ -178,6 +239,7 @@ inline std::array<std::array<int, 8>, 6> const& ap_types ()
     std::array<int, 8> {{3, 4, 5, 6, 1, 7, 7, 7}},
     std::array<int, 8> {{3, 1, 2, 7, 7, 7, 0, 0}}
   }};
+  if (ap_msg_attivo () && !ap_storico_attivo ()) return con_msg;
   if (ap_storico_attivo ()) return con_storico;
   return ap_cq_in_qso () ? con : senza;
 }
@@ -2705,13 +2767,17 @@ extern "C" int ftx_ft8_should_bail_by_tseq_c (int ldiskdat, double tseq, double 
 // conclusioni opposte: la prima e' un collegamento rotto, la seconda un
 // risultato negativo vero.
 std::atomic<int> g_storico_tentativi {0};
+std::atomic<int> g_msg_tentativi {0};
 
 extern "C" int ftx_ft8_ap_storico_tentativi_c () { return g_storico_tentativi.load (); }
+extern "C" int ftx_ft8_ap_msg_tentativi_c () { return g_msg_tentativi.load (); }
 extern "C" void ftx_ft8_ap_storico_azzera_tentativi_c () { g_storico_tentativi.store (0); }
 
 extern "C" int ftx_ft8_ap_storico_passate_c ()
 {
-  return ap_storico_attivo () ? 2 * kApStoricoMax : 0;
+  if (ap_storico_attivo ()) return 2 * kApStoricoMax;
+  if (ap_msg_attivo ()) return 2;      // il tipo 8 occupa un solo slot
+  return 0;
 }
 
 extern "C" int ftx_ft8_select_npasses_c (int lapon, int lapcqonly, int ncontest,
@@ -2836,7 +2902,17 @@ int prepare_ap_pass_impl (int ipass, int nQSOProgress, int lapcqonly, int nconte
   float const apmag = std::fabs (*std::max_element (llrz, llrz + 174,
     [] (float lhs, float rhs) { return std::fabs (lhs) < std::fabs (rhs); })) * 1.1f;
 
-  if (ncontest <= 5 && iaptype >= 3
+  // Il tipo 7 e' escluso da questo cancello: riguarda gli a priori legati al
+  // QSO in corso, che hanno senso solo vicino alla frequenza del corrispondente
+  // (napwid, 50 Hz). L'ipotesi "chi trasmette e' una stazione sentita qui" non
+  // ha niente a che vedere con quella frequenza -- vale su TUTTA la banda, ed e'
+  // anzi li' che serve.
+  //
+  // Trovato misurando in produzione: il contatore diceva ap_storico=0 con
+  // l'elenco pieno di 982 voci e il ciclo corretto. Il tipo 7 e' >= 3 e finiva
+  // dentro questo controllo, che lo scartava per ogni candidato lontano dal
+  // QSO, cioe' quasi tutti.
+  if (ncontest <= 5 && iaptype >= 3 && iaptype != 7 && iaptype != 8
       && (std::fabs (f1 - static_cast<float> (nfqso)) > static_cast<float> (napwid))
       && (std::fabs (f1 - static_cast<float> (nftx)) > static_cast<float> (napwid)))
     {
@@ -2860,6 +2936,30 @@ int prepare_ap_pass_impl (int ipass, int nQSOProgress, int lapcqonly, int nconte
   // viene accettata 0-1 volte su 20000: e' il piu' sicuro dei livelli di a
   // priori, ed e' il motivo per cui si usa questo e non un'ipotesi di
   // messaggio intero.
+  // TIPO 8 -- il messaggio INTERO sentito a questa frequenza due slot fa.
+  // Come il 7, non dipende da mycall/hiscall e salta i controlli sul QSO.
+  if (iaptype == 8)
+    {
+      if ((ipass % 2) != 0)
+        {
+          return 0;      // una sola passata per ipotesi, non due
+        }
+      signed char bits[77] {};
+      if (decodium::apstorico::trova_messaggio (
+              f1, kApStoricoHz, ap_msg_min_ms (), ap_msg_max_ms (), bits) != 1)
+        {
+          return 0;
+        }
+      set_mask_range (apmask, 1, 77);
+      for (int i = 0; i < 77; ++i)
+        {
+          llrz[i] = apmag * (bits[i] ? 1.0f : -1.0f);
+        }
+      *iaptype_out = 8;
+      g_msg_tentativi.fetch_add (1, std::memory_order_relaxed);
+      return 1;
+    }
+
   if (iaptype == 7)
     {
       // Ogni tipo occupa DUE passate. Per le ipotesi storiche se ne fa una

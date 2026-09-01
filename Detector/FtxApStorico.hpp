@@ -69,6 +69,47 @@ void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio);
 int avanza_ciclo ();
 int ciclo_corrente ();
 
+// ---------------------------------------------------------------------------
+// IL MESSAGGIO INTERO, non solo il mittente.
+//
+// In FT8 una stazione che chiama ripete gli STESSI 77 bit finche' non le
+// risponde qualcuno. Se e' stata sentita, il decodificatore non deve indovinare
+// niente: deve VERIFICARE un'ipotesi precisa. E' la differenza fra 29 bit noti
+// (1,33 dB) e 77 (5,92 dB), misurati entrambi in lab/cpp/apriori.cpp.
+//
+// Misurato su 120 000 decodifiche FT8 dal registro:
+//
+//   messaggio identico DUE slot indietro, entro +-5 Hz : 48,8%
+//   ipotesi per candidato                              : 1,02
+//
+// Due slot e non uno: in FT8 le stazioni si alternano fra slot pari e dispari,
+// e a un solo slot di distanza la ripetizione scende al 2,9%. E' la differenza
+// fra una funzione che serve e una che non serve, e si vede solo guardando la
+// parita'.
+//
+// Un'ipotesi sola per candidato, contro le tre del mittente: il costo in
+// esposizione alla CRC-14 cala di venti volte, perche' l'ipotesi esiste solo
+// dove una stazione e' stata davvero sentita.
+//
+// LA FINESTRA E' IN TEMPO, NON IN SLOT. Il contatore di cicli avanza a ogni
+// invocazione del decodificatore, e in FT8 ce n'e' piu' d'una per slot (una
+// anticipata sul buffer parziale, una completa): "due cicli fa" non e' "due
+// slot fa". L'orologio non ha questo problema.
+constexpr long long kDueSlotMinMs = 25000;   // 30 s +- 5, cioe' due slot FT8
+constexpr long long kDueSlotMaxMs = 35000;
+
+// Registra i 77 bit di un messaggio decodificato, con la sua frequenza.
+void registra_messaggio (float freq_hz, signed char const* bits77);
+
+// I 77 bit di un messaggio sentito a questa frequenza fra min_ms e max_ms fa.
+// Ritorna 1 se ne ha trovato uno e ha riempito out77, 0 altrimenti. Se ce ne
+// fosse piu' d'uno prende il piu' recente.
+int trova_messaggio (float freq_hz, float hz, long long min_ms, long long max_ms,
+                     signed char* out77);
+
+// Quanti messaggi sono in memoria, per diagnostica.
+int quanti_messaggi ();
+
 // Svuota l'elenco. Serve ai banchi di prova, per rendere le misure ripetibili,
 // e a un cambio di banda, dopo il quale le stazioni sentite prima non dicono
 // piu' niente su quali frequenze siano occupate.

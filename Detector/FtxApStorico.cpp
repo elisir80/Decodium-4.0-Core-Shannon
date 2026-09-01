@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <deque>
@@ -193,10 +194,105 @@ int ciclo_corrente ()
   return g_ciclo.load (std::memory_order_relaxed);
 }
 
+// ---------------------------------------------------------------------------
+// I messaggi interi. Vedi l'intestazione per il perche' e per i numeri.
+namespace
+{
+
+constexpr int kBit = 77;
+
+struct Messaggio
+{
+  long long ms;                  // quando, su orologio monotono
+  float freq;
+  signed char bits[kBit];
+};
+
+std::mutex g_mutex_msg;
+std::deque<Messaggio> g_messaggi;
+
+// Il tetto e' generoso ma non infinito: con ~50 decodifiche per slot e una
+// memoria di poche decine di secondi bastano poche centinaia di voci.
+constexpr size_t kMaxMessaggi = 4000;
+
+long long adesso_ms ()
+{
+  using namespace std::chrono;
+  return duration_cast<milliseconds> (steady_clock::now ().time_since_epoch ()).count ();
+}
+
+}  // namespace
+
+void registra_messaggio (float freq_hz, signed char const* bits77)
+{
+  if (!bits77)
+    {
+      return;
+    }
+  Messaggio m {};
+  m.ms = adesso_ms ();
+  m.freq = freq_hz;
+  std::memcpy (m.bits, bits77, kBit);
+
+  std::lock_guard<std::mutex> guardia {g_mutex_msg};
+  g_messaggi.push_back (m);
+  while (g_messaggi.size () > kMaxMessaggi)
+    {
+      g_messaggi.pop_front ();
+    }
+}
+
+int trova_messaggio (float freq_hz, float hz, long long min_ms, long long max_ms,
+                     signed char* out77)
+{
+  if (!out77)
+    {
+      return 0;
+    }
+  long long const ora = adesso_ms ();
+
+  std::lock_guard<std::mutex> guardia {g_mutex_msg};
+
+  // Le voci piu' vecchie della finestra non serviranno mai piu': si buttano
+  // qui, l'unico punto in cui la lista viene percorsa comunque.
+  while (!g_messaggi.empty () && ora - g_messaggi.front ().ms > max_ms)
+    {
+      g_messaggi.pop_front ();
+    }
+
+  // Dal piu' recente: se una stazione ha ripetuto piu' volte, l'ultima e' la
+  // piu' probabile.
+  for (auto it = g_messaggi.rbegin (); it != g_messaggi.rend (); ++it)
+    {
+      long long const eta = ora - it->ms;
+      if (eta < min_ms || eta > max_ms)
+        {
+          continue;
+        }
+      if (std::fabs (it->freq - freq_hz) > hz)
+        {
+          continue;
+        }
+      std::memcpy (out77, it->bits, kBit);
+      return 1;
+    }
+  return 0;
+}
+
+int quanti_messaggi ()
+{
+  std::lock_guard<std::mutex> guardia {g_mutex_msg};
+  return static_cast<int> (g_messaggi.size ());
+}
+
 void azzera ()
 {
-  std::lock_guard<std::mutex> guardia {g_mutex};
-  g_voci.clear ();
+  {
+    std::lock_guard<std::mutex> guardia {g_mutex};
+    g_voci.clear ();
+  }
+  std::lock_guard<std::mutex> guardia {g_mutex_msg};
+  g_messaggi.clear ();
 }
 
 int quante ()
