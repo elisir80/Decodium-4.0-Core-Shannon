@@ -114,8 +114,12 @@ int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
         {
           continue;
         }
-      std::strncpy (out[n], it->call, kLunghezzaCall - 1);
-      out[n][kLunghezzaCall - 1] = '\0';
+      // Si copia l'array intero, terminatore compreso, invece di strncpy
+      // con kLunghezzaCall - 1: il contenuto e' sempre una stringa valida
+      // perche' copia_call la termina, e i due array hanno la stessa
+      // dimensione. Con strncpy GCC non puo' dimostrarlo e rifiuta il file
+      // sotto -Werror (stringop-truncation), pur essendo il codice corretto.
+      std::memcpy (out[n], it->call, kLunghezzaCall);
       ++n;
     }
   return n;
