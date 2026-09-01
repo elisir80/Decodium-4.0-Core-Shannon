@@ -2,6 +2,7 @@
 #include "Detector/FtxApStorico.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <deque>
@@ -118,6 +119,74 @@ int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
       ++n;
     }
   return n;
+}
+
+namespace
+{
+
+// Un nominativo standard ha almeno una cifra e almeno tre caratteri, e non e'
+// uno dei qualificatori che compaiono nel secondo campo di una chiamata
+// diretta. Il controllo e' volutamente largo: chi costruisce i bit rifiuta
+// comunque tutto cio' che non e' codificabile, e qui un falso positivo costa
+// solo un'ipotesi inutile.
+bool sembra_call (char const* t)
+{
+  if (!t) return false;
+  int n = 0;
+  bool cifra = false;
+  for (; t[n] && t[n] != ' '; ++n)
+    {
+      if (t[n] >= '0' && t[n] <= '9') cifra = true;
+    }
+  return n >= 3 && n <= 13 && cifra;
+}
+
+}  // namespace
+
+void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio)
+{
+  if (!messaggio) return;
+
+  // I campi si copiano perche' il messaggio arriva da un buffer a lunghezza
+  // fissa riempito di spazi, non da una stringa terminata.
+  char campi[3][kLunghezzaCall] {};
+  int nc = 0;
+  int i = 0;
+  while (messaggio[i] && nc < 3)
+    {
+      while (messaggio[i] == ' ') ++i;
+      if (!messaggio[i]) break;
+      int k = 0;
+      while (messaggio[i] && messaggio[i] != ' ' && k < kLunghezzaCall - 1)
+        {
+          campi[nc][k++] = messaggio[i++];
+        }
+      campi[nc][k] = '\0';
+      while (messaggio[i] && messaggio[i] != ' ') ++i;   // campo troppo lungo
+      ++nc;
+    }
+  if (nc < 2) return;
+
+  // Il secondo campo, o il terzo se il secondo e' un qualificatore.
+  char const* mittente = sembra_call (campi[1]) ? campi[1]
+                       : (nc > 2 && sembra_call (campi[2]) ? campi[2] : nullptr);
+  if (!mittente) return;
+  registra (ciclo, freq_hz, mittente);
+}
+
+namespace
+{
+std::atomic<int> g_ciclo {0};
+}
+
+int avanza_ciclo ()
+{
+  return g_ciclo.fetch_add (1, std::memory_order_relaxed) + 1;
+}
+
+int ciclo_corrente ()
+{
+  return g_ciclo.load (std::memory_order_relaxed);
 }
 
 void azzera ()

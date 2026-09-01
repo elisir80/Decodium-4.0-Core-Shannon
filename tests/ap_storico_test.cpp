@@ -118,6 +118,36 @@ int main (int argc, char* argv[])
   n = vicini (20, 1500.0f, 5.0f, 10, 4, trovati);
   esito (out, n == 0, QStringLiteral ("il ciclo corrente non conta (%1)").arg (n));
 
+  out << "\n4) l'estrazione del mittente dal messaggio\n";
+  struct Caso { char const* msg; char const* atteso; };
+  // L'ultimo caso e' quello che conta: se si leggesse il secondo campo alla
+  // cieca, "DX" finirebbe nell'elenco e sprecherebbe un'ipotesi a ogni
+  // candidato vicino.
+  for (Caso c : {Caso {"IU8LMC K1ABC R-10", "K1ABC"},
+                 Caso {"CQ DL9XYZ JO62", "DL9XYZ"},
+                 Caso {"CQ DX JA1XYZ PM95", "JA1XYZ"},
+                 Caso {"K1ABC IU8LMC RR73", "IU8LMC"}})
+    {
+      azzera ();
+      registra_da_messaggio (5, 1500.0f, c.msg);
+      char t[2][kLunghezzaCall] {};
+      int const n = vicini (6, 1500.0f, 5.0f, 10, 2, t);
+      esito (out, n == 1 && std::strcmp (t[0], c.atteso) == 0,
+             QStringLiteral ("\"%1\" -> %2 (trovato \"%3\")")
+                 .arg (c.msg, c.atteso, n > 0 ? t[0] : "-"));
+    }
+
+  // Un messaggio che non contiene nominativi non deve sporcare l'elenco.
+  azzera ();
+  registra_da_messaggio (5, 1500.0f, "CQ");
+  esito (out, quante () == 0, QStringLiteral ("\"CQ\" da solo non registra niente"));
+
+  out << "\n5) il contatore di ciclo avanza\n";
+  int const c0 = ciclo_corrente ();
+  int const c1 = avanza_ciclo ();
+  esito (out, c1 == c0 + 1 && ciclo_corrente () == c1,
+         QStringLiteral ("%1 -> %2").arg (c0).arg (c1));
+
   out << '\n' << (falliti == 0 ? "TUTTO A POSTO" : QStringLiteral ("%1 FALLITI").arg (falliti))
       << '\n';
   return falliti == 0 ? 0 : 1;

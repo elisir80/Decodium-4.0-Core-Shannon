@@ -52,6 +52,23 @@ void registra (int ciclo, float freq_hz, char const* nominativo);
 int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
             char (*out)[kLunghezzaCall]);
 
+// Estrae il MITTENTE da un messaggio decodificato e lo registra.
+//
+// Il mittente e' il secondo campo ("IU8LMC K1ABC R-10" -> K1ABC), tranne che
+// nelle chiamate dirette a un'area, dove il secondo campo e' un qualificatore
+// e non un nominativo ("CQ DX DL9XYZ JO62" -> DL9XYZ). Qui si prova il secondo
+// e, se non regge come nominativo, il terzo: chi costruisce i bit rifiuta
+// comunque tutto cio' che non e' codificabile in forma standard, quindi un
+// errore di lettura costa un'ipotesi saltata e non un'ipotesi SBAGLIATA.
+void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio);
+
+// Il contatore di slot. avanza_ciclo() va chiamata una volta per invocazione
+// del decodificatore, ciclo_corrente() ovunque serva sapere a che punto si e'.
+// Sono qui e non nel chiamante perche' l'elenco e' l'unico che debba conoscere
+// la propria scala temporale.
+int avanza_ciclo ();
+int ciclo_corrente ();
+
 // Svuota l'elenco. Serve ai banchi di prova, per rendere le misure ripetibili,
 // e a un cambio di banda, dopo il quale le stazioni sentite prima non dicono
 // piu' niente su quali frequenze siano occupate.
