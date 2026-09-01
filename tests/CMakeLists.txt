@@ -76,6 +76,14 @@ add_executable (ft2_stage_compare ft2_stage_compare.cpp)
 target_link_libraries (ft2_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_dependencies (test_qt_helpers ft2_stage_compare)
 
+# Collaudo isolato dell'elenco delle stazioni sentite e dei bit del mittente:
+# non tocca il decoder, verifica solo che i bit dell'ipotesi coincidano con
+# quelli che la catena gia' produce. Un a priori sbagliato non e' neutro,
+# e' dannoso, quindi va dimostrato prima di collegarlo.
+add_executable (ap_storico_test ap_storico_test.cpp)
+target_link_libraries (ap_storico_test wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_dependencies (test_qt_helpers ap_storico_test)
+
 add_executable (q65_stage_compare q65_stage_compare.cpp ../Detector/Q65DecodeWorker.cpp)
 target_include_directories (q65_stage_compare PRIVATE ${PROJECT_BINARY_DIR})
 target_link_libraries (q65_stage_compare wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)

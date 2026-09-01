@@ -691,6 +691,7 @@ set (wsjt_CXXSRCS
   Detector/FtxBaseline.cpp
   Detector/FtxCandidates.cpp
   Detector/FtxBitmetrics.cpp
+  Detector/FtxApStorico.cpp
   Detector/FtxSharedDsp.cpp
   Detector/FtxFst4Core.cpp
   Detector/FtxFst4Ldpc.cpp

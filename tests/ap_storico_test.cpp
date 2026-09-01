@@ -1,0 +1,124 @@
+// ap_storico_test.cpp — collaudo isolato dell'elenco delle stazioni sentite e
+// dei bit del mittente, PRIMA di toccare il decoder.
+//
+// Due cose vanno dimostrate, e sono indipendenti dal decodificatore:
+//
+//  1. I bit prodotti da ftx_ft8_ap_bits_mittente_c devono coincidere con
+//     quelli che la catena esistente gia' produce per lo stesso nominativo.
+//     ftx_prepare_ft8_ap_c mette il corrispondente nelle posizioni 29-57 di
+//     apsym: se i due non coincidono, l'ipotesi a priori sarebbe sbagliata e
+//     il decoder verrebbe portato fuori strada invece che aiutato. E' il
+//     controllo che conta di piu': un a priori SBAGLIATO non e' neutro, e'
+//     dannoso.
+//
+//  2. L'elenco a scorrimento deve rispettare finestra, memoria e ordine
+//     (dal piu' recente), e non deve restituire doppioni.
+//
+// uso: ap_storico_test
+#include <QCoreApplication>
+#include <QTextStream>
+
+#include <array>
+#include <cstring>
+
+#include "Detector/FtxApStorico.hpp"
+
+extern "C"
+{
+  void ftx_prepare_ft8_ap_c (char const mycall[12], char const hiscall[12], int ncontest,
+                             int* apsym, int* aph10);
+  int ftx_ft8_ap_bits_mittente_c (char const* nominativo, int bits[29]);
+}
+
+namespace
+{
+int falliti = 0;
+
+void esito (QTextStream& out, bool ok, QString const& che)
+{
+  out << (ok ? "  ok   " : "  NO   ") << che << '\n';
+  if (!ok) ++falliti;
+}
+
+QByteArray campo12 (char const* s)
+{
+  QByteArray b {s};
+  b.truncate (12);
+  b.append (12 - b.size (), ' ');
+  return b;
+}
+}  // namespace
+
+int main (int argc, char* argv[])
+{
+  QCoreApplication app {argc, argv};
+  QTextStream out {stdout};
+
+  out << "1) i bit del mittente coincidono con quelli della catena esistente\n";
+  for (char const* call : {"K1ABC", "DL9XYZ", "IU8LMC", "9A4ZM", "VK3ABC", "JA1XYZ"})
+    {
+      std::array<int, 58> apsym {};
+      std::array<int, 10> aph10 {};
+      // "il mio nominativo e' KA1ABC, il suo e' <call>": la catena mette <call>
+      // nelle posizioni 29-57, che sono esattamente quelle che ci interessano.
+      ftx_prepare_ft8_ap_c (campo12 ("KA1ABC").constData (), campo12 (call).constData (),
+                            0, apsym.data (), aph10.data ());
+      std::array<int, 29> miei {};
+      int const ok = ftx_ft8_ap_bits_mittente_c (call, miei.data ());
+      bool uguali = ok == 1;
+      for (int i = 0; i < 29 && uguali; ++i)
+        {
+          uguali = miei[static_cast<size_t> (i)] == apsym[static_cast<size_t> (29 + i)];
+        }
+      esito (out, uguali, QStringLiteral ("%1").arg (call));
+    }
+
+  out << "\n2) i nominativi non standard vengono RIFIUTATI, non forzati\n";
+  for (char const* call : {"AB", "", "K1ABC/QRP/X"})
+    {
+      std::array<int, 29> b {};
+      esito (out, ftx_ft8_ap_bits_mittente_c (call, b.data ()) == 0,
+             QStringLiteral ("\"%1\" rifiutato").arg (call));
+    }
+
+  out << "\n3) l'elenco a scorrimento\n";
+  using namespace decodium::apstorico;
+  azzera ();
+  registra (10, 1500.0f, "K1ABC");
+  registra (11, 1502.0f, "DL9XYZ");
+  registra (12, 1600.0f, "JA1XYZ");        // lontano in frequenza
+  registra (13, 1501.0f, "K1ABC");         // doppione, ma piu' recente
+
+  char trovati[4][kLunghezzaCall] {};
+  int n = vicini (14, 1500.0f, 5.0f, 10, 4, trovati);
+  esito (out, n == 2, QStringLiteral ("entro +-5 Hz se ne trovano 2, trovati %1").arg (n));
+  esito (out, n > 0 && std::strcmp (trovati[0], "K1ABC") == 0,
+         QStringLiteral ("il piu' recente e' K1ABC, e' \"%1\"")
+             .arg (n > 0 ? trovati[0] : "-"));
+  esito (out, n > 1 && std::strcmp (trovati[1], "DL9XYZ") == 0,
+         QStringLiteral ("il secondo e' DL9XYZ, e' \"%1\"")
+             .arg (n > 1 ? trovati[1] : "-"));
+
+  n = vicini (14, 1600.0f, 5.0f, 10, 4, trovati);
+  esito (out, n == 1 && std::strcmp (trovati[0], "JA1XYZ") == 0,
+         QStringLiteral ("a 1600 Hz si trova solo JA1XYZ (%1)").arg (n));
+
+  n = vicini (14, 1500.0f, 5.0f, 2, 4, trovati);   // memoria corta: solo cicli 12,13
+  esito (out, n == 1 && std::strcmp (trovati[0], "K1ABC") == 0,
+         QStringLiteral ("con memoria 2 resta solo K1ABC (%1)").arg (n));
+
+  n = vicini (14, 1500.0f, 5.0f, 10, 1, trovati);
+  esito (out, n == 1, QStringLiteral ("il tetto su quante ne torna e' rispettato (%1)").arg (n));
+
+  // Il ciclo corrente non e' storia: una stazione sentita ADESSO non deve
+  // diventare ipotesi per se stessa, altrimenti la misura del guadagno sarebbe
+  // falsata (si "indovinerebbe" cio' che si e' appena letto).
+  azzera ();
+  registra (20, 1500.0f, "K1ABC");
+  n = vicini (20, 1500.0f, 5.0f, 10, 4, trovati);
+  esito (out, n == 0, QStringLiteral ("il ciclo corrente non conta (%1)").arg (n));
+
+  out << '\n' << (falliti == 0 ? "TUTTO A POSTO" : QStringLiteral ("%1 FALLITI").arg (falliti))
+      << '\n';
+  return falliti == 0 ? 0 : 1;
+}

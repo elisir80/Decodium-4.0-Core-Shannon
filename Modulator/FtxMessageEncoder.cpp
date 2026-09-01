@@ -3854,6 +3854,56 @@ void ftx_prepare_ft8_ap_c (char const mycall[12], char const hiscall[12], int nc
     }
 }
 
+// I 29 bit che dicono "il MITTENTE e' questo nominativo", cioe' le posizioni
+// 29-57 del messaggio (secondo nominativo piu' il suo indicatore /R).
+//
+// Serve per usare come ipotesi a priori le stazioni sentite di recente, e non
+// soltanto i due nominativi del QSO in corso: sul traffico vero il mittente
+// era gia' noto nell'83% delle decodifiche (vedi Detector/FtxApStorico.hpp).
+//
+// Si ricava esattamente come fa ftx_prepare_ft8_ap_c, cioe' codificando un
+// messaggio intero e prendendone i bit: il primo nominativo e' un segnaposto e
+// non viene usato, contano solo le posizioni 29-57. Fare altrimenti
+// significherebbe riscrivere la codifica dei nominativi, che ha casi
+// particolari (non standard, /P, /R) che qui verrebbero sbagliati.
+//
+// Ritorna 1 se `bits` e' stato riempito con 29 valori +-1, 0 se il nominativo
+// non e' codificabile in forma standard -- e in quel caso l'ipotesi va
+// semplicemente saltata, non forzata.
+int ftx_ft8_ap_bits_mittente_c (char const* nominativo, int bits[29])
+{
+  if (!nominativo || !bits)
+    {
+      return 0;
+    }
+  QString const suo = QString::fromLatin1 (nominativo).trimmed ().toUpper ();
+  if (suo.size () < 3)
+    {
+      return 0;
+    }
+  // KA1ABC e' lo stesso segnaposto che ftx_prepare_ft8_ap_c usa quando non
+  // conosce il corrispondente: sta nei 28 bit standard e non ha casi
+  // particolari.
+  QString const msg = QStringLiteral ("KA1ABC %1 RRR").arg (suo);
+  decodium::txmsg::EncodedMessage const encoded = decodium::txmsg::encodeFt8 (msg);
+  if (!encoded.ok || encoded.i3 != 1 || encoded.msgbits.size () < 58)
+    {
+      return 0;
+    }
+  // Il messaggio ricodificato deve corrispondere: se la codifica ha dovuto
+  // ripiegare su una forma diversa (nominativo non standard, hash) i bit 29-57
+  // non descrivono piu' quel nominativo e l'ipotesi sarebbe sbagliata.
+  if (trim_or_pad_37 (msg, false) != encoded.msgsent)
+    {
+      return 0;
+    }
+  for (int i = 0; i < 29; ++i)
+    {
+      bits[i] = encoded.msgbits.at (29 + i) ? 1 : -1;
+    }
+  return 1;
+}
+
 void legacy_pack77_reset_context_c ()
 {
   g_legacy_pack77_context.clear ();
