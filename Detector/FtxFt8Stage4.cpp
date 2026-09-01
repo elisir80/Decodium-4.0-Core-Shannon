@@ -5,6 +5,9 @@
 
 #include <algorithm>
 #include "Detector/FtxApStorico.hpp"
+
+extern "C" void ftx_ft8_ap_msg_conta_successo_c ();
+extern "C" int ftx_ft8_ap_msg_successi_c ();
 #include <array>
 #include <atomic>
 #include <cctype>
@@ -3373,6 +3376,11 @@ struct AsyncCollector
     if (nout)
       {
         *nout = count;
+      }
+
+    if (nap == 8)
+      {
+        ftx_ft8_ap_msg_conta_successo_c ();
       }
 
     // La stazione appena letta diventa un'ipotesi a priori per i cicli

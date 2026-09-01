@@ -2771,6 +2771,9 @@ std::atomic<int> g_msg_tentativi {0};
 
 extern "C" int ftx_ft8_ap_storico_tentativi_c () { return g_storico_tentativi.load (); }
 extern "C" int ftx_ft8_ap_msg_tentativi_c () { return g_msg_tentativi.load (); }
+std::atomic<int> g_msg_successi {0};
+extern "C" void ftx_ft8_ap_msg_conta_successo_c () { g_msg_successi.fetch_add (1); }
+extern "C" int ftx_ft8_ap_msg_successi_c () { return g_msg_successi.load (); }
 extern "C" void ftx_ft8_ap_storico_azzera_tentativi_c () { g_storico_tentativi.store (0); }
 
 extern "C" int ftx_ft8_ap_storico_passate_c ()

@@ -33,8 +33,13 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+#include "Detector/FtxApStorico.hpp"
+
 extern "C"
 {
+  int ftx_ft8_ap_storico_tentativi_c ();
+  int ftx_ft8_ap_msg_tentativi_c ();
+  int ftx_ft8_ap_msg_successi_c ();
   void ftx_ft8_stage4_reset_c ();
   void ftx_ft8_stage4_set_cancel_c (int cancel);
   void ftx_ft8_stage4_set_deadline_ms_c (long long deadline_ms);
@@ -2107,7 +2112,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27 pressure_limited=%28")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27 pressure_limited=%28 ap_storico=%29 ap_voci=%30 ap_ciclo=%31 ap_msg=%32 ap_msgmem=%33 ap_msgok=%34")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
@@ -2135,7 +2140,13 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (effectiveCandidateThin)
                  .arg (current_thread_id_hex ())
                  .arg (ftx_ft8_freqpart_bins_used_c ())
-                 .arg (pressureLimitedRequest ? 1 : 0);
+                 .arg (pressureLimitedRequest ? 1 : 0)
+                 .arg (ftx_ft8_ap_storico_tentativi_c ())
+                 .arg (decodium::apstorico::quante ())
+                 .arg (decodium::apstorico::ciclo_corrente ())
+                 .arg (ftx_ft8_ap_msg_tentativi_c ())
+                 .arg (decodium::apstorico::quanti_messaggi ())
+                 .arg (ftx_ft8_ap_msg_successi_c ());
     }
   Q_EMIT decodeReady (request.serial, rows);
   Q_EMIT decodedEntriesReady (request.serial, entries);
