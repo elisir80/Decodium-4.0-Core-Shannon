@@ -35,9 +35,22 @@ truth, for the normalisation factor and the CQ a-priori — not yet on the air.
 
 ### A-priori on CQ while you are busy
 
-During a QSO, calls from other stations are now decoded with the same a-priori
-treatment as when idle: **+0.4 dB** on other stations' CQs. Previously being
-engaged in a contact made you slightly deafer to everyone else.
+Being engaged in a contact used to make you slightly deafer to everyone else:
+during a QSO, other stations' CQs were decoded without the a-priori treatment
+they get when idle. They now get it in FT2, and in FT8 and Q65 as well.
+
+In FT2 the gain was measured as a threshold shift: **+0.4 dB**. In FT8 it was
+measured as recovered decodes instead, and the gap closes completely:
+
+| SNR | not in a QSO | in a QSO, now | in a QSO, before |
+|---|---|---|---|
+| −18 dB | 15/20 | **15/20** | 12/20 |
+| −19 dB | 7/20 | **7/20** | 5/20 |
+
+Interpolating a threshold from those figures would give roughly 0.3 dB, but
+with twenty files per point that is indicative rather than publishable — so the
+0.4 dB figure belongs to FT2 and is not claimed for FT8. What is claimed for
+FT8 is that the penalty disappears.
 
 ### Narrow decode bands: improved, not fixed
 
