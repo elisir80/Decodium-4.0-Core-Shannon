@@ -38,7 +38,16 @@ ApplicationWindow {
     // aperta. Si lega alla visibilita' e non alla distruzione: chi chiude con
     // la crocetta la nasconde soltanto, e il demodulatore resterebbe a girare
     // per nessuno rubando tempo alla decodifica dei modi digitali.
-    onVisibleChanged: if (bridge) bridge.rttyInAscolto = visible
+    onVisibleChanged: {
+        if (!bridge)
+            return
+        // Tutte le strade che rendono visibile questa finestra sono un cambio
+        // di modo, anche un eventuale show() diretto futuro che non passi dal
+        // menu principale.
+        if (visible && bridge.mode !== "RTTY")
+            bridge.mode = "RTTY"
+        bridge.rttyInAscolto = visible
+    }
     Component.onDestruction: if (bridge) bridge.rttyInAscolto = false
 
     // Cambiando banda il decodificatore deve dimenticare quello che ha

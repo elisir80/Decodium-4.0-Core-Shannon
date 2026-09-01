@@ -8108,6 +8108,14 @@ void DecodiumBridge::aggiungiRigaRtty (QString const& testo, double qualita,
 
 void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
 {
+#if DECODIUM_HAS_SSTV
+    // Last-resort boundary for every decode producer. SSTV keeps the visual
+    // PCM path alive, but no dashboard-mode result may enter history/UI while
+    // its exclusive workspace is open.
+    if (m_sstvWorkspaceActive) {
+        return;
+    }
+#endif
     m_decodeList.append(QVariant(entry));
     rememberDecodeDedupEntry(entry);
     trimDecodeListsIfNeeded();
@@ -12593,6 +12601,15 @@ void DecodiumBridge::syncLegacyBackendState()
         return;
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
+#if DECODIUM_HAS_SSTV
+    // The legacy state poll can otherwise reassert its saved MONITOR state a
+    // few hundred milliseconds after the SSTV workspace switched to the
+    // visual-only native capture. Keep CAT/telemetry synchronisation alive,
+    // but make the hidden decoder unconditionally quiescent.
+    if (m_sstvWorkspaceActive && m_legacyBackend->monitoring()) {
+        m_legacyBackend->setMonitoring(false);
+    }
+#endif
     if (m_mode == QStringLiteral("FT8") && m_monitoring) {
         int const periodMs = effectivePeriodMsForMode(m_mode);
         if (periodMs > 0) {
@@ -12728,7 +12745,11 @@ void DecodiumBridge::syncLegacyBackendState()
     // Treat that ownership as active here; otherwise this synchronisation poll
     // mistakes the intentional legacy=false state for a dropped monitor and
     // schedules startRx() repeatedly, starving the panadapter.
-    bool const nativeSstvMonitoring = nativeSstvRxForcesDedicatedAudioCapture();
+    bool const nativeSstvMonitoring =
+#if DECODIUM_HAS_SSTV
+        m_sstvWorkspaceActive ||
+#endif
+        nativeSstvRxForcesDedicatedAudioCapture();
     bool const ft2LinkLegacyRxRequested =
         isFt2LinkApplicationMode(m_mode)
         && m_monitorRequested
@@ -12745,7 +12766,13 @@ void DecodiumBridge::syncLegacyBackendState()
                                 m_periodTimerSessionId,
                                 true);
     }
-    updateBool(m_decoding, m_monitoring, [this]() { emit decodingChanged(); });
+    bool const dashboardDecoderActive = m_monitoring
+#if DECODIUM_HAS_SSTV
+        && !m_sstvWorkspaceActive
+#endif
+        ;
+    updateBool(m_decoding, dashboardDecoderActive,
+               [this]() { emit decodingChanged(); });
     qint64 const txStateNowMs = QDateTime::currentMSecsSinceEpoch();
     bool const bridgeAudioPlaybackTxActive =
         m_transmitting
@@ -13774,6 +13801,26 @@ void DecodiumBridge::applyLegacyFullSpectrumModelDelta()
 
 void DecodiumBridge::syncLegacyBackendDecodeList()
 {
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        // Discard any final queued legacy result. The ALL.TXT cursor is
+        // advanced once at workspace exit, so nothing from the suspended
+        // interval is mirrored after normal monitoring resumes.
+        if (m_legacyBackend) {
+            if (!m_legacyBackend->bandActivityLines().isEmpty()) {
+                m_legacyBackend->clearBandActivity();
+            }
+            if (!m_legacyBackend->rxFrequencyLines().isEmpty()) {
+                m_legacyBackend->clearRxFrequency();
+            }
+            m_legacyBandActivityRevision =
+                m_legacyBackend->bandActivityRevision();
+            m_legacyRxFrequencyRevision =
+                m_legacyBackend->rxFrequencyRevision();
+        }
+        return;
+    }
+#endif
     if (!usingLegacyBackendForTx()) {
         return;
     }
@@ -14949,6 +14996,11 @@ void DecodiumBridge::appendTxDecodeEntry(const QString& message)
 
 void DecodiumBridge::appendRxDecodeEntry(const QVariantMap& entry)
 {
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        return;
+    }
+#endif
     MainThreadTraceScope trace(QStringLiteral("append_rx_decode_entry"),
                                QStringLiteral("rx_rows=%1 msg=[%2]")
                                    .arg(m_rxDecodeList.size())
@@ -22474,7 +22526,7 @@ void DecodiumBridge::startRx()
         // keeps Decodium's monitor state coherent, but the legacy decoder is
         // deliberately quiesced until stopSstvRx() restores the normal path.
 #if DECODIUM_HAS_SSTV
-        if (nativeSstvRxForcesDedicatedAudioCapture()) {
+        if (m_sstvWorkspaceActive || nativeSstvRxForcesDedicatedAudioCapture()) {
             m_periodTimer->stop();
             m_asyncDecodeTimer->stop();
             m_asyncDecodePending = false;
@@ -22498,7 +22550,7 @@ void DecodiumBridge::startRx()
             emit statusMessage(QStringLiteral("RX avviato via capture nativo SSTV - %1")
                                    .arg(m_mode));
             bridgeLog(QStringLiteral(
-                "startRx: native SSTV exclusive capture active; legacy RX quiesced"));
+                "startRx: SSTV workspace exclusive capture active; legacy RX quiesced"));
             return;
         }
 #endif
@@ -22562,10 +22614,18 @@ void DecodiumBridge::startRx()
     }
 
     const bool rtlGeneralReceiver = rtlSdrGeneralReceiverConfigured();
-    if (!rtlGeneralReceiver) {
+    const bool sstvWorkspaceReceiver =
+#if DECODIUM_HAS_SSTV
+        m_sstvWorkspaceActive;
+#else
+        false;
+#endif
+    if (!rtlGeneralReceiver && !sstvWorkspaceReceiver) {
         ensureDecodeWorkerForMode(m_mode);
-    } else {
+    } else if (rtlGeneralReceiver) {
         bridgeLog(QStringLiteral("startRx: RTL-SDR general receiver selected; digital decoder dispatch disabled"));
+    } else {
+        bridgeLog(QStringLiteral("startRx: SSTV workspace selected; normal digital decoder dispatch disabled"));
     }
 
     updatePeriodTicksMax();
@@ -22585,7 +22645,7 @@ void DecodiumBridge::startRx()
     }
     // Sincronizza il period timer al prossimo boundary UTC (FT8=15s, FT4=7.5s, FT2=3.75s).
     // Il session id impedisce a una singleShot vecchia di riattivare il timer dopo stop/cambio modo.
-    if (rtlGeneralReceiver) {
+    if (rtlGeneralReceiver || sstvWorkspaceReceiver) {
         m_periodTimer->stop();
         m_periodTicks = 0;
         m_lastPeriodSlot = -1;
@@ -22595,7 +22655,7 @@ void DecodiumBridge::startRx()
         armPeriodTimerForCurrentMode(monitorSessionId, QStringLiteral("startRx"));
     }
     m_spectrumTimer->start();
-    if (!rtlGeneralReceiver && m_mode == "FT2") {
+    if (!rtlGeneralReceiver && !sstvWorkspaceReceiver && m_mode == "FT2") {
         // store(release): vedi commento nel reset di setMode — il writer usa
         // CAS sul commit e un increment in volo verrà scartato correttamente.
         m_asyncAudioPos.store(0, std::memory_order_release);
@@ -22605,11 +22665,13 @@ void DecodiumBridge::startRx()
 
     startAudioCapture();
 
-    m_decoding = !rtlGeneralReceiver;
+    m_decoding = !rtlGeneralReceiver && !sstvWorkspaceReceiver;
     emit decodingChanged();
     emit statusMessage(rtlGeneralReceiver
                            ? QStringLiteral("RTL-SDR general receiver started")
-                           : QStringLiteral("RX avviato - %1").arg(m_mode));
+                           : (sstvWorkspaceReceiver
+                                  ? QStringLiteral("SSTV audio monitor started")
+                                  : QStringLiteral("RX avviato - %1").arg(m_mode)));
     bridgeLog("startRx() done");
 }
 
@@ -34021,6 +34083,16 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
                                               const QString& db,
                                               int audioFreq)
 {
+#if DECODIUM_HAS_SSTV
+    // External UDP Reply packets use this same path. They must not turn a
+    // decode from the suspended dashboard mode into a QSO/TX action while the
+    // operator is working inside SSTV.
+    if (m_sstvWorkspaceActive) {
+        bridgeLog(QStringLiteral(
+            "decode selection ignored while SSTV workspace is active"));
+        return;
+    }
+#endif
     if (message.isEmpty()) return;
 
     // A manual double-click is an explicit operator takeover. The automatic
@@ -45259,6 +45331,25 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     auto decodeReadyPhaseGuard = qScopeGuard([] {
         DecodiumBridge::noteDecodeReadySlotEnd();
     });
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        m_decodeStartMsBySerial.remove(serial);
+        m_decodeModeBySerial.remove(serial);
+        m_decodeUtcTokenBySerial.remove(serial);
+        m_decodeSessionBySerial.remove(serial);
+        m_ft8PendingDeepFollowups.remove(serial);
+        m_ft8EarlyDecodeSerials.remove(serial);
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        bridgeLog(QStringLiteral(
+            "decode callback discarded while SSTV workspace is active: serial=%1 rows=%2")
+                      .arg(serial)
+                      .arg(rows.size()));
+        return;
+    }
+#endif
     MainThreadTraceScope trace(QStringLiteral("on_ft8_decode_ready"),
                                QStringLiteral("serial=%1 rows=%2 mode=%3 tx=%4")
                                    .arg(serial)
@@ -46443,6 +46534,13 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 
 void DecodiumBridge::onFt2DecodeReady(quint64 serial, QStringList rows)
 {
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        // Reuse the common callback gate so serial bookkeeping is released.
+        onFt8DecodeReady(serial, QStringList {});
+        return;
+    }
+#endif
     // Sprint3-A: il pass sync non passava da onFt2AsyncDecodeReady -> le sue
     // righe non seminavano la AP cache. Stesso pattern (e stessa funzione di
     // hash) del seed async; anti-loop: salta i decode cache-confirmed (nap=7).
@@ -46468,6 +46566,21 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
     // Path turbo async: stessa logica di onFt8DecodeReady ma senza serial.
     // Deduplica per messaggio: non aggiunge righe già presenti nella lista.
     m_asyncDecodePending = false;
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        if (m_asyncDecodeTimer) {
+            m_asyncDecodeTimer->stop();
+        }
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        bridgeLog(QStringLiteral(
+            "FT2 async callback discarded while SSTV workspace is active: rows=%1")
+                      .arg(rows.size()));
+        return;
+    }
+#endif
     if (shouldIgnoreDecodeCallbacks()) {
         bridgeLog("onFt2AsyncDecodeReady: ignored during shutdown");
         return;
@@ -47095,6 +47208,19 @@ void DecodiumBridge::onWsprDecodeReady(quint64 serial, QStringList rows,
         bridgeLog("onWsprDecodeReady: ignored during shutdown");
         return;
     }
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        bridgeLog(QStringLiteral(
+            "WSPR callback discarded while SSTV workspace is active: serial=%1 rows=%2")
+                      .arg(serial)
+                      .arg(rows.size()));
+        return;
+    }
+#endif
 
     QString const serialMode = m_decodeModeBySerial.value(serial);
     quint64 const serialSession = m_decodeSessionBySerial.value(serial, m_decodeSessionId);
@@ -47279,6 +47405,19 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         bridgeLog("onLegacyJtDecodeReady: ignored during shutdown");
         return;
     }
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        bridgeLog(QStringLiteral(
+            "legacy JT callback discarded while SSTV workspace is active: serial=%1 rows=%2")
+                      .arg(serial)
+                      .arg(rows.size()));
+        return;
+    }
+#endif
 
     bridgeLog("onLegacyJtDecodeReady: serial=" + QString::number(serial) +
               " rows=" + QString::number(rows.size()) + " mode=" + m_mode);
@@ -47396,6 +47535,18 @@ void DecodiumBridge::onPeriodTimer()
     // drift del QTimer (±5–50ms/tick su Windows con event loop carico) non
     // sfasa più le finestre passate al decoder.
     m_periodTicks++;
+#if DECODIUM_HAS_SSTV
+    // A stale queued timeout from the mode that was active before opening the
+    // SSTV page must never dispatch a decode or an automatic TX underneath it.
+    if (m_sstvWorkspaceActive) {
+        m_periodTicks = 0;
+        if (m_periodProgress != 0) {
+            m_periodProgress = 0;
+            emit periodProgressChanged();
+        }
+        return;
+    }
+#endif
     qint64 const nowMs     = correctedUtcEpochMs();
     QString const modeSnapshot = m_mode;
     bool   const timeSyncMode = isTimeSyncDecodeMode(modeSnapshot);
@@ -50330,6 +50481,11 @@ void DecodiumBridge::dispatchTimeSyncDecodeWhenReady(qint64 completedUtcSlot,
                                                      quint64 sessionId,
                                                      qint64 deadlineMs)
 {
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        return;
+    }
+#endif
         if (!m_monitoring
         || sessionId != m_periodTimerSessionId
         || m_mode != modeSnapshot
@@ -51055,6 +51211,15 @@ void DecodiumBridge::maybeDispatchFt4EarlyDecode(qint64 utcSlot, int msInSlot, i
 
 void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
 {
+#if DECODIUM_HAS_SSTV
+    if (m_sstvWorkspaceActive) {
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        return;
+    }
+#endif
     QString const modeSnapshot = m_mode;
     int const decodeDepth = effectiveDecodeDepth();
 

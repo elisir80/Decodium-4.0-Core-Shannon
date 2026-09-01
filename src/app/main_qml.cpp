@@ -4175,6 +4175,32 @@ int main(int argc, char* argv[])
 
         rttyHost.avvia (rttySettings);
 
+        // Il sottosistema originale aveva un secondo profilo stazione e una
+        // seconda lingua. Dentro Decodium non devono esistere due verita': le
+        // macro RTTY prendono nominativo, nome/etichetta e QTH dal profilo
+        // generale e si aggiornano immediatamente quando quel profilo cambia.
+        auto sincronizzaProfiloRtty = [&bridge, &rttyHost] {
+            rttyHost.macro ().setStationProfile (bridge.callsign (),
+                                                  bridge.stationName (),
+                                                  bridge.stationQth ());
+        };
+        sincronizzaProfiloRtty ();
+        QObject::connect (&bridge, &DecodiumBridge::callsignChanged,
+                          &rttyHost, sincronizzaProfiloRtty);
+        QObject::connect (&bridge, &DecodiumBridge::stationNameChanged,
+                          &rttyHost, sincronizzaProfiloRtty);
+        QObject::connect (&bridge, &DecodiumBridge::stationQthChanged,
+                          &rttyHost, sincronizzaProfiloRtty);
+
+        // Anche RTTY parte nella lingua scelta per Decodium. Il selettore
+        // globale richiede il riavvio dell'applicazione, quindi questa lettura
+        // iniziale mantiene entrambe le interfacce coerenti per tutta la
+        // sessione senza conservare una preferenza RTTY concorrente.
+        rttyHost.lingua ().attachEngine (&engine);
+        rttyHost.lingua ().setCurrent (
+            bridge.getSetting (QStringLiteral ("UILanguage"),
+                               QStringLiteral ("en")).toString ());
+
         // L'audio: quello che la radio ascolta, gia' a 12 kHz, dallo stesso
         // rubinetto di DecoPort. L'host lo porta a 24 kHz per il motore RTTY.
         QObject::connect (&bridge, &DecodiumBridge::campioniRxRtty,

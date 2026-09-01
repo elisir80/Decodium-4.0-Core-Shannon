@@ -162,7 +162,11 @@ class DecodiumBridge : public QObject
     // === NATIVE SSTV ===
     // SSTV is an in-process Decodium workspace backed by the existing RX
     // audio source. It remains separate from bridge.mode so the weak-signal
-    // period scheduler and CAT mode mapping are not disturbed.
+    // period scheduler and CAT mode mapping are not disturbed. Opening the
+    // workspace replaces the normal decoder generation with a visual-only
+    // audio capture: the panadapter keeps running, while FT/JT/WSPR decode and
+    // automatic slot work remain suspended. Closing restores the normal
+    // monitor state that was active before entry.
     Q_PROPERTY(bool sstvAvailable READ sstvAvailable CONSTANT)
     Q_PROPERTY(bool sstvRxRequested READ sstvRxRequested NOTIFY sstvRxStateChanged)
     Q_PROPERTY(bool sstvRxActive READ sstvRxActive NOTIFY sstvRxStateChanged)
@@ -790,6 +794,8 @@ public:
     sstvRxImageSnapshot() const noexcept;
     std::shared_ptr<const QImage> sstvTxSourceImageSnapshot() const noexcept;
     std::shared_ptr<const QImage> sstvTxPreparedImageSnapshot() const noexcept;
+    Q_INVOKABLE bool enterSstvWorkspace();
+    Q_INVOKABLE void leaveSstvWorkspace();
     Q_INVOKABLE bool startSstvRx();
     Q_INVOKABLE void stopSstvRx();
     Q_INVOKABLE bool resetSstvRx();
@@ -2583,6 +2589,14 @@ private:
     bool m_sstvRxRequested {false};
     bool m_sstvOwnsMonitoring {false};
 #if DECODIUM_HAS_SSTV
+    // While the native workspace is open, the selected FT/JT/WSPR mode stays
+    // unchanged for the dashboard and CAT. Its decoder generation is
+    // suspended, while an already-active panadapter keeps receiving PCM.
+    // This is deliberately separate from m_sstvRxRequested:
+    // opening the page must quiesce the previous decoder even before the user
+    // presses Start monitor.
+    bool m_sstvWorkspaceActive {false};
+    bool m_sstvWorkspaceRestoreMonitoring {false};
     // A native SSTV RX session may temporarily own a dedicated Qt audio
     // capture while the selected Decodium mode is still backed by the legacy
     // decoder.  The flag lets stopSstvRx() restore the legacy single-capture

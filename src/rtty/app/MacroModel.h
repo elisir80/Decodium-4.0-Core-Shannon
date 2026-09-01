@@ -42,6 +42,13 @@ public:
     QString myQth() const   { return m_myQth; }
     int serialNumber() const { return m_serial; }
 
+    // Dentro Decodium l'identita' di stazione ha una sola sorgente: il
+    // profilo generale dell'applicazione. Aggiornarla in un colpo solo evita
+    // tre salvataggi intermedi e, soprattutto, fa riespandere subito tutte le
+    // macro quando il profilo viene modificato nelle impostazioni principali.
+    void setStationProfile(const QString& call, const QString& name,
+                           const QString& qth);
+
     void setMyCall(const QString& call);
     void setHisCall(const QString& call);
     void setRstSent(const QString& rst);

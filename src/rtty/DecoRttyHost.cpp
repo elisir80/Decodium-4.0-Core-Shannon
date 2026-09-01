@@ -146,7 +146,6 @@ void DecoRttyHost::avvia (QSettings& impostazioni)
     connect (&m_macro, &app::MacroModel::qsoChanged, this, &DecoRttyHost::programmaSalvataggio);
     connect (&m_macro, &app::MacroModel::modelReset, this, &DecoRttyHost::programmaSalvataggio);
     connect (&m_motore, &app::RttyEngine::paramsChanged, this, &DecoRttyHost::programmaSalvataggio);
-    connect (&m_lingua, &app::Language::currentChanged, this, &DecoRttyHost::programmaSalvataggio);
 
     m_motore.attachRadio (&m_radio);
 
@@ -218,7 +217,6 @@ void DecoRttyHost::salvaImpostazioni ()
     s.setValue (QStringLiteral ("rtty/lms"),             m_motore.lmsEnabled ());
     s.setValue (QStringLiteral ("rtty/diddleMode"),      m_motore.diddleMode ());
     s.setValue (QStringLiteral ("rtty/charWait"),        m_motore.characterWaitBits ());
-    s.setValue (QStringLiteral ("ui/language"),          m_lingua.current ());
     m_macro.save (s);
 
     // Scrittura immediata, non quando a QSettings pare: se l'applicazione si

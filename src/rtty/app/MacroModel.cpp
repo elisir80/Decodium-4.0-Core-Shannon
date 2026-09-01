@@ -123,6 +123,25 @@ void MacroModel::setMyQth(const QString& qth)
     emit qsoChanged();
 }
 
+void MacroModel::setStationProfile(const QString& call, const QString& name,
+                                   const QString& qth)
+{
+    const QString normalizedCall = call.toUpper().trimmed();
+    const QString normalizedName = name.toUpper().trimmed();
+    const QString normalizedQth = qth.toUpper().trimmed();
+    if (m_myCall == normalizedCall
+        && m_myName == normalizedName
+        && m_myQth == normalizedQth) {
+        return;
+    }
+
+    m_myCall = normalizedCall;
+    m_myName = normalizedName;
+    m_myQth = normalizedQth;
+    refreshExpanded();
+    emit qsoChanged();
+}
+
 void MacroModel::setSerialNumber(int serial)
 {
     serial = qMax(1, serial);

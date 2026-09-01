@@ -1,105 +1,118 @@
 # Decodium 4 FT2 v1.0.606
 
-Version 1.0.606 is a decoder release: the FT8/FT2 LDPC stage is a third faster
-and finds slightly more, at the same false-decode rate.
+Version 1.0.606 is the cumulative fork release after v1.0.604. It includes
+the v1.0.605 speech-to-text removal, the latest upstream fast-LDPC and FT2/FT4
+decode improvements, and the native SSTV/RTTY integration work completed in
+this fork.
 
 ## English (UK)
 
-### A faster LDPC stage that also finds more
+### Native SSTV workspace isolation
 
-Four changes to the `fastldpc` path, measured together rather than one at a
-time — measuring each knob on its own bench and adding the percentages up is
-not legitimate, and the first set of numbers produced that way was wrong:
+- Opening the native SSTV window is now an exclusive receive-workspace
+  transition. The previously selected FT/JT/WSPR dashboard decoder is stopped
+  and its pending decode generation is invalidated.
+- The panadapter and shared PCM path remain alive when the user starts the SSTV
+  monitor, so the spectrum does not disappear or need a manual restart.
+- Results already in flight, legacy backend rows and external decode-selection
+  events are discarded while SSTV is open. They cannot enter the dashboard,
+  history, automatic sequencing, UDP/PSK reporting or QSO actions.
+- Closing SSTV restores the monitoring state that was active before entry and
+  drops stale results from the suspended interval.
 
-| | before | after |
-|---|---|---|
-| time per candidate | 80.3 us | **58.8 us** |
-| candidates reaching the CRC | 6240 | **4986** |
+### RTTY identity and mode behaviour
 
-That is **27% less time** (1.37x) and **20% fewer candidates**, with
-**+2.5% decodes** — and that last figure is quoted at equal false-decode rate,
-not at a fixed threshold. At a fixed threshold the same bench reports +5.8%,
-which flatters the result: `nd_max` is a knob, not a physical property, and two
-configurations on the same curve look far apart only because one of them is
-working higher up it. +2.5% is the number that survives someone repeating the
-measurement.
+- RTTY station macros now use Decodium's global callsign, station name and QTH
+  profile as their single source of truth and refresh immediately when those
+  settings change.
+- RTTY starts with the application's global language instead of maintaining a
+  competing private language setting.
+- Opening the RTTY window switches the application to RTTY and suspends the
+  previously selected digital-mode receive path.
 
-The changes: `ntau` 13 instead of 14 with pairs taken over the first 64
-candidates; the normalisation factor moved from the historic 3/4 of
-Chen-Fossorier to 0.578; the a-priori search widened (`span2` 32 to 64), which
-deliberately spends part of the gain from the previous two.
+### Fast-LDPC and FT2/FT4 decoding updates from upstream
 
-Confirmed on the air for `ntau` 13 (paired comparison, two windows of 145 cycles
-on 7.074 FT8). Confirmed on the bench, on independent data and against ground
-truth, for the normalisation factor and the CQ a-priori — not yet on the air.
+- The fast-LDPC candidate counter is 64-bit and the measured candidate budget
+  is used instead of an estimate.
+- FT2 deep decoding uses a tuned candidate set and pair span, reducing wasted
+  CRC work while retaining the measured candidate range.
+- The LDPC alpha parameter is tuned for the current decoder path, reducing
+  candidate processing cost.
+- Narrow decode bands now use the correct noise-floor and signal-peak region.
+- CQ a-priori handling is also applied while in a QSO, and the second decode
+  span is expanded to 64 where required.
+- The candidate-limit correction is scoped to FT2 and FT4, leaving FT8
+  behaviour unchanged.
 
-### Fewer min-sum iterations
+### Earlier cumulative changes retained from v1.0.604 and v1.0.605
 
-The min-sum iteration cap goes from 30 to 10. Between 30 and 6 the decodes are
-identical — the difference, −0.1%, is inside the noise — over three SNRs and
-150,000 noise candidates. Ten rather than six because the bench measures on
-Gaussian noise, and real signals carry interference that Gaussian noise does not
-contain. **A further 5% off the decoder's time, with decodes unchanged.**
-`DECODIUM_LDPC_MAX_ITER` restores 30 without recompiling.
+The release retains the completed native RTTY integration and radio control,
+Baudot/Viterbi improvements, SPE Expert amplifier discovery, QO-100 and
+transverter frequency offsets, WSPRnet report delivery, and the frequency
+selector work. As in v1.0.605, the experimental SSB speech-to-text subsystem
+is removed because on-air testing did not produce reliable results.
 
-### Two experimental a-priori paths, shipped switched off
+### Packaging and verification
 
-Two additional a-priori strategies are present but disabled by default
-(`DECODIUM_FT8_AP_STORICO`, `DECODIUM_FT8_AP_MSG`): one seeds the decoder from
-stations already heard, the other from whole candidate messages.
+The source tag is `v1.0.606`. GitHub Actions builds the Windows x64 installer,
+macOS Apple Silicon and Intel DMG variants, and Linux x86_64 and aarch64
+AppImages. Each published binary is accompanied by its workflow-generated
+SHA-256 file where provided by the packaging workflow.
 
-On the bench they look spectacular — 0.8 dB and 4.4 dB. On the air the second
-one is worth **+1.2% of decodes**, and that is not a contradiction: the bench
-measures *at the threshold*, where every word is marginal by construction, while
-most real signals sit comfortably above it and need no help. A gain measured at
-the threshold has to be multiplied by the fraction of traffic that actually sits
-there, and that fraction is small.
+## Italiano
 
-They are switched off for exactly that reason, and the numbers are recorded here
-so that nobody re-measures them at the threshold and announces four decibels.
+### Isolamento della finestra SSTV nativa
 
-### A-priori on CQ while you are busy
+- L'apertura della finestra SSTV nativa è ora una transizione esclusiva dello
+  spazio di ricezione. Il decoder FT/JT/WSPR selezionato nella dashboard viene
+  fermato e la generazione di decodifica pendente viene invalidata.
+- Il panadapter e il percorso PCM condiviso rimangono attivi quando si avvia
+  il monitor SSTV, quindi lo spettro non scompare e non richiede un riavvio
+  manuale.
+- I risultati già in elaborazione, le righe del backend legacy e gli eventi
+  esterni di selezione decode vengono scartati mentre SSTV è aperta. Non possono
+  entrare in dashboard, cronologia, sequenza automatica, UDP/PSK Reporter o
+  azioni QSO.
+- Alla chiusura di SSTV viene ripristinato lo stato di monitoraggio precedente e
+  vengono eliminati i risultati obsoleti dell'intervallo sospeso.
 
-Being engaged in a contact used to make you slightly deafer to everyone else:
-during a QSO, other stations' CQs were decoded without the a-priori treatment
-they get when idle. They now get it in FT2, and in FT8 and Q65 as well.
+### Identità e comportamento del modo RTTY
 
-In FT2 the gain was measured as a threshold shift: **+0.4 dB**. In FT8 it was
-measured as recovered decodes instead, and the gap closes completely:
+- Le macro RTTY usano ora il nominativo, il nome della stazione e il QTH del
+  profilo globale di Decodium come unica sorgente, aggiornandosi subito quando
+  cambiano queste impostazioni.
+- RTTY parte con la lingua globale dell'applicazione e non mantiene più una
+  seconda impostazione linguistica privata.
+- L'apertura della finestra RTTY commuta l'applicazione in RTTY e sospende il
+  percorso di ricezione del modo digitale selezionato in precedenza.
 
-| SNR | not in a QSO | in a QSO, now | in a QSO, before |
-|---|---|---|---|
-| −18 dB | 15/20 | **15/20** | 12/20 |
-| −19 dB | 7/20 | **7/20** | 5/20 |
+### Aggiornamenti fast-LDPC e decodifica FT2/FT4 da upstream
 
-Interpolating a threshold from those figures would give roughly 0.3 dB, but
-with twenty files per point that is indicative rather than publishable — so the
-0.4 dB figure belongs to FT2 and is not claimed for FT8. What is claimed for
-FT8 is that the penalty disappears.
+- Il contatore dei candidati fast-LDPC è a 64 bit e viene usato il budget
+  misurato dei candidati invece di una stima.
+- La decodifica profonda FT2 usa un insieme di candidati e un pair span tarati,
+  riducendo il lavoro CRC inutile e mantenendo l'intervallo misurato.
+- Il parametro alpha LDPC è stato tarato per il percorso decoder corrente,
+  riducendo il costo di elaborazione dei candidati.
+- Le bande di decodifica strette usano ora la regione corretta per fondo e picco
+  del segnale.
+- La gestione a-priori del CQ viene applicata anche durante un QSO e il secondo
+  span viene esteso a 64 dove necessario.
+- La correzione del limite candidati è applicata a FT2 e FT4, lasciando
+  invariato il comportamento FT8.
 
-### Narrow decode bands: improved, not fixed
+### Modifiche cumulative mantenute dalla v1.0.604 e v1.0.605
 
-With `nfa`/`nfb` narrower than about 700 Hz, strong signals were being lost
-without warning: the noise floor and the peak were being looked for in the wrong
-place. The case of an off-centre signal is now correct. **The case of a signal
-centred below 500 Hz is still broken** — there is a third mechanism involved
-that has not been identified yet. The practical advice remains: do not set the
-decode band below 700 Hz.
+La release mantiene l'integrazione nativa RTTY e il controllo radio completati,
+le migliorie Baudot/Viterbi, il rilevamento dell'amplificatore SPE Expert, gli
+offset di frequenza QO-100 e transverter, l'invio dei report WSPRnet e il lavoro
+sul selettore di frequenza. Come nella v1.0.605, il sottosistema sperimentale di
+trascrizione SSB è stato rimosso perché i test in aria non fornivano risultati
+affidabili.
 
-Non-regression was verified on both affected modes: FT2 identical line by line
-(zero ghosts at six SNRs; 25/25, 20/25, 15/25 decodes), FT4 identical over 20
-files.
+### Packaging e verifica
 
-### ARM builds
-
-The NEON kernel was changed along with the AVX2 one, on a machine that cannot
-compile it. Its numerical equivalence with AVX2 was therefore proved
-exhaustively instead of argued: both instructions were simulated in scalar
-arithmetic and compared over all 65536 possible magnitudes, for every
-normalisation weight in use. They agree exactly for magnitudes up to 32767 and
-disagree above it, where a magnitude read as signed becomes negative — and the
-decoder clamps every LLR to 2047, so the operating range sits a factor of
-sixteen inside the safe region.
-
-That covers correctness, not compilability, so the aarch64 image was built
-before this release was tagged.
+Il tag sorgente è `v1.0.606`. GitHub Actions genera l'installer Windows x64,
+le varianti DMG per macOS Apple Silicon e Intel e le AppImage Linux x86_64 e
+aarch64. Ogni binario pubblicato è accompagnato dal relativo file SHA-256
+generato dal workflow quando previsto dal percorso di packaging.
