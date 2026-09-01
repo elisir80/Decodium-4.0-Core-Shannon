@@ -151,6 +151,40 @@ void manopole_ft8 (Ft2Config& c) {
 //
 // Con DECODIUM_LDPC_ALPHA si torna a 49152 senza ricompilare, per il confronto
 // appaiato in aria. Vale in entrambi i modi, come ntau e pair_span.
+// Iterazioni del min-sum. Il valore storico era 30, ma ne bastano 10: da 30 a 6
+// le decodifiche sono IDENTICHE (-0,1%, dentro il rumore) e si risparmia il 7%
+// del tempo. Misurato su tre SNR e 150 000 candidati di rumore
+// (lab/cpp/manopole_mai_toccate.cpp):
+//
+//   max_iter   v0.0    v0.5    v1.0    us/cand
+//     30       8262   12649   16630     58,1
+//     10       8245   12636   16623     55,1   -5%
+//      6       8239   12633   16614     53,9   -7%
+//
+// E' la terza conferma indipendente, dopo alpha e la tabella dei pesi, che la
+// CONVERGENZA del min-sum non e' l'obiettivo: qui il min-sum prepara i
+// posteriori per l'OSD, e ventiquattro iterazioni su trenta sono lavoro
+// buttato.
+//
+// Si tiene 10 e non 6 perche' il margine costa poco (2% di tempo) e su segnali
+// veri, che hanno interferenza e derive che il rumore gaussiano non ha, le
+// iterazioni in piu' potrebbero contare piu' che al banco. La misura dice che a
+// 6 non si perde nulla su AWGN, non che non si perda nulla in aria.
+//
+// DECODIUM_LDPC_MAX_ITER riporta al valore che si vuole, 30 compreso.
+int max_iter_scelto ()
+{
+    static int const v = [] {
+        int n = 10;
+        if (char const* e = std::getenv ("DECODIUM_LDPC_MAX_ITER")) {
+            int const k = std::atoi (e);
+            if (k >= 1 && k <= 100) n = k;
+        }
+        return n;
+    }();
+    return v;
+}
+
 unsigned alpha_scelto () {
     static unsigned const v = [] {
         unsigned w = 37888;
@@ -327,6 +361,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             }
             c.batch = 16;                   // una parola per chiamata: batch minimo
             c.alpha_w = alpha_scelto ();
+            c.max_iter = max_iter_scelto ();
             manopole_ft8 (c);
             slot1 = new Ft2Decoder (shared_code(), c);
         }
@@ -337,6 +372,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             Ft2Config c = Ft2Decoder::conservativo();
             c.batch = 16;
             c.alpha_w = alpha_scelto ();
+            c.max_iter = max_iter_scelto ();
             manopole_ft8 (c);
             slot2 = new Ft2Decoder (shared_code(), c);
         }
@@ -347,6 +383,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
         Ft2Config c = Ft2Decoder::sensibile();
         c.batch = 16;
         c.alpha_w = alpha_scelto ();
+        c.max_iter = max_iter_scelto ();
         manopole_ft8 (c);
         slot3 = new Ft2Decoder (shared_code(), c);
     }
