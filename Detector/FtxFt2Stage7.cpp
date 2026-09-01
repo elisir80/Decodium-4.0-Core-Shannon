@@ -113,10 +113,14 @@ extern "C"
                                 int* ntype, int* nharderror, float* dmin);
   // Versione a blocco: decodifica n candidati in una volta, cosi' il min-sum
   // riempie le corsie SIMD AVX2 o NEON invece di lasciarle inutilizzate.
-  // llr e apmask sono [n][174] contigui, le uscite [n] o [n][...].
-  void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
-                                      int Keff, int maxosd, int norder,
-                                      signed char* message91, signed char* cw,
+  // llr e apmask sono [n][174] contigui, le uscite [n] o [n][...].
+
+  void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
+
+                                      int Keff, int maxosd, int norder,
+
+                                      signed char* message91, signed char* cw,
+
                                       int* ntype, int* nharderror, float* dmin);
   void ftx_twkfreq1_c (Complex const* ca, int const* npts, float const* fsample,
                        float const* a, Complex* cb);
@@ -606,7 +610,7 @@ struct Stage7State
   std::array<int, 29> mcqtest {};
   std::array<int, 29> mcqww {};
   std::array<int, 6> nappasses {};
-  std::array<std::array<int, 4>, 6> naptypes {};
+  std::array<std::array<int, 5>, 6> naptypes {};
   std::array<float, kFt2Rows * 3> bm_avg {};
   int navg {0};
   float f_avg {0.0f};
@@ -930,13 +934,42 @@ void ensure_symbol_tables (Stage7State& state)
   fill_scrambled_symbol (state.mcqtest, raw_mcqtest, state.rvec, 0);
   fill_scrambled_symbol (state.mcqww, raw_mcqww, state.rvec, 0);
 
-  state.nappasses = {{3, 3, 3, 4, 4, 4}};
-  state.naptypes[0] = {{1, 2, 0, 0}};
-  state.naptypes[1] = {{2, 3, 0, 0}};
-  state.naptypes[2] = {{2, 3, 0, 0}};
-  state.naptypes[3] = {{3, 4, 5, 6}};
-  state.naptypes[4] = {{3, 4, 5, 6}};
-  state.naptypes[5] = {{3, 1, 2, 0}};
+  // L'a priori di tipo 1 e' l'ipotesi "questo e' un CQ": 29 bit del messaggio
+  // dati per noti. Nella tabella originale compare solo ai livelli 0 e 5,
+  // cioe' quando NON si e' in QSO -- e misurato su verita' di riferimento
+  // (lab/tools/ap_veri.sh) toglierlo costa ~0,4 dB sulle CQ delle altre
+  // stazioni proprio mentre si e' impegnati in un collegamento:
+  //
+  //     snr    fuori QSO   in QSO
+  //     -15        30/30    26/30
+  //   -15,5        28/30    24/30
+  //     -16        25/30    20/30
+  //   -16,5        17/30    10/30
+  //
+  // Verificato che la causa sia il tipo 1 e non altro: con un messaggio NON-CQ
+  // la differenza sparisce del tutto (11/20 in entrambi i casi).
+  //
+  // Ai livelli 1 e 2 il terzo slot valeva 0 ed e' quindi gratis. Ai livelli 3
+  // e 4 le quattro passate erano tutte occupate e ne serve una quinta: costa
+  // una chiamata al decoder per candidato, e il rischio e' misurato -- a 29
+  // bit noti un'ipotesi SBAGLIATA viene accettata 0-1 volte su 20000, contro
+  // le 8-13 dei tipi 4-6 che ne impongono 77 (lab/cpp/apriori.cpp).
+  //
+  // DECODIUM_FT2_AP_CQ=0 torna alla tabella originale.
+  bool const ap_cq = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_CQ");
+    return !e || (e[0] != '0');
+  }();
+  state.nappasses = ap_cq ? std::array<int, 6> {{3, 3, 3, 5, 5, 4}}
+                          : std::array<int, 6> {{3, 3, 3, 4, 4, 4}};
+  state.naptypes[0] = {{1, 2, 0, 0, 0}};
+  state.naptypes[1] = ap_cq ? std::array<int, 5> {{2, 3, 1, 0, 0}}
+                            : std::array<int, 5> {{2, 3, 0, 0, 0}};
+  state.naptypes[2] = state.naptypes[1];
+  state.naptypes[3] = ap_cq ? std::array<int, 5> {{3, 4, 5, 6, 1}}
+                            : std::array<int, 5> {{3, 4, 5, 6, 0}};
+  state.naptypes[4] = state.naptypes[3];
+  state.naptypes[5] = {{3, 1, 2, 0, 0}};
   state.symbol_ready = true;
 }
 

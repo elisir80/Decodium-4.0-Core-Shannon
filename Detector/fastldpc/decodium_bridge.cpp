@@ -223,7 +223,35 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             // assolta. I candidati per parola le separano di 5,4x, coerente
             // con quello che ha fatto il traffico vero.
             c.osd_order = 2;
-            c.span2 = 32;
+            // span2 = 64, non 32. E' possibile SOLO grazie al margine liberato
+            // da alpha: il peso nuovo fa scendere i candidati sottoposti alla
+            // CRC da 5614 a 2271 per parola, e allargare le coppie ne rimette
+            // 2717. Il totale, 4988, resta SOTTO l'esposizione di prima.
+            //
+            // A parita' di nominativi fantasma, su 2 000 000 di candidati di
+            // rumore per cella (lab/cpp/pesi_fantasmi.cpp):
+            //
+            //   fantasmi    prima   alpha+span64
+            //         38    11446   +0,6%
+            //        124    12194   +3,4%
+            //        315    12757   +4,9%
+            //       1478    13342   +6,9%
+            //
+            // Al punto di lavoro (~84 fantasmi) e' +2,5%, e il tempo resta
+            // sotto quello di prima: 57,0 us contro 60,2.
+            //
+            // E' la prima volta in questo progetto che una larghezza di
+            // ricerca si puo' aumentare senza pagarla in falsi: le due
+            // precedenti sono state ritirate dall'aria proprio per quello, e
+            // la differenza e' che quelle allargavano SENZA aver prima
+            // guadagnato margine.
+            //
+            // DECODIUM_LDPC_SPAN2_BASE=32 torna al valore di prima.
+            c.span2 = 64;
+            if (char const* e = std::getenv ("DECODIUM_LDPC_SPAN2_BASE")) {
+                int const n = std::atoi (e);
+                if (n > 0 && n <= 91) c.span2 = n;
+            }
             c.span3 = 0;
             c.pair_search = true;
             // ntau 13 e coppie sui primi 64, non 14 e tutti i 91 come
