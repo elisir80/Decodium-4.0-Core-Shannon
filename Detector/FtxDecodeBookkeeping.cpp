@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdlib>
 #include <array>
 #include <cctype>
 #include <cmath>
@@ -74,15 +75,66 @@ constexpr std::array<int, 19> k73Raw {{
 constexpr std::array<int, 19> kRr73Raw {{
   0,1,1,1,1,1,1,0,0,1,1,1,0,1,0,1,0,0,1
 }};
-constexpr std::array<int, 6> kApPassCounts {{2, 2, 2, 4, 4, 3}};
-constexpr std::array<std::array<int, 4>, 6> kApTypes {{
-  std::array<int, 4> {{1, 2, 0, 0}},
-  std::array<int, 4> {{2, 3, 0, 0}},
-  std::array<int, 4> {{2, 3, 0, 0}},
-  std::array<int, 4> {{3, 4, 5, 6}},
-  std::array<int, 4> {{3, 4, 5, 6}},
-  std::array<int, 4> {{3, 1, 2, 0}}
-}};
+// L'a priori di tipo 1 e' l'ipotesi "questo e' un CQ": 29 bit del messaggio
+// dati per noti. Nella tabella storica compare solo ai livelli 0 e 5 di
+// avanzamento del QSO, cioe' quando NON si e' in collegamento. Durante un QSO
+// sparisce, e con lui le CQ deboli delle ALTRE stazioni -- e' lo scenario in
+// cui l'utente dice "mentre lavoravo qualcuno la banda si e' chiusa".
+//
+// Misurato su FT2, dove la tabella e' identica e la correzione e' gia' stata
+// applicata (FtxFt2Stage7.cpp): il divario si chiudeva del tutto, ~0,4 dB.
+// Su FT8, verita' di riferimento con ft8sim, 20 file per punto:
+//
+//     snr   fuori QSO   in QSO (livelli 2 e 4)
+//     -18       15/20       12/20
+//     -19        7/20        5/20
+//     -20        2/20        0/20
+//
+// Ai livelli 1 e 2 il terzo slot era libero. Ai livelli 3 e 4 le quattro
+// colonne erano occupate e ne serve una quinta: da qui l'array a 5 e il limite
+// di pass_index alzato a 4. Ogni tipo occupa DUE passate (pass_index =
+// ((ipass-4)/2)-1), quindi il costo e' due chiamate al decoder in piu' per
+// candidato. Il rischio e' misurato: a 29 bit noti un'ipotesi sbagliata viene
+// accettata 0-1 volte su 20000, contro le 8-13 dei tipi 4-6 che ne impongono
+// 77 (lab/cpp/apriori.cpp).
+//
+// DECODIUM_FT8_AP_CQ=0 torna alla tabella storica.
+inline bool ap_cq_in_qso ()
+{
+  static bool const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT8_AP_CQ");
+    return !e || (e[0] != '0');
+  }();
+  return v;
+}
+
+inline std::array<int, 6> const& ap_pass_counts ()
+{
+  static std::array<int, 6> const con {{2, 3, 3, 5, 5, 3}};
+  static std::array<int, 6> const senza {{2, 2, 2, 4, 4, 3}};
+  return ap_cq_in_qso () ? con : senza;
+}
+
+inline std::array<std::array<int, 5>, 6> const& ap_types ()
+{
+  static std::array<std::array<int, 5>, 6> const con {{
+    std::array<int, 5> {{1, 2, 0, 0, 0}},
+    std::array<int, 5> {{2, 3, 1, 0, 0}},
+    std::array<int, 5> {{2, 3, 1, 0, 0}},
+    std::array<int, 5> {{3, 4, 5, 6, 1}},
+    std::array<int, 5> {{3, 4, 5, 6, 1}},
+    std::array<int, 5> {{3, 1, 2, 0, 0}}
+  }};
+  static std::array<std::array<int, 5>, 6> const senza {{
+    std::array<int, 5> {{1, 2, 0, 0, 0}},
+    std::array<int, 5> {{2, 3, 0, 0, 0}},
+    std::array<int, 5> {{2, 3, 0, 0, 0}},
+    std::array<int, 5> {{3, 4, 5, 6, 0}},
+    std::array<int, 5> {{3, 4, 5, 6, 0}},
+    std::array<int, 5> {{3, 1, 2, 0, 0}}
+  }};
+  return ap_cq_in_qso () ? con : senza;
+}
 
 struct Ft8A8SearchFft
 {
@@ -2608,7 +2660,7 @@ extern "C" int ftx_ft8_select_npasses_c (int lapon, int lapcqonly, int ncontest,
     {
       if (lapcqonly == 0)
         {
-          npasses = 5 + 2 * kApPassCounts[static_cast<size_t> (progress)];
+          npasses = 5 + 2 * ap_pass_counts ()[static_cast<size_t> (progress)];
         }
       else
         {
@@ -2690,8 +2742,8 @@ int prepare_ap_pass_impl (int ipass, int nQSOProgress, int lapcqonly, int nconte
     }
   else if (lapcqonly == 0)
     {
-      int const pass_index = std::max (0, std::min (((ipass - 4) / 2) - 1, 3));
-      iaptype = kApTypes[static_cast<size_t> (progress)][static_cast<size_t> (pass_index)];
+      int const pass_index = std::max (0, std::min (((ipass - 4) / 2) - 1, 4));
+      iaptype = ap_types ()[static_cast<size_t> (progress)][static_cast<size_t> (pass_index)];
     }
   if (iaptype <= 0)
     {
