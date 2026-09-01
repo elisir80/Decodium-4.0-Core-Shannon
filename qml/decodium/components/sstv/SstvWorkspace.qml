@@ -62,6 +62,9 @@ Window {
             win.engine.cancelSstvTx()
         if (win.engine && win.engine.sstvDigital)
             win.engine.sstvDigital.cancelAll()
+        if (win.engine
+                && typeof win.engine.leaveSstvWorkspace === "function")
+            win.engine.leaveSstvWorkspace()
         close.accepted = true
     }
 

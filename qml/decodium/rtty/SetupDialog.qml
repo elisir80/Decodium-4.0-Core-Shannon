@@ -40,109 +40,30 @@ Dialog {
 
         Item { width: 1; height: 6 }
 
-        // ── lingua ──────────────────────────────────────────────────────
-        //
-        // In cima e non in fondo: chi apre questa finestra perche' non capisce
-        // quello che c'e' scritto deve trovarla subito, e i nomi delle lingue
-        // sono scritti ciascuno nella propria — cercare "Deutsch" in un elenco
-        // che dice "German" e' un ostacolo proprio per chi ha piu' bisogno.
-        Row {
-            x: 16
-            spacing: 10
-
-            PanelHeading {
-                anchors.verticalCenter: parent.verticalCenter
-                text: qsTr("LANGUAGE")
-            }
-
-            ComboBox {
-                id: comboLingua
-                anchors.verticalCenter: parent.verticalCenter
-                width: 190
-                height: 30
-                font.pixelSize: 12
-
-                // Vestito come il pannello, non come il tema dei controlli.
-                // Senza questo prende il fondo chiaro di Material e diventa una
-                // barra grigia su un pannello scuro — quella che copriva la
-                // scritta LINGUA qui accanto.
-                background: Rectangle {
-                    radius: 6
-                    color: Qt.rgba(Theme.bgDeep.r, Theme.bgDeep.g, Theme.bgDeep.b, 0.85)
-                    border.color: comboLingua.activeFocus ? Theme.secondary : Theme.glassBorder
-                    border.width: 1
-                }
-                contentItem: Text {
-                    leftPadding: 10
-                    rightPadding: comboLingua.indicator.width + 6
-                    text: comboLingua.displayText
-                    color: Theme.textPrimary
-                    font: comboLingua.font
-                    verticalAlignment: Text.AlignVCenter
-                    elide: Text.ElideRight
-                }
-                model: language.available
-                textRole: "name"
-                valueRole: "code"
-                currentIndex: {
-                    for (let i = 0; i < model.length; ++i)
-                        if (model[i].code === language.current)
-                            return i
-                    return 0
-                }
-                onActivated: language.current = currentValue
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                text: qsTr("changes immediately")
-                color: Theme.textSecondary
-                font.pixelSize: 10
-            }
-        }
-
-        Rectangle {
-            x: 16
-            width: parent.width - 32
-            height: 1
-            color: Theme.glassBorder
-        }
-
         PanelHeading {
             x: 16
             text: qsTr("STATION")
         }
 
-        Row {
-            x: 16
-            spacing: 10
-
-            QsoField {
-                label: qsTr("MY CALL")
-                width: 130
-                text: macros.myCall
-                highlight: true
-                onEdited: (value) => macros.myCall = value
-            }
-            QsoField {
-                label: qsTr("NAME")
-                width: 130
-                text: macros.myName
-                onEdited: (value) => macros.myName = value
-            }
-            QsoField {
-                label: qsTr("QTH")
-                width: 160
-                text: macros.myQth
-                onEdited: (value) => macros.myQth = value
-            }
-        }
-
-        Rectangle {
+        Text {
             x: 16
             width: parent.width - 32
-            height: 1
-            color: Theme.glassBorder
+            text: [macros.myCall, macros.myName, macros.myQth]
+                      .filter(function(value) { return String(value).length > 0 })
+                      .join("  ·  ")
+            color: Theme.textPrimary
+            font.pixelSize: 12
+            font.bold: true
+            elide: Text.ElideRight
+        }
+
+        Text {
+            x: 16
+            width: parent.width - 32
+            text: qsTr("Callsign, station name and QTH come from Decodium station settings.")
+            color: Theme.textSecondary
+            font.pixelSize: 10
+            wrapMode: Text.WordWrap
         }
 
         Rectangle {

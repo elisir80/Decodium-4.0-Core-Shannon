@@ -1700,6 +1700,12 @@ ApplicationWindow {
     // Decodium process, but its RX worker remains stopped until the user starts
     // reception from this workspace.
     function openSstvWorkspace() {
+        // Entering SSTV is an exclusive workspace transition, like opening
+        // RTTY: replace the previous decoder generation with an SSTV-only
+        // audio capture. The panadapter remains alive; mode/CAT are preserved
+        // and the normal monitor state is restored when SSTV closes.
+        if (!bridge.enterSstvWorkspace())
+            return
         sstvWorkspaceLoader.active = true
         if (sstvWorkspaceLoader.item) {
             sstvWorkspaceLoader.item.show()
@@ -1719,6 +1725,10 @@ ApplicationWindow {
             item.raise()
             item.requestActivate()
         }
+        onStatusChanged: {
+            if (status === Loader.Error)
+                bridge.leaveSstvWorkspace()
+        }
     }
 
     // 1.0.571 - finestra DecoPort, creata alla prima apertura.
@@ -1731,16 +1741,26 @@ ApplicationWindow {
         }
     }
 
-    // Finestra RTTY (DecoRTTY innestato): stessa meccanica di DecoPort,
-    // creata alla prima apertura e non prima, perche' porta con se' il
-    // motore e i suoi pannelli.
-    function openRttyWindow() {
+    // Mostra la finestra gia' nel modo RTTY. Separata dal comando pubblico per
+    // evitare una ricorsione quando setMode emette modeChanged.
+    function showRttyWindow() {
         rttyWindowLoader.active = true
         if (rttyWindowLoader.item) {
             rttyWindowLoader.item.show()
             rttyWindowLoader.item.raise()
             rttyWindowLoader.item.requestActivate()
         }
+    }
+
+    // Aprire RTTY equivale a sceglierlo dal selettore dei modi: il cambio
+    // invalida le code del decoder precedente, ferma i suoi timer di slot e
+    // commuta CAT/frequenza secondo il profilo RTTY. Prima questa strada
+    // apriva soltanto la finestra e FT8/FT4/WSPR continuavano nel background.
+    function openRttyWindow() {
+        if (bridge.mode !== "RTTY")
+            bridge.mode = "RTTY"
+        if (bridge.mode === "RTTY")
+            mainWindow.showRttyWindow()
     }
 
     // Scegliere RTTY dal selettore dei modi apre la finestra: il modo e' attivo,
@@ -1752,7 +1772,7 @@ ApplicationWindow {
         target: bridge
         function onModeChanged() {
             if (bridge.mode === "RTTY")
-                mainWindow.openRttyWindow()
+                mainWindow.showRttyWindow()
         }
     }
 

@@ -70,6 +70,11 @@ public:
         emit sstvTxActiveChanged();
     }
 
+    Q_INVOKABLE void leaveSstvWorkspace()
+    {
+        m_calls.append(QStringLiteral("leave-workspace"));
+    }
+
 signals:
     void sstvTxActiveChanged();
 
@@ -264,7 +269,8 @@ private slots:
         QTRY_VERIFY_WITH_TIMEOUT(!window->isVisible(), 2'000);
         QCOMPARE(bridge.calls(),
                  QStringList({QStringLiteral("stop-rx"),
-                              QStringLiteral("cancel-tx")}));
+                              QStringLiteral("cancel-tx"),
+                              QStringLiteral("leave-workspace")}));
         QVERIFY(!bridge.sstvTxActive());
     }
 };
