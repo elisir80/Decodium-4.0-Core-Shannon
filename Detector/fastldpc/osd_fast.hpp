@@ -390,7 +390,7 @@ public:
     // l'errore che fece sembrare buona la ricerca larga, ritirata poi due volte
     // dal traffico vero: quel conteggio non vede quanti candidati per parola si
     // stanno davvero sottoponendo alla CRC.
-    long n_crc = 0;
+    long long n_crc = 0;
 
 private:
     struct alignas(32) Row { uint64_t w[RW]; };     // bitset su N

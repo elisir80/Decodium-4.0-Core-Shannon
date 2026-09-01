@@ -95,7 +95,7 @@ public:
     // da cui dipendono i nominativi fantasma: la CRC ne ammette uno ogni 16384.
     // E' strutturale e deterministico, quindi dice quello che il conteggio dei
     // fantasmi su una piscina di rumore gaussiano non riesce a dire.
-    long crc_tests() const { return osd_.n_crc; }
+    long long crc_tests() const { return osd_.n_crc; }
     void reset_crc_tests() { osd_.n_crc = 0; }
 
     // apmask (opzionale): [n][174], 1 sui bit gia' noti per ipotesi a priori.
