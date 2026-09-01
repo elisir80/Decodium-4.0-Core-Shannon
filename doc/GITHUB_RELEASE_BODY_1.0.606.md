@@ -33,6 +33,31 @@ Confirmed on the air for `ntau` 13 (paired comparison, two windows of 145 cycles
 on 7.074 FT8). Confirmed on the bench, on independent data and against ground
 truth, for the normalisation factor and the CQ a-priori — not yet on the air.
 
+### Fewer min-sum iterations
+
+The min-sum iteration cap goes from 30 to 10. Between 30 and 6 the decodes are
+identical — the difference, −0.1%, is inside the noise — over three SNRs and
+150,000 noise candidates. Ten rather than six because the bench measures on
+Gaussian noise, and real signals carry interference that Gaussian noise does not
+contain. **A further 5% off the decoder's time, with decodes unchanged.**
+`DECODIUM_LDPC_MAX_ITER` restores 30 without recompiling.
+
+### Two experimental a-priori paths, shipped switched off
+
+Two additional a-priori strategies are present but disabled by default
+(`DECODIUM_FT8_AP_STORICO`, `DECODIUM_FT8_AP_MSG`): one seeds the decoder from
+stations already heard, the other from whole candidate messages.
+
+On the bench they look spectacular — 0.8 dB and 4.4 dB. On the air the second
+one is worth **+1.2% of decodes**, and that is not a contradiction: the bench
+measures *at the threshold*, where every word is marginal by construction, while
+most real signals sit comfortably above it and need no help. A gain measured at
+the threshold has to be multiplied by the fraction of traffic that actually sits
+there, and that fraction is small.
+
+They are switched off for exactly that reason, and the numbers are recorded here
+so that nobody re-measures them at the threshold and announces four decibels.
+
 ### A-priori on CQ while you are busy
 
 Being engaged in a contact used to make you slightly deafer to everyone else:
