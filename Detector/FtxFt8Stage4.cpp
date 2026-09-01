@@ -4,6 +4,7 @@
 #include "helper_functions.h"
 
 #include <algorithm>
+#include "Detector/FtxApStorico.hpp"
 #include <array>
 #include <atomic>
 #include <cctype>
@@ -270,6 +271,7 @@ extern "C"
                                 int nzhsym, int nQSOProgress);
   void ftx_ft8_plan_pass_window_c (int requested_pass, int npasses,
                                    int* pass_first_out, int* pass_last_out);
+  int ftx_ft8_ap_storico_passate_c ();
   int ftx_ft8_prepare_decode_pass_c (int ipass, int nQSOProgress, int lapcqonly, int ncontest,
                                      int nfqso, int nftx, float f1, int napwid,
                                      int const* apsym, int const* aph10,
@@ -3320,6 +3322,9 @@ struct AsyncCollector
     if (decodeds) std::fill_n (decodeds, kFt8MaxLines * kFt8DecodedChars, ' ');
     count = 0;
     if (nout) *nout = 0;
+    // Una invocazione del decodificatore = uno slot. L'elenco delle stazioni
+    // sentite misura la propria memoria in questa scala.
+    decodium::apstorico::avanza_ciclo ();
   }
 
   void append (float sync, int snr, float dt, float freq,
@@ -3369,6 +3374,20 @@ struct AsyncCollector
       {
         *nout = count;
       }
+
+    // La stazione appena letta diventa un'ipotesi a priori per i cicli
+    // successivi, su questa frequenza. Si registra QUI e non piu' a monte
+    // perche' questo e' l'unico punto in cui una decodifica e' definitivamente
+    // accettata: prima ci sono ancora il controllo di plausibilita' e quello
+    // sui doppioni.
+    {
+      // L'inizializzazione a {} azzera tutto, quindi l'ultimo carattere e'
+      // gia' il terminatore che al campo a lunghezza fissa manca.
+      char msg[kFt8DecodedChars + 1] {};
+      std::copy (normalized_decoded.begin (), normalized_decoded.end (), msg);
+      decodium::apstorico::registra_da_messaggio (
+          decodium::apstorico::ciclo_corrente (), freq, msg);
+    }
   }
 
   void resolve_hash_placeholders ()
@@ -7187,7 +7206,12 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
       && !request.supplemental;
   if (live_full_ap || live_cq_ap_candidate)
     {
-      npasses = 8;
+      // Questi rami fissano la finestra a otto passate. Con l'a priori storico
+      // acceso servono anche gli slot in coda, dove stanno le ipotesi dalle
+      // stazioni sentite: senza questo, quelle passate non vengono MAI
+      // eseguite -- verificato, il tipo 7 non compariva mai fra quelli visti e
+      // la misura dava "nessuna differenza" per il motivo sbagliato.
+      npasses = 8 + ftx_ft8_ap_storico_passate_c ();
     }
   int pass_first = 1;
   int pass_last = std::max (0, npasses);

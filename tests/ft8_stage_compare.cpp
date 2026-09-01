@@ -19,6 +19,10 @@
 #include <QSet>
 #include <QStringList>
 #include <QTextStream>
+
+#include "Detector/FtxApStorico.hpp"
+#include <cstdlib>
+#include <iostream>
 #include <QtEndian>
 
 #include <fftw3.h>
@@ -27,6 +31,7 @@
 
 extern "C"
 {
+  int ftx_ft8_ap_storico_tentativi_c ();
   void ftx_ft8_async_decode_stage4_c (short const* iwave, int* nqsoprogress, int* nfqso, int* nftx,
                                       int* nutc, int* nfa, int* nfb, int* nzhsym, int* ndepth,
                                       float* emedelay, int* ncontest, int* nagain,
@@ -1192,6 +1197,28 @@ int main (int argc, char * argv[])
   try
     {
       QCoreApplication app {argc, argv};
+
+      // Innesco di prova per l'a priori storico. Il banco processa un file per
+      // invocazione, quindi l'elenco delle stazioni sentite parte vuoto e il
+      // tipo 7 non avrebbe niente da provare: la misura direbbe "nessuna
+      // differenza" e sarebbe una misura sbagliata, non un risultato negativo.
+      //
+      // Sta QUI e non accanto alla preparazione dell'a priori del banco:
+      // quella e' in un ramo che per questa invocazione non viene mai eseguito
+      // -- verificato con una stampa incondizionata che non compariva mai.
+      // L'a priori vero lo prepara il decodificatore al suo interno.
+      if (char const* seed = std::getenv ("DECODIUM_AP_STORICO_SEED"))
+        {
+          QByteArray const raw {seed};
+          int const sep = raw.indexOf (':');
+          if (sep > 0)
+            {
+              QByteArray const call = raw.left (sep);
+              decodium::apstorico::registra (
+                  decodium::apstorico::ciclo_corrente (),
+                  raw.mid (sep + 1).toFloat (), call.constData ());
+            }
+        }
       QCoreApplication::setApplicationName (QStringLiteral ("ft8_stage_compare"));
       QCoreApplication::setApplicationVersion (QStringLiteral ("1.0"));
 
@@ -1719,6 +1746,17 @@ int main (int argc, char * argv[])
           print_comparison (out, results.front (), results[i]);
         }
 
+        }
+
+      // Diagnostica della fase 1: quante stazioni sono finite nell'elenco
+      // delle sentite di recente. Serve a verificare che il collegamento
+      // funzioni, prima di costruirci sopra le ipotesi.
+      if (std::getenv ("DECODIUM_AP_STORICO_DIAG"))
+        {
+          std::cout << "ap_storico: " << decodium::apstorico::quante ()
+                    << " voci, ciclo " << decodium::apstorico::ciclo_corrente ()
+                    << ", tentativi tipo7 " << ftx_ft8_ap_storico_tentativi_c ()
+                    << std::endl;
         }
 
       return EXIT_SUCCESS;
