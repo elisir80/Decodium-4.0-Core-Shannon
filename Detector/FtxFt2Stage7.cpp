@@ -21,6 +21,7 @@
 #include "helper_functions.h"
 #include "Modulator/FtxMessageEncoder.hpp"
 #include "Detector/CallsignHash28.h"  // 1.0.294 — hash28 condiviso per AP cache
+#include "Detector/FtxApStorico.hpp"   // tipo 8: il messaggio intero sentito due slot fa
 
 namespace
 {
@@ -1412,6 +1413,100 @@ bool any_message_bits (std::array<signed char, kFt2Message91> const& message91)
   return false;
 }
 
+// A priori "tipo 8" per FT2: TUTTI i 77 bit del messaggio sentito due slot fa
+// alla stessa frequenza. E' la decodifica predittiva fatta attraverso l'LDPC:
+// con 77 bit imposti i 14 della CRC sono determinati e resta UNA parola di
+// codice compatibile, quindi il decoder non cerca un messaggio ma VERIFICA se
+// quel segnale c'e'. In FT8 (FtxDecodeBookkeeping.cpp) ha spostato la soglia
+// di 4,4 dB con zero falsi su ipotesi sbagliate; qui e' la stessa cosa con le
+// differenze di FT2: i bit dell'AP vivono nel dominio scrambled con rvec, la
+// finestra e' di due slot da 3,75 s, e l'ipotesi entra come passata in piu'
+// nello stesso blocco batch, quindi non costa una chiamata al decoder.
+//
+// Spento di default: DECODIUM_FT2_AP_MSG=1 lo accende. Con il flag spento il
+// comportamento e' bit-identico. L'archivio e' quello di FtxApStorico,
+// globale con mutex, perche' lo stato di Stage7 e' thread_local.
+bool ft2_ap_msg_attivo ()
+{
+  static bool const attivo = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_MSG");
+    return e && e[0] == '1';
+  }();
+  return attivo;
+}
+
+long long ft2_ap_msg_env_ms (char const* nome, long long predefinito)
+{
+  char const* e = std::getenv (nome);
+  if (!e || !*e) return predefinito;
+  long long const v = std::atoll (e);
+  return v >= 0 ? v : predefinito;
+}
+
+// Due slot FT2 sono 7,5 s; la finestra lascia un margine per l'istante in cui
+// il decoder viene invocato dentro lo slot (in FT2 ce n'e' piu' d'uno).
+long long ft2_ap_msg_min_ms ()
+{
+  static long long const v = ft2_ap_msg_env_ms ("DECODIUM_FT2_AP_MSG_MIN_MS", 5500);
+  return v;
+}
+
+long long ft2_ap_msg_max_ms ()
+{
+  static long long const v = ft2_ap_msg_env_ms ("DECODIUM_FT2_AP_MSG_MAX_MS", 9500);
+  return v;
+}
+
+// Tolleranza in frequenza: lo stesso +-10 Hz con cui Stage7 riaggancia il
+// candidato per la media fra slot.
+float ft2_ap_msg_hz ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_MSG_HZ");
+    float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+    return f > 0.0f ? f : 10.0f;
+  }();
+  return v;
+}
+
+std::atomic<int> g_ft2_msg_tentativi {0};
+std::atomic<int> g_ft2_msg_successi {0};
+std::atomic<int> g_ft2_msg_candidati {0};
+
+// Soglia della VERIFICA DIRETTA: distanza soft normalizzata fra la parola di
+// codice del messaggio atteso e i 174 LLR del candidato,
+//   nd = somma |llr| sui bit in disaccordo / somma |llr| su tutti i bit.
+// Misurato al banco (lab/README.md, 3 settembre) su 541 verifiche di ipotesi
+// FALSE -- rumore puro, messaggio scorrelato, messaggio correlato della stessa
+// stazione -- nd ha media 0,50 e deviazione 0,065, minimo 0,319. Le ipotesi
+// GIUSTE confermano a 0,00-0,23, con tre code fino a 0,29. A 0,22 la soglia
+// dista 4,3 deviazioni dai falsi (~1 su 100 000 verifiche) e costa 3 conferme
+// su 30; a 0,30 ne disterebbe 3 (~1 su 1000), troppo poco per una funzione che
+// puo' fare decine di verifiche per slot. DECODIUM_FT2_AP_MSG_ND la cambia.
+float ft2_ap_msg_nd_max ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_MSG_ND");
+    float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+    return (f > 0.0f && f <= 1.0f) ? f : 0.22f;
+  }();
+  return v;
+}
+
+// Registra i 77 bit (de-scrambled) di una riga emessa, se il tipo 8 e' acceso.
+void ft2_ap_msg_registra (float freq, int nap, std::array<signed char, kFt2Bits> const& bits)
+{
+  if (!ft2_ap_msg_attivo ())
+    {
+      return;
+    }
+  if (nap == 8)
+    {
+      g_ft2_msg_successi.fetch_add (1);
+    }
+  decodium::apstorico::registra_messaggio (freq, bits.data ());
+}
+
 bool prepare_ap_pass (Stage7State const& state, ApSetup const& setup,
                       std::array<float, kFt2Codeword> const& llrc, int ncontest,
                       int qso_progress, bool lapcqonly, int nfqso, float f_for_ap,
@@ -1647,9 +1742,85 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
       prepared.push_back (entry);
     }
 
+  // Tipo 8: VERIFICA DIRETTA del messaggio atteso, fuori dall'LDPC.
+  //
+  // Passare i 77 bit come a priori al decoder non basta: con 77 bit imposti
+  // l'OSD deve ancora indovinare i 14 bit d'informazione liberi fra quelli
+  // rumorosi, e sotto la soglia non ci riesce (misurato: a -19 dB con
+  // nd_max=1 nessuna decodifica). Ma il messaggio noto determina CRC e
+  // parita': la parola di codice compatibile e' UNA, e la domanda "questo
+  // segnale c'e'?" si risponde confrontandola con i 174 LLR. E' la statistica
+  // "bit" di lab/neural/train/predict.py, che nel modello vale +6,5 dB.
+  //
+  // Priorita': le decodifiche normali del blocco vincono; la verifica entra
+  // solo se il blocco non ha prodotto niente (in fondo alla funzione).
+  DecodePassResult atteso;
+  if (ft2_ap_msg_attivo () && !lapcqonly && ndepth0 != 1)
+    {
+      std::array<signed char, kFt2Bits> bits {};
+      if (decodium::apstorico::trova_messaggio (f_for_ap, ft2_ap_msg_hz (),
+                                                ft2_ap_msg_min_ms (), ft2_ap_msg_max_ms (),
+                                                bits.data ()) == 1)
+        {
+          g_ft2_msg_tentativi.fetch_add (1);
+          std::array<signed char, kFt2Bits> scrambled {};
+          for (int i = 0; i < kFt2Bits; ++i)
+            {
+              scrambled[static_cast<size_t> (i)] = static_cast<signed char> (
+                  (static_cast<int> (bits[static_cast<size_t> (i)])
+                   + state.rvec[static_cast<size_t> (i)]) & 1);
+            }
+          std::array<signed char, kFt2Codeword> codeword {};
+          if (encode_codeword77 (scrambled, &codeword))
+            {
+              float disaccordo = 0.0f;
+              float totale = 0.0f;
+              int nhard = 0;
+              for (int i = 0; i < kFt2Codeword; ++i)
+                {
+                  float const l = llrc[static_cast<size_t> (i)];
+                  int const hard = l > 0.0f ? 1 : 0;   // Decodium: positivo = bit 1
+                  float const mag = std::fabs (l);
+                  totale += mag;
+                  if (hard != static_cast<int> (codeword[static_cast<size_t> (i)]))
+                    {
+                      disaccordo += mag;
+                      ++nhard;
+                    }
+                }
+              float const nd = totale > 0.0f ? disaccordo / totale : 1.0f;
+              stage7_debug_logf ("atteso f=%.1f nd=%.3f nhard=%d soglia=%.3f",
+                                 f_for_ap, nd, nhard, ft2_ap_msg_nd_max ());
+              if (std::getenv ("DECODIUM_FT2_AP_MSG_LOG"))
+                {
+                  std::fprintf (stderr, "[APMSG] f=%.1f nd=%.3f nhard=%d\n",
+                                f_for_ap, static_cast<double> (nd), nhard);
+                  std::fflush (stderr);
+                }
+              if (nd <= ft2_ap_msg_nd_max ())
+                {
+                  QByteArray decoded;
+                  if (unpack_message77_with_context (bits, context, &decoded)
+                      && is_plausible_ft2_decoded_message (decoded))
+                    {
+                      atteso.ok = true;
+                      atteso.stop_candidate = true;
+                      atteso.message_fixed = decoded;
+                      atteso.bits = bits;
+                      atteso.iaptype = 8;
+                      atteso.selected_pass = npasses + 1;
+                      atteso.nharderror = nhard;
+                      atteso.maxosd = -1;
+                      atteso.dmin = disaccordo;
+                    }
+                }
+            }
+        }
+    }
+
   if (prepared.empty ())
     {
-      return result;
+      return atteso.ok ? atteso : result;
     }
 
   int maxosd = 3;
@@ -1769,6 +1940,10 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
       return result;
     }
 
+  if (atteso.ok)
+    {
+      return atteso;
+    }
   return result;
 }
 
@@ -1948,6 +2123,44 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
           stage7_debug_logf ("pass=%d ncand=%d", isp, ncand);
         }
 
+      // Candidato ATTESO: dove la memoria ha un messaggio sentito due slot
+      // fa e la ricerca non ha trovato niente entro la tolleranza, si forza un
+      // candidato a quella frequenza. Per lui i cancelli del sincronismo
+      // (smax, segmento 1, badsync, nsync) non valgono: la verifica la fa
+      // l'LDPC con i 77 bit noti, che in FT8 non ha prodotto un falso su
+      // ipotesi sbagliate, correlate o rumore puro.
+      std::array<unsigned char, kFt2MaxCand> cand_atteso {};
+      if (ft2_ap_msg_attivo () && ndepth0 != 1)
+        {
+          std::array<float, 16> fmem {};
+          int const nmem = decodium::apstorico::frequenze_messaggi (
+              ft2_ap_msg_min_ms (), ft2_ap_msg_max_ms (), fmem.data (),
+              static_cast<int> (fmem.size ()));
+          for (int k = 0; k < nmem && ncand < kFt2MaxCand; ++k)
+            {
+              float const fm = fmem[static_cast<size_t> (k)];
+              if (fm < static_cast<float> (nfa) || fm > static_cast<float> (nfb))
+                {
+                  continue;
+                }
+              bool vicino = false;
+              for (int j = 0; j < ncand && !vicino; ++j)
+                {
+                  vicino = std::fabs (candidate[static_cast<size_t> (j * 2)] - fm) <= ft2_ap_msg_hz ();
+                }
+              if (vicino)
+                {
+                  continue;
+                }
+              candidate[static_cast<size_t> (ncand * 2)] = fm;
+              candidate[static_cast<size_t> (ncand * 2 + 1)] = 1.0f;
+              cand_atteso[static_cast<size_t> (ncand)] = 1;
+              ++ncand;
+              g_ft2_msg_candidati.fetch_add (1);
+              stage7_debug_logf ("pass=%d candidato atteso f=%.1f", isp, fm);
+            }
+        }
+
       int newdata = 1;
       for (int icand = 0; icand < ncand; ++icand)
         {
@@ -1955,6 +2168,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
             {
               return;
             }
+          bool const atteso = cand_atteso[static_cast<size_t> (icand)] != 0;
           float const f0 = candidate[static_cast<size_t> (icand * 2)];
           float const snr = candidate[static_cast<size_t> (icand * 2 + 1)] - 1.0f;
           std::array<SegmentSearchTrace, 3> search_trace {};
@@ -2077,7 +2291,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               segment_trace.f1 = trace_f1;
               segment_trace.ibest = ibest;
               segment_trace.idfbest = idfbest;
-              if (smax < smaxthresh)
+              if (smax < smaxthresh && !atteso)
                 {
                   segment_trace.status = kFt2SearchRejectSmax;
                   if (stage7_trace_match (isp, trace_f1))
@@ -2088,7 +2302,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                     }
                   continue;
                 }
-              if (iseg > 1 && smax < segment1_smax)
+              if (iseg > 1 && smax < segment1_smax && !atteso)
                 {
                   segment_trace.status = kFt2SearchRejectSegment1;
                   if (stage7_trace_match (isp, trace_f1))
@@ -2133,7 +2347,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               stage7_debug_compare_bitmetrics_with_reference (
                   cd, bitmetrics, isp, icand + 1, iseg, ibest, f1);
               segment_trace.badsync = badsync;
-              if (badsync != 0)
+              if (badsync != 0 && !atteso)
                 {
                   segment_trace.status = kFt2SearchRejectBadsync;
                   if (stage7_trace_match (isp, f1))
@@ -2159,7 +2373,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               segment_trace.nsync = nsync_qual;
               int nsync_qual_min = 13;
               if (ndepth0 >= 3) nsync_qual_min = 10;
-              if (nsync_qual < nsync_qual_min)
+              if (nsync_qual < nsync_qual_min && !atteso)
                 {
                   segment_trace.status = kFt2SearchRejectNsync;
                   if (stage7_trace_match (isp, f1))
@@ -2390,7 +2604,8 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               // cache band-wide, rilassa il gate nharderror da 48 a 60 (recupera decode
               // borderline confermati). Strict-call già applicato in ft2MessageCallHashes.
               bool const cacheConfirmed = ft2_decode_cache_confirmed (decoded_best.message_fixed);
-              int const harderrLimit = cacheConfirmed ? 60 : 48;
+              int const harderrLimit = decoded_best.iaptype == 8 ? kFt2Codeword
+                                       : (cacheConfirmed ? 60 : 48);
               if (decoded_best.nharderror > harderrLimit)
                 {
                   stage7_debug_logf ("pass=%d cand=%d provisional decode=\"%s\" nharderror=%d dmin=%.3f confirmed=%d",
@@ -2408,6 +2623,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                   copy_decode_row (ndecodes, smax, nsnr, xdt, f1_best, napForRow, qual,
                                    decoded_best.bits, decoded_best.message_fixed, syncs, snrs, dts, freqs,
                                    naps, quals, bits77, decodeds);
+                  ft2_ap_msg_registra (f1_best, napForRow, decoded_best.bits);
                 }
               ++ndecodes;
               break;
@@ -2487,6 +2703,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                                state.dt_avg - 0.5f, state.f_avg, decoded.iaptype, qual,
                                decoded.bits, decoded.message_fixed,
                                syncs, snrs, dts, freqs, naps, quals, bits77, decodeds);
+              ft2_ap_msg_registra (state.f_avg, decoded.iaptype, decoded.bits);
               ++ndecodes;
               reset_average_state (state);
             }
@@ -2611,6 +2828,28 @@ extern "C" void ftx_ft2_stage7_clravg_c ()
 extern "C" int ftx_ft2_cpp_dsp_rollout_stage_c ()
 {
   return 7;
+}
+
+// Contatori del tipo 8, per il DECODEMETRIC e per i banchi: distinguere
+// "non viene eseguito" da "viene eseguito e non aiuta" richiede un contatore.
+extern "C" int ftx_ft2_ap_msg_tentativi_c ()
+{
+  return g_ft2_msg_tentativi.load ();
+}
+
+extern "C" int ftx_ft2_ap_msg_successi_c ()
+{
+  return g_ft2_msg_successi.load ();
+}
+
+extern "C" int ftx_ft2_ap_msg_memoria_c ()
+{
+  return decodium::apstorico::quanti_messaggi ();
+}
+
+extern "C" int ftx_ft2_ap_msg_candidati_c ()
+{
+  return g_ft2_msg_candidati.load ();
 }
 
 extern "C" void ftx_ft2_cpp_dsp_rollout_stage_reset_c ()

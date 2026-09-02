@@ -285,6 +285,35 @@ int quanti_messaggi ()
   return static_cast<int> (g_messaggi.size ());
 }
 
+int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_out)
+{
+  if (!out || max_out <= 0)
+    {
+      return 0;
+    }
+  long long const ora = adesso_ms ();
+  int n = 0;
+  std::lock_guard<std::mutex> guardia {g_mutex_msg};
+  for (auto it = g_messaggi.rbegin (); it != g_messaggi.rend () && n < max_out; ++it)
+    {
+      long long const eta = ora - it->ms;
+      if (eta < min_ms || eta > max_ms)
+        {
+          continue;
+        }
+      bool doppione = false;
+      for (int k = 0; k < n && !doppione; ++k)
+        {
+          doppione = std::fabs (out[k] - it->freq) <= 1.0f;
+        }
+      if (!doppione)
+        {
+          out[n++] = it->freq;
+        }
+    }
+  return n;
+}
+
 void azzera ()
 {
   {

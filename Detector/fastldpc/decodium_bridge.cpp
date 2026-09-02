@@ -440,6 +440,28 @@ static int fastldpc_max_hard () {
     return g_modo_ft8 ? 58 : 22;
 }
 
+// Parola con TUTTI i 77 bit del messaggio imposti dall'a priori (tipo 8):
+// gli errori contati sono sui 97 bit di parita' liberi, e la parola di codice
+// compatibile e' una sola, quindi il limite di 22 tarato sui fantasmi di FT2
+// non c'entra: taglierebbe proprio le verifiche deboli che sono il senso
+// dell'ipotesi. Si usa il valore di FT8, dove il tipo 8 e' stato misurato.
+// DECODIUM_LDPC_MAX_HARD_APMSG lo forza.
+static int fastldpc_max_hard_apmsg () {
+    static int const v = [] {
+        char const* raw = std::getenv ("DECODIUM_LDPC_MAX_HARD_APMSG");
+        int const n = raw ? std::atoi (raw) : 0;
+        return (n > 0 && n <= kN) ? n : 58;
+    }();
+    return v;
+}
+
+static int fastldpc_max_hard_per (signed char const* apmask_word) {
+    if (!apmask_word) return fastldpc_max_hard ();
+    int n_ap = 0;
+    for (int i = 0; i < kN; ++i) n_ap += apmask_word[i] != 0;
+    return n_ap >= 77 ? fastldpc_max_hard_apmsg () : fastldpc_max_hard ();
+}
+
 extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
                                               int maxosd, int norder,
                                               signed char const* apmask_in,
@@ -510,7 +532,7 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
     // d'ambiente del gate consolidato, cosi' i due percorsi si regolano
     // insieme.
     {
-        if (nhard > fastldpc_max_hard ()) {
+        if (nhard > fastldpc_max_hard_per (apmask_in)) {
             if (message91_out) std::memset (message91_out, 0, 91);
             if (cw_out) std::memset (cw_out, 0, kN);
             if (ntype_out) *ntype_out = 0;
@@ -614,10 +636,11 @@ extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
         // 1) bit ribaltati. Su 74 decodifiche vere di stazioni ripetute, da
         //    +11 a -26 dB: mediana 1, p99 16, massimo 20. I fantasmi partivano
         //    da 23, con una valle netta fra 19 e 22.
-        if (nhard > fastldpc_max_hard ()) {
+        int const max_hard = fastldpc_max_hard_per (apmask_in + (size_t) w * kN);
+        if (nhard > max_hard) {
             if (fastldpc_gate_log ())
                 std::fprintf (stderr, "[GATE] scartata: bit ribaltati %d > %d\n",
-                              nhard, fastldpc_max_hard ());
+                              nhard, max_hard);
             if (msg) std::memset (msg, 0, 91);
             if (cw) std::memset (cw, 0, kN);
             if (ntype_out) ntype_out[w] = 0;

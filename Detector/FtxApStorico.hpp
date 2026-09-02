@@ -110,6 +110,13 @@ int trova_messaggio (float freq_hz, float hz, long long min_ms, long long max_ms
 // Quanti messaggi sono in memoria, per diagnostica.
 int quanti_messaggi ();
 
+// Le frequenze (distinte entro 1 Hz) dei messaggi sentiti fra min_ms e max_ms
+// fa, al massimo max_out, dal piu' recente. Serve a FT2 per FORZARE un
+// candidato dove una stazione e' attesa: sotto la soglia del sincronismo il
+// candidato vero non entra in lista, e senza candidato l'ipotesi a 77 bit non
+// viene mai provata.
+int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_out);
+
 // Svuota l'elenco. Serve ai banchi di prova, per rendere le misure ripetibili,
 // e a un cambio di banda, dopo il quale le stazioni sentite prima non dicono
 // piu' niente su quali frequenze siano occupate.
