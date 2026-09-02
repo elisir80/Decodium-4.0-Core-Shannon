@@ -1458,14 +1458,22 @@ long long ft2_ap_msg_max_ms ()
   return v;
 }
 
-// Tolleranza in frequenza: lo stesso +-10 Hz con cui Stage7 riaggancia il
-// candidato per la media fra slot.
+// Tolleranza in frequenza. Misurato (lab/README.md, deriva): la ricerca del
+// sincronismo trova e affina il candidato anche con 8-10 Hz di deriva vera
+// (range nativo +-12 Hz intorno alla frequenza attesa), ma la VERIFICA finale
+// guarda il candidato alla sua frequenza GIA' AFFINATA (f_for_ap), che porta
+// sopra il rumore di stima qualche Hz in piu' della deriva vera -- a 10 Hz di
+// deriva il candidato si affinava a 10,99 Hz e uno scarto di 10 Hz lo
+// escludeva. Allargata a 20 Hz: la sicurezza non dipende da questa soglia
+// (la da' nd, sul contenuto del messaggio, non sulla frequenza -- misurato
+// zero falsi su 541 verifiche a 10 Hz, da riconfermare a 20), la frequenza
+// decide solo QUALE messaggio in memoria si prova a verificare.
 float ft2_ap_msg_hz ()
 {
   static float const v = [] {
     char const* e = std::getenv ("DECODIUM_FT2_AP_MSG_HZ");
     float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
-    return f > 0.0f ? f : 10.0f;
+    return f > 0.0f ? f : 20.0f;
   }();
   return v;
 }
@@ -2191,13 +2199,26 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                 {
                   continue;
                 }
-              bool vicino = false;
-              for (int j = 0; j < ncand && !vicino; ++j)
+              // Se un candidato NORMALE e' gia' vicino a fm non serve un altro
+              // slot, ma quel candidato deve avere comunque l'esenzione: senza,
+              // resta soggetto ai cancelli del sincronismo e li perde lo stesso
+              // se il segnale e' debole -- il motivo per cui il tipo 8 serve.
+              // (Misurato: senza questa marcatura, la conferma crolla da 8/10
+              // a 3/10 e poi 0/10 fra 8 e 12 Hz di deriva, perche' la ricerca
+              // normale comincia a proporre un candidato proprio in quella
+              // fascia e la forzatura si fermava li'.)
+              int vicino = -1;
+              for (int j = 0; j < ncand; ++j)
                 {
-                  vicino = std::fabs (candidate[static_cast<size_t> (j * 2)] - fm) <= ft2_ap_msg_hz ();
+                  if (std::fabs (candidate[static_cast<size_t> (j * 2)] - fm) <= ft2_ap_msg_hz ())
+                    {
+                      vicino = j;
+                      break;
+                    }
                 }
-              if (vicino)
+              if (vicino >= 0)
                 {
+                  cand_atteso[static_cast<size_t> (vicino)] = 1;
                   continue;
                 }
               candidate[static_cast<size_t> (ncand * 2)] = fm;
