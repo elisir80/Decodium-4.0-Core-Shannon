@@ -1538,13 +1538,19 @@ bool ft2_ap_soft_attivo ()
   return attivo;
 }
 
-// Magnitudine della spinta, nelle stesse unita' di llrc. Misurato al banco
-// (lab/README.md, 3 settembre): a 2,0 la spinta e' troppo forte e il
-// decoder puo' "tornare" al messaggio VECCHIO invece di leggere quello
-// vero -- misurato un caso concreto, "IU8LMC DL9XYZ RR73" letto come
-// "IU8LMC DL9XYZ -12". A 1,2 non e' mai successo (zero casi su tre banchi
-// di sicurezza) e il guadagno resta: +1/10 a -18 dB sul messaggio che
-// cambia tipo. Sotto 1,2 rischia di tornare a essere solo un blocco.
+// Magnitudine della spinta, nelle stesse unita' di llrc. A 2,0 il decoder
+// puo' "tornare" al messaggio VECCHIO invece di leggere quello vero
+// (misurato: "IU8LMC DL9XYZ RR73" letto come "IU8LMC DL9XYZ -12").
+//
+// ATTENZIONE (3 settembre, notte): 1,2 era stato misurato "sicuro" solo su
+// una coppia isolata di frequenze, mai su una banda vera. In aria, con un
+// segnale FORTE (-4/-8 dB) che registra il suo messaggio, la stessa spinta
+// ha fatto "decodificare" rumore puro altrove nella banda come se fosse
+// quel messaggio -- 184 righe identiche su quasi 300 Hz, alcune a SNR -26
+// dB, impossibile per una decodifica vera. Il flag resta spento di default
+// e va considerato NON SICURO finche' non si rifa' la misura su una banda
+// con un segnale forte e centinaia di candidati di rumore intorno, non su
+// una coppia isolata. Dettagli in lab/README.md, "RITIRATA".
 float ft2_ap_soft_mag ()
 {
   static float const v = [] {
