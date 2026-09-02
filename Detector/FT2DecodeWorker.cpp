@@ -28,6 +28,10 @@ extern "C"
                                       int* nout);
   void ftx_ft2_stage7_set_cancel_c (int cancel);
   void ftx_ft2_set_ap_hash_cache_c (quint32 const* hashes, int count);  // 1.0.294 AP cache Fase 1
+  int ftx_ft2_ap_msg_tentativi_c ();   // tipo 8: messaggio intero atteso
+  int ftx_ft2_ap_msg_successi_c ();
+  int ftx_ft2_ap_msg_memoria_c ();
+  int ftx_ft2_ap_msg_candidati_c ();
 }
 
 namespace
@@ -304,7 +308,7 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT2-async wait_ms=%1 decode_ms=%2 total_ms=%3 threads_req=%4 threads_active=%5 audio=%6 nout=%7 depth=%8 nfa=%9 nfb=%10 ap_cache=%11 thread=0x%12")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT2-async wait_ms=%1 decode_ms=%2 total_ms=%3 threads_req=%4 threads_active=%5 audio=%6 nout=%7 depth=%8 nfa=%9 nfb=%10 ap_cache=%11 thread=0x%12 ap_msg=%13 ap_msgok=%14 ap_msgmem=%15 ap_msgcand=%16")
                  .arg (waitMs)
                  .arg (decodeMs)
                  .arg (totalMs)
@@ -316,7 +320,11 @@ void FT2DecodeWorker::decodeAsync (AsyncDecodeRequest const& request)
                  .arg (nfa)
                  .arg (nfb)
                  .arg (request.apHashCache.size ())
-                 .arg (current_thread_id_hex ());
+                 .arg (current_thread_id_hex ())
+                 .arg (ftx_ft2_ap_msg_tentativi_c ())
+                 .arg (ftx_ft2_ap_msg_successi_c ())
+                 .arg (ftx_ft2_ap_msg_memoria_c ())
+                 .arg (ftx_ft2_ap_msg_candidati_c ());
     }
   Q_EMIT asyncDecodeReady (build_rows (utcPrefix, '~', nout, snrs, dts, freqs, naps, quals,
                                        decodeds));
@@ -401,7 +409,7 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT2 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT2 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 thread=0x%12 ap_msg=%13 ap_msgok=%14 ap_msgmem=%15 ap_msgcand=%16")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
@@ -413,7 +421,11 @@ void FT2DecodeWorker::decode (DecodeRequest const& request)
                  .arg (ndepth)
                  .arg (nfa)
                  .arg (nfb)
-                 .arg (current_thread_id_hex ());
+                 .arg (current_thread_id_hex ())
+                 .arg (ftx_ft2_ap_msg_tentativi_c ())
+                 .arg (ftx_ft2_ap_msg_successi_c ())
+                 .arg (ftx_ft2_ap_msg_memoria_c ())
+                 .arg (ftx_ft2_ap_msg_candidati_c ());
     }
   Q_EMIT decodeReady (request.serial, build_rows (utcPrefix, '~', nout, snrs, dts, freqs, naps,
                                                   quals, decodeds));
