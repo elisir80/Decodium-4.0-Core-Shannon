@@ -142,6 +142,47 @@ int main (int argc, char* argv[])
   registra_da_messaggio (5, 1500.0f, "CQ");
   esito (out, quante () == 0, QStringLiteral ("\"CQ\" da solo non registra niente"));
 
+  // 4b) FT8 e FT2 non devono leggersi l'archivio a vicenda. Un messaggio FT8
+  // non e' mai presente nell'audio di uno slot FT2: come ipotesi non puo'
+  // andare a buon fine, e in cambio espone alla CRC-14. Tutto il costo del
+  // rischio e zero guadagno possibile, quindi la ricerca filtra per modo.
+  out << "\n4b) l'archivio dei messaggi e' separato per modo\n";
+  {
+    azzera ();
+    std::array<signed char, 77> bits_ft8 {};
+    std::array<signed char, 77> bits_ft2 {};
+    for (int i = 0; i < 77; ++i)
+      {
+        bits_ft8[static_cast<size_t> (i)] = static_cast<signed char> (i & 1);
+        bits_ft2[static_cast<size_t> (i)] = static_cast<signed char> ((i + 1) & 1);
+      }
+    registra_messaggio (1500.0f, bits_ft8.data (), kModoFt8);
+    registra_messaggio (2000.0f, bits_ft2.data (), kModoFt2);
+
+    std::array<signed char, 77> letto {};
+    esito (out, trova_messaggio (1500.0f, 5.0f, 0, 60000, letto.data (), kModoFt8) == 1
+                && letto == bits_ft8,
+           QStringLiteral ("FT8 ritrova il proprio messaggio"));
+    esito (out, trova_messaggio (2000.0f, 5.0f, 0, 60000, letto.data (), kModoFt2) == 1
+                && letto == bits_ft2,
+           QStringLiteral ("FT2 ritrova il proprio messaggio"));
+    esito (out, trova_messaggio (2000.0f, 5.0f, 0, 60000, letto.data (), kModoFt8) == 0,
+           QStringLiteral ("FT8 NON vede il messaggio di FT2"));
+    esito (out, trova_messaggio (1500.0f, 5.0f, 0, 60000, letto.data (), kModoFt2) == 0,
+           QStringLiteral ("FT2 NON vede il messaggio di FT8"));
+
+    std::array<float, 8> freq {};
+    esito (out, frequenze_messaggi (0, 60000, freq.data (), 8, kModoFt2) == 1
+                && freq[0] > 1999.0f && freq[0] < 2001.0f,
+           QStringLiteral ("le frequenze attese di FT2 sono solo le sue"));
+    esito (out, frequenze_messaggi (0, 60000, freq.data (), 8, kModoFt8) == 1
+                && freq[0] > 1499.0f && freq[0] < 1501.0f,
+           QStringLiteral ("le frequenze attese di FT8 sono solo le sue"));
+    esito (out, quanti_messaggi () == 2,
+           QStringLiteral ("l'archivio resta uno solo (2 voci)"));
+    azzera ();
+  }
+
   out << "\n5) il contatore di ciclo avanza\n";
   int const c0 = ciclo_corrente ();
   int const c1 = avanza_ciclo ();
