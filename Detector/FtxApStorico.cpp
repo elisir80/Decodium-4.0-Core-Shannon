@@ -203,6 +203,7 @@ constexpr int kBit = 77;
 
 struct Messaggio
 {
+  int modo {kModoFt8};
   long long ms;                  // quando, su orologio monotono
   float freq;
   signed char bits[kBit];
@@ -223,13 +224,14 @@ long long adesso_ms ()
 
 }  // namespace
 
-void registra_messaggio (float freq_hz, signed char const* bits77)
+void registra_messaggio (float freq_hz, signed char const* bits77, int modo)
 {
   if (!bits77)
     {
       return;
     }
   Messaggio m {};
+  m.modo = modo;
   m.ms = adesso_ms ();
   m.freq = freq_hz;
   std::memcpy (m.bits, bits77, kBit);
@@ -243,7 +245,7 @@ void registra_messaggio (float freq_hz, signed char const* bits77)
 }
 
 int trova_messaggio (float freq_hz, float hz, long long min_ms, long long max_ms,
-                     signed char* out77)
+                     signed char* out77, int modo)
 {
   if (!out77)
     {
@@ -264,6 +266,10 @@ int trova_messaggio (float freq_hz, float hz, long long min_ms, long long max_ms
   // piu' probabile.
   for (auto it = g_messaggi.rbegin (); it != g_messaggi.rend (); ++it)
     {
+      if (it->modo != modo)
+        {
+          continue;
+        }
       long long const eta = ora - it->ms;
       if (eta < min_ms || eta > max_ms)
         {
@@ -285,7 +291,8 @@ int quanti_messaggi ()
   return static_cast<int> (g_messaggi.size ());
 }
 
-int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_out)
+int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_out,
+                        int modo)
 {
   if (!out || max_out <= 0)
     {
@@ -296,6 +303,10 @@ int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_
   std::lock_guard<std::mutex> guardia {g_mutex_msg};
   for (auto it = g_messaggi.rbegin (); it != g_messaggi.rend () && n < max_out; ++it)
     {
+      if (it->modo != modo)
+        {
+          continue;
+        }
       long long const eta = ora - it->ms;
       if (eta < min_ms || eta > max_ms)
         {

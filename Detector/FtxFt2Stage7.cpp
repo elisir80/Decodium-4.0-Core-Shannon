@@ -1528,7 +1528,7 @@ void ft2_ap_msg_registra (float freq, int nap, std::array<signed char, kFt2Bits>
     {
       g_ft2_msg_successi.fetch_add (1);
     }
-  decodium::apstorico::registra_messaggio (freq, bits.data ());
+  decodium::apstorico::registra_messaggio (freq, bits.data (), decodium::apstorico::kModoFt2);
 }
 
 bool prepare_ap_pass (Stage7State const& state, ApSetup const& setup,
@@ -1785,7 +1785,7 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
       std::array<signed char, kFt2Bits> bits {};
       if (decodium::apstorico::trova_messaggio (f_for_ap, ft2_ap_msg_hz (),
                                                 ft2_ap_msg_min_ms (), ft2_ap_msg_max_ms (),
-                                                bits.data ()) == 1)
+                                                bits.data (), decodium::apstorico::kModoFt2) == 1)
         {
           g_ft2_msg_tentativi.fetch_add (1);
           std::array<signed char, kFt2Bits> scrambled {};
@@ -2183,7 +2183,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
           std::array<float, 16> fmem {};
           int const nmem = decodium::apstorico::frequenze_messaggi (
               ft2_ap_msg_min_ms (), ft2_ap_msg_max_ms (), fmem.data (),
-              static_cast<int> (fmem.size ()));
+              static_cast<int> (fmem.size ()), decodium::apstorico::kModoFt2);
           for (int k = 0; k < nmem && ncand < kFt2MaxCand; ++k)
             {
               float const fm = fmem[static_cast<size_t> (k)];

@@ -98,14 +98,21 @@ int ciclo_corrente ();
 constexpr long long kDueSlotMinMs = 25000;   // 30 s +- 5, cioe' due slot FT8
 constexpr long long kDueSlotMaxMs = 35000;
 
+// Il modo che ha prodotto il messaggio. L'archivio e' uno solo per tutto il
+// processo, ma FT8 e FT2 NON devono leggersi a vicenda: un messaggio FT8 non
+// sara' mai presente nell'audio di uno slot FT2, quindi come ipotesi e' un
+// tentativo che non puo' andare a buon fine e in compenso espone alla CRC.
+constexpr int kModoFt8 = 0;
+constexpr int kModoFt2 = 1;
+
 // Registra i 77 bit di un messaggio decodificato, con la sua frequenza.
-void registra_messaggio (float freq_hz, signed char const* bits77);
+void registra_messaggio (float freq_hz, signed char const* bits77, int modo = kModoFt8);
 
 // I 77 bit di un messaggio sentito a questa frequenza fra min_ms e max_ms fa.
 // Ritorna 1 se ne ha trovato uno e ha riempito out77, 0 altrimenti. Se ce ne
 // fosse piu' d'uno prende il piu' recente.
 int trova_messaggio (float freq_hz, float hz, long long min_ms, long long max_ms,
-                     signed char* out77);
+                     signed char* out77, int modo = kModoFt8);
 
 // Quanti messaggi sono in memoria, per diagnostica.
 int quanti_messaggi ();
@@ -115,7 +122,8 @@ int quanti_messaggi ();
 // candidato dove una stazione e' attesa: sotto la soglia del sincronismo il
 // candidato vero non entra in lista, e senza candidato l'ipotesi a 77 bit non
 // viene mai provata.
-int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_out);
+int frequenze_messaggi (long long min_ms, long long max_ms, float* out, int max_out,
+                        int modo = kModoFt8);
 
 // Svuota l'elenco. Serve ai banchi di prova, per rendere le misure ripetibili,
 // e a un cambio di banda, dopo il quale le stazioni sentite prima non dicono
