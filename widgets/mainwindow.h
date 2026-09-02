@@ -226,6 +226,7 @@ public:
   void legacySetAudioOutputChannel(int channel);
   void legacySetRxInputLevel(int value);
   void legacySetTxOutputAttenuation(int value);
+  void legacySetStationIdentity(QString const& callsign, QString const& grid);
   void legacySetDxCall(QString const& call);
   void legacySetDxGrid(QString const& grid);
   void legacySetTxMessage(int index, QString const& message);
@@ -1525,6 +1526,12 @@ private:
   QString m_BestCQpriority;
   QString m_deCall;
   QString m_deGrid;
+  // Decodium's QML shell owns the active station profile.  Keep its identity
+  // separately from m_config so the embedded legacy engine cannot leak the
+  // callsign/grid from its own hidden configuration on a mode change.
+  QString m_embeddedStationCallsign;
+  QString m_embeddedStationGrid;
+  bool m_embeddedStationIdentityOverrideActive {false};
   QString m_freeTextMsg;
   QString m_freeTextMsg0;
   QString m_ready2call[50];

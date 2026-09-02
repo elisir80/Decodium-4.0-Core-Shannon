@@ -62,6 +62,11 @@ public:
     bool superFoxEnabled() const;
     QStringList foxCallerQueueLines() const;
 
+    // The embedded widget backend has its own legacy configuration store.  It
+    // must never use that store as the station-identity authority while it is
+    // hosted by the QML application, otherwise a mode change can regenerate
+    // messages with a callsign from an unrelated legacy profile.
+    void setStationIdentity(const QString& callsign, const QString& grid);
     void setMode(const QString& mode);
     void setFt2DecodeEnabled(bool enabled);
     void setDialFrequency(double frequencyHz);
