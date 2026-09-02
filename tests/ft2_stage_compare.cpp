@@ -34,6 +34,8 @@ extern "C"
   int ftx_ft2_ap_msg_successi_c ();
   int ftx_ft2_ap_msg_memoria_c ();
   int ftx_ft2_ap_msg_candidati_c ();
+  int ftx_ft2_ap_soft_tentativi_c ();
+  int ftx_ft2_ap_soft_successi_c ();
 }
 
 namespace
@@ -574,7 +576,9 @@ int main (int argc, char * argv[])
               out << "ap_msg: tentativi=" << ftx_ft2_ap_msg_tentativi_c ()
                   << " successi=" << ftx_ft2_ap_msg_successi_c ()
                   << " memoria=" << ftx_ft2_ap_msg_memoria_c ()
-                  << " candidati_forzati=" << ftx_ft2_ap_msg_candidati_c () << '\n' << '\n';
+                  << " candidati_forzati=" << ftx_ft2_ap_msg_candidati_c ()
+                  << " ap_soft_tentativi=" << ftx_ft2_ap_soft_tentativi_c ()
+                  << " ap_soft_successi=" << ftx_ft2_ap_soft_successi_c () << '\n' << '\n';
             }
         }
 

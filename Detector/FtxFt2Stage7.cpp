@@ -1505,6 +1505,59 @@ std::atomic<int> g_ft2_msg_tentativi {0};
 std::atomic<int> g_ft2_msg_successi {0};
 std::atomic<int> g_ft2_msg_candidati {0};
 
+// AP MORBIDO dal frame precedente (3b della spec): a differenza del tipo 8,
+// che verifica un messaggio ripetuto TALE E QUALE, questo aiuta un QSO che
+// AVANZA -- stesso mittente e stesso destinatario, ma il rapporto o il
+// saluto sono cambiati da uno slot al successivo. I bit del messaggio dello
+// slot precedente diventano una spinta LIMITATA sugli LLR (non un blocco
+// come apmask): un bit realmente cambiato ha comunque il segnale vero a
+// smentirlo, un bit rumoroso ma davvero rimasto uguale viene aiutato a
+// superare la soglia. Passa dall'LDPC/OSD normale: la CRC-14 resta l'unico
+// giudice finale, la spinta non e' mai sufficiente da sola a decidere.
+//
+// Finestra piu' stretta del tipo 8 (uno slot indietro, non due): qui serve
+// il messaggio APPENA PRIMA, non "sentito di recente".
+long long ft2_ap_soft_min_ms ()
+{
+  static long long const v = ft2_ap_msg_env_ms ("DECODIUM_FT2_AP_SOFT_MIN_MS", 0);
+  return v;
+}
+
+long long ft2_ap_soft_max_ms ()
+{
+  static long long const v = ft2_ap_msg_env_ms ("DECODIUM_FT2_AP_SOFT_MAX_MS", 8500);
+  return v;
+}
+
+bool ft2_ap_soft_attivo ()
+{
+  static bool const attivo = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_SOFT");
+    return e && e[0] == '1';
+  }();
+  return attivo;
+}
+
+// Magnitudine della spinta, nelle stesse unita' di llrc. Misurato al banco
+// (lab/README.md, 3 settembre): a 2,0 la spinta e' troppo forte e il
+// decoder puo' "tornare" al messaggio VECCHIO invece di leggere quello
+// vero -- misurato un caso concreto, "IU8LMC DL9XYZ RR73" letto come
+// "IU8LMC DL9XYZ -12". A 1,2 non e' mai successo (zero casi su tre banchi
+// di sicurezza) e il guadagno resta: +1/10 a -18 dB sul messaggio che
+// cambia tipo. Sotto 1,2 rischia di tornare a essere solo un blocco.
+float ft2_ap_soft_mag ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_SOFT_MAG");
+    float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+    return f > 0.0f ? f : 1.2f;
+  }();
+  return v;
+}
+
+std::atomic<int> g_ft2_soft_tentativi {0};
+std::atomic<int> g_ft2_soft_successi {0};
+
 // Soglia della VERIFICA DIRETTA: distanza soft normalizzata fra la parola di
 // codice del messaggio atteso e i 174 LLR del candidato,
 //   nd = somma |llr| sui bit in disaccordo / somma |llr| su tutti i bit.
@@ -1528,7 +1581,13 @@ float ft2_ap_msg_nd_max ()
 // Registra i 77 bit (de-scrambled) di una riga emessa, se il tipo 8 e' acceso.
 void ft2_ap_msg_registra (float freq, int nap, std::array<signed char, kFt2Bits> const& bits)
 {
-  if (!ft2_ap_msg_attivo ())
+  // Registra se un QUALUNQUE meccanismo che legge questo archivio e' acceso:
+  // il tipo 8 (verifica esatta) e l'AP morbido (spinta sul frame successivo)
+  // condividono lo stesso archivio in FtxApStorico. Senza questo OR, accendere
+  // solo l'AP morbido lasciava la memoria sempre vuota, perche' registrava
+  // solo se il tipo 8 era attivo -- scoperto misurando: ap_soft_tentativi
+  // restava a zero anche con DECODIUM_FT2_AP_SOFT=1.
+  if (!ft2_ap_msg_attivo () && !ft2_ap_soft_attivo ())
     {
       return;
     }
@@ -1775,6 +1834,45 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
       prepared.push_back (entry);
     }
 
+  // AP morbido: una passata IN PIU' (le altre restano intatte), con gli LLR
+  // di llrc spostati verso il messaggio dello slot precedente. iaptype=9 la
+  // distingue nei log e nel campo nap della riga emessa.
+  if (ft2_ap_soft_attivo () && !lapcqonly && ndepth0 != 1
+      && ncontest == 0 /* il rapporto contest non deve farsi trascinare */)
+    {
+      std::array<signed char, kFt2Bits> bits {};
+      if (decodium::apstorico::trova_messaggio (f_for_ap, ft2_ap_msg_hz (),
+                                                ft2_ap_soft_min_ms (), ft2_ap_soft_max_ms (),
+                                                bits.data (), decodium::apstorico::kModoFt2) == 1)
+        {
+          std::array<signed char, kFt2Bits> scrambled {};
+          for (int i = 0; i < kFt2Bits; ++i)
+            {
+              scrambled[static_cast<size_t> (i)] = static_cast<signed char> (
+                  (static_cast<int> (bits[static_cast<size_t> (i)])
+                   + state.rvec[static_cast<size_t> (i)]) & 1);
+            }
+          std::array<signed char, kFt2Codeword> codeword {};
+          if (encode_codeword77 (scrambled, &codeword))
+            {
+              g_ft2_soft_tentativi.fetch_add (1);
+              float const mag = ft2_ap_soft_mag ();
+              PreparedPass entry;
+              entry.llr = llrc;
+              entry.apmask.fill (0);
+              for (int i = 0; i < kFt2Codeword; ++i)
+                {
+                  float const spinta = codeword[static_cast<size_t> (i)] ? mag : -mag;
+                  entry.llr[static_cast<size_t> (i)] += spinta;
+                }
+              entry.ipass = npasses + 2;
+              entry.iaptype = 9;
+              stage7_debug_log_llr_state (entry.ipass, entry.iaptype, f_for_ap, entry.llr, entry.apmask);
+              prepared.push_back (entry);
+            }
+        }
+    }
+
   // Tipo 8: VERIFICA DIRETTA del messaggio atteso, fuori dall'LDPC.
   //
   // Passare i 77 bit come a priori al decoder non basta: con 77 bit imposti
@@ -1931,6 +2029,10 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
       if (!any_message_bits (message91))
         {
           continue;
+        }
+      if (iaptype == 9)
+        {
+          g_ft2_soft_successi.fetch_add (1);
         }
 
       // Il gate anti-fantasma che stava qui e' stato consolidato dentro il
@@ -2931,6 +3033,16 @@ extern "C" int ftx_ft2_ap_msg_memoria_c ()
 extern "C" int ftx_ft2_ap_msg_candidati_c ()
 {
   return g_ft2_msg_candidati.load ();
+}
+
+extern "C" int ftx_ft2_ap_soft_tentativi_c ()
+{
+  return g_ft2_soft_tentativi.load ();
+}
+
+extern "C" int ftx_ft2_ap_soft_successi_c ()
+{
+  return g_ft2_soft_successi.load ();
 }
 
 extern "C" void ftx_ft2_cpp_dsp_rollout_stage_reset_c ()
