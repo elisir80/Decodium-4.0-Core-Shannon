@@ -1542,15 +1542,17 @@ bool ft2_ap_soft_attivo ()
 // puo' "tornare" al messaggio VECCHIO invece di leggere quello vero
 // (misurato: "IU8LMC DL9XYZ RR73" letto come "IU8LMC DL9XYZ -12").
 //
-// ATTENZIONE (3 settembre, notte): 1,2 era stato misurato "sicuro" solo su
-// una coppia isolata di frequenze, mai su una banda vera. In aria, con un
-// segnale FORTE (-4/-8 dB) che registra il suo messaggio, la stessa spinta
-// ha fatto "decodificare" rumore puro altrove nella banda come se fosse
-// quel messaggio -- 184 righe identiche su quasi 300 Hz, alcune a SNR -26
-// dB, impossibile per una decodifica vera. Il flag resta spento di default
-// e va considerato NON SICURO finche' non si rifa' la misura su una banda
-// con un segnale forte e centinaia di candidati di rumore intorno, non su
-// una coppia isolata. Dettagli in lab/README.md, "RITIRATA".
+// ATTENZIONE (3 settembre, notte): una prova in aria sembrava mostrare un
+// segnale fortissimo che "decodificava" rumore puro altrove nella banda
+// (stesso messaggio su ~300 Hz, SNR -26 dB in alcune righe) con questo flag
+// acceso. Riprovato con IL FLAG SPENTO: lo stesso pattern si ripresenta
+// identico -- e' un difetto preesistente (probabile aliasing/cache piu'
+// vecchia), non causato dall'AP morbido. La prova che l'aveva fatto ritirare
+// era viziata. Questo pero' NON lo rimette fra le cose provate sicure: il
+// banco isolato (coppia di frequenze, forte fisso a -8 dB) non ha mai testato
+// "segnale fortissimo (+2/+5 dB) + centinaia di candidati intorno", che resta
+// da fare. Stato: APERTO, ne' sicuro ne' provato pericoloso dal vivo. Storia
+// completa in lab/README.md.
 float ft2_ap_soft_mag ()
 {
   static float const v = [] {
