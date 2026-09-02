@@ -93,6 +93,7 @@ DecodiumUpdater::DecodiumUpdater(QObject* parent)
     : QObject(parent)
     , m_nam(new QNetworkAccessManager(this))
     , m_currentVersion(QStringLiteral(FORK_RELEASE_VERSION))
+    , m_releaseRepository(QString::fromLatin1(kPrimaryRepository))
     , m_releasePageUrl(QString::fromLatin1(kPrimaryReleasesPage))
 {
     m_checkOnStartup = settingsStore().value(kKeyCheckOnStartup, true).toBool();
@@ -223,6 +224,7 @@ void DecodiumUpdater::finishCheckWithoutUpdate(bool silent)
     m_releaseNotes.clear();
     m_downloadUrl.clear();
     m_assetName.clear();
+    m_releaseRepository = QString::fromLatin1(kPrimaryRepository);
     m_releasePageUrl = QString::fromLatin1(kPrimaryReleasesPage);
     emit stateChanged();
     setStatus(tr("Decodium is up to date (%1).").arg(m_currentVersion));
@@ -298,6 +300,7 @@ void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent, bool se
     }
 
     m_latestVersion = version;
+    m_releaseRepository = QString::fromLatin1(repositoryName(secondary));
     m_releaseNotes  = root.value(QStringLiteral("body")).toString();
     m_releasePageUrl = QString::fromLatin1(releasesPage(secondary));
 
@@ -318,6 +321,12 @@ void DecodiumUpdater::onCheckFinished(QNetworkReply* reply, bool silent, bool se
             m_downloadUrl = a.value(QStringLiteral("browser_download_url")).toString();
         }
     }
+
+    qInfo().noquote()
+        << "[UPDATE] Selected GitHub release"
+        << "repository=" << m_releaseRepository
+        << "version=" << m_latestVersion
+        << "asset=" << (m_assetName.isEmpty() ? QStringLiteral("release-page") : m_assetName);
 
     const QString skipped = settingsStore().value(kKeySkippedVersion).toString();
     m_available = true;

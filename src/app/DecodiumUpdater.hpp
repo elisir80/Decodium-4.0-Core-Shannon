@@ -35,6 +35,7 @@ class DecodiumUpdater : public QObject
     Q_PROPERTY(bool    available       READ available       NOTIFY stateChanged)
     Q_PROPERTY(QString currentVersion  READ currentVersion  CONSTANT)
     Q_PROPERTY(QString latestVersion   READ latestVersion   NOTIFY stateChanged)
+    Q_PROPERTY(QString releaseRepository READ releaseRepository NOTIFY stateChanged)
     Q_PROPERTY(QString releaseNotes    READ releaseNotes    NOTIFY stateChanged)
     Q_PROPERTY(bool    busy            READ busy            NOTIFY busyChanged)
     Q_PROPERTY(int     progress        READ progress        NOTIFY progressChanged)  // 0-100, -1 = indeterminato
@@ -49,6 +50,7 @@ public:
     bool    available()      const { return m_available; }
     QString currentVersion() const { return m_currentVersion; }
     QString latestVersion()  const { return m_latestVersion; }
+    QString releaseRepository() const { return m_releaseRepository; }
     QString releaseNotes()   const { return m_releaseNotes; }
     bool    busy()           const { return m_busy; }
     int     progress()       const { return m_progress; }
@@ -104,6 +106,7 @@ private:
     QNetworkAccessManager* m_nam {nullptr};
     QString m_currentVersion;
     QString m_latestVersion;
+    QString m_releaseRepository;
     QString m_releaseNotes;
     QString m_downloadUrl;
     QString m_assetName;

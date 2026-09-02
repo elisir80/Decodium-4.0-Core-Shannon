@@ -357,10 +357,15 @@ Dialog {
             selectedWorkingFrequencyIndex = -1
         if (selectedStationFrequencyIndex >= stationFrequencyRows.length)
             selectedStationFrequencyIndex = -1
-        if (typeof frequencySlopeField !== "undefined")
-            frequencySlopeField.text = Number(bridge.frequencyCalibrationSlopePpm()).toFixed(5)
-        if (typeof frequencyInterceptField !== "undefined")
-            frequencyInterceptField.text = Number(bridge.frequencyCalibrationInterceptHz()).toFixed(2)
+        var page = frequencySettingsPage()
+        if (page) {
+            page.calibrationSlopeFieldControl.text = Number(bridge.frequencyCalibrationSlopePpm()).toFixed(5)
+            page.calibrationInterceptFieldControl.text = Number(bridge.frequencyCalibrationInterceptHz()).toFixed(2)
+        }
+    }
+
+    function frequencySettingsPage() {
+        return settingsTab7Loader && settingsTab7Loader.item ? settingsTab7Loader.item : null
     }
 
     function commitFrequencySlope(text) {
@@ -396,28 +401,37 @@ Dialog {
         if (!row)
             return
         selectedWorkingFrequencyIndex = Number(row.index)
-        setComboText(frequencyRegionCombo, row.region || "All")
-        setComboText(frequencyModeCombo, row.mode || "FT8")
-        frequencyMHzField.text = row.frequencyMHz || ""
-        frequencyPreferredCheck.checked = !!row.preferred
-        frequencyDescriptionField.text = row.description || ""
-        frequencyStartField.text = row.startTime || ""
-        frequencyEndField.text = row.endTime || ""
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        setComboText(page.workingFrequencyRegionControl, row.region || "All")
+        setComboText(page.workingFrequencyModeControl, row.mode || "FT8")
+        page.workingFrequencyMHzControl.text = row.frequencyMHz || ""
+        page.workingFrequencyPreferredControl.checked = !!row.preferred
+        page.workingFrequencyDescriptionControl.text = row.description || ""
+        page.workingFrequencyStartControl.text = row.startTime || ""
+        page.workingFrequencyEndControl.text = row.endTime || ""
     }
 
     function clearWorkingFrequencyEditor() {
         selectedWorkingFrequencyIndex = -1
-        setComboText(frequencyRegionCombo, "All")
-        setComboText(frequencyModeCombo, bridge.mode || "FT8")
-        frequencyMHzField.text = ""
-        frequencyPreferredCheck.checked = false
-        frequencyDescriptionField.text = ""
-        frequencyStartField.text = ""
-        frequencyEndField.text = ""
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        setComboText(page.workingFrequencyRegionControl, "All")
+        setComboText(page.workingFrequencyModeControl, bridge.mode || "FT8")
+        page.workingFrequencyMHzControl.text = ""
+        page.workingFrequencyPreferredControl.checked = false
+        page.workingFrequencyDescriptionControl.text = ""
+        page.workingFrequencyStartControl.text = ""
+        page.workingFrequencyEndControl.text = ""
     }
 
     function workingFrequencyEditorFrequencyText() {
-        var text = String(frequencyMHzField.text || "").trim()
+        var page = frequencySettingsPage()
+        if (!page)
+            return ""
+        var text = String(page.workingFrequencyMHzControl.text || "").trim()
         var lower = text.toLowerCase()
         var explicitMHz = lower.indexOf("mhz") >= 0
         var explicitHz = lower.indexOf("hz") >= 0 && !explicitMHz
@@ -440,30 +454,36 @@ Dialog {
 
     function newWorkingFrequencyEditor() {
         selectedWorkingFrequencyIndex = -1
-        setComboText(frequencyRegionCombo, "All")
-        setComboText(frequencyModeCombo, bridge.mode || "FT8")
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        setComboText(page.workingFrequencyRegionControl, "All")
+        setComboText(page.workingFrequencyModeControl, bridge.mode || "FT8")
         var currentHz = Number(bridge.frequency) || 0
-        frequencyMHzField.text = currentHz > 0 ? (currentHz / 1000000.0).toFixed(6) : ""
-        frequencyPreferredCheck.checked = true
-        frequencyDescriptionField.text = ""
-        frequencyStartField.text = ""
-        frequencyEndField.text = ""
+        page.workingFrequencyMHzControl.text = currentHz > 0 ? (currentHz / 1000000.0).toFixed(6) : ""
+        page.workingFrequencyPreferredControl.checked = true
+        page.workingFrequencyDescriptionControl.text = ""
+        page.workingFrequencyStartControl.text = ""
+        page.workingFrequencyEndControl.text = ""
         Qt.callLater(function() {
-            frequencyMHzField.forceActiveFocus()
-            frequencyMHzField.selectAll()
+            page.workingFrequencyMHzControl.forceActiveFocus()
+            page.workingFrequencyMHzControl.selectAll()
         })
     }
 
     function addWorkingFrequencyFromEditor() {
         if (!workingFrequencyEditorHasValidFrequency())
             return
-        if (bridge.addWorkingFrequencyRow(frequencyRegionCombo.currentText,
-                                          frequencyModeCombo.currentText,
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        if (bridge.addWorkingFrequencyRow(page.workingFrequencyRegionControl.currentText,
+                                          page.workingFrequencyModeControl.currentText,
                                           workingFrequencyEditorFrequencyText(),
-                                          frequencyDescriptionField.text,
-                                          frequencyStartField.text,
-                                          frequencyEndField.text,
-                                          frequencyPreferredCheck.checked)) {
+                                          page.workingFrequencyDescriptionControl.text,
+                                          page.workingFrequencyStartControl.text,
+                                          page.workingFrequencyEndControl.text,
+                                          page.workingFrequencyPreferredControl.checked)) {
             refreshFrequencySettings()
         }
     }
@@ -473,14 +493,17 @@ Dialog {
             return
         if (!workingFrequencyEditorHasValidFrequency())
             return
+        var page = frequencySettingsPage()
+        if (!page)
+            return
         if (bridge.updateWorkingFrequencyRow(selectedWorkingFrequencyIndex,
-                                             frequencyRegionCombo.currentText,
-                                             frequencyModeCombo.currentText,
+                                             page.workingFrequencyRegionControl.currentText,
+                                             page.workingFrequencyModeControl.currentText,
                                              workingFrequencyEditorFrequencyText(),
-                                             frequencyDescriptionField.text,
-                                             frequencyStartField.text,
-                                             frequencyEndField.text,
-                                             frequencyPreferredCheck.checked)) {
+                                             page.workingFrequencyDescriptionControl.text,
+                                             page.workingFrequencyStartControl.text,
+                                             page.workingFrequencyEndControl.text,
+                                             page.workingFrequencyPreferredControl.checked)) {
             refreshFrequencySettings()
         }
     }
@@ -498,32 +521,41 @@ Dialog {
         if (!row)
             return
         selectedStationFrequencyIndex = Number(row.index)
-        setComboText(stationBandCombo, row.band || "20m")
-        stationOffsetField.text = row.offsetMHz || String(row.offset || "").replace(" MHz", "")
-        stationAntennaField.text = row.antenna || ""
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        setComboText(page.stationFrequencyBandControl, row.band || "20m")
+        page.stationFrequencyOffsetControl.text = row.offsetMHz || String(row.offset || "").replace(" MHz", "")
+        page.stationFrequencyAntennaControl.text = row.antenna || ""
         stationFrequencyEditorStatus = ""
         stationFrequencyEditorError = false
     }
 
     function clearStationFrequencyEditor() {
         selectedStationFrequencyIndex = -1
-        setComboText(stationBandCombo, "20m")
-        stationOffsetField.text = "0.000000"
-        stationAntennaField.text = ""
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        setComboText(page.stationFrequencyBandControl, "20m")
+        page.stationFrequencyOffsetControl.text = "0.000000"
+        page.stationFrequencyAntennaControl.text = ""
         stationFrequencyEditorStatus = ""
         stationFrequencyEditorError = false
     }
 
     function addStationFrequencyFromEditor() {
-        var offsetText = String(stationOffsetField.text || "").trim()
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        var offsetText = String(page.stationFrequencyOffsetControl.text || "").trim()
         if (offsetText.length === 0) {
             stationFrequencyEditorError = true
             stationFrequencyEditorStatus = qsTr("Enter a valid offset, for example -2556 MHz")
             return
         }
-        var saved = bridge.addStationFrequencyRow(stationBandCombo.currentText,
+        var saved = bridge.addStationFrequencyRow(page.stationFrequencyBandControl.currentText,
                                                   offsetText,
-                                                  stationAntennaField.text)
+                                                  page.stationFrequencyAntennaControl.text)
         stationFrequencyEditorError = !saved
         stationFrequencyEditorStatus = saved
                 ? qsTr("Offset saved and verified")
@@ -536,16 +568,19 @@ Dialog {
     function updateStationFrequencyFromEditor() {
         if (selectedStationFrequencyIndex < 0)
             return
-        var offsetText = String(stationOffsetField.text || "").trim()
+        var page = frequencySettingsPage()
+        if (!page)
+            return
+        var offsetText = String(page.stationFrequencyOffsetControl.text || "").trim()
         if (offsetText.length === 0) {
             stationFrequencyEditorError = true
             stationFrequencyEditorStatus = qsTr("Enter a valid offset, for example -2556 MHz")
             return
         }
         var saved = bridge.updateStationFrequencyRow(selectedStationFrequencyIndex,
-                                                      stationBandCombo.currentText,
+                                                      page.stationFrequencyBandControl.currentText,
                                                       offsetText,
-                                                      stationAntennaField.text)
+                                                      page.stationFrequencyAntennaControl.text)
         stationFrequencyEditorError = !saved
         stationFrequencyEditorStatus = saved
                 ? qsTr("Offset saved and verified")
@@ -2028,6 +2063,7 @@ Dialog {
                     anchors.fill: parent
                     asynchronous: true
                     active: settingsDialog.tabsReady && tabStack.currentIndex === 7
+                    id: settingsTab7Loader
                     function ensureLoaded() {
                         if (!settingsDialog.tabsReady)
                             return

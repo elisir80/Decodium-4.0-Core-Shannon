@@ -897,6 +897,13 @@ QStringList DecodiumLegacyBackend::foxCallerQueueLines() const
     return m_mainWindow ? m_mainWindow->legacyFoxCallerQueueLines() : QStringList {};
 }
 
+void DecodiumLegacyBackend::setStationIdentity(const QString& callsign, const QString& grid)
+{
+    if (m_mainWindow) {
+        m_mainWindow->legacySetStationIdentity(callsign, grid);
+    }
+}
+
 void DecodiumLegacyBackend::setMode(const QString& mode)
 {
     if (m_mainWindow) {

@@ -547,8 +547,14 @@ Rectangle {
             var toGrid = String(path.toGrid || "")
             if (fromGrid.length < 4 || toGrid.length < 4)
                 continue
-            worldMap.addContact("PSKPATH" + index + "_" + String(path.source || ""),
-                                toGrid, fromGrid, 0)
+            // A spot path is not a synthetic station.  Passing the old
+            // PSKPATH<n> identifier as a callsign made the renderer label
+            // every PSK route with that implementation detail and displaced
+            // real calls from the bounded contact set.  The source endpoint
+            // below is the spotted station (toGrid), so label it with toCall
+            // when available.  Keep anonymous paths visible, just unlabelled.
+            var spottedCall = String(path.toCall || "").trim()
+            worldMap.addContact(spottedCall, toGrid, fromGrid, 0)
         }
     }
 

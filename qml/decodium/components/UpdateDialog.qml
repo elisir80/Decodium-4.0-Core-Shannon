@@ -55,6 +55,14 @@ Dialog {
 
         Label {
             Layout.fillWidth: true
+            visible: updater.releaseRepository.length > 0
+            text: qsTr("Source: %1").arg(updater.releaseRepository)
+            color: "#8b949e"
+            font.pixelSize: 12
+        }
+
+        Label {
+            Layout.fillWidth: true
             text: qsTr("What's new:")
             color: "white"
             font.pixelSize: 13

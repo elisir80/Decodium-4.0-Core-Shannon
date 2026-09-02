@@ -51,6 +51,21 @@ SettingsPageScroll {
     }
     id: frequenciesScrollView
     clip: true
+    // SettingsDialog owns the persistence operations, while this lazily-loaded
+    // page owns the editor controls. Export the controls explicitly: QML ids
+    // are component-local and cannot otherwise be resolved by SettingsDialog.
+    property alias calibrationSlopeFieldControl: frequencySlopeField
+    property alias calibrationInterceptFieldControl: frequencyInterceptField
+    property alias workingFrequencyRegionControl: frequencyRegionCombo
+    property alias workingFrequencyModeControl: frequencyModeCombo
+    property alias workingFrequencyMHzControl: frequencyMHzField
+    property alias workingFrequencyPreferredControl: frequencyPreferredCheck
+    property alias workingFrequencyDescriptionControl: frequencyDescriptionField
+    property alias workingFrequencyStartControl: frequencyStartField
+    property alias workingFrequencyEndControl: frequencyEndField
+    property alias stationFrequencyBandControl: stationBandCombo
+    property alias stationFrequencyOffsetControl: stationOffsetField
+    property alias stationFrequencyAntennaControl: stationAntennaField
     readonly property int pageContentWidth: dialog.frequencyPageMinWidth
     minimumContentWidth: pageContentWidth + dialog.scrollLeftMargin + dialog.scrollRightMargin
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded

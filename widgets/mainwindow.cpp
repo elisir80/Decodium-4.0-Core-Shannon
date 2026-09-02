@@ -4857,6 +4857,9 @@ QString MainWindow::legacyCallsign() const
       return labCallsign;
     }
   }
+  if (m_embeddedStationIdentityOverrideActive) {
+    return m_embeddedStationCallsign;
+  }
   return m_config.my_callsign();
 }
 
@@ -4867,6 +4870,9 @@ QString MainWindow::legacyGrid() const
     if (!labGrid.isEmpty ()) {
       return labGrid;
     }
+  }
+  if (m_embeddedStationIdentityOverrideActive) {
+    return m_embeddedStationGrid;
   }
   return m_config.my_grid();
 }
@@ -5267,6 +5273,25 @@ void MainWindow::legacySetMode(QString const& mode)
   onRemoteSetModeRequested(QString {}, mode);
   if (m_ft2DecodeWorker) {
     m_ft2DecodeWorker->setDecodeEnabled (m_ft2DecodeEnabled && m_mode == "FT2");
+  }
+}
+
+void MainWindow::legacySetStationIdentity(QString const& callsign, QString const& grid)
+{
+  QString const normalizedCallsign = callsign.trimmed().toUpper();
+  QString const normalizedGrid = grid.trimmed().toUpper();
+  bool const changed = !m_embeddedStationIdentityOverrideActive
+      || m_embeddedStationCallsign != normalizedCallsign
+      || m_embeddedStationGrid != normalizedGrid;
+
+  m_embeddedStationIdentityOverrideActive = true;
+  m_embeddedStationCallsign = normalizedCallsign;
+  m_embeddedStationGrid = normalizedGrid;
+  m_baseCall = Radio::base_callsign(normalizedCallsign);
+
+  if (changed) {
+    qInfo().noquote() << QStringLiteral("Embedded legacy station identity synced: call=%1 grid=%2")
+                            .arg(normalizedCallsign, normalizedGrid);
   }
 }
 
@@ -23144,31 +23169,34 @@ void MainWindow::acceptQSO (QDateTime const& QSO_date_off, QString const& call, 
                                      tr ("Cannot open \"%1\"").arg (m_logBook.path ()));
       }
 
-	    auto send_qso_logged = [&] (MessageClient * client, bool send_adif) {
+	    auto send_qso_logged = [&] (MessageClient * client) {
 	      if (!client) return;
 	      client->qso_logged (QSO_date_off, call, grid, dial_freq, mode, rpt_sent, rpt_received
 	                          , tx_power, comments, name, QSO_date_on, operator_call, my_call, my_grid
 	                          , exchange_sent, exchange_rcvd, propmode, satellite, satmode, freqRx);
-	
-	      if (send_adif) {
-	        //avt 11/20/20 external controller needs UI feedback
-	        client->logged_ADIF (ADIF);
-	      }
+	      // The visible "QSO logged" selector controls both messages. Do not
+	      // let the obsolete hidden LoggedAdifEnabled profile key split the
+	      // pair: LogHX needs the LoggedADIF record to insert the QSO.
+	      client->logged_ADIF (ADIF);
 	    };
+	    bool primary_qso_logged_emitted = false;
 	    if (legacy_udp_traffic_enabled (m_settings, QStringLiteral ("UDPPrimary"), QStringLiteral ("Qso")))
 	      {
-	        send_qso_logged (
-	          m_messageClient,
-	          legacy_runtime_bool (m_settings, QStringLiteral ("UDPPrimaryLoggedAdifEnabled"), true));
+	        send_qso_logged (m_messageClient);
+	        primary_qso_logged_emitted = m_messageClient != nullptr;
+	        qInfo ().noquote () << QStringLiteral ("UDP logged QSO primary: call=%1 target=%2:%3 QSOLogged=%4 LoggedADIF=%5")
+	          .arg (call,
+	                m_config.udp_server_name (),
+	                QString::number (m_config.udp_server_port ()),
+	                primary_qso_logged_emitted ? QStringLiteral ("emitted") : QStringLiteral ("not-emitted"),
+	                primary_qso_logged_emitted ? QStringLiteral ("emitted") : QStringLiteral ("not-emitted"));
 	      }
 	    if (legacy_udp_traffic_enabled (m_settings, QStringLiteral ("UDPTertiary"), QStringLiteral ("Qso"))
 	        && legacy_runtime_bool (m_settings, QStringLiteral ("UDPTertiaryEnabled"), false))
 	      {
 	        if (auto * tertiary_client = ensureTertiaryUdpMessageClient ())
 	          {
-	            send_qso_logged (
-	              tertiary_client,
-	              legacy_runtime_bool (m_settings, QStringLiteral ("UDPTertiaryLoggedAdifEnabled"), true));
+	            send_qso_logged (tertiary_client);
 	          }
 	        else
 	          {

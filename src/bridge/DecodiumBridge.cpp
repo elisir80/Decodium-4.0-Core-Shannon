@@ -8116,6 +8116,14 @@ void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
         return;
     }
 #endif
+    // A worker callback queued immediately before entering RTTY must not add
+    // an FT8/FT4/JT line after the RTTY window is visible.  RTTY's own modem
+    // explicitly tags its rows as RTTY, so its history remains intact.
+    if (m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0
+        && entry.value(QStringLiteral("mode")).toString().trimmed()
+               .compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0) {
+        return;
+    }
     m_decodeList.append(QVariant(entry));
     rememberDecodeDedupEntry(entry);
     trimDecodeListsIfNeeded();
@@ -11221,6 +11229,10 @@ bool DecodiumBridge::usingLegacyBackendForTx() const
     QString const normalizedMode = m_mode.trimmed().toUpper();
     if (isFt2LinkApplicationMode(m_mode)
         || bridgeOwnsFst4Audio(m_mode)
+        // RTTY has its own QML/native modem.  The embedded legacy backend
+        // deliberately has no RTTY mode, so letting it retain its previous
+        // FT8/FT4/JT mode makes its state poll silently take ownership back.
+        || normalizedMode == QStringLiteral("RTTY")
         || normalizedMode == QStringLiteral("WSPR")) {
         return false;
     }
@@ -11256,7 +11268,8 @@ bool DecodiumBridge::legacyBackendRequestedForRx() const
     if (rtlSdrEnabled()) {
         return false;
     }
-    if (bridgeOwnsLegacyJtRxWhenCatSuppressed(m_mode)
+    if (m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0
+        || bridgeOwnsLegacyJtRxWhenCatSuppressed(m_mode)
         || bridgeOwnsFst4Audio(m_mode)) {
         return false;
     }
@@ -12257,6 +12270,9 @@ void DecodiumBridge::syncLegacyBackendDialogState()
         return;
     }
 
+    // The QML profile is authoritative.  This must precede setMode(): legacy
+    // mode handlers regenerate the CQ message immediately.
+    m_legacyBackend->setStationIdentity(m_callsign, m_grid);
     if (!m_audioInputDevice.isEmpty()) {
         m_legacyBackend->setAudioInputDeviceName(m_audioInputDevice);
     }
@@ -12274,9 +12290,20 @@ void DecodiumBridge::syncLegacyBackendDialogState()
         ? QStringLiteral("FT2")
         : m_mode;
     m_legacyBackend->setFt2DecodeEnabled(m_mode == QStringLiteral("FT2"));
-    m_legacyBackend->setMode(legacyDialogMode);
-    m_legacyStartupModeGuard = legacyDialogMode.trimmed();
-    m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
+    if (m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+        // Do not hand RTTY to the hidden legacy decoder: it has no RTTY
+        // implementation and would retain its previous decoder mode.  CAT
+        // parameters below are still mirrored for legacy CAT fallback.
+        if (m_legacyBackend->monitoring()) {
+            m_legacyBackend->setMonitoring(false);
+        }
+        m_legacyStartupModeGuard.clear();
+        m_legacyStartupModeGuardUntilMs = 0;
+    } else {
+        m_legacyBackend->setMode(legacyDialogMode);
+        m_legacyStartupModeGuard = legacyDialogMode.trimmed();
+        m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
+    }
     m_legacyBackend->setDialFrequency(m_frequency);
     bool const houndTxSlotLock = m_specialOperationActivity == kSpecialOpHound;
     m_legacyBackend->setAutoSeq(m_autoSeq);
@@ -12299,8 +12326,10 @@ void DecodiumBridge::syncLegacyBackendDialogState()
         : 0;
     m_legacyBackend->setTxWatchdogMinutes(legacyTxWatchdogMinutes);
     syncSpecialOperationToLegacyBackend();
-    bridgeLog(QStringLiteral("legacyTxSync: mode=%1 outDev=%2 outChan=%3 inDev=%4 inChan=%5 tx=%6 rx=%7 currentTx=%8 txPeriod=%9 alt12=%10 txLevel=%11 legacyTxAttn=%12 txWatchdogMin=%13")
-                  .arg(m_mode,
+    bridgeLog(QStringLiteral("legacyTxSync: call=%1 grid=%2 mode=%3 outDev=%4 outChan=%5 inDev=%6 inChan=%7 tx=%8 rx=%9 currentTx=%10 txPeriod=%11 alt12=%12 txLevel=%13 legacyTxAttn=%14 txWatchdogMin=%15")
+                  .arg(m_callsign,
+                       m_grid,
+                       m_mode,
                        m_audioOutputDevice,
                        QString::number(m_audioOutputChannel),
                        m_audioInputDevice,
@@ -12601,12 +12630,18 @@ void DecodiumBridge::syncLegacyBackendState()
         return;
     }
     QScopedValueRollback<bool> legacyStateGuard(m_syncingLegacyBackendState, true);
+    bool const rttyApplicationMode =
+        m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
 #if DECODIUM_HAS_SSTV
     // The legacy state poll can otherwise reassert its saved MONITOR state a
     // few hundred milliseconds after the SSTV workspace switched to the
     // visual-only native capture. Keep CAT/telemetry synchronisation alive,
     // but make the hidden decoder unconditionally quiescent.
-    if (m_sstvWorkspaceActive && m_legacyBackend->monitoring()) {
+    if ((m_sstvWorkspaceActive || rttyApplicationMode) && m_legacyBackend->monitoring()) {
+        m_legacyBackend->setMonitoring(false);
+    }
+#else
+    if (rttyApplicationMode && m_legacyBackend->monitoring()) {
         m_legacyBackend->setMonitoring(false);
     }
 #endif
@@ -12681,7 +12716,7 @@ void DecodiumBridge::syncLegacyBackendState()
             updateString(m_callsign, labCallsign, [this]() { emit callsignChanged(); });
             labStationIdentityChanged = true;
         }
-    } else if (!activeProfileRequested) {
+    } else if (!activeProfileRequested && m_callsign.trimmed().isEmpty()) {
         QString const legacyCallsign = m_legacyBackend->callsign();
         if (!legacyCallsign.isEmpty()) {
             updateString(m_callsign, legacyCallsign, [this]() { emit callsignChanged(); });
@@ -12692,7 +12727,7 @@ void DecodiumBridge::syncLegacyBackendState()
             updateString(m_grid, labGrid, [this]() { emit gridChanged(); });
             labStationIdentityChanged = true;
         }
-    } else if (!activeProfileRequested) {
+    } else if (!activeProfileRequested && m_grid.trimmed().isEmpty()) {
         QString const legacyGrid = m_legacyBackend->grid();
         if (!legacyGrid.isEmpty()) {
             updateString(m_grid, legacyGrid, [this]() { emit gridChanged(); });
@@ -12750,12 +12785,16 @@ void DecodiumBridge::syncLegacyBackendState()
         m_sstvWorkspaceActive ||
 #endif
         nativeSstvRxForcesDedicatedAudioCapture();
+    // RTTY owns the same single modern PCM capture as its QML modem and the
+    // panadapter.  The legacy monitor is intentionally false in this state.
+    bool const nativeRttyMonitoring = rttyApplicationMode && m_monitorRequested;
     bool const ft2LinkLegacyRxRequested =
         isFt2LinkApplicationMode(m_mode)
         && m_monitorRequested
         && usingLegacyBackendForRx();
     bool const effectiveLegacyMonitoring = m_legacyBackend->monitoring()
         || nativeSstvMonitoring
+        || nativeRttyMonitoring
         || ft2LinkLegacyRxRequested
         || (m_monitorRequested
             && usingLegacyBackendForRx()
@@ -12770,6 +12809,7 @@ void DecodiumBridge::syncLegacyBackendState()
 #if DECODIUM_HAS_SSTV
         && !m_sstvWorkspaceActive
 #endif
+        && !rttyApplicationMode
         ;
     updateBool(m_decoding, dashboardDecoderActive,
                [this]() { emit decodingChanged(); });
@@ -12923,7 +12963,18 @@ void DecodiumBridge::syncLegacyBackendState()
             emit catModeChanged();
         }
     }
-    if (!legacyMode.isEmpty() && isFt2LinkApplicationMode(m_mode)) {
+    if (!legacyMode.isEmpty() && rttyApplicationMode) {
+        // The legacy backend has retained its last digital decoder mode.  It
+        // is valid for its own CAT implementation, but must never replace the
+        // active RTTY application mode or re-enable dashboard decoding.
+        static qint64 s_lastRttyLegacyModeIgnoreLogMs = 0;
+        qint64 const logNowMs = QDateTime::currentMSecsSinceEpoch();
+        if (logNowMs - s_lastRttyLegacyModeIgnoreLogMs >= 10000) {
+            s_lastRttyLegacyModeIgnoreLogMs = logNowMs;
+            bridgeLog(QStringLiteral("RTTY: ignoring retained legacy decoder mode %1; RTTY remains exclusive")
+                          .arg(legacyModeRaw));
+        }
+    } else if (!legacyMode.isEmpty() && isFt2LinkApplicationMode(m_mode)) {
         // FT2-Link intentionally keeps the legacy/radio side on the FT2 base
         // mode, but the application mode must remain FT2-Link.  The legacy
         // state poll can otherwise overwrite m_mode back to FT2 and re-enable
@@ -13085,7 +13136,14 @@ void DecodiumBridge::syncLegacyBackendState()
         m_callerQueue.clear();
         emit callerQueueChanged();
     }
-    if (!labStationIdentityOverrideActive) {
+    // The bridge owns all six messages.  In particular, never pull a freshly
+    // regenerated legacy CQ back into QML: the legacy backend has a separate
+    // configuration store and formerly leaked its stale callsign here.
+    bool const bridgeStationIdentityAuthoritative =
+        labStationIdentityOverrideActive
+        || !m_callsign.trimmed().isEmpty()
+        || !m_grid.trimmed().isEmpty();
+    if (!bridgeStationIdentityAuthoritative) {
         updateTxMessage(m_tx1, m_legacyBackend->txMessage(1),
                         [this]() { emit tx1Changed(); },
                         [this]() { emit txMessagesChanged(); emit currentTxMessageChanged(); });
@@ -13801,8 +13859,10 @@ void DecodiumBridge::applyLegacyFullSpectrumModelDelta()
 
 void DecodiumBridge::syncLegacyBackendDecodeList()
 {
+    bool const rttyApplicationMode =
+        m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
 #if DECODIUM_HAS_SSTV
-    if (m_sstvWorkspaceActive) {
+    if (m_sstvWorkspaceActive || rttyApplicationMode) {
         // Discard any final queued legacy result. The ALL.TXT cursor is
         // advanced once at workspace exit, so nothing from the suspended
         // interval is mirrored after normal monitoring resumes.
@@ -13817,6 +13877,20 @@ void DecodiumBridge::syncLegacyBackendDecodeList()
                 m_legacyBackend->bandActivityRevision();
             m_legacyRxFrequencyRevision =
                 m_legacyBackend->rxFrequencyRevision();
+        }
+        return;
+    }
+#else
+    if (rttyApplicationMode) {
+        if (m_legacyBackend) {
+            if (!m_legacyBackend->bandActivityLines().isEmpty()) {
+                m_legacyBackend->clearBandActivity();
+            }
+            if (!m_legacyBackend->rxFrequencyLines().isEmpty()) {
+                m_legacyBackend->clearRxFrequency();
+            }
+            m_legacyBandActivityRevision = m_legacyBackend->bandActivityRevision();
+            m_legacyRxFrequencyRevision = m_legacyBackend->rxFrequencyRevision();
         }
         return;
     }
@@ -15994,6 +16068,9 @@ void DecodiumBridge::setCallsign(const QString& v) {
     if (m_callsign != v) {
         m_callsign = v;
         emit callsignChanged();
+        if (legacyBackendAvailable()) {
+            m_legacyBackend->setStationIdentity(m_callsign, m_grid);
+        }
         refreshPskReporterLocalStation();
         if (m_mapIntelligenceService) {
             m_mapIntelligenceService->setRosterStationCall(m_callsign);
@@ -16033,6 +16110,9 @@ void DecodiumBridge::setGrid(const QString& v) {
     if (m_grid != v) {
         m_grid = v;
         emit gridChanged();
+        if (legacyBackendAvailable()) {
+            m_legacyBackend->setStationIdentity(m_callsign, m_grid);
+        }
         refreshMapMoonOverlay();
         refreshPskReporterLocalStation();
         if (m_dxCluster)   m_dxCluster->setCallsign(m_callsign);
@@ -17523,7 +17603,11 @@ void DecodiumBridge::setMode(const QString& v) {
         QString const previousMode = m_mode;
         bool const monitorWasActive = m_monitoring;
         bool const monitorShouldStayActive = monitorWasActive || m_monitorRequested;
-        bool const rearmModernMonitor = monitorWasActive && !usingLegacyBackendForRx();
+        bool const enteringRtty = normalizedMode == QStringLiteral("RTTY");
+        // Compute this before m_mode is changed.  A legacy FT8/JT monitor
+        // needs a deliberate hand-off to the native RTTY PCM capture.
+        bool const rearmModernMonitor = monitorWasActive
+            && (!usingLegacyBackendForRx() || enteringRtty);
         quint64 const monitorSessionId = monitorShouldStayActive ? ++m_periodTimerSessionId : m_periodTimerSessionId;
         if (rearmModernMonitor && m_periodTimer) {
             m_periodTimer->stop();
@@ -17542,6 +17626,22 @@ void DecodiumBridge::setMode(const QString& v) {
         // sarebbe una sorpresa. La frequenza va sul segmento RTTY della banda
         // in cui si trova gia', non su una banda decisa da noi.
         if (normalizedMode == QStringLiteral("RTTY")) {
+            // RTTY uses the native QML modem; the embedded legacy backend
+            // cannot decode RTTY and otherwise keeps decoding the previously
+            // selected digital mode in the background.
+            if (m_legacyBackend && m_legacyBackend->monitoring()) {
+                m_legacyBackend->setMonitoring(false);
+            }
+            // Do not leave the panadapter waiting for the legacy PCM tap we
+            // have just stopped; the native capture below feeds it directly.
+            m_legacyPcmSpectrumFeed = false;
+            m_legacyStartupModeGuard.clear();
+            m_legacyStartupModeGuardUntilMs = 0;
+            if (m_decoding) {
+                m_decoding = false;
+                emit decodingChanged();
+            }
+            bridgeLog(QStringLiteral("RTTY exclusive workspace: legacy decoder stopped; native PCM keeps RTTY and panadapter active"));
             applyRttyRigMode(QStringLiteral("rtty-mode"));
 #if DECODIUM_HAS_RTTY
             int const banda = decortty::app::bandAt(m_frequency / 1e6);
@@ -17658,12 +17758,19 @@ void DecodiumBridge::setMode(const QString& v) {
 
         emit periodMillisecondsChanged();
         emit modeChanged();
-        if (legacyBackendAvailable() && !isFt2LinkApplicationMode(normalizedMode)) {
+        if (legacyBackendAvailable()
+            && !isFt2LinkApplicationMode(normalizedMode)
+            && normalizedMode != QStringLiteral("RTTY")) {
+            // setMode() causes the embedded widget backend to regenerate CQ
+            // synchronously.  Refresh the profile identity immediately before
+            // that call, even if an earlier state sync has not run yet.
+            m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(normalizedMode == QStringLiteral("FT2"));
             m_legacyBackend->setMode(normalizedMode);
             m_legacyStartupModeGuard = normalizedMode.trimmed();
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
-        } else if (legacyBackendAvailable()) {
+        } else if (legacyBackendAvailable() && normalizedMode != QStringLiteral("RTTY")) {
+            m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(false);
             m_legacyBackend->setMode(QStringLiteral("FT2"));
             m_legacyStartupModeGuard = QStringLiteral("FT2");
@@ -22510,6 +22617,7 @@ void DecodiumBridge::startRx()
     quint64 const monitorSessionId = ++m_periodTimerSessionId;
 
     if (!rtlSdrEnabled()
+        && m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0
         && legacyTxBackendRequested()
         && !legacyBackendAvailable()
         && !ensureLegacyBackendAvailable()) {
@@ -22620,12 +22728,16 @@ void DecodiumBridge::startRx()
 #else
         false;
 #endif
-    if (!rtlGeneralReceiver && !sstvWorkspaceReceiver) {
+    const bool rttyWorkspaceReceiver =
+        m_mode.trimmed().compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0;
+    if (!rtlGeneralReceiver && !sstvWorkspaceReceiver && !rttyWorkspaceReceiver) {
         ensureDecodeWorkerForMode(m_mode);
     } else if (rtlGeneralReceiver) {
         bridgeLog(QStringLiteral("startRx: RTL-SDR general receiver selected; digital decoder dispatch disabled"));
     } else {
-        bridgeLog(QStringLiteral("startRx: SSTV workspace selected; normal digital decoder dispatch disabled"));
+        bridgeLog(rttyWorkspaceReceiver
+                      ? QStringLiteral("startRx: RTTY workspace selected; normal digital decoder dispatch disabled")
+                      : QStringLiteral("startRx: SSTV workspace selected; normal digital decoder dispatch disabled"));
     }
 
     updatePeriodTicksMax();
@@ -22645,7 +22757,7 @@ void DecodiumBridge::startRx()
     }
     // Sincronizza il period timer al prossimo boundary UTC (FT8=15s, FT4=7.5s, FT2=3.75s).
     // Il session id impedisce a una singleShot vecchia di riattivare il timer dopo stop/cambio modo.
-    if (rtlGeneralReceiver || sstvWorkspaceReceiver) {
+    if (rtlGeneralReceiver || sstvWorkspaceReceiver || rttyWorkspaceReceiver) {
         m_periodTimer->stop();
         m_periodTicks = 0;
         m_lastPeriodSlot = -1;
@@ -22655,7 +22767,7 @@ void DecodiumBridge::startRx()
         armPeriodTimerForCurrentMode(monitorSessionId, QStringLiteral("startRx"));
     }
     m_spectrumTimer->start();
-    if (!rtlGeneralReceiver && !sstvWorkspaceReceiver && m_mode == "FT2") {
+    if (!rtlGeneralReceiver && !sstvWorkspaceReceiver && !rttyWorkspaceReceiver && m_mode == "FT2") {
         // store(release): vedi commento nel reset di setMode — il writer usa
         // CAS sul commit e un increment in volo verrà scartato correttamente.
         m_asyncAudioPos.store(0, std::memory_order_release);
@@ -22665,13 +22777,15 @@ void DecodiumBridge::startRx()
 
     startAudioCapture();
 
-    m_decoding = !rtlGeneralReceiver && !sstvWorkspaceReceiver;
+    m_decoding = !rtlGeneralReceiver && !sstvWorkspaceReceiver && !rttyWorkspaceReceiver;
     emit decodingChanged();
     emit statusMessage(rtlGeneralReceiver
                            ? QStringLiteral("RTL-SDR general receiver started")
-                           : (sstvWorkspaceReceiver
+                           : (rttyWorkspaceReceiver
+                                  ? QStringLiteral("RTTY audio monitor started")
+                                  : (sstvWorkspaceReceiver
                                   ? QStringLiteral("SSTV audio monitor started")
-                                  : QStringLiteral("RX avviato - %1").arg(m_mode)));
+                                  : QStringLiteral("RX avviato - %1").arg(m_mode))));
     bridgeLog("startRx() done");
 }
 
@@ -31954,11 +32068,15 @@ void DecodiumBridge::initUdpMessageClient()
             .arg(boolText(decode), boolText(status), boolText(qso), boolText(wspr));
     };
     bool const acceptUdpRequests = getSetting(QStringLiteral("AcceptUDPRequests"), true).toBool();
-    bool const primaryAdifEnabled = getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool();
     bool const primaryDecodeEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Decode"));
     bool const primaryStatusEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Status"));
     bool const primaryQsoEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Qso"));
     bool const primaryWsprEnabled = udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Wspr"));
+    // "QSO logged" is now the sole user-facing control for logged-QSO
+    // traffic. Older profiles can still contain LoggedAdifEnabled, but it
+    // must never suppress the WSJT-X LoggedADIF record once QSO logging is
+    // enabled: LogHX and other compatible loggers require that record.
+    bool const primaryAdifEnabled = primaryQsoEnabled;
     bool const secondaryEnabled = getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool();
     QString const secondaryServerName =
         getSetting(QStringLiteral("UDPSecondaryServer"), serverName).toString().trimmed();
@@ -31971,11 +32089,11 @@ void DecodiumBridge::initUdpMessageClient()
     if (!secondaryInterface.isEmpty()) {
         secondaryInterfaces << secondaryInterface;
     }
-    bool const secondaryAdifEnabled = getSetting(QStringLiteral("UDPSecondaryLoggedAdifEnabled"), true).toBool();
     bool const secondaryDecodeEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Decode"));
     bool const secondaryStatusEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Status"));
     bool const secondaryQsoEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Qso"));
     bool const secondaryWsprEnabled = udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Wspr"));
+    bool const secondaryAdifEnabled = secondaryQsoEnabled;
     bool const secondaryRealtimeEnabled = secondaryEnabled
         && (secondaryDecodeEnabled || secondaryStatusEnabled || secondaryWsprEnabled);
     bool const tertiaryEnabled = getSetting(QStringLiteral("UDPTertiaryEnabled"), false).toBool();
@@ -31990,11 +32108,11 @@ void DecodiumBridge::initUdpMessageClient()
     if (!tertiaryInterface.isEmpty()) {
         tertiaryInterfaces << tertiaryInterface;
     }
-    bool const tertiaryAdifEnabled = getSetting(QStringLiteral("UDPTertiaryLoggedAdifEnabled"), true).toBool();
     bool const tertiaryDecodeEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Decode"));
     bool const tertiaryStatusEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Status"));
     bool const tertiaryQsoEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Qso"));
     bool const tertiaryWsprEnabled = udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Wspr"));
+    bool const tertiaryAdifEnabled = tertiaryQsoEnabled;
     bool const tertiaryRealtimeEnabled = tertiaryEnabled
         && (tertiaryDecodeEnabled || tertiaryStatusEnabled || tertiaryWsprEnabled);
     bool const adifTcpEnabled = getSetting(QStringLiteral("ADIFTcpEnabled"), false).toBool();
@@ -32018,19 +32136,19 @@ void DecodiumBridge::initUdpMessageClient()
     QString const tertiaryClientId = decodium::network::normalizedUdpClientId(
         getSetting(QStringLiteral("UDPTertiaryClientId"), QStringLiteral("Decodium")).toString());
 
-    bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 filters=[%8] loggedADIF=%9")
+    bridgeLog(QStringLiteral("Reporting config: UDP primary server=%1:%2 listen=%3 clientId=%4 interface=%5 ttl=%6 acceptRequests=%7 filters=[%8] loggedADIF=%9 (coupled-to-QSO)")
                   .arg(serverName.trimmed(), QString::number(serverPort), QString::number(listenPort),
                        clientId, interfaceText(interfaces), QString::number(ttl),
                        boolText(acceptUdpRequests),
                        trafficText(primaryDecodeEnabled, primaryStatusEnabled, primaryQsoEnabled, primaryWsprEnabled),
                        boolText(primaryAdifEnabled)));
-    bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=%4 clientId=%5 interface=%6 ttl=%7 filters=[%8] loggedADIF=%9")
+    bridgeLog(QStringLiteral("Reporting config: UDP secondary %1 server=%2:%3 listen=%4 clientId=%5 interface=%6 ttl=%7 filters=[%8] loggedADIF=%9 (coupled-to-QSO)")
                   .arg(boolText(secondaryEnabled), secondaryServerName, QString::number(secondaryPort),
                        secondaryRealtimeEnabled ? QStringLiteral("ephemeral") : QStringLiteral("QSO-only"),
                        secondaryClientId, interfaceText(secondaryInterfaces), QString::number(secondaryTtl),
                        trafficText(secondaryDecodeEnabled, secondaryStatusEnabled, secondaryQsoEnabled, secondaryWsprEnabled),
                        boolText(secondaryAdifEnabled)));
-    bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=%4 clientId=%5 interface=%6 ttl=%7 filters=[%8] loggedADIF=%9")
+    bridgeLog(QStringLiteral("Reporting config: UDP tertiary %1 server=%2:%3 listen=%4 clientId=%5 interface=%6 ttl=%7 filters=[%8] loggedADIF=%9 (coupled-to-QSO)")
                   .arg(boolText(tertiaryEnabled), tertiaryServerName, QString::number(tertiaryPort),
                        tertiaryRealtimeEnabled ? QStringLiteral("ephemeral") : QStringLiteral("QSO-only"),
                        tertiaryClientId, interfaceText(tertiaryInterfaces), QString::number(tertiaryTtl),
@@ -32484,6 +32602,8 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
     int targets = 0;
     int wsjtxAdifTargets = 0;
     int rawAdifTargets = 0;
+    bool primaryQsoLoggedEmitted = false;
+    bool primaryLoggedAdifEmitted = false;
     auto sendLoggedQso = [&](MessageClient* client, bool sendAdif) {
         if (!client) return;
         client->qso_logged(
@@ -32516,14 +32636,17 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
 
     if (wsjtxUdpAvailable) {
         if (udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Qso"))) {
-            sendLoggedQso(m_udpMessageClient,
-                          getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool());
+            // Keep this pair inseparable. The former LoggedAdifEnabled key
+            // is no longer exposed in the UI and may be stale in profiles
+            // saved before 1.0.540; allowing it to suppress LoggedADIF breaks
+            // LogHX while the visible "QSO logged" control says enabled.
+            sendLoggedQso(m_udpMessageClient, true);
+            primaryQsoLoggedEmitted = m_udpMessageClient != nullptr;
+            primaryLoggedAdifEmitted = m_udpMessageClient != nullptr;
         }
         if (m_udpTertiaryMessageClient
             && udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Qso"))) {
-            bool const tertiaryAdifEnabled =
-                getSetting(QStringLiteral("UDPTertiaryLoggedAdifEnabled"), true).toBool();
-            sendLoggedQso(m_udpTertiaryMessageClient, tertiaryAdifEnabled);
+            sendLoggedQso(m_udpTertiaryMessageClient, true);
         }
     }
 
@@ -32555,8 +32678,10 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
         }
     }
 
-    bridgeLog(QStringLiteral("UDP logged QSO sent: call=%1 targets=%2 wsjtxAdifTargets=%3 rawAdifTargets=%4 bytes=%5")
+    bridgeLog(QStringLiteral("UDP logged QSO sent: call=%1 primaryQSOLogged=%2 primaryLoggedADIF=%3 targets=%4 wsjtxAdifTargets=%5 rawAdifTargets=%6 bytes=%7")
                   .arg(dxCall)
+                  .arg(primaryQsoLoggedEmitted ? QStringLiteral("emitted") : QStringLiteral("not-emitted"))
+                  .arg(primaryLoggedAdifEmitted ? QStringLiteral("emitted") : QStringLiteral("not-emitted"))
                   .arg(targets)
                   .arg(wsjtxAdifTargets)
                   .arg(rawAdifTargets)
@@ -32771,7 +32896,7 @@ QVariantMap DecodiumBridge::uploadExternalAdifInternal(quint32 uploadId,
             getSetting(QStringLiteral("UDPServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
         quint16 const primaryPort = udpPortFromSettingValue(
             getSetting(QStringLiteral("UDPServerPort"), 2237), 2237);
-        if (getSetting(QStringLiteral("UDPPrimaryLoggedAdifEnabled"), true).toBool()) {
+        if (udpTrafficEnabled(QStringLiteral("UDPPrimary"), QStringLiteral("Qso"))) {
             ++udpAttempts;
             if (udpSendRawAdifDatagram(QStringLiteral("FT2-Link UDP primary raw ADIF"),
                                        primaryServer, primaryPort, cleanCall, adifBytes)) {
@@ -32784,9 +32909,9 @@ QVariantMap DecodiumBridge::uploadExternalAdifInternal(quint32 uploadId,
 
         bool const secondaryEnabled =
             getSetting(QStringLiteral("UDPSecondaryEnabled"), true).toBool();
-        bool const secondaryAdifEnabled =
-            getSetting(QStringLiteral("UDPSecondaryLoggedAdifEnabled"), true).toBool();
-        if (secondaryEnabled && secondaryAdifEnabled) {
+        bool const secondaryQsoEnabled =
+            udpTrafficEnabled(QStringLiteral("UDPSecondary"), QStringLiteral("Qso"));
+        if (secondaryEnabled && secondaryQsoEnabled) {
             QString const secondaryServer =
                 getSetting(QStringLiteral("UDPSecondaryServer"), primaryServer).toString().trimmed();
             quint16 const secondaryPort = udpPortFromSettingValue(
@@ -32803,9 +32928,9 @@ QVariantMap DecodiumBridge::uploadExternalAdifInternal(quint32 uploadId,
 
         bool const tertiaryEnabled =
             getSetting(QStringLiteral("UDPTertiaryEnabled"), false).toBool();
-        bool const tertiaryAdifEnabled =
-            getSetting(QStringLiteral("UDPTertiaryLoggedAdifEnabled"), true).toBool();
-        if (tertiaryEnabled && tertiaryAdifEnabled) {
+        bool const tertiaryQsoEnabled =
+            udpTrafficEnabled(QStringLiteral("UDPTertiary"), QStringLiteral("Qso"));
+        if (tertiaryEnabled && tertiaryQsoEnabled) {
             QString const tertiaryServer =
                 getSetting(QStringLiteral("UDPTertiaryServer"), QStringLiteral("127.0.0.1")).toString().trimmed();
             quint16 const tertiaryPort = udpPortFromSettingValue(
@@ -51221,6 +51346,19 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
     }
 #endif
     QString const modeSnapshot = m_mode;
+    // RTTY has a streaming native modem.  This is a final asynchronous
+    // boundary for an FT8/FT4/JT dispatch queued before the RTTY switch.
+    if (modeSnapshot.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) == 0) {
+        {
+            QMutexLocker locker(&m_audioBufferMutex);
+            m_audioBuffer.clear();
+        }
+        if (m_decoding) {
+            m_decoding = false;
+            emit decodingChanged();
+        }
+        return;
+    }
     int const decodeDepth = effectiveDecodeDepth();
 
     // FT2-Link has its own streaming RX path (ft2LinkRxSamplesReady ->
