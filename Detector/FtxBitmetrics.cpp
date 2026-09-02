@@ -1483,6 +1483,26 @@ extern "C" void ftx_ft2_bitmetrics_c (Complex const* cd, float* bitmetrics, int*
   run_ft2_bitmetrics (cd, bitmetrics, badsync);
 }
 
+// Moduli dei 4 toni per ciascuno dei 103 simboli della finestra: mags[k*4+j].
+// Serve alla conferma a livello di tono del messaggio atteso (Stage7, tipo 8):
+// con la sequenza di toni nota, la statistica e' la somma non coerente del
+// modulo sul tono atteso meno la media degli altri tre, sui simboli dati.
+extern "C" void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags)
+{
+  constexpr int NN = 103;
+  constexpr int NSS = 32;
+  for (int k = 0; k < NN; ++k)
+    {
+      std::array<Complex, 4> tones {};
+      std::array<float, 4> m {};
+      fft_symbol_4tones (cd + k * NSS, tones, m);
+      for (int j = 0; j < 4; ++j)
+        {
+          mags[k * 4 + j] = m[static_cast<size_t> (j)];
+        }
+    }
+}
+
 extern "C" void ftx_ft2_channel_est_c (Complex const* cd, Complex* cd_eq, float* ch_snr)
 {
   if (!cd || !cd_eq || !ch_snr)

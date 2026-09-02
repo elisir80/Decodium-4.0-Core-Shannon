@@ -81,6 +81,7 @@ extern "C"
   void ftx_sync2d_c (Complex const* cd0, int np, int i0, Complex const* ctwk,
                      int itwk, float* sync);
   void ftx_ft2_bitmetrics_c (Complex const* cd, float* bitmetrics, int* badsync);
+  void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags);
   void ftx_ft2_bitmetrics_diag_c (Complex const* cd,
                                   float* bitmetrics_final,
                                   float* bitmetrics_base,
@@ -1469,6 +1470,29 @@ float ft2_ap_msg_hz ()
   return v;
 }
 
+// Conferma a livello di TONO: con la sequenza di toni del messaggio atteso,
+//   T = somma sui simboli dati di (|tono atteso| - media degli altri tre)
+//       / somma su tutti i simboli dati e i quattro toni di |tono|.
+// Su rumore T vale 0; sul segnale cresce verso ~0,25 (un tono su quattro porta
+// tutta l'energia). Il modello (lab/neural/train/predict.py) la da' 1 dB piu'
+// sensibile della via "bit". Accetta se T >= DECODIUM_FT2_AP_MSG_TONE; il
+// default e' tarato al banco come nd (vedi lab/README.md). 1.0 la spegne.
+float ft2_ap_msg_tone_min ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_AP_MSG_TONE");
+    float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+    return (f > 0.0f && f <= 1.0f) ? f : 1.0f;
+  }();
+  return v;
+}
+
+bool ft2_symbol_is_costas (int k)
+{
+  // 4 blocchi Costas da 4 simboli: 0-3, 33-36, 66-69, 99-102 (ft2_sync_quality).
+  return (k >= 0 && k <= 3) || (k >= 33 && k <= 36) || (k >= 66 && k <= 69) || (k >= 99 && k <= 102);
+}
+
 std::atomic<int> g_ft2_msg_tentativi {0};
 std::atomic<int> g_ft2_msg_successi {0};
 std::atomic<int> g_ft2_msg_candidati {0};
@@ -1655,7 +1679,8 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
                                     std::array<float, kFt2Codeword> const& llre,
                                     int ndepth0, int ncontest, int qso_progress,
                                     bool doosd, bool lapcqonly, int nfqso, float f_for_ap,
-                                    bool averaged, float apmag)
+                                    bool averaged, float apmag,
+                                    float const* symbol_mags = nullptr)
 {
   DecodePassResult result;
 
@@ -1789,15 +1814,38 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
                     }
                 }
               float const nd = totale > 0.0f ? disaccordo / totale : 1.0f;
-              stage7_debug_logf ("atteso f=%.1f nd=%.3f nhard=%d soglia=%.3f",
-                                 f_for_ap, nd, nhard, ft2_ap_msg_nd_max ());
+
+              float tone = -1.0f;
+              std::array<int, kFt2Nn> tones {};
+              if (symbol_mags && message77_to_ft2_tones (bits, &tones))
+                {
+                  float num = 0.0f;
+                  float den = 0.0f;
+                  for (int k = 0; k < kFt2Nn; ++k)
+                    {
+                      if (ft2_symbol_is_costas (k))
+                        {
+                          continue;
+                        }
+                      float const* m = symbol_mags + k * 4;
+                      float const sum = m[0] + m[1] + m[2] + m[3];
+                      float const hit = m[tones[static_cast<size_t> (k)] & 3];
+                      num += hit - (sum - hit) / 3.0f;
+                      den += sum;
+                    }
+                  tone = den > 0.0f ? num / den : 0.0f;
+                }
+
+              stage7_debug_logf ("atteso f=%.1f nd=%.3f nhard=%d tone=%.3f soglie=%.3f/%.3f",
+                                 f_for_ap, nd, nhard, tone, ft2_ap_msg_nd_max (),
+                                 ft2_ap_msg_tone_min ());
               if (std::getenv ("DECODIUM_FT2_AP_MSG_LOG"))
                 {
-                  std::fprintf (stderr, "[APMSG] f=%.1f nd=%.3f nhard=%d\n",
-                                f_for_ap, static_cast<double> (nd), nhard);
+                  std::fprintf (stderr, "[APMSG] f=%.1f nd=%.3f nhard=%d tone=%.3f\n",
+                                f_for_ap, static_cast<double> (nd), nhard, static_cast<double> (tone));
                   std::fflush (stderr);
                 }
-              if (nd <= ft2_ap_msg_nd_max ())
+              if (nd <= ft2_ap_msg_nd_max () || tone >= ft2_ap_msg_tone_min ())
                 {
                   QByteArray decoded;
                   if (unpack_message77_with_context (bits, context, &decoded)
@@ -2405,9 +2453,15 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                 }
               apmag *= 1.1f;
 
+              std::array<float, kFt2Nn * 4> symbol_mags {};
+              if (ft2_ap_msg_attivo ())
+                {
+                  ftx_ft2_symbol_mags_c (cd.data (), symbol_mags.data ());
+                }
               DecodePassResult const decoded = run_decode_passes (
                   state, ap_setup, &context, llra, llrb, llrc, llrd, llre, ndepth0, ncontest,
-                  qso_progress, doosd, false, nfqso, f1, false, apmag);
+                  qso_progress, doosd, false, nfqso, f1, false, apmag,
+                  ft2_ap_msg_attivo () ? symbol_mags.data () : nullptr);
               stage7_debug_compare_with_reference (
                   llra, llrb, llrc, llrd, llre, decoded, ndepth0, ncontest, qso_progress,
                   false, nfqso, f1, false, doosd, apmag, mycall, hiscall);
@@ -2511,10 +2565,16 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                             }
                           apmag_try *= 1.1f;
 
+                          std::array<float, kFt2Nn * 4> symbol_mags_try {};
+                          if (ft2_ap_msg_attivo ())
+                            {
+                              ftx_ft2_symbol_mags_c (cd.data (), symbol_mags_try.data ());
+                            }
                           DecodePassResult const decoded_try = run_decode_passes (
                               state, ap_setup, &context, llra_try, llrb_try, llrc_try, llrd_try, llre_try,
                               ndepth0, ncontest, qso_progress, doosd, false, nfqso, f1_try,
-                              false, apmag_try);
+                              false, apmag_try,
+                              ft2_ap_msg_attivo () ? symbol_mags_try.data () : nullptr);
                           if (!decoded_try.ok)
                             {
                               if (decoded_try.stop_candidate)
