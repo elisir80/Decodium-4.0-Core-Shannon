@@ -28,7 +28,11 @@ Rectangle {
     property var baseMapService: mapLayers ? mapLayers.baseMapService : null
     property var externalOverlays: mapLayers ? mapLayers.externalOverlayService : null
     property var mapOperations: mapLayers ? mapLayers.operationsService : null
-    property bool gpuLiveMapEnabled: engine ? !!engine.getSetting("LiveMapUseGpu", true) : true
+    // Values from older INI files can arrive as strings (for example
+    // "false" on some Linux installations).  !! would turn any non-empty
+    // string into true, so use the same strict conversion as other settings.
+    property bool gpuLiveMapEnabled: engine
+        ? root.coerceBool(engine.getSetting("LiveMapUseGpu", true), true) : true
     property bool intelligencePanelRequested: width >= 760
     property bool showRosterPreferences: false
     property bool showRosterColumns: false
@@ -177,7 +181,8 @@ Rectangle {
             return
         worldMap.setHomeGrid(engine.grid)
         worldMap.setBaseMapEnabled(true)
-        worldMap.setGreylineEnabled(!!engine.getSetting("ShowGreyline", true))
+        worldMap.setGreylineEnabled(
+            root.coerceBool(engine.getSetting("ShowGreyline", true), true))
         worldMap.setDistanceInMiles(root.coerceBool(engine.getSetting("Miles", false), false))
         worldMap.setBaseMapService(root.baseMapService)
         worldMap.setExternalOverlayService(root.externalOverlays)
@@ -968,7 +973,8 @@ Rectangle {
 
                 Rectangle {
                     id: greylineBtn
-                    property bool greylineOn: engine ? !!engine.getSetting("ShowGreyline", true) : true
+                    property bool greylineOn: engine
+                        ? root.coerceBool(engine.getSetting("ShowGreyline", true), true) : true
                     Layout.preferredWidth: 24
                     Layout.preferredHeight: 18
                     radius: 4
@@ -1297,6 +1303,15 @@ Rectangle {
                 active: root.visible
                 sourceComponent: root.gpuLiveMapEnabled ? gpuWorldMapComponent : painterWorldMapComponent
                 onLoaded: {
+                    // A custom build may not contain the QSB greyline shader.
+                    // Fall back to the painter implementation rather than
+                    // silently presenting a map with no day/night overlay.
+                    if (root.gpuLiveMapEnabled && worldMapLoader.item
+                            && worldMapLoader.item.greylineShaderAvailable === false) {
+                        console.warn("Live Map greyline shader unavailable; falling back to CPU WorldMapItem")
+                        root.gpuLiveMapEnabled = false
+                        return
+                    }
                     root.initializeMap()
                     Qt.callLater(root.updateMoonOverlay)
                 }
@@ -5705,13 +5720,15 @@ Rectangle {
         }
         function onSettingValueChanged(key, value) {
             if (key === "LiveMapUseGpu") {
-                root.gpuLiveMapEnabled = !!value
+                root.gpuLiveMapEnabled = root.coerceBool(value, true)
                 return
             }
             if (!worldMap)
                 return
             if (key === "ShowGreyline" || key === "MapShowGreyline") {
-                worldMap.setGreylineEnabled(!!value)
+                var greylineEnabled = root.coerceBool(value, true)
+                worldMap.setGreylineEnabled(greylineEnabled)
+                greylineBtn.greylineOn = greylineEnabled
             } else if (key === "Miles") {
                 worldMap.setDistanceInMiles(root.coerceBool(value, false))
             } else if (key === "WorldMapDisplayed" && root.visible) {

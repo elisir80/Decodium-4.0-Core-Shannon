@@ -104,6 +104,16 @@ const char* liveMapGraphicsApiName(QSGRendererInterface::GraphicsApi api)
     }
 }
 
+bool environmentFlag(const char* name)
+{
+    if (!qEnvironmentVariableIsSet(name)) {
+        return false;
+    }
+    QByteArray const value = qgetenv(name).trimmed().toLower();
+    return value.isEmpty() || value == "1" || value == "true"
+        || value == "yes" || value == "on";
+}
+
 void clearNode(QSGNode* node)
 {
     while (auto* child = node->firstChild()) {
@@ -2468,8 +2478,16 @@ void WorldMapGpuItem::configureRendererPolicy()
 
     bool const openGl = api == QSGRendererInterface::OpenGL;
     bool const conservativeRenderer = openGl;
-    bool const forceOpenGlGreyline = qEnvironmentVariableIsSet("DECODIUM_ENABLE_OPENGL_LIVEMAP_GREYLINE");
-    bool const greylineShaderAllowed = !openGl || forceOpenGlGreyline;
+    // Qt Quick commonly selects OpenGL on Linux.  The old policy disabled the
+    // greyline shader for every OpenGL renderer, so the toolbar toggle changed
+    // state but the layer was immediately cleared.  QSB already provides a
+    // GLSL 120/150/330 fallback; keep OpenGL enabled by default and retain an
+    // explicit opt-out for drivers that are known to misbehave.
+    bool const forceOpenGlGreyline = environmentFlag(
+        "DECODIUM_ENABLE_OPENGL_LIVEMAP_GREYLINE");
+    bool const disableOpenGlGreyline = environmentFlag(
+        "DECODIUM_DISABLE_OPENGL_LIVEMAP_GREYLINE");
+    bool const greylineShaderAllowed = !openGl || !disableOpenGlGreyline;
     int const frameIntervalMs = conservativeRenderer ? kOpenGlFrameMs : kFrameMs;
 
     if (m_rendererPolicyInitialized
@@ -2502,7 +2520,10 @@ void WorldMapGpuItem::configureRendererPolicy()
         << " conservative=" << (m_conservativeRenderer ? 1 : 0)
         << " frameMs=" << m_frameIntervalMs
         << " greylineShader=" << (m_greylineShaderAllowed ? 1 : 0)
-        << (openGl && !forceOpenGlGreyline ? " reason=OpenGL_conservative" : "");
+        << (openGl && disableOpenGlGreyline
+                ? " reason=OpenGL_disabled_by_environment"
+                : (openGl && forceOpenGlGreyline
+                       ? " reason=OpenGL_enabled_by_environment" : ""));
 }
 
 QSGNode* WorldMapGpuItem::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)

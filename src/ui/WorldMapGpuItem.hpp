@@ -20,6 +20,7 @@ class QHoverEvent;
 class WorldMapGpuItem : public QQuickItem
 {
     Q_OBJECT
+    Q_PROPERTY(bool greylineShaderAvailable READ greylineShaderAvailable CONSTANT)
 
 public:
     enum class PathRole {
@@ -82,6 +83,18 @@ public:
                                    double spanLongitude = 90.0,
                                    double spanLatitude = 54.0);
     Q_INVOKABLE bool greylineEnabled() const { return m_greylineEnabled; }
+
+    // Lets QML select the painter implementation for a custom build that was
+    // made without Qt ShaderTools.  Release builds still use the GPU map, but
+    // they no longer fail silently with a missing greyline layer.
+    bool greylineShaderAvailable() const
+    {
+#ifdef DECODIUM_LIVEMAP_GREYLINE_QSB
+        return true;
+#else
+        return false;
+#endif
+    }
 
 Q_SIGNALS:
     void contactClicked(const QString& call, const QString& grid);
