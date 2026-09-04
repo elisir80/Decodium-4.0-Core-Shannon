@@ -31,7 +31,7 @@ RttyEngine::RttyEngine(QObject* parent)
     m_spectrumDb.resize(kFftSize / 2);
     m_spectrumDb.fill(-120.0);
 
-    m_modulator.setAmplitude(0.35f);
+    m_modulator.setAmplitude(m_configuredTransmitLevel);
     applyParams();
 
     m_txTimer.setInterval(kTxChunkMs);
@@ -115,6 +115,8 @@ void RttyEngine::attachRadio(link::RadioHub* radio)
 
     connect(m_radio, &link::RadioHub::audioReady,
             this, &RttyEngine::processRadioAudio);
+    connect(m_radio, &link::RadioHub::connectionChanged,
+            this, &RttyEngine::applyRadioTransmitLevelPolicy);
     // Follow the radio's own idea of whether it is transmitting, rather than
     // assuming our PTT request succeeded.
     connect(m_radio, &link::RadioHub::transmittingChanged, this, [this] {
@@ -125,6 +127,24 @@ void RttyEngine::attachRadio(link::RadioHub* radio)
             emit transmitStateChanged();
         }
     });
+    applyRadioTransmitLevelPolicy();
+}
+
+void RttyEngine::applyRadioTransmitLevelPolicy()
+{
+    const float effective = m_radio && m_radio->requiresFullScaleTransmitAudio()
+                                ? 1.0f
+                                : m_configuredTransmitLevel;
+    if (qFuzzyCompare(m_modulator.amplitude(), effective)) {
+        return;
+    }
+
+    // QMX/QMX+ detect the tone only after it crosses a rise threshold that
+    // defaults to 80%, so they need full-scale application audio. Restore the
+    // configured AFSK level for every other radio; power then remains an
+    // operator-controlled radio setting rather than a leaked QMX override.
+    m_modulator.setAmplitude(effective);
+    emit paramsChanged();
 }
 
 void RttyEngine::rebuildFilters()
@@ -282,10 +302,16 @@ void RttyEngine::setCorrectionDepth(int depth)
 
 void RttyEngine::setTransmitLevel(double level)
 {
-    const float value = static_cast<float>(std::clamp(level, 0.02, 1.0));
-    if (qFuzzyCompare(m_modulator.amplitude(), value))
+    const float configured = static_cast<float>(std::clamp(level, 0.02, 1.0));
+    const float effective = m_radio && m_radio->requiresFullScaleTransmitAudio()
+                                ? 1.0f
+                                : configured;
+    const bool configuredChanged = !qFuzzyCompare(m_configuredTransmitLevel, configured);
+    const bool effectiveChanged = !qFuzzyCompare(m_modulator.amplitude(), effective);
+    if (!configuredChanged && !effectiveChanged)
         return;
-    m_modulator.setAmplitude(value);
+    m_configuredTransmitLevel = configured;
+    m_modulator.setAmplitude(effective);
     emit paramsChanged();
 }
 
@@ -608,6 +634,8 @@ void RttyEngine::beginTransmit(bool autoReturn)
                                .arg(mode));
         return;
     }
+
+    applyRadioTransmitLevelPolicy();
 
     m_transmitting     = true;
     m_drainingTransmit = false;

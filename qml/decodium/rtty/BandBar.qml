@@ -27,6 +27,16 @@ Item {
     // connesso; da una scheda audio non lo e' mai, perche' li' si ascolta
     // soltanto.
     readonly property bool live: radio.connected && radio.canControl
+    // CAT backends use DATA/FSK names while this compact selector uses the
+    // operator-facing DIGU/RTTY names. Compare their meanings, not spelling.
+    readonly property string normalizedRadioMode: {
+        const mode = radio.mode.trim().toUpperCase()
+        if (mode === "DATA-U" || mode === "PKTUSB") return "DIGU"
+        if (mode === "DATA-L" || mode === "PKTLSB") return "DIGL"
+        if (mode === "FSK-R" || mode === "RTTYR") return "RTTY-U"
+        if (mode === "FSK" || mode === "RTTY") return "RTTY-L"
+        return mode
+    }
 
     // Perche' e' spento, detto una volta sola e riusato da ogni suggerimento.
     readonly property string whyIdle: {
@@ -72,7 +82,7 @@ no commands. Connect it in Decodium.")
             font.family: Theme.monoFamily
             rightPadding: 4
             visible: radio.connected && radio.mode !== ""
-                     && radio.modes.indexOf(radio.mode) < 0
+                     && radio.modes.indexOf(root.normalizedRadioMode) < 0
         }
 
         Repeater {
@@ -83,7 +93,7 @@ no commands. Connect it in Decodium.")
 
                 text: modelData
                 enabled: root.live
-                armed: radio.mode === modelData
+                armed: root.normalizedRadioMode === modelData
                 // DIGU e' quello giusto per l'AFSK: si distingue dagli altri.
                 // I due modi RTTY veri si distinguono: sono quelli in cui
                 // l'apparato stringe il filtro attorno ai toni.
@@ -92,29 +102,26 @@ no commands. Connect it in Decodium.")
                 minimumWidth: 46
                 implicitHeight: 22
                 font.pixelSize: 10
-                // Passa dal ponte, non da radio.setMode: li' il nome di un
-                // modo della radio verrebbe preso per un modo
-                // dell'applicazione e lasciato cadere. Cosi' invece la radio
-                // commuta davvero, e la scelta resta per il prossimo cambio
-                // di banda.
-                onClicked: {
-                    if (bridge)
-                        bridge.impostaModoRadioRtty(modelData)
-                    else
-                        radio.setMode(modelData)
-                }
+                // RadioHub owns radio-mode translation. In particular, QMX
+                // exposes USB-audio FSK to Hamlib as PKTUSB/PKTLSB rather than
+                // RTTY/RTTYR.
+                onClicked: radio.setMode(modelData)
                 ToolTip.visible: hovered
                 ToolTip.delay: 700
                 ToolTip.text: {
                     if (!root.live)
                         return root.whyIdle
                     if (modelData === "RTTY-U")
-                        return qsTr("True RTTY, upper sideband: the radio narrows
+                        return radio.requiresFullScaleTransmitAudio
+                               ? qsTr("QMX USB-audio FSK: Decodium selects its Digi/PKTUSB mode for transmission.")
+                               : qsTr("True RTTY, upper sideband: the radio narrows
 its filter around the tones. Best for copying — but
 the radio waits for FSK keying, so transmitting from
 here sends nothing.")
                     if (modelData === "RTTY-L")
-                        return qsTr("True RTTY, lower sideband. Same as RTTY-U:
+                        return radio.requiresFullScaleTransmitAudio
+                               ? qsTr("QMX reverse USB-audio FSK: Decodium selects its Digi/PKTLSB mode.")
+                               : qsTr("True RTTY, lower sideband. Same as RTTY-U:
 receive only, the radio expects FSK keying to
 transmit.")
                     if (modelData === "DIGU")
