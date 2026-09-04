@@ -476,6 +476,13 @@ if (DECODIUM_FASTLDPC_ARM64_TARGET)
   list (APPEND wsjt_qt_CXXSRCS Detector/fastldpc/decodium_bridge.cpp)
   set_source_files_properties (Detector/fastldpc/decodium_dispatch.cpp
     PROPERTIES COMPILE_DEFINITIONS "DECODIUM_FASTLDPC_NEON_BUILT=1")
+  # FASTLDPC_HAVE_GATE_WEIGHTS: strato 2 (gate appreso, FASTLDPC-AI-SPEC-001
+  # §2). Senza questa macro gate.hpp compila comunque (gate_accept() sempre
+  # true) ma DECODIUM_LDPC_GATE=1 diventerebbe silenziosamente solo una soglia
+  # nd_max rilassata, senza classificatore a filtrarla: pericoloso. La macro
+  # carica i pesi; il flag a runtime resta comunque spento di default.
+  set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+    PROPERTIES COMPILE_DEFINITIONS "FASTLDPC_HAVE_GATE_WEIGHTS=1")
   if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
       PROPERTIES COMPILE_OPTIONS "-O3")
@@ -487,6 +494,9 @@ elseif (DECODIUM_FASTLDPC_X86_TARGET)
   list (APPEND wsjt_qt_CXXSRCS Detector/fastldpc/decodium_bridge.cpp)
   set_source_files_properties (Detector/fastldpc/decodium_dispatch.cpp
     PROPERTIES COMPILE_DEFINITIONS "DECODIUM_FASTLDPC_AVX2_BUILT=1")
+  # FASTLDPC_HAVE_GATE_WEIGHTS: vedi il commento nel ramo ARM64 sopra.
+  set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
+    PROPERTIES COMPILE_DEFINITIONS "FASTLDPC_HAVE_GATE_WEIGHTS=1")
   if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set_source_files_properties (Detector/fastldpc/decodium_bridge.cpp
       PROPERTIES COMPILE_OPTIONS "-O3;-mavx2;-mfma")

@@ -20,7 +20,10 @@
 #pragma once
 #include "minsum_avx2.hpp"
 #include "osd_fast.hpp"
+#include "gate.hpp"
+#include <algorithm>
 #include <cstring>
+#include <vector>
 
 struct Ft2Config {
     int   batch     = 64;       // parole per chiamata al min-sum, multiplo di 16
@@ -29,6 +32,19 @@ struct Ft2Config {
     int   span2     = 91;       // bit d'informazione esplorati a coppie
     int   span3     = 48;       // ... e a terne
     float nd_max    = 0.075f;   // gate anti-false-decode; 1.0 lo disattiva
+    // Strato 2 (FASTLDPC-AI-SPEC-001 §2): gate appreso al posto della sola
+    // soglia su nd. 0 = solo nd_max (oggi, invariato). 1 = l'OSD accetta
+    // candidati fino a nd <= gate_relax e la decisione finale la prende
+    // gate_accept() sulle feature del candidato (gate.hpp).
+    //
+    // ATTENZIONE: gate_weights.hpp sono i pesi del pacchetto di ricerca
+    // originale, addestrati PRIMA che il decoder passasse ad alpha 0,578,
+    // ntau 13 e span2 64 (vedi il commento in cima a gate_weights.hpp). Il
+    // meccanismo e' collaudato — a gate_mode=0 il comportamento resta
+    // bit-identico — ma i pesi NON sono stati riaddestrati ne' rimisurati su
+    // questo decoder. gate_mode=1 e' un banco di prova, non una soglia pronta.
+    int   gate_mode  = 0;
+    float gate_relax = 0.25f;
     // Tipi di messaggio i3 ammessi dal controllo di plausibilita' dentro
     // l'OSD: 0 lo spegne. Vedi cpp/plausible.hpp.
     uint32_t tipi_ammessi = 0;
@@ -72,7 +88,7 @@ public:
     static Ft2Config sensibile() { return Ft2Config{}; }
 
     Ft2Decoder(const Code& code, const Ft2Config& cfg = Ft2Config{})
-        : cfg_(cfg), N_(code.N),
+        : cfg_(cfg), N_(code.N), c_M_(code.M),
           ms_(code, cfg.batch, cfg.max_iter),
           osd_(code, cfg.osd_order, cfg.span2, cfg.span3),
           bits_((size_t)cfg.batch * code.N), ok_(cfg.batch), iters_(cfg.batch),
@@ -86,7 +102,7 @@ public:
     }
 
     // Statistiche cumulate dall'ultima reset_stats().
-    struct Stats { long words = 0, by_bp = 0, by_osd = 0, osd_tried = 0; };
+    struct Stats { long words = 0, by_bp = 0, by_osd = 0, osd_tried = 0, gate_rejected = 0; };
     const Stats& stats() const { return st_; }
     void reset_stats() { st_ = Stats{}; }
 
@@ -114,6 +130,10 @@ public:
         int total = 0;
         std::memset(accepted, 0, (size_t)n);
         if (nd) std::memset(nd, 0, (size_t)n * sizeof(float));
+        // Solo se il gate e' attivo: altrimenti il costo di calcolarle (un
+        // ordinamento su N per candidato chiuso) sarebbe un cambio silenzioso
+        // di prestazioni a flag spento, non solo di comportamento.
+        if (cfg_.gate_mode) feat_.assign((size_t)n, GateFeatures{});
 
         for (int off = 0; off < n; off += B) {
             const int cnt = std::min(B, n - off);
@@ -159,6 +179,12 @@ public:
                 if (ok_[b] && crc14_ok(dec)) {          // chiusa dal min-sum
                     std::memcpy(dst, dec, (size_t)N);
                     accepted[i] = 1; ++st_.by_bp; ++total;
+                    // Il gate vale solo per i candidati che l'OSD scava dal
+                    // rumore: una parola chiusa dal min-sum ha gia' convergenza
+                    // vera sul codice, non viene mai messa in discussione.
+                    if (cfg_.gate_mode)
+                        fill_features(i, b, dec, 0.0f,
+                                      apmask ? &apmask[(size_t)i * N] : nullptr, 0);
                     continue;
                 }
                 if (cfg_.osd_order < 0) continue;
@@ -170,18 +196,29 @@ public:
                 // piu' alto. Il fattore (N/N_liberi)^2 e' tarato su 0, 14, 29 e
                 // 58 bit noti: predice il ginocchio della curva in tutti e
                 // quattro i casi (vedi README).
+                // Con il gate acceso l'OSD accetta fino a gate_relax (piu'
+                // largo di nd_max): e' gate_accept() sulle feature, non piu'
+                // la sola distanza soft, a decidere. Non costa candidati alla
+                // CRC in piu': nd_max e' l'ultimo controllo dentro decode(),
+                // dopo che la CRC ha gia' selezionato il candidato.
+                const float base_nd = cfg_.gate_mode ? cfg_.gate_relax : cfg_.nd_max;
                 if (apmask) {
                     int free_bits = 0;
                     const uint8_t* m = &apmask[(size_t)i * N];
                     for (int v = 0; v < N; ++v) free_bits += !m[v];
                     const float r = free_bits > 0 ? (float)N / (float)free_bits : 1.0f;
-                    osd_.nd_max = cfg_.nd_max * r * r;
+                    osd_.nd_max = base_nd * r * r;
                 } else {
-                    osd_.nd_max = cfg_.nd_max;
+                    osd_.nd_max = base_nd;
                 }
                 float d = 0;
                 if (osd_.decode(ms_.posterior(b), word_.data(), &buf_[(size_t)b * N], &d,
                                 apmask ? &apmask[(size_t)i * N] : nullptr)) {
+                    if (cfg_.gate_mode) {
+                        const GateFeatures& g = fill_features(i, b, word_.data(), d,
+                                                              apmask ? &apmask[(size_t)i * N] : nullptr, 1);
+                        if (!gate_accept(g)) { ++st_.gate_rejected; continue; }
+                    }
                     std::memcpy(dst, word_.data(), (size_t)N);
                     accepted[i] = 1; ++st_.by_osd; ++total;
                     if (nd) nd[i] = d;
@@ -202,14 +239,67 @@ public:
     // successo dell'OSD, NON funziona (vedi README).
     int unsat(int b) const { return ms_.unsat(b); }
 
+    // Feature del gate per la parola i dell'ultima decode_batch(), valide sia
+    // per le accettate sia per quelle scartate dal gate (gate_mode=1). Servono
+    // alla raccolta dati sul traffico vero per il riaddestramento (vedi il
+    // commento in cima a gate_weights.hpp). Vuote (has_candidate()==false) se
+    // il gate era spento o la parola non ha chiuso ne' via min-sum ne' via OSD.
+    const GateFeatures& gate_features(int i) const { return feat_[(size_t)i]; }
+    bool has_candidate(int i) const { return cfg_.gate_mode && feat_[(size_t)i].f[4] > 0.0f; }
+
 private:
     Ft2Config cfg_;
     int N_;
+    int c_M_;
     MinSumV3 ms_;
     OsdFast  osd_;
     std::vector<uint8_t> bits_, ok_;
     std::vector<int> iters_;
     std::vector<float> buf_;
     std::vector<uint8_t> word_;
+    std::vector<GateFeatures> feat_;
     Stats st_;
+
+    // Feature del candidato per il gate appreso (strato 2). Costo: un
+    // ordinamento su N per lo split "meta' piu' affidabile", pagato solo
+    // quando gate_mode e' attivo e solo sui candidati che hanno gia' chiuso
+    // (min-sum o OSD), mai sul rumore scartato prima.
+    const GateFeatures& fill_features(int i, int b, const uint8_t* word, float d,
+                                      const uint8_t* m, int by_osd) {
+        const int N = N_;
+        GateFeatures& g = feat_[(size_t)i];
+        const float* w = &buf_[(size_t)b * N];
+        const int16_t* L = ms_.posterior(b);
+        double sum_abs = 0; float min_abs = 1e30f; int nfree = 0;
+        for (int v = 0; v < N; ++v) {
+            if (m && m[v]) continue;
+            const float a = w[v] < 0 ? -w[v] : w[v];
+            sum_abs += a; if (a < min_abs) min_abs = a; ++nfree;
+        }
+        const float mean_abs = nfree ? (float)(sum_abs / nfree) : 0.0f;
+        // ordinamento per |LLR|: "top" = meta' piu' affidabile
+        static thread_local std::vector<int> idx; idx.resize(N);
+        for (int v = 0; v < N; ++v) idx[v] = v;
+        std::sort(idx.begin(), idx.end(), [&](int a, int c) {
+            const float x = w[a] < 0 ? -w[a] : w[a], y = w[c] < 0 ? -w[c] : w[c]; return x > y; });
+        int nhard = 0, nhard_top = 0;
+        for (int r = 0; r < N; ++r) {
+            const int v = idx[r];
+            if (m && m[v]) continue;
+            const bool flip = word[v] != (uint8_t)(w[v] < 0);
+            nhard += flip; if (r < N / 2) nhard_top += flip;
+        }
+        double sum16 = 0; for (int v = 0; v < N; ++v) sum16 += L[v] < 0 ? -L[v] : L[v];
+        g.f[0] = d;
+        g.f[1] = (float)nhard / N;
+        g.f[2] = (float)nhard_top / N;
+        g.f[3] = mean_abs > 0 ? min_abs / mean_abs : 0.0f;
+        g.f[4] = mean_abs;
+        g.f[5] = (float)iters_[b] / cfg_.max_iter;
+        g.f[6] = (float)ms_.unsat(b) / c_M_;
+        g.f[7] = (by_osd && sum16 > 0) ? (float)(osd_.last_score() / sum16) : 0.0f;
+        g.f[8] = (float)nfree / N;
+        g.f[9] = (float)by_osd;
+        return g;
+    }
 };

@@ -197,6 +197,39 @@ unsigned alpha_scelto () {
     return v;
 }
 
+// Strato 2 (FASTLDPC-AI-SPEC-001 §2): gate appreso al posto della sola soglia
+// su nd. Spento di default: DECODIUM_LDPC_GATE=1 lo accende.
+//
+// ATTENZIONE: i pesi (gate_weights.hpp) vengono dal pacchetto di ricerca
+// originale e non sono stati riaddestrati ne' rimisurati su QUESTO decoder
+// (alpha, ntau, span2 sono cambiati da allora, vedi il commento in cima al
+// file dei pesi). Il meccanismo e' collaudato -- a flag spento resta
+// bit-identico -- ma accendere DECODIUM_LDPC_GATE=1 e' un banco di prova, non
+// una soglia pronta all'uso.
+bool gate_mode_scelto () {
+    static bool const v = [] {
+        char const* e = std::getenv ("DECODIUM_LDPC_GATE");
+        return e && e[0] != '0' && e[0] != 0;
+    }();
+    return v;
+}
+
+// DECODIUM_LDPC_GATE_RELAX: quanto l'OSD si allarga oltre nd_max quando il
+// gate e' acceso, prima che gate_accept() decida. 0,25 e' il valore misurato
+// nel pacchetto originale (gate/README.md); piu' alto recupera piu' candidati
+// veri ma ne affida di piu' al classificatore invece che alla sola distanza.
+float gate_relax_scelto () {
+    static float const v = [] {
+        float f = 0.25f;
+        if (char const* e = std::getenv ("DECODIUM_LDPC_GATE_RELAX")) {
+            float const n = static_cast<float> (std::atof (e));
+            if (n > 0.0f && n <= 1.0f) f = n;
+        }
+        return f;
+    }();
+    return v;
+}
+
 Ft2Decoder& decoder_for_preset (int ndeep) {
     // Anche i decoder per thread sono perdite volute, per lo stesso motivo:
     // il distruttore di Ft2Decoder libererebbe memoria da dentro
@@ -362,6 +395,8 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             c.batch = 16;                   // una parola per chiamata: batch minimo
             c.alpha_w = alpha_scelto ();
             c.max_iter = max_iter_scelto ();
+            c.gate_mode = gate_mode_scelto () ? 1 : 0;
+            c.gate_relax = gate_relax_scelto ();
             manopole_ft8 (c);
             slot1 = new Ft2Decoder (shared_code(), c);
         }
@@ -373,6 +408,8 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             c.batch = 16;
             c.alpha_w = alpha_scelto ();
             c.max_iter = max_iter_scelto ();
+            c.gate_mode = gate_mode_scelto () ? 1 : 0;
+            c.gate_relax = gate_relax_scelto ();
             manopole_ft8 (c);
             slot2 = new Ft2Decoder (shared_code(), c);
         }
@@ -384,6 +421,8 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
         c.batch = 16;
         c.alpha_w = alpha_scelto ();
         c.max_iter = max_iter_scelto ();
+        c.gate_mode = gate_mode_scelto () ? 1 : 0;
+        c.gate_relax = gate_relax_scelto ();
         manopole_ft8 (c);
         slot3 = new Ft2Decoder (shared_code(), c);
     }
