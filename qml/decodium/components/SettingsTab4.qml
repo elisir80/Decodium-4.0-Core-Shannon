@@ -667,8 +667,12 @@ SettingsPageScroll {
         }
         Text { text: qsTr("Greyline:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("ShowGreyline", false)
-            onCheckedChanged: bridge.setSetting("ShowGreyline", checked)
+            // Keep the settings page on the same canonical boolean path as
+            // the Live Map.  Direct QVariant binding treats a stored string
+            // such as "false" as true and can also write the fallback value
+            // while the page is being constructed.
+            checked: boolSetting("ShowGreyline", true)
+            onToggled: setBoolSettingIfChanged("ShowGreyline", checked, true)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }

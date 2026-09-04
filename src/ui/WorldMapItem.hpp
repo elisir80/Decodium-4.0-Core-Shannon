@@ -17,12 +17,16 @@ class WorldMapItem : public QQuickPaintedItem
     Q_OBJECT
     Q_PROPERTY(bool gpuAccelerated READ gpuAccelerated CONSTANT)
     Q_PROPERTY(bool lowSpecMode READ lowSpecMode CONSTANT)
+    Q_PROPERTY(bool greylineShaderAvailable READ greylineShaderAvailable CONSTANT)
 
 public:
     explicit WorldMapItem(QQuickItem* parent = nullptr);
 
     bool gpuAccelerated() const { return m_gpuAccelerated; }
     bool lowSpecMode() const { return m_lowSpecMode; }
+    // The painter path does not require a shader; expose the same capability
+    // flag as WorldMapGpuItem so the QML Loader can use one fallback rule.
+    bool greylineShaderAvailable() const { return true; }
 
     Q_INVOKABLE void setHomeGrid(const QString& grid);
     Q_INVOKABLE void setBaseMapEnabled(bool enabled);

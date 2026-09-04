@@ -2096,6 +2096,11 @@ static QString audioChannelSettingValue(int channel)
 static QString aliasedBridgeSettingKey(const QString& key)
 {
     if (key == QStringLiteral("PSKRtcpip")) return QStringLiteral("PSKReporterTCPIP");
+    // Greyline used two names over the lifetime of the legacy Configuration
+    // dialog.  Keep both names in sync so a profile created on Linux, macOS
+    // or Windows cannot silently override the Live Map toggle.
+    if (key == QStringLiteral("ShowGreyline")) return QStringLiteral("MapShowGreyline");
+    if (key == QStringLiteral("MapShowGreyline")) return QStringLiteral("ShowGreyline");
     if (key == QStringLiteral("RemoteWebEnabled")) return QStringLiteral("WebAppEnabled");
     if (key == QStringLiteral("RemoteHttpPort")) return QStringLiteral("WebAppHttpPort");
     if (key == QStringLiteral("RemoteWsPort")) return QStringLiteral("WebAppWsPort");
@@ -31936,6 +31941,8 @@ bool DecodiumBridge::isLegacySyncKey(const QString& key) const
         QStringLiteral("PSKReporter"),
         QStringLiteral("PSKReporterTCPIP"),
         QStringLiteral("PSKRtcpip"),
+        QStringLiteral("ShowGreyline"),
+        QStringLiteral("MapShowGreyline"),
     };
     if (keys.contains(key)) {
         return true;
