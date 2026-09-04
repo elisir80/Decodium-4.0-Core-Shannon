@@ -35,6 +35,7 @@
 #include "DecodiumTransceiverManager.h"
 #include "DecodiumCatShare.h"
 #include "DecodiumAmplifier.h"
+#include "StationTelemetryCodec.hpp"
 #include "DecodeListModel.h"
 #include "Network/DecoSyncTime.hpp"
 #include "FtRuntimeAdaptivePolicy.hpp"
@@ -1410,6 +1411,15 @@ public slots:
     // dal keyer CAT (rig_send_morse), che su molte radio (es. Yaesu FT-991/991A) non
     // funziona in modalita' dati. dialFrequencyHz=0 lascia il VFO dov'e'.
     Q_INVOKABLE void sendCwAudio(const QString& text, qint64 dialFrequencyHz, int wpm);
+    // Telemetria stazione+meteo (tipo FT8/FT4 0.5, opt-in): un solo TX extra
+    // subito dopo che un QSO e' stato loggato, se SendStationTelemetry e'
+    // attivo. Stesso schema one-shot di sendCwAudio, mai instradato nel
+    // sequencer/slot Tx1-6. Vedi src/radio/StationTelemetryCodec.hpp.
+    Q_INVOKABLE void sendStationTelemetry();
+    Q_INVOKABLE void fetchWeatherForGrid();
+    Q_INVOKABLE QVariantMap currentWeatherPreview() const;
+    Q_INVOKABLE QStringList stationRadioModelNames () const { return decodium::telemetry::stationRadioModelNames (); }
+    Q_INVOKABLE QStringList stationAntennaTypeNames () const { return decodium::telemetry::stationAntennaTypeNames (); }
     Q_INVOKABLE bool transmitFt2LinkAudio(const QString& text,
                                           const QVector<float>& wave,
                                           const QVariantMap& plan);
@@ -2116,6 +2126,11 @@ signals:
     void timeSyncSettingsRequested();
     void catSettingsRequested();
     void logQsoPromptRequested();
+    // Un decode e' stato riconosciuto come telemetria stazione+meteo
+    // Decodium (firma valida): fields ha grid4, tempC, windSpeedKmh,
+    // windDirLabel, sky, powerWatts, radioModel, antennaType, likelyCall
+    // (puo' essere vuoto: il tipo di messaggio non porta il nominativo).
+    void stationTelemetryDecoded(QVariantMap fields);
     void mainQmlReadyForNativeWindowing();
     void quitRequested();
     void rigErrorRaised(const QString& title, const QString& summary, const QString& details);
@@ -3577,6 +3592,19 @@ private:
     QString m_pendingCwText;
     int     m_cwWpm {20};
     int     m_cwSidetoneHz {700};
+    // Stato telemetria stazione+meteo (vedi sendStationTelemetry): stesso
+    // schema di m_cwTxActive, un solo messaggio FT one-shot dopo il QSO,
+    // mai instradato nel sequencer/slot Tx1-6.
+    bool    m_telemetryTxActive {false};
+    QString m_pendingTelemetryHex;
+    QString m_lastLoggedQsoCall;
+    qint64  m_lastLoggedQsoTimestampMs {0};
+    int     m_weatherTempC {decodium::telemetry::kTempUnknown};
+    int     m_weatherWindKmh {0};
+    int     m_weatherWindDirDeg {0};
+    decodium::telemetry::SkyCondition m_weatherSky {decodium::telemetry::SkyCondition::Unknown};
+    qint64  m_weatherFetchedAtMs {0};
+    QTimer* m_weatherRefreshTimer {nullptr};
     bool    m_ft2LinkTxActive {false};
     // 0 idle, 1 preparing TX VFO, 2 transmitting, 3 returning to RX VFO.
     // The values are deliberately stable because they are exposed in a QML

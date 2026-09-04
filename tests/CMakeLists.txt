@@ -117,6 +117,12 @@ target_include_directories (test_amplifier_telemetry PRIVATE ${CMAKE_SOURCE_DIR}
 target_link_libraries (test_amplifier_telemetry Qt6::Test Qt6::Core Qt6::SerialPort)
 add_test (NAME test_amplifier_telemetry COMMAND $<TARGET_FILE:test_amplifier_telemetry>)
 
+add_executable (test_station_telemetry_codec test_station_telemetry_codec.cpp
+                ../src/radio/StationTelemetryCodec.cpp)
+target_include_directories (test_station_telemetry_codec PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries (test_station_telemetry_codec Qt6::Test Qt6::Core)
+add_test (NAME test_station_telemetry_codec COMMAND $<TARGET_FILE:test_station_telemetry_codec>)
+
 add_executable (test_qmx_telemetry test_qmx_telemetry.cpp)
 target_link_libraries (test_qmx_telemetry Qt6::Test Qt6::Core)
 add_test (NAME test_qmx_telemetry COMMAND $<TARGET_FILE:test_qmx_telemetry>)
@@ -417,6 +423,7 @@ set (_decodium_regression_test_targets
   test_ptt_transition_policy
   test_audio_sink_tx_gate
   test_amplifier_telemetry
+  test_station_telemetry_codec
   test_qmx_telemetry
   test_decodium_update_support
   test_jt4_roundtrip

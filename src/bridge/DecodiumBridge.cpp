@@ -8129,6 +8129,37 @@ void DecodiumBridge::appendDecodeMapToList(QVariantMap const& entry)
                .compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0) {
         return;
     }
+    // Telemetria stazione+meteo (tipo FT8/FT4 0.5, opt-in): il testo
+    // decodificato di un messaggio tipo-5 e' gia' oggi una stringa esadecimale
+    // a 18 caratteri (unpack77_cpp). Se porta la nostra firma, avvisa la UI
+    // con i campi interpretati — la voce grezza resta comunque in lista.
+    if (getSetting(QStringLiteral("ShowTelemetryPopup"), false).toBool()) {
+        QString const msgText = entry.value(QStringLiteral("message")).toString().trimmed().toUpper();
+        decodium::telemetry::StationTelemetryFields telemetryFields;
+        if (msgText.size() == 18
+            && decodium::telemetry::decodeStationTelemetryHex(msgText, telemetryFields)) {
+            qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+            bool const correlated = !m_lastLoggedQsoCall.isEmpty()
+                && (nowMs - m_lastLoggedQsoTimestampMs) < 60000;
+            QVariantMap fields;
+            fields[QStringLiteral("grid4")] = telemetryFields.grid4;
+            fields[QStringLiteral("tempC")] = telemetryFields.tempC == decodium::telemetry::kTempUnknown
+                ? QVariant() : QVariant(telemetryFields.tempC);
+            fields[QStringLiteral("windSpeedKmh")] = telemetryFields.windSpeedKmh;
+            fields[QStringLiteral("windDirLabel")] = decodium::telemetry::windDirIndex16ToLabel(
+                telemetryFields.windDirDeg16);
+            fields[QStringLiteral("sky")] = decodium::telemetry::stationSkyConditionNames().value(
+                static_cast<int>(telemetryFields.sky), QStringLiteral("?"));
+            fields[QStringLiteral("powerWatts")] = telemetryFields.powerWatts;
+            fields[QStringLiteral("radioModel")] = decodium::telemetry::stationRadioModelNames().value(
+                telemetryFields.radioModelId, QStringLiteral("?"));
+            fields[QStringLiteral("antennaType")] = decodium::telemetry::stationAntennaTypeNames().value(
+                telemetryFields.antennaTypeId, QStringLiteral("?"));
+            fields[QStringLiteral("likelyCall")] = correlated ? m_lastLoggedQsoCall : QString();
+            emit stationTelemetryDecoded(fields);
+        }
+    }
+
     m_decodeList.append(QVariant(entry));
     rememberDecodeDedupEntry(entry);
     trimDecodeListsIfNeeded();
@@ -9795,6 +9826,14 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     connect(m_rtlSdrInput, &RtlSdrInput::audioSamplesReady,
             this, &DecodiumBridge::onRtlSdrAudioSamplesReady);
     refreshRtlSdrDevices();
+    // Telemetria stazione+meteo: refresh periodico in background (non ad
+    // ogni QSO, per non martellare l'API) — usato solo se WeatherApiEnable
+    // e' attivo (il controllo e' dentro fetchWeatherForGrid()).
+    m_weatherRefreshTimer = new QTimer(this);
+    connect(m_weatherRefreshTimer, &QTimer::timeout, this, &DecodiumBridge::fetchWeatherForGrid);
+    m_weatherRefreshTimer->start(20 * 60 * 1000);
+    QTimer::singleShot(5000, this, &DecodiumBridge::fetchWeatherForGrid);
+
     m_audioDeviceRefreshTimer = new QTimer(this);
     m_audioDeviceRefreshTimer->setSingleShot(true);
     connect(m_audioDeviceRefreshTimer, &QTimer::timeout, this, [this]() {
@@ -12828,7 +12867,8 @@ void DecodiumBridge::syncLegacyBackendState()
     bool const bridgeOwnedCustomTxActive =
         m_bridgeAudioLegacyTxActive
         || m_ft2LinkTxActive
-        || m_cwTxActive;
+        || m_cwTxActive
+        || m_telemetryTxActive;
     bool const bridgeManagedLegacyAudio = shouldUseBridgeAudioForLegacyDigitalTx();
     bool const authoritativeLegacyTransmitting =
         decodium::tx::legacyReportedTxIsAuthoritative(bridgeManagedLegacyAudio)
@@ -24287,7 +24327,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
 
     // 1.0.364+ — MAM multi-stream: bypassa la cache (force rebuild) cosi' il
     // multi-stream non serve mai PCM/wave mono stantio. Mono path invariato.
-    if (!m_cwTxActive && !m_ft2LinkTxActive && !multiStreamActive()
+    if (!m_cwTxActive && !m_ft2LinkTxActive && !m_telemetryTxActive && !multiStreamActive()
         && cacheMatchesBase() && (!needPcm || !m_txAudioCache.pcm.isEmpty())) {
         if (needPcm) {
             if (m_cachedTxOutputDeviceValid
@@ -25348,6 +25388,22 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
         return;
     }
 
+    // Telemetria stazione+meteo: come CW, termina senza la logica
+    // QSO/auto-sequence FT (signoff, re-arm, freq hop) — e' un TX extra
+    // one-shot dopo un QSO gia' chiuso, non parte del QSO stesso.
+    if (m_telemetryTxActive) {
+        m_telemetryTxActive = false;
+        m_pendingTelemetryHex.clear();
+        restoreTxAudioSchedulingBoost(reason);
+        resumeRxAudioAfterTx(reason);
+        resumeNonAudioTxWork(reason);
+        if (error) emit errorMessage(QStringLiteral("Info stazione: playback TX terminato con errore"));
+        else       emit statusMessage(QStringLiteral("Info stazione+meteo inviate"));
+        bridgeLog(QStringLiteral("completeTxPlayback: telemetry done reason=%1 err=%2")
+                      .arg(reason).arg(error ? 1 : 0));
+        return;
+    }
+
     bool const txPlaybackFinalizedQso = noteTxPlaybackFinished(reason, error);
 
     restoreTxAudioSchedulingBoost(reason);
@@ -25508,6 +25564,148 @@ void DecodiumBridge::sendCwAudio(const QString& text, qint64 dialFrequencyHz, in
         m_pendingCwText.clear();
         emit statusMessage(QStringLiteral("CW: avvio TX non riuscito"));
     }
+}
+
+// ============================================================
+// Telemetria stazione+meteo (FT8/FT4 tipo 0.5, opt-in) — vedi
+// src/radio/StationTelemetryCodec.hpp per il layout dei 71 bit.
+// ============================================================
+
+void DecodiumBridge::sendStationTelemetry()
+{
+    if (QThread::currentThread() != thread()) {
+        QMetaObject::invokeMethod(this, "sendStationTelemetry", Qt::QueuedConnection);
+        return;
+    }
+    if (m_transmitting || m_tuning) {
+        bridgeLog(QStringLiteral("sendStationTelemetry: TX o Tune gia' attivo, salto"));
+        return;
+    }
+    if (!isGridTokenStrict(m_grid.trimmed().toUpper())) {
+        bridgeLog(QStringLiteral("sendStationTelemetry: locatore non valido, salto"));
+        return;
+    }
+
+    bool const weatherEnabled = getSetting(QStringLiteral("WeatherApiEnable"), false).toBool();
+    qint64 const ageMs = QDateTime::currentMSecsSinceEpoch() - m_weatherFetchedAtMs;
+    bool const weatherFresh = weatherEnabled && m_weatherFetchedAtMs > 0 && ageMs < (30 * 60 * 1000);
+
+    decodium::telemetry::StationTelemetryFields fields;
+    fields.grid4 = m_grid.trimmed().toUpper().left(4);
+    fields.tempC = weatherFresh ? m_weatherTempC : decodium::telemetry::kTempUnknown;
+    fields.windSpeedKmh = weatherFresh ? m_weatherWindKmh : 0;
+    fields.windDirDeg16 = weatherFresh
+        ? decodium::telemetry::windDirDegToIndex16(m_weatherWindDirDeg) : 0;
+    fields.sky = weatherFresh ? m_weatherSky : decodium::telemetry::SkyCondition::Unknown;
+    fields.powerWatts = m_stationPowerWatts;
+    fields.radioModelId = getSetting(QStringLiteral("RadioModelId"), 0).toInt();
+    fields.antennaTypeId = getSetting(QStringLiteral("AntennaTypeId"), 0).toInt();
+
+    QString const hex = decodium::telemetry::encodeStationTelemetryHex(fields);
+
+    m_pendingTelemetryHex = hex;
+    m_telemetryTxActive = true;
+
+    bridgeLog(QStringLiteral("sendStationTelemetry: hex=[%1] grid=%2 tempC=%3 wind=%4/%5 power=%6")
+                  .arg(hex, fields.grid4)
+                  .arg(fields.tempC).arg(fields.windSpeedKmh).arg(fields.windDirDeg16)
+                  .arg(fields.powerWatts));
+
+    startTx();
+
+    if (!m_transmitting) {
+        // Come sendCwAudio: non lasciare lo stato armato se il TX non e'
+        // partito, altrimenti il prossimo TX FT normale verrebbe deviato.
+        m_telemetryTxActive = false;
+        m_pendingTelemetryHex.clear();
+        emit statusMessage(QStringLiteral("Info stazione: avvio TX non riuscito"));
+    }
+}
+
+void DecodiumBridge::fetchWeatherForGrid()
+{
+    if (offlineMode()) {
+        return;
+    }
+    if (!getSetting(QStringLiteral("WeatherApiEnable"), false).toBool()) {
+        return;
+    }
+    QString const grid = m_grid.trimmed().toUpper();
+    double lon = 0.0, lat = 0.0;
+    if (!grid2deg(grid, lon, lat)) {
+        bridgeLog(QStringLiteral("fetchWeatherForGrid: locatore non valido [%1]").arg(grid));
+        return;
+    }
+
+    QNetworkAccessManager* nam = new QNetworkAccessManager(this);
+    QUrl url(QStringLiteral("https://api.open-meteo.com/v1/forecast"));
+    QUrlQuery query;
+    query.addQueryItem(QStringLiteral("latitude"), QString::number(lat, 'f', 4));
+    query.addQueryItem(QStringLiteral("longitude"), QString::number(lon, 'f', 4));
+    query.addQueryItem(QStringLiteral("current"),
+                        QStringLiteral("temperature_2m,wind_speed_10m,wind_direction_10m,weather_code"));
+    query.addQueryItem(QStringLiteral("timezone"), QStringLiteral("UTC"));
+    url.setQuery(query);
+
+    QNetworkRequest req(url);
+    req.setRawHeader("User-Agent", "Decodium/4.0");
+
+    QNetworkReply* reply = nam->get(req);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, nam]() {
+        reply->deleteLater();
+        nam->deleteLater();
+        if (reply->error() != QNetworkReply::NoError) {
+            bridgeLog(QStringLiteral("fetchWeatherForGrid: errore rete: %1").arg(reply->errorString()));
+            return;
+        }
+        QJsonParseError parseError{};
+        QJsonDocument const doc = QJsonDocument::fromJson(reply->readAll(), &parseError);
+        if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
+            bridgeLog(QStringLiteral("fetchWeatherForGrid: JSON non valido"));
+            return;
+        }
+        QJsonObject const current = doc.object().value(QStringLiteral("current")).toObject();
+        if (current.isEmpty()) {
+            return;
+        }
+        m_weatherTempC = qRound(current.value(QStringLiteral("temperature_2m")).toDouble());
+        m_weatherWindKmh = qRound(current.value(QStringLiteral("wind_speed_10m")).toDouble());
+        m_weatherWindDirDeg = qRound(current.value(QStringLiteral("wind_direction_10m")).toDouble());
+        int const wmo = current.value(QStringLiteral("weather_code")).toInt(-1);
+        using decodium::telemetry::SkyCondition;
+        if (wmo == 0)                              m_weatherSky = SkyCondition::Clear;
+        else if (wmo == 1 || wmo == 2)              m_weatherSky = SkyCondition::PartlyCloudy;
+        else if (wmo == 3)                          m_weatherSky = SkyCondition::Cloudy;
+        else if (wmo == 45 || wmo == 48)            m_weatherSky = SkyCondition::Fog;
+        else if ((wmo >= 51 && wmo <= 67) || (wmo >= 80 && wmo <= 82))
+                                                     m_weatherSky = SkyCondition::Rain;
+        else if ((wmo >= 71 && wmo <= 77) || wmo == 85 || wmo == 86)
+                                                     m_weatherSky = SkyCondition::Snow;
+        else if (wmo == 95 || wmo == 96 || wmo == 99) m_weatherSky = SkyCondition::Thunderstorm;
+        else                                         m_weatherSky = SkyCondition::Unknown;
+        m_weatherFetchedAtMs = QDateTime::currentMSecsSinceEpoch();
+        bridgeLog(QStringLiteral("fetchWeatherForGrid: tempC=%1 windKmh=%2 windDeg=%3 wmo=%4")
+                      .arg(m_weatherTempC).arg(m_weatherWindKmh).arg(m_weatherWindDirDeg).arg(wmo));
+        emit statusMessage(QStringLiteral("Meteo aggiornato: %1°C, vento %2 km/h")
+                                .arg(m_weatherTempC).arg(m_weatherWindKmh));
+    });
+}
+
+QVariantMap DecodiumBridge::currentWeatherPreview() const
+{
+    QVariantMap out;
+    qint64 const ageMs = QDateTime::currentMSecsSinceEpoch() - m_weatherFetchedAtMs;
+    bool const fresh = m_weatherFetchedAtMs > 0 && ageMs < (30 * 60 * 1000);
+    out[QStringLiteral("available")] = fresh;
+    if (fresh) {
+        out[QStringLiteral("tempC")] = m_weatherTempC;
+        out[QStringLiteral("windKmh")] = m_weatherWindKmh;
+        out[QStringLiteral("windDirLabel")] = decodium::telemetry::windDirIndex16ToLabel(
+            decodium::telemetry::windDirDegToIndex16(m_weatherWindDirDeg));
+        out[QStringLiteral("sky")] = decodium::telemetry::stationSkyConditionNames().value(
+            static_cast<int>(m_weatherSky), QStringLiteral("?"));
+    }
+    return out;
 }
 
 bool DecodiumBridge::ft2LinkSatelliteHalfDuplexRequested() const
@@ -25876,7 +26074,7 @@ void DecodiumBridge::startTx()
         stopTune();
     }
     if (m_transmitting || m_tuning) { bridgeLog("startTx: already TX/tuning, abort"); return; }
-    bool const customAudioTxActive = m_cwTxActive || m_ft2LinkTxActive;
+    bool const customAudioTxActive = m_cwTxActive || m_ft2LinkTxActive || m_telemetryTxActive;
     QString const txMode = m_ft2LinkTxActive ? QStringLiteral("FT2LINK") : m_mode;
     // Audio custom: salta le guardie FT (validazione payload, fallback CQ,
     // Fox/Hound). CW e FT2-Link hanno testo/waveform arbitrari.
@@ -25907,7 +26105,8 @@ void DecodiumBridge::startTx()
 
     QString msg = m_ft2LinkTxActive
         ? m_pendingFt2LinkText
-        : (m_cwTxActive ? m_pendingCwText : currentBridgeTxRepresentativeMessage());
+        : (m_cwTxActive ? m_pendingCwText
+        : (m_telemetryTxActive ? m_pendingTelemetryHex : currentBridgeTxRepresentativeMessage()));
     if (!customAudioTxActive) {
         forceRecentRogerReportSignoffIfNeeded(msg, QStringLiteral("startTx"));
     }
@@ -27184,6 +27383,7 @@ void DecodiumBridge::stopTx()
         || m_bridgeAudioLegacyTxActive
         || m_ft2LinkTxActive
         || m_cwTxActive
+        || m_telemetryTxActive
         || m_txAudioSink
         || m_txPcmBuffer
         || (m_modulator && m_modulator->isActive())
@@ -27226,6 +27426,9 @@ void DecodiumBridge::stopTx()
     // CW-audio interrotto manualmente: disarma lo stato CW.
     m_cwTxActive = false;
     m_pendingCwText.clear();
+    // Telemetria stazione+meteo interrotta manualmente: idem.
+    m_telemetryTxActive = false;
+    m_pendingTelemetryHex.clear();
     if (!satelliteHalfDuplex) {
         m_ft2LinkTxActive = false;
         m_pendingFt2LinkText.clear();
@@ -42460,6 +42663,11 @@ void DecodiumBridge::logQsoNow()
             m_callsignIntelligence->notifyQsoLogged(legacyCompletedCall);
         }
         clearTxArmedAfterCompletedQso(legacyCompletedCall, QStringLiteral("legacy-log"));
+        m_lastLoggedQsoCall = legacyCompletedCall.trimmed().toUpper();
+        m_lastLoggedQsoTimestampMs = QDateTime::currentMSecsSinceEpoch();
+        if (getSetting(QStringLiteral("SendStationTelemetry"), false).toBool()) {
+            QTimer::singleShot(0, this, &DecodiumBridge::sendStationTelemetry);
+        }
         emit statusMessage("Log QSO via backend legacy");
         return;
     }
@@ -42703,6 +42911,11 @@ void DecodiumBridge::logQsoNow()
         m_callsignIntelligence->notifyQsoLogged(logDxCall);
     }
     clearTxArmedAfterCompletedQso(logDxCall, QStringLiteral("log"));
+    m_lastLoggedQsoCall = logDxCall.trimmed().toUpper();
+    m_lastLoggedQsoTimestampMs = QDateTime::currentMSecsSinceEpoch();
+    if (getSetting(QStringLiteral("SendStationTelemetry"), false).toBool()) {
+        QTimer::singleShot(0, this, &DecodiumBridge::sendStationTelemetry);
+    }
     emit statusMessage("QSO loggato: " + logDxCall);
     traceLogStep(QStringLiteral("done"));
 }

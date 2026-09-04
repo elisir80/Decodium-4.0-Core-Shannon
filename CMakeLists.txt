@@ -648,6 +648,7 @@ set (wsjtx_CXXSRCS
   src/radio/DecodiumCatShare.cpp
   src/radio/DecodiumCatShare.h
   src/radio/DecodiumAmplifier.cpp
+  src/radio/StationTelemetryCodec.cpp
   src/radio/DecodiumAmplifier.h
   src/radio/DecodiumRigDetector.cpp
   src/radio/DecodiumRigDetector.h
@@ -2073,6 +2074,7 @@ add_executable (decodium_qml
   src/radio/DecodiumCatShare.cpp
   src/radio/DecodiumCatShare.h
   src/radio/DecodiumAmplifier.cpp
+  src/radio/StationTelemetryCodec.cpp
   src/radio/DecodiumAmplifier.h
   src/radio/DecodiumRigDetector.cpp
   src/radio/DecodiumRigDetector.h

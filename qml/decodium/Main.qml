@@ -2776,6 +2776,35 @@ ApplicationWindow {
             updateDialogLoader.item.open()
     }
 
+    // IU8LMC — Popup "info stazione + meteo" ricevuta (opt-in, vedi
+    // Settings > Station > "Show popup with correspondent's info").
+    Loader {
+        id: stationTelemetryLoader
+        source: "components/StationTelemetryDialog.qml"
+        active: false
+        asynchronous: true
+        property var pendingFields: ({})
+        onLoaded: {
+            if (item) {
+                item.fields = pendingFields
+                item.open()
+            }
+        }
+    }
+
+    Connections {
+        target: bridge
+        function onStationTelemetryDecoded(fields) {
+            if (stationTelemetryLoader.item) {
+                stationTelemetryLoader.item.fields = fields
+                stationTelemetryLoader.item.open()
+            } else {
+                stationTelemetryLoader.pendingFields = fields
+                stationTelemetryLoader.active = true
+            }
+        }
+    }
+
     Connections {
         target: updater
         // Scatta sia dal controllo all'avvio sia da quello manuale: se c'e' una
