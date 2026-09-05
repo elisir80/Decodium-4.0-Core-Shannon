@@ -623,10 +623,20 @@ void RttyEngine::beginTransmit(bool autoReturn)
     // la trasmissione parte, il PTT chiude, il software non ha nulla da
     // segnalare — e in aria non esce niente. Peggio, se il microfono e' aperto
     // va in onda il rumore della stanza. Meglio fermarsi e dirlo.
-    const QString mode = m_radio->mode().toUpper();
+    const QString mode = m_radio->mode().trimmed().toUpper();
+    const bool nativeFsk = mode.startsWith(QLatin1String("RTTY"))
+        || mode.startsWith(QLatin1String("FSK"));
+    if (nativeFsk && !m_radio->requiresFullScaleTransmitAudio()) {
+        emit errorOccurred(tr("The radio is in %1 (native FSK). Decodium transmits "
+                              "RTTY as audio/AFSK. Press 'Set radio' in the DECODER "
+                              "panel to select DATA-U/DIGU before transmitting.")
+                               .arg(mode));
+        return;
+    }
     if (!mode.isEmpty()
         && !mode.startsWith(QLatin1String("DIG"))
         && !mode.startsWith(QLatin1String("RTTY"))
+        && !(nativeFsk && m_radio->requiresFullScaleTransmitAudio())
         && !mode.startsWith(QLatin1String("PKT"))
         && !mode.startsWith(QLatin1String("DATA"))) {
         emit errorOccurred(tr("The radio is in %1: on voice modes the USB audio does "

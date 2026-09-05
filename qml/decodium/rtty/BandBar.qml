@@ -91,7 +91,11 @@ no commands. Connect it in Decodium.")
             GlassButton {
                 required property var modelData
 
-                text: modelData
+                text: modelData === "DIGU" ? qsTr("DIGU · AFSK")
+                      : modelData === "DIGL" ? qsTr("DIGL · AFSK")
+                      : modelData.indexOf("RTTY") === 0 && !radio.requiresFullScaleTransmitAudio
+                        ? modelData + qsTr(" · FSK")
+                      : modelData
                 enabled: root.live
                 armed: root.normalizedRadioMode === modelData
                 // DIGU e' quello giusto per l'AFSK: si distingue dagli altri.
@@ -125,9 +129,7 @@ here sends nothing.")
 receive only, the radio expects FSK keying to
 transmit.")
                     if (modelData === "DIGU")
-                        return qsTr("Data on the upper sideband: wider filter, but the
-audio really modulates — use this one if you want to
-transmit from here.")
+                        return qsTr("DIGU — RTTY via audio/AFSK. Selects upper-sideband data mode (DATA-U / USB-D). Configure the radio to accept computer audio. Use this for audio-based RTTY transmission.")
                     if (modelData === "DIGL")
                         return qsTr("Data on the lower sideband. The tones come out\nreversed — REV puts them back.")
                     return qsTr("Voice sideband. RTTY is copied just the same,\nbut the radio's filter is wider than it needs.")

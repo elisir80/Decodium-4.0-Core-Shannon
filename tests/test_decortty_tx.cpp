@@ -38,8 +38,44 @@ class TestDecoRttyTx final : public QObject
 private slots:
     void setRadioUsesTheCatHook();
     void prepareProfileIsQmxAware();
+    void nativeFskBlocksPttButDataAllowsAudio();
     void qmxRttyProducesAudioAboveTheDetectorThreshold();
 };
+
+void TestDecoRttyTx::nativeFskBlocksPttButDataAllowsAudio()
+{
+    QString mode;
+    bool ptt = false;
+    QVector<short> audio;
+    auto hooks = radioHooks(QStringLiteral("Icom IC-7100"), &mode);
+    hooks.impostaPtt = [&ptt](bool on) { ptt = on; };
+    hooks.mandaAudioTx = [&audio](QVector<short> const& samples) { audio += samples; };
+    decortty::link::RadioHub radio;
+    decortty::app::RttyEngine engine;
+    engine.attachRadio(&radio);
+    radio.collegaADecodium(std::move(hooks));
+    QSignalSpy errors(&engine, &decortty::app::RttyEngine::errorOccurred);
+    for (QString const& nativeMode : {QStringLiteral("RTTY"), QStringLiteral("RTTY-R"),
+                                    QStringLiteral("RTTY-U"), QStringLiteral("RTTY-L"),
+                                    QStringLiteral("FSK"), QStringLiteral("FSK-R")}) {
+        mode = nativeMode;
+        errors.clear();
+        engine.transmitText(QStringLiteral("RY"));
+        QCOMPARE(errors.size(), 1);
+        QVERIFY(errors.first().first().toString().contains(QStringLiteral("Set radio")));
+        QVERIFY(!ptt);
+        QVERIFY(!engine.transmitting());
+        QVERIFY(audio.isEmpty());
+    }
+    mode = QStringLiteral("DATA-U");
+    errors.clear();
+    engine.transmitText(QStringLiteral("RY"));
+    QTRY_VERIFY_WITH_TIMEOUT(!audio.isEmpty(), 1000);
+    QVERIFY(ptt);
+    QVERIFY(errors.isEmpty());
+    engine.abortTransmit();
+    QVERIFY(!ptt);
+}
 
 void TestDecoRttyTx::setRadioUsesTheCatHook()
 {
