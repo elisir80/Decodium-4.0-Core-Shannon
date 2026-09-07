@@ -1589,13 +1589,32 @@ int ft2_genie_ibest ()
 // (accumulo_call), che nel banco ft2_stage_compare coincide con lo slot, ma
 // in aria servirebbe la chiave sul tempo assoluto del burst. Per ora e' un
 // meccanismo da banco.
+// Interruttore da UI (pulsante nella zona FT2): -1 = mai toccato dall'app,
+// vale ancora la variabile d'ambiente (banchi/test); 0/1 = impostato dal
+// pulsante, vince su tutto e si puo' cambiare in ogni momento senza
+// riavviare. Un semplice atomic basta: la scrittura da qualunque thread
+// (l'interfaccia) e la lettura da qualunque altro (il decoder) sono gia'
+// sicure per costruzione, non serve instradare la chiamata sul thread del
+// worker come per le richieste di decodifica vere.
+std::atomic<int> g_ft2_accumulo_da_ui {-1};
+
+extern "C" void ftx_ft2_set_accumulo_enabled_c (int on)
+{
+  g_ft2_accumulo_da_ui.store (on != 0 ? 1 : 0);
+}
+
 bool ft2_accumulo_attivo ()
 {
-  static bool const v = [] {
+  int const da_ui = g_ft2_accumulo_da_ui.load ();
+  if (da_ui >= 0)
+    {
+      return da_ui != 0;
+    }
+  static bool const da_env = [] {
     char const* e = std::getenv ("DECODIUM_FT2_ACCUMULO");
     return e && e[0] != '\0' && e[0] != '0';
   }();
-  return v;
+  return da_env;
 }
 
 float ft2_accumulo_env_f (char const* nome, float fallback)

@@ -819,6 +819,36 @@ SettingsPageScroll {
                     ToolTip.text: qsTr("Anti-QSB tuning:\n  • Ghost filter -24 dB instead of -22\n  • Retry cap extended SNR-adaptive (+2..+4 extra)\n  • Same-step wait relaxed for weak partners\n\nDefault: OFF — enable it if you have weak DX partners or marginal propagation.")
                 }
 
+                // FT2 accumulo fra slot ripetuti (RX): somma l'energia di
+                // piu' slot della stessa stazione per decodificare dove il
+                // singolo slot non basta. Sperimentale, mai confermato su
+                // traffico reale: vedi Detector/fastldpc/lab/misure/
+                // 20260907_accumulo_ft2.md. Default OFF, non persiste.
+                Text {
+                    text: qsTr("FT2: accumulate repeated slots (RX):")
+                    color: textSecondary
+                    font.pixelSize: 12
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    Layout.preferredWidth: autoSequenceGrid.labelWidth
+                    Layout.preferredHeight: controlHeight
+                }
+                CheckBox {
+                    id: ft2AccumuloCheck
+                    Layout.preferredWidth: autoSequenceGrid.checkWidth
+                    Layout.preferredHeight: controlHeight
+                    checked: bridge ? bridge.ft2AccumuloEnabled : false
+                    onCheckedChanged: {
+                        if (bridge) bridge.setFt2AccumuloEnabled(checked)
+                    }
+                    indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+                    contentItem: Text { text: ""; leftPadding: 24 }
+                    hoverEnabled: true
+                    ToolTip.visible: hovered
+                    ToolTip.delay: 400
+                    ToolTip.text: qsTr("Sums the signal energy of repeated FT2 transmissions from the same station across slots, to decode weaker signals than a single slot allows.\n\nExperimental, never confirmed on real air traffic. Resets to OFF on every restart.\n\nDefault: OFF.")
+                }
+
                 // 1.0.289 — FT2 #1: piena profondità decode durante AutoCQ
                 Text {
                     text: qsTr("FT2: full decode in AutoCQ:")

@@ -19400,6 +19400,18 @@ void DecodiumBridge::setHoldTxFreq(bool v)
     }
 }
 
+extern "C" void ftx_ft2_set_accumulo_enabled_c(int on);
+
+void DecodiumBridge::setFt2AccumuloEnabled(bool v)
+{
+    if (m_ft2AccumuloEnabled != v) {
+        m_ft2AccumuloEnabled = v;
+        ftx_ft2_set_accumulo_enabled_c(v ? 1 : 0);
+        emit ft2AccumuloEnabledChanged();
+        bridgeLog(QStringLiteral("FT2 accumulo fra slot: %1").arg(v ? QStringLiteral("acceso") : QStringLiteral("spento")));
+    }
+}
+
 void DecodiumBridge::setTxEnabled(bool v)
 {
     bool const rearmingFromOff = v && !m_txEnabled;

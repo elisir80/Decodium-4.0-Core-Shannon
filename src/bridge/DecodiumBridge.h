@@ -343,6 +343,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool asyncTxEnabled     READ asyncTxEnabled     WRITE setAsyncTxEnabled     NOTIFY asyncTxEnabledChanged)
     Q_PROPERTY(bool asyncDecodeEnabled READ asyncDecodeEnabled WRITE setAsyncDecodeEnabled NOTIFY asyncDecodeEnabledChanged)
     Q_PROPERTY(bool dualCarrierEnabled READ dualCarrierEnabled WRITE setDualCarrierEnabled NOTIFY dualCarrierEnabledChanged)
+    Q_PROPERTY(bool ft2AccumuloEnabled READ ft2AccumuloEnabled WRITE setFt2AccumuloEnabled NOTIFY ft2AccumuloEnabledChanged)
     Q_PROPERTY(bool quickQsoEnabled    READ quickQsoEnabled    WRITE setQuickQsoEnabled    NOTIFY quickQsoEnabledChanged)
     Q_PROPERTY(bool resumeQsoOnReply   READ resumeQsoOnReply   WRITE setResumeQsoOnReply   NOTIFY resumeQsoOnReplyChanged)
     Q_PROPERTY(int  asyncSnrDb         READ asyncSnrDb                                     NOTIFY asyncSnrDbChanged)
@@ -966,6 +967,12 @@ public:
     void setAsyncDecodeEnabled(bool v){ if (m_asyncDecodeEnabled != v)  { m_asyncDecodeEnabled = v;  emit asyncDecodeEnabledChanged(); } }
     bool dualCarrierEnabled()  const { return m_dualCarrierEnabled; }
     void setDualCarrierEnabled(bool v){ if (m_dualCarrierEnabled!=v){ m_dualCarrierEnabled=v; emit dualCarrierEnabledChanged(); } }
+    // Accumulo di energia fra slot ripetuti FT2 (RX), opt-in, spento di
+    // default a ogni avvio come DualCarrier: non persiste su QSettings di
+    // proposito, e' una funzione non ancora confermata su traffico reale
+    // (vedi Detector/fastldpc/lab/misure/20260907_accumulo_ft2.md).
+    bool ft2AccumuloEnabled() const { return m_ft2AccumuloEnabled; }
+    Q_INVOKABLE void setFt2AccumuloEnabled(bool v);
     bool quickQsoEnabled()     const { return m_quickQsoEnabled; }
     void setQuickQsoEnabled(bool v)   { if (m_quickQsoEnabled != v) { m_quickQsoEnabled = v; emit quickQsoEnabledChanged(); } }
     bool resumeQsoOnReply()    const { return m_resumeQsoOnReply; }
@@ -2061,6 +2068,7 @@ signals:
     void uiFramelessPopoutsChanged();
     void uiStyleChanged();
     void dualCarrierEnabledChanged();
+    void ft2AccumuloEnabledChanged();
     void quickQsoEnabledChanged();
     void resumeQsoOnReplyChanged();
     void settingValueChanged(QString key, QVariant value);
@@ -3019,6 +3027,7 @@ private:
     bool    m_asyncTxEnabled   {true};   // FT2 async TX SEMPRE ON (permanente, non disattivabile): il path FT2 sync e' rimosso di fatto. Solo modo FT2 lo usa (gated ovunque da m_mode=="FT2").
     qint64  m_asyncLastTxEndMs {0};      // timestamp fine ultima TX FT2 async (per guard timer)
     bool m_dualCarrierEnabled{false}; // FT2 dual carrier mode
+    bool m_ft2AccumuloEnabled{false}; // FT2 accumulo di energia fra slot, RX, opt-in
     bool m_quickQsoEnabled   {false}; // FT2 Quick QSO: salta TX1, flusso Ultra2 (2 messaggi)
     // 1.0.304 — resume-on-reply (#9): se attivo, alla Halt con QSO attivo memorizza il
     // partner; se quello ri-risponde (decode con suo call + mio call) entro 2 min, riprende
