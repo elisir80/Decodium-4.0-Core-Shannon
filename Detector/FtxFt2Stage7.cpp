@@ -1595,6 +1595,32 @@ bool ft2_drift_search_attivo ()
   return v;
 }
 
+// Budget per-chiamata dei tentativi di drift-rescue, SEPARATO da
+// stage7_local_rescue_budget() (che resta a 0 di default: e' la manopola
+// sperimentale del rescue locale piu' vecchio, non tocca questa). Prima del
+// 7 settembre 2026 i due meccanismi condividevano lo stesso budget, che
+// default a 0 -- quindi DECODIUM_FT2_DRIFT_SEARCH=1 da solo non bastava mai
+// ad attivare nulla, serviva ANCHE impostare a mano
+// DECODIUM_FT2_STAGE7_LOCAL_RESCUE_BUDGET. Un budget dedicato, non nullo di
+// default quando la ricerca e' accesa, rende la singola variabile
+// sufficiente com'era documentato. 16 tentativi/chiamata: costa una
+// dechirp+bitmetrics+decode_passes completo per tentativo, sul solo
+// sottoinsieme di candidati che gia' supera nsync>=18 e smax alto (vedi
+// enable_drift_rescue) -- raro nel traffico normale.
+int ft2_drift_rescue_budget ()
+{
+  static int const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_DRIFT_RESCUE_BUDGET");
+    if (e && e[0] != 0)
+      {
+        int const n = std::atoi (e);
+        return n > 0 ? n : 0;
+      }
+    return ft2_drift_search_attivo () ? 16 : 0;
+  }();
+  return v;
+}
+
 // Estensione del raggio di ricerca del tasso di deriva, in Hz/s, su tutta la
 // durata del messaggio. Il 6 settembre 2026 un tasso di 14 Hz / 2,47 s ≈
 // 5,7 Hz/s mostrava gia' un arco misurabile: 8,0 Hz/s da' margine sopra
@@ -2436,6 +2462,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
   for (int isp = 1; isp <= nsp; ++isp)
     {
       int local_rescue_budget = stage7_local_rescue_budget ();
+      int drift_rescue_budget = ft2_drift_rescue_budget ();
       if (abort_if_cancelled ())
         {
           return;
@@ -2841,14 +2868,15 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                       && isp >= 2
                       && nsync_qual >= 18
                       && smax >= smaxthresh + 0.10f;
-                  // Stessa soglia di qualita' e stesso budget di enable_local_rescue,
-                  // MA senza isp>=2: misurato (6 settembre 2026) che il segnale
-                  // bersaglio si trova quasi sempre al PRIMO passaggio, mai a isp>=2,
-                  // quindi con quel vincolo questo ramo non scattava mai (vedi il
-                  // commento piu' esteso vicino al ciclo che usa questa variabile).
+                  // Stessa soglia di qualita' di enable_local_rescue ma budget separato
+                  // (drift_rescue_budget, vedi ft2_drift_rescue_budget) e MA senza isp>=2:
+                  // misurato (6 settembre 2026) che il segnale bersaglio si trova quasi
+                  // sempre al PRIMO passaggio, mai a isp>=2, quindi con quel vincolo
+                  // questo ramo non scattava mai (vedi il commento piu' esteso vicino al
+                  // ciclo che usa questa variabile).
                   bool const enable_drift_rescue =
                       ft2_drift_search_attivo ()
-                      && local_rescue_budget > 0
+                      && drift_rescue_budget > 0
                       && nsync_qual >= 18
                       && smax >= smaxthresh + 0.10f;
                   if (!enable_local_rescue && !enable_drift_rescue)
@@ -2989,21 +3017,19 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                   // sempre al PRIMO passaggio (isp=1), mai richiamato a isp>=2 -- col
                   // vincolo isp>=2 di enable_local_rescue questo ramo non scattava mai
                   // e il confronto acceso/spento risultava identico su tutta la tabella.
-                  // Restano le stesse soglie di qualita' (nsync_qual, smax) e lo stesso
-                  // budget condiviso di enable_local_rescue: un tentativo in piu' su un
-                  // candidato gia' giudicato promettente, non un percorso senza controllo.
-                  // ibest resta quello originale: il de-chirp e' solo di fase, non
-                  // sposta la finestra. f1_best resta f1: se dosubtract sottrae un
-                  // segnale che in realta' deriva, il residuo non si cancella del
-                  // tutto -- limite noto, non e' lo scopo di questa modifica.
-                  if (!decoded_best.ok && enable_drift_rescue && local_rescue_budget > 0)
+                  // Restano le stesse soglie di qualita' (nsync_qual, smax); budget
+                  // proprio (drift_rescue_budget), separato da quello del rescue locale:
+                  // un tentativo in piu' su un candidato gia' giudicato promettente, non
+                  // un percorso senza controllo. ibest resta quello originale: il
+                  // de-chirp e' solo di fase, non sposta la finestra. f1_best resta f1:
+                  // se dosubtract sottrae un segnale che in realta' deriva, il residuo
+                  // non si cancella del tutto -- limite noto, non e' lo scopo di questa
+                  // modifica.
+                  if (!decoded_best.ok && enable_drift_rescue && drift_rescue_budget > 0)
                     {
-                      // local_rescue_budget puo' essere gia' stato speso dal rescue
-                      // sopra (enable_local_rescue ed enable_drift_rescue leggono lo
-                      // stesso budget prima che nessuno dei due lo scali): il
-                      // controllo qui e' fresco, non il valore di enable_drift_rescue
-                      // calcolato piu' sopra.
-                      --local_rescue_budget;
+                      // drift_rescue_budget e' proprio: il controllo qui e' fresco, non
+                      // il valore di enable_drift_rescue calcolato piu' sopra.
+                      --drift_rescue_budget;
                       float const range = ft2_drift_search_range_hz_s ();
                       int const steps = ft2_drift_search_steps ();
                       for (int step = 1; step <= steps && !decoded_best.ok; ++step)
@@ -3024,6 +3050,9 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                               int const nsync_drift_probe = ft2_sync_quality (bitmetrics.data ());
                               if (badsync_drift != 0)
                                 {
+                                  stage7_debug_logf (
+                                      "drift-try cand=%d seg=%d rate=%.2f badsync",
+                                      icand + 1, iseg, static_cast<double> (sign * rate));
                                   continue;
                                 }
                               int const nsync_drift = nsync_drift_probe;
@@ -3031,6 +3060,10 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                               if (ndepth0 >= 3) nsync_drift_min = 10;
                               if (nsync_drift < nsync_drift_min)
                                 {
+                                  stage7_debug_logf (
+                                      "drift-try cand=%d seg=%d rate=%.2f nsync=%d < %d",
+                                      icand + 1, iseg, static_cast<double> (sign * rate),
+                                      nsync_drift, nsync_drift_min);
                                   continue;
                                 }
 
@@ -3060,6 +3093,10 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                                   ft2_ap_msg_attivo () ? symbol_mags_d.data () : nullptr);
                               if (!decoded_drift.ok)
                                 {
+                                  stage7_debug_logf (
+                                      "drift-try cand=%d seg=%d rate=%.2f nsync=%d nharderror=%d dmin=%.3f fail",
+                                      icand + 1, iseg, static_cast<double> (sign * rate), nsync_drift,
+                                      decoded_drift.nharderror, static_cast<double> (decoded_drift.dmin));
                                   if (decoded_drift.stop_candidate)
                                     {
                                       decoded_best = decoded_drift;
@@ -3085,16 +3122,27 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                         }
                     }
 
-                  if (decoded_best.stop_candidate)
-                    {
-                      break;
-                    }
+                  // BUG (trovato 7 settembre 2026): un rescue riuscito (decoded_best.ok
+                  // true) ha SEMPRE anche stop_candidate=true (impostato incondizionatamente
+                  // in run_decode_passes appena un candidato supera la CRC, successo o no --
+                  // vedi il commento li'). Controllare stop_candidate PRIMA di ok scartava
+                  // quindi ogni singola decodifica recuperata dal rescue, locale o di deriva,
+                  // prima ancora di arrivare a copy_decode_row: il log "rescued"/"rescued-drift"
+                  // scattava, ma il risultato non veniva mai salvato. Nessun decode normale
+                  // (decoded_best.ok gia' vero all'ingresso) attraversa questo blocco -- per
+                  // quello il bug era invisibile. E' la causa per cui gli sweep acceso/spento
+                  // di DECODIUM_FT2_DRIFT_SEARCH davano tabelle identiche: il rescue non
+                  // aggiungeva mai nulla all'output, a prescindere dalla soglia.
                   if (decoded_best.ok)
                     {
                       nsync_qual = static_cast<int> (qual_best);
                     }
                   else
                     {
+                      if (decoded_best.stop_candidate)
+                        {
+                          break;
+                        }
                       continue;
                     }
                 }
