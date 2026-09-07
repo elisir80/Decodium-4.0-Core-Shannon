@@ -846,7 +846,11 @@ SettingsPageScroll {
                     hoverEnabled: true
                     ToolTip.visible: hovered
                     ToolTip.delay: 400
-                    ToolTip.text: qsTr("Sums the signal energy of repeated FT2 transmissions from the same station across slots, to decode weaker signals than a single slot allows.\n\nExperimental, never confirmed on real air traffic. Resets to OFF on every restart.\n\nDefault: OFF.")
+                    ToolTip.text: qsTr("Sums the signal energy of repeated FT2 transmissions from the same station across slots, to decode weaker signals than a single slot allows.
+
+Experimental, never confirmed on real air traffic. Resets to OFF on every restart.
+
+Default: OFF.")
                 }
 
                 // 1.0.289 — FT2 #1: piena profondità decode durante AutoCQ
