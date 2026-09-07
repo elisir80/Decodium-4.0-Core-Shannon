@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <complex>
 #include <cstdlib>
@@ -83,6 +84,11 @@ extern "C"
                      int itwk, float* sync);
   void ftx_ft2_bitmetrics_c (Complex const* cd, float* bitmetrics, int* badsync);
   void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags);
+  // Accumulo fra slot (DECODIUM_FT2_ACCUMULO): spettri di simbolo di una
+  // finestra e bit-metrics dalla somma di piu' finestre (FtxBitmetrics.cpp).
+  void ftx_ft2_symbol_spectra_c (Complex const* cd, Complex* cs_out, float* beta_out);
+  void ftx_ft2_bitmetrics_accum_c (Complex const* cs, float const* beta, int nslot,
+                                   float* bitmetrics);
   void ftx_ft2_bitmetrics_diag_c (Complex const* cd,
                                   float* bitmetrics_final,
                                   float* bitmetrics_base,
@@ -623,6 +629,45 @@ struct Stage7State
   float last_avg_freq {0.0f};
   float last_avg_dt {0.0f};
   std::array<char, kFt2DecodedChars> last_avg_decoded {};
+
+  // Accumulo fra slot (DECODIUM_FT2_ACCUMULO=1, spento di default). Una
+  // tabella di stazioni, ciascuna con gli spettri di simbolo degli ultimi
+  // slot in cui e' stata vista alla stessa frequenza e allo stesso dt. La
+  // somma delle energie per ipotesi (ftx_ft2_bitmetrics_accum_c) vale +2,0 dB
+  // a due slot e +3,9 a quattro (Monte Carlo, lab/tools/slot_accumulo.py).
+  // Diverso da bm_avg qui sopra, che media le bit-metrics DOPO il max-log
+  // di un solo candidato a pesi uguali.
+  // 16 voci e non 4: in una chiamata la ricerca propone decine di candidati
+  // di rumore con smax 1,3-1,6, e con quattro voci la stazione vera veniva
+  // sfrattata nella stessa chiamata in cui era entrata (misurato sui WAV di
+  // lab/ft2q). Lo sfratto va alla voce con lo smax piu' basso.
+  static constexpr int kAccumuloVoci = 16;
+  static constexpr int kAccumuloSlot = 4;
+  struct AccumuloSlot
+  {
+    std::array<Complex, kFt2Nn * 4> cs {};
+    float beta {0.0f};
+    float smax {0.0f};
+    long long call {0};
+  };
+  struct AccumuloVoce
+  {
+    bool valid {false};
+    float f {0.0f};
+    float dt {0.0f};
+    long long last_call {0};
+    long long decoded_call {0};
+    long long tentato_call {-1};
+    int nslot {0};
+    int next {0};
+    float smax_best {0.0f};
+    std::array<AccumuloSlot, kAccumuloSlot> slot {};
+  };
+  std::array<AccumuloVoce, kAccumuloVoci> accumulo {};
+  // Identita' dell'ultimo slot elaborato: l'orologio reale diviso in bucket
+  // da 3,75 s (ft2_accumulo_slot_id()), non un contatore di chiamate -- vedi
+  // il commento su quella funzione per il motivo.
+  long long accumulo_call {0};
 };
 
 Stage7State& stage7_state ()
@@ -1486,6 +1531,300 @@ float ft2_ap_msg_hz ()
     return f > 0.0f ? f : 20.0f;
   }();
   return v;
+}
+
+// Genie del sincronismo, SOLO per il banco di misura
+// (lab/tools/genie_sync_ft2.sh). DECODIUM_FT2_GENIE_F = frequenza audio VERA
+// del segnale in Hz: un candidato viene forzato li', esente dai quattro
+// cancelli del sincronismo come il candidato atteso del tipo 8, ma senza
+// memoria dei messaggi e senza alcun bit noto -- l'LDPC lavora alla cieca.
+// La differenza fra questa curva e quella normale e' il costo della RICERCA
+// dei candidati. 0 (default, variabile assente) = spento, nessun effetto.
+float ft2_genie_f ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_GENIE_F");
+    float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+    return f > 0.0f ? f : 0.0f;
+  }();
+  return v;
+}
+
+// Tolleranza entro cui un candidato NORMALE gia' in lista riceve l'esenzione
+// al posto della forzatura (DECODIUM_FT2_GENIE_HZ). Default 3 Hz, stretta:
+// qui la frequenza e' nota esattamente, non ricordata da due slot fa.
+float ft2_genie_hz ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_GENIE_HZ");
+    float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+    return f > 0.0f ? f : 3.0f;
+  }();
+  return v;
+}
+
+// Genie del TEMPO, stessa famiglia: DECODIUM_FT2_GENIE_DT_MS = inizio vero
+// del burst nel WAV, in millisecondi (ft2_make_test_wav: --offset-ms, 600 di
+// default). Per il candidato genie il ritardo e' imposto e la frequenza fine
+// azzerata, cosi' la misura separa la RICERCA dei candidati (solo GENIE_F)
+// dalla stima fine di tempo e frequenza (GENIE_F + GENIE_DT_MS). -1 = spento.
+int ft2_genie_ibest ()
+{
+  static int const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_GENIE_DT_MS");
+    if (!e || e[0] == '\0') return -1;
+    double const ms = std::atof (e);
+    return ms >= 0.0 ? static_cast<int> (std::lround (ms / (1000.0 * kFt2FreqDtScale))) : -1;
+  }();
+  return v;
+}
+
+// ---------------------------------------------------------------------------
+// Accumulo fra slot: DECODIUM_FT2_ACCUMULO=1 lo accende (spento di default,
+// bit-identico con la variabile assente). Vedi Stage7State::accumulo.
+//
+// ATTENZIONE, prima di pensarlo per l'aria: il decoder asincrono gira ogni
+// 100 ms su una finestra scorrevole, quindi lo STESSO burst arriverebbe qui
+// decine di volte. La tabella distingue le chiamate con un contatore
+// (accumulo_call), che nel banco ft2_stage_compare coincide con lo slot, ma
+// in aria servirebbe la chiave sul tempo assoluto del burst. Per ora e' un
+// meccanismo da banco.
+bool ft2_accumulo_attivo ()
+{
+  static bool const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_ACCUMULO");
+    return e && e[0] != '\0' && e[0] != '0';
+  }();
+  return v;
+}
+
+float ft2_accumulo_env_f (char const* nome, float fallback)
+{
+  char const* e = std::getenv (nome);
+  float const f = e ? static_cast<float> (std::atof (e)) : 0.0f;
+  return f > 0.0f ? f : fallback;
+}
+
+// Tolleranza di aggancio in frequenza (Hz) e in tempo (s) fra uno slot e il
+// successivo della stessa stazione: 10 Hz come bm_avg, 2 simboli in tempo.
+float ft2_accumulo_hz ()
+{
+  static float const v = ft2_accumulo_env_f ("DECODIUM_FT2_ACCUMULO_HZ", 10.0f);
+  return v;
+}
+
+float ft2_accumulo_dt ()
+{
+  static float const v = ft2_accumulo_env_f ("DECODIUM_FT2_ACCUMULO_DT", 0.05f);
+  return v;
+}
+
+// Quanti slot si sommano (2..4) e dopo quante chiamate senza contributi una
+// voce decade.
+int ft2_accumulo_max_slot ()
+{
+  static int const v = [] {
+    int const n = static_cast<int> (ft2_accumulo_env_f ("DECODIUM_FT2_ACCUMULO_SLOT", 4.0f));
+    return std::max (2, std::min (n, Stage7State::kAccumuloSlot));
+  }();
+  return v;
+}
+
+int ft2_accumulo_max_age ()
+{
+  static int const v = static_cast<int> (ft2_accumulo_env_f ("DECODIUM_FT2_ACCUMULO_AGE", 6.0f));
+  return v;
+}
+
+// Identita' di SLOT per l'accumulo -- non un contatore di chiamate.
+//
+// In aria decode_ft2_stage7 gira ogni 100 ms sulla stessa finestra
+// scorrevole (DecodiumBridge.cpp:47028, la cadenza asincrona di FT2, la
+// stessa gia' nota dal tipo 8): dentro UN SOLO slot fisico da 3,75 s la
+// funzione viene chiamata circa 37 volte. Un contatore di chiamate come
+// state.accumulo_call prima di questo fix avanzerebbe di 37 scatti in un
+// solo slot, e con ft2_accumulo_max_age() a 6 (di default) ogni voce
+// decadrebbe in ~600 ms -- MOLTO prima che la ripetizione vera, 3,75 s dopo,
+// abbia una sola occasione di aggiungersi. Con questo bug l'accumulo, acceso
+// in aria, non avrebbe MAI accumulato niente fra due slot diversi: avrebbe
+// solo continuato a ri-catturare la STESSA finestra dello stesso slot,
+// scambiando "37 sguardi allo stesso burst" per "37 slot", indistinguibile
+// da un banco che passa un file al secondo invece che ogni 3,75 s.
+//
+// Qui l'identita' e' l'orologio reale diviso in bucket da 3,75 s -- lo
+// stesso periodo che DecodiumBridge.cpp usa in utcTokenForSlotStart() per
+// gli stessi slot, ricalcolato in locale per non dover far viaggiare un
+// parametro nuovo attraverso tre livelli di firme extern "C"
+// (ftx_ft2_async_decode_stage7_c, ft2_async_decode_, ft2_triggered_decode_)
+// fino a qui. Tutte le chiamate della STESSA finestra reale condividono lo
+// stesso numero, quindi il dedup gia' esistente in accumulo_raccogli
+// ("stesso burst visto di nuovo: tieni il migliore") si estende da solo
+// dai 3 segmenti di UNA chiamata a tutte le ~37 chiamate di UN vero slot:
+// un solo scatto netto per slot fisico, non uno a chiamata.
+//
+// DECODIUM_FT2_ACCUMULO_BANCO=1 torna al contatore di chiamate: e' quello
+// che usano gia' tutti i banchi di questa sessione
+// (accumulo_ft2_misura.sh, accumulo_tipo8_misura.sh,
+// due_stazioni_vicine_misura.sh), dove un file WAV = una chiamata = uno
+// slot logico, indipendentemente da quanto tempo reale passa fra un file e
+// l'altro (che e' millisecondi, non 3,75 s: l'orologio reale li
+// confonderebbe tutti in un solo "slot" e romperebbe ogni misura di
+// stanotte).
+long long ft2_accumulo_slot_id ()
+{
+  static bool const modo_banco = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_ACCUMULO_BANCO");
+    return e && e[0] != '\0' && e[0] != '0';
+  }();
+  if (modo_banco)
+    {
+      static long long contatore = 0;
+      return ++contatore;
+    }
+  auto const ora = std::chrono::system_clock::now ().time_since_epoch ();
+  long long const ms = std::chrono::duration_cast<std::chrono::milliseconds> (ora).count ();
+  constexpr long long kFt2SlotMs = 3750;
+  return ms / kFt2SlotMs;
+}
+
+// Cancello sulla SOMMA: si tenta la decodifica accumulata solo se la qualita'
+// del sincronismo delle bit-metrics sommate (bit Costas azzeccati su 32, come
+// ft2_sync_quality) supera questa soglia. Il rumore sta a 16 +- 2,8: a 20 ne
+// passa il 10%, a 22 il 2,5%. Tiene basso il numero di parole date alla CRC
+// per le voci di rumore, che in tabella ci sono sempre.
+int ft2_accumulo_nsync_min ()
+{
+  static int const v = static_cast<int> (ft2_accumulo_env_f ("DECODIUM_FT2_ACCUMULO_NSYNC", 20.0f));
+  return v;
+}
+
+// Apertura larga (DECODIUM_FT2_ACCUMULO_APERTURA=1): una voce nuova si apre
+// anche con badsync, basta lo smax. Misura dell'avvio a freddo: a due slot
+// il banco dava +1,2 dB contro i +2,0 attesi, e il sospetto e' che la prima
+// finestra non riesca ad aprire la voce.
+bool ft2_accumulo_apertura_larga ()
+{
+  static bool const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_ACCUMULO_APERTURA");
+    return e && e[0] != '\0' && e[0] != '0';
+  }();
+  return v;
+}
+
+std::atomic<int> g_ft2_accumulo_tentativi {0};
+std::atomic<int> g_ft2_accumulo_successi {0};
+
+int accumulo_trova (Stage7State const& state, float f, float dt)
+{
+  for (int i = 0; i < Stage7State::kAccumuloVoci; ++i)
+    {
+      auto const& v = state.accumulo[static_cast<size_t> (i)];
+      if (!v.valid) continue;
+      if (std::fabs (v.f - f) <= ft2_accumulo_hz () && std::fabs (v.dt - dt) <= ft2_accumulo_dt ())
+        {
+          return i;
+        }
+    }
+  return -1;
+}
+
+// Registra la finestra di un candidato nella tabella. `nuova_ammessa` dice se
+// il candidato ha passato i cancelli normali del sincronismo: solo allora
+// puo' APRIRE una voce; per aggiungersi a una voce esistente basta smax_min.
+void accumulo_raccogli (Stage7State& state, float f, float dt, float smax,
+                        Complex const* cd, bool nuova_ammessa)
+{
+  int idx = accumulo_trova (state, f, dt);
+  if (idx < 0)
+    {
+      if (!nuova_ammessa) return;
+
+      // Il GEMELLO: un'altra voce gia' occupa questa FREQUENZA (dt escluso,
+      // altrimenti accumulo_trova l'avrebbe gia' trovata). Trovato coi log
+      // (DECODIUM_FT2_STAGE7_DEBUG=1, "accumulo: APRE voce"): un segnale
+      // forte apre una voce vera, e la sua STESSA correlazione di
+      // sincronismo ha un lobo laterale a pochi Hz di distanza ma con un dt
+      // tutto diverso, abbastanza alto da passare comunque i cancelli e
+      // aprire una voce fantasma accanto a quella vera. Un debole con
+      // timing rumoroso puo' agganciarsi al fantasma invece che alla voce
+      // vera, sprecando la cattura (misurato: il primo debole dopo un forte
+      // si e' agganciato al lobo laterale, non alla voce del forte).
+      //
+      // Non si puo' sapere a priori quale delle due sia il lobo: vince lo
+      // smax migliore, come nello sfratto qui sotto ma ristretto al vicino
+      // invece che a tutta la tabella. Se il vicino e' piu' forte il
+      // candidato si scarta (niente voce gemella); se il candidato e' piu'
+      // forte prende il POSTO del vicino, non se ne apre una terza.
+      for (int i = 0; i < Stage7State::kAccumuloVoci; ++i)
+        {
+          auto& altra = state.accumulo[static_cast<size_t> (i)];
+          if (!altra.valid || std::fabs (altra.f - f) > ft2_accumulo_hz ()) continue;
+          if (smax <= altra.smax_best)
+            {
+              return;                          // il vicino e' piu' forte: scarta il gemello
+            }
+          idx = i;
+          altra = Stage7State::AccumuloVoce {};
+          altra.valid = true;
+          altra.f = f;
+          altra.dt = dt;
+          stage7_debug_logf (
+              "accumulo: SOSTITUISCE voce %d f=%.1f dt=%.3f smax=%.3f (gemello piu' forte del vicino) chiamata=%lld",
+              idx, f, dt, smax, state.accumulo_call);
+          break;
+        }
+
+      if (idx < 0)
+        {
+          // Voce libera; altrimenti si sfratta quella col punteggio piu'
+          // basso: una voce con almeno due slot vale piu' di una appena
+          // aperta, a parita' conta lo smax migliore. Se il nuovo candidato
+          // e' piu' debole della voce piu' debole, non entra.
+          int peggiore = -1;
+          float punteggio_peggiore = 1.0e30f;
+          for (int i = 0; i < Stage7State::kAccumuloVoci; ++i)
+            {
+              auto const& v = state.accumulo[static_cast<size_t> (i)];
+              if (!v.valid) { peggiore = i; punteggio_peggiore = -1.0f; break; }
+              float const punteggio = (v.nslot >= 2 ? 100.0f : 0.0f) + v.smax_best;
+              if (punteggio < punteggio_peggiore) { punteggio_peggiore = punteggio; peggiore = i; }
+            }
+          if (peggiore < 0 || (punteggio_peggiore >= 0.0f && smax <= punteggio_peggiore)) return;
+          idx = peggiore;
+          auto& v = state.accumulo[static_cast<size_t> (idx)];
+          v = Stage7State::AccumuloVoce {};
+          v.valid = true;
+          v.f = f;
+          v.dt = dt;
+          stage7_debug_logf ("accumulo: APRE voce %d f=%.1f dt=%.3f smax=%.3f chiamata=%lld",
+                             idx, f, dt, smax, state.accumulo_call);
+        }
+    }
+  auto& v = state.accumulo[static_cast<size_t> (idx)];
+  // stesso burst visto di nuovo (altro segmento o passata): tieni il migliore
+  if (v.nslot > 0)
+    {
+      int const last = (v.next - 1 + Stage7State::kAccumuloSlot) % Stage7State::kAccumuloSlot;
+      if (v.slot[static_cast<size_t> (last)].call == state.accumulo_call)
+        {
+          if (smax <= v.slot[static_cast<size_t> (last)].smax) return;
+          v.next = last;
+          --v.nslot;
+        }
+    }
+  auto& s = v.slot[static_cast<size_t> (v.next)];
+  ftx_ft2_symbol_spectra_c (cd, s.cs.data (), &s.beta);
+  s.smax = smax;
+  s.call = state.accumulo_call;
+  v.next = (v.next + 1) % Stage7State::kAccumuloSlot;
+  v.nslot = std::min (v.nslot + 1, Stage7State::kAccumuloSlot);
+  v.last_call = state.accumulo_call;
+  v.smax_best = std::max (v.smax_best, smax);
+  if (v.nslot >= 2)
+    {
+      stage7_debug_logf ("accumulo: voce %d f=%.1f dt=%.3f smax=%.3f nslot=%d chiamata=%lld",
+                         idx, v.f, v.dt, smax, v.nslot, state.accumulo_call);
+    }
 }
 
 // Raggio (in Hz, coincide con le unita' di idf) della ricerca GENERALE del
@@ -2412,6 +2751,24 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
 
   ApSetup const ap_setup = build_ap_setup (state, mycall, hiscall, &context);
 
+  // Accumulo fra slot: identita' dello SLOT (non della chiamata), le voci
+  // troppo vecchie decadono. Vedi ft2_accumulo_slot_id() per il motivo:
+  // senza questo, in aria (dove questa funzione gira ogni 100 ms) l'eta'
+  // sarebbe misurata in centesimi di slot invece che in slot, e ogni voce
+  // decadrebbe ben prima della ripetizione vera 3,75 s dopo.
+  bool const accumulo = ft2_accumulo_attivo ();
+  if (accumulo)
+    {
+      state.accumulo_call = ft2_accumulo_slot_id ();
+      for (auto& v : state.accumulo)
+        {
+          if (v.valid && state.accumulo_call - v.last_call > ft2_accumulo_max_age ())
+            {
+              v = Stage7State::AccumuloVoce {};
+            }
+        }
+    }
+
   std::array<float, kFt2NMax> dd {};
   for (int i = 0; i < kFt2NMax; ++i)
     {
@@ -2519,6 +2876,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
       // l'LDPC con i 77 bit noti, che in FT8 non ha prodotto un falso su
       // ipotesi sbagliate, correlate o rumore puro.
       std::array<unsigned char, kFt2MaxCand> cand_atteso {};
+      std::array<unsigned char, kFt2MaxCand> cand_genie {};   // solo banco, vedi ft2_genie_f
       if (ft2_ap_msg_attivo () && ndepth0 != 1)
         {
           std::array<float, 16> fmem {};
@@ -2560,6 +2918,74 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               ++ncand;
               g_ft2_msg_candidati.fetch_add (1);
               stage7_debug_logf ("pass=%d candidato atteso f=%.1f", isp, fm);
+            }
+        }
+
+      // Genie del sincronismo (SOLO banco di misura, vedi ft2_genie_f): un
+      // candidato alla frequenza vera, esente dai cancelli, nessun bit noto.
+      // Se la ricerca normale ha gia' un candidato entro ft2_genie_hz, e'
+      // quello a ricevere l'esenzione, cosi' la curva misura il costo dei
+      // cancelli e della lista insieme. Con la variabile assente non entra.
+      if (float const fg = ft2_genie_f ();
+          fg > 0.0f && ndepth0 != 1 && ncand < kFt2MaxCand
+          && fg >= static_cast<float> (nfa) && fg <= static_cast<float> (nfb))
+        {
+          int vicino = -1;
+          for (int j = 0; j < ncand; ++j)
+            {
+              if (std::fabs (candidate[static_cast<size_t> (j * 2)] - fg) <= ft2_genie_hz ())
+                {
+                  vicino = j;
+                  break;
+                }
+            }
+          if (vicino >= 0)
+            {
+              cand_atteso[static_cast<size_t> (vicino)] = 1;
+              cand_genie[static_cast<size_t> (vicino)] = 1;
+            }
+          else
+            {
+              candidate[static_cast<size_t> (ncand * 2)] = fg;
+              candidate[static_cast<size_t> (ncand * 2 + 1)] = 1.0f;
+              cand_atteso[static_cast<size_t> (ncand)] = 1;
+              cand_genie[static_cast<size_t> (ncand)] = 1;
+              ++ncand;
+            }
+          stage7_debug_logf ("pass=%d genie f=%.1f in_lista=%d", isp, fg, vicino >= 0 ? 1 : 0);
+        }
+
+      // Accumulo fra slot: ogni stazione in tabella vale un candidato atteso
+      // alla sua frequenza, esente dai cancelli, come il tipo 8. E' il
+      // sincronismo accumulato nella forma piu' semplice: una stazione vista
+      // una volta viene riprovata negli slot successivi anche se da sola non
+      // passerebbe piu' la ricerca.
+      if (accumulo && ndepth0 != 1)
+        {
+          for (auto const& v : state.accumulo)
+            {
+              if (!v.valid || v.decoded_call == state.accumulo_call) continue;
+              if (v.f < static_cast<float> (nfa) || v.f > static_cast<float> (nfb)) continue;
+              int vicino = -1;
+              for (int j = 0; j < ncand; ++j)
+                {
+                  if (std::fabs (candidate[static_cast<size_t> (j * 2)] - v.f) <= ft2_accumulo_hz ())
+                    {
+                      vicino = j;
+                      break;
+                    }
+                }
+              if (vicino >= 0)
+                {
+                  cand_atteso[static_cast<size_t> (vicino)] = 1;
+                }
+              else if (ncand < kFt2MaxCand)
+                {
+                  candidate[static_cast<size_t> (ncand * 2)] = v.f;
+                  candidate[static_cast<size_t> (ncand * 2 + 1)] = 1.0f;
+                  cand_atteso[static_cast<size_t> (ncand)] = 1;
+                  ++ncand;
+                }
             }
         }
 
@@ -2678,6 +3104,19 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                     }
                 }
 
+              // Genie del tempo (banco, vedi ft2_genie_ibest): per il
+              // candidato genie il ritardo e' quello vero e la frequenza fine
+              // e' esatta; smax resta quello stimato, serve solo ai cancelli
+              // da cui il candidato e' comunque esente.
+              if (cand_genie[static_cast<size_t> (icand)] != 0 && ft2_genie_ibest () >= 0)
+                {
+                  ibest = ft2_genie_ibest ();
+                  // f1 = f0 + idfbest deve essere la frequenza VERA anche
+                  // quando il candidato viene dalla lista normale (f0 sulla
+                  // griglia grossolana, non a 1500,0).
+                  idfbest = static_cast<int> (std::lround (ft2_genie_f () - f0));
+                }
+
               if (iseg == 1)
                 {
                   segment1_smax = smax;
@@ -2758,6 +3197,19 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               stage7_debug_compare_bitmetrics_with_reference (
                   cd, bitmetrics, isp, icand + 1, iseg, ibest, f1);
               segment_trace.badsync = badsync;
+
+              // Accumulo fra slot: la finestra di questo candidato entra in
+              // tabella. Apre una voce nuova solo se ha passato da sola i
+              // cancelli smax e badsync (o solo smax, con apertura larga);
+              // a una voce esistente si aggiunge anche un candidato esente.
+              if (accumulo)
+                {
+                  accumulo_raccogli (state, f1, static_cast<float> (ibest) * kFt2FreqDtScale,
+                                     smax, cd.data (),
+                                     smax >= smaxthresh
+                                       && (badsync == 0 || ft2_accumulo_apertura_larga ()));
+                }
+
               if (badsync != 0 && !atteso)
                 {
                   segment_trace.status = kFt2SearchRejectBadsync;
@@ -2782,6 +3234,22 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
 
               int nsync_qual = ft2_sync_quality (bitmetrics.data ());
               segment_trace.nsync = nsync_qual;
+              // Diagnostica per capire perche' ACC (accumulo cieco) aggancia
+              // poco quando una voce e' gia' aperta: il candidato FORZATO
+              // riparte da f0=v.f ma la ricerca fine (idf +-sync_radius) lo
+              // riaffina senza vincoli, e su segnale debole l'argmax puo'
+              // cadere su un picco di rumore lontano da f0. Se scarto supera
+              // ft2_accumulo_hz(), accumulo_trova() in accumulo_raccogli()
+              // non trova la voce e la cattura va persa in silenzio (nessun
+              // log, perche' quel percorso logga solo da nslot>=2). Solo
+              // banco, gated su STAGE7_DEBUG.
+              if (accumulo && atteso)
+                {
+                  stage7_debug_logf (
+                      "accumulo-diag: f0=%.1f f1=%.1f scarto=%.1f smax=%.3f badsync=%d nsync=%d in_tolleranza=%d",
+                      f0, f1, f1 - f0, smax, badsync, nsync_qual,
+                      std::fabs (f1 - f0) <= ft2_accumulo_hz () ? 1 : 0);
+                }
               int nsync_qual_min = 13;
               if (ndepth0 >= 3) nsync_qual_min = 10;
               if (nsync_qual < nsync_qual_min && !atteso)
@@ -3218,6 +3686,170 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
         }
     }
 
+  // Accumulo fra slot: per ogni stazione in tabella vista anche in questa
+  // chiamata e non decodificata da sola, si decodifica la SOMMA degli ultimi
+  // slot. Un candidato in piu' per stazione: entra nel budget della CRC come
+  // tutti gli altri, nessun bit viene imposto.
+  //
+  // v.tentato_call limita il tentativo a UNA volta per SLOT VERO. Senza,
+  // dato che l'identita' di slot (ft2_accumulo_slot_id) resta la stessa per
+  // le ~37 chiamate da 100 ms di un solo slot fisico in aria, e una voce
+  // attiva rinfresca v.last_call a ogni chiamata finche' il suo candidato
+  // continua a passare i cancelli, questo blocco riproverebbe la STESSA
+  // somma decine di volte per slot: candidati sprecati nel budget della
+  // CRC per lo stesso tentativo, non per ripetizioni vere.
+  if (accumulo)
+    {
+      for (auto& v : state.accumulo)
+        {
+          if (!v.valid || v.nslot < 2 || v.last_call != state.accumulo_call
+              || v.decoded_call == state.accumulo_call
+              || v.tentato_call == state.accumulo_call)
+            {
+              continue;
+            }
+          v.tentato_call = state.accumulo_call;
+          bool gia_decodificata = false;
+          for (int i = 0; i < ndecodes; ++i)
+            {
+              if (std::fabs (freqs[i] - v.f) <= ft2_accumulo_hz ())
+                {
+                  gia_decodificata = true;
+                  break;
+                }
+            }
+          // Una decodifica consuma l'energia accumulata: la voce resta armata
+          // (frequenza e dt) ma riparte da zero slot. Le ripetizioni
+          // successive le verifica il tipo 8, slot per slot, con +3 dB.
+          //
+          // NON toccare smax_best qui. Bug trovato coi log (DECODIUM_FT2_
+          // STAGE7_DEBUG=1, "accumulo: APRE voce"): azzerarlo insieme
+          // all'anello faceva perdere alla voce la sua "prova" di essere una
+          // stazione vera. Il punteggio di sfratto e' (nslot>=2?100:0) +
+          // smax_best: appena questo scende a 0, la voce diventa il bersaglio
+          // piu' facile della tabella, e viene sostituita da un candidato di
+          // rumore qualunque (smax 1,3-1,9) nella chiamata SUCCESSIVA -- su
+          // un banco reale (forte poi 5 deboli), la voce del forte (smax
+          // 3,2) e' sopravvissuta due chiamate, poi e' stata rimpiazzata da
+          // rumore quattro volte nella stessa chiamata subito dopo la prima
+          // conferma via somma. smax_best resta il picco storico: e' una
+          // targa "qui c'e' stata una stazione vera", non l'energia
+          // dell'ultimo anello, e non ha motivo di sparire quando l'anello
+          // si svuota.
+          auto svuota = [] (Stage7State::AccumuloVoce& voce) {
+            voce.nslot = 0;
+            voce.next = 0;
+          };
+          if (gia_decodificata)
+            {
+              v.decoded_call = state.accumulo_call;
+              svuota (v);
+              continue;
+            }
+          if (abort_if_cancelled ())
+            {
+              return;
+            }
+
+          int const n = std::min (v.nslot, ft2_accumulo_max_slot ());
+          std::vector<Complex> cs_all (static_cast<size_t> (n) * kFt2Nn * 4);
+          std::vector<float> betas (static_cast<size_t> (n));
+          float smax_best = 0.0f;
+          for (int s = 0; s < n; ++s)
+            {
+              int const idx = (v.next - 1 - s + 2 * Stage7State::kAccumuloSlot)
+                              % Stage7State::kAccumuloSlot;
+              auto const& sl = v.slot[static_cast<size_t> (idx)];
+              std::copy (sl.cs.begin (), sl.cs.end (),
+                         cs_all.begin () + static_cast<std::ptrdiff_t> (s) * kFt2Nn * 4);
+              betas[static_cast<size_t> (s)] = sl.beta;
+              smax_best = std::max (smax_best, sl.smax);
+            }
+          std::array<float, kFt2Rows * 3> bm {};
+          ftx_ft2_bitmetrics_accum_c (cs_all.data (), betas.data (), n, bm.data ());
+          int const nsync_acc = ft2_sync_quality (bm.data ());
+          // Il cancello su nsync_acc protegge il budget della CRC dall'OSD
+          // cieco (norder>=1) sulle voci di rumore, che sono la maggioranza
+          // in tabella: SENZA di lui ogni voce, anche pura confusione,
+          // proverebbe l'ordine pieno ogni chiamata. Ma la verifica diretta
+          // del tipo 8 (dentro run_decode_passes, sotto "atteso") non e' una
+          // statistica di sincronismo: e' un confronto di CONTENUTO contro un
+          // messaggio gia' noto, con la sua soglia nd indipendente, e non
+          // deve pagare il prezzo di un cancello pensato per un altro
+          // meccanismo. Percio' si chiama SEMPRE run_decode_passes (la
+          // verifica del tipo 8 costa un prodotto scalare, non un OSD), e si
+          // usa nsync_acc SOLO per decidere se concedere anche l'OSD cieco.
+          bool const osd_su_somma = doosd && nsync_acc >= ft2_accumulo_nsync_min ();
+          if (!osd_su_somma)
+            {
+              stage7_debug_logf ("accumulo: f=%.1f nslot=%d nsync=%d < %d, solo tipo8",
+                                 v.f, n, nsync_acc, ft2_accumulo_nsync_min ());
+            }
+
+          std::array<float, kFt2Codeword> llra {};
+          std::array<float, kFt2Codeword> llrb {};
+          std::array<float, kFt2Codeword> llrc {};
+          std::array<float, kFt2Codeword> llrd {};
+          std::array<float, kFt2Codeword> llre {};
+          build_llr_sets (bm.data (), llra, llrb, llrc, llrd, llre);
+          float apmag = 0.0f;
+          for (size_t i = 0; i < llra.size (); ++i)
+            {
+              apmag = std::max (apmag, std::fabs (llra[i]));
+            }
+          apmag *= 1.1f;
+
+          g_ft2_accumulo_tentativi.fetch_add (1);
+          DecodePassResult const decoded = run_decode_passes (
+              state, ap_setup, &context, llra, llrb, llrc, llrd, llre, ndepth0, ncontest,
+              qso_progress, osd_su_somma, false, nfqso, v.f, true, apmag);
+          stage7_debug_logf ("accumulo: f=%.1f nslot=%d -> %s", v.f, n,
+                             decoded.ok ? "DECODIFICATA" : "niente");
+          // Test di necessita': se la somma SENZA lo slot corrente decodifica
+          // gia', lo slot corrente non ha contribuito e la riga sarebbe l'eco
+          // di un burst precedente (misurato sul profilo "vuoti" di lab/ft2q:
+          // lo slot di solo rumore "decodificava" grazie ai due precedenti).
+          // In quel caso non si emette niente e la voce si svuota.
+          if (decoded.ok && n >= 2)
+            {
+              std::array<float, kFt2Rows * 3> bm_prima {};
+              ftx_ft2_bitmetrics_accum_c (cs_all.data () + static_cast<std::ptrdiff_t> (kFt2Nn) * 4,
+                                          betas.data () + 1, n - 1, bm_prima.data ());
+              std::array<float, kFt2Codeword> pa {}, pb {}, pc {}, pd {}, pe {};
+              build_llr_sets (bm_prima.data (), pa, pb, pc, pd, pe);
+              float apmag_prima = 0.0f;
+              for (size_t i = 0; i < pa.size (); ++i)
+                {
+                  apmag_prima = std::max (apmag_prima, std::fabs (pa[i]));
+                }
+              DecodePassResult const prima = run_decode_passes (
+                  state, ap_setup, &context, pa, pb, pc, pd, pe, ndepth0, ncontest,
+                  qso_progress, doosd, false, nfqso, v.f, true, apmag_prima * 1.1f);
+              if (prima.ok)
+                {
+                  stage7_debug_logf ("accumulo: f=%.1f eco di slot precedenti, non emessa", v.f);
+                  v.decoded_call = state.accumulo_call;
+                  svuota (v);
+                  continue;
+                }
+            }
+          if (decoded.ok && ndecodes < kFt2MaxLines)
+            {
+              float const qual =
+                  1.0f - (static_cast<float> (decoded.nharderror) + decoded.dmin) / 60.0f;
+              copy_decode_row (ndecodes, smax_best, static_cast<int> (kFt2SnrFloor),
+                               v.dt - 0.5f, v.f, decoded.iaptype, qual,
+                               decoded.bits, decoded.message_fixed,
+                               syncs, snrs, dts, freqs, naps, quals, bits77, decodeds);
+              ft2_ap_msg_registra (v.f, decoded.iaptype, decoded.bits);
+              ++ndecodes;
+              v.decoded_call = state.accumulo_call;
+              svuota (v);
+              g_ft2_accumulo_successi.fetch_add (1);
+            }
+        }
+    }
+
   if ((ndepth & 16) != 0 && got_candidate)
     {
       if (abort_if_cancelled ())
@@ -3407,6 +4039,17 @@ extern "C" void ftx_ft2_stage7_clravg_c ()
   Stage7State& state = stage7_state ();
   reset_average_state (state);
   clear_last_average_emit_state (state);
+}
+
+// Contatori dell'accumulo fra slot (banchi e DECODEMETRIC).
+extern "C" int ftx_ft2_accumulo_tentativi_c ()
+{
+  return g_ft2_accumulo_tentativi.load ();
+}
+
+extern "C" int ftx_ft2_accumulo_successi_c ()
+{
+  return g_ft2_accumulo_successi.load ();
 }
 
 extern "C" int ftx_ft2_cpp_dsp_rollout_stage_c ()

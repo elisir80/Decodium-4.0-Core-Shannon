@@ -1503,6 +1503,126 @@ extern "C" void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags)
     }
 }
 
+// Accumulo fra slot (Stage7, DECODIUM_FT2_ACCUMULO). Spettri di simbolo e
+// fattore di rumore di UNA finestra, da sommare a livello di IPOTESI con
+// quelli di altri slot della stessa stazione. cs_out[k*4+j] = FFT del simbolo
+// k sul tono j (103 x 4); beta_out = 0,5 / varianza di rumore, lo stesso beta
+// che il demodulatore usa per scalare le energie.
+extern "C" void ftx_ft2_symbol_spectra_c (Complex const* cd, Complex* cs_out, float* beta_out)
+{
+  constexpr int NN = 103;
+  constexpr int NSS = 32;
+  std::array<std::array<float, 4>, NN> pwr {};
+  for (int k = 0; k < NN; ++k)
+    {
+      std::array<Complex, 4> tones {};
+      std::array<float, 4> mags {};
+      std::array<float, 4> power {};
+      fft_symbol_4tones (cd + k * NSS, tones, mags, &power);
+      for (int j = 0; j < 4; ++j)
+        {
+          cs_out[k * 4 + j] = tones[static_cast<size_t> (j)];
+        }
+      pwr[static_cast<size_t> (k)] = power;
+    }
+  float const noise_var = ft2_legacy_base_noise_var (pwr);
+  *beta_out = clamp_value (0.5f / noise_var, 0.01f, 50.0f);
+}
+
+// Bit-metrics dalla SOMMA di piu' slot. Stesse ipotesi a 1, 2 e 4 simboli del
+// demodulatore (run_ft2_bitmetrics_impl, ramo non equalizzato), ma l'energia
+// di ogni ipotesi e' sommata sugli slot, ciascuno col proprio beta: la somma
+// coerente resta DENTRO lo slot (fase continua fra simboli vicini), fra slot
+// diversi si sommano le energie (fase indipendente). E' la combinazione
+// quadratica classica; il Monte Carlo (lab/tools/slot_accumulo.py) la da'
+// entro 0,05 dB dalla verosimiglianza esatta. Con nslot = 1 riproduce il
+// ramo base. cs = [nslot][103*4], beta = [nslot].
+extern "C" void ftx_ft2_bitmetrics_accum_c (Complex const* cs, float const* beta, int nslot,
+                                            float* bitmetrics)
+{
+  static std::array<int, 4> const graymap {{0, 1, 3, 2}};
+  auto const& one = one8_table ();
+  constexpr int NN = 103;
+  constexpr int rows = 2 * NN;
+  std::fill (bitmetrics, bitmetrics + rows * 3, 0.0f);
+  if (!cs || !beta || nslot <= 0)
+    {
+      return;
+    }
+
+  for (int nseq = 1; nseq <= 3; ++nseq)
+    {
+      int const nsym = (nseq == 1 ? 1 : (nseq == 2 ? 2 : 4));
+      int const nt = 1 << (2 * nsym);
+      std::array<float, 256> sp {};
+      for (int ks = 1; ks <= NN - nsym + 1; ks += nsym)
+        {
+          for (int i = 0; i < nt; ++i)
+            {
+              int const i1 = i / 64;
+              int const i2 = (i & 63) / 16;
+              int const i3 = (i & 15) / 4;
+              int const i4 = (i & 3);
+              float acc = 0.0f;
+              for (int s = 0; s < nslot; ++s)
+                {
+                  Complex const* c = cs + static_cast<size_t> (s) * NN * 4;
+                  auto tone = [&] (int k, int idx) {
+                    return c[(ks - 1 + k) * 4 + graymap[static_cast<size_t> (idx)]];
+                  };
+                  Complex ctmp {};
+                  if (nsym == 1)
+                    {
+                      ctmp = tone (0, i4);
+                    }
+                  else if (nsym == 2)
+                    {
+                      ctmp = tone (0, i3) + tone (1, i4);
+                    }
+                  else
+                    {
+                      ctmp = tone (0, i1) + tone (1, i2) + tone (2, i3) + tone (3, i4);
+                    }
+                  acc += (beta[s] / static_cast<float> (nsym)) * abs2 (ctmp);
+                }
+              sp[static_cast<size_t> (i)] = acc;
+            }
+
+          int const ipt = 1 + (ks - 1) * 2;
+          int const ibmax = (nsym == 1 ? 1 : (nsym == 2 ? 3 : 7));
+          for (int ib = 0; ib <= ibmax; ++ib)
+            {
+              if (ipt + ib > rows)
+                {
+                  continue;
+                }
+              float maxp1 = -1.0e30f;
+              float maxp0 = -1.0e30f;
+              for (int i = 0; i < nt; ++i)
+                {
+                  bool const set = one[static_cast<size_t> (i)][static_cast<size_t> (ibmax - ib)];
+                  if (set) maxp1 = std::max (maxp1, sp[static_cast<size_t> (i)]);
+                  else maxp0 = std::max (maxp0, sp[static_cast<size_t> (i)]);
+                }
+              float lse1 = 0.0f;
+              float lse0 = 0.0f;
+              for (int i = 0; i < nt; ++i)
+                {
+                  bool const set = one[static_cast<size_t> (i)][static_cast<size_t> (ibmax - ib)];
+                  if (set) lse1 += std::exp (sp[static_cast<size_t> (i)] - maxp1);
+                  else lse0 += std::exp (sp[static_cast<size_t> (i)] - maxp0);
+                }
+              bm_at (bitmetrics, rows, ipt + ib - 1, nseq - 1) =
+                (maxp1 + std::log (std::max (lse1, kTiny))) -
+                (maxp0 + std::log (std::max (lse0, kTiny)));
+            }
+        }
+    }
+
+  normalizebmet_cpp (bitmetrics + rows * 0, rows);
+  finalize_ft2_bitmetric_columns (bitmetrics, rows);
+}
+
 extern "C" void ftx_ft2_channel_est_c (Complex const* cd, Complex* cd_eq, float* ch_snr)
 {
   if (!cd || !cd_eq || !ch_snr)
