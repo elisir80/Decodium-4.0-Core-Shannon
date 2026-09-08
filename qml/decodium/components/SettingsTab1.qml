@@ -1628,7 +1628,7 @@ SettingsPageScroll {
         Text { text: qsTr("Speed:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         DecoTextField {
             id: ampBaud
-            text: "9600"
+            text: (bridge && bridge.amplifier) ? String(bridge.amplifier.baud) : "9600"
             inputMethodHints: Qt.ImhDigitsOnly
             Layout.fillWidth: true
             implicitHeight: controlHeight

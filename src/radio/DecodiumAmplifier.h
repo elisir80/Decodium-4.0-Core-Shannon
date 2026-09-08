@@ -33,6 +33,7 @@ class DecodiumAmplifier : public QObject
     Q_OBJECT
     Q_PROPERTY(bool    enabled     READ enabled     NOTIFY configChanged)
     Q_PROPERTY(QString port        READ port        NOTIFY configChanged)
+    Q_PROPERTY(int     baud        READ baud        NOTIFY configChanged)
     Q_PROPERTY(bool    passive     READ passive     NOTIFY configChanged)
     Q_PROPERTY(bool    connected   READ connected   NOTIFY connectedChanged)
     Q_PROPERTY(bool    responding  READ responding  NOTIFY telemetryChanged)
@@ -68,6 +69,7 @@ public:
 
     bool    enabled()      const { return m_enabled; }
     QString port()         const { return m_port; }
+    int     baud()         const { return m_baud; }
     bool    passive()      const { return m_passive; }
     bool    connected()    const;
     bool    responding()   const { return m_responding; }
