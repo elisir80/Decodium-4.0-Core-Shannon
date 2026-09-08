@@ -96,16 +96,6 @@ float compute_signal_rms (std::vector<float> const& frame)
   return count == 0 ? 0.0f : static_cast<float> (std::sqrt (sum_sq / static_cast<double> (count)));
 }
 
-void add_awgn (std::vector<float>& frame, float snr_db, unsigned seed)
-{
-  float const signal_rms = compute_signal_rms (frame);
-  if (signal_rms <= 0.0f) return;
-  double const sigma = static_cast<double> (signal_rms) / std::pow (10.0, static_cast<double> (snr_db) / 20.0);
-  std::mt19937 rng {seed};
-  std::normal_distribution<float> noise {0.0f, static_cast<float> (sigma)};
-  for (float& sample : frame) sample += noise (rng);
-}
-
 // A differenza di FT2 (ftx_encode174_91_message77_c + scrambling con
 // ftx_ft2_rvec_c), FT8 non scrambla: ftx_encode_ft8_candidate_c da' gia' il
 // codeword a 174 bit pronto per il confronto diretto con l'uscita del
@@ -122,20 +112,57 @@ std::array<signed char, kFt8Codeword> expected_codeword (QString const& message,
   return codeword;
 }
 
-std::vector<qint16> make_wav_samples (int const* tones, float freq_hz, float gain,
-                                      int offset_samples, float snr_db, bool has_noise, unsigned seed)
+void place_ft8_wave (std::vector<float>& frame, int const* tones, float freq_hz, float gain,
+                     int offset_samples)
 {
   QVector<float> const wave = decodium::txwave::generateFt8Wave (
       tones, 79, kNsps, kBt, static_cast<float> (kSampleRate), freq_hz);
   if (wave.isEmpty ()) fail (QStringLiteral ("generazione forma d'onda FT8 fallita"));
-  if (offset_samples < 0 || offset_samples + wave.size () > kFrameSamples)
+  if (offset_samples < 0 || offset_samples + wave.size () > static_cast<int> (frame.size ()))
     fail (QStringLiteral ("la forma d'onda non entra nella cornice FT8"));
-
-  std::vector<float> frame (static_cast<size_t> (kFrameSamples), 0.0f);
   for (int i = 0; i < wave.size (); ++i)
-    frame[static_cast<size_t> (offset_samples + i)] = gain * wave[i];
+    frame[static_cast<size_t> (offset_samples + i)] += gain * wave[i];
+}
 
-  if (has_noise) add_awgn (frame, snr_db, seed);
+// Un interferente da mescolare nella stessa cornice del messaggio principale,
+// per riprodurre un pileup: stessi 15 s, frequenza vicina, ampiezza propria
+// (relativa al messaggio principale, puo' essere piu' debole o piu' forte),
+// piccolo scarto temporale indipendente. Il rumore resta unico e condiviso,
+// aggiunto dopo la somma di tutti i segnali -- vedi make_wav_samples.
+struct Interferer
+{
+  std::array<int, 79> tones {};
+  float freq_hz {0.0f};
+  float snr_delta_db {0.0f};   // rispetto allo SNR del messaggio principale
+  int offset_samples {6000};
+};
+
+std::vector<qint16> make_wav_samples (int const* tones, float freq_hz, float gain,
+                                      int offset_samples, float snr_db, bool has_noise, unsigned seed,
+                                      std::vector<Interferer> const& interferers = {})
+{
+  std::vector<float> primary_only (static_cast<size_t> (kFrameSamples), 0.0f);
+  place_ft8_wave (primary_only, tones, freq_hz, gain, offset_samples);
+  // Lo SNR del messaggio principale si calibra sulla SUA sola energia, non su
+  // quella della cornice piena di interferenti: altrimenti --snr-list smette
+  // di significare "SNR del messaggio che sto etichettando" e il dataset non
+  // e' piu' confrontabile con quello a segnale singolo.
+  float const primary_rms = compute_signal_rms (primary_only);
+
+  std::vector<float> frame = primary_only;
+  for (Interferer const& interf : interferers)
+    {
+      float const interf_gain = gain * std::pow (10.0f, interf.snr_delta_db / 20.0f);
+      place_ft8_wave (frame, interf.tones.data (), interf.freq_hz, interf_gain, interf.offset_samples);
+    }
+
+  if (has_noise && primary_rms > 0.0f)
+    {
+      double const sigma = static_cast<double> (primary_rms) / std::pow (10.0, static_cast<double> (snr_db) / 20.0);
+      std::mt19937 rng {seed};
+      std::normal_distribution<float> noise {0.0f, static_cast<float> (sigma)};
+      for (float& sample : frame) sample += noise (rng);
+    }
 
   std::vector<qint16> pcm (static_cast<size_t> (kFrameSamples), 0);
   for (int i = 0; i < kFrameSamples; ++i)
@@ -228,6 +255,21 @@ int main (int argc, char* argv[])
       QCommandLineOption depth_option {"depth", "Profondita' di decodifica FT8.", "n", "3"};
       QCommandLineOption clean_option {"clean-too", "Include anche una prova pulita (senza rumore) per messaggio."};
       QCommandLineOption relax_option {"relax", "DECODIUM_LDPC_GATE_RELAX (soglia nd allargata).", "value", "0.30"};
+      QCommandLineOption pileup_option {"pileup",
+          "Interferenti da mescolare per prova, per riprodurre un pileup (0 = disattivato, come prima).",
+          "n", "0"};
+      QCommandLineOption pileup_pool_option {"pileup-message",
+          "Messaggio da usare come interferente (ripetibile; default: gli stessi --message).", "text"};
+      QCommandLineOption pileup_freq_option {"pileup-freq-range",
+          "Scarto in Hz degli interferenti dal messaggio principale, min,max (segno casuale).",
+          "hz,hz", "5,50"};
+      QCommandLineOption pileup_snr_option {"pileup-snr-delta",
+          "SNR dell'interferente relativo al messaggio principale, min,max in dB "
+          "(negativo = interferente piu' debole, positivo = piu' forte, come nei pileup veri).",
+          "db,db", "-6,12"};
+      QCommandLineOption pileup_seed_option {"pileup-seed",
+          "Seme base per la scelta di interferenti/frequenze/SNR (indipendente dal seme del rumore).",
+          "n", "9000"};
 
       parser.addOption (out_option);
       parser.addOption (message_option);
@@ -237,6 +279,11 @@ int main (int argc, char* argv[])
       parser.addOption (depth_option);
       parser.addOption (clean_option);
       parser.addOption (relax_option);
+      parser.addOption (pileup_option);
+      parser.addOption (pileup_pool_option);
+      parser.addOption (pileup_freq_option);
+      parser.addOption (pileup_snr_option);
+      parser.addOption (pileup_seed_option);
       parser.process (app);
 
       QStringList messages = parser.values (message_option);
@@ -257,6 +304,27 @@ int main (int argc, char* argv[])
       float const relax = parser.value (relax_option).toFloat (&ok);
       if (!ok || relax <= 0.0f) fail (QStringLiteral ("--relax non valido"));
 
+      int const pileup_n = parser.value (pileup_option).toInt (&ok);
+      if (!ok || pileup_n < 0) fail (QStringLiteral ("--pileup non valido"));
+      QStringList pileup_pool = parser.values (pileup_pool_option);
+      if (pileup_pool.isEmpty ()) pileup_pool = messages;
+      QList<double> const pileup_freq_range = parse_double_list (parser.value (pileup_freq_option), "pileup-freq-range");
+      QList<double> const pileup_snr_range = parse_double_list (parser.value (pileup_snr_option), "pileup-snr-delta");
+      if (pileup_n > 0 && (pileup_freq_range.size () != 2 || pileup_snr_range.size () != 2))
+        fail (QStringLiteral ("--pileup-freq-range e --pileup-snr-delta vogliono esattamente due valori, min,max"));
+      unsigned const pileup_seed_base = static_cast<unsigned> (parser.value (pileup_seed_option).toUInt (&ok));
+      if (pileup_n > 0 && !ok) fail (QStringLiteral ("--pileup-seed non valido"));
+
+      // Toni degli interferenti, codificati una sola volta (come per i messaggi principali).
+      QList<std::array<int, 79>> pileup_tones;
+      for (QString const& m : pileup_pool)
+        {
+          std::array<char, kDecodedChars> sent {};
+          std::array<int, 79> t {};
+          expected_codeword (m, &sent, &t);
+          pileup_tones.append (t);
+        }
+
       // Impostate PRIMA del primo decode: decodium_bridge.cpp le legge una
       // sola volta, in modo statico, al primo uso (come ft2_gate_dump.cpp).
       // gate_relax allarga la soglia nd dell'OSD cosi' emergono anche i
@@ -268,7 +336,8 @@ int main (int argc, char* argv[])
       fastldpc_gate_dump_open_c (out_path.toLocal8Bit ().constData ());
 
       QTextStream out {stdout};
-      long long trials = 0, decodes = 0;
+      long long trials = 0, decodes = 0, pileup_trials = 0;
+      int message_index = 0;
       for (QString const& message : messages)
         {
           std::array<char, kDecodedChars> msgsent {};
@@ -276,10 +345,44 @@ int main (int argc, char* argv[])
           std::array<signed char, kFt8Codeword> const truth =
               expected_codeword (message, &msgsent, &tones);
 
+          // Indici del pool interferenti che non sono QUESTO messaggio: se il
+          // pool coincide con --message (caso di default), evita di mescolare
+          // il segnale principale con una copia di se' stesso.
+          QList<int> pileup_candidates;
+          for (int i = 0; i < pileup_pool.size (); ++i)
+            if (pileup_pool.at (i) != message) pileup_candidates.append (i);
+
           auto run_one = [&] (bool has_noise, double snr_db, unsigned seed) {
+            std::vector<Interferer> interferers;
+            if (pileup_n > 0 && !pileup_candidates.isEmpty ())
+              {
+                // Seme deterministico per prova: base + indice del messaggio +
+                // seme del rumore, cosi' ogni combinazione ha il suo pileup
+                // riproducibile ma diverso dalle altre.
+                std::mt19937 pileup_rng {pileup_seed_base + 97u * static_cast<unsigned> (message_index) + seed};
+                std::uniform_int_distribution<int> pick_msg (0, pileup_candidates.size () - 1);
+                std::uniform_real_distribution<float> pick_freq (
+                    static_cast<float> (pileup_freq_range.at (0)), static_cast<float> (pileup_freq_range.at (1)));
+                std::uniform_real_distribution<float> pick_snr_delta (
+                    static_cast<float> (pileup_snr_range.at (0)), static_cast<float> (pileup_snr_range.at (1)));
+                std::uniform_int_distribution<int> pick_sign (0, 1);
+                std::uniform_int_distribution<int> pick_dt (-300, 300);   // +-25 ms di scarto temporale
+                for (int k = 0; k < pileup_n; ++k)
+                  {
+                    int const pool_index = pileup_candidates.at (pick_msg (pileup_rng));
+                    float const delta_hz = pick_freq (pileup_rng) * (pick_sign (pileup_rng) ? 1.0f : -1.0f);
+                    Interferer interf;
+                    interf.tones = pileup_tones.at (pool_index);
+                    interf.freq_hz = freq + delta_hz;
+                    interf.snr_delta_db = pick_snr_delta (pileup_rng);
+                    interf.offset_samples = std::max (0, 6000 + pick_dt (pileup_rng));
+                    interferers.push_back (interf);
+                  }
+                ++pileup_trials;
+              }
             std::vector<qint16> const pcm =
                 make_wav_samples (tones.data (), freq, 0.85f, 6000, static_cast<float> (snr_db),
-                                  has_noise, seed);
+                                  has_noise, seed, interferers);
             fastldpc_gate_truth_set_c (truth.data ());
             int const n = run_decode (pcm, depth, freq);
             fastldpc_gate_truth_clear_c ();
@@ -293,8 +396,9 @@ int main (int argc, char* argv[])
               run_one (true, snr_db, static_cast<unsigned> (2000000 + seed));
 
           out << "messaggio \"" << message << "\": fatto (" << trials << " prove finora, "
-              << decodes << " decodifiche totali)\n";
+              << decodes << " decodifiche totali, " << pileup_trials << " con pileup)\n";
           out.flush ();
+          ++message_index;
         }
 
       fastldpc_gate_dump_close_c ();
