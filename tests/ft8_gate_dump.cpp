@@ -227,6 +227,7 @@ int main (int argc, char* argv[])
       QCommandLineOption freq_option {"freq", "Frequenza audio in Hz.", "hz", "1500.0"};
       QCommandLineOption depth_option {"depth", "Profondita' di decodifica FT8.", "n", "3"};
       QCommandLineOption clean_option {"clean-too", "Include anche una prova pulita (senza rumore) per messaggio."};
+      QCommandLineOption relax_option {"relax", "DECODIUM_LDPC_GATE_RELAX (soglia nd allargata).", "value", "0.30"};
 
       parser.addOption (out_option);
       parser.addOption (message_option);
@@ -235,6 +236,7 @@ int main (int argc, char* argv[])
       parser.addOption (freq_option);
       parser.addOption (depth_option);
       parser.addOption (clean_option);
+      parser.addOption (relax_option);
       parser.process (app);
 
       QStringList messages = parser.values (message_option);
@@ -252,6 +254,8 @@ int main (int argc, char* argv[])
       int const depth = parser.value (depth_option).toInt (&ok);
       bool const clean_too = parser.isSet (clean_option);
       QString const out_path = parser.value (out_option);
+      float const relax = parser.value (relax_option).toFloat (&ok);
+      if (!ok || relax <= 0.0f) fail (QStringLiteral ("--relax non valido"));
 
       // Impostate PRIMA del primo decode: decodium_bridge.cpp le legge una
       // sola volta, in modo statico, al primo uso (come ft2_gate_dump.cpp).
@@ -259,7 +263,7 @@ int main (int argc, char* argv[])
       // candidati che il gate scarterebbe, per avere sia veri che falsi nel
       // dataset -- esattamente come lab/neural/gate/make_dataset.sh.
       qputenv ("DECODIUM_LDPC_GATE", "1");
-      qputenv ("DECODIUM_LDPC_GATE_RELAX", "0.30");
+      qputenv ("DECODIUM_LDPC_GATE_RELAX", QByteArray::number (relax));
 
       fastldpc_gate_dump_open_c (out_path.toLocal8Bit ().constData ());
 
