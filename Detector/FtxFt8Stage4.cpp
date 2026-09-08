@@ -3757,6 +3757,20 @@ void save_known_cq_call (Ft8KnownCqCallState& state, std::string const& call,
                          float freq, float dt, int nutc);
 int ft8_utc_delta_seconds (int newer, int older);
 
+// Una stazione FT8 trasmette solo su una delle due parita' di slot da 15 s
+// (:00/:30 oppure :15/:45), sempre la stessa per tutta la sessione: una vera
+// ripetizione dello stesso CQ arriva quindi solo a multipli di 30 s, mai a
+// 15/45/75/... Le voci dello storico (known_call_grid, known_cq_call) non lo
+// controllavano e potevano riproporre il messaggio nello slot sbagliato,
+// dove la stazione non trasmette -- misurato in aria l'8/9/2026
+// (lab/misure/20260908_fantasmi_ft8.md): 8,8% dei CQ di Decodium erano eco
+// fabbricati nello slot subito dopo quello vero, contro lo 0,2% di rumore
+// fisiologico di JTDX sullo stesso audio.
+bool ft8_utc_same_transmit_parity (int newer, int older)
+{
+  return (ft8_utc_delta_seconds (newer, older) % 30) == 0;
+}
+
 int sequence_index_for_utc (int nutc)
 {
   return std::abs ((nutc / 5) % 2);
@@ -4476,6 +4490,16 @@ void append_known_cq_candidates (Ft8KnownCallGridState const& state,
         }
       if (age_seconds > ft8_knowncq_fast_age ())
         {
+          continue;
+        }
+      if (!ft8_utc_same_transmit_parity (request.nutc, entry.nutc))
+        {
+          if (debug_known_cq_replay ())
+            {
+              std::cerr << "[KNOWNCQ] skip parity call=" << trim_fixed (entry.call)
+                        << " grid=" << trim_fixed (entry.grid)
+                        << " age=" << age_seconds << '\n';
+            }
           continue;
         }
       if (entry.freq < static_cast<float> (ifa) - 3.0f
@@ -6463,6 +6487,10 @@ int collect_known_call_grid_cq_matches (Ft8KnownCallGridState const& state,
         {
           continue;
         }
+      if (!ft8_utc_same_transmit_parity (request.nutc, entry.nutc))
+        {
+          continue;
+        }
       if (!history_replay
           && age_seconds > kFt8KnownCallGridFastReplayMaxAgeSeconds
           && !(allow_wide_fast && age_seconds <= 15 * 60))
@@ -6589,6 +6617,10 @@ int collect_known_cq_call_matches (Ft8KnownCqCallState const& state,
         }
       int const age_seconds = ft8_utc_delta_seconds (request.nutc, entry.nutc);
       if (age_seconds <= 0 || age_seconds > kFt8KnownCallGridMaxAgeSeconds)
+        {
+          continue;
+        }
+      if (!ft8_utc_same_transmit_parity (request.nutc, entry.nutc))
         {
           continue;
         }
