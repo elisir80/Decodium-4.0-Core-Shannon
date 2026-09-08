@@ -244,6 +244,22 @@ float gate_relax_scelto () {
     return v;
 }
 
+// DECODIUM_LDPC_GATE_DELTA: scostamento della soglia del classificatore del
+// gate (gate.hpp, gate_threshold_delta). 0 = soglia appresa, bit-identico;
+// negativo accetta di piu'. Solo per misurare il costo del gate sui segnali
+// veri (lab/misure/20260908_fantasmi_ft8.md): non e' un default.
+float gate_delta_scelto () {
+    static float const v = [] {
+        float f = 0.0f;
+        if (char const* e = std::getenv ("DECODIUM_LDPC_GATE_DELTA")) {
+            float const n = static_cast<float> (std::atof (e));
+            if (n >= -10.0f && n <= 10.0f) f = n;
+        }
+        return f;
+    }();
+    return v;
+}
+
 // Raccolta LLR reali per il riaddestramento del gate (FASTLDPC-AI-SPEC-001
 // §2b, vedi il commento su gate_weights.hpp e Detector/fastldpc/lab/neural/gate/).
 // Il pacchetto di ricerca originale genera il dataset su un canale AWGN
@@ -482,6 +498,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             c.max_iter = max_iter_scelto ();
             c.gate_mode = gate_mode_scelto () ? 1 : 0;
             c.gate_relax = gate_relax_scelto ();
+            gate_threshold_delta () = gate_delta_scelto ();
             c.gate_is_ft8 = g_modo_ft8;
             c.gate_dump_cb = gate_dump_callback;
             manopole_ft8 (c);
@@ -497,6 +514,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             c.max_iter = max_iter_scelto ();
             c.gate_mode = gate_mode_scelto () ? 1 : 0;
             c.gate_relax = gate_relax_scelto ();
+            gate_threshold_delta () = gate_delta_scelto ();
             c.gate_is_ft8 = g_modo_ft8;
             c.gate_dump_cb = gate_dump_callback;
             manopole_ft8 (c);
@@ -512,6 +530,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
         c.max_iter = max_iter_scelto ();
         c.gate_mode = gate_mode_scelto () ? 1 : 0;
         c.gate_relax = gate_relax_scelto ();
+        gate_threshold_delta () = gate_delta_scelto ();
         c.gate_is_ft8 = g_modo_ft8;
         c.gate_dump_cb = gate_dump_callback;
         manopole_ft8 (c);

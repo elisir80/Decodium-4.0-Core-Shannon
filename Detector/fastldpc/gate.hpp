@@ -26,6 +26,16 @@ struct GateFeatures {
 // sono diversi. I due modi hanno pesi separati (GATE_*_FT2 / GATE_*_FT8 in
 // gate_weights.hpp); il parametro ft8 sceglie quale tabella usare, deciso a
 // costruzione del decoder (Ft2Config::gate_is_ft8, vedi decodium_bridge.cpp).
+// Scostamento della soglia del classificatore a runtime, impostato da
+// decodium_bridge.cpp (DECODIUM_LDPC_GATE_DELTA). 0 = soglia appresa,
+// bit-identico a prima; negativo accetta di piu' (recupera candidati veri
+// deboli, lascia passare piu' falsi), positivo il contrario. Manopola di
+// misura (lab/misure/20260908_fantasmi_ft8.md), non un default.
+inline float& gate_threshold_delta() {
+    static float v = 0.0f;
+    return v;
+}
+
 #ifdef FASTLDPC_HAVE_GATE_WEIGHTS
 #include "gate_weights.hpp"
 inline float gate_logit(const GateFeatures& g, bool ft8 = false) {
@@ -37,7 +47,8 @@ inline float gate_logit(const GateFeatures& g, bool ft8 = false) {
     return z;
 }
 inline bool gate_accept(const GateFeatures& g, bool ft8 = false) {
-    return gate_logit(g, ft8) > (ft8 ? GATE_THRESHOLD_FT8 : GATE_THRESHOLD_FT2);
+    return gate_logit(g, ft8) > (ft8 ? GATE_THRESHOLD_FT8 : GATE_THRESHOLD_FT2)
+                                 + gate_threshold_delta();
 }
 #else
 inline float gate_logit(const GateFeatures&, bool = false) { return 1.0f; }
