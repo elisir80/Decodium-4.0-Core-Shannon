@@ -23,6 +23,16 @@ namespace ft8
 // the Qt runtime.
 void shutdownHashSeedWorker ();
 
+// Live MyCall hypotheses need recent message TX, not an armed Auto TX,
+// tuning, or a stale selected partner. File decoding keeps explicit AP use.
+inline bool allowMyCallAp (bool decodingFile, bool transmittingMessage,
+                           qint64 lastMessageTxMs, qint64 nowMs)
+{
+  return decodingFile || transmittingMessage
+      || (lastMessageTxMs > 0 && nowMs >= lastMessageTxMs
+          && nowMs - lastMessageTxMs < 180000);
+}
+
 struct DecodeRequest
 {
   quint64 serial {0};
@@ -42,6 +52,7 @@ struct DecodeRequest
   int superFoxTolHz {50};
   int nagain {0};
   int lft8apon {0};
+  bool apMyCallEnabled {true}; // Offline callers retain explicit AP; live producers snapshot TX eligibility.
   int lmultift8 {0};
   int lapcqonly {0};
   int napwid {50};

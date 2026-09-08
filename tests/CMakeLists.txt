@@ -35,6 +35,15 @@ target_link_libraries (test_qt_helpers wsjt_qt wsjt_cxx wsjt_fort Qt6::Test)
 add_test (NAME test_qt_helpers COMMAND $<TARGET_FILE:test_qt_helpers>)
 set_tests_properties (test_qt_helpers PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+add_executable (test_ft8_mycall_ap
+  test_ft8_mycall_ap.cpp
+  ../Detector/FT8DecodeWorker.cpp
+  ../Decoder/decodedtext.cpp)
+target_include_directories (test_ft8_mycall_ap PRIVATE ${PROJECT_BINARY_DIR})
+target_compile_options (test_ft8_mycall_ap PRIVATE -include wsjtx_config.h)
+target_link_libraries (test_ft8_mycall_ap wsjt_qt wsjt_cxx wsjt_fort Qt6::Test)
+add_test (NAME test_ft8_mycall_ap COMMAND $<TARGET_FILE:test_ft8_mycall_ap>)
+
 add_executable (test_qso_sequencer_rules
   test_qso_sequencer_rules.cpp
   ../Sequencer/QsoSequencerRules.cpp

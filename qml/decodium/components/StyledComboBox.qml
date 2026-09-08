@@ -40,6 +40,7 @@ ComboBox {
                      ? control.font.family
                      : (Qt.platform.os === "osx" ? "Helvetica Neue" : "")
         font.pixelSize: control.effectiveFontPixelSize
+        font.bold: control.font.bold
         color: control.textColor
         horizontalAlignment: control.textHorizontalAlignment
         verticalAlignment: Text.AlignVCenter
@@ -86,7 +87,7 @@ ComboBox {
                          ? control.font.family
                          : (Qt.platform.os === "osx" ? "Helvetica Neue" : "")
             font.pixelSize: control.effectiveFontPixelSize
-            font.bold: highlighted
+            font.bold: control.font.bold || highlighted
             elide: Text.ElideRight
             horizontalAlignment: control.textHorizontalAlignment
             verticalAlignment: Text.AlignVCenter

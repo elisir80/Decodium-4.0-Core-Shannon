@@ -204,7 +204,6 @@
 extern "C" void ftx_ft8_stage4_seed_known_cq_c(char const* call, char const* grid,
                                                 float freq, float dt, int nutc);
 extern "C" void ftx_ft8_stage4_seed_hash_call_c(char const* call);
-extern "C" void ftx_ft8_set_ap_mycall_enabled_c(int on);
 #ifdef FFTW3_SINGLE_FOUND
 #include <fftw3.h>
 #endif
@@ -22319,6 +22318,9 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
         m_transmitting = true;
         emit transmittingChanged();
     }
+    if (m_mode == QStringLiteral("FT8") && !m_tuning) {
+        m_lastFt8MessageTxMs = QDateTime::currentMSecsSinceEpoch();
+    }
     m_bridgeAudioLegacyTxActive = true;
     suspendNonAudioTxWork(QStringLiteral("legacy-bridge-tx"));
 
@@ -26381,6 +26383,9 @@ void DecodiumBridge::startTx()
 
         m_lastTransmittedMessage = msg.trimmed();
         m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
+        if (txMode == QStringLiteral("FT8") && !m_tuning) {
+            m_lastFt8MessageTxMs = QDateTime::currentMSecsSinceEpoch();
+        }
         m_transmitting = true;
         emit transmittingChanged();
         applyTxAudioSchedulingBoost(QStringLiteral("tx-mac"));
@@ -26647,6 +26652,9 @@ void DecodiumBridge::startTx()
     // riga 11506 PRIMA del prepare: prepare fail => m_lastTransmittedMessage
     // settato senza TX reale => completeFinishedSignoffIfReady false-positive.
     m_lastTransmittedMessage = msg.trimmed();
+    if (txMode == QStringLiteral("FT8") && !m_tuning) {
+        m_lastFt8MessageTxMs = QDateTime::currentMSecsSinceEpoch();
+    }
     m_transmitting = true;
     emit transmittingChanged();
     applyTxAudioSchedulingBoost(QStringLiteral("tx"));
@@ -51089,27 +51097,9 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
     req.emedelay = 0.0f;
     req.nagain = 0;
     req.lft8apon = (ft8ApEnabled && !txAudioActive) ? 1 : 0;
-    // Ipotesi AP sul mio nominativo ("MyCall ??? ???" e seguenti) solo se
-    // qualcuno puo' davvero starmi chiamando: TX in corso, QSO in corso o TX
-    // finita da meno di tre minuti. In ascolto puro non hanno niente da
-    // trovare e fabbricano righe col mio nominativo davanti.
-    {
-        constexpr qint64 kFt8ApMyCallGraceMs = 180000;
-        qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-        qint64 const lastTxEndMs = qMax(m_lastTxEndMs, m_asyncLastTxEndMs);
-        bool const myCallApAllowed = txAudioActive
-            || decodeQsoProgress > 0
-            || (lastTxEndMs > 0 && nowMs - lastTxEndMs < kFt8ApMyCallGraceMs);
-        static bool s_lastMyCallApAllowed = true;
-        if (myCallApAllowed != s_lastMyCallApAllowed) {
-            s_lastMyCallApAllowed = myCallApAllowed;
-            bridgeLog(QStringLiteral("FT8 AP: ipotesi sul mio nominativo %1")
-                          .arg(myCallApAllowed
-                                   ? QStringLiteral("riattivate (TX recente o QSO in corso)")
-                                   : QStringLiteral("sospese (nessuna TX da 3 minuti)")));
-        }
-        ftx_ft8_set_ap_mycall_enabled_c(myCallApAllowed ? 1 : 0);
-    }
+    req.apMyCallEnabled = decodium::ft8::allowMyCallAp(
+        false, m_transmitting && !m_tuning && m_mode == QStringLiteral("FT8"),
+        m_lastFt8MessageTxMs, QDateTime::currentMSecsSinceEpoch());
     qint64 const monitoringAgeMs =
         (m_monitoring && m_monitoringSince.isValid())
             ? m_monitoringSince.msecsTo(QDateTime::currentDateTimeUtc())
@@ -52456,6 +52446,9 @@ void DecodiumBridge::feedAudioToDecoder(qint64 completedUtcSlot)
         req.ncontest = m_ncontest;
         req.nagain = 0;
         req.lft8apon = m_ft8ApEnabled ? 1 : 0;
+        req.apMyCallEnabled = decodium::ft8::allowMyCallAp(
+            false, m_transmitting && !m_tuning && m_mode == QStringLiteral("FT8"),
+            m_lastFt8MessageTxMs, QDateTime::currentMSecsSinceEpoch());
         req.lmultift8 = 1;
         req.lapcqonly = cqHint;
         if (m_frequency < 30000000.0) {

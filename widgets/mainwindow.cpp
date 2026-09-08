@@ -13942,6 +13942,9 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   request.lapcqonly = dec_data.params.lapcqonly ? 1 : 0;
   request.napwid = qBound (0, int (dec_data.params.napwid), 200);
   request.ldiskdat = dec_data.params.ndiskdat ? 1 : 0;
+  request.apMyCallEnabled = decodium::ft8::allowMyCallAp (
+      request.ldiskdat != 0, m_transmitting && !m_tune && m_mode == "FT8",
+      m_lastFt8MessageTxMs, QDateTime::currentMSecsSinceEpoch ());
   request.ncandthin = qBound (1, int (dec_data.params.ncandthin), 100);
   request.nft8Cycles = qBound (1, int (dec_data.params.nft8cycles), 3);
   request.nft8RxFreqSensitivity = qBound (1, int (dec_data.params.nft8rxfsens), 3);
@@ -13973,16 +13976,6 @@ decodium::ft8::DecodeRequest MainWindow::buildFt8DecodeRequest () const
   request.mycall = QByteArray (dec_data.params.mycall, int (sizeof dec_data.params.mycall));
   request.hiscall = QByteArray (dec_data.params.hiscall, int (sizeof dec_data.params.hiscall));
   request.hisgrid = QByteArray (dec_data.params.hisgrid, int (sizeof dec_data.params.hisgrid));
-  if (m_embeddedShellMode && !m_diskData) {
-    bool const hasApTarget = ft8HasApTarget (request.hiscall);
-    if (request.ndepth >= 4 && hasApTarget) {
-      if (request.nzhsym == 47) {
-        request.lft8apon = 1;
-      } else if (request.nzhsym >= 50) {
-        request.lft8apon = 1;
-      }
-    }
-  }
   if (auto * bridge = qApp ? qApp->property ("decodiumBridge").value<QObject*> () : nullptr) {
     bool neural = false, turbo = false, coherent = false;
     QMetaObject::invokeMethod (bridge, "effectiveNeuralSync", Qt::DirectConnection,
@@ -14005,7 +13998,6 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodi
   }
 
   int const baseDepth = request.ndepth;
-  bool const hasApTarget = ft8HasApTarget (request.hiscall);
   if (request.nzhsym >= 50) {
     request.ndepth = qMin (request.ndepth, 3);
     if (baseDepth >= 3) {
@@ -14017,7 +14009,7 @@ decodium::ft8::DecodeRequest MainWindow::buildEmbeddedFt8FastLiveRequest (decodi
     request.subpass = false;
     request.nft8Cycles = 1;
     request.nft8RxFreqSensitivity = 1;
-    request.lft8apon = (baseDepth >= 3 && (request.lft8apon || hasApTarget)) ? 1 : 0;
+    request.lft8apon = (baseDepth >= 3 && request.lft8apon) ? 1 : 0;
   } else {
     request.ndepth = qMin (request.ndepth, 2);
     request.maxDecodeMs = baseDepth >= 4 ? 2400 : 1800;
@@ -17808,6 +17800,9 @@ void MainWindow::guiUpdate()
       default: break;             // determined elsewhere
     }
     m_transmitting = true;
+    if (m_mode == "FT8" && !m_tune) {
+      m_lastFt8MessageTxMs = QDateTime::currentMSecsSinceEpoch ();
+    }
     transmitDisplay (true);
     statusUpdate ();
 

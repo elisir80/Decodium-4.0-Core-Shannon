@@ -1612,6 +1612,7 @@ private:
 
   QDateTime m_dateTimeQSOOn;
   QDateTime m_dateTimeLastTX;
+  qint64 m_lastFt8MessageTxMs {0}; // Actual FT8 message start; excludes tuning/armed Auto TX.
   QDateTime m_dateTimeSentTx3;
   QDateTime m_dateTimeRcvdRR73;
   QDateTime m_dateTimeBestSP;

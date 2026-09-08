@@ -21,6 +21,7 @@
 #include <QMutexLocker>
 #include <QRegularExpression>
 #include <QSet>
+#include <QScopeGuard>
 #include <QStandardPaths>
 #include <QThread>
 #include <QTimeZone>
@@ -37,6 +38,8 @@
 
 extern "C"
 {
+  void ftx_ft8_set_ap_mycall_enabled_c (int enabled);
+  int ftx_ft8_ap_mycall_enabled_c ();
   int ftx_ft8_ap_storico_tentativi_c ();
   int ftx_ft8_ap_msg_tentativi_c ();
   int ftx_ft8_ap_msg_successi_c ();
@@ -1939,6 +1942,14 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
     {
       return;
     }
+  // Apply the immutable request only while owning the shared DSP runtime.
+  // A queued GUI request must never change the gate of an in-flight decode.
+  int const previousMyCallAp = ftx_ft8_ap_mycall_enabled_c ();
+  bool const myCallApEnabled = effectiveApEnabled && request.apMyCallEnabled;
+  ftx_ft8_set_ap_mycall_enabled_c (myCallApEnabled ? 1 : 0);
+  auto const restoreMyCallAp = qScopeGuard ([previousMyCallAp] {
+    ftx_ft8_set_ap_mycall_enabled_c (previousMyCallAp);
+  });
   qint64 const hashPrepStartMs = totalTimer.elapsed ();
   qint64 initialHashPrepMs = 0;
   qint64 refreshHashPrepMs = 0;
@@ -2116,7 +2127,7 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
   if (decodium::logging::should_log_decode_metric (waitMs, decodeMs, totalMs, lastMetricLogMs))
     {
       qInfo().noquote()
-          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27 pressure_limited=%28 ap_storico=%29 ap_voci=%30 ap_ciclo=%31 ap_msg=%32 ap_msgmem=%33 ap_msgok=%34")
+          << QStringLiteral ("[DECODEMETRIC] mode=FT8 serial=%1 wait_ms=%2 decode_ms=%3 total_ms=%4 threads_req=%5 threads_active=%6 audio=%7 nout=%8 depth=%9 nfa=%10 nfb=%11 ap=%12 low=%13 subpass=%14 cycles=%15 requested_low=%16 requested_subpass=%17 requested_cycles=%18 requested_depth=%19 supplemental=%20 max_ms=%21 constrained=%22 hashprep_ms=%23 hashreplay=%24 candthin=%25 thread=0x%26 freqpart=%27 pressure_limited=%28 ap_storico=%29 ap_voci=%30 ap_ciclo=%31 ap_msg=%32 ap_msgmem=%33 ap_msgok=%34 ap_mycall=%35")
                  .arg (request.serial)
                  .arg (waitMs)
                  .arg (decodeMs)
@@ -2150,7 +2161,8 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                  .arg (decodium::apstorico::ciclo_corrente ())
                  .arg (ftx_ft8_ap_msg_tentativi_c ())
                  .arg (decodium::apstorico::quanti_messaggi ())
-                 .arg (ftx_ft8_ap_msg_successi_c ());
+                 .arg (ftx_ft8_ap_msg_successi_c ())
+                 .arg (myCallApEnabled ? 1 : 0);
     }
   Q_EMIT decodeReady (request.serial, rows);
   Q_EMIT decodedEntriesReady (request.serial, entries);

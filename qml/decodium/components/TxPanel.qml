@@ -625,7 +625,7 @@ Item {
         property color foreground: "white"
         property int glyphSize: 14
         property int labelSize: 10
-        property bool boldLabel: false
+        property bool boldLabel: true
         implicitWidth: contentLayout.implicitWidth
         implicitHeight: contentLayout.implicitHeight
         clip: true
@@ -777,7 +777,7 @@ Item {
                                         text: bandRect.bandLabel
                                         font.family: decodiumMonoFontFamily
                                         font.pixelSize: 10
-                                        font.bold: bandRect.isSelected
+                                        font.bold: true
                                         color: bandRect.isSelected ? "#ffffff" : textPrimary
                                         horizontalAlignment: Text.AlignHCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -853,6 +853,7 @@ Item {
                                         txPanel.syncModeSelector()
                                     }
                                 }
+                                font.bold: true
                                 font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(11, Math.round(11 * txPanel.toolbarScale))
                                 itemHeight: 34
@@ -914,7 +915,7 @@ Item {
                                            ? secondaryCyan : textPrimary
                                     font.family: decodiumMonoFontFamily
                                     font.pixelSize: Math.max(10, Math.round(10 * txPanel.toolbarScale))
-                                    font.bold: workingFrequencySelector.currentIndex >= 0
+                                    font.bold: true
                                     horizontalAlignment: Text.AlignLeft
                                     verticalAlignment: Text.AlignVCenter
                                     elide: Text.ElideRight
@@ -963,7 +964,7 @@ Item {
                                             color: frequencyOptionDelegate.isCurrent ? secondaryCyan : textPrimary
                                             font.family: decodiumMonoFontFamily
                                             font.pixelSize: 11
-                                            font.bold: frequencyOptionDelegate.isCurrent
+                                            font.bold: true
                                             Layout.preferredWidth: 112
                                         }
                                         Text {
@@ -1064,6 +1065,7 @@ Item {
                                             wsprPowerSelector.currentIndex = txPanel.wsprPowerIndexFor(engine.wsprPowerDbm, wsprPowerSelector.model)
                                     }
                                 }
+                                font.bold: true
                                 font.family: decodiumMonoFontFamily
                                 font.pixelSize: Math.max(10, Math.round(10 * txPanel.toolbarScale))
                                 itemHeight: 34
@@ -1326,7 +1328,6 @@ Item {
                                     foreground: (engine && engine.multiAnswerMode) ? warningOrange : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: engine && engine.multiAnswerMode
                                 }
                             }
                         }
@@ -1351,7 +1352,6 @@ Item {
                                     foreground: (engine && engine.deepSearchEnabled) ? accentGreen : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: engine && engine.deepSearchEnabled
                                 }
                             }
                         }
@@ -1376,7 +1376,6 @@ Item {
                                     foreground: (engine && engine.ft8ApEnabled) ? secondaryCyan : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: engine && engine.ft8ApEnabled
                                 }
                             }
                         }
@@ -1401,7 +1400,6 @@ Item {
                                     foreground: (engine && engine.autoSeq) ? primaryBlue : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: engine && engine.autoSeq
                                 }
                             }
                         }
@@ -1426,7 +1424,6 @@ Item {
                                     foreground: (engine && engine.quickQsoEnabled) ? accentGreen : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: engine && engine.quickQsoEnabled
                                 }
                             }
                         }
@@ -1488,7 +1485,6 @@ Item {
                                     foreground: parent.isHeld ? "#FFC107" : textSecondary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: parent.isHeld
                                 }
                             }
                         }
@@ -1520,7 +1516,6 @@ Item {
                                     foreground: parent.acqOn ? successGreen : textPrimary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: parent.acqOn
                                 }
                             }
                         }
@@ -1550,7 +1545,6 @@ Item {
                                     foreground: parent.callOn ? successGreen : textPrimary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: parent.callOn
                                 }
                             }
                         }
@@ -1604,7 +1598,6 @@ Item {
                                     foreground: parent.altOn ? warningOrange : textPrimary
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: parent.altOn
                                 }
                             }
                         }
@@ -1725,7 +1718,6 @@ Item {
                                     foreground: secondaryCyan
                                     glyphSize: txPanel.toolbarGlyphSize
                                     labelSize: txPanel.toolbarLabelSize
-                                    boldLabel: parent.filterOn
                                 }
                             }
                         }
@@ -2004,15 +1996,34 @@ Item {
                     }
                 }
 
+                SuperFoxIndicator {
+                    engine: txPanel.engine
+                    Layout.preferredHeight: qsoInfoControlHeight
+                    activeColor: accentGreen
+                    inactiveColor: textSecondary
+                    inactiveBorder: glassBorder
+                    backgroundColor: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.8)
+                    labelPixelSize: qsoInfoLabelSize
+                }
+
                 // Next/TX Message display
                 Rectangle {
+                    objectName: "nextTxMessageDisplay"
                     Layout.fillWidth: true
+                    Layout.minimumWidth: 160
+                    Layout.preferredWidth: Math.round(280 * txPanel.toolbarScale)
+                    Layout.maximumWidth: Layout.preferredWidth
                     Layout.preferredHeight: qsoInfoControlHeight
                     color: engine && engine.transmitting ?
                            Qt.alpha(errorRed, 0.2) :
                            Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                     border.color: engine && engine.transmitting ? errorRed : glassBorder
                     radius: 4
+
+                    HoverHandler { id: nextMessageHover }
+                    ToolTip.visible: nextMessageHover.hovered
+                    ToolTip.delay: 500
+                    ToolTip.text: engine ? engine.currentTxMessage : ""
 
                     RowLayout {
                         anchors.fill: parent
@@ -2024,7 +2035,7 @@ Item {
                             text: engine && engine.transmitting ? "TX:" : "Next:"
                             color: engine && engine.transmitting ? errorRed : textSecondary
                             font.pixelSize: 10
-                            font.bold: engine && engine.transmitting
+                            font.bold: true
                         }
 
                         Text {
@@ -2033,7 +2044,7 @@ Item {
                             color: engine && engine.transmitting ? errorRed : textPrimary
                             font.family: decodiumMonoFontFamily
                             font.pixelSize: 11
-                            font.bold: engine && engine.transmitting
+                            font.bold: true
                             elide: Text.ElideRight
                         }
 
@@ -2104,6 +2115,12 @@ Item {
                                   : (engine && engine.dxCall.length > 0
                                      ? qsTr("Log current QSO")
                                      : qsTr("No active QSO to log"))
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    Layout.preferredWidth: 0
                 }
             }
 
