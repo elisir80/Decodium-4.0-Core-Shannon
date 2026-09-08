@@ -12814,6 +12814,22 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         MenuItem {
+            text: (bridge.ft8ApEnabled ? "✓ " : "☐ ") + qsTr("FT8 AP")
+            onTriggered: bridge.ft8ApEnabled = !bridge.ft8ApEnabled
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: bridge.ft8ApEnabled ? successGreen : textSecondary
+                leftPadding: 10
+            }
+        }
+
+        MenuItem {
             text: (bridge.avgDecodeEnabled ? "✓ " : "☐ ") + qsTr("Avg Decode")
             onTriggered: bridge.avgDecodeEnabled = !bridge.avgDecodeEnabled
 
