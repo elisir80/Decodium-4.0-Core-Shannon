@@ -2853,6 +2853,16 @@ extern "C" int ftx_ft8_finalize_decode_pass_c (int nbadcrc, int pass_index, int 
 
 namespace
 {
+// Ipotesi a priori sul MIO nominativo (tipi 2..6: "MyCall ??? ???" e
+// seguenti). Hanno senso solo se qualcuno puo' davvero starmi chiamando,
+// cioe' se ho trasmesso di recente. In ascolto puro non hanno niente da
+// trovare e fabbricano righe col mio nominativo davanti (misurato in aria
+// a settembre 2026, vedi lab/misure/20260908_fantasmi_ft8.md). Il ponte le
+// sospende quando la stazione non trasmette da qualche minuto: 1 = ammesse
+// (default), 0 = sospese. I tipi 1 (CQ), 7 e 8 non dipendono dal mio
+// nominativo e non sono toccati.
+std::atomic<int> g_ap_mio_nominativo {1};
+
 int prepare_ap_pass_impl (int ipass, int nQSOProgress, int lapcqonly, int ncontest,
                           int nfqso, int nftx, float f1, int napwid,
                           int const* apsym, int const* aph10,
@@ -2895,6 +2905,11 @@ int prepare_ap_pass_impl (int ipass, int nQSOProgress, int lapcqonly, int nconte
         }
     }
   if (iaptype <= 0)
+    {
+      return 0;
+    }
+  if (iaptype >= 2 && iaptype <= 6
+      && g_ap_mio_nominativo.load (std::memory_order_relaxed) == 0)
     {
       return 0;
     }
@@ -3165,6 +3180,16 @@ int prepare_ap_pass_impl (int ipass, int nQSOProgress, int lapcqonly, int nconte
   *iaptype_out = iaptype;
   return 1;
 }
+}
+
+extern "C" void ftx_ft8_set_ap_mycall_enabled_c (int on)
+{
+  g_ap_mio_nominativo.store (on != 0 ? 1 : 0, std::memory_order_relaxed);
+}
+
+extern "C" int ftx_ft8_ap_mycall_enabled_c ()
+{
+  return g_ap_mio_nominativo.load (std::memory_order_relaxed);
 }
 
 extern "C" int ftx_ft8_prepare_ap_pass_c (int ipass, int nQSOProgress, int lapcqonly, int ncontest,

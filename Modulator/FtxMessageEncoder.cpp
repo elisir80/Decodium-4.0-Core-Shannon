@@ -1482,8 +1482,19 @@ Maybe<QByteArray> unpack77_cpp (MessageBits77 const& bits, int i3, int n3,
             }
           else if (irpt >= 106)
             {
+              // Rapporto seguito da TU: 106..185 vale -30..+49, 187..206 vale
+              // -50..-31. Il resto del campo (186 e 207..367) non lo produce
+              // nessun trasmettitore: e' una parola sbagliata passata dalla CRC.
+              if (irpt > 206)
+                {
+                  return {};
+                }
               int isnr = (irpt - 101) - 35;
               if (isnr > 50) isnr -= 101;
+              if (isnr < -50 || isnr > 49)
+                {
+                  return {};
+                }
               QString const report = format_report (isnr);
               msg = ir == 0
                   ? QStringLiteral ("%1 %2 %3 TU").arg (call1.value, call2.value, report)
@@ -1493,6 +1504,12 @@ Maybe<QByteArray> unpack77_cpp (MessageBits77 const& bits, int i3, int n3,
             {
               int isnr = irpt - 35;
               if (isnr > 50) isnr -= 101;
+              // 5..84 vale -30..+49, 86..105 vale -50..-31: 85 ("+50") non
+              // e' producibile e va respinto come parola sbagliata.
+              if (isnr < -50 || isnr > 49)
+                {
+                  return {};
+                }
               QString const report = format_report (isnr);
               msg = ir == 0
                   ? QStringLiteral ("%1 %2 %3").arg (call1.value, call2.value, report)

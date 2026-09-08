@@ -52,6 +52,7 @@ extern "C"
                                             int candidate_thin);
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
   void ftx_ft8_stage4_set_superfox_options_c (int enabled, int ntol_hz);
+  void ftx_ft8_set_ap_mycall_enabled_c (int on);
   void ftx_ft8_stage4_seed_known_cq_c (char const* call, char const* grid,
                                        float freq, float dt, int nutc);
   void ftx_ft8_stage4_seed_known_cq_call_c (char const* call,
@@ -1339,6 +1340,12 @@ int main (int argc, char * argv[])
           QStringLiteral ("hz"),
           QStringLiteral ("50")
       };
+      QCommandLineOption const ap_mycall_option {
+          QStringLiteral ("ap-mycall"),
+          QStringLiteral ("Allow AP hypotheses on mycall, types 2..6 (0/1); 0 = station only listening."),
+          QStringLiteral ("value"),
+          QStringLiteral ("1")
+      };
       QCommandLineOption const nagain_option {
           QStringLiteral ("nagain"),
           QStringLiteral ("Again flag (0/1)."),
@@ -1547,6 +1554,7 @@ int main (int argc, char * argv[])
       parser.addOption (ncontest_option);
       parser.addOption (superfox_option);
       parser.addOption (sf_tol_option);
+      parser.addOption (ap_mycall_option);
       parser.addOption (nagain_option);
       parser.addOption (lft8apon_option);
       parser.addOption (lapcqonly_option);
@@ -1635,6 +1643,8 @@ int main (int argc, char * argv[])
       int const ncontest = parse_int_option (parser, ncontest_option, QStringLiteral ("ncontest"));
       int const superfoxEnabled = parse_int_option (parser, superfox_option, QStringLiteral ("superfox"));
       int const sfTolHz = parse_int_option (parser, sf_tol_option, QStringLiteral ("sf-tol"));
+      int const apMyCall = parse_int_option (parser, ap_mycall_option, QStringLiteral ("ap-mycall"));
+      ftx_ft8_set_ap_mycall_enabled_c (apMyCall);
       int const nagain = parse_int_option (parser, nagain_option, QStringLiteral ("nagain"));
       int const lft8apon = parse_int_option (parser, lft8apon_option, QStringLiteral ("lft8apon"));
       int const lapcqonly = parse_int_option (parser, lapcqonly_option, QStringLiteral ("lapcqonly"));
