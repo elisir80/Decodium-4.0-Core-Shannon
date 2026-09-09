@@ -295,6 +295,41 @@ void fase_da_sync (Complex const* cs, float* fase_out)
     }
 }
 
+// Le CINQUE passate cieche di produzione (llra..llre, ipass 1..5 di
+// FtxFt2Stage7), ricavate dalle metriche vere del demodulatore invece che
+// reimplementate: e' il riferimento onesto contro cui misurare un ramo in
+// piu'. llra/llrb/llrc sono i tre piani (1, 2 e 4 simboli combinati
+// coerentemente), llrd il piu' forte per bit e llre il secondo.
+void passate_di_produzione (Complex const* cd, std::array<std::array<float, kCodeword>, 5>& out)
+{
+  std::array<float, kRows * 3> bm {};
+  int badsync = 0;
+  ftx_ft2_bitmetrics_c (cd, bm.data (), &badsync);
+
+  for (int i = 0; i < 58; ++i)
+    {
+      for (int p = 0; p < 3; ++p)
+        {
+          out[static_cast<size_t> (p)][static_cast<size_t> (i)] = bm[static_cast<size_t> (8 + i + p * kRows)] * kScaleFac;
+          out[static_cast<size_t> (p)][static_cast<size_t> (58 + i)] = bm[static_cast<size_t> (74 + i + p * kRows)] * kScaleFac;
+          out[static_cast<size_t> (p)][static_cast<size_t> (116 + i)] = bm[static_cast<size_t> (140 + i + p * kRows)] * kScaleFac;
+        }
+    }
+  for (int c = 0; c < kCodeword; ++c)
+    {
+      float const a = out[0][static_cast<size_t> (c)];
+      float const b = out[1][static_cast<size_t> (c)];
+      float const d = out[2][static_cast<size_t> (c)];
+      float primo = a, secondo = b;
+      if (std::fabs (b) > std::fabs (primo)) { secondo = primo; primo = b; }
+      else if (std::fabs (b) > std::fabs (secondo)) { secondo = b; }
+      if (std::fabs (d) > std::fabs (primo)) { secondo = primo; primo = d; }
+      else if (std::fabs (d) > std::fabs (secondo)) { secondo = d; }
+      out[3][static_cast<size_t> (c)] = primo;
+      out[4][static_cast<size_t> (c)] = secondo;
+    }
+}
+
 Code const& codice ()
 {
   static Code c = [] {
@@ -591,17 +626,17 @@ int main (int argc, char* argv[])
       out << "semi=" << semi << " messaggi=" << messaggi.size () << " giri=" << giri << "\n\n";
       out << "| SNR | prove | base | " ;
       for (int g = 1; g <= giri; ++g) out << "bicm" << g << " | ";
-      out << "genio | fase | fase-sync | unione |\n|---:|---:|---:|";
+      out << "genio | fase | fase-sync | unione | base5 | unione6 |\n|---:|---:|---:|";
       for (int g = 1; g <= giri; ++g) out << "---:|";
       out << "---:|---:|\n";
 
       Ft2Decoder dec {codice (), produzione ()};
-      long tot_base = 0, tot_genio = 0, tot_prove = 0, tot_fase = 0, tot_stim = 0, tot_unione = 0;
+      long tot_base = 0, tot_genio = 0, tot_prove = 0, tot_fase = 0, tot_stim = 0, tot_unione = 0, tot_base5 = 0, tot_un6 = 0;
       std::vector<long> tot_bicm (static_cast<size_t> (giri), 0);
 
       for (double snr : snrs)
         {
-          long prove = 0, base = 0, genio = 0, fase_ok = 0, fase_stim = 0, unione = 0;
+          long prove = 0, base = 0, genio = 0, fase_ok = 0, fase_stim = 0, unione = 0, base5 = 0, unione6 = 0;
           std::vector<long> bicm (static_cast<size_t> (giri), 0);
           for (QString const& m : messaggi)
             {
@@ -686,6 +721,19 @@ int main (int argc, char* argv[])
                     bool const ok_coer = tenta (l.data ());
                     if (ok_coer) ++fase_stim;
                     if (ok_coer || preso) ++unione;
+
+                    // Il confronto che conta davvero: le CINQUE passate di
+                    // produzione contro le stesse cinque piu' il ramo coerente
+                    // come sesta. Il riferimento a una passata sola
+                    // sopravvaluta il guadagno, perche' la produzione una parte
+                    // della coerenza se la prende gia' combinando 2 e 4 simboli.
+                    std::array<std::array<float, kCodeword>, 5> prod {};
+                    passate_di_produzione (c.cd.data (), prod);
+                    bool ok5 = false;
+                    for (int p = 0; p < 5 && !ok5; ++p)
+                      ok5 = tenta (prod[static_cast<size_t> (p)].data ());
+                    if (ok5) ++base5;
+                    if (ok5 || ok_coer) ++unione6;
                   }
 
                   // braccio genio: a priori perfetta
@@ -700,16 +748,18 @@ int main (int argc, char* argv[])
             }
           out << "| " << snr << " | " << prove << " | " << base << " | ";
           for (int g = 0; g < giri; ++g) out << bicm[static_cast<size_t> (g)] << " | ";
-          out << genio << " | " << fase_ok << " | " << fase_stim << " | " << unione << " |\n";
+          out << genio << " | " << fase_ok << " | " << fase_stim << " | " << unione
+              << " | " << base5 << " | " << unione6 << " |\n";
           out.flush ();
-          tot_prove += prove; tot_base += base; tot_genio += genio; tot_fase += fase_ok; tot_stim += fase_stim; tot_unione += unione;
+          tot_prove += prove; tot_base += base; tot_genio += genio; tot_fase += fase_ok; tot_stim += fase_stim; tot_unione += unione; tot_base5 += base5; tot_un6 += unione6;
           for (int g = 0; g < giri; ++g) tot_bicm[static_cast<size_t> (g)] += bicm[static_cast<size_t> (g)];
         }
 
       out << "\ntotale su " << tot_prove << " prove: base " << tot_base;
       for (int g = 0; g < giri; ++g) out << ", bicm" << (g + 1) << " " << tot_bicm[static_cast<size_t> (g)];
       out << ", genio " << tot_genio << ", fase " << tot_fase
-          << ", fase-sync " << tot_stim << ", unione " << tot_unione << "\n";
+          << ", fase-sync " << tot_stim << ", unione " << tot_unione
+          << " | PRODUZIONE: base5 " << tot_base5 << ", unione6 " << tot_un6 << "\n";
       return 0;
     }
   catch (std::exception const& e)
