@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Select version
         env:
@@ -201,7 +201,7 @@ jobs:
 
       - name: Restore Qt 6.11 cache
         id: qt-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.QT_CACHE_ROOT }}
           key: macos-intel-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}-v1
@@ -355,7 +355,7 @@ jobs:
             --skip-compat-check
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: decodium4-ft2-${{ env.VERSION }}-${{ matrix.asset_suffix }}
           if-no-files-found: error
@@ -371,7 +371,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Select version
         id: version
@@ -386,7 +386,7 @@ jobs:
           echo "Using version: ${VERSION}"
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: decodium4-ft2-${{ steps.version.outputs.version }}-macos-*x86_64
           merge-multiple: true
