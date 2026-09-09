@@ -346,6 +346,10 @@ extern "C"
                                             float* s8_out, int* nsync_out,
                                             float* llra, float* llrb, float* llrc,
                                             float* llrd, float* llre);
+  // Metriche coerenti FT8: fase stimata dai 21 simboli Costas (FtxBitmetrics.cpp).
+  void ftx_ft8_bitmetrics_coherent_c (std::complex<float> const* cs, float scale,
+                                      float* llra, float* llrb, float* llrc,
+                                      float* llrd, float* llre);
   void ftx_ft8_bitmetrics_capture_c (std::complex<float> const* cd0, int np2,
                                      int ibest, int imetric, float scale,
                                      int weak_deep, int equalize_tone_power,
@@ -473,6 +477,18 @@ int ft8_classic_rescue_budget ()
     return (v >= 0 && v <= 200) ? v : 12;
   }();
   return n;
+}
+
+// Tentativo con le metriche coerenti (fase stimata dai simboli Costas).
+// SPENTO di default: misurato solo su AWGN sintetico, senza fading ne' QRM.
+// Come la passata coerente di FT2 in Stage7, si accende quando l'aria conferma.
+bool ft8_coerente_attivo ()
+{
+  static bool const attivo = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_COERENTE");
+    return raw && raw[0] != '0';
+  }();
+  return attivo;
 }
 
 int& ft8_classic_rescue_used ()
@@ -7302,14 +7318,32 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   std::array<signed char, 91> message91 {};
   std::array<signed char, 174> cw {};
 
-  int const llr_attempts = have_cq_history ? 2 : 1;
+  // Tentativo COERENTE: un insieme di LLR in piu', con la fase del canale
+  // stimata dai 21 simboli Costas invece che ignorata (vedi
+  // ftx_ft8_bitmetrics_coherent_c). SPENTO di default, DECODIUM_FT8_COERENTE=1.
+  //
+  // Misurato sul banco: +37% di decodifiche, con 4,3x alla soglia; da solo pero'
+  // peggiora a segnale forte, quindi va SEMPRE come tentativo aggiuntivo e mai
+  // al posto degli altri. Stessa scelta fatta per FT2 in Stage7.
+  std::array<float, 174> coer_llra {}, coer_llrb {}, coer_llrc {}, coer_llrd {}, coer_llre {};
+  bool const usa_coerente = ft8_coerente_attivo ();
+  if (usa_coerente)
+    {
+      ftx_ft8_bitmetrics_coherent_c (current_cs.data (), kFt8BitMetricScale,
+                                     coer_llra.data (), coer_llrb.data (), coer_llrc.data (),
+                                     coer_llrd.data (), coer_llre.data ());
+    }
+
+  int const llr_attempts = (have_cq_history ? 2 : 1) + (usa_coerente ? 1 : 0);
+  int const indice_coerente = have_cq_history ? 2 : 1;
   for (int llr_attempt = 0; llr_attempt < llr_attempts; ++llr_attempt)
     {
-      float const* active_llra = llr_attempt == 0 ? llra.data () : history_llra.data ();
-      float const* active_llrb = llr_attempt == 0 ? llrb.data () : history_llrb.data ();
-      float const* active_llrc = llr_attempt == 0 ? llrc.data () : history_llrc.data ();
-      float const* active_llrd = llr_attempt == 0 ? llrd.data () : history_llrd.data ();
-      float const* active_llre = llr_attempt == 0 ? llre.data () : history_llre.data ();
+      bool const coerente = usa_coerente && llr_attempt == indice_coerente;
+      float const* active_llra = coerente ? coer_llra.data () : (llr_attempt == 0 ? llra.data () : history_llra.data ());
+      float const* active_llrb = coerente ? coer_llrb.data () : (llr_attempt == 0 ? llrb.data () : history_llrb.data ());
+      float const* active_llrc = coerente ? coer_llrc.data () : (llr_attempt == 0 ? llrc.data () : history_llrc.data ());
+      float const* active_llrd = coerente ? coer_llrd.data () : (llr_attempt == 0 ? llrd.data () : history_llrd.data ());
+      float const* active_llre = coerente ? coer_llre.data () : (llr_attempt == 0 ? llre.data () : history_llre.data ());
 
       // ---- Precalcolo a BLOCCHI delle passate di questo tentativo LLR.
       //

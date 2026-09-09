@@ -1508,6 +1508,132 @@ extern "C" void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags)
 // quelli di altri slot della stessa stazione. cs_out[k*4+j] = FFT del simbolo
 // k sul tono j (103 x 4); beta_out = 0,5 / varianza di rumore, lo stesso beta
 // che il demodulatore usa per scalare le energie.
+// Bit-metrics COERENTI per FT8: la fase del canale stimata dai 21 simboli
+// Costas (tre gruppi da 7 ai simboli k, k+36, k+72, toni {3,1,4,0,6,5,2}).
+//
+// Stessa idea della versione FT2 qui sotto, con le differenze del modo: 8
+// ipotesi di tono invece di 4, max-log invece di log-sum-exp, tre blocchi di
+// combinazione coerente (1, 2 e 3 simboli) invece di 1, 2 e 4, e la
+// normalizzazione in RMS sui 174 bit invece che in sigma sulle 206 righe.
+//
+// Con la fase nota l'ipotesi si pesa sulla PROIEZIONE invece che sul modulo, e
+// la proiezione puo' essere negativa: e' quella l'informazione in piu', perche'
+// un tono in controfase e' meno probabile di uno a energia nulla.
+//
+// Tetto teorico su FT8: 1,27 dB (terne 3,96 contro 2,69 del limite coerente),
+// piu' alto dell'1,1 di FT2. Come in FT2 va usata come attempt IN PIU', mai al
+// posto delle altre: da sola peggiora a segnale forte.
+//
+// cs: [79][8] spettri per simbolo, gia' catturati da
+// ftx_ft8_bitmetrics_capture_c. Uscite: cinque insiemi da 174, gia' scalati.
+extern "C" void ftx_ft8_bitmetrics_coherent_c (Complex const* cs, float scale,
+                                               float* llra, float* llrb, float* llrc,
+                                               float* llrd, float* llre)
+{
+  static std::array<int, 8> const graymap {{0, 1, 3, 2, 5, 6, 4, 7}};
+  static int const icos7[7] = {3, 1, 4, 0, 6, 5, 2};
+  static int const gruppo[3] = {0, 36, 72};
+  auto const& one = one9_table ();
+
+  // Ancore di fase sui tre gruppi Costas.
+  std::array<Complex, 3> ancora {};
+  std::array<float, 3> centro {};
+  for (int g = 0; g < 3; ++g)
+    {
+      Complex somma {};
+      for (int k = 0; k < 7; ++k)
+        somma += cs[static_cast<size_t> ((gruppo[g] + k) * 8 + icos7[k])];
+      float const mag = std::abs (somma);
+      ancora[static_cast<size_t> (g)] = mag > 0.0f ? somma / mag : Complex {1.0f, 0.0f};
+      centro[static_cast<size_t> (g)] = static_cast<float> (gruppo[g]) + 3.0f;
+    }
+  auto rotazione = [&] (int simbolo) {
+    float const x = static_cast<float> (simbolo);
+    Complex rif;
+    if (x <= centro[0]) rif = ancora[0];
+    else if (x >= centro[2]) rif = ancora[2];
+    else
+      {
+        int const g = (x > centro[1]) ? 1 : 0;
+        float const t = (x - centro[static_cast<size_t> (g)])
+                        / (centro[static_cast<size_t> (g + 1)] - centro[static_cast<size_t> (g)]);
+        rif = ancora[static_cast<size_t> (g)] * (1.0f - t) + ancora[static_cast<size_t> (g + 1)] * t;
+      }
+    float const mag = std::abs (rif);
+    return mag > 0.0f ? std::conj (rif / mag) : Complex {1.0f, 0.0f};
+  };
+
+  std::array<float, 174> bmeta {}, bmetb {}, bmetc {};
+  for (int nsym = 1; nsym <= 3; ++nsym)
+    {
+      int const nt = 1 << (3 * nsym);
+      for (int ihalf = 1; ihalf <= 2; ++ihalf)
+        {
+          for (int k = 1; k <= 29; k += nsym)
+            {
+              int const ks = (ihalf == 1) ? (k + 7) : (k + 43);
+              Complex const rot = rotazione (ks - 1);
+              std::array<float, 512> sp {};
+              for (int i = 0; i < nt; ++i)
+                {
+                  int const i1 = (i >> 6) & 7, i2 = (i >> 3) & 7, i3 = i & 7;
+                  Complex somma {};
+                  if (nsym == 1)
+                    somma = cs[static_cast<size_t> ((ks - 1) * 8 + graymap[static_cast<size_t> (i3)])];
+                  else if (nsym == 2)
+                    somma = cs[static_cast<size_t> ((ks - 1) * 8 + graymap[static_cast<size_t> (i2)])]
+                            + cs[static_cast<size_t> (ks * 8 + graymap[static_cast<size_t> (i3)])];
+                  else
+                    somma = cs[static_cast<size_t> ((ks - 1) * 8 + graymap[static_cast<size_t> (i1)])]
+                            + cs[static_cast<size_t> (ks * 8 + graymap[static_cast<size_t> (i2)])]
+                            + cs[static_cast<size_t> ((ks + 1) * 8 + graymap[static_cast<size_t> (i3)])];
+                  sp[static_cast<size_t> (i)] = std::real (somma * rot);
+                }
+
+              int const i32 = 1 + (k - 1) * 3 + (ihalf - 1) * 87;
+              int const ibmax = (nsym == 1 ? 2 : (nsym == 2 ? 5 : 8));
+              for (int ib = 0; ib <= ibmax; ++ib)
+                {
+                  if (i32 + ib > 174) continue;
+                  float max1 = -1.0e30f, max0 = -1.0e30f;
+                  for (int i = 0; i < nt; ++i)
+                    {
+                      float const v = sp[static_cast<size_t> (i)];
+                      if (one[static_cast<size_t> (i)][static_cast<size_t> (ibmax - ib)]) max1 = std::max (max1, v);
+                      else max0 = std::max (max0, v);
+                    }
+                  int const out_index = i32 + ib - 1;
+                  float const bm = max1 - max0;
+                  if (nsym == 1) bmeta[static_cast<size_t> (out_index)] = bm;
+                  else if (nsym == 2) bmetb[static_cast<size_t> (out_index)] = bm;
+                  else bmetc[static_cast<size_t> (out_index)] = bm;
+                }
+            }
+        }
+    }
+
+  normalizebmet_rms_cpp (bmeta.data (), 174);
+  normalizebmet_rms_cpp (bmetb.data (), 174);
+  normalizebmet_rms_cpp (bmetc.data (), 174);
+
+  for (int i = 0; i < 174; ++i)
+    {
+      float const a = bmeta[static_cast<size_t> (i)];
+      float const b = bmetb[static_cast<size_t> (i)];
+      float const c = bmetc[static_cast<size_t> (i)];
+      float primo = a, secondo = b;
+      if (std::abs (b) > std::abs (primo)) { secondo = primo; primo = b; }
+      else if (std::abs (b) > std::abs (secondo)) { secondo = b; }
+      if (std::abs (c) > std::abs (primo)) { secondo = primo; primo = c; }
+      else if (std::abs (c) > std::abs (secondo)) { secondo = c; }
+      llra[i] = scale * a;
+      llrb[i] = scale * b;
+      llrc[i] = scale * c;
+      llrd[i] = scale * primo;
+      llre[i] = scale * secondo;
+    }
+}
+
 // Bit-metrics COERENTI: la fase del canale stimata dai simboli di
 // sincronismo, invece di essere ignorata.
 //
