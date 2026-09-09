@@ -244,6 +244,57 @@ std::array<uint8_t, kCodeword> codeword_vero (QByteArray const& bits77)
   return out;
 }
 
+// Fase stimata dai soli SIMBOLI DI SINCRONISMO, cioe' quello che una
+// implementazione vera potrebbe fare senza sapere nulla dei dati.
+//
+// FT2 trasmette quattro gruppi Costas da 4 simboli (ai simboli 0-3, 33-36,
+// 66-69, 99-102) con toni NOTI: su quelli la fase del canale si misura
+// direttamente. Ogni gruppo da' un'ancora (somma coerente dei suoi 4 simboli
+// al tono giusto, per alzare il rapporto segnale-rumore della stima), e fra
+// un'ancora e l'altra si interpola. L'interpolazione si fa sui vettori
+// complessi unitari e non sugli angoli, cosi' non serve gestire i salti di
+// 2 pi greco.
+//
+// E' la differenza fra il genio e il realizzabile: qui la stima e' rumorosa,
+// ed e' proprio quel rumore che decide se la strada vale la pena.
+void fase_da_sync (Complex const* cs, float* fase_out)
+{
+  static int const icos[4][4] = {{0,1,3,2},{1,0,2,3},{2,3,1,0},{3,2,0,1}};
+  static int const base[4] = {0, 33, 66, 99};
+
+  Complex ancora[4];
+  float centro[4];
+  for (int g = 0; g < 4; ++g)
+    {
+      Complex somma {};
+      for (int k = 0; k < 4; ++k)
+        {
+          int const s = base[g] + k;
+          somma += cs[s * 4 + icos[g][k]];
+        }
+      float const mag = std::abs (somma);
+      ancora[g] = mag > 0.0f ? somma / mag : Complex {1.0f, 0.0f};
+      centro[g] = static_cast<float> (base[g]) + 1.5f;
+    }
+
+  for (int s = 0; s < kNn; ++s)
+    {
+      float const x = static_cast<float> (s);
+      Complex r;
+      if (x <= centro[0]) r = ancora[0];
+      else if (x >= centro[3]) r = ancora[3];
+      else
+        {
+          int g = 0;
+          while (g < 3 && x > centro[g + 1]) ++g;
+          float const t = (x - centro[g]) / (centro[g + 1] - centro[g]);
+          r = ancora[g] * (1.0f - t) + ancora[g + 1] * t;
+        }
+      float const mag = std::abs (r);
+      fase_out[s] = mag > 0.0f ? std::arg (r) : 0.0f;
+    }
+}
+
 Code const& codice ()
 {
   static Code c = [] {
@@ -540,17 +591,17 @@ int main (int argc, char* argv[])
       out << "semi=" << semi << " messaggi=" << messaggi.size () << " giri=" << giri << "\n\n";
       out << "| SNR | prove | base | " ;
       for (int g = 1; g <= giri; ++g) out << "bicm" << g << " | ";
-      out << "genio | fase |\n|---:|---:|---:|";
+      out << "genio | fase | fase-sync | unione |\n|---:|---:|---:|";
       for (int g = 1; g <= giri; ++g) out << "---:|";
       out << "---:|---:|\n";
 
       Ft2Decoder dec {codice (), produzione ()};
-      long tot_base = 0, tot_genio = 0, tot_prove = 0, tot_fase = 0;
+      long tot_base = 0, tot_genio = 0, tot_prove = 0, tot_fase = 0, tot_stim = 0, tot_unione = 0;
       std::vector<long> tot_bicm (static_cast<size_t> (giri), 0);
 
       for (double snr : snrs)
         {
-          long prove = 0, base = 0, genio = 0, fase_ok = 0;
+          long prove = 0, base = 0, genio = 0, fase_ok = 0, fase_stim = 0, unione = 0;
           std::vector<long> bicm (static_cast<size_t> (giri), 0);
           for (QString const& m : messaggi)
             {
@@ -612,11 +663,29 @@ int main (int argc, char* argv[])
                       }
                   }
 
-                  // braccio genio della FASE: rivelazione coerente
+                  // braccio genio della FASE: rivelazione coerente, fase vera
                   {
                     std::vector<float> l (kCodeword);
                     demodula_coerente (c.cs.data (), c.fase.data (), c.beta, l.data ());
                     if (tenta (l.data ())) ++fase_ok;
+                  }
+
+                  // braccio REALIZZABILE: fase stimata dai soli simboli di
+                  // sincronismo, come potrebbe fare il decoder vero.
+                  //
+                  // "unione" e' il numero che conta per una decisione: FT2 fa
+                  // gia' cinque passate cieche e tiene quella che decodifica,
+                  // quindi il ramo coerente aggiunto come SESTA passata darebbe
+                  // l'unione, non la sostituzione. Dove la stima peggiora
+                  // (SNR alti) decodifica comunque una delle altre.
+                  {
+                    std::array<float, kNn> stima {};
+                    fase_da_sync (c.cs.data (), stima.data ());
+                    std::vector<float> l (kCodeword);
+                    demodula_coerente (c.cs.data (), stima.data (), c.beta, l.data ());
+                    bool const ok_coer = tenta (l.data ());
+                    if (ok_coer) ++fase_stim;
+                    if (ok_coer || preso) ++unione;
                   }
 
                   // braccio genio: a priori perfetta
@@ -631,15 +700,16 @@ int main (int argc, char* argv[])
             }
           out << "| " << snr << " | " << prove << " | " << base << " | ";
           for (int g = 0; g < giri; ++g) out << bicm[static_cast<size_t> (g)] << " | ";
-          out << genio << " | " << fase_ok << " |\n";
+          out << genio << " | " << fase_ok << " | " << fase_stim << " | " << unione << " |\n";
           out.flush ();
-          tot_prove += prove; tot_base += base; tot_genio += genio; tot_fase += fase_ok;
+          tot_prove += prove; tot_base += base; tot_genio += genio; tot_fase += fase_ok; tot_stim += fase_stim; tot_unione += unione;
           for (int g = 0; g < giri; ++g) tot_bicm[static_cast<size_t> (g)] += bicm[static_cast<size_t> (g)];
         }
 
       out << "\ntotale su " << tot_prove << " prove: base " << tot_base;
       for (int g = 0; g < giri; ++g) out << ", bicm" << (g + 1) << " " << tot_bicm[static_cast<size_t> (g)];
-      out << ", genio " << tot_genio << ", fase " << tot_fase << "\n";
+      out << ", genio " << tot_genio << ", fase " << tot_fase
+          << ", fase-sync " << tot_stim << ", unione " << tot_unione << "\n";
       return 0;
     }
   catch (std::exception const& e)
