@@ -1037,7 +1037,7 @@ SettingsPageScroll {
         SpinBox {
             id: pollSpin
             visible: !dialog.usesCat4OmControls()
-            from: 1; to: 99; value: bridge.catManager ? bridge.catManager.pollInterval : 3; editable: true
+            from: 2; to: 99; value: bridge.catManager ? Math.max(2, bridge.catManager.pollInterval) : 2; editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
             onValueChanged: {
                 if (bridge.catManager) bridge.catManager.pollInterval = value

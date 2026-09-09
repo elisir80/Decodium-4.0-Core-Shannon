@@ -3683,7 +3683,7 @@ void Configuration::impl::read_settings ()
   if (dt_clamp_unsynced_ms_ < dt_clamp_synced_ms_) dt_clamp_unsynced_ms_ = dt_clamp_synced_ms_;
   highDPI_ = settings_->value("HighDPI",true).toBool ();
   largerTabWidget_ = settings_->value("LargerTabWidget",false).toBool ();
-  bSuperFox_ = settings_->value("SuperFox",true).toBool ();
+  bSuperFox_ = settings_->value("SuperFox",false).toBool ();
   Individual_Contest_Name_ = settings_->value("Individual_Contest_Name",false).toBool ();
   NCCC_Sprint_ = settings_->value("NCCC_Sprint",false).toBool ();
   Blacklisted_ = settings_->value("Blacklisted",false).toBool ();

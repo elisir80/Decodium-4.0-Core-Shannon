@@ -2577,7 +2577,7 @@ private:
                                 const QByteArray& adifRecord);
     void udpSendN1mmLoggedQso(const QString& dxCall, const QByteArray& adifRecord);
     void tcpSendLoggedAdifQso(const QString& dxCall, const QByteArray& adifRecord);
-    void maybePlayDecodeAlert(bool isCQ, bool isMyCall);
+    void maybePlayDecodeAlert(bool isCQ, bool isMyCall, const QString &message = QString());
 
     QString m_callsign;
     QString m_grid {"JN70"};
@@ -3854,6 +3854,8 @@ private:
     bool                 m_alertSoundsEnabled {false};
     qint64               m_lastCqAlertMs {0};
     qint64               m_lastMyCallAlertMs {0};
+    qint64               m_lastWantedAlertMs {0};
+    QString              m_lastWantedCall;
     DecodiumAlertManager* m_alertManager {nullptr};
     DxccLookup*           m_dxccLookup  {nullptr};
 

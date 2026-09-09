@@ -335,6 +335,8 @@ Window {
 
     function customHighlightColor(modelData) {
         var message = modelData.message || ""
+        if (bridge.getSetting("alertOnWantedCallsign", false) && highlightListMatches(message, bridge.getSetting("wantedCallsigns", "")))
+            return "#FFD000"
         if (highlightOrange && highlightListMatches(message, highlightOrangeCallsigns))
             return "#E14B00"
         if (highlightBlue && highlightListMatches(message, highlightBlueCallsigns))
