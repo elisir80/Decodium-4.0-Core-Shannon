@@ -78,11 +78,11 @@
 // altrimenti costo zero. Sta nei cicli piu' caldi del decoder, quindi non puo'
 // essere sempre attivo; ma e' la grandezza che predice i nominativi fantasma
 // (vedi il commento su n_crc piu' sotto).
-#ifdef OSD_COUNT
-#define OSD_C(k) (n_crc += (k))
-#else
-#define OSD_C(k) do {} while (0)
-#endif
+// Sempre attivo: un'addizione per candidato (16 per blocco AVX2). Serve al
+// gate appreso (feature 10 e 11 in gate.hpp): il rango del candidato accettato
+// e' la grandezza che predice i fantasmi. n_crc resta cumulativo per le
+// statistiche, n_tested_ si azzera a ogni decode().
+#define OSD_C(k) (n_crc += (k), n_tested_ += (k))
 
 class OsdFast {
 public:
@@ -244,6 +244,7 @@ public:
         // CRC (uno XOR e un test), e solo per i pochi candidati che la passano
         // lo score completo e la costruzione della parola.
         best_score_ = LONG_MAX; found_ = false;
+        n_tested_ = 0; n_pass_ = 0; rank_at_best_ = 0; pass_at_best_ = 0;
         OSD_C(1);
         if (syn0 == 0) eval(d0, -1, -1, 0);                             // OSD-0
         if (order_ >= 1) {
@@ -383,6 +384,10 @@ public:
     // Score del candidato accettato dall'ultima decode() riuscita: somma dei
     // |LLR a posteriori| smentiti, in unita' Q=1/8.
     long last_score() const { return best_score_; }
+    // Rango del candidato accettato: quanti candidati erano stati sottoposti
+    // alla CRC-14 quando e' stato trovato, e quanti l'avevano gia' passata.
+    long long last_rank() const { return rank_at_best_; }
+    long long last_pass() const { return pass_at_best_; }
 
     // Tempi cumulati per fase, in secondi (solo con -DOSD_PROFILE).
     double t_sort = 0, t_gauss = 0, t_pre = 0, t_crc = 0, t_enum = 0;
@@ -399,6 +404,7 @@ public:
     // dal traffico vero: quel conteggio non vede quanti candidati per parola si
     // stanno davvero sottoponendo alla CRC.
     long long n_crc = 0;
+    long long n_tested_ = 0, n_pass_ = 0, rank_at_best_ = 0, pass_at_best_ = 0;
 
 private:
     struct alignas(32) Row { uint64_t w[RW]; };     // bitset su N
@@ -547,8 +553,10 @@ private:
         for (int r = 0; r < M; ++r)
             tmp_[pivcol_[r]] = (uint8_t)(hard_[pivcol_[r]] ^ ((d[r >> 6] >> (r & 63)) & 1));
         assert(crc14_ok(tmp_.data()) && "sindrome CRC incrementale incoerente");
+        ++n_pass_;
         if (!plausibile(tmp_.data())) return;
         best_score_ = score; found_ = true; best_ = tmp_;
+        rank_at_best_ = n_tested_; pass_at_best_ = n_pass_;
     }
 
     inline void eval(const Mask& d, int f1, int f2, long lb) {
@@ -561,8 +569,10 @@ private:
         for (int r = 0; r < M; ++r)                    // par[r] = hard[pivcol[r]] ^ d[r]
             tmp_[pivcol_[r]] = (uint8_t)(hard_[pivcol_[r]] ^ ((d[r >> 6] >> (r & 63)) & 1));
         assert(crc14_ok(tmp_.data()) && "sindrome CRC incrementale incoerente");
+        ++n_pass_;
         if (!plausibile(tmp_.data())) return;
         best_score_ = score; found_ = true; best_ = tmp_;
+        rank_at_best_ = n_tested_; pass_at_best_ = n_pass_;
     }
 
     // Il candidato ha passato la CRC-14: descrive anche un messaggio possibile?

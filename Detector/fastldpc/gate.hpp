@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 
-static constexpr int GATE_NF = 10;
+static constexpr int GATE_NF = 12;
 
 struct GateFeatures {
     float f[GATE_NF];
@@ -19,6 +19,15 @@ struct GateFeatures {
     // 7 score        score OSD (somma |L16| dei flip) / somma |L16|
     // 8 free_ratio   bit liberi (non AP) / N
     // 9 by_osd       1 se il candidato viene dall'OSD, 0 dal min-sum
+    // 10 rango       log2(1 + candidati sottoposti alla CRC-14 prima di questo)
+    // 11 passaggi    log2(1 + candidati che avevano gia' passato la CRC-14)
+    //
+    // 10 e 11 sono il "giudice consapevole del rango" (idea di SO-GRAND): un
+    // candidato trovato dopo 18000 tentativi, con altri che avevano gia'
+    // passato la CRC, e' statisticamente un'altra cosa da uno trovato al terzo.
+    // La CRC ammette un falso ogni 16384 candidati: il rango dice quanti
+    // dadi si sono tirati. E' la grandezza strutturale del README §5, che
+    // finora il gate non vedeva. Entrambi zero per i candidati del min-sum.
 };
 
 // FT2 e FT8 condividono il decoder (decodium_bridge.cpp, Ft2Decoder), ma NON

@@ -310,10 +310,11 @@ void gate_dump_write (const GateFeatures& g, bool label, bool ft8) {
     std::FILE* f = gate_dump_file ();
     if (!f) return;
     std::lock_guard<std::mutex> lock (gate_dump_mutex ());
-    std::fprintf (f, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %d %d\n",
+    std::fprintf (f, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %d %d\n",
                  (double) g.f[0], (double) g.f[1], (double) g.f[2], (double) g.f[3],
                  (double) g.f[4], (double) g.f[5], (double) g.f[6], (double) g.f[7],
-                 (double) g.f[8], (double) g.f[9], label ? 1 : 0, gate_accept (g, ft8) ? 1 : 0);
+                 (double) g.f[8], (double) g.f[9], (double) g.f[10], (double) g.f[11],
+                 label ? 1 : 0, gate_accept (g, ft8) ? 1 : 0);
     std::fflush (f);
 }
 

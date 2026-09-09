@@ -329,6 +329,10 @@ private:
         g.f[7] = (by_osd && sum16 > 0) ? (float)(osd_.last_score() / sum16) : 0.0f;
         g.f[8] = (float)nfree / N;
         g.f[9] = (float)by_osd;
+        // Rango e passaggi CRC (gate.hpp, feature 10 e 11): in log2 perche'
+        // vanno da 1 a decine di migliaia e la regressione e' lineare.
+        g.f[10] = by_osd ? std::log2(1.0f + (float)osd_.last_rank()) : 0.0f;
+        g.f[11] = by_osd ? std::log2(1.0f + (float)osd_.last_pass()) : 0.0f;
         return g;
     }
 };
