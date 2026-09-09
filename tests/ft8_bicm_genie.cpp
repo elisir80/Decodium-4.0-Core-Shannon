@@ -152,6 +152,74 @@ void demodula (Complex const* cs, uint8_t const* veri, float* llr_out)
     llr_out[i] = kScale * static_cast<float> (m[static_cast<size_t> (i)] / sigma);
 }
 
+// Demodulatore COERENTE per FT8: la fase del canale stimata dai 21 simboli
+// Costas (tre gruppi da 7 ai simboli k, k+36, k+72, toni {3,1,4,0,6,5,2}),
+// invece di essere ignorata.
+//
+// Stessa idea della passata coerente gia' portata in Stage7 per FT2, ma qui il
+// tetto e' piu' alto: dall'informazione mutua, FT8 a terne sta a 3,96 contro
+// 2,69 del limite coerente, cioe' 1,27 dB contro l'1,1 di FT2. E in FT8 la
+// prova in aria e' possibile, perche' la propagazione c'e'.
+//
+// Con la fase nota l'informazione sta nella parte reale: l'ipotesi si pesa
+// sulla sua proiezione, che a differenza del modulo puo' essere NEGATIVA --
+// ed e' proprio quella l'informazione in piu' (un tono in controfase e' meno
+// probabile di uno a energia nulla).
+void demodula_coerente_ft8 (Complex const* cs, float* llr_out)
+{
+  static int const icos7[7] = {3, 1, 4, 0, 6, 5, 2};
+  static int const gruppo[3] = {0, 36, 72};
+
+  Complex ancora[3];
+  float centro[3];
+  for (int g = 0; g < 3; ++g)
+    {
+      Complex somma {};
+      for (int k = 0; k < 7; ++k)
+        somma += cs[(gruppo[g] + k) * 8 + icos7[k]];
+      float const mag = std::abs (somma);
+      ancora[g] = mag > 0.0f ? somma / mag : Complex {1.0f, 0.0f};
+      centro[g] = static_cast<float> (gruppo[g]) + 3.0f;
+    }
+
+  std::array<float, kCodeword> m {};
+  for (int c = 0; c < kCodeword; ++c)
+    {
+      Posto const p = posto_di (c);
+      float const x = static_cast<float> (p.simbolo);
+      Complex rif;
+      if (x <= centro[0]) rif = ancora[0];
+      else if (x >= centro[2]) rif = ancora[2];
+      else
+        {
+          int const g = (x > centro[1]) ? 1 : 0;
+          float const t = (x - centro[g]) / (centro[g + 1] - centro[g]);
+          rif = ancora[g] * (1.0f - t) + ancora[g + 1] * t;
+        }
+      float const rmag = std::abs (rif);
+      Complex const rot = rmag > 0.0f ? std::conj (rif / rmag) : Complex {1.0f, 0.0f};
+
+      float s2[8];
+      for (int i = 0; i < 8; ++i)
+        s2[i] = std::real (cs[p.simbolo * 8 + kGraymap[i]] * rot);
+
+      float max1 = -1.0e30f, max0 = -1.0e30f;
+      for (int i = 0; i < 8; ++i)
+        {
+          if ((i & (1 << p.bit_ipotesi)) != 0) max1 = std::max (max1, s2[i]);
+          else max0 = std::max (max0, s2[i]);
+        }
+      m[static_cast<size_t> (c)] = max1 - max0;
+    }
+
+  double s = 0.0;
+  for (int i = 0; i < kCodeword; ++i) s += static_cast<double> (m[static_cast<size_t> (i)]) * m[static_cast<size_t> (i)];
+  double sigma = std::sqrt (std::max (s / kCodeword, 0.0));
+  if (sigma <= 0.0) sigma = 1.0;
+  for (int i = 0; i < kCodeword; ++i)
+    llr_out[i] = kScale * static_cast<float> (m[static_cast<size_t> (i)] / sigma);
+}
+
 Code const& codice ()
 {
   static Code c = [] {
@@ -336,13 +404,13 @@ int main (int argc, char* argv[])
 
       QList<double> const snrs = lista (parser.value (snr_opt));
       out << "semi=" << semi << " messaggi=" << messaggi.size () << "\n\n";
-      out << "| SNR | prove | base | genio |\n|---:|---:|---:|---:|\n";
+      out << "| SNR | prove | base | genio | coerente | unione |\n|---:|---:|---:|---:|---:|---:|\n";
 
       Ft2Decoder dec {codice (), produzione_ft8 ()};
-      long tp = 0, tb = 0, tg = 0;
+      long tp = 0, tb = 0, tg = 0, tc = 0, tu = 0;
       for (double snr : snrs)
         {
-          long prove = 0, base = 0, genio = 0;
+          long prove = 0, base = 0, genio = 0, coer = 0, unione = 0;
           for (QString const& m : messaggi)
             {
               decodium::txmsg::EncodedMessage const enc = decodium::txmsg::encodeFt8 (m);
@@ -364,16 +432,24 @@ int main (int argc, char* argv[])
                     return true;
                   };
                   demodula (c.cs.data (), nullptr, l.data ());
-                  if (tenta (l.data ())) ++base;
+                  bool const ok_base = tenta (l.data ());
+                  if (ok_base) ++base;
                   demodula (c.cs.data (), vero.data (), l.data ());
                   if (tenta (l.data ())) ++genio;
+                  // ramo coerente REALIZZABILE: fase dai Costas
+                  demodula_coerente_ft8 (c.cs.data (), l.data ());
+                  bool const ok_coer = tenta (l.data ());
+                  if (ok_coer) ++coer;
+                  if (ok_base || ok_coer) ++unione;
                 }
             }
-          out << "| " << snr << " | " << prove << " | " << base << " | " << genio << " |\n";
+          out << "| " << snr << " | " << prove << " | " << base << " | " << genio
+              << " | " << coer << " | " << unione << " |\n";
           out.flush ();
-          tp += prove; tb += base; tg += genio;
+          tp += prove; tb += base; tg += genio; tc += coer; tu += unione;
         }
-      out << "\ntotale su " << tp << " prove: base " << tb << ", genio " << tg << "\n";
+      out << "\ntotale su " << tp << " prove: base " << tb << ", genio " << tg
+          << ", coerente " << tc << ", unione " << tu << "\n";
       return 0;
     }
   catch (std::exception const& e)
