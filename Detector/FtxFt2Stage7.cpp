@@ -87,6 +87,9 @@ extern "C"
   // Accumulo fra slot (DECODIUM_FT2_ACCUMULO): spettri di simbolo di una
   // finestra e bit-metrics dalla somma di piu' finestre (FtxBitmetrics.cpp).
   void ftx_ft2_symbol_spectra_c (Complex const* cd, Complex* cs_out, float* beta_out);
+  // Metriche coerenti: fase stimata dai simboli di sincronismo, 206 righe
+  // normalizzate (vedi FtxBitmetrics.cpp).
+  void ftx_ft2_bitmetrics_coherent_c (Complex const* cd, float* rows_out);
   void ftx_ft2_bitmetrics_accum_c (Complex const* cs, float const* beta, int nslot,
                                    float* bitmetrics);
   void ftx_ft2_bitmetrics_diag_c (Complex const* cd,
@@ -1491,6 +1494,27 @@ bool ft2_ap_msg_attivo ()
   return attivo;
 }
 
+// Passata coerente: una sesta passata cieca con la fase stimata dai simboli di
+// sincronismo (ftx_ft2_bitmetrics_coherent_c). SPENTA di default.
+//
+// Misurato sul banco (lab/misure/20260909_genio_ft8_e_fase.md), contro le
+// cinque passate vere e non contro la sola llra: +23% di decodifiche e +6% di
+// fantasmi, con +67% alla soglia di -21 dB. Ma e' AWGN sintetico con un solo
+// segnale, senza fading ne' QRM: finche' non c'e' una prova in aria resta
+// opt-in, come l'accumulo fra slot.
+//
+// NON va usata al posto delle altre: da sola peggiora a rapporto
+// segnale-rumore alto, dove il non coerente va gia' bene e l'errore di stima
+// della fase butta via segnale. Serve solo come passata IN PIU'.
+bool ft2_coerente_attivo ()
+{
+  static bool const attivo = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_COERENTE");
+    return e && e[0] != '0';
+  }();
+  return attivo;
+}
+
 long long ft2_ap_msg_env_ms (char const* nome, long long predefinito)
 {
   char const* e = std::getenv (nome);
@@ -2335,7 +2359,8 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
                                     int ndepth0, int ncontest, int qso_progress,
                                     bool doosd, bool lapcqonly, int nfqso, float f_for_ap,
                                     bool averaged, float apmag,
-                                    float const* symbol_mags = nullptr)
+                                    float const* symbol_mags = nullptr,
+                                    std::array<float, kFt2Codeword> const* llr_coerente = nullptr)
 {
   DecodePassResult result;
 
@@ -2459,6 +2484,23 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
               prepared.push_back (entry);
             }
         }
+    }
+
+  // Passata COERENTE: una in piu' (le altre restano intatte), con le metriche
+  // calcolate proiettando le ipotesi di tono sulla fase del canale stimata dai
+  // simboli di sincronismo, invece di ignorarla. Vedi ft2_coerente_attivo() e
+  // ftx_ft2_bitmetrics_coherent_c. Nessun bit imposto: e' un insieme di LLR
+  // come gli altri cinque, giudicato da CRC, plausibilita' e gate allo stesso
+  // modo.
+  if (llr_coerente != nullptr)
+    {
+      PreparedPass entry;
+      entry.llr = *llr_coerente;
+      entry.apmask.fill (0);
+      entry.ipass = npasses + 3;
+      entry.iaptype = 0;
+      stage7_debug_log_llr_state (entry.ipass, entry.iaptype, f_for_ap, entry.llr, entry.apmask);
+      prepared.push_back (entry);
     }
 
   // Tipo 8: VERIFICA DIRETTA del messaggio atteso, fuori dall'LDPC.
@@ -3308,10 +3350,30 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                 {
                   ftx_ft2_symbol_mags_c (cd.data (), symbol_mags.data ());
                 }
+
+              // Sesta passata cieca con le metriche coerenti, se accesa.
+              // Stessa mappatura di build_llr_sets: le 206 righe portano i 174
+              // bit in tre blocchi da 58, saltando i simboli di sincronismo.
+              std::array<float, kFt2Codeword> llr_coerente {};
+              bool const usa_coerente = ft2_coerente_attivo ();
+              if (usa_coerente)
+                {
+                  std::array<float, kFt2Rows> righe {};
+                  ftx_ft2_bitmetrics_coherent_c (cd.data (), righe.data ());
+                  float const scalefac = 2.83f;
+                  for (int i = 0; i < 58; ++i)
+                    {
+                      llr_coerente[static_cast<size_t> (i)] = righe[static_cast<size_t> (8 + i)] * scalefac;
+                      llr_coerente[static_cast<size_t> (58 + i)] = righe[static_cast<size_t> (74 + i)] * scalefac;
+                      llr_coerente[static_cast<size_t> (116 + i)] = righe[static_cast<size_t> (140 + i)] * scalefac;
+                    }
+                }
+
               DecodePassResult const decoded = run_decode_passes (
                   state, ap_setup, &context, llra, llrb, llrc, llrd, llre, ndepth0, ncontest,
                   qso_progress, doosd, false, nfqso, f1, false, apmag,
-                  ft2_ap_msg_attivo () ? symbol_mags.data () : nullptr);
+                  ft2_ap_msg_attivo () ? symbol_mags.data () : nullptr,
+                  usa_coerente ? &llr_coerente : nullptr);
               stage7_debug_compare_with_reference (
                   llra, llrb, llrc, llrd, llre, decoded, ndepth0, ncontest, qso_progress,
                   false, nfqso, f1, false, doosd, apmag, mycall, hiscall);

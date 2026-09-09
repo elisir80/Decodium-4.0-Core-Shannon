@@ -1508,6 +1508,117 @@ extern "C" void ftx_ft2_symbol_mags_c (Complex const* cd, float* mags)
 // quelli di altri slot della stessa stazione. cs_out[k*4+j] = FFT del simbolo
 // k sul tono j (103 x 4); beta_out = 0,5 / varianza di rumore, lo stesso beta
 // che il demodulatore usa per scalare le energie.
+// Bit-metrics COERENTI: la fase del canale stimata dai simboli di
+// sincronismo, invece di essere ignorata.
+//
+// PERCHE'. Il demodulatore di FT2 e' non coerente: usa l'energia dell'ipotesi
+// di tono, perche' la fase del canale non si conosce. Ma la fase non e'
+// l'informazione da decodificare, e' un parametro di disturbo -- e i parametri
+// di disturbo si stimano. FT2 trasmette 16 simboli di sincronismo con toni
+// NOTI (i quattro gruppi Costas ai simboli 0-3, 33-36, 66-69, 99-102): su
+// quelli la fase si misura direttamente.
+//
+// COME. Un'ancora per gruppo (somma coerente dei suoi quattro simboli al tono
+// giusto, per alzare il rapporto segnale-rumore della stima), poi
+// interpolazione fra un'ancora e l'altra. L'interpolazione si fa sui vettori
+// complessi unitari e non sugli angoli, cosi' non serve gestire i salti di
+// 2 pi greco. Con la fase nota l'informazione sta nella parte reale e la
+// quadratura e' solo rumore, quindi l'ipotesi si pesa sulla sua proiezione.
+//
+// COSA ASPETTARSI. Da sola questa metrica PEGGIORA a rapporto segnale-rumore
+// alto, dove il non coerente va gia' bene e l'errore di stima butta via
+// segnale. Va usata come passata IN PIU' accanto alle cinque cieche, mai al
+// loro posto: misurato +23% di decodifiche e +6% di fantasmi contro le cinque
+// passate di produzione (lab/misure/20260909_genio_ft8_e_fase.md).
+//
+// Uscita: 206 righe normalizzate, stesso formato di un piano di
+// ftx_ft2_bitmetrics_c, da mappare con gli indici di build_llr_sets.
+extern "C" void ftx_ft2_bitmetrics_coherent_c (Complex const* cd, float* rows_out)
+{
+  constexpr int NN = 103;
+  constexpr int NSS = 32;
+  constexpr int rows = 2 * NN;
+  static std::array<int, 4> const graymap {{0, 1, 3, 2}};
+  static int const icos[4][4] = {{0,1,3,2},{1,0,2,3},{2,3,1,0},{3,2,0,1}};
+  static int const gruppo[4] = {0, 33, 66, 99};
+
+  std::array<std::array<Complex, 4>, NN> cs {};
+  std::array<std::array<float, 4>, NN> pwr {};
+  for (int k = 0; k < NN; ++k)
+    {
+      std::array<Complex, 4> tones {};
+      std::array<float, 4> mags {};
+      std::array<float, 4> power {};
+      fft_symbol_4tones (cd + k * NSS, tones, mags, &power);
+      cs[static_cast<size_t> (k)] = tones;
+      pwr[static_cast<size_t> (k)] = power;
+    }
+  float const noise_var = ft2_legacy_base_noise_var (pwr);
+  float const beta = clamp_value (0.5f / noise_var, 0.01f, 50.0f);
+
+  // Ancore di fase sui quattro gruppi Costas.
+  std::array<Complex, 4> ancora {};
+  std::array<float, 4> centro {};
+  for (int g = 0; g < 4; ++g)
+    {
+      Complex somma {};
+      for (int k = 0; k < 4; ++k)
+        {
+          somma += cs[static_cast<size_t> (gruppo[g] + k)][static_cast<size_t> (icos[g][k])];
+        }
+      float const mag = std::abs (somma);
+      ancora[static_cast<size_t> (g)] = mag > 0.0f ? somma / mag : Complex {1.0f, 0.0f};
+      centro[static_cast<size_t> (g)] = static_cast<float> (gruppo[g]) + 1.5f;
+    }
+
+  std::array<float, rows> m {};
+  for (int r = 0; r < rows; ++r)
+    {
+      int const s = r / 2;
+      int const mio = 1 - (r % 2);
+
+      float const x = static_cast<float> (s);
+      Complex rif;
+      if (x <= centro[0]) rif = ancora[0];
+      else if (x >= centro[3]) rif = ancora[3];
+      else
+        {
+          int g = 0;
+          while (g < 3 && x > centro[static_cast<size_t> (g + 1)]) ++g;
+          float const t = (x - centro[static_cast<size_t> (g)])
+                          / (centro[static_cast<size_t> (g + 1)] - centro[static_cast<size_t> (g)]);
+          rif = ancora[static_cast<size_t> (g)] * (1.0f - t)
+                + ancora[static_cast<size_t> (g + 1)] * t;
+        }
+      float const rmag = std::abs (rif);
+      Complex const rot = rmag > 0.0f ? std::conj (rif / rmag) : Complex {1.0f, 0.0f};
+
+      float w[4];
+      for (int i = 0; i < 4; ++i)
+        {
+          float const proj = std::real (cs[static_cast<size_t> (s)][static_cast<size_t> (graymap[static_cast<size_t> (i)])] * rot);
+          w[i] = beta * proj * std::fabs (proj);
+        }
+      float max1 = -1.0e30f, max0 = -1.0e30f;
+      for (int i = 0; i < 4; ++i)
+        {
+          if ((i & (1 << mio)) != 0) max1 = std::max (max1, w[i]);
+          else max0 = std::max (max0, w[i]);
+        }
+      float lse1 = 0.0f, lse0 = 0.0f;
+      for (int i = 0; i < 4; ++i)
+        {
+          if ((i & (1 << mio)) != 0) lse1 += std::exp (w[i] - max1);
+          else lse0 += std::exp (w[i] - max0);
+        }
+      m[static_cast<size_t> (r)] = (max1 + std::log (std::max (lse1, kTiny)))
+                                   - (max0 + std::log (std::max (lse0, kTiny)));
+    }
+
+  normalizebmet_cpp (m.data (), rows);
+  std::copy_n (m.data (), rows, rows_out);
+}
+
 extern "C" void ftx_ft2_symbol_spectra_c (Complex const* cd, Complex* cs_out, float* beta_out)
 {
   constexpr int NN = 103;
