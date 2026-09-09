@@ -448,8 +448,15 @@ void demodula_coerente (Complex const* cs, float const* fase, float beta, float*
 
 // Genera, sincronizza e restituisce gli spettri per simbolo: e' il punto in cui
 // il demodulatore vero consegna quello che serve al BICM-ID.
+// Con `solo_rumore` la cornice non contiene alcun segnale: il sincronismo si
+// aggancia dove capita, come farebbe su un candidato di rumore proposto dalla
+// ricerca, e QUALUNQUE parola accettata a valle e' un fantasma per
+// costruzione. E' il modo di misurare quanto costa una passata in piu' in
+// termini di falsi: piu' passate = piu' candidati alla CRC-14, che ne ammette
+// uno sbagliato ogni 16384.
 Cornice prepara (QString const& messaggio, float freq, float offset_ms, double snr_db,
-                 unsigned seme, std::array<std::array<Complex, 2 * kNss>, 33> const& tw)
+                 unsigned seme, std::array<std::array<Complex, 2 * kNss>, 33> const& tw,
+                 bool solo_rumore = false)
 {
   Cornice out;
   decodium::txmsg::EncodedMessage const enc = decodium::txmsg::encodeFt2 (messaggio);
@@ -460,9 +467,10 @@ Cornice prepara (QString const& messaggio, float freq, float offset_ms, double s
 
   int const off = static_cast<int> (std::lround (static_cast<double> (offset_ms) * kSampleRate / 1000.0));
   std::vector<float> frame (static_cast<size_t> (kFrameSamples), 0.0f);
-  for (int i = 0; i < wave.size (); ++i) frame[static_cast<size_t> (off + i)] = 0.85f * wave[i];
-  float const r = rms (frame);
-  double const sigma = static_cast<double> (r) / std::pow (10.0, snr_db / 20.0);
+  if (!solo_rumore)
+    for (int i = 0; i < wave.size (); ++i) frame[static_cast<size_t> (off + i)] = 0.85f * wave[i];
+  float const r = solo_rumore ? 0.05f : rms (frame);
+  double const sigma = solo_rumore ? 0.05 : static_cast<double> (r) / std::pow (10.0, snr_db / 20.0);
   std::mt19937 rng {seme};
   std::normal_distribution<float> noise {0.0f, static_cast<float> (sigma)};
   for (float& x : frame) x += noise (rng);
@@ -552,11 +560,13 @@ int main (int argc, char* argv[])
       QCommandLineOption giri_opt {"giri", "Giri di BICM-ID.", "n", "3"};
       QCommandLineOption freq_opt {"freq", "Frequenza audio.", "hz", "1500.0"};
       QCommandLineOption off_opt {"offset-ms", "Inizio del burst.", "ms", "600.0"};
+      QCommandLineOption rumore_opt {"rumore", "Cornici di solo rumore: conta i fantasmi con 5 passate e con 6."};
       QCommandLineOption clamp_opt {"clamp", "Limite sull'estrinseca rimandata al demodulatore.", "v", "2.0"};
       QCommandLineOption damp_opt {"damp", "Smorzamento dell'estrinseca (1 = nessuno).", "v", "1.0"};
       parser.addOption (verifica_opt); parser.addOption (msg_opt); parser.addOption (snr_opt);
       parser.addOption (seeds_opt); parser.addOption (giri_opt); parser.addOption (freq_opt);
       parser.addOption (off_opt); parser.addOption (clamp_opt); parser.addOption (damp_opt);
+      parser.addOption (rumore_opt);
       parser.process (app);
 
       QStringList messaggi = parser.values (msg_opt);
@@ -574,6 +584,50 @@ int main (int argc, char* argv[])
 
       auto const tw = tweaks_tab ();
       QTextStream out {stdout};
+
+      // --- fantasmi: cornici di solo rumore, ogni accettazione e' un falso
+      if (parser.isSet (rumore_opt))
+        {
+          Ft2Decoder dec {codice (), produzione ()};
+          long prove = 0, f5 = 0, fcoer = 0, f6 = 0;
+          std::vector<uint8_t> bits (kCodeword), acc (1);
+          std::array<float, kCodeword> lf {};
+          auto accetta = [&] (float const* llrd) {
+            for (int i = 0; i < kCodeword; ++i) lf[static_cast<size_t> (i)] = -llrd[i];
+            dec.decode_batch (lf.data (), 1, bits.data (), acc.data ());
+            return acc[0] != 0;
+          };
+          for (int s = 0; s < semi; ++s)
+            {
+              Cornice const c = prepara (messaggi.first (), freq, offms, 0.0,
+                                         static_cast<unsigned> (3000000 + s), tw, true);
+              if (!c.ok) continue;
+              ++prove;
+              std::array<std::array<float, kCodeword>, 5> prod {};
+              passate_di_produzione (c.cd.data (), prod);
+              bool p5 = false;
+              for (int p = 0; p < 5; ++p) if (accetta (prod[static_cast<size_t> (p)].data ())) p5 = true;
+              std::array<float, kNn> stima {};
+              fase_da_sync (c.cs.data (), stima.data ());
+              std::array<float, kCodeword> l {};
+              demodula_coerente (c.cs.data (), stima.data (), c.beta, l.data ());
+              bool const pc = accetta (l.data ());
+              if (p5) ++f5;
+              if (pc) ++fcoer;
+              if (p5 || pc) ++f6;
+              if ((s % 200) == 199) { out << "  " << prove << " cornici...\n"; out.flush (); }
+            }
+          out << "\ncornici di solo rumore: " << prove << "\n";
+          out << "| configurazione | fantasmi | per mille |\n|---|---:|---:|\n";
+          out << "| 5 passate (produzione) | " << f5 << " | "
+              << QString::number (1000.0 * f5 / std::max<long> (1, prove), 'f', 2) << " |\n";
+          out << "| solo ramo coerente | " << fcoer << " | "
+              << QString::number (1000.0 * fcoer / std::max<long> (1, prove), 'f', 2) << " |\n";
+          out << "| 6 passate (con coerente) | " << f6 << " | "
+              << QString::number (1000.0 * f6 / std::max<long> (1, prove), 'f', 2) << " |\n";
+          return 0;
+        }
+
 
       // --- verifica: a priori nulla deve dare il demodulatore di produzione
       if (parser.isSet (verifica_opt))
