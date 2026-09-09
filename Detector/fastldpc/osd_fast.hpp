@@ -97,6 +97,14 @@ public:
     // stringe ai tipi che un QSO usa davvero. Vedi cpp/plausible.hpp.
     uint32_t tipi_ammessi = 0;
 
+    // 77 bit di scrambling da togliere PRIMA del controllo di plausibilita'.
+    // Serve a FT2, che mescola il payload con rvec prima di codificare e lo
+    // rimette in chiaro solo dopo il decoder (FtxFt2Stage7.cpp): senza questo
+    // il filtro legge un numero casuale al posto del messaggio, e finisce per
+    // scartare parole VERE -- misurato, ~7% delle decodifiche FT2 e +24% alla
+    // soglia. FT8 non mescola e lascia il puntatore nullo.
+    const uint8_t* descramble77 = nullptr;
+
     // Ricerca a coppie mirata, sul modello del passo npre2 di WSJT-X
     // (osd174_91). Invece di provare tutte le C(K,2) coppie di bit
     // d'informazione, si cercano solo quelle che azzerano i `ntau` bit di
@@ -571,7 +579,13 @@ private:
     // Costa quasi niente: lo vedono solo i candidati che hanno gia' passato la
     // CRC, cioe' uno su 16384.
     inline bool plausibile(const uint8_t* cw) const {
-        return tipi_ammessi == 0 || plaus::message77_ok(cw, tipi_ammessi);
+        if (tipi_ammessi == 0) return true;
+        if (!descramble77) return plaus::message77_ok(cw, tipi_ammessi);
+        // Costa 77 XOR su un candidato ogni 16384 (solo quelli che hanno gia'
+        // passato la CRC), quindi non si vede nel tempo di decodifica.
+        uint8_t chiaro[77];
+        for (int i = 0; i < 77; ++i) chiaro[i] = (uint8_t)((cw[i] ^ descramble77[i]) & 1);
+        return plaus::message77_ok(chiaro, tipi_ammessi);
     }
 
     const Code& c_;

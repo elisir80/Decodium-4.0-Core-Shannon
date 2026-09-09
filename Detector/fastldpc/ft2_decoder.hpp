@@ -62,6 +62,9 @@ struct Ft2Config {
     // Tipi di messaggio i3 ammessi dal controllo di plausibilita' dentro
     // l'OSD: 0 lo spegne. Vedi cpp/plausible.hpp.
     uint32_t tipi_ammessi = 0;
+    // 77 bit di scrambling da togliere prima di quel controllo (FT2: rvec).
+    // Nullo per FT8, che non mescola. Vedi OsdFast::descramble77.
+    const uint8_t* descramble77 = nullptr;
     // Bit d'informazione ammessi nelle coppie; 0 = tutti. Vedi OsdFast.
     int pair_span   = 0;
     // Limite sui |LLR| in ingresso, in multipli della media della parola.
@@ -109,6 +112,7 @@ public:
           buf_((size_t)cfg.batch * code.N), word_(code.N) {
         osd_.nd_max = cfg.nd_max;
         osd_.tipi_ammessi = cfg.tipi_ammessi;
+        osd_.descramble77 = cfg.descramble77;
         osd_.pair_span = cfg.pair_span;
         osd_.pair_search = cfg.pair_search;
         osd_.ntau = cfg.ntau;

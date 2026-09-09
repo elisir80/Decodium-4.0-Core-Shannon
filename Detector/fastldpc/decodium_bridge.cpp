@@ -46,6 +46,22 @@
 
 extern "C" void ftx_ldpc174_91_tables_c (int* Mn_out, int* Nm_out, int* nrw_out, int* ncw_out);
 
+// Vettore di scrambling di FT2 (FtxFt2Stage7.cpp): fisso per tutta la vita del
+// processo. Serve al controllo di plausibilita' dentro l'OSD, che altrimenti
+// leggerebbe il payload mescolato.
+extern "C" void ftx_ft2_rvec_c (signed char* out77);
+
+static uint8_t const* rvec_ft2 () {
+    static uint8_t const* const v = [] {
+        static uint8_t bits[77];
+        signed char tmp[77];
+        ftx_ft2_rvec_c (tmp);
+        for (int i = 0; i < 77; ++i) bits[i] = (uint8_t) (tmp[i] & 1);
+        return bits;
+    }();
+    return v;
+}
+
 namespace {
 
 constexpr int kN = 174;
@@ -488,10 +504,26 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             // quei tipi non verrebbe mai decodificato. Con FASTLDPC_TIPI=tutti
             // si torna a non escludere niente, al prezzo di piu' fantasmi.
             {
+                // FASTLDPC_TIPI=nessuno spegne del tutto il filtro. Serve a
+                // misurare quanto costa in FT2, dove i 77 bit che il decoder
+                // vede sono MESCOLATI con rvec (FtxFt2Stage7 de-mescola solo
+                // dopo, riga ~2649): li' i controlli di struttura leggono un
+                // numero casuale invece del messaggio. In FT8, che non mescola,
+                // il filtro lavora sui bit veri e non c'e' niente da misurare.
                 char const* env = std::getenv ("FASTLDPC_TIPI");
-                c.tipi_ammessi = (g_modo_ft8 || (env && std::string (env) == "tutti"))
-                                     ? plaus::kTuttiDefiniti
-                                     : plaus::kSoloUsati;
+                std::string const scelta = env ? std::string (env) : std::string {};
+                c.tipi_ammessi = scelta == "nessuno"
+                                     ? 0u
+                                     : ((g_modo_ft8 || scelta == "tutti")
+                                            ? plaus::kTuttiDefiniti
+                                            : plaus::kSoloUsati);
+                // In FT2 il decoder vede il payload MESCOLATO con rvec (lo
+                // rimette in chiaro FtxFt2Stage7 dopo, riga ~2649): senza
+                // togliere lo scrambling qui il filtro leggerebbe un numero
+                // casuale e scarterebbe parole vere. FT8 non mescola.
+                // FASTLDPC_TIPI=mescolato ripristina il comportamento di prima
+                // della correzione: serve solo a misurare quanto costava.
+                c.descramble77 = (g_modo_ft8 || scelta == "mescolato") ? nullptr : rvec_ft2 ();
             }
             c.batch = 16;                   // una parola per chiamata: batch minimo
             c.alpha_w = alpha_scelto ();

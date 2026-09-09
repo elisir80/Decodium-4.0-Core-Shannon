@@ -126,6 +126,20 @@ if (MINGW)
 endif ()
 add_dependencies (test_qt_helpers ft8_gate_dump)
 
+# Vettori .llr dal demodulatore 4-GFSK vero: tutti quelli in lab/data sono
+# sintetici (gen_test.py, BPSK/AWGN con LLR esatti). Servono ai banchi del
+# laboratorio (ml_gap2, gate_stats) per misurare sul canale che c'e' davvero.
+add_executable (ft2_llr_vectors ft2_llr_vectors.cpp)
+target_link_libraries (ft2_llr_vectors wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_dependencies (test_qt_helpers ft2_llr_vectors)
+
+# Decide llr_clip (2 o 2,5) sul demodulatore 4-GFSK vero invece che sul canale
+# AWGN/BPSK sintetico: il taglio serve contro l'interferenza impulsiva, che il
+# banco sintetico non ha, quindi li' se ne vedeva solo il costo.
+add_executable (ft2_llr_clip_bench ft2_llr_clip_bench.cpp)
+target_link_libraries (ft2_llr_clip_bench wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_dependencies (test_qt_helpers ft2_llr_clip_bench)
+
 add_executable (test_tx_pipeline test_tx_pipeline.cpp)
 target_link_libraries (test_tx_pipeline wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_tx_pipeline COMMAND $<TARGET_FILE:test_tx_pipeline>)
