@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <complex>
 #include <limits>
 #include <memory>
@@ -221,6 +222,17 @@ void normalizebmet_cpp (float* data, int n)
     {
       data[i] /= sigma;
     }
+}
+
+// DECODIUM_FT8_STORICO_ENERGIA=1: somma di energie nello storico CQ (vedi
+// save_cq_signal_history in FtxFt8Stage4.cpp). Letto una volta sola.
+inline bool ft8_history_energy_mode ()
+{
+  static bool const v = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_STORICO_ENERGIA");
+    return raw && raw[0] != '0';
+  }();
+  return v;
 }
 
 void normalizebmet_rms_cpp (float* data, int n)
@@ -1237,7 +1249,15 @@ void run_ft8_bitmetrics (Complex const* cd0, int np2, int ibest, int imetric,
                                     + history_cs[ks * 8 + tone2]
                                     + history_cs[(ks + 1) * 8 + tone3];
                         }
-                      value = abs1 (current) + abs1 (history);
+                      // Con DECODIUM_FT8_STORICO_ENERGIA=1 lo storico porta la
+                      // radice della somma delle energie passate, e qui si sommano
+                      // le ENERGIE (|S|^2), non i moduli: e' il combinatore quadratico
+                      // classico, misurato in FT2 entro 0,05 dB dalla verosimiglianza
+                      // esatta. Il risultato resta in unita' di modulo per le forme
+                      // di metrica a valle.
+                      value = ft8_history_energy_mode ()
+                                  ? std::sqrt (abs2 (current) + abs2 (history))
+                                  : abs1 (current) + abs1 (history);
                       if (use_weak_transform)
                         {
                           value = std::pow (0.5f * value, 3.0f);

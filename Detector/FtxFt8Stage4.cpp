@@ -54,6 +54,42 @@ constexpr int kFt8CqSignalMemory {48};
 constexpr int kFt8CqSignalMaxAge {4};
 constexpr float kFt8CqSignalSaveScore {1.15f};
 constexpr float kFt8CqSignalRepeatScore {0.65f};
+// Regolabili per misura (DECODIUM_FT8_STORICO_SAVE / _REPEAT): quanto deve
+// essere forte la firma CQ di un candidato NON decodificato perche' i suoi
+// spettri vengano salvati, e perche' un candidato successivo li riusi. Alla
+// soglia di decodifica la firma e' debole, e queste due soglie decidono se
+// l'accumulo fra slot si attiva mai.
+inline float ft8_cq_save_score ()
+{
+  static float const v = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_STORICO_SAVE");
+    float const f = raw ? static_cast<float> (std::atof (raw)) : 0.0f;
+    return f > 0.0f ? f : kFt8CqSignalSaveScore;
+  }();
+  return v;
+}
+inline float ft8_cq_repeat_score ()
+{
+  static float const v = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_STORICO_REPEAT");
+    float const f = raw ? static_cast<float> (std::atof (raw)) : 0.0f;
+    return f > 0.0f ? f : kFt8CqSignalRepeatScore;
+  }();
+  return v;
+}
+// DECODIUM_FT8_STORICO_ENERGIA=1: lo storico accumula ENERGIE (somma di |S|^2
+// sugli ultimi ~4 slot) invece di mediare i moduli, e il combinatore in
+// FtxBitmetrics somma le energie invece dei moduli. E' il combinatore che
+// l'accumulo FT2 ha misurato entro 0,05 dB dalla verosimiglianza esatta
+// (lab/tools/slot_accumulo.py). Spento di default.
+inline bool ft8_storico_energia ()
+{
+  static bool const v = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_STORICO_ENERGIA");
+    return raw && raw[0] != '0';
+  }();
+  return v;
+}
 constexpr int kFt8CallGridMemory {96};
 constexpr int kFt8CallGridMaxAge {4};
 constexpr int kFt8KnownCallGridMemory {1024};
@@ -6759,7 +6795,7 @@ Ft8CqSignalEntry const* find_cq_signal_history (Ft8CqSignalHistoryState const& s
                                                 float cq_score)
 {
   if (jseq < 0 || jseq >= kFt8SequenceCount || request.ndepth < 3
-      || cq_score < kFt8CqSignalRepeatScore)
+      || cq_score < ft8_cq_repeat_score ())
     {
       return nullptr;
     }
@@ -6806,7 +6842,7 @@ void save_cq_signal_history (Ft8CqSignalHistoryState& state, Ft8Request const& r
                              bool force)
 {
   if (jseq < 0 || jseq >= kFt8SequenceCount || request.ndepth < 3
-      || (!force && cq_score < kFt8CqSignalSaveScore))
+      || (!force && cq_score < ft8_cq_save_score ()))
     {
       return;
     }
@@ -6865,9 +6901,22 @@ void save_cq_signal_history (Ft8CqSignalHistoryState& state, Ft8Request const& r
     {
       float const previous_mag = same_signal ? std::abs (entry.cs[index]) : 0.0f;
       float const current_mag = std::abs (cs[index]);
-      float const merged_mag =
-          same_signal ? (previous_mag * previous_weight + current_mag) / total_weight
-                      : current_mag;
+      float merged_mag = 0.0f;
+      if (ft8_storico_energia ())
+        {
+          // Somma di energie: il modulo salvato e' la radice della somma dei
+          // |S|^2 degli slot passati, cosi' abs2(storico) restituisce la somma.
+          // Oltre 4 contributi si scala l'energia vecchia di 3/4: una finestra
+          // scorrevole approssimata, senza tenere gli slot separati.
+          float previous_energy = previous_mag * previous_mag;
+          if (previous_hits >= 4) previous_energy *= 0.75f;
+          merged_mag = std::sqrt (previous_energy + current_mag * current_mag);
+        }
+      else
+        {
+          merged_mag = same_signal ? (previous_mag * previous_weight + current_mag) / total_weight
+                                   : current_mag;
+        }
       entry.cs[index] = std::complex<float> {merged_mag, 0.0f};
     }
 }
