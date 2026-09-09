@@ -292,6 +292,13 @@ float gate_delta_scelto () {
 // piu' d'uno.
 thread_local std::vector<uint8_t> g_gate_truth_cw174;
 
+// Indice progressivo della prova del banco (cresce a ogni truth_set). Scritto
+// come ultima colonna della riga del dump: senza, le righe vere dello stesso
+// messaggio trovato da piu' candidati o in piu' passate della STESSA prova
+// sono indistinguibili da prove diverse, e un confronto fra ricerche di
+// ampiezza diversa conta doppioni come guadagno (lab/misure/20260909_giudice_rango.md).
+thread_local long long g_gate_trial = 0;
+
 std::mutex& gate_dump_mutex () {
     static std::mutex m;
     return m;
@@ -303,18 +310,19 @@ std::FILE*& gate_dump_file () {
 }
 
 // Riga nello stesso formato di gate/make_dataset.sh e letto da train_gate.py:
-// f0..f9 label(1=vero) acc(1=il gate compilato oggi accetterebbe). L'ultima
-// colonna non serve al training, solo a confrontare a occhio il gate vecchio
-// con le etichette vere sullo stesso file.
-void gate_dump_write (const GateFeatures& g, bool label, bool ft8) {
+// f0..f11 label(1=vero) acc(1=il gate compilato oggi accetterebbe) prova.
+// Le ultime due colonne non servono al training: acc confronta a occhio il
+// gate vecchio con le etichette vere sullo stesso file, prova permette di
+// contare le PROVE decodificate invece delle righe (giudice_prove.py).
+void gate_dump_write (const GateFeatures& g, bool label, bool ft8, long long trial) {
     std::FILE* f = gate_dump_file ();
     if (!f) return;
     std::lock_guard<std::mutex> lock (gate_dump_mutex ());
-    std::fprintf (f, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %d %d\n",
+    std::fprintf (f, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %d %d %lld\n",
                  (double) g.f[0], (double) g.f[1], (double) g.f[2], (double) g.f[3],
                  (double) g.f[4], (double) g.f[5], (double) g.f[6], (double) g.f[7],
                  (double) g.f[8], (double) g.f[9], (double) g.f[10], (double) g.f[11],
-                 label ? 1 : 0, gate_accept (g, ft8) ? 1 : 0);
+                 label ? 1 : 0, gate_accept (g, ft8) ? 1 : 0, trial);
     std::fflush (f);
 }
 
@@ -345,7 +353,7 @@ void gate_dump_callback (int /*i*/, const GateFeatures& g, const uint8_t* word) 
     bool label = true;
     for (int v = 0; v < kN && label; ++v)
         if (word[v] != g_gate_truth_cw174[(size_t) v]) label = false;
-    gate_dump_write (g, label, g_modo_ft8);
+    gate_dump_write (g, label, g_modo_ft8, g_gate_trial);
 }
 
 Ft2Decoder& decoder_for_preset (int ndeep) {
@@ -655,6 +663,7 @@ extern "C" void fastldpc_simd_gate_dump_close_c () {
 // banco genera anche slot di solo rumore.
 extern "C" void fastldpc_simd_gate_truth_set_c (signed char const* cw174) {
     g_gate_truth_cw174.assign (cw174, cw174 + kN);
+    ++g_gate_trial;
 }
 
 extern "C" void fastldpc_simd_gate_truth_clear_c () {
