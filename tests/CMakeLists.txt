@@ -126,6 +126,22 @@ if (MINGW)
 endif ()
 add_dependencies (test_qt_helpers ft8_gate_dump)
 
+# Demodulazione iterativa (BICM-ID) per FT2: l'estrinseca del decodificatore
+# torna al demodulatore, che pesa le ipotesi di tono anche per l'altro bit
+# dello stesso simbolo. Il braccio "genio" (a priori perfetta) e' il limite
+# superiore e dice se vale la pena portarlo dentro Stage7.
+add_executable (ft2_bicm_id ft2_bicm_id.cpp)
+target_link_libraries (ft2_bicm_id wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+# Include ft2_decoder.hpp direttamente (servono i posteriori del min-sum), e
+# senza AVX2 MinSumV3 diventa un alias della versione scalare, che non ha
+# set_alpha: stessi flag che la produzione da' a decodium_bridge.cpp.
+if (DECODIUM_FASTLDPC_X86_TARGET AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options (ft2_bicm_id PRIVATE -mavx2 -mfma)
+elseif (DECODIUM_FASTLDPC_X86_TARGET AND MSVC)
+  target_compile_options (ft2_bicm_id PRIVATE /arch:AVX2)
+endif ()
+add_dependencies (test_qt_helpers ft2_bicm_id)
+
 # Vettori .llr dal demodulatore 4-GFSK vero: tutti quelli in lab/data sono
 # sintetici (gen_test.py, BPSK/AWGN con LLR esatti). Servono ai banchi del
 # laboratorio (ml_gap2, gate_stats) per misurare sul canale che c'e' davvero.

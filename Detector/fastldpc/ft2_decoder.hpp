@@ -132,6 +132,14 @@ public:
     long long crc_tests() const { return osd_.n_crc; }
     void reset_crc_tests() { osd_.n_crc = 0; }
 
+    // Posteriori del min-sum per la parola b dell'ultima decode_batch(), in
+    // virgola fissa (dividere per kPosteriorFix per avere l'LLR). Servono alla
+    // demodulazione iterativa (BICM-ID): l'estrinseca che torna al
+    // demodulatore e' posteriore meno LLR di canale. Sola lettura, nessun
+    // effetto sul decodificatore.
+    static constexpr int kPosteriorFix = 8;   // MinSumV3::LLR_FIX
+    const int16_t* posterior(int b) const { return ms_.posterior(b); }
+
     // apmask (opzionale): [n][174], 1 sui bit gia' noti per ipotesi a priori.
     // Gli LLR di quei bit devono gia' portare il valore noto, come fa FT2
     // (llr[i] = apmag * apbits[i]); qui vengono saturati al massimo
