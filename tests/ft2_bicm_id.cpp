@@ -309,9 +309,56 @@ struct Cornice
 {
   std::array<Complex, kNn * 4> cs {};
   std::array<Complex, kNSeg> cd {};   // finestra sincronizzata, per il riferimento
+  std::array<float, kNn> fase {};     // fase VERA del canale per simbolo (genio)
   float beta {0.0f};
   bool ok {false};
 };
+
+// Demodulatore COERENTE con fase nota: al posto del modulo dell'ipotesi si usa
+// la sua proiezione sulla fase vera del canale. E' il genio della fase, cioe'
+// il limite superiore di un tracciamento alla Wiener (BCJR sugli stati di
+// fase): il divario fra questo e il demodulatore di oggi e' quanto vale al
+// massimo quella strada. Su fsk_gmi.py il tetto era 1,1 dB per FT2.
+void demodula_coerente (Complex const* cs, float const* fase, float beta, float* llr_out)
+{
+  std::array<float, kRows> m {};
+  for (int r = 0; r < kRows; ++r)
+    {
+      int const s = r / 2;
+      int const mio = 1 - (r % 2);
+      Complex const rot = std::polar (1.0f, -fase[s]);
+      float w[4];
+      for (int i = 0; i < 4; ++i)
+        {
+          // proiezione sulla fase vera: con fase nota l'informazione sta nella
+          // parte reale, la quadratura e' solo rumore.
+          float const proj = std::real (cs[s * 4 + kGraymap[i]] * rot);
+          w[i] = beta * proj * std::fabs (proj);
+        }
+      float max1 = -1.0e30f, max0 = -1.0e30f;
+      for (int i = 0; i < 4; ++i)
+        {
+          if ((i & (1 << mio)) != 0) max1 = std::max (max1, w[i]);
+          else max0 = std::max (max0, w[i]);
+        }
+      float lse1 = 0.0f, lse0 = 0.0f;
+      for (int i = 0; i < 4; ++i)
+        {
+          if ((i & (1 << mio)) != 0) lse1 += std::exp (w[i] - max1);
+          else lse0 += std::exp (w[i] - max0);
+        }
+      m[static_cast<size_t> (r)] = (max1 + std::log (std::max (lse1, 1.0e-30f)))
+                                   - (max0 + std::log (std::max (lse0, 1.0e-30f)));
+    }
+  double sum = 0.0, sum2 = 0.0;
+  for (int r = 0; r < kRows; ++r) { sum += m[static_cast<size_t> (r)]; sum2 += static_cast<double> (m[static_cast<size_t> (r)]) * m[static_cast<size_t> (r)]; }
+  double const media = sum / kRows, media2 = sum2 / kRows;
+  double const varianza = media2 - media * media;
+  double sigma = varianza > 0.0 ? std::sqrt (varianza) : std::sqrt (std::max (media2, 0.0));
+  if (sigma <= 0.0) sigma = 1.0;
+  for (int c = 0; c < kCodeword; ++c)
+    llr_out[c] = kScaleFac * static_cast<float> (m[static_cast<size_t> (riga_di (c))] / sigma);
+}
 
 // Genera, sincronizza e restituisce gli spettri per simbolo: e' il punto in cui
 // il demodulatore vero consegna quello che serve al BICM-ID.
@@ -366,6 +413,35 @@ Cornice prepara (QString const& messaggio, float freq, float offset_ms, double s
   finestra (out.cd, cb2, ibest);
 
   ftx_ft2_symbol_spectra_c (out.cd.data (), out.cs.data (), &out.beta);
+
+  // Fase VERA del canale: stessa strada ma senza rumore. Nella cornice pulita
+  // il tono trasmesso e' l'unico con energia, quindi la sua fase e' la fase
+  // del canale a quel simbolo. Serve al braccio "genio della fase".
+  {
+    std::vector<float> pulito (static_cast<size_t> (kFrameSamples), 0.0f);
+    for (int i = 0; i < wave.size (); ++i) pulito[static_cast<size_t> (off + i)] = 0.85f * wave[i];
+    std::array<Complex, kNdMax> cbp {};
+    int nd = 1;
+    ftx_ft2_downsample_c (pulito.data (), &nd, freq + static_cast<float> (idfbest), cbp.data ());
+    normalizza (cbp.data (), kNdMax);
+    std::array<Complex, kNSeg> cdp {};
+    finestra (cdp, cbp, ibest);
+    std::array<Complex, kNn * 4> csp {};
+    float betap = 0.0f;
+    ftx_ft2_symbol_spectra_c (cdp.data (), csp.data (), &betap);
+    for (int k = 0; k < kNn; ++k)
+      {
+        int best_t = 0;
+        float best_m = -1.0f;
+        for (int t = 0; t < 4; ++t)
+          {
+            float const mm = std::abs (csp[k * 4 + t]);
+            if (mm > best_m) { best_m = mm; best_t = t; }
+          }
+        out.fase[static_cast<size_t> (k)] = std::arg (csp[k * 4 + best_t]);
+      }
+  }
+
   out.ok = true;
   return out;
 }
@@ -464,17 +540,17 @@ int main (int argc, char* argv[])
       out << "semi=" << semi << " messaggi=" << messaggi.size () << " giri=" << giri << "\n\n";
       out << "| SNR | prove | base | " ;
       for (int g = 1; g <= giri; ++g) out << "bicm" << g << " | ";
-      out << "genio |\n|---:|---:|---:|";
+      out << "genio | fase |\n|---:|---:|---:|";
       for (int g = 1; g <= giri; ++g) out << "---:|";
-      out << "---:|\n";
+      out << "---:|---:|\n";
 
       Ft2Decoder dec {codice (), produzione ()};
-      long tot_base = 0, tot_genio = 0, tot_prove = 0;
+      long tot_base = 0, tot_genio = 0, tot_prove = 0, tot_fase = 0;
       std::vector<long> tot_bicm (static_cast<size_t> (giri), 0);
 
       for (double snr : snrs)
         {
-          long prove = 0, base = 0, genio = 0;
+          long prove = 0, base = 0, genio = 0, fase_ok = 0;
           std::vector<long> bicm (static_cast<size_t> (giri), 0);
           for (QString const& m : messaggi)
             {
@@ -536,6 +612,13 @@ int main (int argc, char* argv[])
                       }
                   }
 
+                  // braccio genio della FASE: rivelazione coerente
+                  {
+                    std::vector<float> l (kCodeword);
+                    demodula_coerente (c.cs.data (), c.fase.data (), c.beta, l.data ());
+                    if (tenta (l.data ())) ++fase_ok;
+                  }
+
                   // braccio genio: a priori perfetta
                   {
                     std::vector<float> la (kCodeword), l (kCodeword);
@@ -548,15 +631,15 @@ int main (int argc, char* argv[])
             }
           out << "| " << snr << " | " << prove << " | " << base << " | ";
           for (int g = 0; g < giri; ++g) out << bicm[static_cast<size_t> (g)] << " | ";
-          out << genio << " |\n";
+          out << genio << " | " << fase_ok << " |\n";
           out.flush ();
-          tot_prove += prove; tot_base += base; tot_genio += genio;
+          tot_prove += prove; tot_base += base; tot_genio += genio; tot_fase += fase_ok;
           for (int g = 0; g < giri; ++g) tot_bicm[static_cast<size_t> (g)] += bicm[static_cast<size_t> (g)];
         }
 
       out << "\ntotale su " << tot_prove << " prove: base " << tot_base;
       for (int g = 0; g < giri; ++g) out << ", bicm" << (g + 1) << " " << tot_bicm[static_cast<size_t> (g)];
-      out << ", genio " << tot_genio << "\n";
+      out << ", genio " << tot_genio << ", fase " << tot_fase << "\n";
       return 0;
     }
   catch (std::exception const& e)

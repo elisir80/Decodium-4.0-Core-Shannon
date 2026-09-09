@@ -130,6 +130,21 @@ add_dependencies (test_qt_helpers ft8_gate_dump)
 # torna al demodulatore, che pesa le ipotesi di tono anche per l'altro bit
 # dello stesso simbolo. Il braccio "genio" (a priori perfetta) e' il limite
 # superiore e dice se vale la pena portarlo dentro Stage7.
+# Lo stesso, ma per FT8 e solo il braccio "genio": serve a sapere quanto vale
+# il massimo teorico prima di rifare su FT8 l'anello completo gia' misurato
+# (e trovato poco redditizio) su FT2.
+add_executable (ft8_bicm_genie ft8_bicm_genie.cpp)
+target_link_libraries (ft8_bicm_genie wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+if (DECODIUM_FASTLDPC_X86_TARGET AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options (ft8_bicm_genie PRIVATE -mavx2 -mfma)
+elseif (DECODIUM_FASTLDPC_X86_TARGET AND MSVC)
+  target_compile_options (ft8_bicm_genie PRIVATE /arch:AVX2)
+endif ()
+if (MINGW)
+  target_link_options (ft8_bicm_genie PRIVATE -Wl,--stack,67108864)
+endif ()
+add_dependencies (test_qt_helpers ft8_bicm_genie)
+
 add_executable (ft2_bicm_id ft2_bicm_id.cpp)
 target_link_libraries (ft2_bicm_id wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 # Include ft2_decoder.hpp direttamente (servono i posteriori del min-sum), e
