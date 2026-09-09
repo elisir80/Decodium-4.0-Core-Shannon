@@ -67,6 +67,21 @@ SettingsPageScroll {
         Text { text: qsTr("AUDIO ALERTS"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 4 }
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
 
+        Text { text: qsTr("Wanted callsign alert:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 150 }
+        CheckBox {
+            checked: bridge.getSetting("alertOnWantedCallsign", false)
+            onCheckedChanged: bridge.setSetting("alertOnWantedCallsign", checked)
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        Text { text: qsTr("Calls (comma/space separated, * wildcard):"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 150 }
+        DecoTextField {
+            text: bridge.getSetting("wantedCallsigns", ""); Layout.fillWidth: true; implicitHeight: controlHeight; leftPadding: 8
+            color: textPrimary; font.pixelSize: controlFontSize
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onTextChanged: bridge.setSetting("wantedCallsigns", text.toUpperCase())
+        }
+
         Text { text: qsTr("Alerts Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.alertSoundsEnabled
