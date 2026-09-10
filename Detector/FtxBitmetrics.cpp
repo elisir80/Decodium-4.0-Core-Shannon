@@ -1654,6 +1654,211 @@ extern "C" void ftx_ft8_bitmetrics_coherent_c (Complex const* cs, float scale,
     }
 }
 
+// Bit-metrics FT8 con informazione a priori sugli ALTRI bit del gruppo
+// (demodulazione iterativa, BICM-ID).
+//
+// PERCHE'. Il demodulatore scompone ogni gruppo di simboli in bit trattati come
+// indipendenti; non lo sono, perche' condividono le stesse ipotesi di tono. Il
+// calcolo dell'informazione mutua (lab/tools/fsk_gmi.py) misura quanto costa
+// quella scomposizione: 0,93 dB su un simbolo, 1,45 su coppie, 1,63 su terne --
+// e cresce proprio dove la produzione combina piu' simboli. Il max-log invece
+// non c'entra (0,06-0,13 dB dalla metrica esatta): ottimizzare la formula
+// sarebbe tempo buttato.
+//
+// COME. `la` porta l'estrinseca del decodificatore
+// (fastldpc_extrinsic174_91_c): per ogni ipotesi si somma alla metrica il
+// contributo a priori di TUTTI i bit del gruppo TRANNE quello che si sta
+// calcolando. Escluderlo e' cio' che rende l'uscita estrinseca, cioe' notizia
+// nuova per il decodificatore e non l'eco della sua stessa opinione.
+//
+// LA SCALA CONTA. La metrica e' un modulo |cs|, l'a priori un LLR: sommarli
+// direttamente vorrebbe dire pesare l'a priori a caso. Il fattore di
+// conversione e' l'RMS della metrica grezza diviso `scale`, perche' l'uscita
+// normalizzata vale scale*(max1-max0)/rms. Si ricava qui da una prima passata
+// di max-log senza a priori, cosi' non dipende da cosa passa il chiamante.
+// Gli |cs| delle ipotesi si calcolano UNA volta sola e si riusano nelle due
+// passate: la parte cara sono quelli, non il max-log.
+//
+// I CINQUE INSIEMI sono quelli di run_ft8_bitmetrics e non altri: a, b, c sono
+// le metriche a 1, 2 e 3 simboli; d e' quella a un simbolo divisa per il
+// proprio livello max(max1,max0); e e' quella col modulo maggiore fra le tre.
+// (Attenzione: NON e' la coppia "primo e secondo" della versione coerente.
+// Con `la` nullo questa funzione riproduce la produzione bit per bit, e il
+// banco lo verifica su tutti e cinque -- e' l'unico modo di sapere che
+// l'innesto e' inerte da spento.)
+//
+// Come la passata coerente va usata come tentativo IN PIU', mai al posto degli
+// altri. Misurato sul banco (tests/ft8_bicm_genie.cpp, solo il ramo a un
+// simbolo): +21,3% di decodifiche, ~0,3 dB, zero falsi su 2236 cornici di
+// rumore e sulle 960 prove con segnale. Il banco pero' confronta con la sola
+// llra, mentre qui la produzione ha gia' cinque passate: il guadagno
+// incrementale vero va misurato sulla catena, non dedotto da quel numero --
+// e' l'errore che aveva gonfiato la passata coerente da +23% a +80%.
+// Rapporto: lab/misure/20260910_bicm_id_ft8.md
+//
+// cs: [79][8] spettri per simbolo, gia' catturati da
+// ftx_ft8_bitmetrics_capture_c (stesso ingresso della versione coerente).
+// la: [174] convenzione Decodium (positivo = bit 1); nullo = nessuna.
+// Uscite: cinque insiemi da 174, gia' scalati.
+extern "C" void ftx_ft8_bitmetrics_bicm_c (Complex const* cs, float scale, float const* la,
+                                           float* llra, float* llrb, float* llrc,
+                                           float* llrd, float* llre)
+{
+  static std::array<int, 8> const graymap {{0, 1, 3, 2, 5, 6, 4, 7}};
+  auto const& one = one9_table ();
+
+  struct Gruppo
+  {
+    int nsym {0};
+    int i32 {0};
+    int ibmax {0};
+    std::size_t off {0};
+  };
+
+  // Passata comune: i moduli delle ipotesi, una volta sola per ogni gruppo.
+  std::vector<float> ipotesi;
+  ipotesi.reserve (12700);                 // 58*8 + 30*64 + 20*512
+  std::vector<Gruppo> gruppi;
+  gruppi.reserve (110);
+  for (int nsym = 1; nsym <= 3; ++nsym)
+    {
+      int const nt = 1 << (3 * nsym);
+      int const ibmax = (nsym == 1 ? 2 : (nsym == 2 ? 5 : 8));
+      for (int ihalf = 1; ihalf <= 2; ++ihalf)
+        {
+          for (int k = 1; k <= 29; k += nsym)
+            {
+              int const ks = (ihalf == 1) ? (k + 7) : (k + 43);
+              std::size_t const off = ipotesi.size ();
+              for (int i = 0; i < nt; ++i)
+                {
+                  int const i1 = i / 64, i2 = (i & 63) / 8, i3 = i & 7;
+                  Complex somma {};
+                  if (nsym == 1)
+                    somma = cs[static_cast<size_t> ((ks - 1) * 8 + graymap[static_cast<size_t> (i3)])];
+                  else if (nsym == 2)
+                    somma = cs[static_cast<size_t> ((ks - 1) * 8 + graymap[static_cast<size_t> (i2)])]
+                            + cs[static_cast<size_t> (ks * 8 + graymap[static_cast<size_t> (i3)])];
+                  else
+                    somma = cs[static_cast<size_t> ((ks - 1) * 8 + graymap[static_cast<size_t> (i1)])]
+                            + cs[static_cast<size_t> (ks * 8 + graymap[static_cast<size_t> (i2)])]
+                            + cs[static_cast<size_t> ((ks + 1) * 8 + graymap[static_cast<size_t> (i3)])];
+                  ipotesi.push_back (abs1 (somma));
+                }
+              gruppi.push_back (Gruppo {nsym, 1 + (k - 1) * 3 + (ihalf - 1) * 87, ibmax, off});
+            }
+        }
+    }
+
+  // max-log di un gruppo. Con `peso` non nullo ogni ipotesi porta in piu' il
+  // contributo a priori degli altri bit del gruppo, gia' in unita' di metrica.
+  // `dst_d` riceve la forma divisa per il livello, che esiste solo a un simbolo.
+  auto max_log = [&] (Gruppo const& g, float const* peso, float const* proprio,
+                      std::array<float, 174>& dst, std::array<float, 174>* dst_d) {
+    int const nt = 1 << (3 * g.nsym);
+    for (int ib = 0; ib <= g.ibmax; ++ib)
+      {
+        if (g.i32 + ib > 174) continue;
+        float max1 = -1.0e30f, max0 = -1.0e30f;
+        for (int i = 0; i < nt; ++i)
+          {
+            float v = ipotesi[g.off + static_cast<std::size_t> (i)];
+            bool const uno = one[static_cast<size_t> (i)][static_cast<size_t> (g.ibmax - ib)];
+            if (peso)
+              {
+                // il proprio bit non entra mai nel proprio a priori
+                v += peso[i] - (uno ? proprio[ib] : 0.0f);
+              }
+            if (uno) max1 = std::max (max1, v);
+            else max0 = std::max (max0, v);
+          }
+        std::size_t const out_index = static_cast<size_t> (g.i32 + ib - 1);
+        float const bm = max1 - max0;
+        dst[out_index] = bm;
+        if (dst_d)
+          {
+            float const den = std::max (max1, max0);
+            (*dst_d)[out_index] = den > 0.0f ? (bm / den) : 0.0f;
+          }
+      }
+  };
+
+  // Passata 1: senza a priori. Serve a due cose -- le metriche di partenza e,
+  // dal loro RMS, il fattore che porta un LLR nelle unita' della metrica.
+  std::array<float, 174> bmeta {}, bmetb {}, bmetc {}, bmetd {}, bmete {};
+  for (Gruppo const& g : gruppi)
+    max_log (g, nullptr, nullptr,
+             g.nsym == 1 ? bmeta : (g.nsym == 2 ? bmetb : bmetc),
+             g.nsym == 1 ? &bmetd : nullptr);
+
+  if (la)
+    {
+      auto rms_di = [] (std::array<float, 174> const& v) {
+        double s = 0.0;
+        for (int i = 0; i < 174; ++i) s += static_cast<double> (v[static_cast<size_t> (i)]) * v[static_cast<size_t> (i)];
+        double const r = std::sqrt (s / 174.0);
+        return r > 0.0 ? static_cast<float> (r) : 1.0f;
+      };
+      float const conv[3] = {rms_di (bmeta) / scale, rms_di (bmetb) / scale, rms_di (bmetc) / scale};
+
+      // Passata 2: le stesse ipotesi, ora pesate con l'estrinseca.
+      std::array<float, 512> peso {};
+      std::array<float, 9> proprio {};
+      for (Gruppo const& g : gruppi)
+        {
+          int const nt = 1 << (3 * g.nsym);
+          float const cv = conv[static_cast<size_t> (g.nsym - 1)];
+          for (int ib = 0; ib <= g.ibmax; ++ib)
+            {
+              int const c = g.i32 + ib - 1;
+              proprio[static_cast<size_t> (ib)] = (c < 174) ? cv * la[c] : 0.0f;
+            }
+          for (int i = 0; i < nt; ++i)
+            {
+              float somma = 0.0f;
+              for (int ib = 0; ib <= g.ibmax; ++ib)
+                if (one[static_cast<size_t> (i)][static_cast<size_t> (g.ibmax - ib)])
+                  somma += proprio[static_cast<size_t> (ib)];
+              peso[static_cast<size_t> (i)] = somma;
+            }
+          max_log (g, peso.data (), proprio.data (),
+                   g.nsym == 1 ? bmeta : (g.nsym == 2 ? bmetb : bmetc),
+                   g.nsym == 1 ? &bmetd : nullptr);
+        }
+    }
+
+  // e = quella col modulo maggiore fra le tre, come in run_ft8_bitmetrics.
+  for (int i = 0; i < 174; ++i)
+    {
+      std::array<float, 3> const temp {{bmeta[static_cast<size_t> (i)],
+                                        bmetb[static_cast<size_t> (i)],
+                                        bmetc[static_cast<size_t> (i)]}};
+      int best = 0;
+      float best_abs = std::abs (temp[0]);
+      for (int j = 1; j < 3; ++j)
+        {
+          float const current_abs = std::abs (temp[static_cast<size_t> (j)]);
+          if (current_abs > best_abs) { best = j; best_abs = current_abs; }
+        }
+      bmete[static_cast<size_t> (i)] = temp[static_cast<size_t> (best)];
+    }
+
+  normalizebmet_rms_cpp (bmeta.data (), 174);
+  normalizebmet_rms_cpp (bmetb.data (), 174);
+  normalizebmet_rms_cpp (bmetc.data (), 174);
+  normalizebmet_rms_cpp (bmetd.data (), 174);
+  normalizebmet_rms_cpp (bmete.data (), 174);
+
+  for (int i = 0; i < 174; ++i)
+    {
+      llra[i] = scale * bmeta[static_cast<size_t> (i)];
+      llrb[i] = scale * bmetb[static_cast<size_t> (i)];
+      llrc[i] = scale * bmetc[static_cast<size_t> (i)];
+      llrd[i] = scale * bmetd[static_cast<size_t> (i)];
+      llre[i] = scale * bmete[static_cast<size_t> (i)];
+    }
+}
+
 // Bit-metrics COERENTI: la fase del canale stimata dai simboli di
 // sincronismo, invece di essere ignorata.
 //

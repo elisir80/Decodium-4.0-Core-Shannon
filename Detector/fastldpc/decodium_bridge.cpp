@@ -773,6 +773,53 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
 }
 
 // ---------------------------------------------------------------------------
+// Estrinseca del decodificatore, per la demodulazione iterativa (BICM-ID).
+//
+// Il demodulatore FT8 scompone ogni simbolo a 8 toni in tre bit trattati come
+// indipendenti; non lo sono, e l'informazione mutua dice che quella scomposizione
+// costa 1,63 dB sulle terne. Dopo un tentativo fallito pero' il decodificatore
+// sa comunque qualcosa sui bit -- i posteriori del min-sum -- e sottraendo
+// l'LLR di canale resta l'informazione ESTRINSECA, cioe' la parte che il
+// demodulatore non gli ha dato. Rimandata indietro, quella pesa le ipotesi di
+// tono anche per gli ALTRI bit dello stesso simbolo.
+//
+// llr_in, est_out: [174] nella convenzione Decodium (positivo = bit 1).
+// clamp limita l'estrinseca: un valore enorme e' quasi sempre un artefatto
+// della quantizzazione a virgola fissa dei posteriori, non una certezza.
+//
+// Ritorna 1 se questa decodifica ha gia' accettato una parola (e allora
+// l'estrinseca non serve a nessuno), 0 altrimenti.
+//
+// Misure: lab/misure/20260910_bicm_id_ft8.md (+21,3% di decodifiche, ~0,3 dB,
+// zero falsi su 2236 cornici di rumore e 960 prove con segnale).
+extern "C" int fastldpc_extrinsic174_91_c (float const* llr_in, int norder,
+                                           float clamp, float* est_out)
+{
+    if (!llr_in || !est_out) return 0;
+    if (clamp <= 0.0f) clamp = 2.0f;
+
+    Ft2Decoder& dec = decoder_for_preset (norder);
+
+    float llr[kN];
+    for (int i = 0; i < kN; ++i) llr[i] = -llr_in[i];   // -> convenzione fastldpc
+
+    uint8_t bits[kN], accepted = 0;
+    dec.decode_batch (llr, 1, bits, &accepted);
+
+    const int16_t* post = dec.posterior (0);
+    if (!post) { std::memset (est_out, 0, sizeof (float) * kN); return accepted ? 1 : 0; }
+    for (int i = 0; i < kN; ++i) {
+        const float p = (float) post[i] / Ft2Decoder::kPosteriorFix;
+        const float est = p - llr[i];
+        float v = -est;                                 // -> convenzione Decodium
+        if (v > clamp) v = clamp;
+        if (v < -clamp) v = -clamp;
+        est_out[i] = v;
+    }
+    return accepted ? 1 : 0;
+}
+
+// ---------------------------------------------------------------------------
 // Versione a blocco.
 //
 // Il min-sum lavora su 16 parole per registro AVX2 o 8 per registro NEON: con

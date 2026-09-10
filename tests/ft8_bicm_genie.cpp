@@ -87,6 +87,10 @@ extern "C"
                                      float* llrd, float* llre);
   void ftx_ldpc174_91_tables_c (int* Mn_out, int* Nm_out, int* nrw_out, int* ncw_out);
   int ftx_encode174_91_message77_c (signed char const* message77, signed char* codeword_out);
+  // la versione INNESTATA in Stage4, quella che va in aria
+  void ftx_ft8_bitmetrics_bicm_c (std::complex<float> const* cs, float scale,
+                                  float const* la, float* llra, float* llrb,
+                                  float* llrc, float* llrd, float* llre);
 }
 
 namespace {
@@ -310,7 +314,7 @@ Ft2Config produzione_ft8 ()
 struct Cornice
 {
   std::array<Complex, kSyms * 8> cs {};
-  std::array<float, kCodeword> llra_prod {};
+  std::array<float, kCodeword> llra_prod {}, llrb_prod {}, llrc_prod {}, llrd_prod {}, llre_prod {};
   bool ok {false};
 };
 
@@ -381,12 +385,12 @@ Cornice prepara (QString const& messaggio, float freq, float dt_s, double snr_db
   ftx_ft8_a7_refine_search_c (cd0.data (), kNp2, kFs2, ibest, &ibest, &sy, &xdt);
 
   std::array<float, 8 * kSyms> s8 {};
-  std::array<float, kCodeword> llrb {}, llrc {}, llrd {}, llre {};
   int nsync = 0;
   ftx_ft8_bitmetrics_capture_c (cd0.data (), kNp2, ibest, 0, kScale, 0, 0,
                                 nullptr, out.cs.data (), s8.data (), &nsync,
-                                out.llra_prod.data (), llrb.data (), llrc.data (),
-                                llrd.data (), llre.data ());
+                                out.llra_prod.data (), out.llrb_prod.data (),
+                                out.llrc_prod.data (), out.llrd_prod.data (),
+                                out.llre_prod.data ());
   out.ok = true;
   return out;
 }
@@ -483,7 +487,31 @@ int main (int argc, char* argv[])
                 << "  produzione=" << c.llra_prod[static_cast<size_t> (peggio)] << "\n";
           out << (dmax < 1e-3 ? "OK: demodulatore identico a quello di produzione\n"
                               : "DIVERSO: la mappatura non combacia\n");
-          return dmax < 1e-3 ? 0 : 1;
+
+          // La funzione INNESTATA in Stage4: con estrinseca nulla deve
+          // riprodurre tutte e cinque le metriche di produzione, altrimenti
+          // l'innesto cambia il comportamento anche da spento.
+          std::array<float, kCodeword> zero {}, ba {}, bb {}, bc {}, bd {}, be {};
+          ftx_ft8_bitmetrics_bicm_c (c.cs.data (), kScale, zero.data (),
+                                     ba.data (), bb.data (), bc.data (), bd.data (), be.data ());
+          struct Coppia { char const* nome; float const* mio; float const* prod; };
+          Coppia const coppie[5] = {{"llra", ba.data (), c.llra_prod.data ()},
+                                    {"llrb", bb.data (), c.llrb_prod.data ()},
+                                    {"llrc", bc.data (), c.llrc_prod.data ()},
+                                    {"llrd", bd.data (), c.llrd_prod.data ()},
+                                    {"llre", be.data (), c.llre_prod.data ()}};
+          double peggiore = 0.0;
+          for (auto const& cp : coppie)
+            {
+              double d = 0.0;
+              for (int i = 0; i < kCodeword; ++i)
+                d = std::max (d, std::fabs (static_cast<double> (cp.mio[i] - cp.prod[i])));
+              out << "  bicm(la=0) vs produzione, " << cp.nome << ": scarto massimo " << d << "\n";
+              peggiore = std::max (peggiore, d);
+            }
+          out << (peggiore < 1e-3 ? "OK: la funzione innestata e' inerte a estrinseca nulla\n"
+                                  : "DIVERSO: l'innesto NON e' inerte\n");
+          return (dmax < 1e-3 && peggiore < 1e-3) ? 0 : 1;
         }
 
       // --- fantasmi: cornici di solo rumore, ogni accettazione e' un falso.

@@ -386,6 +386,13 @@ extern "C"
   void ftx_ft8_bitmetrics_coherent_c (std::complex<float> const* cs, float scale,
                                       float* llra, float* llrb, float* llrc,
                                       float* llrd, float* llre);
+  // Metriche FT8 con l'estrinseca del decodificatore (BICM-ID, FtxBitmetrics.cpp),
+  // e l'estrinseca stessa dai posteriori del min-sum (fastldpc/decodium_bridge.cpp).
+  void ftx_ft8_bitmetrics_bicm_c (std::complex<float> const* cs, float scale,
+                                  float const* la, float* llra, float* llrb,
+                                  float* llrc, float* llrd, float* llre);
+  int fastldpc_extrinsic174_91_c (float const* llr_in, int norder, float clamp,
+                                  float* est_out);
   void ftx_ft8_bitmetrics_capture_c (std::complex<float> const* cd0, int np2,
                                      int ibest, int imetric, float scale,
                                      int weak_deep, int equalize_tone_power,
@@ -525,6 +532,27 @@ bool ft8_coerente_attivo ()
     return raw && raw[0] != '0';
   }();
   return attivo;
+}
+
+// Demodulazione iterativa (BICM-ID): dopo un tentativo fallito si prende
+// l'estrinseca dai posteriori del min-sum e la si rimanda al demodulatore, che
+// con essa pesa le ipotesi di tono anche per gli ALTRI bit dello stesso gruppo.
+// Il valore della variabile e' il numero di GIRI (1 o 2: il banco dice che il
+// secondo aggiunge poco e il terzo quasi nulla). SPENTO di default.
+//
+// Misurato solo su AWGN sintetico (+21,3% di decodifiche, ~0,3 dB, zero falsi),
+// e per giunta contro la sola llra mentre qui la produzione ha gia' cinque
+// passate: il guadagno incrementale vero e' quello che va misurato in aria.
+// Vedi lab/misure/20260910_bicm_id_ft8.md.
+int ft8_bicm_giri ()
+{
+  static int const giri = [] {
+    char const* raw = std::getenv ("DECODIUM_FT8_BICM");
+    if (!raw || raw[0] == '0' || raw[0] == 0) return 0;
+    int const v = std::atoi (raw);
+    return v > 0 ? std::min (v, 3) : 1;
+  }();
+  return giri;
 }
 
 int& ft8_classic_rescue_used ()
@@ -7383,16 +7411,53 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
                                      coer_llrd.data (), coer_llre.data ());
     }
 
-  int const llr_attempts = (have_cq_history ? 2 : 1) + (usa_coerente ? 1 : 0);
+  // Tentativo BICM-ID: le stesse metriche, ricalcolate con l'estrinseca che il
+  // decodificatore ha prodotto fallendo sulla llra. SPENTO di default,
+  // DECODIUM_FT8_BICM=1 (o 2 per due giri).
+  //
+  // La sonda e' una decodifica in piu' sulla sola llra, senza a priori, come nel
+  // banco: serve per i posteriori del min-sum, non per il suo esito. Se pero'
+  // quella accetta una parola, l'anello non ha nulla da recuperare e si spegne
+  // per questo candidato -- e' il caso piu' frequente sui segnali forti, dove
+  // questo costa una decodifica e basta.
+  //
+  // Richiede fastldpc: i posteriori del min-sum esistono solo li'.
+  std::array<float, 174> bicm_llra {}, bicm_llrb {}, bicm_llrc {}, bicm_llrd {}, bicm_llre {};
+  bool usa_bicm = ft8_bicm_giri () > 0 && ft8_use_fastldpc () && !g_ft8_forza_classico;
+  if (usa_bicm)
+    {
+      std::array<float, 174> est {};
+      std::array<float, 174> sonda = llra;
+      bool ottenuta = false;
+      for (int giro = 0; giro < ft8_bicm_giri (); ++giro)
+        {
+          // Se la sonda accetta, l'anello si ferma qui. Al primo giro vuol dire
+          // che la llra decideva gia' da sola e non c'e' niente da recuperare;
+          // dal secondo in poi vuol dire che le metriche del giro PRECEDENTE
+          // funzionano, e quelle si tengono (ottenuta e' gia' vera).
+          if (fastldpc_extrinsic174_91_c (sonda.data (), 2, 2.0f, est.data ()))
+            break;
+          ftx_ft8_bitmetrics_bicm_c (current_cs.data (), kFt8BitMetricScale, est.data (),
+                                     bicm_llra.data (), bicm_llrb.data (), bicm_llrc.data (),
+                                     bicm_llrd.data (), bicm_llre.data ());
+          sonda = bicm_llra;         // il giro successivo riparte da queste
+          ottenuta = true;
+        }
+      usa_bicm = ottenuta;
+    }
+
+  int const llr_attempts = (have_cq_history ? 2 : 1) + (usa_coerente ? 1 : 0) + (usa_bicm ? 1 : 0);
   int const indice_coerente = have_cq_history ? 2 : 1;
+  int const indice_bicm = indice_coerente + (usa_coerente ? 1 : 0);
   for (int llr_attempt = 0; llr_attempt < llr_attempts; ++llr_attempt)
     {
       bool const coerente = usa_coerente && llr_attempt == indice_coerente;
-      float const* active_llra = coerente ? coer_llra.data () : (llr_attempt == 0 ? llra.data () : history_llra.data ());
-      float const* active_llrb = coerente ? coer_llrb.data () : (llr_attempt == 0 ? llrb.data () : history_llrb.data ());
-      float const* active_llrc = coerente ? coer_llrc.data () : (llr_attempt == 0 ? llrc.data () : history_llrc.data ());
-      float const* active_llrd = coerente ? coer_llrd.data () : (llr_attempt == 0 ? llrd.data () : history_llrd.data ());
-      float const* active_llre = coerente ? coer_llre.data () : (llr_attempt == 0 ? llre.data () : history_llre.data ());
+      bool const bicm = usa_bicm && llr_attempt == indice_bicm;
+      float const* active_llra = bicm ? bicm_llra.data () : (coerente ? coer_llra.data () : (llr_attempt == 0 ? llra.data () : history_llra.data ()));
+      float const* active_llrb = bicm ? bicm_llrb.data () : (coerente ? coer_llrb.data () : (llr_attempt == 0 ? llrb.data () : history_llrb.data ()));
+      float const* active_llrc = bicm ? bicm_llrc.data () : (coerente ? coer_llrc.data () : (llr_attempt == 0 ? llrc.data () : history_llrc.data ()));
+      float const* active_llrd = bicm ? bicm_llrd.data () : (coerente ? coer_llrd.data () : (llr_attempt == 0 ? llrd.data () : history_llrd.data ()));
+      float const* active_llre = bicm ? bicm_llre.data () : (coerente ? coer_llre.data () : (llr_attempt == 0 ? llre.data () : history_llre.data ()));
 
       // ---- Precalcolo a BLOCCHI delle passate di questo tentativo LLR.
       //
