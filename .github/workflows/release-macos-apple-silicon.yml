@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Select version
         env:
@@ -135,7 +135,7 @@ jobs:
             --repo "${GITHUB_REPOSITORY}"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: decodium4-ft2-${{ env.VERSION }}-${{ matrix.asset_suffix }}
           if-no-files-found: error
@@ -151,7 +151,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Select version
         id: version
@@ -166,7 +166,7 @@ jobs:
           echo "Using version: ${VERSION}"
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: decodium4-ft2-${{ steps.version.outputs.version }}-macos-*-arm64
           merge-multiple: true

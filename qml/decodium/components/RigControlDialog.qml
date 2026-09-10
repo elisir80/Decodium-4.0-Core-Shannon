@@ -636,7 +636,7 @@ Dialog {
                     // Poll interval
                     Text { text: "Poll (s):"; color: textSecondary; font.pixelSize: 12 }
                     SpinBox {
-                        id: pollSpin; from: 1; to: 10; value: bridge.catManager.pollInterval; implicitHeight: controlHeight
+                        id: pollSpin; from: 2; to: 10; value: Math.max(2, bridge.catManager.pollInterval); implicitHeight: controlHeight
                         contentItem: Text { text: pollSpin.value; color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     }

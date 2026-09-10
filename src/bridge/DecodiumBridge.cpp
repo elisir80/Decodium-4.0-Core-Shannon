@@ -18125,6 +18125,25 @@ void DecodiumBridge::requestLegacyPttOffOnce(const QString& reason)
                         m_omniRigCat, m_legacyBackend);
         txTimelineLog(QStringLiteral("[TX-TL] ptt_off_once reason=%1 backend=%2")
                           .arg(reason, m_catBackend));
+        // CI-V/Hamlib can acknowledge the local request before the Icom has
+        // physically left TX.  Recheck after the serial polling interval and
+        // issue one unconditional RX retry if the radio still reports TX.
+        QTimer::singleShot(2300, this, [this, reason]() {
+            if (!activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend,
+                                 m_omniRigCat, m_legacyBackend)) return;
+            const bool stillActive = activeCatReportsPttActive();
+            // Always send the follow-up RX command.  The cached state can be
+            // stale/false on Hamlib even while the physical rig is in TX.
+            activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false,
+                            m_omniRigCat, m_legacyBackend);
+            if (stillActive) {
+                txTimelineLog(QStringLiteral("[TX-TL] ptt_off_retry reason=%1 backend=%2")
+                                  .arg(reason, m_catBackend));
+            } else {
+                txTimelineLog(QStringLiteral("[TX-TL] ptt_off_recheck_rx backend=%1")
+                                  .arg(m_catBackend));
+            }
+        });
     }
 }
 
@@ -22576,7 +22595,7 @@ void DecodiumBridge::syncSpecialOperationToLegacyBackend()
         return;
     }
 
-    bool const superFox = getSetting(QStringLiteral("SuperFox"), true).toBool();
+    bool const superFox = getSetting(QStringLiteral("SuperFox"), false).toBool();
     m_legacyBackend->setSuperFoxEnabled(superFox);
     m_legacyBackend->setSpecialOperationActivity(m_specialOperationActivity);
 }
@@ -32910,6 +32929,18 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
     QString const cleanSatellite = satellite.trimmed();
     QString const cleanSatMode = satMode.trimmed();
     QString const cleanFreqRx = freqRx.trimmed();
+    QByteArray udpAdifRecord = adifRecord;
+    if (getSetting(QStringLiteral("EasyLogLowercaseBand"), true).toBool()) {
+        QString adif = QString::fromUtf8(udpAdifRecord);
+        QRegularExpression bandField(QStringLiteral("(<BAND:\\d+>)([^<\\r\\n]*)"),
+                                      QRegularExpression::CaseInsensitiveOption);
+        QRegularExpressionMatch match = bandField.match(adif);
+        if (match.hasMatch()) {
+            adif.replace(match.capturedStart(2), match.capturedLength(2),
+                         match.captured(2).trimmed().toLower());
+            udpAdifRecord = adif.toUtf8();
+        }
+    }
 
     int targets = 0;
     int wsjtxAdifTargets = 0;
@@ -32971,7 +33002,7 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
         quint16 const secondaryPort = udpPortFromSettingValue(
             getSetting(QStringLiteral("UDPSecondaryServerPort"), 2239), 2239);
         if (udpSendRawAdifDatagram(QStringLiteral("UDP secondary raw ADIF"),
-                                   secondaryServerName, secondaryPort, dxCall, adifRecord)) {
+                                   secondaryServerName, secondaryPort, dxCall, udpAdifRecord)) {
             ++rawAdifTargets;
         }
     }
@@ -32985,7 +33016,7 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
         quint16 const tertiaryPort = udpPortFromSettingValue(
             getSetting(QStringLiteral("UDPTertiaryServerPort"), 2237), 2237);
         if (udpSendRawAdifDatagram(QStringLiteral("UDP tertiary QSO-only raw ADIF"),
-                                   tertiaryServerName, tertiaryPort, dxCall, adifRecord)) {
+                                   tertiaryServerName, tertiaryPort, dxCall, udpAdifRecord)) {
             ++rawAdifTargets;
         }
     }
@@ -42266,10 +42297,10 @@ QString DecodiumBridge::defaultLogCommentForQso(const QString& mode,
         case 5: return individualContestName && !contestName.isEmpty()
                     ? contestName + QStringLiteral(" Contest")
                     : QStringLiteral("WW Digi Contest");
-        case 6: return getSetting(QStringLiteral("SuperFox"), true).toBool()
+        case 6: return getSetting(QStringLiteral("SuperFox"), false).toBool()
                     ? QStringLiteral("SF/H mode")
                     : QStringLiteral("F/H mode");
-        case 7: return getSetting(QStringLiteral("SuperFox"), true).toBool()
+        case 7: return getSetting(QStringLiteral("SuperFox"), false).toBool()
                     ? QStringLiteral("SF/H mode")
                     : QStringLiteral("F/H mode");
         case 8: return individualContestName && !contestName.isEmpty()
@@ -47832,7 +47863,7 @@ void DecodiumBridge::onWsprDecodeReady(quint64 serial, QStringList rows,
         appendLegacyAllTxtDecodeLine(entry);
         queueWorldMapEntryForReplay(entry, false, 250);
         udpSendWsprDecode(true, row);
-        maybePlayDecodeAlert(false, entry.value(QStringLiteral("isMyCall")).toBool());
+        maybePlayDecodeAlert(false, entry.value(QStringLiteral("isMyCall")).toBool(), msg);
         changed = true;
         ++accepted;
     }
@@ -47958,7 +47989,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         }
         changed = true;
 
-        maybePlayDecodeAlert(isCQ, isMyCall);
+        maybePlayDecodeAlert(isCQ, isMyCall, msg);
     }
     if (changed) {
         // JT9/JT65/Q65 source rows are normalized by the worker snapshot just
@@ -51177,7 +51208,7 @@ void DecodiumBridge::queueFt8DecodeRequest(const QVector<short>& audioSnapshot, 
         ? qBound(1, qMin(threadCountOverride, normalThreadCount), kMaxFtDecodeThreads)
         : normalThreadCount;
     req.ncontest = m_ncontest;
-    req.superFoxEnabled = getSetting(QStringLiteral("SuperFox"), true).toBool()
+    req.superFoxEnabled = getSetting(QStringLiteral("SuperFox"), false).toBool()
                           && (m_ncontest == 7);
     req.superFoxTolHz = getSetting(QStringLiteral("Ftol_SF"), 50).toInt();
     req.emedelay = 0.0f;
@@ -54157,7 +54188,7 @@ void DecodiumBridge::reloadDxccLookupAsync(const std::function<void(bool, const 
 // B8 — Alert sounds: playback tramite DecodiumAlertManager
 // ============================================================
 
-void DecodiumBridge::maybePlayDecodeAlert(bool isCQ, bool isMyCall)
+void DecodiumBridge::maybePlayDecodeAlert(bool isCQ, bool isMyCall, const QString &message)
 {
     if (!m_alertSoundsEnabled || !m_alertManager) {
         return;
@@ -54175,6 +54206,29 @@ void DecodiumBridge::maybePlayDecodeAlert(bool isCQ, bool isMyCall)
     if (isCQ && m_alertOnCq && nowMs - m_lastCqAlertMs >= alertGapMs) {
         m_lastCqAlertMs = nowMs;
         playAlert(QStringLiteral("CQ"));
+        return;
+    }
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    if (!settings.value(QStringLiteral("alertOnWantedCallsign"), false).toBool()) return;
+    const QString wantedText = settings.value(QStringLiteral("wantedCallsigns"), QString()).toString().toUpper();
+    const QStringList wanted = wantedText.split(QRegularExpression(QStringLiteral("[,\\s;]+")), Qt::SkipEmptyParts);
+    const QStringList words = message.toUpper().replace(QRegularExpression(QStringLiteral("[<>;,]")), QStringLiteral(" "))
+                                   .split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+    QString matched;
+    for (const QString &pattern : wanted) {
+        QString rx = QRegularExpression::escape(pattern).replace(QStringLiteral("\\*"), QStringLiteral(".*"));
+        QRegularExpression re(QStringLiteral("^") + rx + QStringLiteral("$"));
+        for (const QString &word : words) {
+            if (re.match(word).hasMatch()) { matched = word; break; }
+        }
+        if (!matched.isEmpty()) break;
+    }
+    if (!matched.isEmpty() && (matched != m_lastWantedCall || nowMs - m_lastWantedAlertMs >= alertGapMs)) {
+        m_lastWantedCall = matched;
+        m_lastWantedAlertMs = nowMs;
+        playAlert(QStringLiteral("WantedCallsign"));
     }
 }
 

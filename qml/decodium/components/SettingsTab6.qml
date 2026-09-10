@@ -946,6 +946,14 @@ SettingsPageScroll {
             Layout.fillWidth: true
         }
 
+        Text { text: qsTr("EasyLog band format:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        CheckBox {
+            checked: boolSetting("EasyLogLowercaseBand", true)
+            onToggled: setBoolSettingIfChanged("EasyLogLowercaseBand", checked, true)
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: qsTr("Send BAND as 20m (lowercase)"); color: textSecondary; leftPadding: 24; font.pixelSize: 11 }
+        }
+
         Item { Layout.fillWidth: true; Layout.preferredWidth: labelWidth }
         Button {
             id: hrdLogbookPresetButton

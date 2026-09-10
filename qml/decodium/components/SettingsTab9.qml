@@ -501,8 +501,8 @@ SettingsPageScroll {
                 Text { text: qsTr("SuperFox:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedOperatingGrid.labelWidth; Layout.preferredHeight: controlHeight }
                 CheckBox {
                     Layout.preferredWidth: advancedOperatingGrid.checkWidth; Layout.preferredHeight: controlHeight
-                    checked: dialog.boolSetting("SuperFox", true)
-                    onToggled: dialog.setBoolSettingIfChanged("SuperFox", checked, true)
+                    checked: dialog.boolSetting("SuperFox", false)
+                    onToggled: dialog.setBoolSettingIfChanged("SuperFox", checked, false)
                     enabled: !bridge.transmitting && !bridge.tuning
                     hoverEnabled: true
                     ToolTip.visible: hovered

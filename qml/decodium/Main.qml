@@ -29,7 +29,7 @@ ApplicationWindow {
     visible: true
     flags: Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint
          | Qt.WindowMinMaxButtonsHint | Qt.WindowCloseButtonHint
-    property bool superFoxOptionEnabled: bridge ? settingBool("SuperFox", true) : true
+    property bool superFoxOptionEnabled: bridge ? settingBool("SuperFox", false) : false
     readonly property string dxpeditionModeLabel: !bridge || bridge.mode !== "FT8" ? ""
         : bridge.houndMode ? (superFoxOptionEnabled ? "SuperHound" : "Hound")
         : bridge.foxMode ? (superFoxOptionEnabled ? "SuperFox" : "Fox") : ""
@@ -3285,6 +3285,8 @@ ApplicationWindow {
         if (!modelData)
             return ""
         var message = modelData.message || ""
+        if (bridge.getSetting("alertOnWantedCallsign", false) && highlightListMatches(message, bridge.getSetting("wantedCallsigns", "")))
+            return "#FFD000"
         if (highlightOrange && highlightListMatches(message, highlightOrangeCallsigns))
             return "#E14B00"
         if (highlightBlue && highlightListMatches(message, highlightBlueCallsigns))

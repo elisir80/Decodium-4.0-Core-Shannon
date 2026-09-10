@@ -14,7 +14,7 @@ Rectangle {
         return value === true || value === 1
             || String(value).toLowerCase() === "true" || String(value) === "1"
     }
-    property bool optionEnabled: engine ? asBool(engine.getSetting("SuperFox", true)) : false
+    property bool optionEnabled: engine ? asBool(engine.getSetting("SuperFox", false)) : false
     readonly property bool active: !!(engine && optionEnabled && engine.mode === "FT8"
                                       && (engine.houndMode || engine.foxMode))
     readonly property string statusDescription: active
@@ -36,8 +36,16 @@ Rectangle {
     radius: 4
     color: active ? Qt.alpha(activeColor, 0.14) : backgroundColor
     border.color: active ? activeColor : inactiveBorder
-    Accessible.role: Accessible.StaticText
+    Accessible.role: Accessible.Button
     Accessible.name: "SuperFox: " + statusDescription
+    Accessible.onPressAction: toggleSuperFox()
+
+    function toggleSuperFox() {
+        if (!engine) return
+        var next = !optionEnabled
+        engine.setSetting("SuperFox", next)
+        optionEnabled = next
+    }
 
     Row {
         id: content
@@ -58,6 +66,7 @@ Rectangle {
         }
     }
     HoverHandler { id: hover }
+    TapHandler { onTapped: indicator.toggleSuperFox() }
     ToolTip.visible: hover.hovered
     ToolTip.delay: 500
     ToolTip.text: statusDescription

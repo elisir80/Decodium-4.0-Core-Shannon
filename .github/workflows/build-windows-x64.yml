@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -526,14 +526,14 @@ jobs:
           Get-ChildItem $outputDir
 
       - name: Upload portable bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: decodium-windows-x64-portable
           if-no-files-found: error
           path: dist-windows-x64
 
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: decodium-windows-x64-installer
           if-no-files-found: error

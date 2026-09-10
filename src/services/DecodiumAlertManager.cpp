@@ -137,6 +137,7 @@ QSoundEffect* DecodiumAlertManager::soundForType(const QString& type)
 {
     if (type == "CQ")      return m_cqSound;
     if (type == "MyCall")  return m_myCallSound;
+    if (type == "WantedCallsign") return m_myCallSound;
     if (type == "DX")      return m_dxSound;
     if (type == "73")      return m_sound73;
     if (type == "NewDXCC") return m_newDxccSound;
