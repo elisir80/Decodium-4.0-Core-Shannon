@@ -6681,8 +6681,17 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
     // gia' passata piu' forte, o si ripetera'; un falso da CRC compare una
     // volta sola. Misurato in aria: col solo decode normale i nominativi visti
     // una volta sola erano il 19%, con la fase profonda sono saliti al 44%.
+    //
+    // 10 settembre 2026: conferma anche per RIPETIZIONE. Con la sola conferma
+    // "gia' sentito forte" una stazione DX che sale dal rumore resta invisibile
+    // finche' non supera i -20 dB una volta: in una notte sui 40 m "CQ YB1BZV
+    // OI42" e' stato scartato 190 volte, "CQ DV4ZAR PK13" e altri 1375 in
+    // tutto, poi sentiti anche a -9. Il falso da CRC non ripete mai lo stesso
+    // nominativo in uno slot diverso: se un nominativo debole torna entro dieci
+    // minuti in un altro slot, e' una stazione, e da li' passa.
     {
         static QSet<QString> sentitiForte;
+        static QHash<QString, QPair<QString, qint64>> sentitiDeboli;   // nominativo -> (slot, ms)
         bool snrLetto = false;
         int const snr = entry.value(QStringLiteral("db")).toString().trimmed().toInt(&snrLetto);
         QString testo = entry.value(QStringLiteral("displayMessage")).toString().trimmed();
@@ -6713,9 +6722,32 @@ bool DecodiumBridge::looksLikeGhostDecode(QVariantMap const& entry) const
                 if (sembraNominativo(w)) sentitiForte.insert(w);
             }
         } else if (snrLetto && snr <= -23) {
+            QString const slot = entry.value(QStringLiteral("time")).toString().trimmed();
+            qint64 const adessoMs = QDateTime::currentMSecsSinceEpoch();
+            static constexpr qint64 kRipetizioneMs = 10 * 60 * 1000;
             bool confermato = false;
             for (QString const& w : parole) {
-                if (sembraNominativo(w) && sentitiForte.contains(w)) { confermato = true; break; }
+                if (!sembraNominativo(w)) continue;
+                if (sentitiForte.contains(w)) { confermato = true; break; }
+                auto const it = sentitiDeboli.constFind(w);
+                if (it != sentitiDeboli.constEnd()
+                    && it.value().first != slot
+                    && adessoMs - it.value().second <= kRipetizioneMs) {
+                    // Da qui il nominativo e' noto come uno sentito forte: la
+                    // lista viene riclassificata a ogni aggiornamento della UI
+                    // e una riga accettata non deve sparire dopo dieci minuti.
+                    sentitiForte.insert(w);
+                    confermato = true;
+                    break;
+                }
+            }
+            // Avvistamento debole (primo o rinfrescato): serve alla conferma
+            // del prossimo slot e tiene viva la finestra finche' la stazione
+            // continua. Il limite tiene la tabella piccola anche in una notte
+            // di fase profonda.
+            if (sentitiDeboli.size() > 4096) sentitiDeboli.clear();
+            for (QString const& w : parole) {
+                if (sembraNominativo(w)) sentitiDeboli.insert(w, qMakePair(slot, adessoMs));
             }
             if (!confermato) return true;
         }
@@ -27518,6 +27550,47 @@ void DecodiumBridge::stopTx()
     resumeNonAudioTxWork(QStringLiteral("stopTx"));
 }
 
+// 1.0.623 — watchdog del Tune. Il Tune del bridge rigenera il tono ogni 9,8 s
+// e non finisce mai da solo: chi lo lasciava acceso teneva la radio in
+// trasmissione a tempo indeterminato. Il front-end legacy aveva gia' questa
+// protezione (widgets/mainwindow.cpp, tuneATU_Timer) e le sue impostazioni,
+// TuneWatchdog (acceso di default) e TuneWatchdogTime (secondi, 90), qui non
+// venivano lette da nessuno.
+void DecodiumBridge::armTuneWatchdog()
+{
+    if (!getSetting(QStringLiteral("TuneWatchdog"), true).toBool()) {
+        return;
+    }
+    int const configured = getSetting(QStringLiteral("TuneWatchdogTime"), 90).toInt();
+    if (configured <= 0) {
+        return;   // lo spin box arriva a 0: zero secondi vale "nessun limite"
+    }
+    int const seconds = qBound(5, configured, 3600);
+    if (!m_tuneWatchdogTimer) {
+        m_tuneWatchdogTimer = new QTimer(this);
+        m_tuneWatchdogTimer->setSingleShot(true);
+        connect(m_tuneWatchdogTimer, &QTimer::timeout, this, [this]() {
+            if (!m_tuning && !m_bridgeAudioTuneActive) {
+                return;   // gia' fermo: niente da fare
+            }
+            bridgeLog(QStringLiteral("Tune watchdog: timeout -> Tune fermato"));
+            emit statusMessage(QStringLiteral("Tune watchdog: tempo scaduto, Tune fermato"));
+            stopTune();
+        });
+    }
+    m_tuneWatchdogTimer->start(seconds * 1000);
+    bridgeLog(QStringLiteral("Tune watchdog armato: %1 s").arg(seconds));
+}
+
+void DecodiumBridge::disarmTuneWatchdog(const QString& reason)
+{
+    if (!m_tuneWatchdogTimer || !m_tuneWatchdogTimer->isActive()) {
+        return;
+    }
+    m_tuneWatchdogTimer->stop();
+    bridgeLog(QStringLiteral("Tune watchdog disarmato (%1)").arg(reason));
+}
+
 void DecodiumBridge::startTune()
 {
     if (rtlSdrEnabled()) {
@@ -27539,6 +27612,9 @@ void DecodiumBridge::startTune()
         return;
     }
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
+    // Da qui in poi il Tune parte davvero, su tutti e tre i percorsi (backend
+    // legacy, TCI, audio del bridge): il watchdog si arma una volta sola qui.
+    armTuneWatchdog();
 
     if (m_currentTx >= 1 && m_currentTx <= 5 &&
         m_dxCall.trimmed().isEmpty() &&
@@ -27690,6 +27766,7 @@ void DecodiumBridge::startTune()
 
     if (!launchTuneAudio()) {
         if (m_tuneTimer) m_tuneTimer->stop();
+        disarmTuneWatchdog(QStringLiteral("tune-start-failed"));
         if (activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend))
             activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, false, m_omniRigCat, m_legacyBackend);
         m_tuning = false;
@@ -27862,6 +27939,8 @@ void DecodiumBridge::stopTune()
             "stopTune ignored while native SSTV owns TX"));
         return;
     }
+
+    disarmTuneWatchdog(QStringLiteral("stopTune"));
 
     bool const catReportsPttActive =
         (m_catBackend == QStringLiteral("native") && m_nativeCat && m_nativeCat->pttActive())
@@ -46526,6 +46605,11 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             if (secondaryWork.publishPsk) {
                 queueNativeDecodeSecondaryWork(std::move(secondaryWork));
             }
+            // L'archivio SQLite e' un registro come ALL.TXT e PSK Reporter, non
+            // una vista: con "solo CQ" acceso perdeva tutte le righe dirette
+            // (misurato il 10/9/2026: 14% conservate in un'ora con il filtro
+            // acceso, 100% con il filtro spento). Si archivia prima di nascondere.
+            persistDecodeHistoryEntry(entry);
             if (!legacyUiMirrorActive && filteredByCqOnly && !filteredByMyCallOnly) {
                 appendRxDecodeEntry(entry);
             }
@@ -47295,6 +47379,7 @@ void DecodiumBridge::onFt2AsyncDecodeReady(QStringList rows)
         bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !passesCqFilter(isCQ, msg);
         bool const filteredByMyCallOnly = !m_filtersBypassed && m_filterMyCallOnly && !isMyCall;
         if (filteredByCqOnly || filteredByMyCallOnly) {
+            persistDecodeHistoryEntry(entry);   // archivio = registro, non vista (vedi il ramo FT8)
             if (filteredByCqOnly && !filteredByMyCallOnly) {
                 appendRxDecodeEntry(entry);
             }
@@ -47846,6 +47931,7 @@ void DecodiumBridge::onLegacyJtDecodeReady(quint64 serial, QStringList rows)
         bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !passesCqFilter(isCQ, msg);
         bool const filteredByMyCallOnly = !m_filtersBypassed && m_filterMyCallOnly && !isMyCall;
         if (filteredByCqOnly || filteredByMyCallOnly) {
+            persistDecodeHistoryEntry(entry);   // archivio = registro, non vista (vedi il ramo FT8)
             if (filteredByCqOnly && !filteredByMyCallOnly) {
                 appendRxDecodeEntry(entry);
             }

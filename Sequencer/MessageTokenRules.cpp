@@ -121,6 +121,27 @@ bool isDirectedCqModifierToken(QString const& token)
 }
 
 
+// Forma ITU del nominativo standard: prefisso (1-2 lettere, lettera+cifra o
+
+// cifra 2-9 + lettera), UNA cifra, suffisso di 1-4 lettere. Condivisa dai due
+
+// rami di isStrictAmateurCallsignToken.
+
+static QRegularExpression const& strictAmateurCallsignPattern()
+
+{
+
+    static const QRegularExpression pattern {
+
+        QStringLiteral(R"(^(?:[A-Z]{1,2}|[A-Z][0-9]|[2-9][A-Z])[0-9][A-Z]{1,4}$)")
+
+    };
+
+    return pattern;
+
+}
+
+
 bool isStrictAmateurCallsignToken(QString const& token)
 
 {
@@ -173,6 +194,98 @@ bool isStrictAmateurCallsignToken(QString const& token)
 
             t = suffix;
 
+        } else {
+
+            // Forma PREFISSO/CALL con il prefisso di paese che porta la cifra
+
+            // d'area: IH9/IT9JUI, SV8/F6BLP, P4/PE1AZX, EA8/G6MXL, TA1/TF1OL.
+
+            // Il ramo sopra gestisce solo prefissi senza cifre, cioe' quasi
+
+            // nessuno: in aria il 9/9/2026 questo scartava come "ghost" il 3%
+
+            // delle decodifiche, tutte stazioni vere e quasi tutte DX. Vale il
+
+            // pezzo che ha la forma di un nominativo; se ce l'hanno entrambi,
+
+            // il piu' lungo (come Radio::base_callsign). Il pezzo che resta
+
+            // deve avere l'aria di un prefisso: 1-4 alfanumerici con almeno
+
+            // una lettera, non i prefissi impossibili che iniziano per 0 o 1.
+
+            auto const looksLikeCallPart = [](QString const& part) {
+
+                return part.size() >= 3 && part.size() <= 7
+
+                    && strictAmateurCallsignPattern().match(part).hasMatch();
+
+            };
+
+            auto const looksLikePrefixPart = [](QString const& part) {
+
+                if (part.isEmpty() || part.size() > 4) {
+
+                    return false;
+
+                }
+
+                bool letter = false;
+
+                for (QChar const& ch : part) {
+
+                    if (!ch.isLetterOrNumber()) {
+
+                        return false;
+
+                    }
+
+                    letter = letter || ch.isLetter();
+
+                }
+
+                if (!letter) {
+
+                    return false;
+
+                }
+
+                QChar const first = part.at(0);
+
+                if (first == QLatin1Char('0')) {
+
+                    return false;
+
+                }
+
+                if (first == QLatin1Char('1') && !part.startsWith(QStringLiteral("1A"))) {
+
+                    return false;
+
+                }
+
+                return true;
+
+            };
+
+            bool const prefixIsCall = looksLikeCallPart(prefix);
+
+            bool const suffixIsCall = looksLikeCallPart(suffix);
+
+            if (prefixIsCall && suffixIsCall) {
+
+                t = prefix.size() >= suffix.size() ? prefix : suffix;
+
+            } else if (suffixIsCall && looksLikePrefixPart(prefix)) {
+
+                t = suffix;
+
+            } else if (prefixIsCall && looksLikePrefixPart(suffix)) {
+
+                t = prefix;
+
+            }
+
         }
 
     }
@@ -183,13 +296,7 @@ bool isStrictAmateurCallsignToken(QString const& token)
 
     }
 
-    static const QRegularExpression pattern {
-
-        QStringLiteral(R"(^(?:[A-Z]{1,2}|[A-Z][0-9]|[2-9][A-Z])[0-9][A-Z]{1,4}$)")
-
-    };
-
-    return pattern.match(t).hasMatch();
+    return strictAmateurCallsignPattern().match(t).hasMatch();
 
 }
 

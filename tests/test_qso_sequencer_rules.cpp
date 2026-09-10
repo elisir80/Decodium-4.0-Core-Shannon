@@ -193,6 +193,26 @@ private slots:
     QVERIFY (isPlausibleDecodedCallsignToken ("8A1AAA/LH"));
     QVERIFY (!isPlausibleDecodedCallsignToken ("ABCDEF12"));
 
+    // Prefisso di paese con cifra d'area davanti al nominativo: in aria il
+    // 9/9/2026 il filtro semantico scartava come ghost il 3% delle
+    // decodifiche, tutte di questa forma (IH9/IT9JUI 119 volte in 16 ore).
+    QVERIFY (isPlausibleDecodedCallsignToken ("IH9/IT9JUI"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("SV8/F6BLP"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("P4/PE1AZX"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("IS0/IK2YCW"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("TA1/TF1OL"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("SV9/PD9VOG"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("EA1/PE5X"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("EA8/G6MXL"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("VP2E/K1ABC"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("IT9JUI/IH9"));
+    // Le due meta' entrambe nominativo: vale la piu' lunga, come base_callsign.
+    QVERIFY (isPlausibleDecodedCallsignToken ("F6BLP/SV8AB"));
+    // Spazzatura con la barra: prefisso impossibile (0...), pezzi senza forma.
+    QVERIFY (!isPlausibleDecodedCallsignToken ("0Z4/IT9JUI"));
+    QVERIFY (!isPlausibleDecodedCallsignToken ("12345/IT9JUI"));
+    QVERIFY (!isPlausibleDecodedCallsignToken ("ABCDE/IT9JUI"));
+
     QCOMPARE (decodedDxCallToken ("CQ 8B8FTDM OI33"), QString ("8B8FTDM"));
     QCOMPARE (decodedDxCallToken ("CQ 8D8DADA OI33"), QString ("8D8DADA"));
     QCOMPARE (decodedDxCallToken ("CQ 8A3B OI62"), QString ("8A3B"));

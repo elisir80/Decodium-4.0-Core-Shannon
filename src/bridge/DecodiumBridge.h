@@ -1441,6 +1441,10 @@ public slots:
     Q_INVOKABLE void clearTxMessages();
     Q_INVOKABLE void startTune();      // tono continuo fino a stopTune()
     Q_INVOKABLE void stopTune();
+    // 1.0.623 — arma/disarma il watchdog del Tune (impostazioni TuneWatchdog,
+    // TuneWatchdogTime). Nessun effetto se il watchdog e' disattivato.
+    void armTuneWatchdog();
+    void disarmTuneWatchdog(const QString& reason);
     // 1.0.324 — ALC auto-calibration (Fase 2)
     Q_INVOKABLE void startAlcCalibration();
     Q_INVOKABLE void cancelAlcCalibration();
@@ -3514,6 +3518,12 @@ private:
     bool               m_ft2LinkLegacyRxDrainScheduled {false};
     QVector<short>     m_ft2LinkLegacyRxPending;
     QTimer*            m_tuneTimer    {nullptr};
+    // 1.0.623 — watchdog del Tune. Il Tune del bridge si rigenera ogni 9,8 s
+    // all'infinito: senza questo timer la radio resta in trasmissione finche'
+    // qualcuno non preme di nuovo il pulsante. Le impostazioni sono quelle
+    // storiche (TuneWatchdog, TuneWatchdogTime in secondi), finora lette solo
+    // dal front-end legacy (widgets/mainwindow.cpp, tuneATU_Timer).
+    QTimer*            m_tuneWatchdogTimer {nullptr};
     DecodiumLegacyBackend* m_legacyBackend {nullptr};
     bool m_useLegacyTxBackend {false};
     MessageClient* m_udpMessageClient {nullptr};
