@@ -120,7 +120,13 @@ public:
     }
 
     // Statistiche cumulate dall'ultima reset_stats().
-    struct Stats { long words = 0, by_bp = 0, by_osd = 0, osd_tried = 0, gate_rejected = 0; };
+    // `chiamate` e `corsie_usate`/`corsie_totali` dicono quanto e' pieno il
+    // batch in aria: corsie_usate/corsie_totali e' la frazione di lavoro SIMD
+    // che serve davvero. Prima del 10/9/2026 il resto veniva comunque
+    // decodificato (copie della prima parola), adesso i gruppi vuoti si
+    // saltano; il rapporto misura quanto vale il salto su questo traffico.
+    struct Stats { long words = 0, by_bp = 0, by_osd = 0, osd_tried = 0, gate_rejected = 0,
+                        chiamate = 0, corsie_usate = 0, corsie_totali = 0; };
     const Stats& stats() const { return st_; }
     void reset_stats() { st_ = Stats{}; }
 
@@ -190,12 +196,20 @@ public:
                     }
                 }
             }
-            // Le lane in eccesso ripetono la prima parola: il min-sum lavora
-            // sempre a batch pieno e il costo per parola resta quello nominale.
-            for (int b = cnt; b < B; ++b)
+            // Le corsie in eccesso dell'ULTIMO gruppo ripetono la prima parola,
+            // cosi' il gruppo lavora su dati validi; i gruppi interamente vuoti
+            // il min-sum li salta (parametro `occupate`). Prima si riempiva
+            // tutto il batch: con 6 parole vere su 64, tre gruppi di 16 su
+            // quattro decodificavano una copia da buttare.
+            const int lanes = ms_.LANES;
+            const int b_usati = std::min(B, ((cnt + lanes - 1) / lanes) * lanes);
+            for (int b = cnt; b < b_usati; ++b)
                 std::memcpy(&buf_[(size_t)b * N], buf_.data(), (size_t)N * sizeof(float));
+            ++st_.chiamate;
+            st_.corsie_usate += b_usati;
+            st_.corsie_totali += B;
 
-            ms_.decode(buf_.data(), bits_.data(), iters_.data(), ok_.data());
+            ms_.decode(buf_.data(), bits_.data(), iters_.data(), ok_.data(), cnt);
 
             for (int b = 0; b < cnt; ++b) {
                 ++st_.words;

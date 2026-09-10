@@ -50,6 +50,9 @@ class MinSumV2 {
 public:
     static constexpr int LLR_FIX = 8;
     static constexpr int LLR_MAX = 2047;
+    // Non ci sono corsie qui: 1 tiene la stessa interfaccia dei backend SIMD
+    // per chi calcola quante parole servono a riempire un gruppo.
+    static constexpr int LANES = 1;
 
     MinSumV2(const Code& code, int batch, int max_iter)
         : c_(code), B_(batch), max_iter_(max_iter),
@@ -67,7 +70,13 @@ public:
     // di MinSumV3::unsat, cosi' le due classi restano interscambiabili.
     int unsat(int b) const { return unsat_[b]; }
 
-    void decode(const float* llr, uint8_t* out_bits, int* out_iters, uint8_t* out_ok) {
+    // `occupate` esiste solo per avere la stessa firma dei backend SIMD, che
+    // saltano i gruppi di corsie vuoti. Qui viene IGNORATO di proposito:
+    // questo file e' il riferimento con cui verify.cpp confronta bit per bit,
+    // e un riferimento che cambia comportamento non misura piu' niente.
+    void decode(const float* llr, uint8_t* out_bits, int* out_iters, uint8_t* out_ok,
+                int occupate = -1) {
+        (void) occupate;
         const int N = c_.N, M = c_.M, B = B_;
         for (int v = 0; v < N; ++v) {
             int16_t* Lv = &L_[(size_t)v * B];

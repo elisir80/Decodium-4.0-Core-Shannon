@@ -126,6 +126,16 @@ if (MINGW)
 endif ()
 add_dependencies (test_qt_helpers ft8_gate_dump)
 
+# Quanto costa una chiamata al decoder LDPC al variare di quante parole porta:
+# serve a decidere se vale la pena raggruppare piu' candidati di sincronismo
+# nello stesso blocco (vedi lab/misure/20260910_corsie_batch.md).
+add_executable (fastldpc_batch_bench fastldpc_batch_bench.cpp)
+target_link_libraries (fastldpc_batch_bench wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+if (MINGW)
+  target_link_options (fastldpc_batch_bench PRIVATE -Wl,--stack,67108864)
+endif ()
+add_dependencies (test_qt_helpers fastldpc_batch_bench)
+
 # Demodulazione iterativa (BICM-ID) per FT2: l'estrinseca del decodificatore
 # torna al demodulatore, che pesa le ipotesi di tono anche per l'altro bit
 # dello stesso simbolo. Il braccio "genio" (a priori perfetta) e' il limite

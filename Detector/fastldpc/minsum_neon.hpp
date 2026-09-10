@@ -40,12 +40,20 @@ public:
     const int16_t* posterior(int b) const { return &Lout_[(size_t)b * c_.N]; }
     int unsat(int b) const { return unsat_[b]; }
 
-    void decode(const float* llr, uint8_t* out_bits, int* out_iters, uint8_t* out_ok)
+    // `occupate`: quante corsie portano lavoro vero, -1 per tutte. Vedi la
+    // nota in minsum_avx2.hpp: i gruppi sono indipendenti, saltare quelli
+    // vuoti non cambia il risultato delle corsie vere. Qui i gruppi sono da 8.
+    void decode(const float* llr, uint8_t* out_bits, int* out_iters, uint8_t* out_ok,
+                int occupate = -1)
     {
         const int N = c_.N, M = c_.M, B = B_;
+        const int gusati = (occupate < 0 || occupate >= B)
+                               ? G_
+                               : std::max(1, (occupate + LANES - 1) / LANES);
+        const int busati = gusati * LANES;
         for (int v = 0; v < N; ++v) {
             int16_t* Lv = &L_[(size_t)v * B];
-            for (int b = 0; b < B; ++b) {
+            for (int b = 0; b < busati; ++b) {
                 float x = llr[(size_t)b * N + v] * LLR_FIX;
                 x = std::max(-(float)LLR_MAX, std::min((float)LLR_MAX, x));
                 Lv[b] = (int16_t)std::lrint(x);
@@ -59,9 +67,9 @@ public:
             out_ok[b] = 0;
         }
 
-        int groupsLeft = G_;
+        int groupsLeft = gusati;
         for (int iteration = 1; iteration <= max_iter_ && groupsLeft > 0; ++iteration) {
-            for (int group = 0; group < G_; ++group) {
+            for (int group = 0; group < gusati; ++group) {
                 if (!gactive_[group]) continue;
                 const int firstLane = group * LANES;
                 for (int checkIndex = 0; checkIndex < M; ++checkIndex) {
@@ -116,7 +124,7 @@ public:
             }
         }
 
-        for (int word = 0; word < B; ++word) {
+        for (int word = 0; word < busati; ++word) {
             if (!done_[word]) snapshot(word);
             const int16_t* posteriorValues = posterior(word);
             for (int variable = 0; variable < N; ++variable)

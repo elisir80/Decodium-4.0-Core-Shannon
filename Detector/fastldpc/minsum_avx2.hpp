@@ -51,11 +51,23 @@ public:
     // quindi di quanta speranza ha l'OSD (vedi cpp/triage_stats.cpp).
     int unsat(int b) const { return unsat_[b]; }
 
-    void decode(const float* llr, uint8_t* out_bits, int* out_iters, uint8_t* out_ok) {
+    // `occupate` = quante corsie portano lavoro vero. Chi chiama con meno
+    // parole del batch riempiva le corsie in eccesso con una copia della
+    // prima: il min-sum le decodificava sul serio, e su un batch da 64 con 6
+    // parole vere erano tre gruppi di 16 su quattro spesi per niente. I gruppi
+    // sono indipendenti (ogni load e store porta + g0), quindi saltare quelli
+    // vuoti non cambia di un bit il risultato delle corsie vere.
+    // -1 = comportamento storico, tutte le corsie.
+    void decode(const float* llr, uint8_t* out_bits, int* out_iters, uint8_t* out_ok,
+                int occupate = -1) {
         const int N = c_.N, M = c_.M, B = B_;
+        const int gusati = (occupate < 0 || occupate >= B)
+                               ? G_
+                               : std::max(1, (occupate + LANES - 1) / LANES);
+        const int busati = gusati * LANES;
         for (int v = 0; v < N; ++v) {
             int16_t* Lv = &L_[(size_t)v * B];
-            for (int b = 0; b < B; ++b) {
+            for (int b = 0; b < busati; ++b) {
                 float x = llr[(size_t)b * N + v] * LLR_FIX;
                 x = std::max(-(float)LLR_MAX, std::min((float)LLR_MAX, x));
                 Lv[b] = (int16_t)std::lrint(x);
@@ -66,9 +78,9 @@ public:
         std::fill(gactive_.begin(), gactive_.end(), (uint8_t)1);
         for (int b = 0; b < B; ++b) { out_iters[b] = max_iter_; out_ok[b] = 0; }
 
-        int gleft = G_;
+        int gleft = gusati;
         for (int it = 1; it <= max_iter_ && gleft > 0; ++it) {
-            for (int g = 0; g < G_; ++g) {
+            for (int g = 0; g < gusati; ++g) {
                 if (!gactive_[g]) continue;
                 const int g0 = g * LANES;
                 for (int m = 0; m < M; ++m) {
@@ -107,7 +119,7 @@ public:
                 if (all_done) { gactive_[g] = 0; --gleft; }
             }
         }
-        for (int b = 0; b < B; ++b) {
+        for (int b = 0; b < busati; ++b) {
             if (!done_[b]) snapshot(b);
             const int16_t* P = posterior(b);
             for (int v = 0; v < N; ++v) out_bits[(size_t)b * N + v] = (P[v] < 0);

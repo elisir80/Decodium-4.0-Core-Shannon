@@ -36,6 +36,8 @@
 //  * Un'istanza per thread (thread_local): FT2DecodeWorker decodifica in
 //    parallelo e il decoder ha stato interno.
 #include "ft2_decoder.hpp"
+#include <atomic>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -291,6 +293,15 @@ float gate_delta_scelto () {
 // non si rischia di condividere stato fra thread se mai lo si chiamasse da
 // piu' d'uno.
 thread_local std::vector<uint8_t> g_gate_truth_cw174;
+
+// Microsecondi spesi dentro fastldpc, sommati su tutti i thread. Serve solo
+// alla diagnostica DECODIUM_LDPC_CORSIE: dice che frazione del tempo di uno
+// slot va nel decoder LDPC, cioe' quanto vale ottimizzarlo.
+std::atomic<long long>& tempo_ldpc_ms ()
+{
+    static std::atomic<long long> v {0};
+    return v;
+}
 
 // Indice progressivo della prova del banco (cresce a ogni truth_set). Scritto
 // come ultima colonna della riga del dump: senza, le righe vere dello stesso
@@ -815,7 +826,28 @@ extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
     }
 
     const long bp_before = dec.stats ().by_bp;
+    auto const t_ldpc0 = std::chrono::steady_clock::now ();
     dec.decode_batch (llr.data (), n, bits.data (), accepted.data (), nullptr, apmask.data ());
+    tempo_ldpc_ms ().fetch_add (
+        std::chrono::duration_cast<std::chrono::microseconds> (
+            std::chrono::steady_clock::now () - t_ldpc0).count (),
+        std::memory_order_relaxed);
+    // DECODIUM_LDPC_CORSIE=1: quanto e' pieno il batch in aria. Il min-sum
+    // lavora a gruppi di 16 corsie e salta quelli vuoti, quindi il rapporto
+    // corsie_usate/corsie_totali dice quanta parte del lavoro SIMD serve
+    // davvero. Muto senza la variabile.
+    if (std::getenv ("DECODIUM_LDPC_CORSIE")) {
+        auto const& st = dec.stats ();
+        static std::atomic<long> passaggi {0};
+        if ((++passaggi % 200) == 0 && st.corsie_totali > 0)
+            std::fprintf (stderr,
+                          "[CORSIE] chiamate=%ld parole=%ld per chiamata %.1f corsie usate %lld su %lld (%.0f%%) tempo ldpc %.0f ms\n",
+                          st.chiamate, st.words,
+                          (double) st.words / (double) std::max (1L, st.chiamate),
+                          (long long) st.corsie_usate, (long long) st.corsie_totali,
+                          100.0 * (double) st.corsie_usate / (double) st.corsie_totali,
+                          tempo_ldpc_ms ().load (std::memory_order_relaxed) / 1000.0);
+    }
     // by_bp cresce su tutto il blocco: non si puo' attribuire a una singola
     // parola, quindi ntype distingue solo accettata (2) da non accettata (0).
     // Il chiamante di FT2 usa ntype solo per il diario.
