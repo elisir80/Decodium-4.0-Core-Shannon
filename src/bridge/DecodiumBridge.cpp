@@ -32971,7 +32971,7 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
             cleanSatMode,
             cleanFreqRx);
         if (sendAdif) {
-            client->logged_ADIF(adifRecord);
+            client->logged_ADIF(udpAdifRecord);
             ++wsjtxAdifTargets;
         }
         ++targets;
