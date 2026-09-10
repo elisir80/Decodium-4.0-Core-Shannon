@@ -1,13 +1,30 @@
-// ft8_bicm_genie.cpp — quanto c'e' da guadagnare in FT8 con la demodulazione
-// iterativa: il braccio "genio".
+// ft8_bicm_genie.cpp — demodulazione iterativa in FT8: genio, anello vero e
+// a priori dell'AP.
 //
-// PERCHE' SOLO IL GENIO. Su FT2 l'anello completo (tests/ft2_bicm_id.cpp) e'
-// stato implementato e misurato: +6,3% di decodifiche, mentre il genio dava
+// IL GENIO ERA IL PRIMO PASSO. Su FT2 l'anello completo (tests/ft2_bicm_id.cpp)
+// e' stato implementato e misurato: +6,3% di decodifiche, mentre il genio dava
 // +34,5%. L'iterazione cattura il 18% di quello che c'e', perche' l'estrinseca
-// la si ottiene solo da un decodificatore che ha gia' fallito. Prima di
-// rifare tutto quel lavoro su FT8 conviene sapere quanto vale il MASSIMO
-// teorico raggiungibile qui, dove il divario dell'informazione mutua e' il
-// doppio (1,63 dB su terne contro 1,08 di FT2).
+// la si ottiene solo da un decodificatore che ha gia' fallito. Il genio su FT8,
+// dove il divario dell'informazione mutua e' il doppio (1,63 dB su terne contro
+// 1,08 di FT2), ha dato 3,8x le decodifiche: il massimo qui e' molto piu' alto.
+//
+// ORA I DUE BRACCI CHE MANCAVANO (10/9/2026):
+//
+//   bicmN  L'ANELLO VERO, che su FT8 non era mai stato chiuso: dopo un
+//          tentativo fallito si prende l'estrinseca dai posteriori del min-sum
+//          e la si rimanda al demodulatore come a priori MORBIDA sugli altri
+//          bit del simbolo. Dice quanto dei 3,8x si prende davvero, invece di
+//          stimarlo per analogia col 18% di FT2.
+//
+//   ap     L'a priori dell'AP, che e' informazione VERA e gia' disponibile.
+//          Stage4 costruisce apmask/llrz per le ipotesi note (il proprio
+//          nominativo, quello del corrispondente, "CQ") e li passa SOLO al
+//          decodificatore LDPC: il demodulatore non li vede mai. Ma un bit
+//          noto dimezza le ipotesi di tono anche per gli ALTRI due bit dello
+//          stesso simbolo -- e' il genio, ristretto ai bit che l'AP conosce
+//          per davvero, e costa UNA demodulazione, non due giri.
+//          `--ap-bits K` fissa i primi K bit del messaggio (29 = "CQ" + flag,
+//          58 = i due nominativi: sono i casi veri di iaptype).
 //
 // IL GENIO IN MAX-LOG. FT8 demodula con max-log su 8 ipotesi di tono, 3 bit
 // per simbolo:
@@ -106,10 +123,23 @@ Posto posto_di (int c)
 }
 
 // Demodulatore FT8 a un simbolo (ramo nseq=1 di run_ft8_bitmetrics: max-log su
-// 8 ipotesi, metrica = |cs| del tono). Con `veri` non nullo fa il GENIO:
-// restringe le ipotesi a quelle compatibili con i due altri bit veri del
-// simbolo, cioe' esattamente due.
-void demodula (Complex const* cs, uint8_t const* veri, float* llr_out)
+// 8 ipotesi, metrica = |cs| del tono), con informazione a priori sugli ALTRI
+// due bit dello stesso simbolo. Il bit che si sta calcolando non entra mai nel
+// proprio a priori: l'uscita resta ESTRINSECA, cioe' notizia nuova per il
+// decodificatore e non l'eco della sua stessa opinione.
+//
+//   veri      bit veri del codeword; con `maschera` nulla fa il GENIO pieno
+//             (restringe a due le ipotesi compatibili), con `maschera` fa il
+//             genio ristretto ai bit segnati, che e' quello che l'AP sa.
+//   la        a priori MORBIDA in LLR (convenzione Decodium: positivo = bit 1),
+//             usata sui bit che `maschera` non copre.
+//   conv      porta un LLR nelle unita' della metrica |cs|: e' sigma/kScale
+//             della passata senza a priori, perche' la produzione emette
+//             llr = kScale * (max1-max0) / sigma. Senza questa conversione
+//             l'a priori peserebbe a caso.
+//   sigma_out se non nullo riceve la sigma di questa passata.
+void demodula (Complex const* cs, uint8_t const* veri, uint8_t const* maschera,
+               float const* la, float conv, float* llr_out, double* sigma_out = nullptr)
 {
   std::array<float, kCodeword> m {};
   for (int c = 0; c < kCodeword; ++c)
@@ -119,26 +149,34 @@ void demodula (Complex const* cs, uint8_t const* veri, float* llr_out)
       for (int i = 0; i < 8; ++i)
         s2[i] = std::abs (cs[p.simbolo * 8 + kGraymap[i]]);
 
-      // maschera degli altri due bit del simbolo, quando li conosciamo
-      int maschera = 0, valore = 0;
-      if (veri)
+      int const base = c - (2 - p.bit_ipotesi);   // primo bit del simbolo
+      int maschera_ip = 0, valore = 0;            // a priori dura
+      float peso[8] = {};                         // a priori morbida
+      for (int ib = 0; ib < 3; ++ib)
         {
-          int const base = c - (2 - p.bit_ipotesi);   // primo bit del simbolo
-          for (int ib = 0; ib < 3; ++ib)
+          int const bi = 2 - ib;
+          if (bi == p.bit_ipotesi) continue;      // mai il proprio bit
+          int const c_altro = base + ib;
+          if (veri && (!maschera || maschera[static_cast<size_t> (c_altro)]))
             {
-              int const bi = 2 - ib;
-              if (bi == p.bit_ipotesi) continue;
-              maschera |= (1 << bi);
-              if (veri[base + ib]) valore |= (1 << bi);
+              maschera_ip |= (1 << bi);
+              if (veri[static_cast<size_t> (c_altro)]) valore |= (1 << bi);
+            }
+          else if (la)
+            {
+              float const a = conv * la[c_altro];
+              for (int i = 0; i < 8; ++i)
+                if ((i & (1 << bi)) != 0) peso[i] += a;
             }
         }
 
       float max1 = -1.0e30f, max0 = -1.0e30f;
       for (int i = 0; i < 8; ++i)
         {
-          if (maschera && ((i & maschera) != valore)) continue;
-          if ((i & (1 << p.bit_ipotesi)) != 0) max1 = std::max (max1, s2[i]);
-          else max0 = std::max (max0, s2[i]);
+          if (maschera_ip && ((i & maschera_ip) != valore)) continue;
+          float const w = s2[i] + peso[i];
+          if ((i & (1 << p.bit_ipotesi)) != 0) max1 = std::max (max1, w);
+          else max0 = std::max (max0, w);
         }
       m[static_cast<size_t> (c)] = max1 - max0;
     }
@@ -148,6 +186,7 @@ void demodula (Complex const* cs, uint8_t const* veri, float* llr_out)
   for (int i = 0; i < kCodeword; ++i) s += static_cast<double> (m[static_cast<size_t> (i)]) * m[static_cast<size_t> (i)];
   double sigma = std::sqrt (std::max (s / kCodeword, 0.0));
   if (sigma <= 0.0) sigma = 1.0;
+  if (sigma_out) *sigma_out = sigma;
   for (int i = 0; i < kCodeword; ++i)
     llr_out[i] = kScale * static_cast<float> (m[static_cast<size_t> (i)] / sigma);
 }
@@ -275,24 +314,31 @@ struct Cornice
   bool ok {false};
 };
 
-Cornice prepara (QString const& messaggio, float freq, float dt_s, double snr_db, unsigned seme)
+// Con `solo_rumore` la cornice non contiene alcun segnale: il sincronismo si
+// aggancia dove capita, come farebbe su un candidato di rumore proposto dalla
+// ricerca in aria, e QUALUNQUE parola accettata e' un fantasma per costruzione.
+Cornice prepara (QString const& messaggio, float freq, float dt_s, double snr_db, unsigned seme,
+                 bool solo_rumore = false)
 {
   Cornice out;
-  decodium::txmsg::EncodedMessage const enc = decodium::txmsg::encodeFt8 (messaggio);
-  if (!enc.ok || enc.tones.isEmpty ()) return out;
-  QVector<float> const wave = decodium::txwave::generateFt8Wave (
-      enc.tones.constData (), enc.tones.size (), kNsps, kBt, static_cast<float> (kSampleRate), freq);
-  if (wave.isEmpty ()) return out;
-
-  int const off = static_cast<int> (std::lround (static_cast<double> (dt_s) * kSampleRate));
   std::vector<float> dd (static_cast<size_t> (kFrameSamples), 0.0f);
-  for (int i = 0; i < wave.size () && off + i < kFrameSamples; ++i)
-    dd[static_cast<size_t> (off + i)] = 0.5f * wave[i];
+  if (!solo_rumore)
+    {
+      decodium::txmsg::EncodedMessage const enc = decodium::txmsg::encodeFt8 (messaggio);
+      if (!enc.ok || enc.tones.isEmpty ()) return out;
+      QVector<float> const wave = decodium::txwave::generateFt8Wave (
+          enc.tones.constData (), enc.tones.size (), kNsps, kBt, static_cast<float> (kSampleRate), freq);
+      if (wave.isEmpty ()) return out;
+
+      int const off = static_cast<int> (std::lround (static_cast<double> (dt_s) * kSampleRate));
+      for (int i = 0; i < wave.size () && off + i < kFrameSamples; ++i)
+        dd[static_cast<size_t> (off + i)] = 0.5f * wave[i];
+    }
 
   double s2 = 0.0;
   for (float x : dd) s2 += static_cast<double> (x) * x;
   double const rms = std::sqrt (s2 / kFrameSamples);
-  double const sigma = rms / std::pow (10.0, snr_db / 20.0);
+  double const sigma = solo_rumore ? 0.05 : rms / std::pow (10.0, snr_db / 20.0);
   std::mt19937 rng {seme};
   std::normal_distribution<float> noise {0.0f, static_cast<float> (sigma)};
   for (float& x : dd) x += noise (rng);
@@ -304,14 +350,22 @@ Cornice prepara (QString const& messaggio, float freq, float dt_s, double snr_db
                              kMaxCand, 1, 100, cand.data (), &ncand, sbase.data ());
   if (ncand <= 0) return out;
 
-  // il candidato piu' vicino alla frequenza vera
-  int best = -1; float bestd = 1.0e30f;
-  for (int i = 0; i < ncand; ++i)
+  int best = -1;
+  if (solo_rumore)
     {
-      float const d = std::fabs (cand[static_cast<size_t> (i * 4)] - freq);
-      if (d < bestd) { bestd = d; best = i; }
+      best = 0;                                  // il primo che la ricerca propone
     }
-  if (best < 0 || bestd > 20.0f) return out;
+  else
+    {
+      // il candidato piu' vicino alla frequenza vera
+      float bestd = 1.0e30f;
+      for (int i = 0; i < ncand; ++i)
+        {
+          float const d = std::fabs (cand[static_cast<size_t> (i * 4)] - freq);
+          if (d < bestd) { bestd = d; best = i; }
+        }
+      if (best < 0 || bestd > 20.0f) return out;
+    }
 
   std::array<Complex, kNp2> cd0 {};
   int newdat = 1;
@@ -359,7 +413,7 @@ int main (int argc, char* argv[])
       QCoreApplication::setApplicationName (QStringLiteral ("ft8_bicm_genie"));
       QCommandLineParser parser;
       parser.setApplicationDescription (
-          QStringLiteral ("Limite superiore della demodulazione iterativa in FT8 (braccio genio)."));
+          QStringLiteral ("Demodulazione iterativa in FT8: genio, anello vero e a priori dell'AP."));
       parser.addHelpOption ();
       QCommandLineOption ver_opt {"verifica", "Controlla che a priori nulla riproduca la llra di produzione."};
       QCommandLineOption msg_opt {"message", "Messaggio FT8 (ripetibile).", "text"};
@@ -367,8 +421,15 @@ int main (int argc, char* argv[])
       QCommandLineOption seeds_opt {"seeds", "Semi per punto.", "n", "25"};
       QCommandLineOption freq_opt {"freq", "Frequenza audio.", "hz", "1500.0"};
       QCommandLineOption dt_opt {"dt", "Ritardo del burst in s.", "s", "0.5"};
+      QCommandLineOption giri_opt {"giri", "Giri dell'anello BICM-ID.", "n", "2"};
+      QCommandLineOption clamp_opt {"clamp", "Limite sull'estrinseca rimandata al demodulatore.", "v", "2.0"};
+      QCommandLineOption damp_opt {"damp", "Smorzamento dell'estrinseca (1 = nessuno).", "v", "1.0"};
+      QCommandLineOption ap_opt {"ap-bits", "Bit del messaggio noti all'AP (29 = CQ+flag, 58 = i due nominativi).", "n", "58"};
+      QCommandLineOption rumore_opt {"rumore", "Cornici di solo rumore: conta i fantasmi del base e dell'anello."};
       parser.addOption (ver_opt); parser.addOption (msg_opt); parser.addOption (snr_opt);
       parser.addOption (seeds_opt); parser.addOption (freq_opt); parser.addOption (dt_opt);
+      parser.addOption (giri_opt); parser.addOption (clamp_opt); parser.addOption (damp_opt);
+      parser.addOption (ap_opt); parser.addOption (rumore_opt);
       parser.process (app);
 
       QStringList messaggi = parser.values (msg_opt);
@@ -379,14 +440,37 @@ int main (int argc, char* argv[])
       int const semi = parser.value (seeds_opt).toInt (&ok);
       float const freq = parser.value (freq_opt).toFloat (&ok);
       float const dt = parser.value (dt_opt).toFloat (&ok);
+      int const giri = std::max (1, parser.value (giri_opt).toInt (&ok));
+      float const clamp = parser.value (clamp_opt).toFloat (&ok);
+      float const damp = parser.value (damp_opt).toFloat (&ok);
+      int const ap_bits = std::max (0, std::min (kBits77, parser.value (ap_opt).toInt (&ok)));
       QTextStream out {stdout};
+
+      // maschera dell'AP: i primi ap_bits bit del messaggio. Il codice e'
+      // sistematico (77 bit di messaggio, 14 di CRC, 83 di parita'), quindi
+      // sono i primi ap_bits indici del codeword -- la --verifica lo controlla.
+      std::array<uint8_t, kCodeword> mask_ap {};
+      for (int i = 0; i < ap_bits; ++i) mask_ap[static_cast<size_t> (i)] = 1;
 
       if (parser.isSet (ver_opt))
         {
           Cornice const c = prepara (messaggi.first (), freq, dt, -10.0, 1000000u);
           if (!c.ok) fail (QStringLiteral ("preparazione fallita (nessun candidato?)"));
+          // il codice e' sistematico? i primi 77 bit del codeword devono essere
+          // il messaggio, altrimenti la maschera dell'AP punta altrove.
+          decodium::txmsg::EncodedMessage const enc = decodium::txmsg::encodeFt8 (messaggi.first ());
+          if (enc.ok)
+            {
+              std::array<uint8_t, kCodeword> const cw = codeword_vero (enc.msgbits);
+              int diversi = 0;
+              for (int i = 0; i < kBits77; ++i)
+                if (cw[static_cast<size_t> (i)] != (enc.msgbits.at (i) != 0 ? 1 : 0)) ++diversi;
+              out << "codeword sistematico: " << (diversi == 0 ? "SI" : "NO")
+                  << " (" << diversi << " bit diversi sui primi 77)\n";
+              if (diversi != 0) return 1;
+            }
           std::array<float, kCodeword> mio {};
-          demodula (c.cs.data (), nullptr, mio.data ());
+          demodula (c.cs.data (), nullptr, nullptr, nullptr, 0.0f, mio.data ());
           double dmax = 0.0; int peggio = -1;
           for (int i = 0; i < kCodeword; ++i)
             {
@@ -402,15 +486,80 @@ int main (int argc, char* argv[])
           return dmax < 1e-3 ? 0 : 1;
         }
 
+      // --- fantasmi: cornici di solo rumore, ogni accettazione e' un falso.
+      // L'anello prova due volte in piu' per ogni candidato che fallisce: sono
+      // due occasioni in piu' di passare la CRC-14 per caso (una ogni 16384).
+      if (parser.isSet (rumore_opt))
+        {
+          Ft2Decoder dec {codice (), produzione_ft8 ()};
+          long prove = 0, fbase = 0, fanello = 0;
+          std::vector<uint8_t> bits (kCodeword), acc (1);
+          std::array<float, kCodeword> lf {};
+          auto accetta = [&] (float const* llrd) {
+            for (int i = 0; i < kCodeword; ++i) lf[static_cast<size_t> (i)] = -llrd[i];
+            dec.decode_batch (lf.data (), 1, bits.data (), acc.data ());
+            return acc[0] != 0;
+          };
+          for (int s = 0; s < semi; ++s)
+            {
+              Cornice const c = prepara (messaggi.first (), freq, dt, 0.0,
+                                         static_cast<unsigned> (3000000 + s), true);
+              if (!c.ok) continue;
+              ++prove;
+              std::array<float, kCodeword> l {}, la {};
+              double sigma0 = 1.0;
+              demodula (c.cs.data (), nullptr, nullptr, nullptr, 0.0f, l.data (), &sigma0);
+              float const conv = static_cast<float> (sigma0) / kScale;
+              bool falso = accetta (l.data ());
+              if (falso) ++fbase;
+              bool falso_anello = falso;
+              for (int g = 0; g < giri && !falso_anello; ++g)
+                {
+                  for (int i = 0; i < kCodeword; ++i) lf[static_cast<size_t> (i)] = -l[static_cast<size_t> (i)];
+                  dec.decode_batch (lf.data (), 1, bits.data (), acc.data ());
+                  int16_t const* post = dec.posterior (0);
+                  for (int i = 0; i < kCodeword; ++i)
+                    {
+                      float const p = static_cast<float> (post[i]) / Ft2Decoder::kPosteriorFix;
+                      float const est = p - lf[static_cast<size_t> (i)];
+                      float const v = -est * damp;
+                      la[static_cast<size_t> (i)] = std::max (-clamp, std::min (clamp, v));
+                    }
+                  demodula (c.cs.data (), nullptr, nullptr, la.data (), conv, l.data ());
+                  falso_anello = accetta (l.data ());
+                }
+              if (falso_anello) ++fanello;
+              if ((s % 500) == 499) { out << "  " << prove << " cornici...\n"; out.flush (); }
+            }
+          out << "\ncornici di solo rumore: " << prove << " (giri=" << giri << ")\n";
+          out << "| configurazione | fantasmi | per mille |\n|---|---:|---:|\n";
+          out << "| base (produzione) | " << fbase << " | "
+              << QString::number (1000.0 * static_cast<double> (fbase) / std::max<long> (1, prove), 'f', 2) << " |\n";
+          out << "| base + anello BICM-ID | " << fanello << " | "
+              << QString::number (1000.0 * static_cast<double> (fanello) / std::max<long> (1, prove), 'f', 2) << " |\n";
+          return 0;
+        }
+
       QList<double> const snrs = lista (parser.value (snr_opt));
-      out << "semi=" << semi << " messaggi=" << messaggi.size () << "\n\n";
-      out << "| SNR | prove | base | genio | coerente | unione |\n|---:|---:|---:|---:|---:|---:|\n";
+      out << "semi=" << semi << " messaggi=" << messaggi.size ()
+          << " giri=" << giri << " clamp=" << clamp << " damp=" << damp
+          << " ap-bits=" << ap_bits << "\n\n";
+      out << "| SNR | prove | base |";
+      for (int g = 1; g <= giri; ++g) out << " bicm" << g << " |";
+      out << " apdec | apdem | apdue | genio | coerente | unione |\n|---:|---:|---:|";
+      for (int g = 0; g < giri; ++g) out << "---:|";
+      out << "---:|---:|---:|---:|---:|---:|\n";
 
       Ft2Decoder dec {codice (), produzione_ft8 ()};
       long tp = 0, tb = 0, tg = 0, tc = 0, tu = 0;
+      long tapdec = 0, tapdem = 0, tapdue = 0;
+      long fbase = 0, fbicm = 0;      // parole accettate ma SBAGLIATE
+      std::vector<long> tot_bicm (static_cast<size_t> (giri), 0);
       for (double snr : snrs)
         {
           long prove = 0, base = 0, genio = 0, coer = 0, unione = 0;
+          long apdec = 0, apdem = 0, apdue = 0;
+          std::vector<long> bicm (static_cast<size_t> (giri), 0);
           for (QString const& m : messaggi)
             {
               decodium::txmsg::EncodedMessage const enc = decodium::txmsg::encodeFt8 (m);
@@ -423,18 +572,86 @@ int main (int argc, char* argv[])
                   ++prove;
                   std::array<float, kCodeword> l {}, lf {};
                   std::vector<uint8_t> bits (kCodeword), acc (1);
-                  auto tenta = [&] (float const* llrd) {
+                  // `con_ap` riproduce quello che Stage4 fa GIA' oggi: i bit
+                  // noti forzati a +-apmag (1,1 volte il massimo, come
+                  // FtxDecodeBookkeeping.cpp:2925) e apmask al decodificatore,
+                  // che cosi' non li flippa nella ricerca OSD.
+                  // `falso` (se passato) conta le parole ACCETTATE ma diverse
+                  // dalla vera: sono i fantasmi in presenza di segnale, che in
+                  // aria contano piu' di quelli sul rumore puro.
+                  auto tenta = [&] (float const* llrd, bool con_ap = false, long* falso = nullptr) {
                     for (int i = 0; i < kCodeword; ++i) lf[static_cast<size_t> (i)] = -llrd[i];
-                    dec.decode_batch (lf.data (), 1, bits.data (), acc.data ());
+                    if (con_ap && ap_bits > 0)
+                      {
+                        float amax = 0.0f;
+                        for (int i = 0; i < kCodeword; ++i) amax = std::max (amax, std::fabs (lf[static_cast<size_t> (i)]));
+                        float const apmag = 1.1f * amax;
+                        // in fastldpc il segno e' invertito: positivo = bit 0
+                        for (int i = 0; i < ap_bits; ++i)
+                          lf[static_cast<size_t> (i)] = vero[static_cast<size_t> (i)] ? -apmag : apmag;
+                      }
+                    dec.decode_batch (lf.data (), 1, bits.data (), acc.data (), nullptr,
+                                      (con_ap && ap_bits > 0) ? mask_ap.data () : nullptr);
                     if (!acc[0]) return false;
                     for (int i = 0; i < kCodeword; ++i)
-                      if (bits[static_cast<size_t> (i)] != vero[static_cast<size_t> (i)]) return false;
+                      if (bits[static_cast<size_t> (i)] != vero[static_cast<size_t> (i)])
+                        {
+                          if (falso) ++*falso;
+                          return false;
+                        }
                     return true;
                   };
-                  demodula (c.cs.data (), nullptr, l.data ());
-                  bool const ok_base = tenta (l.data ());
+                  double sigma0 = 1.0;
+                  demodula (c.cs.data (), nullptr, nullptr, nullptr, 0.0f, l.data (), &sigma0);
+                  bool const ok_base = tenta (l.data (), false, &fbase);
                   if (ok_base) ++base;
-                  demodula (c.cs.data (), vero.data (), l.data ());
+                  // un LLR vale sigma/kScale unita' della metrica |cs|
+                  float const conv = static_cast<float> (sigma0) / kScale;
+
+                  // ANELLO BICM-ID: giri con l'estrinseca del decodificatore
+                  {
+                    std::array<float, kCodeword> li {}, la {};
+                    demodula (c.cs.data (), nullptr, nullptr, nullptr, 0.0f, li.data ());
+                    bool fatto = ok_base;
+                    for (int g = 0; g < giri; ++g)
+                      {
+                        if (!fatto)
+                          {
+                            for (int i = 0; i < kCodeword; ++i) lf[static_cast<size_t> (i)] = -li[static_cast<size_t> (i)];
+                            dec.decode_batch (lf.data (), 1, bits.data (), acc.data ());
+                            int16_t const* post = dec.posterior (0);
+                            for (int i = 0; i < kCodeword; ++i)
+                              {
+                                float const p = static_cast<float> (post[i]) / Ft2Decoder::kPosteriorFix;
+                                float const est = p - lf[static_cast<size_t> (i)];
+                                // -> convenzione Decodium, smorzata e limitata:
+                                // un'estrinseca enorme e' quasi sempre un
+                                // artefatto della quantizzazione.
+                                float const v = -est * damp;
+                                la[static_cast<size_t> (i)] = std::max (-clamp, std::min (clamp, v));
+                              }
+                            demodula (c.cs.data (), nullptr, nullptr, la.data (), conv, li.data ());
+                            fatto = tenta (li.data (), false, &fbicm);
+                          }
+                        if (fatto) ++bicm[static_cast<size_t> (g)];
+                      }
+                  }
+
+                  // A PRIORI DELL'AP, tre bracci per non sbagliare riferimento:
+                  //   apdec  l'AP al solo decodificatore = quello che Stage4 fa OGGI
+                  //   apdem  l'AP al solo demodulatore
+                  //   apdue  a tutti e due = la proposta.
+                  // Il guadagno da citare e' apdue - apdec, non apdue - base.
+                  if (ap_bits > 0)
+                    {
+                      demodula (c.cs.data (), nullptr, nullptr, nullptr, 0.0f, l.data ());
+                      if (tenta (l.data (), true)) ++apdec;
+                      demodula (c.cs.data (), vero.data (), mask_ap.data (), nullptr, 0.0f, l.data ());
+                      if (tenta (l.data ())) ++apdem;
+                      if (tenta (l.data (), true)) ++apdue;
+                    }
+
+                  demodula (c.cs.data (), vero.data (), nullptr, nullptr, 0.0f, l.data ());
                   if (tenta (l.data ())) ++genio;
                   // ramo coerente REALIZZABILE: fase dai Costas
                   demodula_coerente_ft8 (c.cs.data (), l.data ());
@@ -443,13 +660,26 @@ int main (int argc, char* argv[])
                   if (ok_base || ok_coer) ++unione;
                 }
             }
-          out << "| " << snr << " | " << prove << " | " << base << " | " << genio
+          out << "| " << snr << " | " << prove << " | " << base << " | ";
+          for (int g = 0; g < giri; ++g) out << bicm[static_cast<size_t> (g)] << " | ";
+          out << apdec << " | " << apdem << " | " << apdue << " | " << genio
               << " | " << coer << " | " << unione << " |\n";
           out.flush ();
           tp += prove; tb += base; tg += genio; tc += coer; tu += unione;
+          tapdec += apdec; tapdem += apdem; tapdue += apdue;
+          for (int g = 0; g < giri; ++g) tot_bicm[static_cast<size_t> (g)] += bicm[static_cast<size_t> (g)];
         }
-      out << "\ntotale su " << tp << " prove: base " << tb << ", genio " << tg
-          << ", coerente " << tc << ", unione " << tu << "\n";
+      out << "\ntotale su " << tp << " prove: base " << tb;
+      for (int g = 0; g < giri; ++g) out << ", bicm" << (g + 1) << " " << tot_bicm[static_cast<size_t> (g)];
+      out << ", apdec " << tapdec << ", apdem " << tapdem << ", apdue " << tapdue
+          << ", genio " << tg << ", coerente " << tc << ", unione " << tu << "\n";
+      if (tapdec > 0)
+        out << "guadagno vero dell'AP al demodulatore: " << (tapdue - tapdec)
+            << " su " << tapdec << " = "
+            << (100.0 * static_cast<double> (tapdue - tapdec) / static_cast<double> (tapdec))
+            << "%\n";
+      out << "parole accettate ma SBAGLIATE: base " << fbase << ", anello " << fbicm
+          << " (su " << tp << " prove)\n";
       return 0;
     }
   catch (std::exception const& e)
