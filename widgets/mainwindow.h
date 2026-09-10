@@ -213,6 +213,7 @@ public:
   bool legacyHoldTxFreq() const;
   void legacySetTxWatchdogMinutes(int minutes);
   void legacySetAutoCq(bool enabled);
+  void legacySetAutoCqBurstCadence(int callsPerBurst, int listeningCycles);
   void legacySetDecodeDepthBits(int bits);
   void legacySetFt8DeepThreadPenalty(bool enabled);
   void legacySetCqOnly(bool enabled);
@@ -1129,6 +1130,12 @@ private:
   bool    m_bDoubleClicked;
   bool    m_bCallingCQ;
   bool    m_autoCQ;
+  int     m_autoCqBurstCallsPerBurst {0};
+  int     m_autoCqBurstListeningCycles {0};
+  int     m_autoCqBurstCompletedCalls {0};
+  qint64  m_autoCqBurstListenUntilMs {0};
+  bool    m_autoCqBurstPttLatched {false};
+  QString m_autoCqBurstModeSnapshot;
   bool    m_ft2DeferredLogPending {false};   // AutoCQ: delay log/CQ restart while repeating RR73/73
   bool    m_logAfterOwn73 {false};           // Partner already closed; send our final 73 once, then log immediately
   QString m_autoCqLockedCall;
@@ -1142,6 +1149,12 @@ private:
   bool legacyWidgetLogicallyVisible (QWidget const * widget) const;
   bool legacyAutoSeqEnabled () const;
   bool legacyRespondSelectionEnabled () const;
+  bool autoCqBurstCadenceEnabled () const;
+  bool isAutoCqBurstPureCq () const;
+  void resetAutoCqBurstCadenceState ();
+  void ensureAutoCqBurstCadenceState ();
+  bool blockAutoCqBurstPureCqStart ();
+  void updateAutoCqBurstCadencePttEdges ();
   bool isRecentAutoCqDuplicate (QString const& call) const;
   void rememberRecentAutoCqAbandoned (QString const& call, Frequency dialFreq, QString const& mode);
   void rememberRecentAutoCqWorked (QString const& call, Frequency dialFreq, QString const& mode);

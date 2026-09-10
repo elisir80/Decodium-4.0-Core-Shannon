@@ -635,6 +635,10 @@ ApplicationWindow {
         // (3 colonne + TX area) negli slot-host indicati dalla mappa (default = ordine
         // attuale -> no-op; una mappa salvata a 3 elementi migra con "txpanel" in slot 3).
         Qt.callLater(applyClassicColumnOrder)
+        // Tell the native stall watchdog whether this top-level window can
+        // actually present frames before it starts sampling the event loop.
+        bridge.setMainWindowRenderActive(visibility !== Window.Hidden
+                                         && visibility !== Window.Minimized)
         bridge.notifyMainQmlReady()
         startupLog("bridge notified ready")
         if (startupVisualStagingEnabled) {
@@ -1073,7 +1077,12 @@ ApplicationWindow {
         scheduleNormalWindowGeometryCapture()
         scheduleWindowStateSave()
     }
-    onVisibilityChanged: {
+    onVisibilityChanged: function(visibility) {
+        if (bridge) {
+            const renderActive = visibility !== Window.Hidden
+                    && visibility !== Window.Minimized
+            bridge.setMainWindowRenderActive(renderActive)
+        }
         if (windowStateRestoreInProgress)
             return
         if (visibility === Window.Maximized) {

@@ -1556,6 +1556,7 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
                 connection = QMetaObject::Connection();
             }
         };
+        disconnectMetricSignal(m_qsgVisibilityConnection);
         disconnectMetricSignal(m_qsgFrameConnection);
         disconnectMetricSignal(m_qsgBeforeSyncConnection);
         disconnectMetricSignal(m_qsgBeforeRenderConnection);
@@ -1587,7 +1588,7 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
             m_qsgAfterRenderUs.store(monotonicUs(), std::memory_order_relaxed);
             m_qsgAfterRenderCount.fetch_add(1, std::memory_order_relaxed);
         }, Qt::DirectConnection);
-        connect(win, &QWindow::visibilityChanged, this, [this](QWindow::Visibility visibility) {
+        m_qsgVisibilityConnection = connect(win, &QWindow::visibilityChanged, this, [this](QWindow::Visibility visibility) {
             const bool active = visibility != QWindow::Hidden
                 && visibility != QWindow::Minimized;
             {
@@ -1599,24 +1600,40 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
                 m_pendingWaterfallRows.clear();
                 m_hasPendingPcmFrame = false;
                 m_lastUpdateNs = 0;
+                if (!active && m_gpuFft) {
+                    // A readback submitted just before minimisation cannot
+                    // describe the frame after restore. Invalidate it rather
+                    // than letting the RHI timeout path mistake suspension
+                    // for a failed GPU on Metal or D3D.
+                    m_gpuFft->readbackPending = false;
+                    m_gpuFft->readbackPendingSinceMs = 0;
+                    ++m_gpuFft->readbackSerial;
+                }
                 if (active) {
                     m_spectrumDirty = true;
                     m_spectrumOverlayDirty = true;
-                    m_geometryDirty = true;
                 } else {
                     m_spectrumDirty = false;
                 }
             }
-            if (!active) {
-                // Drop RHI compute/readback state; it is tied to the scene
-                // graph that may be suspended or recreated while minimised.
-                releaseGpuFftResources();
+            // Do not include the interval while the window could not present
+            // in the QSG frame timing metrics.
+            m_qsgFrameTimingResetPending.store(true, std::memory_order_release);
+            qInfo().noquote()
+                << "[PANDBG] Panadapter render"
+                << (active ? "resumed" : "suspended")
+                << "visibility=" << static_cast<int>(visibility)
+                << "backlog_dropped=1";
+            if (!active)
                 return;
-            }
             QMetaObject::invokeMethod(this, [this]() { update(); }, Qt::QueuedConnection);
-        }, Qt::UniqueConnection);
+        });
         m_qsgFrameConnection = connect(win, &QQuickWindow::frameSwapped, this, [this]() {
             qint64 const nowUs = monotonicUs();
+            if (m_qsgFrameTimingResetPending.exchange(false, std::memory_order_acq_rel)) {
+                m_qsgFrameLastSwapUs = nowUs;
+                return;
+            }
             ++m_qsgSwapCount;
             if (m_qsgFrameLastSwapUs > 0)
                 recordQsgFrameMetric(nowUs - m_qsgFrameLastSwapUs, nowUs);
@@ -1627,6 +1644,8 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
 
 PanadapterItem::~PanadapterItem()
 {
+    if (m_qsgVisibilityConnection)
+        QObject::disconnect(m_qsgVisibilityConnection);
     if (m_qsgFrameConnection)
         QObject::disconnect(m_qsgFrameConnection);
     if (m_qsgBeforeSyncConnection)
@@ -2421,8 +2440,23 @@ void PanadapterItem::addSpectrumData(const QVector<float>& dbValues,
                                       float minDb, float maxDb,
                                       float freqMinHz, float freqMaxHz)
 {
+    if (dbValues.isEmpty())
+        return;
+
+    // The CPU fallback is also fed while a QQuickWindow is minimised. Do not
+    // spend time calculating auto-range/averages or leave rows to be replayed
+    // after the window is restored; the next live frame is the only useful
+    // one then.
+    if (isWindowRenderSuspended()) {
+        QMutexLocker lock(&m_mutex);
+        m_pendingWaterfallRows.clear();
+        m_hasPendingPcmFrame = false;
+        m_spectrumDirty = false;
+        m_lastUpdateNs = 0;
+        return;
+    }
+
     QMutexLocker lock(&m_mutex);
-    if (dbValues.isEmpty()) return;
 
     qint64 const nowMs = monotonicMs();
     bool const gpuFftOwnsSpectrum =
@@ -2644,6 +2678,18 @@ void PanadapterItem::prepareGpuSpectrumRetry()
 // Compatibilità: riceve valori 0-1 normalizzati e li converte in dB
 void PanadapterItem::addSpectrumDataNorm(const QVector<float>& normValues)
 {
+    if (normValues.isEmpty())
+        return;
+
+    if (isWindowRenderSuspended()) {
+        QMutexLocker lock(&m_mutex);
+        m_pendingWaterfallRows.clear();
+        m_hasPendingPcmFrame = false;
+        m_spectrumDirty = false;
+        m_lastUpdateNs = 0;
+        return;
+    }
+
     {
         QMutexLocker lock(&m_mutex);
         qint64 const nowMs = monotonicMs();
@@ -2752,6 +2798,9 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
             return true;
     }
 
+    if (!isFrameConsumer())
+        return true;
+
     QString reason;
     if (!gpuFftSupported(&reason)) {
         if (!m_loggedGpuFftRejected) {
@@ -2845,7 +2894,24 @@ bool PanadapterItem::addPcmFrame(const QVector<float>& samples,
 // deve poterlo escludere dal conteggio delle accettazioni.
 bool PanadapterItem::isFrameConsumer() const
 {
-    return isVisible() && window() && width() > 0.0 && height() > 0.0;
+    QQuickWindow* const win = window();
+    if (!isVisible() || !win || width() <= 0.0 || height() <= 0.0)
+        return false;
+
+    // QQuickItem remains visible while its top-level window is minimised.
+    // Do not submit frames that the RHI backend cannot present: on
+    // restoration, only the next live SDR frame should be rendered.
+    return !isWindowRenderSuspended();
+}
+
+bool PanadapterItem::isWindowRenderSuspended() const
+{
+    QQuickWindow* const win = window();
+    if (!win)
+        return false;
+
+    QWindow::Visibility const visibility = win->visibility();
+    return visibility == QWindow::Hidden || visibility == QWindow::Minimized;
 }
 
 bool PanadapterItem::addPcmFrameI16(const short* ring,
@@ -2865,7 +2931,7 @@ bool PanadapterItem::addPcmFrameI16(const short* ring,
             return true;
     }
 
-    if (!isVisible() || !window() || width() <= 0.0 || height() <= 0.0)
+    if (!isFrameConsumer())
         return true;
 
     QString reason;
@@ -4927,7 +4993,7 @@ void PanadapterItem::recordGpuFftCompute()
                 int const timeoutCount = ++m_gpuFftReadbackTimeouts;
                 if (timeoutCount >= gpuFftTimeoutLimit()) {
                     disableGpuFft = true;
-                    disableReason = QStringLiteral("Metal GPU FFT readback timeout count=%1 age=%2ms threshold=%3ms")
+                    disableReason = QStringLiteral("RHI GPU FFT readback timeout count=%1 age=%2ms threshold=%3ms")
                         .arg(timeoutCount)
                         .arg(pendingAgeMs)
                         .arg(timeoutMs);
@@ -5631,7 +5697,7 @@ void PanadapterItem::recordGpuFftCompute()
                 }
                 if (slowCount >= gpuFftSlowReadbackLimit()) {
                     disableAfterFrameReason =
-                        QStringLiteral("Metal GPU FFT readback too slow count=%1 age=%2ms threshold=%3ms")
+                        QStringLiteral("RHI GPU FFT readback too slow count=%1 age=%2ms threshold=%3ms")
                             .arg(slowCount)
                             .arg(readbackAgeMs)
                             .arg(slowThresholdMs);

@@ -15,6 +15,9 @@
 // AutoCQ generico (reuse esistente):
 //   - bridge.autoCqMaxCycles        (0 = infinito)
 //   - bridge.autoCqPauseSec
+// Cadenza AutoCQ a raffiche (persistente):
+//   - bridge.autoCqBurstCalls        (0 = ACQ continuo)
+//   - bridge.autoCqListenCycles      (0 = cadenza disattivata)
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -694,6 +697,52 @@ Window {
                         Layout.preferredWidth: 100
                         onValueModified: if (bridge) bridge.autoCqPauseSec = value
                     }
+                }
+                Text {
+                    text: qsTr("CQ burst / listening cadence")
+                    color: callDialog.cMuted
+                    font.pixelSize: 11
+                    font.italic: true
+                    Layout.topMargin: 6
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        text: qsTr("CQs per burst (0 = continuous)")
+                        color: callDialog.cMuted
+                        font.pixelSize: 12
+                        Layout.preferredWidth: 180
+                    }
+                    StyledSpinBox {
+                        from: 0; to: 999
+                        value: bridge ? bridge.autoCqBurstCalls : 0
+                        Layout.preferredWidth: 100
+                        onValueModified: if (bridge) bridge.autoCqBurstCalls = value
+                    }
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    Text {
+                        text: qsTr("Listening cycles between bursts")
+                        color: callDialog.cMuted
+                        font.pixelSize: 12
+                        Layout.preferredWidth: 180
+                    }
+                    StyledSpinBox {
+                        from: 0; to: 999
+                        value: bridge ? bridge.autoCqListenCycles : 0
+                        Layout.preferredWidth: 100
+                        onValueModified: if (bridge) bridge.autoCqListenCycles = value
+                    }
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Set both values above zero to enable this cadence. Valid callers are still answered while listening.")
+                    color: callDialog.cMuted
+                    font.pixelSize: 10
+                    wrapMode: Text.WordWrap
                 }
             }
 

@@ -316,6 +316,10 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(int  txDisabledMask   READ txDisabledMask   NOTIFY txDisabledMaskChanged)
     Q_PROPERTY(int  autoCqMaxCycles  READ autoCqMaxCycles  WRITE setAutoCqMaxCycles  NOTIFY autoCqMaxCyclesChanged)
     Q_PROPERTY(int  autoCqPauseSec   READ autoCqPauseSec   WRITE setAutoCqPauseSec   NOTIFY autoCqPauseSecChanged)
+    // Burst cadence for the ordinary ACQ button.  Both values must be non-zero
+    // before it changes the historical continuous-CQ behaviour.
+    Q_PROPERTY(int  autoCqBurstCalls READ autoCqBurstCalls WRITE setAutoCqBurstCalls NOTIFY autoCqBurstCallsChanged)
+    Q_PROPERTY(int  autoCqListenCycles READ autoCqListenCycles WRITE setAutoCqListenCycles NOTIFY autoCqListenCyclesChanged)
     // WSJT-Z-style Auto Call: automatically answer eligible CQ callers.
     Q_PROPERTY(bool autoCallEnabled READ autoCallEnabled WRITE setAutoCallEnabled NOTIFY autoCallEnabledChanged)
     Q_PROPERTY(int autoCallMaxQsos READ autoCallMaxQsos WRITE setAutoCallMaxQsos NOTIFY autoCallMaxQsosChanged)
@@ -919,6 +923,10 @@ public:
     void setAutoCqMaxCycles(int v) { if (m_autoCqMaxCycles != v) { m_autoCqMaxCycles = qBound(0, v, 999); emit autoCqMaxCyclesChanged(); } }
     int  autoCqPauseSec()    const { return m_autoCqPauseSec; }
     void setAutoCqPauseSec(int v) { if (m_autoCqPauseSec != v) { m_autoCqPauseSec = qBound(0, v, 300); emit autoCqPauseSecChanged(); } }
+    int  autoCqBurstCalls() const { return m_autoCqBurstCalls; }
+    void setAutoCqBurstCalls(int v);
+    int  autoCqListenCycles() const { return m_autoCqListenCycles; }
+    void setAutoCqListenCycles(int v);
     bool autoCallEnabled() const { return m_autoCallEnabled; }
     void setAutoCallEnabled(bool v);
     int autoCallMaxQsos() const { return m_autoCallMaxQsos; }
@@ -1127,6 +1135,19 @@ public:
     // only the legacy FT8threads setting and could therefore consume every
     // logical core even though the QML bridge had reserved cores for the UI.
     Q_INVOKABLE int effectiveFtThreadLimitForDecode() const;
+    // A minimised/hidden QQuickWindow does not present scene-graph frames.
+    // Keep the watchdogs from mistaking that intentional pause for a real
+    // GUI stall. The epoch changes on every visibility transition so a
+    // watchdog resumed before or after the QML handler can reset its clock.
+    Q_INVOKABLE void setMainWindowRenderActive(bool active);
+    bool mainWindowRenderActive() const
+    {
+        return m_mainWindowRenderActive.load(std::memory_order_acquire);
+    }
+    quint64 mainWindowRenderEpoch() const
+    {
+        return m_mainWindowRenderEpoch.load(std::memory_order_acquire);
+    }
     void noteMainThreadMicroStall(qint64 deltaMs);
     Q_INVOKABLE void setFtThreads(int v);
     Q_INVOKABLE void setFtThreadsAuto(bool enabled);
@@ -2006,6 +2027,8 @@ signals:
     void processPriorityChanged();   // 1.0.388
     void autoCqMaxCyclesChanged();
     void autoCqPauseSecChanged();
+    void autoCqBurstCallsChanged();
+    void autoCqListenCyclesChanged();
     void autoCallEnabledChanged();
     void autoCallMaxQsosChanged();
     void autoCallQsoCountChanged();
@@ -2398,6 +2421,13 @@ private:
                              const QString& decodeMode) const;
     QString autoCqBandKeyForFrequency(double freqHz) const;
     bool autoCqCanRestartTx6() const;
+    bool autoCqBurstCadenceEnabled() const;
+    bool autoCqBurstListening();
+    bool isAutoCqBurstPureCq(int txNumber, const QString& message) const;
+    void resetAutoCqBurstCadence(const QString& reason);
+    void noteAutoCqBurstCqCompleted(bool completedPureAutoCqCq,
+                                    const QString& reason, bool error);
+    void applyAutoCqBurstCadenceToLegacyBackend();
     QString startupModeForFrequency(double dialFrequency) const;
     double workingFrequencyForBandMode(const QString& bandLambda, const QString& mode) const;
     void maybeApplyStartupModeFromRigFrequency(double dialFrequency, bool authoritativeRigFrequency = false);
@@ -3088,6 +3118,8 @@ private:
     QElapsedTimer m_uiStallClock;
     qint64 m_lastUiStallTickMs {0};
     qint64 m_lastUiStallLogMs {0};
+    std::atomic_bool m_mainWindowRenderActive {true};
+    std::atomic<quint64> m_mainWindowRenderEpoch {0};
     double m_localCatFrequencyTargetHz {0.0};
     double m_localCatFrequencyPreviousHz {0.0};
     QString m_currentCatLogicalBand;
@@ -3658,6 +3690,15 @@ private:
     int  m_autoCqMaxCycles  {0};   // 0 = infinito, >0 = max cicli CQ
     int  m_autoCqPauseSec   {0};   // pausa (s) tra cicli CQ (0 = nessuna pausa)
     int  m_autoCqCycleCount {0};   // contatore cicli CQ corrente
+    // A separate, persistent cadence for AutoCQ: N completed CQs followed by
+    // M full receive periods. Defaults preserve continuous AutoCQ exactly.
+    int     m_autoCqBurstCalls {0};
+    int     m_autoCqListenCycles {0};
+    int     m_autoCqBurstCompletedCalls {0};
+    qint64  m_autoCqBurstListenUntilMs {0};
+    QString m_autoCqBurstListenMode;
+    quint64 m_autoCqBurstSerial {0};
+    bool    m_activeTxWasPureAutoCqCq {false};
 
     // WSJT-Z-style Auto Call session state. The feature is deliberately
     // decode/control-only: it never touches the waterfall or panadapter path.

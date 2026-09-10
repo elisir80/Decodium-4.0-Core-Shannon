@@ -7614,6 +7614,40 @@ void DecodiumBridge::setMaxCallerRetries(int v)
     bridgeLog(QStringLiteral("[FT2WS] Caller retries cap = %1").arg(clamped));
 }
 
+void DecodiumBridge::setAutoCqBurstCalls(int v)
+{
+    int const clamped = qBound(0, v, 999);
+    if (m_autoCqBurstCalls == clamped) {
+        return;
+    }
+
+    m_autoCqBurstCalls = clamped;
+    resetAutoCqBurstCadence(QStringLiteral("calls-per-burst changed"));
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("AutoCqBurstCalls"), clamped);
+    applyAutoCqBurstCadenceToLegacyBackend();
+    emit autoCqBurstCallsChanged();
+    bridgeLog(QStringLiteral("AutoCQ burst: calls per burst = %1").arg(clamped));
+}
+
+void DecodiumBridge::setAutoCqListenCycles(int v)
+{
+    int const clamped = qBound(0, v, 999);
+    if (m_autoCqListenCycles == clamped) {
+        return;
+    }
+
+    m_autoCqListenCycles = clamped;
+    resetAutoCqBurstCadence(QStringLiteral("listening cycles changed"));
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("AutoCqListenCycles"), clamped);
+    applyAutoCqBurstCadenceToLegacyBackend();
+    emit autoCqListenCyclesChanged();
+    bridgeLog(QStringLiteral("AutoCQ burst: listening cycles = %1").arg(clamped));
+}
+
 // 1.0.446 - P1-5: cap "Caller retries" duro anche con TX watchdog ON (default ON su fork da 1.0.493).
 void DecodiumBridge::setCallerRetriesAlwaysHard(bool v)
 {
@@ -11946,6 +11980,8 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                                                     : QStringLiteral("unknown error")));
         return false;
     }
+
+    applyAutoCqBurstCadenceToLegacyBackend();
 
     if (createdNow) {
         connect(m_legacyBackend, &DecodiumLegacyBackend::waterfallRowReady,
@@ -17690,6 +17726,8 @@ void DecodiumBridge::setMode(const QString& v) {
             m_periodTimer->stop();
         }
 
+        resetAutoCqBurstCadence(QStringLiteral("application mode changed %1->%2")
+                                    .arg(previousMode, normalizedMode));
         m_mode = normalizedMode;
 
         // Entrando in RTTY si commuta la radio, perche' sceglierlo dal
@@ -17844,12 +17882,14 @@ void DecodiumBridge::setMode(const QString& v) {
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(normalizedMode == QStringLiteral("FT2"));
             m_legacyBackend->setMode(normalizedMode);
+            applyAutoCqBurstCadenceToLegacyBackend();
             m_legacyStartupModeGuard = normalizedMode.trimmed();
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
         } else if (legacyBackendAvailable() && normalizedMode != QStringLiteral("RTTY")) {
             m_legacyBackend->setStationIdentity(m_callsign, m_grid);
             m_legacyBackend->setFt2DecodeEnabled(false);
             m_legacyBackend->setMode(QStringLiteral("FT2"));
+            applyAutoCqBurstCadenceToLegacyBackend();
             m_legacyStartupModeGuard = QStringLiteral("FT2");
             m_legacyStartupModeGuardUntilMs = QDateTime::currentMSecsSinceEpoch() + 6000;
         }
@@ -19615,6 +19655,9 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
     }
     if (m_autoCqRepeat != v) {
         m_autoCqRepeat = v;
+        resetAutoCqBurstCadence(m_autoCqRepeat
+                                     ? QStringLiteral("AutoCQ enabled")
+                                     : QStringLiteral("AutoCQ disabled"));
         if (m_autoCqRepeat) {
             bool const cqOrCompletedState = m_currentTx == 6
                 || m_qsoProgress <= 1
@@ -19647,6 +19690,7 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
         if (usingLegacyBackendForTx()) {
             syncLegacyBackendTxState();
             m_legacyBackend->setAutoCq(v);
+            applyAutoCqBurstCadenceToLegacyBackend();
         }
         if (m_autoCqRepeat) {
             if (!m_txEnabled) {
@@ -21701,6 +21745,14 @@ void DecodiumBridge::updateUiStallDiagnostics()
     }
 
     qint64 const nowMonoMs = m_uiStallClock.elapsed();
+    if (!mainWindowRenderActive()) {
+        // A hidden/minimised QQuickWindow may suspend its event loop. Reset
+        // the baseline so that intentional non-presentation is never fed to
+        // the CPU/GPU pressure guards as a UI freeze.
+        m_lastUiStallTickMs = nowMonoMs;
+        m_recentShortStalls.clear();
+        return;
+    }
     qint64 const gapMs = m_lastUiStallTickMs > 0 ? nowMonoMs - m_lastUiStallTickMs : 0;
     m_lastUiStallTickMs = nowMonoMs;
     // 1.0.178 — Relax UI stall thresholds: il valore 360/700/10000 era
@@ -22354,6 +22406,8 @@ bool DecodiumBridge::startBridgeAudioForLegacyDigitalTx(const QString& reason)
     m_lastTxActivityUtc = QDateTime::currentDateTimeUtc();
     m_activeTxNumber = m_currentTx;
     m_activeTxMessage = msg.trimmed();
+    // The embedded backend owns its own PTT-edge cadence accounting.
+    m_activeTxWasPureAutoCqCq = false;
     phaseTimer.restart();
     syncActiveCatTxSplitFrequency(QStringLiteral("legacyBridgeTxAudio"));
     syncMs = phaseTimer.elapsed();
@@ -24244,6 +24298,9 @@ void DecodiumBridge::mamDispatchPeriod()
     // (4) Costruisci i payload per gli slot attivi (cap m_mamMaxStreams).
     m_mamMessages.clear();
     m_mamF0sHz.clear();
+    // A listening interval suppresses only new CQ streams. Existing MAM QSO
+    // slots remain free to send their directed reply/signoff traffic.
+    bool const autoCqBurstListeningNow = autoCqBurstListening();
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     QVector<int> txSlotIdx;
     for (int i = 0; i < m_mamSlots.size() && m_mamMessages.size() < m_mamMaxStreams; ++i) {
@@ -24298,6 +24355,7 @@ void DecodiumBridge::mamDispatchPeriod()
     }
     if (m_mamCqSlots
         && m_autoCqRepeat
+        && !autoCqBurstListeningNow
         && !cqMessage.isEmpty()
         && m_mamMessages.size() < m_mamMaxStreams) {
         int const want = m_mamMaxStreams - m_mamMessages.size();
@@ -24323,7 +24381,7 @@ void DecodiumBridge::mamDispatchPeriod()
         // frequenza TX, restando nel path MAM (non deleghiamo a
         // checkAndStartPeriodicTx per evitare ricorsione, dato che quello
         // rientra in mamDispatchPeriod).
-        if (m_autoCqRepeat && !cqMessage.isEmpty()) {
+        if (m_autoCqRepeat && !autoCqBurstListeningNow && !cqMessage.isEmpty()) {
             m_mamMessages.append(cqMessage);
             m_mamF0sHz.append(qBound(200, m_txFrequency > 0 ? m_txFrequency : m_rxFrequency, 4000));
             bridgeLog(QStringLiteral("MAM dispatch: no active slots, sending CQ [%1]").arg(cqMessage));
@@ -24665,12 +24723,19 @@ bool DecodiumBridge::noteTxPlaybackFinished(const QString& reason, bool error)
 {
     int const finishedTx = m_activeTxNumber;
     QString const finishedMessage = m_activeTxMessage;
+    bool const finishedPureAutoCqCq = m_activeTxWasPureAutoCqCq;
     m_activeTxNumber = 0;
     m_activeTxMessage.clear();
+    m_activeTxWasPureAutoCqCq = false;
 
     if (finishedTx <= 0) {
         return false;
     }
+
+    // Count a burst only after the app-owned audio playback completed.  The
+    // pure-CQ marker was captured at TX start so a caller decoded meanwhile
+    // cannot turn this CQ into a different operation retroactively.
+    noteAutoCqBurstCqCompleted(finishedPureAutoCqCq, reason, error);
 
     if (error) {
         bridgeLog(QStringLiteral("tx-playback-finished: TX%1 error, not counting signoff (%2)")
@@ -26412,6 +26477,8 @@ void DecodiumBridge::startTx()
 
         m_activeTxNumber = m_currentTx;
         m_activeTxMessage = msg.trimmed();
+        m_activeTxWasPureAutoCqCq = isAutoCqBurstPureCq(m_activeTxNumber,
+                                                         m_activeTxMessage);
         applyConfiguredCatRigMode(QStringLiteral("startTx"));
         bool const satelliteHalfDuplex = ft2LinkSatelliteHalfDuplexOperationActive();
         if (!satelliteHalfDuplex) {
@@ -26626,6 +26693,8 @@ void DecodiumBridge::startTx()
     // ExpertSDR riceve "trx:true" senza suffisso/payload TCI.
     m_activeTxNumber = m_currentTx;
     m_activeTxMessage = msg.trimmed();
+    m_activeTxWasPureAutoCqCq = isAutoCqBurstPureCq(m_activeTxNumber,
+                                                     m_activeTxMessage);
     applyConfiguredCatRigMode(QStringLiteral("startTx"));
     bool const satelliteHalfDuplex = ft2LinkSatelliteHalfDuplexOperationActive();
     bool const voxPtt = activeCatUsesVoxPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat);
@@ -33773,6 +33842,8 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("txPeriod",          m_txPeriod);
     s.setValue("alt12Enabled",      m_alt12Enabled);
     s.setValue("quickQsoEnabled",   m_quickQsoEnabled);
+    s.setValue("AutoCqBurstCalls",  m_autoCqBurstCalls);
+    s.setValue("AutoCqListenCycles", m_autoCqListenCycles);
     // B7 — Colors
     s.setValue("colorCQ",        m_colorCQ);
     s.setValue("colorMyCall",    m_colorMyCall);
@@ -34919,6 +34990,132 @@ bool DecodiumBridge::autoCqCanRestartTx6() const
     return m_autoCqRepeat
         && !m_tx6.trimmed().isEmpty()
         && !isTxDisabled(6);
+}
+
+bool DecodiumBridge::autoCqBurstCadenceEnabled() const
+{
+    return m_autoCqRepeat
+        && m_autoCqBurstCalls > 0
+        && m_autoCqListenCycles > 0;
+}
+
+bool DecodiumBridge::isAutoCqBurstPureCq(int txNumber, const QString& message) const
+{
+    if (!m_autoCqRepeat || txNumber != 6
+        || !m_dxCall.trimmed().isEmpty()
+        || !m_autoCqLockedCall.trimmed().isEmpty()
+        || m_pendingAutoSeqTxAfterActiveTx > 0
+        || m_qsoProgress > 1) {
+        return false;
+    }
+
+    QString const payload = message.trimmed().toUpper();
+    return payload == QStringLiteral("CQ")
+        || payload.startsWith(QStringLiteral("CQ "))
+        || payload == QStringLiteral("QRZ")
+        || payload.startsWith(QStringLiteral("QRZ "));
+}
+
+void DecodiumBridge::resetAutoCqBurstCadence(const QString& reason)
+{
+    bool const hadCadenceState = m_autoCqBurstCompletedCalls > 0
+        || m_autoCqBurstListenUntilMs > 0
+        || m_activeTxWasPureAutoCqCq;
+    ++m_autoCqBurstSerial;
+    m_autoCqBurstCompletedCalls = 0;
+    m_autoCqBurstListenUntilMs = 0;
+    m_autoCqBurstListenMode.clear();
+    // A CQ that was in flight belongs to the preceding cadence session.  Do
+    // not let its completion start a new pause after a configuration, mode or
+    // caller transition reset.
+    m_activeTxWasPureAutoCqCq = false;
+    if (hadCadenceState) {
+        bridgeLog(QStringLiteral("AutoCQ burst: cadence reset (%1)").arg(reason));
+    }
+}
+
+bool DecodiumBridge::autoCqBurstListening()
+{
+    if (!autoCqBurstCadenceEnabled() || m_autoCqBurstListenUntilMs <= 0) {
+        return false;
+    }
+
+    if (m_autoCqBurstListenMode != m_mode) {
+        resetAutoCqBurstCadence(QStringLiteral("mode changed while listening"));
+        return false;
+    }
+
+    qint64 const nowMs = correctedUtcEpochMs();
+    if (nowMs < m_autoCqBurstListenUntilMs) {
+        return true;
+    }
+
+    m_autoCqBurstListenUntilMs = 0;
+    m_autoCqBurstListenMode.clear();
+    bridgeLog(QStringLiteral("AutoCQ burst: listening interval complete; CQ cadence resumes"));
+    return false;
+}
+
+void DecodiumBridge::applyAutoCqBurstCadenceToLegacyBackend()
+{
+    if (m_legacyBackend) {
+        m_legacyBackend->setAutoCqBurstCadence(m_autoCqBurstCalls,
+                                                m_autoCqListenCycles);
+    }
+}
+
+void DecodiumBridge::noteAutoCqBurstCqCompleted(bool completedPureAutoCqCq,
+                                                  const QString& reason,
+                                                  bool error)
+{
+    if (error || !completedPureAutoCqCq || !autoCqBurstCadenceEnabled()) {
+        return;
+    }
+
+    ++m_autoCqBurstCompletedCalls;
+    if (m_autoCqBurstCompletedCalls < m_autoCqBurstCalls) {
+        bridgeLog(QStringLiteral("AutoCQ burst: completed CQ %1/%2 (%3)")
+                      .arg(m_autoCqBurstCompletedCalls)
+                      .arg(m_autoCqBurstCalls)
+                      .arg(reason));
+        return;
+    }
+
+    m_autoCqBurstCompletedCalls = 0;
+    QString const modeSnapshot = m_mode;
+    qint64 const periodMs = qMax<qint64>(1, effectivePeriodMsForMode(modeSnapshot));
+    qint64 const pauseMs = static_cast<qint64>(m_autoCqListenCycles) * periodMs;
+    if (pauseMs <= 0) {
+        return;
+    }
+
+    m_autoCqBurstListenMode = modeSnapshot;
+    m_autoCqBurstListenUntilMs = correctedUtcEpochMs() + pauseMs;
+    quint64 const serial = ++m_autoCqBurstSerial;
+    bridgeLog(QStringLiteral("AutoCQ burst: completed %1 CQs; listening for %2 cycle(s) / %3 ms (%4)")
+                  .arg(m_autoCqBurstCalls)
+                  .arg(m_autoCqListenCycles)
+                  .arg(pauseMs)
+                  .arg(reason));
+
+    // The period timer normally reaches the dispatch path itself.  This wake
+    // up covers an idle scheduler without bypassing the normal parity and
+    // late-slot checks.
+    int const wakeDelayMs = static_cast<int>(qMin<qint64>(
+        static_cast<qint64>(std::numeric_limits<int>::max()), pauseMs + 25));
+    QTimer::singleShot(wakeDelayMs, this, [this, serial, modeSnapshot]() {
+        if (serial != m_autoCqBurstSerial
+            || !m_autoCqRepeat
+            || m_mode != modeSnapshot
+            || m_shuttingDown
+            || QCoreApplication::closingDown()) {
+            return;
+        }
+        if (autoCqBurstListening() || m_manualTxHold || m_transmitting || m_tuning) {
+            return;
+        }
+        checkAndStartPeriodicTx();
+    });
 }
 
 bool DecodiumBridge::isRecentAutoCqDuplicate(const QString& call, double freqHz, const QString& mode) const
@@ -38395,6 +38592,12 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             return;
         }
 
+        if (isAutoCqBurstPureCq(m_currentTx, selectedTxPayload)
+            && autoCqBurstListening()) {
+            bridgeLog(QStringLiteral("AutoCQ burst: suppressing CQ while listening"));
+            return;
+        }
+
         bridgeLog("checkAndStartPeriodicTx: TX" + QString::number(m_currentTx) +
                   " retry=" + QString::number(m_txRetryCount) +
                   " async=" + QString::number(m_asyncTxEnabled));
@@ -38414,6 +38617,10 @@ void DecodiumBridge::checkAndStartPeriodicTx()
                                m_autoCqLockedCall.trimmed().isEmpty()
                                    ? QStringLiteral("<none>")
                                    : m_autoCqLockedCall.trimmed()));
+            return;
+        }
+        if (autoCqBurstListening()) {
+            bridgeLog(QStringLiteral("AutoCQ burst: suppressing CQ fallback while listening"));
             return;
         }
         bridgeLog("checkAndStartPeriodicTx: AutoCQ async=" + QString::number(m_asyncTxEnabled));
@@ -39209,6 +39416,7 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
         m_txWatchdogTicks = 0;
         if (m_autoCqRepeat && cqModeAcceptedFreshCaller) {
             clearFt2AutoCqAwaitingPartnerDecode(QStringLiteral("AutoCQ fresh caller"));
+            resetAutoCqBurstCadence(QStringLiteral("valid AutoCQ caller accepted"));
         }
         setReportSent(QString::number(decodeSnrOrDefault(f.value(1), -10)));
 
@@ -40077,6 +40285,8 @@ void DecodiumBridge::loadSettings()
     m_txPeriod          =s.value("txPeriod",            0).toInt() != 0 ? 1 : 0;
     m_alt12Enabled      =s.value("alt12Enabled",     false).toBool();
     m_quickQsoEnabled   =s.value("quickQsoEnabled",  false).toBool();
+    m_autoCqBurstCalls  =qBound(0, s.value("AutoCqBurstCalls", 0).toInt(), 999);
+    m_autoCqListenCycles=qBound(0, s.value("AutoCqListenCycles", 0).toInt(), 999);
     // B7 — Colors
     m_colorCQ       = s.value("colorCQ",        "#33FF33").toString();
     m_colorMyCall   = s.value("colorMyCall",     "#FF5555").toString();
@@ -40224,6 +40434,7 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     int const previousAudioInputChannel = m_audioInputChannel;
 
     loadSettings();
+    applyAutoCqBurstCadenceToLegacyBackend();
     updatePeriodTicksMax();
     if (m_bandManager) {
         m_bandManager->setCurrentMode(m_mode);
@@ -40354,6 +40565,8 @@ void DecodiumBridge::reloadBridgeSettingsFromPersistentStore()
     emit txPeriodChanged();
     emit alt12EnabledChanged();
     emit quickQsoEnabledChanged();
+    emit autoCqBurstCallsChanged();
+    emit autoCqListenCyclesChanged();
     emit tx1Changed();
     emit tx2Changed();
     emit tx3Changed();
@@ -41249,9 +41462,30 @@ int DecodiumBridge::effectiveFtThreadLimitForDecode() const
     return adaptiveInteractiveFtThreadCount(effectiveFtThreadLimit());
 }
 
+void DecodiumBridge::setMainWindowRenderActive(bool active)
+{
+    // Increment even when the state did not change. The event-loop watchdog
+    // can resume before or after QML receives a visibility transition, so the
+    // epoch is the reliable request to discard one elapsed interval.
+    m_mainWindowRenderActive.store(active, std::memory_order_release);
+    quint64 const epoch = m_mainWindowRenderEpoch.fetch_add(1, std::memory_order_acq_rel) + 1;
+
+    if (m_uiStallClock.isValid())
+        m_lastUiStallTickMs = m_uiStallClock.elapsed();
+    else
+        m_lastUiStallTickMs = 0;
+    m_recentShortStalls.clear();
+
+    qInfo().noquote()
+        << "[MAINWATCH] main window render state"
+        << (active ? "active" : "suspended")
+        << "epoch=" << epoch;
+}
+
 void DecodiumBridge::noteMainThreadMicroStall(qint64 deltaMs)
 {
-    if (deltaMs < decodium::decode::Ft8MicroStallGuard::StallThresholdMs
+    if (!mainWindowRenderActive()
+        || deltaMs < decodium::decode::Ft8MicroStallGuard::StallThresholdMs
         || m_mode != QStringLiteral("FT8")
         || !m_monitoring) {
         return;
@@ -48391,10 +48625,20 @@ void DecodiumBridge::onSpectrumTimer()
         && m_remoteServer->waterfallEnabled();
     bool spectrum3dNeedsCpuHistory = false;
 #if defined(DECODIUM_QML_PANADAPTER_DIRECT)
+    bool hasRegisteredPanadapterItem = false;
+    bool hasLocalPanadapterConsumer = false;
     m_panadapterItems.removeAll(QPointer<PanadapterItem>(nullptr));
     for (const QPointer<PanadapterItem>& ref : m_panadapterItems) {
         PanadapterItem* item = ref.data();
-        if (item && item->requiresCpuSpectrumHistory()) {
+        if (!item) {
+            continue;
+        }
+        hasRegisteredPanadapterItem = true;
+        if (!item->isFrameConsumer()) {
+            continue;
+        }
+        hasLocalPanadapterConsumer = true;
+        if (item->requiresCpuSpectrumHistory()) {
             spectrum3dNeedsCpuHistory = true;
             break;
         }
@@ -48413,6 +48657,17 @@ void DecodiumBridge::onSpectrumTimer()
         }
         return;
     }
+#if defined(DECODIUM_QML_PANADAPTER_DIRECT)
+    if (hasRegisteredPanadapterItem
+        && !hasLocalPanadapterConsumer
+        && !remoteWaterfallNeedsCpu) {
+        // The only local visual target is hidden/minimised. Do not copy audio
+        // or run CPU/GPU FFT work that cannot be presented; a fresh ring
+        // snapshot will be taken as soon as the target becomes visible.
+        m_lastPanadapterFrameMs = 0;
+        return;
+    }
+#endif
 
     qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
     if (m_lastPanadapterFrameMs <= 0) {
