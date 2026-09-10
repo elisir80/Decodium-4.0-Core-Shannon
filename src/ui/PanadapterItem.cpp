@@ -17,6 +17,7 @@
 #include <QSGSimpleTextureNode>
 #include <QSGTexture>
 #include <QQuickWindow>
+#include <QWindow>
 #include <QFile>
 #include <QFontDatabase>
 #include <QMouseEvent>
@@ -1586,6 +1587,34 @@ PanadapterItem::PanadapterItem(QQuickItem* parent)
             m_qsgAfterRenderUs.store(monotonicUs(), std::memory_order_relaxed);
             m_qsgAfterRenderCount.fetch_add(1, std::memory_order_relaxed);
         }, Qt::DirectConnection);
+        connect(win, &QWindow::visibilityChanged, this, [this](QWindow::Visibility visibility) {
+            const bool active = visibility != QWindow::Hidden
+                && visibility != QWindow::Minimized;
+            {
+                QMutexLocker lock(&m_mutex);
+                // A minimised window must not retain a render backlog.  The
+                // scene graph may stop presenting while the SDR feed keeps
+                // arriving, so replaying queued rows after restore makes the
+                // panadapter look several seconds old.
+                m_pendingWaterfallRows.clear();
+                m_hasPendingPcmFrame = false;
+                m_lastUpdateNs = 0;
+                if (active) {
+                    m_spectrumDirty = true;
+                    m_spectrumOverlayDirty = true;
+                    m_geometryDirty = true;
+                } else {
+                    m_spectrumDirty = false;
+                }
+            }
+            if (!active) {
+                // Drop RHI compute/readback state; it is tied to the scene
+                // graph that may be suspended or recreated while minimised.
+                releaseGpuFftResources();
+                return;
+            }
+            QMetaObject::invokeMethod(this, [this]() { update(); }, Qt::QueuedConnection);
+        }, Qt::UniqueConnection);
         m_qsgFrameConnection = connect(win, &QQuickWindow::frameSwapped, this, [this]() {
             qint64 const nowUs = monotonicUs();
             ++m_qsgSwapCount;
