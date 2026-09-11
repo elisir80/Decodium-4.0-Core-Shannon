@@ -4033,6 +4033,19 @@ static bool hasHighConfidenceGhostPrefix(QString const& callRaw)
 
 /* step A3: spostata in Sequencer/MessageTokenRules.cpp */
 
+// Un nominativo hashato fra parentesi angolari CON un contenuto vero dentro
+// ("<IU8LMC>"), da distinguere dal segnaposto "<...>" che indica un hash che
+// non sappiamo ancora risolvere.
+static bool isHashedCallToken(QString const& token)
+{
+    QString const t = token.trimmed();
+    if (t.size() < 3 || !t.startsWith(QLatin1Char('<')) || !t.endsWith(QLatin1Char('>'))) {
+        return false;
+    }
+    QString const inner = t.mid(1, t.size() - 2).trimmed();
+    return !inner.isEmpty() && inner != QStringLiteral("...");
+}
+
 static bool directedPeerLooksStructurallyGhost(QString const& peerToken)
 {
     if (peerToken.trimmed().isEmpty() || isPlaceholderCallToken(peerToken)) {
@@ -44347,7 +44360,14 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         return true;
     }
 
-    if (tokens.size() < 3) {
+    // Il tipo 4 ("<IU8LMC> II8IHBC") ha DUE soli token ed e' gia' completo:
+    // il nominativo non standard per esteso e quello dell'altro come hash.
+    // Senza questa eccezione veniva scartato qui, prima ancora del controllo
+    // sul payload: 67 chiamate perse in una sola serata.
+    bool const hashedPairOnly =
+        tokens.size() == 2
+        && (isHashedCallToken(tokens.at(0)) || isHashedCallToken(tokens.at(1)));
+    if (tokens.size() < 3 && !hashedPairOnly) {
         if (reason) *reason = QStringLiteral("directed message without payload");
         return false;
     }
@@ -44425,7 +44445,19 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
         }
     }
 
-    if (!payloadValid) {
+    // 1.0.626: "<IU8LMC> II8IHBC" senza coda NON e' un messaggio monco, e' la
+    // forma canonica del tipo 4, quella dei nominativi NON STANDARD (oltre i
+    // sei caratteri: prefissi speciali come II8IHBC, portatili come PJ4/K1ABC).
+    // Il protocollo manda il nominativo dell'altro come hash fra parentesi
+    // angolari e il proprio per esteso, senza rapporto, e significa "il secondo
+    // chiama il primo". Il filtro lo rifiutava come "missing directed payload":
+    // i CQ di quella stazione passavano, le sue RISPOSTE no, e l'operatore non
+    // vedeva chi lo stava chiamando. Segnalato in aria da IU8LMC l'11/9/2026.
+    bool const hashedNonStandardForm =
+        payload.isEmpty()
+        && (isHashedCallToken(tokens.at(0)) || isHashedCallToken(tokens.at(1)));
+
+    if (!payloadValid && !hashedNonStandardForm) {
         if (reason) *reason = payloadRejectReason;
         return false;
     }

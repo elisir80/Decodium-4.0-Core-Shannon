@@ -193,6 +193,13 @@ private slots:
     QVERIFY (isPlausibleDecodedCallsignToken ("8A1AAA/LH"));
     QVERIFY (!isPlausibleDecodedCallsignToken ("ABCDEF12"));
 
+    // Nominativi NON STANDARD: piu' di sei caratteri, quindi il protocollo li
+    // manda col tipo 4 e l'altro nominativo come hash. Segnalato in aria
+    // l'11/9/2026: II8IHBC chiamava e le sue risposte sparivano.
+    QVERIFY (isPlausibleDecodedCallsignToken ("II8IHBC"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("IQ8XYZW"));
+    QVERIFY (isPlausibleDecodedCallsignToken ("PJ4/K1ABC"));
+
     // Prefisso di paese con cifra d'area davanti al nominativo: in aria il
     // 9/9/2026 il filtro semantico scartava come ghost il 3% delle
     // decodifiche, tutte di questa forma (IH9/IT9JUI 119 volte in 16 ore).
