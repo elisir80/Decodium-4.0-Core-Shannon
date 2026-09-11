@@ -117,18 +117,114 @@ constexpr float kApStoricoHz = 5.0f;
 constexpr int kApStoricoMemoria = 10;
 constexpr int kApStoricoMax = 3;
 
-// L'a priori storico e' SPENTO finche' non e' misurato in aria: aggiunge tre
-// chiamate al decoder per candidato, e ogni chiamata e' esposizione alla
-// CRC-14 -- e' il conto che ha fatto ritirare due volte la ricerca larga.
-// DECODIUM_FT8_AP_STORICO=1 lo accende.
+// ---------------------------------------------------------------------------
+// GOVERNATORE DELLE LEVE DI SENSIBILITA' (1.0.627)
+//
+// Le quattro leve (BICM-ID, passata coerente, AP dallo storico, accumulo a
+// energia) costano dal 30 al 50% di tempo di decodifica in piu'. Su una
+// macchina capace e' tempo che avanza; su una modesta e' la differenza fra
+// decodificare e non arrivare in fondo allo slot. La 1.0.626 le accendeva per
+// tutti e su un PC a 8 core e' morta al primo slot profondo.
+//
+// PERCHE' NON SI CONTANO I CORE. Un otto-core recente batte un sedici-core di
+// cinque anni fa, e il lavoro non dipende solo dalla macchina: una banda
+// affollata moltiplica i candidati. Il numero di core direbbe poco e lo direbbe
+// una volta sola. Il segnale onesto e' quello che gia' misuriamo a ogni slot,
+// cioe' quanto del budget di tempo abbiamo consumato davvero.
+//
+// LA REGOLA, asimmetrica di proposito:
+//   - si parte SPENTI. Il primo slot profondo e' esattamente quello che ha
+//     ucciso il PC del tester: non e' il momento di essere ottimisti.
+//   - si accende dopo kSlotPrudenza slot consecutivi con largo margine
+//     (sotto il 50% del budget) e senza pressione della CPU;
+//   - si spegne SUBITO al primo slot che supera l'80% del budget, o se il
+//     decoder e' stato limitato per pressione. Riaccendere costa qualche slot,
+//     restare accesi quando non si arriva in fondo costa decodifiche.
+//
+// La variabile d'ambiente, quando c'e', vince sempre: chi la imposta sa quello
+// che fa e non vogliamo che il governatore gli cambi la configurazione sotto i
+// piedi durante una misura.
+namespace {
+
+constexpr int kSlotPrudenza = 4;          // slot buoni prima di concedere
+constexpr double kSogliaAccensione = 0.50; // frazione del budget
+constexpr double kSogliaSpegnimento = 0.80;
+
+std::atomic<bool> g_leve_concesse {false};
+std::atomic<int> g_slot_buoni {0};
+std::atomic<int> g_transizioni {0};
+
+}  // namespace
+
+extern "C" int ftx_ft8_leve_adattive_attive_c ()
+{
+  return g_leve_concesse.load (std::memory_order_relaxed) ? 1 : 0;
+}
+
+extern "C" int ftx_ft8_leve_adattive_transizioni_c ()
+{
+  return g_transizioni.load (std::memory_order_relaxed);
+}
+
+// Chiamata dal worker dopo ogni decodifica. Ritorna 1 se lo stato e' cambiato,
+// cosi' il chiamante puo' scriverlo nel log senza inondarlo.
+extern "C" int ftx_ft8_leve_adattive_aggiorna_c (int decode_ms, int max_ms,
+                                                 int pressure_limited)
+{
+  bool const attive = g_leve_concesse.load (std::memory_order_relaxed);
+
+  // Senza un budget noto non si giudica: si tiene lo stato corrente.
+  if (max_ms <= 0 || decode_ms < 0)
+    {
+      return 0;
+    }
+
+  double const usato = static_cast<double> (decode_ms) / static_cast<double> (max_ms);
+
+  if (pressure_limited != 0 || usato > kSogliaSpegnimento)
+    {
+      g_slot_buoni.store (0, std::memory_order_relaxed);
+      if (attive)
+        {
+          g_leve_concesse.store (false, std::memory_order_relaxed);
+          g_transizioni.fetch_add (1, std::memory_order_relaxed);
+          return 1;
+        }
+      return 0;
+    }
+
+  if (usato < kSogliaAccensione)
+    {
+      int const buoni = g_slot_buoni.fetch_add (1, std::memory_order_relaxed) + 1;
+      if (!attive && buoni >= kSlotPrudenza)
+        {
+          g_leve_concesse.store (true, std::memory_order_relaxed);
+          g_transizioni.fetch_add (1, std::memory_order_relaxed);
+          return 1;
+        }
+      return 0;
+    }
+
+  // Zona di mezzo: non si concede altro credito, ma non si toglie quello dato.
+  g_slot_buoni.store (0, std::memory_order_relaxed);
+  return 0;
+}
+
+// Decide una leva: la variabile d'ambiente ha sempre l'ultima parola, in un
+// senso e nell'altro; senza variabile decide il governatore.
+extern "C" int ftx_ft8_leva_concessa_c (char const* nome_variabile)
+{
+  char const* raw = nome_variabile ? std::getenv (nome_variabile) : nullptr;
+  if (raw && raw[0] != 0)
+    {
+      return raw[0] != '0' ? 1 : 0;
+    }
+  return ftx_ft8_leve_adattive_attive_c ();
+}
+
 inline bool ap_storico_attivo ()
 {
-  static bool const v = [] {
-    // Acceso di default dalla 1.0.625. DECODIUM_FT8_AP_STORICO=0 lo spegne.
-    char const* e = std::getenv ("DECODIUM_FT8_AP_STORICO");
-    return !e || e[0] != '0';
-  }();
-  return v;
+  return ftx_ft8_leva_concessa_c ("DECODIUM_FT8_AP_STORICO") != 0;
 }
 
 // L'a priori sul MESSAGGIO INTERO, 77 bit. E' l'ipotesi forte: in FT8 una

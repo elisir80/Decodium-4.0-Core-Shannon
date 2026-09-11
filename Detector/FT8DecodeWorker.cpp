@@ -43,6 +43,10 @@ extern "C"
   int ftx_ft8_ap_storico_tentativi_c ();
   int ftx_ft8_ap_msg_tentativi_c ();
   int ftx_ft8_ap_msg_successi_c ();
+  // Governatore delle leve adattive (FtxDecodeBookkeeping.cpp): riceve il costo
+  // reale di ogni slot e decide se la macchina ha margine per le leve.
+  int ftx_ft8_leve_adattive_aggiorna_c (int decode_ms, int max_ms, int pressure_limited);
+  int ftx_ft8_leve_adattive_attive_c ();
   void ftx_ft8_stage4_reset_c ();
   void ftx_ft8_stage4_set_cancel_c (int cancel);
   void ftx_ft8_stage4_set_deadline_ms_c (long long deadline_ms);
@@ -2086,6 +2090,23 @@ void FT8DecodeWorker::decode (DecodeRequest const& request)
                                  &snrs[0], &dts[0], &freqs[0], &naps[0], &quals[0],
                                  &bits77[0], &decodeds[0], &nout);
   qint64 const decodeMs = decodeTimer.elapsed ();
+
+  // Chiude l'anello del governatore: quanto e' costato questo slot rispetto al
+  // budget decide se le leve di sensibilita' restano concesse. Si registra solo
+  // il cambio di stato, non ogni slot, altrimenti il log diventa illeggibile.
+  if (ftx_ft8_leve_adattive_aggiorna_c (static_cast<int> (decodeMs),
+                                        request.maxDecodeMs,
+                                        pressureLimitedRequest ? 1 : 0) != 0)
+    {
+      qInfo ().noquote ()
+          << QStringLiteral ("[LEVE] sensibilita' %1: decode_ms=%2 budget=%3 pressione=%4")
+                 .arg (ftx_ft8_leve_adattive_attive_c () ? QStringLiteral ("ACCESE")
+                                                         : QStringLiteral ("spente"))
+                 .arg (decodeMs)
+                 .arg (request.maxDecodeMs)
+                 .arg (pressureLimitedRequest ? 1 : 0);
+    }
+
   ftx_ft8_stage4_set_deadline_ms_c (0);
   ftx_ft8_stage4_set_ldpc_osd_c (-1, 0);
   ftx_ft8_stage4_set_decode_options_c (0, 0, 1, 1, 100);

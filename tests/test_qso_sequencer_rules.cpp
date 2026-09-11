@@ -200,6 +200,36 @@ private slots:
     QVERIFY (isPlausibleDecodedCallsignToken ("IQ8XYZW"));
     QVERIFY (isPlausibleDecodedCallsignToken ("PJ4/K1ABC"));
 
+    // --- Forma canonica del tipo 4 (nominativi non standard).
+    //
+    // Questi casi nascono da un difetto vero: "<IU8LMC> II8IHBC" veniva
+    // scartato dal filtro semantico come messaggio monco, e l'operatore non
+    // vedeva chi lo chiamava. La prima correzione fu INERTE perche' guardava i
+    // token gia' normalizzati, dove normalizeCallToken() ha tolto le parentesi
+    // angolari e un hash e' indistinguibile da un nominativo qualsiasi.
+    // Il primo QVERIFY qui sotto fallisce con entrambe le versioni sbagliate.
+    using decodium::seq::isNonStandardDirectedForm;
+    using decodium::seq::isHashedCallToken;
+
+    QVERIFY (isNonStandardDirectedForm ("<IU8LMC> II8IHBC"));
+    QVERIFY (isNonStandardDirectedForm ("<IU8LMC> II8IHBC ?"));
+    QVERIFY (isNonStandardDirectedForm ("II8IHBC <IU8LMC>"));
+    QVERIFY (isNonStandardDirectedForm ("<W1ABC> PJ4/K1ABC"));
+
+    // Non e' la forma canonica: c'e' un payload vero, oppure manca l'hash,
+    // oppure l'hash e' il segnaposto non risolvibile.
+    QVERIFY (!isNonStandardDirectedForm ("<IU8LMC> II8IHBC RR73"));
+    QVERIFY (!isNonStandardDirectedForm ("IU8LMC II8IHBC"));
+    QVERIFY (!isNonStandardDirectedForm ("<...> II8IHBC"));
+    QVERIFY (!isNonStandardDirectedForm ("CQ II8IHBC"));
+    QVERIFY (!isNonStandardDirectedForm ("II8IHBC"));
+    QVERIFY (!isNonStandardDirectedForm (""));
+
+    QVERIFY (isHashedCallToken ("<IU8LMC>"));
+    QVERIFY (!isHashedCallToken ("<...>"));
+    QVERIFY (!isHashedCallToken ("IU8LMC"));
+    QVERIFY (!isHashedCallToken ("<>"));
+
     // Prefisso di paese con cifra d'area davanti al nominativo: in aria il
     // 9/9/2026 il filtro semantico scartava come ghost il 3% delle
     // decodifiche, tutte di questa forma (IH9/IT9JUI 119 volte in 16 ore).

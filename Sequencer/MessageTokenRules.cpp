@@ -60,6 +60,70 @@ bool isPlaceholderCallToken(QString const& token)
 }
 
 
+bool isHashedCallToken(QString const& token)
+
+{
+
+    QString const t = token.trimmed();
+
+    if (t.size() < 3
+
+        || !t.startsWith(QLatin1Char('<'))
+
+        || !t.endsWith(QLatin1Char('>'))) {
+
+        return false;
+
+    }
+
+    QString const inner = t.mid(1, t.size() - 2).trimmed();
+
+    return !inner.isEmpty() && inner != QStringLiteral("...");
+
+}
+
+
+bool isNonStandardDirectedForm(QString const& message)
+
+{
+
+    // GREZZO di proposito: le parentesi angolari sopravvivono solo qui.
+
+    QStringList const raw = message.trimmed().toUpper().simplified()
+
+        .split(QLatin1Char(' '), Qt::SkipEmptyParts);
+
+    if (raw.size() < 2) {
+
+        return false;
+
+    }
+
+    // Uno dei due nominativi e' un hash vero: e' il tipo 4. La coda ammessa e'
+
+    // solo il marcatore "?" di bassa confidenza, che non e' payload.
+
+    if (!isHashedCallToken(raw.at(0)) && !isHashedCallToken(raw.at(1))) {
+
+        return false;
+
+    }
+
+    for (int i = 2; i < raw.size(); ++i) {
+
+        if (raw.at(i) != QStringLiteral("?")) {
+
+            return false;
+
+        }
+
+    }
+
+    return true;
+
+}
+
+
 bool isDirectedCqModifierToken(QString const& token)
 
 {

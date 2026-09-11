@@ -4033,19 +4033,6 @@ static bool hasHighConfidenceGhostPrefix(QString const& callRaw)
 
 /* step A3: spostata in Sequencer/MessageTokenRules.cpp */
 
-// Un nominativo hashato fra parentesi angolari CON un contenuto vero dentro
-// ("<IU8LMC>"), da distinguere dal segnaposto "<...>" che indica un hash che
-// non sappiamo ancora risolvere.
-static bool isHashedCallToken(QString const& token)
-{
-    QString const t = token.trimmed();
-    if (t.size() < 3 || !t.startsWith(QLatin1Char('<')) || !t.endsWith(QLatin1Char('>'))) {
-        return false;
-    }
-    QString const inner = t.mid(1, t.size() - 2).trimmed();
-    return !inner.isEmpty() && inner != QStringLiteral("...");
-}
-
 static bool directedPeerLooksStructurallyGhost(QString const& peerToken)
 {
     if (peerToken.trimmed().isEmpty() || isPlaceholderCallToken(peerToken)) {
@@ -44204,6 +44191,15 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
                                                 bool allowUnresolvedPlaceholder) const
 {
     QStringList const tokens = normalizedMessageTokens(message);
+
+    // Il messaggio e' nella forma canonica del tipo 4 ("<IU8LMC> II8IHBC")?
+    // La domanda va fatta sul testo GREZZO, perche' i token qui sopra hanno
+    // gia' perso le parentesi angolari (normalizeCallToken le rimuove) e un
+    // hash e' ormai indistinguibile da un nominativo qualsiasi. La regola sta
+    // in MessageTokenRules ed e' coperta dai test: la prima versione di questa
+    // correzione interrogava i token normalizzati ed era INERTE.
+    bool const hashedCallInMessage = decodium::seq::isNonStandardDirectedForm(message);
+
     if (tokens.isEmpty()) {
         if (reason) *reason = QStringLiteral("empty message");
         return false;
@@ -44364,9 +44360,7 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
     // il nominativo non standard per esteso e quello dell'altro come hash.
     // Senza questa eccezione veniva scartato qui, prima ancora del controllo
     // sul payload: 67 chiamate perse in una sola serata.
-    bool const hashedPairOnly =
-        tokens.size() == 2
-        && (isHashedCallToken(tokens.at(0)) || isHashedCallToken(tokens.at(1)));
+    bool const hashedPairOnly = tokens.size() == 2 && hashedCallInMessage;
     if (tokens.size() < 3 && !hashedPairOnly) {
         if (reason) *reason = QStringLiteral("directed message without payload");
         return false;
@@ -44453,9 +44447,7 @@ bool DecodiumBridge::shouldAcceptDecodedMessage(const QString& message,
     // chiama il primo". Il filtro lo rifiutava come "missing directed payload":
     // i CQ di quella stazione passavano, le sue RISPOSTE no, e l'operatore non
     // vedeva chi lo stava chiamando. Segnalato in aria da IU8LMC l'11/9/2026.
-    bool const hashedNonStandardForm =
-        payload.isEmpty()
-        && (isHashedCallToken(tokens.at(0)) || isHashedCallToken(tokens.at(1)));
+    bool const hashedNonStandardForm = payload.isEmpty() && hashedCallInMessage;
 
     if (!payloadValid && !hashedNonStandardForm) {
         if (reason) *reason = payloadRejectReason;

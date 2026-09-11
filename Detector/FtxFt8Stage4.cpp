@@ -77,19 +77,21 @@ inline float ft8_cq_repeat_score ()
   }();
   return v;
 }
+// Governatore delle leve adattive (FtxDecodeBookkeeping.cpp). Dichiarato qui
+// perche' le funzioni delle leve stanno in cima al file, prima del blocco
+// extern "C" generale.
+extern "C" int ftx_ft8_leva_concessa_c (char const* nome_variabile);
+extern "C" int ftx_ft8_leve_adattive_attive_c ();
+
 // DECODIUM_FT8_STORICO_ENERGIA=1: lo storico accumula ENERGIE (somma di |S|^2
 // sugli ultimi ~4 slot) invece di mediare i moduli, e il combinatore in
 // FtxBitmetrics somma le energie invece dei moduli. E' il combinatore che
 // l'accumulo FT2 ha misurato entro 0,05 dB dalla verosimiglianza esatta
-// (lab/tools/slot_accumulo.py). Spento di default.
+// (lab/tools/slot_accumulo.py). La concessione e' adattiva dalla 1.0.627.
 inline bool ft8_storico_energia ()
 {
-  static bool const v = [] {
-    // Acceso di default dalla 1.0.625. DECODIUM_FT8_STORICO_ENERGIA=0 lo spegne.
-    char const* raw = std::getenv ("DECODIUM_FT8_STORICO_ENERGIA");
-    return !raw || raw[0] != '0';
-  }();
-  return v;
+  // 1.0.627: la decide il governatore adattivo; la variabile scavalca.
+  return ftx_ft8_leva_concessa_c ("DECODIUM_FT8_STORICO_ENERGIA") != 0;
 }
 constexpr int kFt8CallGridMemory {96};
 constexpr int kFt8CallGridMaxAge {4};
@@ -394,6 +396,9 @@ extern "C"
                                   float* llrc, float* llrd, float* llre);
   int fastldpc_extrinsic174_91_c (float const* llr_in, int norder, float clamp,
                                   float* est_out);
+  // Governatore delle leve adattive (FtxDecodeBookkeeping.cpp)
+  int ftx_ft8_leve_adattive_attive_c ();
+  int ftx_ft8_leva_concessa_c (char const* nome_variabile);
   void ftx_ft8_bitmetrics_capture_c (std::complex<float> const* cd0, int np2,
                                      int ibest, int imetric, float scale,
                                      int weak_deep, int equalize_tone_power,
@@ -540,13 +545,12 @@ int ft8_classic_rescue_budget ()
 // visti una sola volta per finestra, contro 0-3 senza. Vanno sorvegliati.
 // Vedi lab/misure/20260911_coerente_isolata_aria.md (con la correzione in testa)
 // e 20260909_coerente_su_segnali_veri.md.
+// Dalla 1.0.627 la decide il governatore delle leve adattive
+// (FtxDecodeBookkeeping.cpp): acceso dove la CPU ha margine, spento dove non
+// ce l'ha. DECODIUM_FT8_COERENTE=1/0 scavalca la decisione automatica.
 bool ft8_coerente_attivo ()
 {
-  static bool const attivo = [] {
-    char const* raw = std::getenv ("DECODIUM_FT8_COERENTE");
-    return !raw || raw[0] != '0';
-  }();
-  return attivo;
+  return ftx_ft8_leva_concessa_c ("DECODIUM_FT8_COERENTE") != 0;
 }
 
 // Demodulazione iterativa (BICM-ID): dopo un tentativo fallito si prende
@@ -564,14 +568,17 @@ bool ft8_coerente_attivo ()
 // Vedi lab/misure/20260910_bicm_id_ft8.md e 20260910_bicm_id_ft8_reale.md.
 int ft8_bicm_giri ()
 {
-  static int const giri = [] {
+  // Con la variabile impostata comanda lei, anche nel numero di giri; senza,
+  // decide il governatore adattivo e il numero di giri e' uno.
+  static int const richiesti = [] {
     char const* raw = std::getenv ("DECODIUM_FT8_BICM");
-    if (!raw || raw[0] == 0) return 1;          // predefinito: un giro
-    if (raw[0] == '0') return 0;                // spento su richiesta
+    if (!raw || raw[0] == 0) return -1;         // nessuna richiesta esplicita
+    if (raw[0] == '0') return 0;
     int const v = std::atoi (raw);
     return v > 0 ? std::min (v, 3) : 1;
   }();
-  return giri;
+  if (richiesti >= 0) return richiesti;
+  return ftx_ft8_leve_adattive_attive_c () != 0 ? 1 : 0;
 }
 
 int& ft8_classic_rescue_used ()
