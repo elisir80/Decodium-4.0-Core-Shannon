@@ -524,13 +524,27 @@ int ft8_classic_rescue_budget ()
 }
 
 // Tentativo con le metriche coerenti (fase stimata dai simboli Costas).
-// SPENTO di default: misurato solo su AWGN sintetico, senza fading ne' QRM.
-// Come la passata coerente di FT2 in Stage7, si accende quando l'aria conferma.
+//
+// ACCESO di default dalla 1.0.625. DECODIUM_FT8_COERENTE=0 lo spegne.
+//
+// Storia della decisione, perche' e' stata tormentata. Su registrazioni vere
+// degradate (9/9) valeva ZERO: quella misura resta agli atti e non e' spiegata.
+// In aria pero' porta il rapporto con JTDX da 1,17 a 1,50, e le righe in piu'
+// NON sono fantasmi: l'81-84% viene da nominativi che ricompaiono in slot
+// diversi, e una parola casuale che passa la CRC-14 non si ripete. L'avevo
+// dichiarata un generatore di falsi basandomi su "righe che nessun altro
+// programma vede", indicatore che misura la sensibilita' e non i falsi --
+// con TUTTE le leve spente quello stesso indicatore sta al 97%.
+//
+// Quel che resta di sospetto: con la coerente accesa compaiono ~60 nominativi
+// visti una sola volta per finestra, contro 0-3 senza. Vanno sorvegliati.
+// Vedi lab/misure/20260911_coerente_isolata_aria.md (con la correzione in testa)
+// e 20260909_coerente_su_segnali_veri.md.
 bool ft8_coerente_attivo ()
 {
   static bool const attivo = [] {
     char const* raw = std::getenv ("DECODIUM_FT8_COERENTE");
-    return raw && raw[0] != '0';
+    return !raw || raw[0] != '0';
   }();
   return attivo;
 }
