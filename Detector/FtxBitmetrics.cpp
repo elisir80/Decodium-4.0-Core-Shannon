@@ -229,8 +229,9 @@ void normalizebmet_cpp (float* data, int n)
 inline bool ft8_history_energy_mode ()
 {
   static bool const v = [] {
+    // Acceso di default dalla 1.0.625. DECODIUM_FT8_STORICO_ENERGIA=0 lo spegne.
     char const* raw = std::getenv ("DECODIUM_FT8_STORICO_ENERGIA");
-    return raw && raw[0] != '0';
+    return !raw || raw[0] != '0';
   }();
   return v;
 }

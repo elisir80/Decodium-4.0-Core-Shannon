@@ -124,8 +124,9 @@ constexpr int kApStoricoMax = 3;
 inline bool ap_storico_attivo ()
 {
   static bool const v = [] {
+    // Acceso di default dalla 1.0.625. DECODIUM_FT8_AP_STORICO=0 lo spegne.
     char const* e = std::getenv ("DECODIUM_FT8_AP_STORICO");
-    return e && e[0] != '0';
+    return !e || e[0] != '0';
   }();
   return v;
 }

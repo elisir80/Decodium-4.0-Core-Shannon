@@ -85,8 +85,9 @@ inline float ft8_cq_repeat_score ()
 inline bool ft8_storico_energia ()
 {
   static bool const v = [] {
+    // Acceso di default dalla 1.0.625. DECODIUM_FT8_STORICO_ENERGIA=0 lo spegne.
     char const* raw = std::getenv ("DECODIUM_FT8_STORICO_ENERGIA");
-    return raw && raw[0] != '0';
+    return !raw || raw[0] != '0';
   }();
   return v;
 }
@@ -538,17 +539,21 @@ bool ft8_coerente_attivo ()
 // l'estrinseca dai posteriori del min-sum e la si rimanda al demodulatore, che
 // con essa pesa le ipotesi di tono anche per gli ALTRI bit dello stesso gruppo.
 // Il valore della variabile e' il numero di GIRI (1 o 2: il banco dice che il
-// secondo aggiunge poco e il terzo quasi nulla). SPENTO di default.
+// secondo aggiunge poco e il terzo quasi nulla).
 //
-// Misurato solo su AWGN sintetico (+21,3% di decodifiche, ~0,3 dB, zero falsi),
-// e per giunta contro la sola llra mentre qui la produzione ha gia' cinque
-// passate: il guadagno incrementale vero e' quello che va misurato in aria.
-// Vedi lab/misure/20260910_bicm_id_ft8.md.
+// ACCESO di default a UN giro dalla 1.0.625, su decisione dell'operatore.
+// DECODIUM_FT8_BICM=0 lo spegne, =2 concede il secondo giro.
+//
+// Misurato: +21,3% di decodifiche sul banco sintetico (~0,3 dB, zero falsi) e,
+// su 170 slot registrati e degradati di +12 dB, +14 righe vere con 4 fantasmi,
+// tutti sotto -23 dB. Costo +32% di tempo di decodifica, dentro il budget.
+// Vedi lab/misure/20260910_bicm_id_ft8.md e 20260910_bicm_id_ft8_reale.md.
 int ft8_bicm_giri ()
 {
   static int const giri = [] {
     char const* raw = std::getenv ("DECODIUM_FT8_BICM");
-    if (!raw || raw[0] == '0' || raw[0] == 0) return 0;
+    if (!raw || raw[0] == 0) return 1;          // predefinito: un giro
+    if (raw[0] == '0') return 0;                // spento su richiesta
     int const v = std::atoi (raw);
     return v > 0 ? std::min (v, 3) : 1;
   }();
