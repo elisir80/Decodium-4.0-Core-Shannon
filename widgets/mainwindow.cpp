@@ -5478,6 +5478,13 @@ void MainWindow::legacySetAutoCq(bool enabled)
   onRemoteSetAutoCqRequested(QString {}, enabled);
 }
 
+void MainWindow::legacySetAutoCqBurstCadence(int callsPerBurst, int listeningCycles)
+{
+  m_autoCqBurstCallsPerBurst = qBound (0, callsPerBurst, 999);
+  m_autoCqBurstListeningCycles = qBound (0, listeningCycles, 999);
+  resetAutoCqBurstCadenceState ();
+}
+
 void MainWindow::legacySetDecodeDepthBits(int bits)
 {
   m_ndepth = qMax(1, bits);
@@ -16738,6 +16745,8 @@ void MainWindow::guiUpdate()
   static char msgsent[38];
   double txDuration;
 
+  ensureAutoCqBurstCadenceState ();
+
   if(m_TRperiod==0) m_TRperiod=60.0;
   txDuration=tx_duration(m_mode,m_TRperiod,m_nsps,m_bFast9);
   if(m_mode=="FT8" and m_specOp==SpecOp::FOX and m_config.superFox()) txDuration=1.0+151*1024.0/12000.0;
@@ -17003,7 +17012,12 @@ void MainWindow::guiUpdate()
       ui->txrb5->setChecked(true);
     }
 
-    if(g_iptt==0 and ((m_bTxTime and (fTR < 0.75) and txReady) or m_tune)) {
+    bool const autoCqBurstBlocksStart = g_iptt == 0
+        && m_bTxTime
+        && fTR < 0.75
+        && txReady
+        && blockAutoCqBurstPureCqStart ();
+    if(g_iptt==0 and ((m_bTxTime and (fTR < 0.75) and txReady and !autoCqBurstBlocksStart) or m_tune)) {
       //### Allow late starts
       icw[0]=m_ncw;
       g_iptt = 1;
@@ -18139,6 +18153,7 @@ void MainWindow::guiUpdate()
     m_sec0=nsec;
     displayDialFrequency ();
   }
+  updateAutoCqBurstCadencePttEdges ();
   m_iptt0=g_iptt;
   m_btxok0=m_btxok;
 
@@ -19311,6 +19326,7 @@ void MainWindow::processMessage (DecodedText const& message, Qt::KeyboardModifie
   if (starting_auto_cq_partner) {
     // Starting a fresh AutoCQ QSO must always clear any stale retry/miss counters
     // left over from the previous caller or prior CQ cycles.
+    resetAutoCqBurstCadenceState ();
     m_txRetryCount = 0;
     m_lastNtx = -1;
     m_cqRetryCount = 0;
@@ -31169,6 +31185,7 @@ void MainWindow::on_ft2Button_clicked()
 void MainWindow::on_autoCQButton_clicked(bool checked)
 {
     m_autoCQ = checked;
+  resetAutoCqBurstCadenceState ();
   clearPendingAutoLogSnapshot ();
   clearAutoCqPartnerLock ();
   m_ft2DeferredLogPending = false;
@@ -31422,6 +31439,79 @@ bool MainWindow::legacyRespondSelectionEnabled () const
   return ui
       && ui->respondComboBox
       && legacyWidgetLogicallyVisible (ui->respondComboBox);
+}
+
+bool MainWindow::autoCqBurstCadenceEnabled () const
+{
+  return m_autoCqBurstCallsPerBurst > 0 && m_autoCqBurstListeningCycles > 0;
+}
+
+bool MainWindow::isAutoCqBurstPureCq () const
+{
+  if (!m_autoCQ || m_tune || m_bDXpedMode || m_ntx != 6 || !m_bCallingCQ
+      || m_QSOProgress != CALLING || !ui || !ui->tx6) {
+    return false;
+  }
+
+  QString const tx6 = ui->tx6->text ().trimmed ().toUpper ();
+  return tx6 == QStringLiteral ("CQ") || tx6.startsWith (QStringLiteral ("CQ "))
+      || tx6 == QStringLiteral ("QRZ") || tx6.startsWith (QStringLiteral ("QRZ "));
+}
+
+void MainWindow::resetAutoCqBurstCadenceState ()
+{
+  m_autoCqBurstCompletedCalls = 0;
+  m_autoCqBurstListenUntilMs = 0;
+  m_autoCqBurstPttLatched = false;
+  m_autoCqBurstModeSnapshot = m_mode;
+}
+
+void MainWindow::ensureAutoCqBurstCadenceState ()
+{
+  if (m_autoCqBurstModeSnapshot != m_mode
+      || !m_autoCQ
+      || !autoCqBurstCadenceEnabled ()) {
+    resetAutoCqBurstCadenceState ();
+  }
+}
+
+bool MainWindow::blockAutoCqBurstPureCqStart ()
+{
+  ensureAutoCqBurstCadenceState ();
+  if (!autoCqBurstCadenceEnabled () || !isAutoCqBurstPureCq ()) {
+    return false;
+  }
+
+  return QDateTime::currentMSecsSinceEpoch () < m_autoCqBurstListenUntilMs;
+}
+
+void MainWindow::updateAutoCqBurstCadencePttEdges ()
+{
+  ensureAutoCqBurstCadenceState ();
+
+  if (g_iptt == 1 && m_iptt0 == 0) {
+    m_autoCqBurstPttLatched = isAutoCqBurstPureCq ();
+    return;
+  }
+
+  if (g_iptt != 0 || m_iptt0 == 0) {
+    return;
+  }
+
+  if (m_autoCqBurstPttLatched && autoCqBurstCadenceEnabled ()) {
+    ++m_autoCqBurstCompletedCalls;
+    if (m_autoCqBurstCompletedCalls >= m_autoCqBurstCallsPerBurst) {
+      m_autoCqBurstCompletedCalls = 0;
+      qint64 const periodMs = qMax<qint64> (1, qRound64 (m_TRperiod * 1000.0));
+      m_autoCqBurstListenUntilMs = QDateTime::currentMSecsSinceEpoch ()
+          + m_autoCqBurstListeningCycles * periodMs;
+      debugAutoCq ("burst-complete",
+                   QString {"listen:%1 periods:%2ms"}
+                       .arg (m_autoCqBurstListeningCycles)
+                       .arg (periodMs));
+    }
+  }
+  m_autoCqBurstPttLatched = false;
 }
 
 void MainWindow::debugAutoCq(QString const& event, QString const& details)

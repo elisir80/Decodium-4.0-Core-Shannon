@@ -1070,6 +1070,26 @@ Searched paths:
         <translation>Max CQ calls (0=∞)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="702"/>
+        <source>CQ burst / listening cadence</source>
+        <translation>CQ burst / listening cadence</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="712"/>
+        <source>CQs per burst (0 = continuous)</source>
+        <translation>CQs per burst (0 = continuous)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="728"/>
+        <source>Listening cycles between bursts</source>
+        <translation>Listening cycles between bursts</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="744"/>
+        <source>Set both values above zero to enable this cadence. Valid callers are still answered while listening.</source>
+        <translation>Set both values above zero to enable this cadence. Valid callers are still answered while listening.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
         <source>Close</source>
         <translation>Close</translation>

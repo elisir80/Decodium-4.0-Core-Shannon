@@ -1066,6 +1066,26 @@ Searched paths:
         <translation>Max chiamate CQ (0=∞)</translation>
     </message>
     <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="702"/>
+        <source>CQ burst / listening cadence</source>
+        <translation>Raffiche CQ / cadenza di ascolto</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="712"/>
+        <source>CQs per burst (0 = continuous)</source>
+        <translation>CQ per raffica (0 = continuo)</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="728"/>
+        <source>Listening cycles between bursts</source>
+        <translation>Cicli di ascolto tra le raffiche</translation>
+    </message>
+    <message>
+        <location filename="../qml/decodium/components/CallDialog.qml" line="744"/>
+        <source>Set both values above zero to enable this cadence. Valid callers are still answered while listening.</source>
+        <translation>Imposta entrambi i valori sopra lo zero per attivare la cadenza. Durante l'ascolto Decodium risponde comunque ai chiamanti validi.</translation>
+    </message>
+    <message>
         <location filename="../qml/decodium/components/CallDialog.qml" line="529"/>
         <source>Close</source>
         <translation>Chiudi</translation>

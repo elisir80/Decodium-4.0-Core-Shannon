@@ -302,6 +302,7 @@ private:
     void rebuildSpectrumOverlayImage(int w, int h, bool gpuDirectReady);
     void updateSpectrumOverlayNode(QSGNode* spectrumRoot, int w, int h, bool gpuDirectReady, bool gpuSpectrumGraph);
     bool gpuFftSupported(QString* reason = nullptr) const;
+    bool isWindowRenderSuspended() const;
     void recordGpuFftCompute();
     void releaseGpuFftResources();
     void failGpuFft(const QString& reason);
@@ -493,10 +494,12 @@ private:
     bool  m_loggedGpuWaterfallDetached = false;
     bool  m_loggedGpuSpectrum3d = false;
     QQuickWindow* m_qsgMetricWindow = nullptr;
+    QMetaObject::Connection m_qsgVisibilityConnection;
     QMetaObject::Connection m_qsgFrameConnection;
     QMetaObject::Connection m_qsgBeforeSyncConnection;
     QMetaObject::Connection m_qsgBeforeRenderConnection;
     QMetaObject::Connection m_qsgAfterRenderConnection;
+    std::atomic_bool m_qsgFrameTimingResetPending {false};
     qint64 m_qsgFrameLastSwapUs = 0;
     qint64 m_qsgFrameMetricLastLogMs = 0;
     qint64 m_qsgFrameMetricAccumUs = 0;

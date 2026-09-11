@@ -666,6 +666,8 @@ static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
     auto metricSamples = std::make_shared<int>(0);
     auto metricAccumMs = std::make_shared<qint64>(0);
     auto metricMaxMs = std::make_shared<qint64>(0);
+    auto lastRenderEpoch = std::make_shared<quint64>(
+        bridge ? bridge->mainWindowRenderEpoch() : 0);
 
     QObject::connect(timer, &QTimer::timeout, parent,
                      [clock,
@@ -675,9 +677,23 @@ static void installMainThreadWatchdog(QObject* parent, DecodiumBridge* bridge)
                       metricSamples,
                       metricAccumMs,
                       metricMaxMs,
+                      lastRenderEpoch,
                       bridge]() {
         qint64 const nowNs = clock->nsecsElapsed();
         qint64 const nowMs = clock->elapsed();
+        if (bridge) {
+            quint64 const renderEpoch = bridge->mainWindowRenderEpoch();
+            if (!bridge->mainWindowRenderActive()
+                || renderEpoch != *lastRenderEpoch) {
+                // Minimising a native window can suspend this timer. Ignore
+                // the elapsed interval on either side of the corresponding
+                // QML visibility event rather than treating it as a real UI
+                // stall and throttling the panadapter for several seconds.
+                *lastRenderEpoch = renderEpoch;
+                *lastNs = nowNs;
+                return;
+            }
+        }
         qint64 const deltaMs = (nowNs - *lastNs) / 1000000;
         *lastNs = nowNs;
         if (deltaMs < kStallThresholdMs)
