@@ -230,6 +230,35 @@ private slots:
     QVERIFY (!isHashedCallToken ("IU8LMC"));
     QVERIFY (!isHashedCallToken ("<>"));
 
+    // I due nominativi del tipo 4: il destinatario sta fra le parentesi (gia'
+    // risolto dal decoder), il mittente e' quello per esteso. Serve al
+    // sequencer per capire che la chiamata e' per lui: senza, il messaggio
+    // arrivava alla lista ma il contatto non si chiudeva.
+    using decodium::seq::splitNonStandardDirected;
+    QString dest, mitt;
+
+    QVERIFY (splitNonStandardDirected ("<IU8LMC> II8IHBC", &dest, &mitt));
+    QCOMPARE (dest, QString ("IU8LMC"));
+    QCOMPARE (mitt, QString ("II8IHBC"));
+
+    // Ordine invertito: il destinatario resta quello fra parentesi.
+    QVERIFY (splitNonStandardDirected ("II8IHBC <IU8LMC>", &dest, &mitt));
+    QCOMPARE (dest, QString ("IU8LMC"));
+    QCOMPARE (mitt, QString ("II8IHBC"));
+
+    // Col marcatore di bassa confidenza in coda vale lo stesso.
+    QVERIFY (splitNonStandardDirected ("<IU8LMC> II8IHBC ?", &dest, &mitt));
+    QCOMPARE (mitt, QString ("II8IHBC"));
+
+    // Diretto a un altro: si estrae comunque, decide il chiamante.
+    QVERIFY (splitNonStandardDirected ("<IK7YC> II8IHBC", &dest, &mitt));
+    QCOMPARE (dest, QString ("IK7YC"));
+
+    // Non e' tipo 4: niente da estrarre.
+    QVERIFY (!splitNonStandardDirected ("IU8LMC II8IHBC -12", &dest, &mitt));
+    QVERIFY (!splitNonStandardDirected ("<...> II8IHBC", &dest, &mitt));
+    QVERIFY (!splitNonStandardDirected ("CQ II8IHBC", &dest, &mitt));
+
     // Prefisso di paese con cifra d'area davanti al nominativo: in aria il
     // 9/9/2026 il filtro semantico scartava come ghost il 3% delle
     // decodifiche, tutte di questa forma (IH9/IT9JUI 119 volte in 16 ore).

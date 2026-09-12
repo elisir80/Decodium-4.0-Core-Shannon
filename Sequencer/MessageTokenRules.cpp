@@ -124,6 +124,49 @@ bool isNonStandardDirectedForm(QString const& message)
 }
 
 
+bool splitNonStandardDirected(QString const& message,
+
+                              QString* hashedOut,
+
+                              QString* plainOut)
+
+{
+
+    if (hashedOut) hashedOut->clear();
+
+    if (plainOut) plainOut->clear();
+
+    if (!isNonStandardDirectedForm(message)) {
+
+        return false;
+
+    }
+
+    QStringList const raw = message.trimmed().toUpper().simplified()
+
+        .split(QLatin1Char(' '), Qt::SkipEmptyParts);
+
+    int const idxHash = isHashedCallToken(raw.at(0)) ? 0 : 1;
+
+    QString const hashed = normalizeCallToken(raw.at(idxHash));
+
+    QString const plain = normalizeCallToken(raw.at(1 - idxHash));
+
+    if (hashed.isEmpty() || plain.isEmpty()) {
+
+        return false;
+
+    }
+
+    if (hashedOut) *hashedOut = hashed;
+
+    if (plainOut) *plainOut = plain;
+
+    return true;
+
+}
+
+
 bool isDirectedCqModifierToken(QString const& token)
 
 {

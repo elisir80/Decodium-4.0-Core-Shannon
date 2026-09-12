@@ -36438,6 +36438,38 @@ bool DecodiumBridge::isDirectedToLocalHashFromActivePartner(const QString& messa
         return false;
     }
 
+    // CASO 1: messaggio di tipo 4 con l'hash GIA' RISOLTO dal decoder, cioe'
+    // "<IU8LMC> II8IHBC". Qui il destinatario e' scritto: non serve indovinarlo
+    // dal QSO in corso come nel caso 2, basta confrontarlo col proprio
+    // nominativo, ed e' un controllo piu' stringente di qualunque euristica.
+    //
+    // Senza questo ramo il messaggio arrivava alla lista ma non al sequencer:
+    // l'operatore vedeva la stazione chiamarlo e il contatto non si chiudeva.
+    // Due erano gli ostacoli, entrambi invisibili: i due soli token (il
+    // controllo sotto ne pretende tre) e il fatto che i token normalizzati
+    // hanno gia' perso le parentesi angolari, quindi cercarvi un hash e'
+    // inutile. Segnalato in aria da IU8LMC il 12/9/2026 su II8IHBC.
+    {
+        QString destinatario;
+        QString mittente;
+        if (decodium::seq::splitNonStandardDirected(msg, &destinatario, &mittente)) {
+            QString const myBase = normalizedBaseCall(m_callsign.trimmed().toUpper());
+            QString const destBase = normalizedBaseCall(destinatario);
+            if (!myBase.isEmpty() && destBase == myBase
+                && isPlausibleDecodedCallsign(mittente)
+                && !hasHighConfidenceGhostPrefix(mittente)) {
+                if (partnerOut) {
+                    *partnerOut = normalizedUsableCallToken(mittente);
+                }
+                return true;
+            }
+            // Tipo 4 diretto a qualcun altro: non e' roba nostra.
+            return false;
+        }
+    }
+
+    // CASO 2: hash NON risolto ("<...>"). Qui il destinatario non si conosce e
+    // va dedotto dal QSO in corso, con tutte le cautele che seguono.
     QStringList const tokens = normalizedMessageTokens(msg);
     if (tokens.size() < 3) {
         return false;

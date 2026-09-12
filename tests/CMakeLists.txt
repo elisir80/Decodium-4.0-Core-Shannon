@@ -335,6 +335,16 @@ add_executable (test_ft2_qso_sim test_ft2_qso_sim.cpp)
 target_link_libraries (test_ft2_qso_sim wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_ft2_qso_sim COMMAND $<TARGET_FILE:test_ft2_qso_sim>)
 
+# Giro completo per un nominativo NON STANDARD che chiama: encode -> trama FT2
+# -> decoder di produzione -> regole vere di riconoscimento. Nasce dai due
+# difetti dell 11-12/9/2026 (riga invisibile, poi contatto che non si chiudeva).
+add_executable (test_nonstandard_call_directed
+  test_nonstandard_call_directed.cpp
+  ../Sequencer/MessageTokenRules.cpp
+  ../src/radio/Radio.cpp)
+target_link_libraries (test_nonstandard_call_directed wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_test (NAME test_nonstandard_call_directed COMMAND $<TARGET_FILE:test_nonstandard_call_directed>)
+
 if (DECODIUM_FASTLDPC_ARM64_TARGET)
   add_executable (test_fastldpc_neon test_fastldpc_neon.cpp)
   set_target_properties (test_fastldpc_neon PROPERTIES

@@ -34,6 +34,17 @@ bool isHashedCallToken(QString const& token);
 // reso inerte la prima correzione dell'11/9/2026.
 bool isNonStandardDirectedForm(QString const& message);
 
+// Come sopra, ma restituisce anche i due nominativi: in *hashedOut quello che
+// sta fra le parentesi angolari (il DESTINATARIO, gia' risolto dal decoder) e
+// in *plainOut quello per esteso (il MITTENTE, non standard). Entrambi senza
+// parentesi e in maiuscolo. Torna false se il messaggio non e' di tipo 4.
+//
+// Serve al sequencer: quando il destinatario e' esplicito non c'e' bisogno di
+// indovinare dal QSO in corso, basta confrontarlo col proprio nominativo.
+bool splitNonStandardDirected(QString const& message,
+                              QString* hashedOut,
+                              QString* plainOut);
+
 bool isDirectedCqModifierToken(QString const& token);
 
 bool isStrictAmateurCallsignToken(QString const& token);
