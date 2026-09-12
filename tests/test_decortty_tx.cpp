@@ -40,7 +40,32 @@ private slots:
     void prepareProfileIsQmxAware();
     void nativeFskBlocksPttButDataAllowsAudio();
     void qmxRttyProducesAudioAboveTheDetectorThreshold();
+    void modeExitStopsAutoCqAndAudio();
 };
+
+void TestDecoRttyTx::modeExitStopsAutoCqAndAudio()
+{
+    QString mode = QStringLiteral("DIGU");
+    bool ptt = false;
+    int chunks = 0;
+    auto hooks = radioHooks(QStringLiteral("QMX"), &mode);
+    hooks.impostaPtt = [&ptt](bool on) { ptt = on; };
+    hooks.mandaAudioTx = [&chunks](QVector<short> const&) { ++chunks; };
+    decortty::link::RadioHub radio;
+    decortty::app::RttyEngine engine;
+    engine.attachRadio(&radio);
+    radio.collegaADecodium(std::move(hooks));
+    engine.startAutoCq(QStringLiteral("CQ CQ TEST"), 3);
+    QTRY_VERIFY_WITH_TIMEOUT(chunks > 0, 1000);
+    engine.stopAutoCq();
+    engine.stopTransmit(true);
+    QVERIFY(!ptt);
+    QVERIFY(!engine.transmitting());
+    const int stoppedChunks = chunks;
+    QTest::qWait(3200);
+    QCOMPARE(chunks, stoppedChunks);
+    QVERIFY(!ptt);
+}
 
 void TestDecoRttyTx::nativeFskBlocksPttButDataAllowsAudio()
 {

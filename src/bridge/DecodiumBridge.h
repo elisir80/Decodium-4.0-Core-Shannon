@@ -1918,6 +1918,7 @@ public:
     Q_INVOKABLE void testQrzLogbookApi();
 
 signals:
+    void rttyModeLeaving();
     void satelliteTrackingWindowRequested();
     void ft2LinkSatelliteHalfDuplexStatusChanged();
     void spectrumDataReady(QVector<float> data);
@@ -3482,6 +3483,7 @@ private:
         int txAudioFrequency {0};
         int periodMs {0};
         bool tciAudio {false};
+        bool multiStream {false};
         QString outputDeviceName;
         QString outputDeviceDescription;
         int outputChannel {0};
@@ -4280,10 +4282,9 @@ public:
     void noteDecodeCommitted();        // contatore "committed" (append)
 
     // 1.0.364+ — MAM multi-stream nativo (FASE 1, solo C++, default OFF).
-    // multiStreamActive() e' true solo quando il toggle e' attivo, il modo e'
-    // FT2/FT4/FT8 e c'e' >=1 messaggio con altrettante frequenze. Quando false (sempre
-    // se m_mamMultiStream==false, oppure se m_mamMessages e' vuoto) il path TX
-    // resta byte-identico al mono single-stream esistente.
+    // multiStreamActive() e' true solo mentre il sequencer MAM e' realmente
+    // attivo e c'e' >=1 messaggio con altrettante frequenze. Un payload MAM
+    // residuo non puo' quindi essere usato da un TX manuale.
     // FASE 2: la soglia e' >=1 (era >=2 in FASE 1) cosi' il caso 1-slot del
     // sequencer usa generateMultiStreamFtxWave (1 stream all'offset dello slot)
     // invece del mono path che leggerebbe lo stato single-QSO non popolato in
@@ -4571,6 +4572,7 @@ private:
                                uint64_t serial);
     void initTxDevices();
     void invalidateTxAudioCache();
+    void clearMamPendingTxPayload(const QString& reason);
     void scheduleIdleAudioBufferRelease(int delayMs = 120000);
     void releaseIdleAudioBuffers();
     void scheduleTxAudioPrecompute(int delayMs = 75);

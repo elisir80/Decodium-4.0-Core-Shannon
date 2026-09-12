@@ -11,6 +11,7 @@
 #include "DecoPortRigDriver.h"
 #include "DecodiumDecoPortGateway.h"
 #include "DecodeUiFilterPolicy.h"
+#include "MamTxPayloadPolicy.h"
 #include "src/core/HostProcessEnvironment.h"
 #include "Ft2LinkSatelliteHalfDuplex.h"
 #include "LinuxDrmGpuUsage.h"
@@ -17730,6 +17731,22 @@ void DecodiumBridge::setMode(const QString& v) {
                                     .arg(previousMode, normalizedMode));
         m_mode = normalizedMode;
 
+        if (previousMode == QStringLiteral("RTTY")) {
+            // Stop producers before releasing their shared USB output. The
+            // mode has already changed, so late RTTY callbacks cannot re-key.
+            emit rttyModeLeaving();
+            setRttyInAscolto(false);
+            decoPortKeyLocalRig(false);
+            if (m_decoPortTxOut) {
+                QPointer<RtlSdrAudioOutput> out(m_decoPortTxOut);
+                QMetaObject::invokeMethod(m_decoPortTxOut, [out]() {
+                    if (out) out->stop(QStringLiteral("leaving-rtty"));
+                }, Qt::QueuedConnection);
+            }
+            m_decoPortTxOutRate = 0;
+            bridgeLog(QStringLiteral("Leaving RTTY: producer stopped, PTT released, USB TX output closing"));
+        }
+
         // Entrando in RTTY si commuta la radio, perche' sceglierlo dal
         // selettore dei modi e' una richiesta di lavorare in RTTY, non di
         // guardarlo. La decodifica dei modi digitali si ferma da se': RTTY non
@@ -19516,6 +19533,11 @@ void DecodiumBridge::setTxEnabled(bool v)
         bridgeLog(QStringLiteral("setTxEnabled(false): disabling AutoCQ with TX"));
         setAutoCqRepeat(false);
     }
+    if (!v) {
+        // A MAM payload belongs to the current automatic dispatch only. It
+        // must never survive a stop and be selected by a later manual TX.
+        clearMamPendingTxPayload(QStringLiteral("tx-disabled"));
+    }
 
     if (v && !prepareHoundTxSelectionForStart(QStringLiteral("tx-enable"))) {
         if (m_txEnabled) {
@@ -19643,6 +19665,7 @@ void DecodiumBridge::setMultiAnswerMode(bool v)
         clearPendingAutoLogSnapshot();
         clearLateAutoLogSnapshot();
         clearPendingAutoSeqTx(QStringLiteral("mam-disabled"));
+        clearMamPendingTxPayload(QStringLiteral("mam-disabled"));
     }
     bridgeLog(QStringLiteral("MultiAnswerMode: %1").arg(m_multiAnswerMode ? 1 : 0));
     emit multiAnswerModeChanged();
@@ -19685,6 +19708,12 @@ void DecodiumBridge::setAutoCqRepeat(bool v)
             clearPendingAutoLogSnapshot();
             clearLateAutoLogSnapshot();
             clearPendingAutoSeqTx(QStringLiteral("autocq-disabled"));
+            // Keep a running Multi-Answer QSO intact if that mode remains
+            // enabled. Otherwise this is the terminal AutoCQ transition and
+            // the generated multi-stream payload must be discarded.
+            if (!m_multiAnswerMode) {
+                clearMamPendingTxPayload(QStringLiteral("autocq-disabled"));
+            }
         }
         emit autoCqRepeatChanged();
         if (usingLegacyBackendForTx()) {
@@ -22010,7 +22039,7 @@ bool DecodiumBridge::shouldUseBridgeAudioForLegacyDigitalTx() const
 
 QString DecodiumBridge::currentBridgeTxRepresentativeMessage() const
 {
-    if (!m_cwTxActive && mamMultiStreamSequencerActive() && !m_mamMessages.isEmpty()) {
+    if (!m_cwTxActive && multiStreamActive()) {
         return m_mamMessages.first().trimmed();
     }
     return buildCurrentTxMessage();
@@ -23425,6 +23454,25 @@ void DecodiumBridge::invalidateTxAudioCache()
     m_txAudioCache = TxAudioCache {};
 }
 
+void DecodiumBridge::clearMamPendingTxPayload(const QString& reason)
+{
+    const int messageCount = m_mamMessages.size();
+    const int frequencyCount = m_mamF0sHz.size();
+    const bool hadPayload = decodium::mamtx::clearPendingPayload(m_mamMessages,
+                                                                   m_mamF0sHz);
+    // A MAM composite can have the same representative message, frequency and
+    // period as mono TX. Always invalidate it, even if the vectors were
+    // already empty, so the next manual transmission is regenerated safely.
+    invalidateTxAudioCache();
+    if (hadPayload) {
+        bridgeLog(QStringLiteral("MAM pending TX payload cleared (%1): messages=%2 frequencies=%3")
+                      .arg(reason.trimmed().isEmpty() ? QStringLiteral("unspecified")
+                                                      : reason.trimmed())
+                      .arg(messageCount)
+                      .arg(frequencyCount));
+    }
+}
+
 void DecodiumBridge::scheduleIdleAudioBufferRelease(int delayMs)
 {
     if (!m_audioBufferReleaseTimer) {
@@ -23634,10 +23682,8 @@ void DecodiumBridge::precomputeTxAudioForCurrentMessage(const QString& reason)
 // 1.0.364+ — MAM multi-stream nativo (FASE 1).
 bool DecodiumBridge::multiStreamActive() const
 {
-    return m_mamMultiStream
-        && isMamMultiStreamMode()
-        && m_mamMessages.size() >= 1
-        && m_mamMessages.size() == m_mamF0sHz.size();
+    return decodium::mamtx::multiStreamPayloadIsActive(
+        mamMultiStreamSequencerActive(), m_mamMessages, m_mamF0sHz);
 }
 
 // 1.0.365+ — modi ammessi al MAM multi-stream. FT8 (path sync), FT4 (path
@@ -23692,8 +23738,7 @@ void DecodiumBridge::setMamMultiStream(bool on)
         // OFF: smonta tutto lo stato multi-stream. m_mamMessages/m_mamF0sHz
         // vuoti -> multiStreamActive() torna false -> seam TX mono invariato.
         m_mamSlots.clear();
-        m_mamMessages.clear();
-        m_mamF0sHz.clear();
+        clearMamPendingTxPayload(QStringLiteral("multi-stream-disabled"));
     }
     // FASE 3: persisti nello store canonico Decodium3 (come i toggle FT2).
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
@@ -23851,13 +23896,12 @@ void DecodiumBridge::mamLogSlotNow(const QString& call)
 // 1.0.569+ - svuota tutti gli slot attivi (pulsante CLEAR). Non logga nulla.
 void DecodiumBridge::mamClearSlots()
 {
-    if (m_mamSlots.isEmpty()) {
+    if (m_mamSlots.isEmpty() && m_mamMessages.isEmpty() && m_mamF0sHz.isEmpty()) {
         return;
     }
     int const n = m_mamSlots.size();
     m_mamSlots.clear();
-    m_mamMessages.clear();
-    m_mamF0sHz.clear();
+    clearMamPendingTxPayload(QStringLiteral("slots-cleared"));
     bridgeLog(QStringLiteral("MAM slots cleared by operator: %1 removed").arg(n));
     emit mamActiveSlotsChanged();
 }
@@ -23877,12 +23921,13 @@ void DecodiumBridge::mamClearQueue()
 
 bool DecodiumBridge::mamMultiStreamSequencerActive() const
 {
-    return m_mamMultiStream
-        && isMamMultiStreamMode()
-        && m_txEnabled
-        && (m_autoCqRepeat || m_multiAnswerMode)
-        && (!usingLegacyBackendForTx() || shouldUseBridgeAudioForLegacyDigitalTx())
-        && !m_manualTxHold;
+    return decodium::mamtx::multiStreamSequencerIsActive(
+        m_mamMultiStream,
+        isMamMultiStreamMode(),
+        m_txEnabled,
+        m_autoCqRepeat || m_multiAnswerMode,
+        !usingLegacyBackendForTx() || shouldUseBridgeAudioForLegacyDigitalTx(),
+        m_manualTxHold);
 }
 
 // 1.0.365+ — path CLICK->SLOT (modello Fox/hunter): l'utente fa doppio-click
@@ -24416,6 +24461,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     QString const message = msg.trimmed();
     bool const tciAudio = usingTciAudioInput();
     int const effectivePeriodMs = effectivePeriodMsForMode(mode);
+    bool const useMultiStream = multiStreamActive();
     auto logResult = [&](bool cacheHit,
                          qint64 waveMs,
                          qint64 resolveMs,
@@ -24446,12 +24492,14 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
             && m_txAudioCache.message == message
             && m_txAudioCache.txAudioFrequency == txAudioFrequency
             && m_txAudioCache.periodMs == effectivePeriodMs
-            && m_txAudioCache.tciAudio == tciAudio;
+            && m_txAudioCache.tciAudio == tciAudio
+            && decodium::mamtx::cacheMatchesPayloadKind(m_txAudioCache.multiStream,
+                                                          useMultiStream);
     };
 
     // 1.0.364+ — MAM multi-stream: bypassa la cache (force rebuild) cosi' il
     // multi-stream non serve mai PCM/wave mono stantio. Mono path invariato.
-    if (!m_cwTxActive && !m_ft2LinkTxActive && !m_telemetryTxActive && !multiStreamActive()
+    if (!m_cwTxActive && !m_ft2LinkTxActive && !m_telemetryTxActive && !useMultiStream
         && cacheMatchesBase() && (!needPcm || !m_txAudioCache.pcm.isEmpty())) {
         if (needPcm) {
             if (m_cachedTxOutputDeviceValid
@@ -24528,7 +24576,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
         if (wave.isEmpty()) {
             buildError = QStringLiteral("Generazione onda CW fallita");
         }
-    } else if (multiStreamActive()) {
+    } else if (useMultiStream) {
         wave = generateMultiStreamFtxWave(mode, m_mamMessages, m_mamF0sHz, &buildError);
     } else {
         wave = buildTxWaveformForMessage(mode, message, txAudioFrequency,
@@ -24591,6 +24639,7 @@ bool DecodiumBridge::ensureTxAudioPrepared(const QString& msg, int txAudioFreque
     m_txAudioCache.txAudioFrequency = txAudioFrequency;
     m_txAudioCache.periodMs = effectivePeriodMs;
     m_txAudioCache.tciAudio = tciAudio;
+    m_txAudioCache.multiStream = useMultiStream;
     m_txAudioCache.outputDeviceName = needPcm ? m_audioOutputDevice : QString {};
     m_txAudioCache.outputDeviceDescription = needPcm ? device.description() : QString {};
     m_txAudioCache.outputChannel = needPcm ? m_audioOutputChannel : 0;
@@ -28332,6 +28381,14 @@ void DecodiumBridge::haltWithReason(const QString& reason)
 
     engageManualTxHold(haltReason, true);
     clearDeferredManualSyncTx(haltReason);
+    clearMamPendingTxPayload(QStringLiteral("halt:%1").arg(haltReason));
+    // Halt is an explicit operator abort. Unlike a temporary TX disable, it
+    // must discard every active MAM QSO on both native and legacy paths.
+    const bool hadMamSlots = !m_mamSlots.isEmpty();
+    m_mamSlots.clear();
+    if (hadMamSlots) {
+        emit mamActiveSlotsChanged();
+    }
 
 #if defined(Q_OS_MAC)
     cancelPendingLegacyBridgeAudioStart(haltReason);
@@ -28370,8 +28427,6 @@ void DecodiumBridge::haltWithReason(const QString& reason)
     stopTx();
     stopTune();
     setTxEnabled(false);
-    // 1.0.364+ MAM multi-stream nativo (FASE 2): halt azzera gli slot.
-    m_mamSlots.clear();
 }
 
 void DecodiumBridge::refreshAudioDevices()
@@ -41395,11 +41450,15 @@ void DecodiumBridge::reloadActiveLogbookState(const QString& reason)
 
 void DecodiumBridge::rttyAlzaPtt(bool on)
 {
+    if (on && m_mode != QStringLiteral("RTTY"))
+        return;
     decoPortKeyLocalRig(on);
 }
 
 void DecodiumBridge::rttyMandaAudioTx(const QVector<short>& campioni12k)
 {
+    if (m_mode != QStringLiteral("RTTY"))
+        return;
     decoPortPlayTxAudio(campioni12k);
 }
 

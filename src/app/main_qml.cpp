@@ -4179,7 +4179,8 @@ int main(int argc, char* argv[])
         // digitali sta trasmettendo o accordando, e il PTT viene rifiutato se
         // il CAT non c'e'.
         ganci.puoTrasmettere     = [&bridge] {
-            return bridge.catConnected () && !bridge.transmitting ();
+            return bridge.mode() == QStringLiteral("RTTY")
+                && bridge.catConnected () && !bridge.transmitting ();
         };
         ganci.impostaPtt         = [&bridge] (bool on) { bridge.rttyAlzaPtt (on); };
         ganci.mandaAudioTx       = [&bridge] (QVector<short> const& c) {
@@ -4196,6 +4197,11 @@ int main(int argc, char* argv[])
         rttyHost.impostaGanciRadio (std::move (ganci));
 
         rttyHost.avvia (rttySettings);
+        QObject::connect (&bridge, &DecodiumBridge::rttyModeLeaving,
+                          &rttyHost, [&rttyHost] {
+            rttyHost.motore().stopAutoCq();
+            rttyHost.motore().stopTransmit(true);
+        });
 
         // Il sottosistema originale aveva un secondo profilo stazione e una
         // seconda lingua. Dentro Decodium non devono esistere due verita': le

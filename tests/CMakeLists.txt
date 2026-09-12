@@ -189,6 +189,12 @@ add_executable (test_ptt_transition_policy test_ptt_transition_policy.cpp)
 target_link_libraries (test_ptt_transition_policy Qt6::Test Qt6::Core)
 add_test (NAME test_ptt_transition_policy COMMAND $<TARGET_FILE:test_ptt_transition_policy>)
 
+add_executable (test_mam_tx_payload_policy test_mam_tx_payload_policy.cpp)
+target_compile_definitions (test_mam_tx_payload_policy
+  PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries (test_mam_tx_payload_policy Qt6::Test Qt6::Core)
+add_test (NAME test_mam_tx_payload_policy COMMAND $<TARGET_FILE:test_mam_tx_payload_policy>)
+
 add_executable (test_audio_sink_tx_gate
   test_audio_sink_tx_gate.cpp
   ../Audio/AudioDevice.cpp
@@ -527,6 +533,7 @@ set (_decodium_regression_test_targets
   test_qso_sequencer_rules
   test_tx_pipeline
   test_ptt_transition_policy
+  test_mam_tx_payload_policy
   test_audio_sink_tx_gate
   test_amplifier_telemetry
   test_station_telemetry_codec

@@ -523,6 +523,32 @@ ApplicationWindow {
             colSlot3.targetPanelWidth = slot3Width
     }
 
+    function resetPanelSizes() {
+        // SplitView replaces preferredWidth bindings when its handles are dragged.
+        // Updating targetPanelWidth alone therefore cannot reset a used layout.
+        var slots = [colSlot0, colSlot1, colSlot2, colSlot3]
+        var defaults = [400, 400, 360, 380]
+        savedPeriod1PanelWidth = 400
+        savedRxFreqPanelWidth = 400
+        savedLiveMapPanelWidth = 360
+        savedDxClusterColumnWidth = 380
+        decodePanelLayoutSaved = false
+        for (var i = 0; i < slots.length; ++i) {
+            var slot = slots[i]
+            slot.targetPanelWidth = defaults[i]
+            slot.SplitView.preferredWidth = panelWidthBinding(slot)
+        }
+        colSlot0.userDraggedSplit = false
+        snapAnimation.stop()
+        waterfallPanel.SplitView.preferredHeight = 420
+        bridge.uiWaterfallHeight = 420
+        mainWindow.scheduleSave()
+    }
+
+    function panelWidthBinding(slot) {
+        return Qt.binding(function() { return slot.slotCollapsed ? 0 : slot.targetPanelWidth })
+    }
+
     function captureDecodePanelWidths() {
         var layoutSettings = ({})
         if (!bridge)
@@ -966,6 +992,7 @@ ApplicationWindow {
         target: bridge
         function onWindowLayoutResetRequested() {
             console.log("[ResetLayout] applying default layout")
+            mainWindow.resetClassicColumnOrder()
             // 1) Re-dock di tutte le finestre floating (toglie detached + minimized)
             waterfallDetached = false;   waterfallMinimized = false
             logWindowDetached = false;   logWindowMinimized = false
@@ -991,14 +1018,14 @@ ApplicationWindow {
             txPanelDetached = false;     txPanelMinimized = false
             liveMapDetached = false;     liveMapMinimized = false
             // 1.0.275 — DX Cluster: riporta alla posizione default vicino bordo destro mainWindow
+            dxClusterDetached = false
             dxClusterMinimized = false
             if (dxClusterFloatingWindow) {
                 dxClusterFloatingWindow.width = 560
                 dxClusterFloatingWindow.height = 360
                 dxClusterFloatingWindow.x = mainWindow.x + Math.max(0, mainWindow.width - 560 - 60)
                 dxClusterFloatingWindow.y = mainWindow.y + 80
-                dxClusterFloatingWindow.visibility = Window.Windowed
-                if (dxClusterFloatingWindow.visible) dxClusterFloatingWindow.raise()
+                dxClusterFloatingWindow.hide()
             }
 
             // 2) Centra mainWindow su primary screen con dimensioni default
@@ -1020,7 +1047,11 @@ ApplicationWindow {
             raise(); requestActivate()
 
             // 3) Forza salvataggio nuovo state pulito (sovrascrive QSettings)
-            Qt.callLater(persistWindowLayouts)
+            Qt.callLater(function() {
+                mainWindow.resetPanelSizes()
+                // Save after SplitView has applied the new preferred sizes.
+                windowStateSaveTimer.restart()
+            })
         }
     }
 
@@ -11031,7 +11062,6 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         onAccepted: {
-            mainWindow.resetClassicColumnOrder()
             if (bridge)
                 bridge.resetWindowLayout()
         }
@@ -11759,7 +11789,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     Shortcut {
         sequence: "Ctrl+Shift+L"
         context: Qt.ApplicationShortcut
-        onActivated: { mainWindow.resetClassicColumnOrder(); if (bridge) bridge.resetWindowLayout() }
+        onActivated: { if (bridge) bridge.resetWindowLayout() }
     }
     // 1.0.268 (Phase 5.3) — apre Decode History Dialog
     Shortcut {
