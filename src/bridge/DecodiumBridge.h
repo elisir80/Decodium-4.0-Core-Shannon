@@ -1,4 +1,5 @@
 #pragma once
+namespace decodium::audio { class RttyRxRecovery; }
 #include <QObject>
 #include <QStringList>
 #include <QVariantList>
@@ -3464,6 +3465,8 @@ private:
     qint64             m_lastAudioWatchdogRestartMs {0};
     qint64             m_lastAudioWatchdogLogMs {0};
     quint64            m_audioWatchdogRecoverySerial {0};
+    void scheduleRttyExitRxRecovery();
+    decodium::audio::RttyRxRecovery* m_rttyRxRecovery {nullptr};
     qint64             m_audioWatchdogIgnoreUntilMs {0};
     qint64             m_audioOverdriveStartMs {0};
     qint64             m_lastAudioOverdriveWarningMs {0};
