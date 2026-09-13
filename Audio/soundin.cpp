@@ -720,11 +720,9 @@ void SoundInput::start(QAudioDevice const& device, int framesPerBuffer, AudioDev
       return;
     }
 
-#if defined(Q_OS_LINUX)
   // A pending recovery must never reopen an old device after a manual start,
   // a mode change, or a newer watchdog attempt has superseded it.
   ++m_deferredRestartGeneration;
-#endif
   m_sink = sink;
 
   bool usingStereoForMono = false;
@@ -986,13 +984,14 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
 #if defined(Q_OS_MACOS)
   qDebug() << "SoundInput: forced restart for" << device.description();
   stop ();
+  quint64 const recoveryGeneration = ++m_deferredRestartGeneration;
 
   QPointer<SoundInput> guard {this};
   QPointer<AudioDevice> sinkGuard {sink};
   QAudioDevice deviceCopy {device};
   auto delayedStart = [guard, deviceCopy, framesPerBuffer, sinkGuard,
-                       downSampleFactor, channel] {
-    if (guard && sinkGuard)
+                       downSampleFactor, channel, recoveryGeneration] {
+    if (guard && sinkGuard && guard->m_deferredRestartGeneration == recoveryGeneration)
       {
         guard->start (deviceCopy, framesPerBuffer, sinkGuard.data(), downSampleFactor, channel);
       }
@@ -1091,12 +1090,14 @@ void SoundInput::restart(QAudioDevice const& device, int framesPerBuffer, AudioD
   m_sink = sink;
   m_sink->setInputGainLinear (m_inputGain);
   m_expectedSuspend_ = false;
+  quint64 const recoveryGeneration = ++m_deferredRestartGeneration;
   m_stream->reset ();
 
   QPointer<SoundInput> guard {this};
   QPointer<AudioDevice> sinkGuard {sink};
-  QTimer::singleShot (120, this, [guard, sinkGuard] {
-    if (!guard || !sinkGuard || !guard->m_stream)
+  QTimer::singleShot (120, this, [guard, sinkGuard, recoveryGeneration] {
+    if (!guard || !sinkGuard || !guard->m_stream
+        || guard->m_deferredRestartGeneration != recoveryGeneration)
       {
         return;
       }
@@ -1129,6 +1130,8 @@ void SoundInput::suspend ()
       return;
     }
 
+  // A delayed recovery must not undo a newer TX-side suspension.
+  ++m_deferredRestartGeneration;
   if (m_stream)
     {
       if (m_stream->state () == QAudio::ActiveState
@@ -1398,9 +1401,7 @@ void SoundInput::stop()
       return;
     }
 
-#if defined(Q_OS_LINUX)
   ++m_deferredRestartGeneration;
-#endif
 #if defined(Q_OS_MACOS)
   stopNativeMacInput ();
 #endif

@@ -17744,7 +17744,7 @@ void DecodiumBridge::setMode(const QString& v) {
                 }, Qt::QueuedConnection);
             }
             m_decoPortTxOutRate = 0;
-            bridgeLog(QStringLiteral("Leaving RTTY: producer stopped, PTT released, USB TX output closing"));
+            bridgeLog(QStringLiteral("Leaving RTTY: producer stopped, PTT release requested, USB TX output closing"));
         }
 
         // Entrando in RTTY si commuta la radio, perche' sceglierlo dal
@@ -51035,7 +51035,14 @@ void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMod
     bool const keepExistingQtCapture = (!m_tciAudioCaptureActive && m_soundInput)
         || (m_rtlSdrInput && m_rtlSdrInput->isActive());
 
-    if (keepExistingQtCapture) {
+    bool const recoverLocalCapture = previousMode == QStringLiteral("RTTY")
+        && m_soundInput && !m_tciAudioCaptureActive && !m_decoPortUseRemote
+        && !(m_rtlSdrInput && m_rtlSdrInput->isActive());
+
+    if (recoverLocalCapture) {
+        bridgeLog(QStringLiteral("setMode: rearming local RX after RTTY -> %1; input existence is not PCM liveness")
+                      .arg(m_mode));
+    } else if (keepExistingQtCapture) {
         bridgeLog(QStringLiteral("setMode: preserving active QAudioSource for mode change %1 -> %2")
                       .arg(previousMode, m_mode));
     } else {
@@ -51060,7 +51067,40 @@ void DecodiumBridge::restartAudioCaptureForModeChange(const QString& previousMod
         m_asyncAudioPos.store(0, std::memory_order_release);
     }
 
-    if (keepExistingQtCapture) {
+    if (recoverLocalCapture) {
+        // Clear a TX discard/suspend latch as well as resetting the decoder.
+        // Keep SoundInput alive: its restart() owns the safe PipeWire recovery.
+        m_rxAudioSuspendedForTx = false;
+        m_rxAudioKeptOpenForTx = false;
+        if (m_audioSink)
+            m_audioSink->setDiscardSamples(false);
+        quint64 const session = m_periodTimerSessionId;
+        QTimer::singleShot(250, this, [this, session]() {
+            if (session != m_periodTimerSessionId || !m_monitorRequested
+                || !m_monitoring || m_transmitting || m_tuning
+                || m_mode == QStringLiteral("RTTY") || m_decoPortUseRemote
+                || m_tciAudioCaptureActive || rtlSdrEnabled())
+                return;
+            // Give the queued RTTY output close a chance to settle before RX
+            // recovery. Unlike start(), restart bypasses the active/pending
+            // stream shortcuts and reconnects a suspended/stalled source.
+            startAudioCapture(true);
+            qint64 const requestedAt = QDateTime::currentMSecsSinceEpoch();
+            QTimer::singleShot(3500, this, [this, session, requestedAt]() {
+                if (session != m_periodTimerSessionId || !m_monitorRequested
+                    || !m_monitoring || m_transmitting || m_tuning
+                    || m_decoPortUseRemote || m_tciAudioCaptureActive || rtlSdrEnabled())
+                    return;
+                bool const pcmArrived = m_lastAudioHealthMs > requestedAt;
+                bridgeLog(QStringLiteral("RTTY exit RX check: pcm=%1 rms=%2 peak=%3 catPtt=%4 mode=%5")
+                              .arg(pcmArrived ? 1 : 0).arg(m_lastAudioHealthRms)
+                              .arg(m_lastAudioHealthPeak).arg(activeCatReportsPttActive() ? 1 : 0)
+                              .arg(m_mode));
+                if (!pcmArrived)
+                    restartAudioCaptureFromWatchdog(QStringLiteral("RTTY exit: no fresh RX PCM"));
+            });
+        });
+    } else if (keepExistingQtCapture) {
         if (m_soundInput) {
             m_soundInput->setInputGain(rxInputGainFromLevel(m_rxInputLevel));
         }
