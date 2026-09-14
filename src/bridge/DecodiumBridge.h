@@ -5,6 +5,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 #include <QVariantList>
 #include <QVariantMap>
 #include "DecodeUiFilterPolicy.h"
+#include "RttyRigModeState.h"
 #include <QString>
 #include <QByteArray>
 #include <QVector>
@@ -2411,6 +2412,9 @@ private:
     // banda: molti apparati, la FT-991A compresa, ricordano un modo diverso per
     // ciascuna banda e ci tornano da soli appena ci si sposta.
     void applyRttyRigMode(const QString& reason);
+    QString rttyCatContext() const;
+    decodium::radio::RttyRigModeState m_rttyRigModeState;
+    quint64 m_rttyRigModeGeneration {0};
     void updateRigTelemetry(double powerWatts, double swr, double alc = 0.0, bool alcValid = false);
     void applyNtpSettings();
     void configureNtpClientForMode(const QString& mode);

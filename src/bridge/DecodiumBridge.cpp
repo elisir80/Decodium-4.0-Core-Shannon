@@ -10718,6 +10718,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             bool c = catProp("connected").toBool();
             bridgeLog("CAT[" + backend + "] connectedChanged: " + QString::number(c));
             if (m_catConnected != c) {
+                if (!c) m_rttyRigModeState.clear();
                 m_catConnected = c;
                 m_catRigName = c ? catProp("rigName").toString() : QString();
                 emit catConnectedChanged();
@@ -17711,6 +17712,16 @@ void DecodiumBridge::setMode(const QString& v) {
     }
 
     if (m_mode != normalizedMode) {
+        quint64 const rttyRigGeneration = ++m_rttyRigModeGeneration;
+        if (normalizedMode == QStringLiteral("RTTY")) {
+            m_rttyRigModeState.enter(rttyCatContext(), m_catMode);
+            bridgeLog(QStringLiteral("RTTY entry state: catMode=%1 rxLevel=%2 rxGain=%3 autoRx=%4 channel=%5")
+                          .arg(m_catMode).arg(m_rxInputLevel).arg(rxInputGainFromLevel(m_rxInputLevel))
+                          .arg(m_autoRxInputLevel ? 1 : 0).arg(m_audioInputChannel));
+        } else if (m_mode == QStringLiteral("RTTY"))
+            m_rttyRigModeState.leave(QDateTime::currentMSecsSinceEpoch());
+        else
+            m_rttyRigModeState.clear();
         if (m_rttyRxRecovery)
             m_rttyRxRecovery->cancel(QStringLiteral("application mode changed"));
         // 1.0.179 — Smooth Decode Flow: cambio mode invalida la coda
@@ -17917,7 +17928,9 @@ void DecodiumBridge::setMode(const QString& v) {
             regenerateTxMessages();
         }
         QString const configuredRigMode = configuredCatRigMode();
-        if (!configuredRigMode.isEmpty()) {
+        QString const rttyRestoreMode = m_rttyRigModeState.restoreTarget(
+            rttyCatContext(), configuredRigMode, QDateTime::currentMSecsSinceEpoch());
+        if (!configuredRigMode.isEmpty() || !rttyRestoreMode.isEmpty()) {
             applyConfiguredCatRigMode(QStringLiteral("mode-change"));
         } else if (m_catBackend == QStringLiteral("tci")
             && m_hamlibCat
@@ -17932,6 +17945,27 @@ void DecodiumBridge::setMode(const QString& v) {
         // temporarily false. UTC/NTP rearming must not cancel audio recovery.
         if (previousMode == QStringLiteral("RTTY") && monitorShouldStayActive)
             scheduleRttyExitRxRecovery();
+        if (!rttyRestoreMode.isEmpty()) {
+            bridgeLog(QStringLiteral("RTTY exit CAT restore: scheduled previous=%1 reported=%2")
+                          .arg(rttyRestoreMode, m_catMode));
+            // The immediate request can be deferred by a band QSY. Also
+            // cover mode changes which do not emit a post-QSY callback.
+            QTimer::singleShot(1200, this, [this, rttyRigGeneration]() {
+                if (rttyRigGeneration != m_rttyRigModeGeneration) return;
+                applyConfiguredCatRigMode(QStringLiteral("rtty-exit/settled"));
+            });
+            QTimer::singleShot(4500, this, [this, rttyRigGeneration, rttyRestoreMode]() {
+                if (rttyRigGeneration != m_rttyRigModeGeneration) return;
+                const auto target = m_rttyRigModeState.restoreTarget(
+                    rttyCatContext(), configuredCatRigMode(), QDateTime::currentMSecsSinceEpoch());
+                bridgeLog(QStringLiteral("RTTY exit CAT restore check: requested=%1 reported=%2 result=%3")
+                              .arg(rttyRestoreMode, m_catMode,
+                                   target.isEmpty() ? QStringLiteral("cancelled/context-or-policy-changed")
+                                   : (m_catMode.compare(target, Qt::CaseInsensitive) == 0
+                                      ? QStringLiteral("reported-match") : QStringLiteral("not-confirmed"))));
+                m_rttyRigModeState.clear();
+            });
+        }
         scheduleTxAudioPrecompute();
     }
 }
@@ -29318,6 +29352,7 @@ void DecodiumBridge::setCatBackend(const QString& v)
         m_lastCatError.clear();
         emit lastCatErrorChanged();
     }
+    m_rttyRigModeState.clear();
     m_catBackend = normalized;
     emit catBackendChanged();
     emit catManagerChanged();
@@ -29400,6 +29435,12 @@ QString DecodiumBridge::rttyRigMode() const
     return testo;
 }
 
+QString DecodiumBridge::rttyCatContext() const
+{
+    if (!m_catConnected || m_decoPortUseRemote || decoPortIsCat(m_catBackend)) return {};
+    return m_catBackend + QChar('|') + m_catRigName;
+}
+
 void DecodiumBridge::applyRttyRigMode(const QString& reason)
 {
     if (m_mode.compare(QStringLiteral("RTTY"), Qt::CaseInsensitive) != 0)
@@ -29428,6 +29469,7 @@ void DecodiumBridge::applyRttyRigMode(const QString& reason)
     if (m_catBackend == QStringLiteral("native")) {
         if (m_nativeCat && m_nativeCat->connected()) {
             bridgeLog(QStringLiteral("RTTY: modo radio (%1): native -> %2").arg(reason, rigMode));
+            m_rttyRigModeState.overrideRequested(rttyCatContext(), rigMode);
             m_nativeCat->setRigMode(rigMode);
         }
         return;
@@ -29435,6 +29477,7 @@ void DecodiumBridge::applyRttyRigMode(const QString& reason)
     if (m_catBackend == QStringLiteral("cat4om")) {
         if (m_cat4OmCat && m_cat4OmCat->connected()) {
             bridgeLog(QStringLiteral("RTTY: modo radio (%1): cat4om -> %2").arg(reason, rigMode));
+            m_rttyRigModeState.overrideRequested(rttyCatContext(), rigMode);
             m_cat4OmCat->setRigMode(rigMode);
         }
         return;
@@ -29443,19 +29486,29 @@ void DecodiumBridge::applyRttyRigMode(const QString& reason)
         if (m_hamlibCat && m_hamlibCat->connected()) {
             bridgeLog(QStringLiteral("RTTY: modo radio (%1): %2 -> %3")
                           .arg(reason, m_catBackend, rigMode));
+            m_rttyRigModeState.overrideRequested(rttyCatContext(), rigMode);
             m_hamlibCat->setRigMode(rigMode);
         }
         return;
     }
     if (m_catBackend == QStringLiteral("omnirig") && m_omniRigCat && m_omniRigCat->connected()) {
         bridgeLog(QStringLiteral("RTTY: modo radio (%1): omnirig -> %2").arg(reason, rigMode));
+        m_rttyRigModeState.overrideRequested(rttyCatContext(), rigMode);
         m_omniRigCat->setRigMode(rigMode);
     }
 }
 
 void DecodiumBridge::applyConfiguredCatRigMode(const QString& reason)
 {
-    QString const rigMode = configuredCatRigMode();
+    QString rigMode = configuredCatRigMode();
+    if (rigMode.isEmpty() && m_mode != QStringLiteral("RTTY")) {
+        rigMode = m_rttyRigModeState.restoreTarget(
+            rttyCatContext(), rigMode, QDateTime::currentMSecsSinceEpoch());
+        if (!rigMode.isEmpty() && (m_transmitting || m_tuning || m_decoPortRemoteKeyed)) {
+            bridgeLog(QStringLiteral("RTTY exit CAT restore deferred: TX/Tune active"));
+            return;
+        }
+    }
     if (rigMode.isEmpty()) {
         return;
     }
@@ -51091,9 +51144,11 @@ void DecodiumBridge::scheduleRttyExitRxRecovery()
                 state.monitoring = m_monitoring;
                 state.busy = m_transmitting || m_tuning || m_decoPortRemoteKeyed;
                 state.pcmStamp = m_lastAudioHealthMs;
-                state.details = QStringLiteral("rms=%1 peak=%2 catPtt=%3 mode=%4")
+                state.details = QStringLiteral("rms=%1 peak=%2 catPtt=%3 mode=%4 catMode=%5 rxLevel=%6 rxGain=%7 autoRx=%8 channel=%9")
                     .arg(m_lastAudioHealthRms).arg(m_lastAudioHealthPeak)
-                    .arg(activeCatReportsPttActive() ? 1 : 0).arg(m_mode);
+                    .arg(activeCatReportsPttActive() ? 1 : 0).arg(m_mode).arg(m_catMode)
+                    .arg(m_rxInputLevel).arg(rxInputGainFromLevel(m_rxInputLevel))
+                    .arg(m_autoRxInputLevel ? 1 : 0).arg(m_audioInputChannel);
                 if (m_mode == QStringLiteral("RTTY"))
                     state.cancelReason = QStringLiteral("returned to RTTY");
                 else if (m_decoPortUseRemote || m_tciAudioCaptureActive || usingTciAudioInput() || rtlSdrEnabled())

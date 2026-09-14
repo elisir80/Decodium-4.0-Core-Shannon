@@ -206,6 +206,10 @@ add_executable (test_rtty_rx_recovery test_rtty_rx_recovery.cpp)
 target_link_libraries (test_rtty_rx_recovery Qt6::Test Qt6::Core)
 add_test (NAME test_rtty_rx_recovery COMMAND $<TARGET_FILE:test_rtty_rx_recovery>)
 
+add_executable (test_rtty_rig_mode_state test_rtty_rig_mode_state.cpp)
+target_link_libraries (test_rtty_rig_mode_state Qt6::Test Qt6::Core)
+add_test (NAME test_rtty_rig_mode_state COMMAND $<TARGET_FILE:test_rtty_rig_mode_state>)
+
 add_executable (test_amplifier_telemetry test_amplifier_telemetry.cpp
                 ../src/radio/DecodiumAmplifier.cpp)
 target_include_directories (test_amplifier_telemetry PRIVATE ${CMAKE_SOURCE_DIR})
@@ -540,6 +544,7 @@ set (_decodium_regression_test_targets
   test_mam_tx_payload_policy
   test_audio_sink_tx_gate
   test_rtty_rx_recovery
+  test_rtty_rig_mode_state
   test_amplifier_telemetry
   test_station_telemetry_codec
   test_qmx_telemetry
