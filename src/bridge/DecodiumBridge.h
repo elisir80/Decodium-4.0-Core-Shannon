@@ -350,6 +350,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool asyncDecodeEnabled READ asyncDecodeEnabled WRITE setAsyncDecodeEnabled NOTIFY asyncDecodeEnabledChanged)
     Q_PROPERTY(bool dualCarrierEnabled READ dualCarrierEnabled WRITE setDualCarrierEnabled NOTIFY dualCarrierEnabledChanged)
     Q_PROPERTY(bool ft2AccumuloEnabled READ ft2AccumuloEnabled WRITE setFt2AccumuloEnabled NOTIFY ft2AccumuloEnabledChanged)
+    Q_PROPERTY(QString ft2LogBridgeStatus READ ft2LogBridgeStatus NOTIFY ft2LogBridgeStatusChanged)
     Q_PROPERTY(bool quickQsoEnabled    READ quickQsoEnabled    WRITE setQuickQsoEnabled    NOTIFY quickQsoEnabledChanged)
     Q_PROPERTY(bool resumeQsoOnReply   READ resumeQsoOnReply   WRITE setResumeQsoOnReply   NOTIFY resumeQsoOnReplyChanged)
     Q_PROPERTY(int  asyncSnrDb         READ asyncSnrDb                                     NOTIFY asyncSnrDbChanged)
@@ -983,6 +984,13 @@ public:
     // (vedi Detector/fastldpc/lab/misure/20260907_accumulo_ft2.md).
     bool ft2AccumuloEnabled() const { return m_ft2AccumuloEnabled; }
     Q_INVOKABLE void setFt2AccumuloEnabled(bool v);
+    // FT2 Log Bridge (client di community.ft2.it): avvio automatico con
+    // Decodium. Impostazioni "FT2LogBridgeAutoStart" e "FT2LogBridgePath"
+    // lette con getSetting(); vedi Ft2LogBridgeLauncher.h.
+    QString ft2LogBridgeStatus() const { return m_ft2LogBridgeStatus; }
+    Q_INVOKABLE void startFt2LogBridgeNow();
+    Q_INVOKABLE void detectFt2LogBridgePath();
+    Q_INVOKABLE bool ft2LogBridgeRunning() const;
     bool quickQsoEnabled()     const { return m_quickQsoEnabled; }
     void setQuickQsoEnabled(bool v)   { if (m_quickQsoEnabled != v) { m_quickQsoEnabled = v; emit quickQsoEnabledChanged(); } }
     bool resumeQsoOnReply()    const { return m_resumeQsoOnReply; }
@@ -2099,6 +2107,7 @@ signals:
     void uiStyleChanged();
     void dualCarrierEnabledChanged();
     void ft2AccumuloEnabledChanged();
+    void ft2LogBridgeStatusChanged();
     void quickQsoEnabledChanged();
     void resumeQsoOnReplyChanged();
     void settingValueChanged(QString key, QVariant value);
@@ -3068,6 +3077,9 @@ private:
     qint64  m_asyncLastTxEndMs {0};      // timestamp fine ultima TX FT2 async (per guard timer)
     bool m_dualCarrierEnabled{false}; // FT2 dual carrier mode
     bool m_ft2AccumuloEnabled{false}; // FT2 accumulo di energia fra slot, RX, opt-in
+    QString m_ft2LogBridgeStatus;
+    void launchFt2LogBridge(bool automatic);
+    void setFt2LogBridgeStatus(const QString& status);
     bool m_quickQsoEnabled   {false}; // FT2 Quick QSO: salta TX1, flusso Ultra2 (2 messaggi)
     // 1.0.304 — resume-on-reply (#9): se attivo, alla Halt con QSO attivo memorizza il
     // partner; se quello ri-risponde (decode con suo call + mio call) entro 2 min, riprende

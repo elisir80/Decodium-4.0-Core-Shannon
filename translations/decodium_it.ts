@@ -2627,6 +2627,42 @@ Premi Monitor per iniziare</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Searching for FT2 Log Bridge...</source>
+        <translation>Ricerca di FT2 Log Bridge...</translation>
+    </message>
+    <message>
+        <source>No configured FT2 Log Bridge found: download it from the community.ft2.it Dashboard.</source>
+        <translation>Nessun FT2 Log Bridge configurato trovato: scaricalo dalla Dashboard di community.ft2.it.</translation>
+    </message>
+    <message>
+        <source>Found: %1</source>
+        <translation>Trovato: %1</translation>
+    </message>
+    <message>
+        <source>Starting FT2 Log Bridge...</source>
+        <translation>Avvio di FT2 Log Bridge...</translation>
+    </message>
+    <message>
+        <source>FT2 Log Bridge is already running.</source>
+        <translation>FT2 Log Bridge è già in esecuzione.</translation>
+    </message>
+    <message>
+        <source>FT2 Log Bridge started.</source>
+        <translation>FT2 Log Bridge avviato.</translation>
+    </message>
+    <message>
+        <source>FT2 Log Bridge could not start: %1</source>
+        <translation>FT2 Log Bridge non si è avviato: %1</translation>
+    </message>
+    <message>
+        <source>Warning: Decodium sends UDP to %1:%2, the bridge listens on 127.0.0.1:%3.</source>
+        <translation>Attenzione: Decodium invia l'UDP a %1:%2, il bridge ascolta su 127.0.0.1:%3.</translation>
+    </message>
+    <message>
+        <source>Warning: &quot;QSO logged&quot; is not sent over UDP.</source>
+        <translation>Attenzione: «QSO logged» non viene inviato via UDP.</translation>
+    </message>
+    <message>
         <source>Update in progress...</source>
         <translation>Aggiornamento in corso...</translation>
     </message>
@@ -22912,6 +22948,70 @@ Costa CPU extra durante i QSO. Default: OFF.</translation>
 </context>
 <context>
     <name>SettingsTab6</name>
+    <message>
+        <source>FT2 LOG BRIDGE</source>
+        <translation>FT2 LOG BRIDGE</translation>
+    </message>
+    <message>
+        <source>The FT2 Community client that uploads every logged QSO to the Online Log on community.ft2.it. Download it already configured from the Dashboard of the site: Decodium finds it and starts it together with itself.</source>
+        <translation>Il client di FT2 Community che carica ogni QSO loggato nel Log Online di community.ft2.it. Scaricalo già configurato dalla Dashboard del sito: Decodium lo trova e lo avvia insieme a sé.</translation>
+    </message>
+    <message>
+        <source>Start with Decodium:</source>
+        <translation>Avvio con Decodium:</translation>
+    </message>
+    <message>
+        <source>Start FT2 Log Bridge automatically</source>
+        <translation>Avvia FT2 Log Bridge automaticamente</translation>
+    </message>
+    <message>
+        <source>Program:</source>
+        <translation>Programma:</translation>
+    </message>
+    <message>
+        <source>ft2logbridge.exe (found automatically)</source>
+        <translation>ft2logbridge.exe (trovato automaticamente)</translation>
+    </message>
+    <message>
+        <source>Browse...</source>
+        <translation>Sfoglia...</translation>
+    </message>
+    <message>
+        <source>Find automatically</source>
+        <translation>Cerca automaticamente</translation>
+    </message>
+    <message>
+        <source>Looks in Downloads, Documents and Desktop for the most recent ft2logbridge with a config.json containing your API key.</source>
+        <translation>Cerca in Download, Documenti e Desktop l'ft2logbridge più recente con un config.json che contiene la tua chiave API.</translation>
+    </message>
+    <message>
+        <source>Start now</source>
+        <translation>Avvia ora</translation>
+    </message>
+    <message>
+        <source>Not started in this session.</source>
+        <translation>Non avviato in questa sessione.</translation>
+    </message>
+    <message>
+        <source>Select the FT2 Log Bridge program</source>
+        <translation>Seleziona il programma FT2 Log Bridge</translation>
+    </message>
+    <message>
+        <source>FT2 Log Bridge (ft2logbridge*.exe)</source>
+        <translation>FT2 Log Bridge (ft2logbridge*.exe)</translation>
+    </message>
+    <message>
+        <source>Programs (*.exe)</source>
+        <translation>Programmi (*.exe)</translation>
+    </message>
+    <message>
+        <source>FT2 Log Bridge (ft2logbridge*)</source>
+        <translation>FT2 Log Bridge (ft2logbridge*)</translation>
+    </message>
+    <message>
+        <source>All files (*)</source>
+        <translation>Tutti i file (*)</translation>
+    </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="61"/>
         <source>NETWORK SERVICES</source>

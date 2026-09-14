@@ -331,6 +331,8 @@ Source: "{#SourceRoot}\COPYING"; DestDir: "{app}"; DestName: "COPYING.txt"; Flag
 [Icons]
 Name: "{group}\{#AppName}";              Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\{#AppExeName}"
 Name: "{group}\Disinstalla {#AppName}";  Filename: "{uninstallexe}"
+; Decodium RX: ricevitore FT8/FT4/FT2 da terminale (solo RX), come su DecodiumOS.
+Name: "{group}\Decodium RX (terminale)"; Filename: "{app}\decodium-rx.exe"; WorkingDir: "{app}"; IconFilename: "{app}\{#AppExeName}"; Comment: "Ricezione FT8, FT4 e FT2 da terminale, solo RX"
 Name: "{autodesktop}\{#AppName}";        Filename: "{app}\{#AppExeName}"; IconFilename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
 ; 1.0.482 — [Registry] rimossa di proposito: Decodium non scrive PIU' nulla di suo

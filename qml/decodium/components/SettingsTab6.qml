@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import QtQuick.Dialogs
 import QtQuick.Layouts
 
 SettingsPageScroll {
@@ -84,6 +85,40 @@ SettingsPageScroll {
             leftPadding: 24
         }
     }
+    component OutlineButton: Button {
+        id: outlineButton
+        property var settingsHost
+        implicitHeight: settingsHost ? settingsHost.controlHeight : 32
+        hoverEnabled: true
+        background: Rectangle {
+            color: outlineButton.hovered && outlineButton.settingsHost
+                   ? Qt.rgba(outlineButton.settingsHost.secondaryCyan.r, outlineButton.settingsHost.secondaryCyan.g,
+                             outlineButton.settingsHost.secondaryCyan.b, 0.18)
+                   : (outlineButton.settingsHost ? outlineButton.settingsHost.bgMedium : "#101722")
+            border.color: outlineButton.settingsHost ? outlineButton.settingsHost.secondaryCyan : "#00d9ff"
+            radius: 4
+        }
+        contentItem: Text {
+            text: outlineButton.text
+            color: outlineButton.settingsHost ? outlineButton.settingsHost.secondaryCyan : "#00d9ff"
+            font.pixelSize: 11
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: 10
+            rightPadding: 10
+        }
+    }
+
+    function localPathFromUrl(url) {
+        var s = String(url)
+        if (s.indexOf("file:///") === 0)
+            s = (Qt.platform.os === "windows" ? "" : "/") + s.substring(8)
+        else if (s.indexOf("file://") === 0)
+            s = s.substring(7)
+        return decodeURIComponent(s)
+    }
+
     clip: true
     ScrollBar.horizontal.policy: ScrollBar.AsNeeded
 
@@ -931,6 +966,108 @@ SettingsPageScroll {
                 enabled: udpTertiaryCheck.checked
             }
             UdpTrafficCheck { settingsHost: root; text: qsTr("WSPR"); settingKey: "UDPTertiarySendWspr"; enabled: udpTertiaryCheck.checked }
+        }
+
+        // ── FT2 Log Bridge (community.ft2.it) ──
+        // Client separato che riceve i QSO loggati sulla porta UDP 2237 e li
+        // carica nel Log Online: Decodium lo avvia da solo (Ft2LogBridgeLauncher.h).
+        Text { text: qsTr("FT2 LOG BRIDGE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+        Text {
+            text: qsTr("The FT2 Community client that uploads every logged QSO to the Online Log on community.ft2.it. Download it already configured from the Dashboard of the site: Decodium finds it and starts it together with itself.")
+            color: textSecondary
+            font.pixelSize: 11
+            wrapMode: Text.Wrap
+            Layout.columnSpan: pageColumns
+            Layout.fillWidth: true
+        }
+
+        Text { text: qsTr("Start with Decodium:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        CheckBox {
+            checked: boolSetting("FT2LogBridgeAutoStart", true)
+            onToggled: setBoolSettingIfChanged("FT2LogBridgeAutoStart", checked, true)
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: qsTr("Start FT2 Log Bridge automatically"); color: textSecondary; leftPadding: 24; font.pixelSize: 11 }
+        }
+
+        Text { text: qsTr("Program:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+            DecoTextField {
+                id: ft2LogBridgePathField
+                text: bridge ? String(bridge.getSetting("FT2LogBridgePath", "")) : ""
+                placeholderText: qsTr("ft2logbridge.exe (found automatically)")
+                Layout.fillWidth: true
+                Layout.minimumWidth: fieldMinWidth
+                implicitHeight: controlHeight
+                leftPadding: 8
+                color: textPrimary
+                font.pixelSize: controlFontSize
+                background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+                onEditingFinished: if (bridge) bridge.setSetting("FT2LogBridgePath", String(text).trim())
+            }
+            OutlineButton {
+                settingsHost: root
+                text: qsTr("Browse...")
+                onClicked: ft2LogBridgeFileDialog.open()
+            }
+        }
+
+        Item { Layout.fillWidth: true; Layout.preferredWidth: labelWidth }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+            OutlineButton {
+                settingsHost: root
+                text: qsTr("Find automatically")
+                onClicked: if (bridge) bridge.detectFt2LogBridgePath()
+                ToolTip.visible: hovered
+                ToolTip.delay: 400
+                ToolTip.text: qsTr("Looks in Downloads, Documents and Desktop for the most recent ft2logbridge with a config.json containing your API key.")
+            }
+            OutlineButton {
+                settingsHost: root
+                text: qsTr("Start now")
+                onClicked: if (bridge) bridge.startFt2LogBridgeNow()
+            }
+            Item { Layout.fillWidth: true }
+        }
+
+        Text { text: qsTr("Status:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        Text {
+            text: bridge && bridge.ft2LogBridgeStatus.length > 0
+                  ? bridge.ft2LogBridgeStatus
+                  : qsTr("Not started in this session.")
+            color: textPrimary
+            font.pixelSize: 11
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+        }
+
+        Connections {
+            target: bridge
+            ignoreUnknownSignals: true
+            function onFt2LogBridgeStatusChanged() {
+                if (!ft2LogBridgePathField.activeFocus)
+                    ft2LogBridgePathField.text = String(bridge.getSetting("FT2LogBridgePath", ""))
+            }
+        }
+
+        FileDialog {
+            id: ft2LogBridgeFileDialog
+            title: qsTr("Select the FT2 Log Bridge program")
+            fileMode: FileDialog.OpenFile
+            nameFilters: Qt.platform.os === "windows"
+                         ? [qsTr("FT2 Log Bridge (ft2logbridge*.exe)"), qsTr("Programs (*.exe)")]
+                         : [qsTr("FT2 Log Bridge (ft2logbridge*)"), qsTr("All files (*)")]
+            onAccepted: {
+                var path = root.localPathFromUrl(selectedFile)
+                ft2LogBridgePathField.text = path
+                if (bridge)
+                    bridge.setSetting("FT2LogBridgePath", path)
+            }
         }
 
         // ── N1MM Logger+ / HRD Logbook / EasyLog (ADIF UDP) ──

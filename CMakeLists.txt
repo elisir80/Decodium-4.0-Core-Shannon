@@ -1834,6 +1834,28 @@ if (WSJT_BUILD_UTILS)
   endif ()
 endif (WSJT_BUILD_UTILS)
 
+# Decodium RX: ricevitore FT8/FT4/FT2 da terminale, solo RX. Porta in un solo
+# eseguibile il decodium-rx di DecodiumOS (mods/54-decodium-rx), con i worker
+# di decodifica nello stesso processo. Il nome del target e' scelto apposta
+# diverso da quello del core che la mod di DecodiumOS aggiunge a questo file:
+# la mod lo aggiunge solo se il suo nome qui manca, e non va disturbata.
+add_executable (decodium_rx_terminal utils/decodium_rx.cpp)
+target_sources (decodium_rx_terminal PRIVATE
+  Decoder/decodedtext.cpp
+  Detector/FT2DecodeWorker.cpp
+  Detector/FT4DecodeWorker.cpp
+  Detector/FT8DecodeWorker.cpp
+  )
+set_target_properties (decodium_rx_terminal PROPERTIES OUTPUT_NAME decodium-rx)
+link_wsjtx_cycle_group (decodium_rx_terminal wsjt_qt wsjt_cxx wsjt_fort)
+target_link_libraries (decodium_rx_terminal Qt6::Multimedia)
+if (MINGW)
+  # I decoder FT8 vogliono uno stack grande (l'applicazione da' 16 MB ai suoi
+  # thread di decodifica): con quello di default di MinGW vanno in overflow.
+  # Vale anche per std::thread, che eredita la riserva dell'eseguibile.
+  target_link_options (decodium_rx_terminal PRIVATE -Wl,--stack,67108864)
+endif ()
+
 if (WIN32)
   find_package (Portaudio REQUIRED)
   add_subdirectory (map65)
@@ -2583,6 +2605,13 @@ install (DIRECTORY
 install (TARGETS udp_daemon message_aggregator wsjtx_app_version
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
   BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
+  )
+
+# OPTIONAL: le build di rilascio Linux/macOS compilano un elenco di target
+# esplicito; se decodium-rx non c'e', l'installazione non deve fallire.
+install (TARGETS decodium_rx_terminal
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime
+  OPTIONAL
   )
 
 install (TARGETS wsprd
