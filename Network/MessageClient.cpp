@@ -1,4 +1,5 @@
 #include "MessageClient.hpp"
+#include "AdifUdpPayload.hpp"
 
 #include <stdexcept>
 #include <vector>
@@ -1332,7 +1333,7 @@ void MessageClient::logged_ADIF (QByteArray const& ADIF_record)
           .arg (program_id.size ())
           .arg (program_id)
           .toLatin1 ()
-        + ADIF_record + " <EOR>"};
+        + decodium::adif::udpPayload(ADIF_record) + " <EOR>"};
       out << ADIF;
       TRACE_UDP ("ADIF:" << ADIF);
       m_->send_message (out, message);

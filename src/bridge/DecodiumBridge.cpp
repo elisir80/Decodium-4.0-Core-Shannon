@@ -1,5 +1,7 @@
 #include "DecodiumBridge.h"
 #include "AdifExportSanitizer.h"
+#include "Network/AdifUdpPayload.hpp"
+#include "Sequencer/AutoCqCallPolicy.hpp"
 
 #if DECODIUM_HAS_SSTV
 #include "src/sstv/integration/SstvQsoLog.h"
@@ -27629,6 +27631,8 @@ void DecodiumBridge::stopTx()
         QMetaObject::invokeMethod(this, &DecodiumBridge::stopTx, Qt::QueuedConnection);
         return;
     }
+    // An aborted call must not be counted by a subsequent idle callback.
+    m_activeTxWasPureAutoCqCq = false;
 
     if (sstvTxActive()) {
         bridgeLog(QStringLiteral(
@@ -33147,18 +33151,7 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
     QString const cleanSatellite = satellite.trimmed();
     QString const cleanSatMode = satMode.trimmed();
     QString const cleanFreqRx = freqRx.trimmed();
-    QByteArray udpAdifRecord = adifRecord;
-    if (getSetting(QStringLiteral("EasyLogLowercaseBand"), true).toBool()) {
-        QString adif = QString::fromUtf8(udpAdifRecord);
-        QRegularExpression bandField(QStringLiteral("(<BAND:\\d+>)([^<\\r\\n]*)"),
-                                      QRegularExpression::CaseInsensitiveOption);
-        QRegularExpressionMatch match = bandField.match(adif);
-        if (match.hasMatch()) {
-            adif.replace(match.capturedStart(2), match.capturedLength(2),
-                         match.captured(2).trimmed().toLower());
-            udpAdifRecord = adif.toUtf8();
-        }
-    }
+    QByteArray const udpAdifRecord = decodium::adif::udpPayload(adifRecord);
 
     int targets = 0;
     int wsjtxAdifTargets = 0;
@@ -33294,7 +33287,7 @@ bool DecodiumBridge::udpSendRawAdifDatagram(const QString& label,
     }
 
     QUdpSocket socket;
-    QByteArray const payload = adifRecord + " <eor>";
+    QByteArray const payload = decodium::adif::udpPayload(adifRecord) + " <eor>";
     qint64 const written = socket.writeDatagram(payload, target, port);
     if (written < 0) {
         bridgeLog(QStringLiteral("%1 send failed for %2: %3")
@@ -35150,19 +35143,11 @@ bool DecodiumBridge::autoCqBurstCadenceEnabled() const
 
 bool DecodiumBridge::isAutoCqBurstPureCq(int txNumber, const QString& message) const
 {
-    if (!m_autoCqRepeat || txNumber != 6
-        || !m_dxCall.trimmed().isEmpty()
+    bool const partnerActive = !m_dxCall.trimmed().isEmpty()
         || !m_autoCqLockedCall.trimmed().isEmpty()
-        || m_pendingAutoSeqTxAfterActiveTx > 0
-        || m_qsoProgress > 1) {
-        return false;
-    }
-
-    QString const payload = message.trimmed().toUpper();
-    return payload == QStringLiteral("CQ")
-        || payload.startsWith(QStringLiteral("CQ "))
-        || payload == QStringLiteral("QRZ")
-        || payload.startsWith(QStringLiteral("QRZ "));
+        || m_pendingAutoSeqTxAfterActiveTx > 0;
+    return decodium::isAutoCqCall(m_autoCqRepeat && !m_tuning, txNumber,
+                                 m_qsoProgress <= 1, partnerActive, message);
 }
 
 void DecodiumBridge::resetAutoCqBurstCadence(const QString& reason)

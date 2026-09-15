@@ -678,7 +678,7 @@ ApplicationWindow {
 
     // Altezza pannello waterfall — caricata da bridge.uiWaterfallHeight.
     // Default 420px così all'avvio la cascata è già ben aperta (feedback IK8OLM).
-    property int  waterfallPanelHeight: bridge.uiWaterfallHeight > 0 ? bridge.uiWaterfallHeight : 420
+    property int  waterfallPanelHeight: bridge.uiWaterfallHeight >= 0 ? bridge.uiWaterfallHeight : 420
 
     // Timer che salva le impostazioni 2s dopo ogni modifica (debounce)
     Timer {
@@ -7690,6 +7690,11 @@ ApplicationWindow {
                                 snapAnimation.to = nearestSnap
                                 snapAnimation.start()
                             }
+                            // Persist user intent, not transient startup/window geometry.
+                            if (mainWindow.waterfallPanelVisible && !waterfallDetached) {
+                                bridge.uiWaterfallHeight = Math.round(nearestSnap)
+                                mainWindow.scheduleSave()
+                            }
                         }
                     }
                 }
@@ -7747,7 +7752,7 @@ ApplicationWindow {
                         // 1.0.288 — persisti SOLO su bridge.uiWaterfallHeight (per il save).
                         // NON riscrivere mainWindow.waterfallPanelHeight: romperebbe il binding
                         // di riga 310 e rialimenterebbe il loop che bloccava il resize.
-                        if (mainWindow.waterfallPanelVisible && !waterfallDetached && height > 40) {
+                        if (mainVerticalSplit.resizing && mainWindow.waterfallPanelVisible && !waterfallDetached) {
                             var roundedHeight = Math.round(height)
                             if (Math.abs(bridge.uiWaterfallHeight - roundedHeight) >= 1) {
                                 bridge.uiWaterfallHeight = roundedHeight
@@ -10779,20 +10784,20 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     property int startTxHeight: 0
 
                     onPressed: {
-                        startMouseY = mouseY
+                        startMouseY = mapToItem(contentArea, mouseX, mouseY).y
                         startTxHeight = txPanelContainer.height
                     }
 
 	                    onPositionChanged: {
 	                        if (pressed) {
-	                            var dy = startMouseY - mouseY
+	                            var dy = startMouseY - mapToItem(contentArea, mouseX, mouseY).y
 	                            var newHeight = startTxHeight + dy
-	                            if (newHeight >= txPanelContainer.minHeight
-	                                    && newHeight <= txPanelContainer.maxHeight) {
-	                                txPanelContainer.height = newHeight
-	                            }
+	                            txPanelContainer.savedHeight = Math.max(txPanelContainer.minHeight,
+                                    Math.min(txPanelContainer.maxHeight, newHeight))
 	                        }
 	                    }
+                    onReleased: bridge.setSetting("uiBottomPanelHeight", txPanelContainer.savedHeight)
+                    onCanceled: bridge.setSetting("uiBottomPanelHeight", txPanelContainer.savedHeight)
                 }
             }
 
@@ -10807,11 +10812,12 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 	                anchors.bottom: parent.bottom
 	                height: mainWindow.ft2LinkModeActive && !txPanelDetached
 	                        ? Math.max(minHeight, Math.min(maxHeight, txPanelAutoHeight))
-	                        : 160
+	                        : Math.max(minHeight, Math.min(maxHeight, savedHeight))
 	                color: "transparent"
+                    property real savedHeight: Number(bridge.getSetting("uiBottomPanelHeight", 160))
 
 	                readonly property int txPanelAutoHeight: Math.ceil((txPanelComponent ? txPanelComponent.implicitHeight : 92) + 2)
-	                property int minHeight: mainWindow.ft2LinkModeActive ? 72 : 100
+	                property int minHeight: mainWindow.ft2LinkModeActive ? 72 : 40
 	                property int maxHeight: 350
 
                 // Placeholder when detached - magnetic dock zone.

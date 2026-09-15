@@ -1,5 +1,7 @@
 //---------------------------------------------------------- MainWindow
 #include "mainwindow.h"
+#include "Network/AdifUdpPayload.hpp"
+#include "Sequencer/AutoCqCallPolicy.hpp"
 #include "RTTYTerminalWidget.hpp"
 #include "Detector/FT2DecodeWorker.hpp"
 #include "Detector/FT4DecodeWorker.hpp"
@@ -425,7 +427,7 @@ namespace
         return false;
       }
 
-    QByteArray const payload = ADIF + " <eor>";
+    QByteArray const payload = decodium::adif::udpPayload(ADIF) + " <eor>";
     qint64 const written = sock.writeDatagram (payload, target, port);
     if (written < 0)
       {
@@ -23251,7 +23253,7 @@ void MainWindow::acceptQSO (QDateTime const& QSO_date_off, QString const& call, 
                                          tr ("Unable to resolve \"%1\": %2")
                                            .arg (m_config.n1mm_server_name (), resolve_error));
           }
-        else if (-1 == sock.writeDatagram (ADIF + " <eor>"
+        else if (-1 == sock.writeDatagram (decodium::adif::udpPayload(ADIF) + " <eor>"
                                       , target
                                       , m_config.n1mm_server_port ()))
           {
@@ -25379,6 +25381,8 @@ void MainWindow::stopTuneATU()
 
 void MainWindow::on_stopTxButton_clicked()                    // Stop Tx
 {
+  // PTT falling after an operator abort is not a completed AutoCQ call.
+  m_autoCqBurstPttLatched = false;
   resetRttyTransmissionState();
   if (m_enableButtonNotify) debugToFile(QString{});       //avt 10/2/25 by operator, not from a controller command
   debugToFile(QString{"on_stopTxBut by operator:%1"}.arg(m_enableButtonNotify));   //avt 2/2/24
@@ -31453,9 +31457,9 @@ bool MainWindow::isAutoCqBurstPureCq () const
     return false;
   }
 
-  QString const tx6 = ui->tx6->text ().trimmed ().toUpper ();
-  return tx6 == QStringLiteral ("CQ") || tx6.startsWith (QStringLiteral ("CQ "))
-      || tx6 == QStringLiteral ("QRZ") || tx6.startsWith (QStringLiteral ("QRZ "));
+  return decodium::isAutoCqCall(m_autoCQ, m_ntx, true,
+                               !ui->dxCallEntry->text().trimmed().isEmpty(),
+                               ui->tx6->text());
 }
 
 void MainWindow::resetAutoCqBurstCadenceState ()
