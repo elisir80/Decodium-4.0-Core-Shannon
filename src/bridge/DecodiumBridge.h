@@ -3669,6 +3669,12 @@ private:
     // mai instradato nel sequencer/slot Tx1-6.
     bool    m_telemetryTxActive {false};
     QString m_pendingTelemetryHex;
+    // Telemetria di stazione rimandata al prossimo slot TX nostro: partita a
+    // meta' slot tagliava il messaggio (15/9/2026, FT2: PTT per ~1 s e 70 ms
+    // di segnale), partita durante il 73 veniva scartata.
+    bool    m_stationTelemetryPending {false};
+    qint64  m_stationTelemetryPendingSinceMs {0};
+    void armStationTelemetryForNextSlot(const QString& reason);
     QString m_lastLoggedQsoCall;
     qint64  m_lastLoggedQsoTimestampMs {0};
     int     m_weatherTempC {decodium::telemetry::kTempUnknown};

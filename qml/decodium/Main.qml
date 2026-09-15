@@ -9376,6 +9376,9 @@ ApplicationWindow {
                                         verticalLayoutDirection: mainWindow.fsNewestFirst ? ListView.BottomToTop : ListView.TopToBottom
                                         property bool followTail: true
                                         property bool tailFollowPending: false
+                                        property real tailLastY: 0
+                                        property real tailLastHeight: 0
+                                        property real tailLastOriginY: 0
 	                                        property bool tailFollowQueued: false
 	                                        // 1.0.231 — counter pending decodes mentre user scrolla up.
 	                                        // Permette al floating button "↓ N new" di sapere quanti
@@ -9387,11 +9390,29 @@ ApplicationWindow {
 		                                            return contentY >= tailContentY() - 48
 		                                        }
 	                                        function updateFollowTail() {
+	                                            // Solo l'utente allontana la vista dalla coda: trascinamento,
+	                                            // rotella, barra di scorrimento. Righe nuove, righe tolte in testa
+	                                            // e stime d'altezza di ListView spostano contentY da sole: prima
+	                                            // bastava una di queste per spegnere l'inseguimento, e la lista
+	                                            // restava ferma qualche riga sopra l'ultima.
+	                                            var userMove = dragging || flicking || movingVertically
+	                                                           || (ScrollBar.vertical && ScrollBar.vertical.pressed)
+	                                            var layoutStable = Math.abs(contentHeight - tailLastHeight) < 0.5
+	                                                               && Math.abs(originY - tailLastOriginY) < 0.5
+	                                            var awayFromTail = verticalLayoutDirection === ListView.BottomToTop
+	                                                               ? contentY > tailLastY + 0.5
+	                                                               : contentY < tailLastY - 0.5
+	                                            tailLastY = contentY
+	                                            tailLastHeight = contentHeight
+	                                            tailLastOriginY = originY
 	                                            if (tailFollowPending)
 	                                                return
-	                                            followTail = isNearTail()
-	                                            // 1.0.231 — reset counter "↓ N new" quando torna a tail
-	                                            if (followTail) evenPeriodList.pendingNewDecodes = 0
+	                                            if (isNearTail()) {
+	                                                followTail = true
+	                                                evenPeriodList.pendingNewDecodes = 0
+	                                            } else if (userMove || (layoutStable && awayFromTail)) {
+	                                                followTail = false
+	                                            }
 	                                        }
 	                                        function tailContentY() {
 	                                            if (mainWindow.fsNewestFirst) return originY
@@ -9406,8 +9427,10 @@ ApplicationWindow {
 	                                                if (Math.abs(contentY - targetY) > 0.5)
 	                                                    contentY = targetY
 	                                            }
-	                                            followTail = isNearTail()
-	                                            if (followTail) evenPeriodList.pendingNewDecodes = 0
+	                                            if (isNearTail()) {
+	                                                followTail = true
+	                                                evenPeriodList.pendingNewDecodes = 0
+	                                            }
                                         }
                                         function forceTailFollow() {
     evenPeriodList.followTail = true
@@ -9431,7 +9454,14 @@ ApplicationWindow {
         // delegate appena aggiunti; tail-follow content scroll non serve
         // animation per essere fluido. In floating mode (vedi
         // period1FloatingList) mantenuto NumberAnimation perche' UX detached.
-        evenPeriodList.contentY = targetY
+        // Dall'alto verso il basso positionViewAtEnd() crea e dispone le
+        // ultime righe: la coda calcolata da contentHeight e' una stima di
+        // ListView e, con righe e separatori di altezze diverse, lasciava
+        // l'ultima riga fuori vista.
+        if (evenPeriodList.verticalLayoutDirection === ListView.BottomToTop)
+            evenPeriodList.contentY = targetY
+        else
+            evenPeriodList.positionViewAtEnd()
         evenPeriodList.finishTailFollow()
     })
 }
@@ -10036,6 +10066,9 @@ NumberAnimation {
 	                                        interactive: true
 	                                        property bool followTail: true
 	                                        property bool tailFollowPending: false
+	                                        property real tailLastY: 0
+	                                        property real tailLastHeight: 0
+	                                        property real tailLastOriginY: 0
 		                                        property bool tailFollowQueued: false
 		                                        property int pendingNewDecodes: 0
 		                                        function isNearTail() {
@@ -10043,11 +10076,29 @@ NumberAnimation {
 		                                                || contentY >= tailContentY() - 48
 		                                        }
 	                                        function updateFollowTail() {
+	                                            // Solo l'utente allontana la vista dalla coda: trascinamento,
+	                                            // rotella, barra di scorrimento. Righe nuove, righe tolte in testa
+	                                            // e stime d'altezza di ListView spostano contentY da sole: prima
+	                                            // bastava una di queste per spegnere l'inseguimento, e la lista
+	                                            // restava ferma qualche riga sopra l'ultima.
+	                                            var userMove = dragging || flicking || movingVertically
+	                                                           || (ScrollBar.vertical && ScrollBar.vertical.pressed)
+	                                            var layoutStable = Math.abs(contentHeight - tailLastHeight) < 0.5
+	                                                               && Math.abs(originY - tailLastOriginY) < 0.5
+	                                            var awayFromTail = verticalLayoutDirection === ListView.BottomToTop
+	                                                               ? contentY > tailLastY + 0.5
+	                                                               : contentY < tailLastY - 0.5
+	                                            tailLastY = contentY
+	                                            tailLastHeight = contentHeight
+	                                            tailLastOriginY = originY
 	                                            if (tailFollowPending)
 	                                                return
-	                                            followTail = isNearTail()
-	                                            // 1.0.231 — reset counter "↓ N new" quando torna a tail
-	                                            if (followTail) rxFrequencyList.pendingNewDecodes = 0
+	                                            if (isNearTail()) {
+	                                                followTail = true
+	                                                rxFrequencyList.pendingNewDecodes = 0
+	                                            } else if (userMove || (layoutStable && awayFromTail)) {
+	                                                followTail = false
+	                                            }
 	                                        }
 	                                        function tailContentY() {
 	                                            var bottom = originY + contentHeight - height
@@ -10061,8 +10112,10 @@ NumberAnimation {
 	                                                if (Math.abs(contentY - targetY) > 0.5)
 	                                                    contentY = targetY
 	                                            }
-	                                            followTail = isNearTail()
-	                                            if (followTail) rxFrequencyList.pendingNewDecodes = 0
+	                                            if (isNearTail()) {
+	                                                followTail = true
+	                                                rxFrequencyList.pendingNewDecodes = 0
+	                                            }
 	                                        }
 	                                        function forceTailFollow() {
     rxFrequencyList.followTail = true
@@ -10083,7 +10136,14 @@ NumberAnimation {
         // machine" (righe che rimbalzano/saltano "nelle risposte"). Il tail-follow
         // non necessita animazione (l'addDisplaced YAnimator copre gia' i delegate).
         // NumberAnimation mantenuta nei floating detached (UX pop-out).
-        rxFrequencyList.contentY = targetY
+        // Dall'alto verso il basso positionViewAtEnd() crea e dispone le
+        // ultime righe: la coda calcolata da contentHeight e' una stima di
+        // ListView e, con righe e separatori di altezze diverse, lasciava
+        // l'ultima riga fuori vista.
+        if (rxFrequencyList.verticalLayoutDirection === ListView.BottomToTop)
+            rxFrequencyList.contentY = targetY
+        else
+            rxFrequencyList.positionViewAtEnd()
         rxFrequencyList.finishTailFollow()
     })
 }
@@ -15271,6 +15331,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         verticalLayoutDirection: mainWindow.fsNewestFirst ? ListView.BottomToTop : ListView.TopToBottom
                         property bool followTail: true
                         property bool tailFollowPending: false
+                        property real tailLastY: 0
+                        property real tailLastHeight: 0
+                        property real tailLastOriginY: 0
 	                        property bool tailFollowQueued: false
 	                        // 1.0.231 — counter pending decodes (floating mode)
 		                        property int pendingNewDecodes: 0
@@ -15280,10 +15343,29 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 		                            return contentY >= tailContentY() - 48
 		                        }
                         function updateFollowTail() {
+                            // Solo l'utente allontana la vista dalla coda: trascinamento,
+                            // rotella, barra di scorrimento. Righe nuove, righe tolte in testa
+                            // e stime d'altezza di ListView spostano contentY da sole: prima
+                            // bastava una di queste per spegnere l'inseguimento, e la lista
+                            // restava ferma qualche riga sopra l'ultima.
+                            var userMove = dragging || flicking || movingVertically
+                                           || (ScrollBar.vertical && ScrollBar.vertical.pressed)
+                            var layoutStable = Math.abs(contentHeight - tailLastHeight) < 0.5
+                                               && Math.abs(originY - tailLastOriginY) < 0.5
+                            var awayFromTail = verticalLayoutDirection === ListView.BottomToTop
+                                               ? contentY > tailLastY + 0.5
+                                               : contentY < tailLastY - 0.5
+                            tailLastY = contentY
+                            tailLastHeight = contentHeight
+                            tailLastOriginY = originY
                             if (tailFollowPending)
                                 return
-                            followTail = isNearTail()
-                            if (followTail) period1FloatingList.pendingNewDecodes = 0
+                            if (isNearTail()) {
+                                followTail = true
+                                period1FloatingList.pendingNewDecodes = 0
+                            } else if (userMove || (layoutStable && awayFromTail)) {
+                                followTail = false
+                            }
                         }
 	                        function tailContentY() {
 	                            if (mainWindow.fsNewestFirst) return originY
@@ -15298,8 +15380,10 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 	                                if (Math.abs(contentY - targetY) > 0.5)
 	                                    contentY = targetY
 	                            }
-	                            followTail = isNearTail()
-	                            if (followTail) period1FloatingList.pendingNewDecodes = 0
+	                            if (isNearTail()) {
+	                                followTail = true
+	                                period1FloatingList.pendingNewDecodes = 0
+	                            }
                         }
                         function forceTailFollow() {
     period1FloatingList.followTail = true
@@ -15314,7 +15398,14 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         var targetY = period1FloatingList.tailContentY()
         period1FloatingTailAnimation.stop()
         period1FloatingList.tailFollowPending = true
-        period1FloatingList.contentY = targetY
+        // Dall'alto verso il basso positionViewAtEnd() crea e dispone le
+        // ultime righe: la coda calcolata da contentHeight e' una stima di
+        // ListView e, con righe e separatori di altezze diverse, lasciava
+        // l'ultima riga fuori vista.
+        if (period1FloatingList.verticalLayoutDirection === ListView.BottomToTop)
+            period1FloatingList.contentY = targetY
+        else
+            period1FloatingList.positionViewAtEnd()
         period1FloatingList.finishTailFollow()
     })
 }
@@ -15877,6 +15968,9 @@ NumberAnimation {
 	                        interactive: true
 	                        property bool followTail: true
 	                        property bool tailFollowPending: false
+	                        property real tailLastY: 0
+	                        property real tailLastHeight: 0
+	                        property real tailLastOriginY: 0
 		                        property bool tailFollowQueued: false
 		                        property int pendingNewDecodes: 0
 		                        function isNearTail() {
@@ -15884,10 +15978,29 @@ NumberAnimation {
 		                                || contentY >= tailContentY() - 48
 		                        }
                         function updateFollowTail() {
+                            // Solo l'utente allontana la vista dalla coda: trascinamento,
+                            // rotella, barra di scorrimento. Righe nuove, righe tolte in testa
+                            // e stime d'altezza di ListView spostano contentY da sole: prima
+                            // bastava una di queste per spegnere l'inseguimento, e la lista
+                            // restava ferma qualche riga sopra l'ultima.
+                            var userMove = dragging || flicking || movingVertically
+                                           || (ScrollBar.vertical && ScrollBar.vertical.pressed)
+                            var layoutStable = Math.abs(contentHeight - tailLastHeight) < 0.5
+                                               && Math.abs(originY - tailLastOriginY) < 0.5
+                            var awayFromTail = verticalLayoutDirection === ListView.BottomToTop
+                                               ? contentY > tailLastY + 0.5
+                                               : contentY < tailLastY - 0.5
+                            tailLastY = contentY
+                            tailLastHeight = contentHeight
+                            tailLastOriginY = originY
                             if (tailFollowPending)
                                 return
-                            followTail = isNearTail()
-                            if (followTail) rxFrequencyFloatingList.pendingNewDecodes = 0
+                            if (isNearTail()) {
+                                followTail = true
+                                rxFrequencyFloatingList.pendingNewDecodes = 0
+                            } else if (userMove || (layoutStable && awayFromTail)) {
+                                followTail = false
+                            }
                         }
 	                        function tailContentY() {
 	                            var bottom = originY + contentHeight - height
@@ -15901,8 +16014,10 @@ NumberAnimation {
 	                                if (Math.abs(contentY - targetY) > 0.5)
 	                                    contentY = targetY
 	                            }
-	                            followTail = isNearTail()
-	                            if (followTail) rxFrequencyFloatingList.pendingNewDecodes = 0
+	                            if (isNearTail()) {
+	                                followTail = true
+	                                rxFrequencyFloatingList.pendingNewDecodes = 0
+	                            }
 	                        }
                         function forceTailFollow() {
     rxFrequencyFloatingList.followTail = true
@@ -15917,7 +16032,14 @@ NumberAnimation {
         var targetY = rxFrequencyFloatingList.tailContentY()
         rxFrequencyFloatingTailAnimation.stop()
         rxFrequencyFloatingList.tailFollowPending = true
-        rxFrequencyFloatingList.contentY = targetY
+        // Dall'alto verso il basso positionViewAtEnd() crea e dispone le
+        // ultime righe: la coda calcolata da contentHeight e' una stima di
+        // ListView e, con righe e separatori di altezze diverse, lasciava
+        // l'ultima riga fuori vista.
+        if (rxFrequencyFloatingList.verticalLayoutDirection === ListView.BottomToTop)
+            rxFrequencyFloatingList.contentY = targetY
+        else
+            rxFrequencyFloatingList.positionViewAtEnd()
         rxFrequencyFloatingList.finishTailFollow()
     })
 }
