@@ -12522,6 +12522,13 @@ void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()
     }
 
     bridgeLog(QStringLiteral("Migrating active monitor session to legacy backend"));
+    // Results still in flight belong to the preceding native RX session.
+    ++m_decodeSessionId;
+    resetNativeDecodeDedupIndex();
+    if (m_decoding) {
+        m_decoding = false;
+        emit decodingChanged();
+    }
     ++m_periodTimerSessionId;
 
     if (m_periodTimer) {
@@ -13874,7 +13881,7 @@ void DecodiumBridge::drainNativeDecodeSecondaryWork()
             udpSendDecode(true, work.rawRow, work.serial);
         }
         if (work.playAlert) {
-            maybePlayDecodeAlert(isCQ, isMyCall);
+            maybePlayDecodeAlert(isCQ, isMyCall, message);
         }
         ++processed;
     }
@@ -22732,15 +22739,26 @@ void DecodiumBridge::syncSpecialOperationToLegacyBackend()
         return;
     }
 
+    // Legacy setters emit status changes synchronously. Never read an
+    // intermediate activity back into the bridge between these two writes.
+    QScopedValueRollback<bool> stateGuard(m_syncingLegacyBackendState, true);
+    int const requestedActivity = m_specialOperationActivity;
     bool const superFox = getSetting(QStringLiteral("SuperFox"), false).toBool();
     m_legacyBackend->setSuperFoxEnabled(superFox);
-    m_legacyBackend->setSpecialOperationActivity(m_specialOperationActivity);
+    m_legacyBackend->setSpecialOperationActivity(requestedActivity);
 }
 
 void DecodiumBridge::setSpecialOperationActivity(int activity)
 {
+    if (m_transmitting || m_tuning) {
+        emit warningRaised(QStringLiteral("Fox/Hound"),
+                           QStringLiteral("Stop TX/Tune before changing operating activity"), QString());
+        return;
+    }
+    QScopedValueRollback<bool> stateGuard(m_syncingLegacyBackendState, true);
     activity = qBound(kSpecialOpNone, activity, kSpecialOpMax);
     bool const wasLegacyTx = usingLegacyBackendForTx();
+    bool const wasLegacyRx = usingLegacyBackendForRx();
     bool const wasForced = m_forceLegacyTxForSpecialOp;
     bool const wantLegacyTx = activity == kSpecialOpFox || activity == kSpecialOpHound;
 
@@ -22773,9 +22791,9 @@ void DecodiumBridge::setSpecialOperationActivity(int activity)
             return;
         }
         syncLegacyBackendDialogState();
-        syncSpecialOperationToLegacyBackend();
         shutdownUdpMessageClient();
-        if (m_monitoring && !m_transmitting && !m_tuning) {
+        if (m_monitoring && !m_transmitting && !m_tuning
+            && (!wasLegacyRx || !m_legacyBackend->monitoring())) {
             migrateActiveMonitoringToLegacyBackend();
         }
         bridgeLog(QStringLiteral("SpecialOp enabled through legacy backend: activity=%1").arg(activity));

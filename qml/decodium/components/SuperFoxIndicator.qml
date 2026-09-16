@@ -50,11 +50,16 @@ Rectangle {
         // Complete reception setup in one click; never enable Fox transmission
         // implicitly or change the operator's selected radio mode.
         var next = engine.mode === "FT8" ? !active : false
+        // Exit Hound before changing the decoder option; on entry set the
+        // option first. Avoid configuring ordinary Hound as an intermediate.
+        if (!next && engine.houndMode)
+            engine.houndMode = false
+        engine.setSetting("SuperFox", next)
         if (next && !engine.foxMode && !engine.houndMode)
             engine.houndMode = true
-        engine.setSetting("SuperFox", next)
         optionEnabled = next
-        engine.saveSettingsAsync()
+        // Both setters persist their own keys. A full profile save here also
+        // snapshots unrelated settings and stalls the GUI during mode changes.
     }
 
     Row {

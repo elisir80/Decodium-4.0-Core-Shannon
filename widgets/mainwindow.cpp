@@ -24019,6 +24019,8 @@ void MainWindow::on_actionRTTY_triggered()
 
 void MainWindow::on_actionFT8_triggered()
 {
+  QElapsedTimer transitionTimer;
+  transitionTimer.start();
   // SuperFox changes also enter this path. Cancel the deferred UI update
   // if the embedded window is destroyed, or a different mode is selected.
   QTimer::singleShot (50, this, [this] {
@@ -24196,6 +24198,8 @@ void MainWindow::on_actionFT8_triggered()
   if (ui->labDXped->isVisible()) ui->labDXped->setStyleSheet("QLabel {background-color: red; color: white;}");
   statusChanged();
   configActiveStations();
+  qInfo().noquote() << QStringLiteral("[SPECIALOP-TIMING] FT8 reconfigure ms=%1 activity=%2 superfox=%3")
+      .arg(transitionTimer.elapsed()).arg(static_cast<int>(m_specOp)).arg(m_config.superFox());
 }
 
 void MainWindow::on_actionJT4_triggered()

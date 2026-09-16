@@ -2064,7 +2064,10 @@ void Configuration::setSpecial_Activity(int activity)
     }
     m_->SelectedActivity_ = activityId;
   }
-  m_->write_settings();
+  // A mode toggle must not rewrite unrelated credentials/keychain entries.
+  SettingsGroup group {m_->settings_, "Configuration"};
+  m_->settings_->setValue("SpecialOpActivity", m_->bSpecialOp_);
+  m_->settings_->setValue("SelectedActivity", m_->SelectedActivity_);
 }
 
 void Configuration::setSpecial_None()
@@ -2089,7 +2092,8 @@ void Configuration::toggle_SF()
     m_->ui_->cbSuperFox->setChecked(true);
   }
   m_->bSuperFox_ = m_->ui_->cbSuperFox->isChecked ();
-  m_->write_settings();
+  SettingsGroup group {m_->settings_, "Configuration"};
+  m_->settings_->setValue("SuperFox", m_->bSuperFox_);
 }
 
 QString Configuration::OTPSeed() const

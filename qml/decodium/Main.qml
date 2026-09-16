@@ -7724,7 +7724,9 @@ ApplicationWindow {
                     // waterfall, lasciando che il pannello ospite gestisca la propria visibilità.
                     readonly property bool hostsWaterfall: mainWindow.classicIdInSlot(5) === "waterfall"
                     visible: hostsWaterfall ? (mainWindow.waterfallPanelVisible || waterfallDetached) : true
-                    SplitView.minimumHeight: !hostsWaterfall ? 0 : (!mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0))  // 1.0.288: nessun vincolo di altezza quando ancorato (resize completamente libero, richiesta utente). Era 260 → 120 → 0.
+                    SplitView.minimumHeight: mainWindow.classicIdInSlot(5) === "txpanel" && !txPanelDetached
+                        ? txPanelContainer.txPanelAutoHeight
+                        : !hostsWaterfall ? 0 : (!mainWindow.waterfallPanelVisible ? 0 : (waterfallDetached ? 40 : 0))
                     color: Qt.rgba(bgDeep.r, bgDeep.g, bgDeep.b, 0.6)
                     radius: 8
                     border.color: isDockHighlighted ? secondaryCyan : glassBorder
@@ -10817,8 +10819,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                     property real savedHeight: Number(bridge.getSetting("uiBottomPanelHeight", 160))
 
 	                readonly property int txPanelAutoHeight: Math.ceil((txPanelComponent ? txPanelComponent.implicitHeight : 92) + 2)
-	                property int minHeight: mainWindow.ft2LinkModeActive ? 72 : 40
-	                property int maxHeight: 350
+	                property int minHeight: mainWindow.classicIdInSlot(4) === "txpanel" && !txPanelDetached
+                        ? txPanelAutoHeight : (mainWindow.ft2LinkModeActive ? 72 : 40)
+	                property int maxHeight: Math.max(350, minHeight)
 
                 // Placeholder when detached - magnetic dock zone.
                 // Stadio 2: mostrato solo quando la TX area (slot 3) ospita davvero il TX
@@ -10995,6 +10998,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                         property real startY: 0
                         property real startHeight: 0
 
+                        onReleased: bridge.setSetting("uiBottomPanelHeight", txPanelContainer.savedHeight)
+                        onCanceled: bridge.setSetting("uiBottomPanelHeight", txPanelContainer.savedHeight)
+
                         onPressed: function(mouse) {
                             startY = mouse.y + txPanelResizeHandle.mapToGlobal(0, 0).y
                             startHeight = txPanelContainer.height
@@ -11006,7 +11012,7 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
                                 var deltaY = startY - currentY
                                 var newHeight = startHeight + deltaY
                                 newHeight = Math.max(txPanelContainer.minHeight, Math.min(txPanelContainer.maxHeight, newHeight))
-                                txPanelContainer.height = newHeight
+                                txPanelContainer.savedHeight = newHeight
                             }
                         }
                     }
