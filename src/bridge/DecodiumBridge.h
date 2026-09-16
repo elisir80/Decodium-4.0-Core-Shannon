@@ -991,6 +991,11 @@ public:
     Q_INVOKABLE void startFt2LogBridgeNow();
     Q_INVOKABLE void detectFt2LogBridgePath();
     Q_INVOKABLE bool ft2LogBridgeRunning() const;
+    // Decodium RX (utils/decodium_rx.cpp): il ricevitore da terminale che
+    // l'installer mette accanto a decodium.exe. Il menu lo apre in una
+    // console propria.
+    Q_INVOKABLE bool decodiumRxTerminalAvailable() const;
+    Q_INVOKABLE void openDecodiumRxTerminal();
     bool quickQsoEnabled()     const { return m_quickQsoEnabled; }
     void setQuickQsoEnabled(bool v)   { if (m_quickQsoEnabled != v) { m_quickQsoEnabled = v; emit quickQsoEnabledChanged(); } }
     bool resumeQsoOnReply()    const { return m_resumeQsoOnReply; }

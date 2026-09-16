@@ -43,7 +43,8 @@ struct ModeConfig
 };
 
 // ---------------------------------------------------------------------------
-// DUE VARIANTI DELLA STIMA DEL FONDO (solo misura, spente senza la variabile).
+// LA STIMA DEL FONDO NELLA RICERCA DEI CANDIDATI: una correzione accesa e una
+// variante opt-in.
 //
 // Il banco del 16/9 (lab/misure/20260916_banco_ft2_verita.md) ha mostrato che
 // su una registrazione vera l'aggancio si ferma al 77% anche a +6 dB, e che i
@@ -52,16 +53,24 @@ struct ModeConfig
 // spalla del filtro del ricevitore: sul rapporto savsm/sbase l'interpolazione
 // parabolica finisce fuori posto.
 //
+//   DECODIUM_FONDO=differenza   ACCESO DI DEFAULT dal 16/9/2026: il massimo e
+//                               l'interpolazione si cercano su savsm - sbase
+//                               invece che sul rapporto, dove la pendenza del
+//                               fondo pesa molto meno (la soglia syncmin resta
+//                               sul rapporto, cosi' non cambia significato);
 //   DECODIUM_FONDO=mediana      il fondo e' una mediana scorrevole in dB
 //                               (+-DECODIUM_FONDO_CELLE celle, default 19,
 //                               cioe' +-200 Hz) invece della quartica;
-//   DECODIUM_FONDO=differenza   il massimo e l'interpolazione si cercano su
-//                               savsm - sbase invece che sul rapporto (la
-//                               soglia syncmin resta sul rapporto, cosi' non
-//                               cambia significato);
-//   DECODIUM_FONDO=entrambi     le due insieme.
+//   DECODIUM_FONDO=entrambi     le due insieme;
+//   DECODIUM_FONDO=0            torna al comportamento di prima, bit-identico.
 //
-// Senza la variabile il comportamento e' bit-identico a prima.
+// PERCHE' LA DIFFERENZA E NON LA MEDIANA. Sugli stessi 800 slot valgono quasi
+// uguale -- aggancio 56,1% -> 67,0% con la differenza, 66,9% con la mediana,
+// 70,2% con entrambe; decodifiche +18,3%, +15,7%, +21,6% -- ma il costo no: la
+// mediana porta i candidati per slot da 38 a 85 e raddoppia il tempo di
+// decodifica, la differenza li lascia a 42. In FT2 la stabilita' viene prima
+// della resa (la 1.0.626 e' morta su un PC a 8 core proprio per carico in
+// piu'), quindi di default si accende solo quella che non costa niente.
 enum class ModoFondo { originale, mediana, differenza, entrambi };
 
 ModoFondo modo_fondo ()
@@ -72,7 +81,8 @@ ModoFondo modo_fondo ()
     if (t == "mediana") return ModoFondo::mediana;
     if (t == "differenza") return ModoFondo::differenza;
     if (t == "entrambi") return ModoFondo::entrambi;
-    return ModoFondo::originale;
+    if (t == "0" || t == "originale" || t == "no") return ModoFondo::originale;
+    return ModoFondo::differenza;      // default dal 16/9/2026
   }();
   return v;
 }

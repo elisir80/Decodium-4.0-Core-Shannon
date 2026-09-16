@@ -2627,6 +2627,18 @@ Premi Monitor per iniziare</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>Decodium RX was not found next to Decodium: %1</source>
+        <translation>Decodium RX non è stato trovato accanto a Decodium: %1</translation>
+    </message>
+    <message>
+        <source>Decodium RX needs a terminal window: start %1 from a terminal</source>
+        <translation>Decodium RX ha bisogno di una finestra di terminale: avvia %1 da un terminale</translation>
+    </message>
+    <message>
+        <source>Decodium RX could not be started</source>
+        <translation>Non è stato possibile avviare Decodium RX</translation>
+    </message>
+    <message>
         <source>Searching for FT2 Log Bridge...</source>
         <translation>Ricerca di FT2 Log Bridge...</translation>
     </message>
@@ -7919,6 +7931,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
 </context>
 <context>
     <name>Main</name>
+    <message>
+        <source>Decodium RX - terminal receiver...</source>
+        <translation>Decodium RX - ricevitore da terminale...</translation>
+    </message>
     <message>
         <location filename="../qml/decodium/Main.qml"/>
         <source>DX-Ped</source>

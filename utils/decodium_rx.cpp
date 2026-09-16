@@ -43,6 +43,7 @@
 #include <QIODevice>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLoggingCategory>
 #include <QMediaDevices>
 #include <QRegularExpression>
 #include <QStandardPaths>
@@ -835,6 +836,11 @@ void interactive (Options& options, QString& device)
     }
   options.mode = mode;
   options.dial = QString {dial}.replace (QLatin1Char (','), QLatin1Char ('.')).toDouble ();
+  // "7074" o "14074": frequenza scritta in kHz, come sulla radio.
+  if (options.dial > 1000.0)
+    {
+      options.dial /= 1000.0;
+    }
   options.call = (call == QStringLiteral ("-") || call.isEmpty ()) ? QString {} : call.toUpper ();
   QDir ().mkpath (QFileInfo {configPath ()}.absolutePath ());
   QFile file {configPath ()};
@@ -954,8 +960,19 @@ int main (int argc, char* argv[])
       return 0;
     }
 
+  // Qt Multimedia avvisa che non ha backend video: per la sola cattura audio
+  // non servono, e la riga finirebbe in mezzo alle domande iniziali.
+  if (!parser.isSet (verboseOpt))
+    {
+      QLoggingCategory::setFilterRules (QStringLiteral ("qt.multimedia*=false"));
+    }
+
   Options options;
   options.dial = parser.value (dialOpt).replace (QLatin1Char (','), QLatin1Char ('.')).toDouble ();
+  if (options.dial > 1000.0)   // scritta in kHz
+    {
+      options.dial /= 1000.0;
+    }
   options.call = parser.value (callOpt).trimmed ().toUpper ();
   options.depth = std::clamp (parser.value (depthOpt).toInt (), 1, 3);
   options.low = parser.value (lowOpt).toInt ();

@@ -12658,6 +12658,29 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
         }
 
         MenuItem {
+            // Decodium RX: il ricevitore FT8/FT4/FT2 da terminale (solo RX),
+            // programma a se' accanto a decodium.exe; si apre in una console
+            // propria. Nascosto dove il programma non c'e' (pacchetti Linux).
+            readonly property bool available: bridge ? bridge.decodiumRxTerminalAvailable() : false
+            visible: available
+            height: available ? implicitHeight : 0
+            text: qsTr("Decodium RX - terminal receiver...")
+            icon.source: ""
+            onTriggered: bridge.openDecodiumRxTerminal()
+
+            background: Rectangle {
+                color: parent.highlighted ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.2) : "transparent"
+                radius: 6
+            }
+            contentItem: Text {
+                text: parent.text
+                font.pixelSize: 12
+                color: textPrimary
+                leftPadding: 10
+            }
+        }
+
+        MenuItem {
             text: qsTr("About Decodium")
             icon.source: ""
             onTriggered: mainWindow.openInfoDialog(0)
