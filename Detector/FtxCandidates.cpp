@@ -42,6 +42,82 @@ struct ModeConfig
   bool sort_groups;
 };
 
+// ---------------------------------------------------------------------------
+// DUE VARIANTI DELLA STIMA DEL FONDO (solo misura, spente senza la variabile).
+//
+// Il banco del 16/9 (lab/misure/20260916_banco_ft2_verita.md) ha mostrato che
+// su una registrazione vera l'aggancio si ferma al 77% anche a +6 dB, e che i
+// frame persi ai bordi del passabanda hanno il picco SPOSTATO di 38-55 Hz.
+// La causa e' la quartica del fondo (ftx_baseline_fit_c) che non sa seguire la
+// spalla del filtro del ricevitore: sul rapporto savsm/sbase l'interpolazione
+// parabolica finisce fuori posto.
+//
+//   DECODIUM_FONDO=mediana      il fondo e' una mediana scorrevole in dB
+//                               (+-DECODIUM_FONDO_CELLE celle, default 19,
+//                               cioe' +-200 Hz) invece della quartica;
+//   DECODIUM_FONDO=differenza   il massimo e l'interpolazione si cercano su
+//                               savsm - sbase invece che sul rapporto (la
+//                               soglia syncmin resta sul rapporto, cosi' non
+//                               cambia significato);
+//   DECODIUM_FONDO=entrambi     le due insieme.
+//
+// Senza la variabile il comportamento e' bit-identico a prima.
+enum class ModoFondo { originale, mediana, differenza, entrambi };
+
+ModoFondo modo_fondo ()
+{
+  static ModoFondo const v = [] {
+    char const* e = std::getenv ("DECODIUM_FONDO");
+    std::string const t = e ? e : "";
+    if (t == "mediana") return ModoFondo::mediana;
+    if (t == "differenza") return ModoFondo::differenza;
+    if (t == "entrambi") return ModoFondo::entrambi;
+    return ModoFondo::originale;
+  }();
+  return v;
+}
+
+inline bool fondo_mediana () { return modo_fondo () == ModoFondo::mediana || modo_fondo () == ModoFondo::entrambi; }
+inline bool fondo_differenza () { return modo_fondo () == ModoFondo::differenza || modo_fondo () == ModoFondo::entrambi; }
+
+int fondo_celle ()
+{
+  static int const v = [] {
+    char const* e = std::getenv ("DECODIUM_FONDO_CELLE");
+    int const n = e ? std::atoi (e) : 19;
+    return std::max (3, std::min (n, 200));
+  }();
+  return v;
+}
+
+// Mediana scorrevole in dB sullo spettro medio, piu' lo stesso scostamento che
+// la quartica applica. Robusta a un segnale stretto quanto il decimo
+// percentile, ma senza forma imposta: segue la spalla del filtro.
+void fondo_a_mediana (float const* savg, int nh1, int ia, int ib, float offset_db,
+                      float* sbase)
+{
+  int const m = fondo_celle ();
+  std::vector<float> db (static_cast<size_t> (nh1), 0.0f);
+  for (int i = 0; i < nh1; ++i)
+    {
+      db[static_cast<size_t> (i)] =
+          10.0f * std::log10 (std::max (savg[i], 1e-30f));
+    }
+  std::vector<float> finestra;
+  finestra.reserve (static_cast<size_t> (2 * m + 1));
+  for (int i = ia - 1; i <= ib - 1; ++i)
+    {
+      if (i < 0 || i >= nh1) continue;
+      int const lo = std::max (0, i - m);
+      int const hi = std::min (nh1 - 1, i + m);
+      finestra.assign (db.begin () + lo, db.begin () + hi + 1);
+      size_t const meta = finestra.size () / 2;
+      std::nth_element (finestra.begin (), finestra.begin () + meta, finestra.end ());
+      float const mediana = finestra[meta];
+      sbase[i] = std::pow (10.0f, (mediana + offset_db) / 10.0f);
+    }
+}
+
 struct FftBuffers
 {
   explicit FftBuffers (int nfft)
@@ -310,7 +386,14 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
         }
     }
 
-  ftx_baseline_fit_c (savg, config.nh1, nfa_base, nfb_base, config.baseline_offset_db, 1, sbase);
+  if (fondo_mediana ())
+    {
+      fondo_a_mediana (savg, config.nh1, nfa_base, nfb_base, config.baseline_offset_db, sbase);
+    }
+  else
+    {
+      ftx_baseline_fit_c (savg, config.nh1, nfa_base, nfb_base, config.baseline_offset_db, 1, sbase);
+    }
 
   // Il picco si cerca su savsm, che e' lisciato su 15 celle (+-7). Un picco
   // lisciato e' largo una quindicina di celle piu' la larghezza del segnale: se
@@ -331,6 +414,17 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
   int const nfa_s = std::max (min_bin, nfa - margine);
   int const nfb_s = std::min (top_bin, nfb + margine);
 
+  // Con DECODIUM_FONDO=differenza il massimo si cerca sulla DIFFERENZA, dove
+  // la pendenza del fondo pesa molto meno; la soglia resta sul rapporto.
+  std::vector<float> differenza;
+  if (fondo_differenza ())
+    {
+      differenza.assign (savsm.begin (), savsm.end ());
+      for (int i = nfa_s - 1; i <= nfb_s - 1; ++i)
+        {
+          differenza[static_cast<size_t> (i)] -= sbase[i];
+        }
+    }
   for (int i = nfa_s - 1; i <= nfb_s - 1; ++i)
     {
       if (sbase[i] <= 0.0f)
@@ -347,10 +441,12 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
 
   for (int i = nfa_s + 1; i <= nfb_s - 1; ++i)
     {
-      float const left = savsm[static_cast<size_t> (i - 2)];
-      float const center = savsm[static_cast<size_t> (i - 1)];
-      float const right = savsm[static_cast<size_t> (i)];
-      if (center < left || center < right || center < syncmin)
+      std::vector<float> const& metrica = fondo_differenza () ? differenza : savsm;
+      float const left = metrica[static_cast<size_t> (i - 2)];
+      float const center = metrica[static_cast<size_t> (i - 1)];
+      float const right = metrica[static_cast<size_t> (i)];
+      if (center < left || center < right
+          || savsm[static_cast<size_t> (i - 1)] < syncmin)
         {
           continue;
         }
@@ -374,7 +470,9 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
           continue;
         }
 
-      float const speak = center - 0.25f * (left - right) * del;
+      float const speak = fondo_differenza ()
+          ? savsm[static_cast<size_t> (i - 1)]
+          : center - 0.25f * (left - right) * del;
       raw_candidates.push_back ({fpeak, speak});
       if (static_cast<int> (raw_candidates.size ()) == maxcand)
         {
