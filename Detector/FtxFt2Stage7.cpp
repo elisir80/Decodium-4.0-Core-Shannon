@@ -5,6 +5,7 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -74,6 +75,102 @@ constexpr float kFt2SnrFloor = -26.0f;
 // Legacy FT2 uses a rounded 1333.33 samples/s when converting ibest -> dt.
 constexpr float kFt2FreqDtScale = 1.0f / 1333.33f;
 constexpr int kFt2FoxMax = 1000;
+
+// ---------------------------------------------------------------------------
+// DUMP DEGLI LLR (solo misura, spento senza DECODIUM_LLR_DUMP=<file>)
+//
+// Serve a separare il demodulatore dal decodificatore: Decodium produce gli
+// LLR veri, con la sua sincronizzazione e su rumore vero, e il confronto fra
+// decodificatori (min-sum, AP, liste, fastldpc) si fa dopo, offline, sugli
+// STESSI candidati. Formato e convenzioni: doc/fastldpc/llr_dump.md.
+//
+// Un record per candidato, little-endian, 735 byte:
+//   uint32  magic 0x4C4C5231 ("LLR1")
+//   uint32  versione 1
+//   double  inizio del ciclo, secondi UTC
+//   float   frequenza Hz
+//   float   DT s
+//   float   punteggio di sync
+//   uint8   esito (1 = decodificato, 0 = no)
+//   uint8   messaggio 77 bit impacchettati in 10 byte (primo bit = bit 7 del
+//           primo byte; zeri se l'esito e' 0)
+//   float   llr[174] col segno del chiamante: POSITIVO = bit 1, come vuole
+//           ftx_decode174_91_c (gli script di fastldpc usano il segno opposto).
+constexpr std::uint32_t kLlrDumpMagic = 0x4C4C5231u;
+constexpr std::uint32_t kLlrDumpVersione = 1u;
+constexpr size_t kLlrDumpRecord = 4 + 4 + 8 + 4 + 4 + 4 + 1 + 10 + 4 * 174;
+
+// Il percorso si legge una volta sola: senza la variabile il dump non costa
+// nulla, nemmeno una getenv per candidato.
+inline char const* llr_dump_percorso ()
+{
+  static char const* const v = [] {
+    char const* e = std::getenv ("DECODIUM_LLR_DUMP");
+    return (e && e[0] != 0) ? e : nullptr;
+  }();
+  return v;
+}
+
+// Il file si apre alla prima scrittura e resta aperto. I decodificatori girano
+// in parallelo, quindi la scrittura del record intero e' sotto lucchetto: un
+// record non puo' finire spezzato dentro un altro.
+std::mutex g_llr_dump_mutex;
+
+void llr_dump_scrivi (double inizio_ciclo_utc, float freq_hz, float dt_s, float sync,
+                      bool ok, signed char const* bits77, float const* llr174)
+{
+  char const* const percorso = llr_dump_percorso ();
+  if (!percorso || !llr174)
+    {
+      return;
+    }
+
+  std::array<unsigned char, kLlrDumpRecord> rec {};
+  size_t p = 0;
+  auto metti = [&rec, &p] (void const* src, size_t n) {
+    std::memcpy (rec.data () + p, src, n);
+    p += n;
+  };
+  metti (&kLlrDumpMagic, 4);
+  metti (&kLlrDumpVersione, 4);
+  metti (&inizio_ciclo_utc, 8);
+  metti (&freq_hz, 4);
+  metti (&dt_s, 4);
+  metti (&sync, 4);
+  unsigned char const esito = ok ? 1u : 0u;
+  metti (&esito, 1);
+  std::array<unsigned char, 10> impacchettato {};
+  if (ok && bits77)
+    {
+      for (int i = 0; i < kFt2Bits; ++i)
+        {
+          if (bits77[i])
+            {
+              impacchettato[static_cast<size_t> (i / 8)] |=
+                  static_cast<unsigned char> (0x80u >> (i % 8));
+            }
+        }
+    }
+  metti (impacchettato.data (), impacchettato.size ());
+  metti (llr174, 4 * static_cast<size_t> (kFt2Codeword));
+
+  std::lock_guard<std::mutex> guardia {g_llr_dump_mutex};
+  static std::FILE* const f = std::fopen (percorso, "ab");
+  if (!f)
+    {
+      return;                     // percorso sbagliato: si tace, non si decodifica peggio
+    }
+  std::fwrite (rec.data (), 1, rec.size (), f);
+  std::fflush (f);                // una misura interrotta deve lasciare i record gia' scritti
+}
+
+// L'ora di inizio del ciclo, in secondi UTC. In replay non e' l'ora della
+// registrazione: serve a raggruppare i record di uno stesso ciclo.
+inline double llr_dump_adesso_utc ()
+{
+  using namespace std::chrono;
+  return duration_cast<microseconds> (system_clock::now ().time_since_epoch ()).count () / 1.0e6;
+}
 
 extern "C"
 {
@@ -2792,6 +2889,8 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
   Stage7State& state = stage7_state ();
   ensure_tweaks (state);
   ensure_symbol_tables (state);
+  // Marca temporale unica per tutti i candidati di questo ciclo (dump LLR).
+  double const inizio_ciclo_utc = llr_dump_adesso_utc ();
   decodium::txmsg::Decode77Context context = make_decode77_context (mycall, hiscall);
   auto abort_if_cancelled = [&state, nout] () {
     if (!stage7_should_cancel ())
@@ -3374,6 +3473,13 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                   qso_progress, doosd, false, nfqso, f1, false, apmag,
                   ft2_ap_msg_attivo () ? symbol_mags.data () : nullptr,
                   usa_coerente ? &llr_coerente : nullptr);
+
+              // Gli LLR di questo candidato, con l'esito che il decodificatore
+              // di oggi ne ha tratto: il confronto con altri decodificatori si
+              // fa offline, sugli stessi dati (doc/fastldpc/llr_dump.md).
+              llr_dump_scrivi (inizio_ciclo_utc, f1,
+                               static_cast<float> (ibest) * kFt2FreqDtScale - 0.5f,
+                               smax, decoded.ok, decoded.bits.data (), llra.data ());
               stage7_debug_compare_with_reference (
                   llra, llrb, llrc, llrd, llre, decoded, ndepth0, ncontest, qso_progress,
                   false, nfqso, f1, false, doosd, apmag, mycall, hiscall);
