@@ -2631,7 +2631,8 @@ private:
                                 const QByteArray& adifRecord);
     void udpSendN1mmLoggedQso(const QString& dxCall, const QByteArray& adifRecord);
     void tcpSendLoggedAdifQso(const QString& dxCall, const QByteArray& adifRecord);
-    void maybePlayDecodeAlert(bool isCQ, bool isMyCall, const QString &message = QString());
+    // The payload is mandatory: Wanted Callsign matching cannot use CQ flags alone.
+    void maybePlayDecodeAlert(bool isCQ, bool isMyCall, const QString &message);
 
     QString m_callsign;
     QString m_grid {"JN70"};

@@ -2,52 +2,88 @@
 
 ## English (UK)
 
-This release fixes a weakness in the FT2 candidate search that made the program miss signals near the edges of the receiver passband, even strong ones, and adds the Decodium RX terminal receiver to the ☰ menu.
+Cumulative changes since v1.0.632, including Martino's v1.0.633 and v1.0.634 updates and the following local corrections.
 
-### FT2 now finds signals at the edges of the audio passband
+### AutoCQ: personalised calls and listening pauses
 
-- A new bench measured the program against known truth: synthetic FT2 signals of known message, frequency, DT and level mixed into a real 20 m recording, 800 slots in all. It showed that the frames Decodium loses are not lost by the decoder but by the **signal search**: the proportion of decoded frames follows the proportion of frames for which a candidate exists at the right frequency, at every level.
-- That search was not finding every signal even at +6 dB, where it stopped at 77 %. By frequency the picture was clear: 85–91 % between 1000 and 2000 Hz, but 46 % below 500 Hz and 44 % above 2500 Hz.
-- The cause is the way the noise floor is estimated. A quartic curve is fitted to the spectrum, and on the shoulder of the receiver filter — 40 dB of slope between 500 and 1500 Hz on the test recording — the parabolic interpolation of the peak lands 38 to 55 Hz away from the real signal, outside the ±12–16 Hz that FT2 synchronisation can recover. The candidate exists but starts from the wrong place.
-- From this release the peak and its interpolation are searched on the **difference** between the smoothed spectrum and the estimated floor, instead of their ratio, where the slope of the floor weighs far less. On the same 800 slots the search rises from 56.1 % to 67.0 % and decodes increase by **18.3 %**, with no unexpected lines and none at all on 500 slots of noise only. The cost is negligible: 42 candidates per slot instead of 38, and the same decode time.
-- The correction is enabled in FT2, where it was measured. FT4 uses the same search but has not been measured, so there it remains optional. `DECODIUM_FONDO=0` restores the previous behaviour exactly; `DECODIUM_FONDO=mediana` replaces the quartic with a sliding median, which decodes about as much but doubles the number of candidates and the decode time, which is why it is not the default.
+- Burst counting now recognises the scheduled AutoCQ operation rather than requiring its text to start with CQ or QRZ. Personalised TX6 calls such as `TEST VY2XT FN86` therefore participate in the configured burst/listening cadence.
+- Normal QSO replies, active-partner exchanges and empty messages remain excluded. Counting stays in the transmission-completion path; operator-aborted calls are not counted by a subsequent completion notification.
+- The correction covers both modern and legacy backends. It concerns “CQs per burst” and “Listening cycles between bursts”; it does not redesign the separate maximum-call/pause controls.
 
-### Decodium RX in the ☰ menu
+### EasyLog and UDP ADIF band names
 
-- "Decodium RX — terminal receiver" opens the standalone FT8/FT4/FT2 receiver in a console window of its own, without the graphical interface. On Windows it gets a real new console; on Linux it uses the system terminal emulator.
-- The terminal now accepts the dial frequency in kHz as well as MHz, and no longer prints Qt Multimedia notices over its opening questions.
+- A shared normaliser now handles outgoing ADIF in both backends, including primary, secondary and tertiary logging destinations, WSJT-X LoggedADIF messages and direct ADIF datagrams.
+- BAND and BAND_RX values use lower case (`20m`, `70cm`). Field lengths and formatting are preserved, including typed fields; reports such as `-10` and `-12`, callsigns and other values are not changed.
+- Normalisation no longer depends on the obsolete hidden EasyLogLowercaseBand setting. Existing local logbook records are not rewritten.
+- The binary QSOLogged message carries frequency rather than a textual band. A logger deriving its own band label from that message may still apply its own capitalisation; actual EasyLog import requires confirmation.
 
-### Measurement tooling
+### Dashboard SuperFox control
 
-- With `DECODIUM_LLR_DUMP=<file>` set, each FT2 candidate writes a binary record with its 174 LLRs, estimated frequency and DT, sync score and decode outcome. This separates the demodulator from the decoder, so different decoders can be compared offline on exactly the same candidates. Without the variable nothing is written and behaviour is unchanged. Format and conventions: `doc/fastldpc/llr_dump.md`.
+- In FT8, clicking SuperFox enables the option and selects Hound if neither Hound nor Fox is selected. An existing Fox selection is retained; Fox transmission is never enabled implicitly.
+- The indicator turns green when the mode is active. Clicking again disables SuperFox without changing the Hound/Fox selection. Settings are saved for restart.
+- Changes are blocked during TX or Tune; the button does not silently switch the operating mode to FT8.
 
-### Downloads
+### Resizable dashboard panels
 
-Source ZIP and tar.gz archives are available for this tag. The Windows x64 installer EXE is attached to this release; GitHub workflows add Linux x86_64/aarch64 AppImages with checksum files as they finish.
+- The lower divider remembers its chosen height instead of returning to 160 pixels after restart. Its minimum area height is reduced from 100 to 40 pixels outside FT2-Link.
+- Dragging uses stable coordinates to avoid movement feedback. The upper divider's stored height is no longer overwritten by ordinary automatic geometry changes; a collapsed height is also retained.
+
+### Included from v1.0.633
+
+- Automatic discovery and launch of a configured FT2 Log Bridge, duplicate-process protection and UDP configuration warnings. Settings → Reporting provides automatic-start, location, search and launch controls.
+- Windows gains the receive-only `decodium-rx.exe` terminal FT8/FT4/FT2 receiver and a Start-menu shortcut. It supports interactive setup, ALL.TXT output, WAV input, slot recording and filtering, without CAT/PTT transmission. Linux AppImages do not yet include this companion executable.
+
+### Included from v1.0.634
+
+- Full Spectrum and Signal RX follow the latest row reliably, both docked and detached. Manual scrolling suspends following until the operator returns to the bottom.
+- Optional post-QSO station telemetry is deferred to a suitable TX slot, waits for ongoing transmission and expires if it cannot start within four periods. This timing change is not a claim of fully validated FT2 telemetry support. Telemetry remains optional and disabled by default, not a required part of an FT2 QSO.
+- Additional `[LOGSTALL]` diagnostics record interface pauses during the four seconds after logging; this is diagnostic instrumentation, not a confirmed cure for every pause.
+
+### Validation and downloads
+
+Local macOS builds and targeted AutoCQ classification/ADIF tests passed during development, including receipt of normalised ADIF on three local UDP ports. These tests do not replace Windows UI, real-radio or EasyLog end-to-end verification. Source ZIP/tar.gz archives accompany the tag. GitHub workflows publish the Windows x64 installer, Linux x86_64/aarch64 AppImages and macOS Apple Silicon/Intel DMGs as each build finishes; platform checksum files accompany the AppImages and DMGs.
 
 ---
 
 ## Italiano
 
-Questo rilascio corregge un difetto nella ricerca dei candidati FT2 che faceva perdere al programma i segnali vicini ai bordi del passabanda del ricevitore, anche quelli forti, e porta il ricevitore da terminale Decodium RX nel menu ☰.
+Modifiche cumulative dalla v1.0.632, comprendenti gli aggiornamenti v1.0.633 e v1.0.634 di Martino e le seguenti correzioni locali.
 
-### FT2 trova i segnali ai bordi della banda audio
+### AutoCQ: chiamate personalizzate e pause di ascolto
 
-- Un banco nuovo ha misurato il programma con la verità nota: segnali FT2 sintetici, di cui si sa messaggio, frequenza, DT e livello, mescolati dentro una registrazione vera dei 20 metri, 800 slot in tutto. Ne è uscito che i frame che Decodium perde non li perde il decodificatore ma **l'aggancio del segnale**: la percentuale di frame decodificati segue quella dei frame per cui esiste un candidato alla frequenza giusta, a ogni livello.
-- Quella ricerca non trovava tutti i segnali nemmeno a +6 dB, dove si fermava al 77 %. Guardando per frequenza il quadro era chiaro: 85-91 % fra 1000 e 2000 Hz, ma 46 % sotto i 500 Hz e 44 % sopra i 2500 Hz.
-- La causa è il modo in cui si stima il rumore di fondo. Al fondo viene adattata una quartica, e sulla spalla del filtro del ricevitore — 40 dB di dislivello fra 500 e 1500 Hz nella registrazione di prova — l'interpolazione parabolica del picco finisce da 38 a 55 Hz lontano dal segnale vero, fuori dai ±12-16 Hz che il sincronismo FT2 riesce a recuperare. Il candidato esiste ma parte dal posto sbagliato.
-- Da questa versione il massimo e la sua interpolazione si cercano sulla **differenza** fra lo spettro lisciato e il fondo stimato, invece che sul loro rapporto, dove la pendenza del fondo pesa molto meno. Sugli stessi 800 slot l'aggancio sale dal 56,1 % al 67,0 % e le decodifiche aumentano del **18,3 %**, senza righe impreviste e con zero righe su 500 slot di solo rumore. Il costo è trascurabile: 42 candidati per slot invece di 38, e lo stesso tempo di decodifica.
-- La correzione è accesa in FT2, dove è stata misurata. FT4 usa la stessa ricerca ma non è stato misurato, quindi lì resta opzionale. `DECODIUM_FONDO=0` riporta esattamente al comportamento precedente; `DECODIUM_FONDO=mediana` sostituisce la quartica con una mediana scorrevole, che decodifica quasi altrettanto ma raddoppia i candidati e il tempo di decodifica, ed è il motivo per cui non è il default.
+- Il conteggio delle raffiche riconosce ora l'operazione AutoCQ programmata, senza richiedere che il testo inizi con CQ o QRZ. Le chiamate TX6 personalizzate, come `TEST VY2XT FN86`, partecipano quindi alla cadenza chiamate/ascolto configurata.
+- Restano escluse le risposte durante un QSO, gli scambi con un interlocutore attivo e i messaggi vuoti. Il conteggio resta nel percorso di completamento della trasmissione; una chiamata interrotta dall'operatore non viene conteggiata dal successivo evento di fine TX.
+- La correzione copre backend moderno e legacy. Riguarda “CQs per burst” e “Listening cycles between bursts”; non ridisegna i controlli separati di massimo chiamate/pausa.
 
-### Decodium RX nel menu ☰
+### EasyLog e banda nell'ADIF via UDP
 
-- "Decodium RX — terminal receiver" apre il ricevitore FT8/FT4/FT2 da terminale in una console propria, senza interfaccia grafica. Su Windows ottiene una console vera; su Linux usa l'emulatore di terminale di sistema.
-- Il terminale accetta ora la frequenza anche in kHz oltre che in MHz, e non stampa più gli avvisi di Qt Multimedia sopra le domande iniziali.
+- Una normalizzazione comune gestisce l'ADIF in uscita da entrambi i backend: destinazioni di logging primaria, secondaria e terziaria, messaggi WSJT-X LoggedADIF e datagrammi ADIF diretti.
+- BAND e BAND_RX vengono inviati in minuscolo (`20m`, `70cm`). Lunghezze e formattazione dei campi sono conservate, compresi i campi tipizzati; rapporti come `-10` e `-12`, nominativi e altri valori non vengono modificati.
+- La normalizzazione non dipende più dalla vecchia opzione nascosta EasyLogLowercaseBand. I QSO già presenti nel log locale non vengono riscritti.
+- Il messaggio binario QSOLogged contiene la frequenza, non la banda testuale: un logger che ricava autonomamente la banda può ancora applicare la propria capitalizzazione. L'importazione reale in EasyLog richiede conferma.
 
-### Strumenti di misura
+### Pulsante SuperFox nella dashboard
 
-- Con `DECODIUM_LLR_DUMP=<file>` ogni candidato FT2 scrive un record binario con i suoi 174 LLR, la frequenza e il DT stimati, il punteggio di sincronismo e l'esito della decodifica. Serve a separare il demodulatore dal decodificatore, così decodificatori diversi si confrontano fuori dal programma sugli stessi identici candidati. Senza la variabile non viene scritto nulla e il comportamento non cambia. Formato e convenzioni: `doc/fastldpc/llr_dump.md`.
+- In FT8, un clic abilita SuperFox e seleziona Hound se non è già selezionato Hound o Fox. Un'eventuale selezione Fox viene conservata; la trasmissione Fox non viene mai attivata implicitamente.
+- Il pulsante diventa verde quando la modalità è attiva. Un secondo clic disabilita SuperFox senza cambiare la selezione Hound/Fox. Le impostazioni vengono salvate per il riavvio.
+- Modifiche bloccate durante TX o Tune; il pulsante non cambia automaticamente il modo operativo in FT8.
 
-### Download
+### Pannelli ridimensionabili della dashboard
 
-Per questo tag sono disponibili gli archivi sorgente ZIP e tar.gz. L'installer Windows x64 è allegato a questo rilascio; i workflow GitHub aggiungono le AppImage Linux x86_64/aarch64 con i file di checksum man mano che finiscono.
+- Il divisore inferiore ricorda l'altezza scelta invece di ripartire da 160 pixel al riavvio. Fuori da FT2-Link, l'altezza minima dell'area scende da 100 a 40 pixel.
+- Il trascinamento usa coordinate stabili per evitare scatti. L'altezza salvata del divisore superiore non viene più sovrascritta dai normali cambiamenti automatici della geometria; viene conservata anche l'altezza collassata.
+
+### Novità incluse dalla v1.0.633
+
+- Ricerca e avvio automatici di FT2 Log Bridge già configurato, protezione dai processi duplicati e avvisi sulla configurazione UDP. Impostazioni → Reporting offre controlli per avvio automatico, percorso, ricerca e avvio immediato.
+- Windows include il ricevitore da terminale `decodium-rx.exe`, solo RX FT8/FT4/FT2, e il collegamento nel menu Start. Supporta configurazione interattiva, ALL.TXT, ingresso WAV, salvataggio slot e filtri, senza trasmissione CAT/PTT. Le AppImage Linux non includono ancora questo eseguibile aggiuntivo.
+
+### Novità incluse dalla v1.0.634
+
+- Full Spectrum e Signal RX seguono correttamente l'ultima riga, sia agganciati sia staccati. Lo scorrimento manuale sospende il seguito automatico fino al ritorno in fondo.
+- La telemetria opzionale dopo il QSO viene rinviata a uno slot TX adatto, attende la fine di una trasmissione in corso e scade se non riesce a partire entro quattro periodi. Questa correzione temporale non costituisce conferma del supporto completo e verificato della telemetria FT2. La telemetria resta opzionale, disattivata di default e non necessaria per un QSO FT2.
+- Nuova diagnostica `[LOGSTALL]` delle pause dell'interfaccia nei quattro secondi successivi alla messa a log: è strumentazione diagnostica, non una soluzione confermata per tutte le pause.
+
+### Verifiche e download
+
+Durante lo sviluppo sono riuscite le build locali macOS e le prove mirate di classificazione AutoCQ/ADIF, inclusa la ricezione dell'ADIF normalizzato su tre porte UDP locali. Non sostituiscono le verifiche dell'interfaccia Windows, sulla radio e nell'importazione reale EasyLog. Il tag comprende gli archivi sorgente ZIP/tar.gz. I workflow GitHub pubblicano installer Windows x64, AppImage Linux x86_64/aarch64 e DMG macOS Apple Silicon/Intel al completamento dei rispettivi build, con file di controllo per AppImage e DMG.

@@ -480,6 +480,7 @@ SettingsPageScroll {
                 CheckBox {
                     Layout.preferredWidth: advancedOperatingGrid.checkWidth; Layout.preferredHeight: controlHeight
                     checked: bridge.foxMode
+                    enabled: !bridge.transmitting && !bridge.tuning
                     onToggled: {
                         bridge.foxMode = checked
                         dialog.scheduleSettingsPersist()
@@ -491,6 +492,7 @@ SettingsPageScroll {
                 CheckBox {
                     Layout.preferredWidth: advancedOperatingGrid.checkWidth; Layout.preferredHeight: controlHeight
                     checked: bridge.houndMode
+                    enabled: !bridge.transmitting && !bridge.tuning
                     onToggled: {
                         bridge.houndMode = checked
                         dialog.scheduleSettingsPersist()

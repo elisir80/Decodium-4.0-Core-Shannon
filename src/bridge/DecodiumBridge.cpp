@@ -1,5 +1,7 @@
 #include "DecodiumBridge.h"
 #include "AdifExportSanitizer.h"
+#include "Network/AdifUdpPayload.hpp"
+#include "Sequencer/AutoCqCallPolicy.hpp"
 
 #if DECODIUM_HAS_SSTV
 #include "src/sstv/integration/SstvQsoLog.h"
@@ -12520,6 +12522,13 @@ void DecodiumBridge::migrateActiveMonitoringToLegacyBackend()
     }
 
     bridgeLog(QStringLiteral("Migrating active monitor session to legacy backend"));
+    // Results still in flight belong to the preceding native RX session.
+    ++m_decodeSessionId;
+    resetNativeDecodeDedupIndex();
+    if (m_decoding) {
+        m_decoding = false;
+        emit decodingChanged();
+    }
     ++m_periodTimerSessionId;
 
     if (m_periodTimer) {
@@ -13872,7 +13881,7 @@ void DecodiumBridge::drainNativeDecodeSecondaryWork()
             udpSendDecode(true, work.rawRow, work.serial);
         }
         if (work.playAlert) {
-            maybePlayDecodeAlert(isCQ, isMyCall);
+            maybePlayDecodeAlert(isCQ, isMyCall, message);
         }
         ++processed;
     }
@@ -22730,15 +22739,26 @@ void DecodiumBridge::syncSpecialOperationToLegacyBackend()
         return;
     }
 
+    // Legacy setters emit status changes synchronously. Never read an
+    // intermediate activity back into the bridge between these two writes.
+    QScopedValueRollback<bool> stateGuard(m_syncingLegacyBackendState, true);
+    int const requestedActivity = m_specialOperationActivity;
     bool const superFox = getSetting(QStringLiteral("SuperFox"), false).toBool();
     m_legacyBackend->setSuperFoxEnabled(superFox);
-    m_legacyBackend->setSpecialOperationActivity(m_specialOperationActivity);
+    m_legacyBackend->setSpecialOperationActivity(requestedActivity);
 }
 
 void DecodiumBridge::setSpecialOperationActivity(int activity)
 {
+    if (m_transmitting || m_tuning) {
+        emit warningRaised(QStringLiteral("Fox/Hound"),
+                           QStringLiteral("Stop TX/Tune before changing operating activity"), QString());
+        return;
+    }
+    QScopedValueRollback<bool> stateGuard(m_syncingLegacyBackendState, true);
     activity = qBound(kSpecialOpNone, activity, kSpecialOpMax);
     bool const wasLegacyTx = usingLegacyBackendForTx();
+    bool const wasLegacyRx = usingLegacyBackendForRx();
     bool const wasForced = m_forceLegacyTxForSpecialOp;
     bool const wantLegacyTx = activity == kSpecialOpFox || activity == kSpecialOpHound;
 
@@ -22771,9 +22791,9 @@ void DecodiumBridge::setSpecialOperationActivity(int activity)
             return;
         }
         syncLegacyBackendDialogState();
-        syncSpecialOperationToLegacyBackend();
         shutdownUdpMessageClient();
-        if (m_monitoring && !m_transmitting && !m_tuning) {
+        if (m_monitoring && !m_transmitting && !m_tuning
+            && (!wasLegacyRx || !m_legacyBackend->monitoring())) {
             migrateActiveMonitoringToLegacyBackend();
         }
         bridgeLog(QStringLiteral("SpecialOp enabled through legacy backend: activity=%1").arg(activity));
@@ -27629,6 +27649,8 @@ void DecodiumBridge::stopTx()
         QMetaObject::invokeMethod(this, &DecodiumBridge::stopTx, Qt::QueuedConnection);
         return;
     }
+    // An aborted call must not be counted by a subsequent idle callback.
+    m_activeTxWasPureAutoCqCq = false;
 
     if (sstvTxActive()) {
         bridgeLog(QStringLiteral(
@@ -33147,18 +33169,7 @@ void DecodiumBridge::udpSendLoggedQso(const QString& dxCall, const QString& dxGr
     QString const cleanSatellite = satellite.trimmed();
     QString const cleanSatMode = satMode.trimmed();
     QString const cleanFreqRx = freqRx.trimmed();
-    QByteArray udpAdifRecord = adifRecord;
-    if (getSetting(QStringLiteral("EasyLogLowercaseBand"), true).toBool()) {
-        QString adif = QString::fromUtf8(udpAdifRecord);
-        QRegularExpression bandField(QStringLiteral("(<BAND:\\d+>)([^<\\r\\n]*)"),
-                                      QRegularExpression::CaseInsensitiveOption);
-        QRegularExpressionMatch match = bandField.match(adif);
-        if (match.hasMatch()) {
-            adif.replace(match.capturedStart(2), match.capturedLength(2),
-                         match.captured(2).trimmed().toLower());
-            udpAdifRecord = adif.toUtf8();
-        }
-    }
+    QByteArray const udpAdifRecord = decodium::adif::udpPayload(adifRecord);
 
     int targets = 0;
     int wsjtxAdifTargets = 0;
@@ -33294,7 +33305,7 @@ bool DecodiumBridge::udpSendRawAdifDatagram(const QString& label,
     }
 
     QUdpSocket socket;
-    QByteArray const payload = adifRecord + " <eor>";
+    QByteArray const payload = decodium::adif::udpPayload(adifRecord) + " <eor>";
     qint64 const written = socket.writeDatagram(payload, target, port);
     if (written < 0) {
         bridgeLog(QStringLiteral("%1 send failed for %2: %3")
@@ -35150,19 +35161,11 @@ bool DecodiumBridge::autoCqBurstCadenceEnabled() const
 
 bool DecodiumBridge::isAutoCqBurstPureCq(int txNumber, const QString& message) const
 {
-    if (!m_autoCqRepeat || txNumber != 6
-        || !m_dxCall.trimmed().isEmpty()
+    bool const partnerActive = !m_dxCall.trimmed().isEmpty()
         || !m_autoCqLockedCall.trimmed().isEmpty()
-        || m_pendingAutoSeqTxAfterActiveTx > 0
-        || m_qsoProgress > 1) {
-        return false;
-    }
-
-    QString const payload = message.trimmed().toUpper();
-    return payload == QStringLiteral("CQ")
-        || payload.startsWith(QStringLiteral("CQ "))
-        || payload == QStringLiteral("QRZ")
-        || payload.startsWith(QStringLiteral("QRZ "));
+        || m_pendingAutoSeqTxAfterActiveTx > 0;
+    return decodium::isAutoCqCall(m_autoCqRepeat && !m_tuning, txNumber,
+                                 m_qsoProgress <= 1, partnerActive, message);
 }
 
 void DecodiumBridge::resetAutoCqBurstCadence(const QString& reason)
