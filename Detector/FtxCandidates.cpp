@@ -40,6 +40,9 @@ struct ModeConfig
   float max_frequency_hz;
   float baseline_offset_db;
   bool sort_groups;
+  // La correzione del fondo e' misurata su FT2 (banco del 16/9); FT4 usa la
+  // stessa ricerca ma non e' stato misurato, quindi li' resta opt-in.
+  bool fondo_differenza_di_default;
 };
 
 // ---------------------------------------------------------------------------
@@ -53,7 +56,9 @@ struct ModeConfig
 // spalla del filtro del ricevitore: sul rapporto savsm/sbase l'interpolazione
 // parabolica finisce fuori posto.
 //
-//   DECODIUM_FONDO=differenza   ACCESO DI DEFAULT dal 16/9/2026: il massimo e
+//   DECODIUM_FONDO=differenza   ACCESO DI DEFAULT IN FT2 dal 16/9/2026 (in FT4
+//                               la stessa ricerca c'e' ma non e' stata
+//                               misurata, quindi li' resta opt-in): il massimo e
 //                               l'interpolazione si cercano su savsm - sbase
 //                               invece che sul rapporto, dove la pendenza del
 //                               fondo pesa molto meno (la soglia syncmin resta
@@ -71,7 +76,7 @@ struct ModeConfig
 // decodifica, la differenza li lascia a 42. In FT2 la stabilita' viene prima
 // della resa (la 1.0.626 e' morta su un PC a 8 core proprio per carico in
 // piu'), quindi di default si accende solo quella che non costa niente.
-enum class ModoFondo { originale, mediana, differenza, entrambi };
+enum class ModoFondo { secondo_il_modo, originale, mediana, differenza, entrambi };
 
 ModoFondo modo_fondo ()
 {
@@ -82,13 +87,24 @@ ModoFondo modo_fondo ()
     if (t == "differenza") return ModoFondo::differenza;
     if (t == "entrambi") return ModoFondo::entrambi;
     if (t == "0" || t == "originale" || t == "no") return ModoFondo::originale;
-    return ModoFondo::differenza;      // default dal 16/9/2026
+    return ModoFondo::secondo_il_modo;
   }();
   return v;
 }
 
-inline bool fondo_mediana () { return modo_fondo () == ModoFondo::mediana || modo_fondo () == ModoFondo::entrambi; }
-inline bool fondo_differenza () { return modo_fondo () == ModoFondo::differenza || modo_fondo () == ModoFondo::entrambi; }
+inline bool fondo_mediana ()
+{
+  return modo_fondo () == ModoFondo::mediana || modo_fondo () == ModoFondo::entrambi;
+}
+
+inline bool fondo_differenza (ModeConfig const& config)
+{
+  if (modo_fondo () == ModoFondo::secondo_il_modo)
+    {
+      return config.fondo_differenza_di_default;
+    }
+  return modo_fondo () == ModoFondo::differenza || modo_fondo () == ModoFondo::entrambi;
+}
 
 int fondo_celle ()
 {
@@ -427,7 +443,7 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
   // Con DECODIUM_FONDO=differenza il massimo si cerca sulla DIFFERENZA, dove
   // la pendenza del fondo pesa molto meno; la soglia resta sul rapporto.
   std::vector<float> differenza;
-  if (fondo_differenza ())
+  if (fondo_differenza (config))
     {
       differenza.assign (savsm.begin (), savsm.end ());
       for (int i = nfa_s - 1; i <= nfb_s - 1; ++i)
@@ -451,7 +467,7 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
 
   for (int i = nfa_s + 1; i <= nfb_s - 1; ++i)
     {
-      std::vector<float> const& metrica = fondo_differenza () ? differenza : savsm;
+      std::vector<float> const& metrica = fondo_differenza (config) ? differenza : savsm;
       float const left = metrica[static_cast<size_t> (i - 2)];
       float const center = metrica[static_cast<size_t> (i - 1)];
       float const right = metrica[static_cast<size_t> (i)];
@@ -480,7 +496,7 @@ void run_get_candidates (ModeConfig const& config, float const* dd,
           continue;
         }
 
-      float const speak = fondo_differenza ()
+      float const speak = fondo_differenza (config)
           ? savsm[static_cast<size_t> (i - 1)]
           : center - 0.25f * (left - right) * del;
       raw_candidates.push_back ({fpeak, speak});
@@ -537,7 +553,7 @@ extern "C" void ftx_getcandidates2_c (float const* dd, float fa, float fb, float
                                       float* candidate, int* ncand, float* sbase)
 {
   static ModeConfig const config {
-    45000, 1152, 576, 152, 288, 288, 5500.0f, 0.50f, true
+    45000, 1152, 576, 152, 288, 288, 5500.0f, 0.50f, true, true
   };
   run_get_candidates (config, dd, fa, fb, syncmin, nfqso, maxcand, savg, candidate, ncand, sbase);
 }
@@ -547,7 +563,7 @@ extern "C" void ftx_getcandidates4_c (float const* dd, float fa, float fb, float
                                       float* candidate, int* ncand, float* sbase)
 {
   static ModeConfig const config {
-    72576, 2304, 1152, 122, 576, 576, 4910.0f, 0.65f, false
+    72576, 2304, 1152, 122, 576, 576, 4910.0f, 0.65f, false, false
   };
   run_get_candidates (config, dd, fa, fb, syncmin, nfqso, maxcand, savg, candidate, ncand, sbase);
 }
