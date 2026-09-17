@@ -151,6 +151,7 @@ private Q_SLOTS:
   void reacquiresLeaderThatStartsAfterRejectedGap ();
   void ignoresNoiseAndLowConfidenceWithoutLocking ();
   void rejectsHeaderTimingAndBadParity ();
+  void acceptsVoxLeaderWithoutRelaxingRestOfHeader ();
   void reportsAmbiguousAndUnderCoveredBits ();
   void handlesEarlyStopFinishAndTimeout ();
   void decodesBackToBackFrames ();
@@ -438,6 +439,34 @@ void TestSstvVisDetector::ignoresNoiseAndLowConfidenceWithoutLocking ()
             SstvVisDetectionCause::LowConfidence);
   QVERIFY (std::abs (headerAwareResult.front ().confidence - 0.40)
            < 1.0e-9);
+}
+
+void TestSstvVisDetector::acceptsVoxLeaderWithoutRelaxingRestOfHeader ()
+{
+  for (bool fragmented : {false, true})
+    {
+      auto events = standardFrame (44U);
+      events.front ().durationUs += 750'000U;
+      for (std::size_t i = 1; i < events.size (); ++i)
+        events[i].startTimeUs += 750'000U;
+      if (fragmented)
+        events = fragmentEvents (events);
+      SstvVisDetector detector;
+      auto result = detector.consume (events);
+      QCOMPARE (result.size (), std::size_t {1});
+      QVERIFY (result.front ().valid ());
+      QCOMPARE (result.front ().codecResult.primary.payload, std::uint8_t {44});
+    }
+  // A long second leader is not a pre-key and must still be rejected.
+  auto malformed = standardFrame (44U);
+  malformed[2].durationUs += 750'000U;
+  for (std::size_t i = 3; i < malformed.size (); ++i)
+    malformed[i].startTimeUs += 750'000U;
+  SstvVisDetector detector;
+  auto result = detector.consume (malformed);
+  QVERIFY (!result.empty ());
+  QVERIFY (std::none_of (result.begin (), result.end (),
+                        [](const auto& item) { return item.valid (); }));
 }
 
 void TestSstvVisDetector::rejectsHeaderTimingAndBadParity ()

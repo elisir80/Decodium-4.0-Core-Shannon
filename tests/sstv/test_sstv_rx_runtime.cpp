@@ -840,6 +840,42 @@ private slots:
         QCOMPARE(runtime.snapshot().chunksProcessed, std::uint64_t {0U});
     }
 
+    void martinM1AcquiresWithAndWithoutLongVoxPreamble()
+    {
+        for (const unsigned preKeyMs : {0U, 750U, 4'000U}) {
+            auto config = smallConfig();
+            config.ingress.maximumQueuedSamples = 65'536U;
+            config.ingress.maximumSamplesPerCall = 16'384U;
+            const auto payload = martinPrefix(SstvMartinMode::M1, 3U);
+            std::vector<std::int16_t> pcm(preKeyMs * 12U);
+            SstvToneGenerator generator(kRate);
+            if (!pcm.empty()) {
+                QCOMPARE(generator.generatePcm16(1'900.0, 0.5,
+                    pcm.data(), pcm.size()), pcm.size());
+            }
+            pcm.insert(pcm.end(), payload.begin(), payload.end());
+            SstvRxRuntime runtime(config);
+            QVERIFY(runtime.start(SstvAudioSourceKind::Replay, 44U));
+            std::uint64_t chunks = 0U;
+            for (std::size_t offset = 0; offset < pcm.size(); offset += 4093U) {
+                const auto count = std::min(std::size_t {4093U}, pcm.size() - offset);
+                QVERIFY(runtime.enqueuePcm16At(pcmChunk(pcm, offset, count),
+                    kRate, runtime.routeToken(),
+                    static_cast<qint64>(offset * 1'000'000'000ULL / kRate)));
+                ++chunks;
+                QTRY_COMPARE_WITH_TIMEOUT(runtime.snapshot().chunksProcessed,
+                    chunks, 4'000);
+            }
+            const auto result = runtime.snapshot();
+            QVERIFY(result.vis.valid);
+            QCOMPARE(result.vis.mappedMode, QStringLiteral("martin-m1"));
+            QVERIFY(result.image.available);
+            QVERIFY(result.image.linesPublished >= 1U);
+            QVERIFY(!result.image.complete);
+            QVERIFY(runtime.stop());
+        }
+    }
+
     void martinM1VisStartsProgressiveNativeImageSession()
     {
         SstvDiagnosticLogBuffer::instance().clear();

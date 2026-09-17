@@ -29,7 +29,8 @@ class StudioEngineFixture final : public QObject
     Q_PROPERTY(QString callsign READ callsign CONSTANT)
     Q_PROPERTY(QString grid READ grid CONSTANT)
     Q_PROPERTY(qulonglong frequency READ frequency CONSTANT)
-    Q_PROPERTY(bool sstvTxCanStart READ sstvTxCanStart CONSTANT)
+    Q_PROPERTY(bool sstvTxCanStart READ sstvTxCanStart NOTIFY txReadinessChanged)
+    Q_PROPERTY(QString sstvTxUnavailableReason READ sstvTxUnavailableReason NOTIFY txReadinessChanged)
     Q_PROPERTY(bool sstvTxActive READ sstvTxActive CONSTANT)
     Q_PROPERTY(QString sstvTxState READ sstvTxState CONSTANT)
     Q_PROPERTY(double sstvTxProgress READ sstvTxProgress CONSTANT)
@@ -47,13 +48,28 @@ public:
         : QObject(parent)
         , m_studio(studio)
     {
+        connect(studio, &SstvStudioController::preparedChanged,
+                this, &StudioEngineFixture::txReadinessChanged);
+        connect(studio, &SstvStudioController::stateChanged,
+                this, &StudioEngineFixture::txReadinessChanged);
+        connect(studio, &SstvStudioController::sourceChanged,
+                this, &StudioEngineFixture::txReadinessChanged);
     }
 
     QObject* sstvStudio() const noexcept { return m_studio; }
     QString callsign() const { return QStringLiteral("9H1TEST"); }
     QString grid() const { return QStringLiteral("JM75FV"); }
     qulonglong frequency() const noexcept { return 14'230'000ULL; }
-    bool sstvTxCanStart() const noexcept { return true; }
+    bool sstvTxCanStart() const { return sstvTxUnavailableReason().isEmpty(); }
+    QString sstvTxUnavailableReason() const {
+        if (m_studio->busy()) return QStringLiteral("Image operation in progress");
+        if (!m_studio->preparedReady()) return QStringLiteral("Press Preview");
+        return m_txBlocker;
+    }
+    void setTxBlocker(const QString& reason) {
+        m_txBlocker = reason;
+        emit txReadinessChanged();
+    }
     bool sstvTxActive() const noexcept { return false; }
     QString sstvTxState() const { return QStringLiteral("Idle"); }
     double sstvTxProgress() const noexcept { return 0.0; }
@@ -79,9 +95,13 @@ public:
     Q_INVOKABLE void cancelSstvTx() {}
     QString lastCalibrationTone() const { return m_lastCalibrationTone; }
 
+signals:
+    void txReadinessChanged();
+
 private:
     SstvStudioController* const m_studio;
     QString m_lastCalibrationTone;
+    QString m_txBlocker;
 };
 
 class StudioImageProvider final : public QQuickImageProvider
@@ -165,6 +185,12 @@ private slots:
         QVERIFY2(object, qPrintable(qmlErrors(component.errors())));
         auto* page = qobject_cast<QQuickItem*>(object.data());
         QVERIFY(page);
+        auto* transmit = page->findChild<QQuickItem*>(QStringLiteral("sstvTransmitButton"));
+        auto* unavailable = page->findChild<QQuickItem*>(QStringLiteral("sstvTxUnavailableReason"));
+        QVERIFY(transmit);
+        QVERIFY(unavailable);
+        QVERIFY(!transmit->isEnabled());
+        QCOMPARE(unavailable->property("text").toString(), QStringLiteral("Press Preview"));
 
         QObject* modeSelector = page->findChild<QObject*>(
             QStringLiteral("sstvModeSelector"));
@@ -248,8 +274,13 @@ private slots:
         window.show();
 
         QVERIFY(QMetaObject::invokeMethod(page, "preparePreview"));
+        QVERIFY(studio.busy());
+        QVERIFY(!transmit->isEnabled());
         QTRY_VERIFY_WITH_TIMEOUT(!studio.busy(), 5'000);
         QVERIFY2(studio.preparedReady(), qPrintable(studio.error()));
+        // No page reload, mode change or coordinator TX event is needed.
+        QTRY_VERIFY(transmit->isEnabled());
+        QVERIFY(!unavailable->isVisible());
         QTRY_VERIFY_WITH_TIMEOUT(page->window() == &window, 2'000);
         QTest::qWait(250);
         const QImage rendered = window.grabWindow();
@@ -270,6 +301,27 @@ private slots:
         }
         QVERIFY2(sampledColours.size() > 8,
                  "Rendered studio page did not contain meaningful visual content");
+
+        // Keep CAT/PTT/preflight checks authoritative after preparation.
+        fixture.setTxBlocker(QStringLiteral("the tune tone is active"));
+        QTRY_VERIFY(!transmit->isEnabled());
+        QVERIFY(unavailable->isVisible());
+        QCOMPARE(unavailable->property("text").toString(), QStringLiteral("the tune tone is active"));
+        fixture.setTxBlocker({});
+        QTRY_VERIFY(transmit->isEnabled());
+
+        QVERIFY(QMetaObject::invokeMethod(page, "preparePreview"));
+        QVERIFY(!transmit->isEnabled());
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.busy(), 5'000);
+        QTRY_VERIFY(transmit->isEnabled());
+        studio.setModeId(QStringLiteral("martin-m1"));
+        QTRY_VERIFY(!transmit->isEnabled());
+        QVERIFY(QMetaObject::invokeMethod(page, "preparePreview"));
+        QTRY_VERIFY_WITH_TIMEOUT(!studio.busy(), 5'000);
+        QTRY_VERIFY(transmit->isEnabled());
+        studio.clearSource();
+        QTRY_VERIFY(!transmit->isEnabled());
+        QVERIFY(unavailable->isVisible());
         QVERIFY2(runtimeWarnings.isEmpty(), qPrintable(runtimeWarnings.join('\n')));
     }
 };

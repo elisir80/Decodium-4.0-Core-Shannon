@@ -792,7 +792,7 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
 //
 // Misure: lab/misure/20260910_bicm_id_ft8.md (+21,3% di decodifiche, ~0,3 dB,
 // zero falsi su 2236 cornici di rumore e 960 prove con segnale).
-extern "C" int fastldpc_extrinsic174_91_c (float const* llr_in, int norder,
+extern "C" int fastldpc_simd_extrinsic174_91_c (float const* llr_in, int norder,
                                            float clamp, float* est_out)
 {
     if (!llr_in || !est_out) return 0;

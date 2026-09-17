@@ -345,6 +345,7 @@ private slots:
     void cancellationDuringHeaderImageAndFskReleasesExactlyOnce();
     void calibrationPreparedPathSharesPttLifecycleAndMetrics();
     void voxCompletionUsesNoPttOffHook();
+    void audioOnlyDoesNotAddVoxEnvelope();
     void cancelShutdownRetainDeviceUntilDetachAndReleaseOnce();
     void audioLeaseSurvivesConcurrentPullUntilDetachAcknowledgement();
     void hookFailuresFailClosedWithoutDuplicatePttOff();
@@ -1432,10 +1433,30 @@ void TestSstvTxCoordinator::calibrationPreparedPathSharesPttLifecycleAndMetrics(
     QVERIFY(!serialized.contains("secret-device"));
 }
 
+void TestSstvTxCoordinator::audioOnlyDoesNotAddVoxEnvelope()
+{
+    FakeHooks fake;
+    fake.preflight.pttReleaseRequired = false;
+    auto coordinator = enabledCoordinator(fake);
+    const auto started = coordinator->start(
+        1U, requestFor(SstvTxCoordinatorMode::MartinM1));
+    QVERIFY(started.accepted);
+    QVERIFY(coordinator->notifyPttConfirmed(2U, started.sessionId));
+    const auto plan = coordinator->snapshot().audioPlan;
+    QVERIFY(!plan.voxEnvelopeEnabled);
+    QCOMPARE(plan.voxPreKeyFrames, std::uint64_t {0});
+    QCOMPARE(plan.voxHangFrames, std::uint64_t {0});
+    QCOMPARE(plan.protocolStartFrame, std::uint64_t {0});
+    QCOMPARE(plan.totalFrames, plan.protocolEndFrame);
+    QVERIFY(coordinator->cancel(3U));
+    QCOMPARE(fake.pttOffCalls, std::uint64_t {0});
+}
+
 void TestSstvTxCoordinator::voxCompletionUsesNoPttOffHook()
 {
     FakeHooks fake;
     fake.preflight.pttReleaseRequired = false;
+    fake.preflight.voxAudioActivation = true;
     const SstvTxCoordinatorConfig config = fastConfig();
     auto coordinator = enabledCoordinator(fake, config);
     SstvTxTimingConfig timing;

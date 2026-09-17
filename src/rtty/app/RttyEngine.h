@@ -241,6 +241,10 @@ private:
     bool m_drainingTransmit{false};
     // True while the decoder is held off because the radio is transmitting.
     bool m_mutedByTransmit{false};
+    bool m_rxFecPending{false};
+    bool m_rxSessionActive{false};
+    qint64 m_rxSamplesSinceFrame{0};
+    qint64 m_rxQuietSamples{0};
     // Vero quando questa trasmissione deve chiudersi da sola a coda vuota.
     bool m_autoReturnToRx{false};
 

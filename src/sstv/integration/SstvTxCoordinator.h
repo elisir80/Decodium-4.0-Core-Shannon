@@ -191,6 +191,9 @@ struct SstvTxCoordinatorPreflight final
     // it false, but still provide requestPttOn and an explicit confirmation.
     bool pttReleaseRequired {true};
     std::string detail;
+    // No CAT/PTT release is also normal in an audio-only lab.  Only actual
+    // VOX needs an audible pre-key/hang envelope.
+    bool voxAudioActivation {false};
 };
 
 struct SstvTxCoordinatorConfig final

@@ -53,6 +53,12 @@ extern "C" void fastldpc_simd_gate_dump_open_c (char const*);
 extern "C" void fastldpc_simd_gate_dump_close_c ();
 extern "C" void fastldpc_simd_gate_truth_set_c (signed char const*);
 extern "C" void fastldpc_simd_gate_truth_clear_c ();
+extern "C" int fastldpc_simd_extrinsic174_91_c (float const*, int, float, float*);
+#endif
+
+#if defined(DECODIUM_FASTLDPC_TESTING)
+// Test-only CPUID snapshot injection. Never enabled in the application.
+extern "C" unsigned fastldpc_test_x86_features_c ();
 #endif
 
 namespace {
@@ -235,6 +241,18 @@ CpuCapabilities detectCpuCapabilities ()
 #endif
 #if defined(DECODIUM_FASTLDPC_NEON_BUILT)
     result.neonBackendBuilt = true;
+#endif
+
+#if defined(DECODIUM_FASTLDPC_TESTING)
+    unsigned const features = fastldpc_test_x86_features_c ();
+    result.model = "test x86 CPU";
+    result.x86 = true;
+    result.avx = (features & 1u) != 0;
+    result.avx2 = (features & 2u) != 0;
+    result.fma = (features & 4u) != 0;
+    result.osxsave = (features & 8u) != 0;
+    result.osAvxState = (features & 16u) != 0;
+    return result;
 #endif
 
 #if DECODIUM_FASTLDPC_X86
@@ -454,13 +472,31 @@ extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llrIn,
     }
 }
 
+// BICM-ID is optional: the generic LDPC decoder has no min-sum posterior.
+// Return neutral extrinsic information without entering the SIMD translation
+// unit on unsupported CPUs, or when disabled by the UI/emergency switch.
+extern "C" int fastldpc_extrinsic174_91_c (float const* llrIn, int norder,
+                                          float clamp, float* extrinsicOut)
+{
+    if (extrinsicOut) std::memset (extrinsicOut, 0, kN * sizeof (float));
+    if (!llrIn || !extrinsicOut) return 0;
+    logDecoderSelection ("extrinsic", false);
+#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
+    if (useFastLdpc ()) {
+        fastldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
+        return fastldpc_simd_extrinsic174_91_c (llrIn, norder, clamp, extrinsicOut);
+    }
+#endif
+    return 0;
+}
+
 // Raccolta dati per il riaddestramento del gate (tests/ft2_gate_dump.cpp):
 // niente da fare senza il backend SIMD, non esiste un gate nel decoder
 // originale a cui agganciarsi.
 extern "C" void fastldpc_gate_dump_open_c (char const* path)
 {
 #if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_dump_open_c (path);
+    if (cpuCapabilities ().fastLdpcUsable ()) fastldpc_simd_gate_dump_open_c (path);
 #else
     (void) path;
 #endif
@@ -469,14 +505,14 @@ extern "C" void fastldpc_gate_dump_open_c (char const* path)
 extern "C" void fastldpc_gate_dump_close_c ()
 {
 #if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_dump_close_c ();
+    if (cpuCapabilities ().fastLdpcUsable ()) fastldpc_simd_gate_dump_close_c ();
 #endif
 }
 
 extern "C" void fastldpc_gate_truth_set_c (signed char const* cw174)
 {
 #if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_truth_set_c (cw174);
+    if (cpuCapabilities ().fastLdpcUsable ()) fastldpc_simd_gate_truth_set_c (cw174);
 #else
     (void) cw174;
 #endif
@@ -485,6 +521,6 @@ extern "C" void fastldpc_gate_truth_set_c (signed char const* cw174)
 extern "C" void fastldpc_gate_truth_clear_c ()
 {
 #if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_truth_clear_c ();
+    if (cpuCapabilities ().fastLdpcUsable ()) fastldpc_simd_gate_truth_clear_c ();
 #endif
 }

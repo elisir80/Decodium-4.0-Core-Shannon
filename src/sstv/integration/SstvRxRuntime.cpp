@@ -2270,6 +2270,14 @@ bool SstvRxRuntime::processChunk(WorkerPipeline& pipeline,
                     / totalWeight);
                 pending.durationUs = saturatingUnsignedAdd(
                     pending.durationUs, event.durationUs);
+                // Bound continuous carriers before passing physical runs to
+                // the VIS detector.  Its first-leader rolling window can then
+                // acquire even after a long VOX pre-key without relaxing any
+                // later header phase or permitting oversized observations.
+                if (pending.durationUs >= 300'000U) {
+                    flushPendingRun();
+                    consumeEvents();
+                }
                 continue;
             }
             flushPendingRun();
@@ -3719,6 +3727,7 @@ bool SstvRxRuntime::beginMartinM1Session(
     sessionConfig.clockErrorPpm = roundedClockErrorPpm(clockError);
     sessionConfig.frequencyOffsetHz = 0.0;
     sessionConfig.mode = *mode;
+    sessionConfig.refineInitialSync = true;
     pipeline.martinM1Session =
         std::make_unique<SstvMartinM1RxSession>(sessionConfig);
     pipeline.martinM1LinesReported = 0U;

@@ -2627,6 +2627,30 @@ Premi Monitor per iniziare</translation>
 <context>
     <name>DecodiumBridge</name>
     <message>
+        <source>SSTV Transmit Studio is not available</source>
+        <translation>Transmit Studio SSTV non è disponibile</translation>
+    </message>
+    <message>
+        <source>Wait for the current image operation to finish</source>
+        <translation>Attendi il completamento dell&apos;operazione sull&apos;immagine</translation>
+    </message>
+    <message>
+        <source>Press Preview to prepare the image for transmission</source>
+        <translation>Premi Anteprima per preparare l&apos;immagine alla trasmissione</translation>
+    </message>
+    <message>
+        <source>Load an image, then press Preview</source>
+        <translation>Carica un&apos;immagine, poi premi Anteprima</translation>
+    </message>
+    <message>
+        <source>SSTV TX is not ready: %1</source>
+        <translation>TX SSTV non pronta: %1</translation>
+    </message>
+    <message>
+        <source>SSTV support is not available in this build</source>
+        <translation>Il supporto SSTV non è disponibile in questa build</translation>
+    </message>
+    <message>
         <source>Decodium RX was not found next to Decodium: %1</source>
         <translation>Decodium RX non è stato trovato accanto a Decodium: %1</translation>
     </message>
@@ -3229,8 +3253,8 @@ Premi Monitor per iniziare</translation>
         <translation>Parametri di ridecodifica SSTV non validi</translation>
     </message>
     <message>
-        <source>No retained SSTV acquisition is available to save</source>
-        <translation>Nessuna acquisizione SSTV conservata è disponibile per il salvataggio</translation>
+        <source>No retained SSTV audio is available to save</source>
+        <translation>Nessun audio SSTV conservato è disponibile per il salvataggio</translation>
     </message>
     <message>
         <source>SSTV WAV replay failed and the live RX route could not be restored</source>
@@ -32224,12 +32248,12 @@ VUCC: %2</translation>
         <translation>Salva audio grezzo</translation>
     </message>
     <message>
-        <source>Save the retained SSTV acquisition as a diagnostic WAV</source>
-        <translation>Salva l'acquisizione SSTV conservata come WAV diagnostico</translation>
+        <source>Save retained receiver audio as a diagnostic WAV, even without a recognised image</source>
+        <translation>Salva l'audio ricevuto come WAV diagnostico, anche senza un'immagine riconosciuta</translation>
     </message>
     <message>
-        <source>Saving retained diagnostic WAV</source>
-        <translation>Salvataggio del WAV diagnostico conservato</translation>
+        <source>Diagnostic WAV saved: %1</source>
+        <translation>WAV diagnostico salvato: %1</translation>
     </message>
     <message>
         <source>Diagnostic WAV could not be saved</source>
@@ -33895,8 +33919,8 @@ VUCC: %2</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Start native TX through Decodium audio and CAT/PTT</source>
-        <translation>Avvia la TX nativa tramite l&apos;audio e CAT/PTT di Decodium</translation>
+        <source>Start SSTV audio using the configured output and PTT route</source>
+        <translation>Avvia l&apos;audio SSTV usando l&apos;uscita e il percorso PTT configurati</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -35694,6 +35718,10 @@ scrivi dal vivo.</translation>
 <context>
     <name>HeaderBar</name>
     <message>
+        <source>Audio only — no CAT</source>
+        <translation>Solo audio — senza CAT</translation>
+    </message>
+    <message>
         <source>RTTY</source>
         <translation>RTTY</translation>
     </message>
@@ -35780,6 +35808,10 @@ nel campo HIS CALL.</translation>
 <context>
     <name>RttyMain</name>
     <message>
+        <source>Audio only — no CAT</source>
+        <translation>Solo audio — senza CAT</translation>
+    </message>
+    <message>
         <source>RTTY</source>
         <translation>RTTY</translation>
     </message>
@@ -35838,6 +35870,10 @@ nel campo HIS CALL.</translation>
 <context>
     <name>TransmitPanel</name>
     <message>
+        <source>Select RTTY and an available audio output</source>
+        <translation>Seleziona RTTY e un'uscita audio disponibile</translation>
+    </message>
+    <message>
         <source>Type here — Enter sends the line</source>
         <translation>Scrivi qui — Invio manda</translation>
     </message>
@@ -35871,6 +35907,126 @@ nel campo HIS CALL.</translation>
     <message>
         <source>TUNING</source>
         <translation>SINTONIA</translation>
+    </message>
+</context>
+<context>
+    <name>decortty::link::DecodiumLink</name>
+    <message>
+        <source>Audio/AFSK — use VOX or manual PTT</source>
+        <translation>Audio/AFSK — usa VOX o PTT manuale</translation>
+    </message>
+    <message>
+        <source>RTTY TX unavailable: check audio output and active mode</source>
+        <translation>TX RTTY non disponibile: controlla l'uscita audio e il modo attivo</translation>
+    </message>
+</context>
+<context>
+    <name>decortty::app::RttyEngine</name>
+    <message>
+        <source>RTTY audio transmission stopped: output unavailable or transmitter busy.</source>
+        <translation>Trasmissione audio RTTY interrotta: uscita non disponibile o trasmettitore occupato.</translation>
+    </message>
+</context>
+<context>
+    <name>Q65DopplerTracker</name>
+    <message>
+        <source>Doppler stopped: manual radio tuning</source>
+        <translation>Doppler disattivato: sintonia manuale della radio</translation>
+    </message>
+    <message>
+        <source>Connect a CAT radio</source>
+        <translation>Collegare una radio CAT</translation>
+    </message>
+    <message>
+        <source>EME tracking requires the Hamlib backend</source>
+        <translation>Il tracking EME richiede il backend Hamlib</translation>
+    </message>
+    <message>
+        <source>Select Q65</source>
+        <translation>Selezionare Q65</translation>
+    </message>
+    <message>
+        <source>Set CAT Split to Rig or Fake It</source>
+        <translation>Impostare lo split CAT su Rig o Fake It</translation>
+    </message>
+    <message>
+        <source>Select an EME frequency at or above 21 MHz</source>
+        <translation>Selezionare una frequenza EME pari o superiore a 21 MHz</translation>
+    </message>
+    <message>
+        <source>Enter your station locator (6 or 8 characters)</source>
+        <translation>Inserire il locator della propria stazione (6 o 8 caratteri)</translation>
+    </message>
+    <message>
+        <source>Enter the DX locator (6 or 8 characters)</source>
+        <translation>Inserire il locator DX (6 o 8 caratteri)</translation>
+    </message>
+    <message>
+        <source>Another radio/audio controller is active</source>
+        <translation>È attivo un altro controllo radio/audio</translation>
+    </message>
+    <message>
+        <source>Start monitoring</source>
+        <translation>Avviare il monitoraggio</translation>
+    </message>
+    <message>
+        <source>Lunar calculation unavailable</source>
+        <translation>Calcolo lunare non disponibile</translation>
+    </message>
+    <message>
+        <source>TX: correction held at the period midpoint</source>
+        <translation>TX: correzione fissa calcolata al centro del periodo</translation>
+    </message>
+    <message>
+        <source>Stopping Doppler after TX</source>
+        <translation>Disattivazione Doppler al termine del TX</translation>
+    </message>
+    <message>
+        <source>Doppler tracking active</source>
+        <translation>Inseguimento Doppler attivo</translation>
+    </message>
+    <message>
+        <source>Doppler tracking off</source>
+        <translation>Inseguimento Doppler disattivato</translation>
+    </message>
+</context>
+<context>
+    <name>Q65DopplerPanel</name>
+    <message>
+        <source>Q65 — EME Doppler tracking</source>
+        <translation>Q65 — Inseguimento Doppler EME</translation>
+    </message>
+    <message>
+        <source>Constant frequency on Moon (CFOM)</source>
+        <translation>Frequenza costante sulla Luna (CFOM)</translation>
+    </message>
+    <message>
+        <source>Full Doppler to DX Grid</source>
+        <translation>Doppler completo verso il locator DX</translation>
+    </message>
+    <message>
+        <source>Own Echo (RX only)</source>
+        <translation>Eco proprio (solo RX)</translation>
+    </message>
+    <message>
+        <source>My grid: %1</source>
+        <translation>Mio locator: %1</translation>
+    </message>
+    <message>
+        <source>DX locator (6 characters)</source>
+        <translation>Locator DX (6 caratteri)</translation>
+    </message>
+    <message>
+        <source>Enable Doppler tracking</source>
+        <translation>Abilita inseguimento Doppler</translation>
+    </message>
+    <message>
+        <source>RX correction: %1 Hz   TX correction: %2 Hz</source>
+        <translation>Correzione RX: %1 Hz   Correzione TX: %2 Hz</translation>
+    </message>
+    <message>
+        <source>Hamlib + Rig/Fake It split required. TX correction is held during transmission. Tracking starts OFF each session; coordinate the method with the other station.</source>
+        <translation>Sono richiesti Hamlib e split Rig/Fake It. La correzione TX resta fissa durante la trasmissione. Il tracking parte SPENTO a ogni avvio; concordare il metodo con il corrispondente.</translation>
     </message>
 </context>
 </TS>

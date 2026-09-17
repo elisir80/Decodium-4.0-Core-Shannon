@@ -5,6 +5,7 @@ namespace decodium::audio { class RttyRxRecovery; }
 #include <QVariantList>
 #include <QVariantMap>
 #include "DecodeUiFilterPolicy.h"
+#include "NativeDecodeSecondaryWork.h"
 #include "RttyRigModeState.h"
 #include <QString>
 #include <QByteArray>
@@ -64,6 +65,7 @@ class DecodiumPropagationManager;
 class MapIntelligenceService;
 class CallsignIntelligenceService;
 class SatelliteTrackingService;
+class Q65DopplerTracker;
 class MessageClient;
 class UsStateDataManager;
 
@@ -154,6 +156,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(bool ft2LinkAccessUnlocked READ ft2LinkAccessUnlocked NOTIFY ft2LinkAccessChanged)
 
     // === RX/TX STATE ===
+    Q_PROPERTY(QObject* q65Doppler READ q65Doppler CONSTANT)
     Q_PROPERTY(bool monitoring READ monitoring WRITE setMonitoring NOTIFY monitoringChanged)
     Q_PROPERTY(bool transmitting READ transmitting NOTIFY transmittingChanged)
     Q_PROPERTY(bool txRequested READ txRequested NOTIFY txRequestedChanged)
@@ -201,6 +204,7 @@ class DecodiumBridge : public QObject
     Q_PROPERTY(QObject* sstvDigital READ sstvDigital CONSTANT)
     Q_PROPERTY(QObject* sstvDiagnostics READ sstvDiagnostics CONSTANT)
     Q_PROPERTY(bool sstvTxCanStart READ sstvTxCanStart NOTIFY sstvTxStateChanged)
+    Q_PROPERTY(QString sstvTxUnavailableReason READ sstvTxUnavailableReason NOTIFY sstvTxStateChanged)
     Q_PROPERTY(QVariantMap sstvTxDiagnostics READ sstvTxDiagnostics NOTIFY sstvTxStateChanged)
     Q_PROPERTY(bool sstvTxActive READ sstvTxActive NOTIFY sstvTxStateChanged)
     Q_PROPERTY(QString sstvTxState READ sstvTxState NOTIFY sstvTxStateChanged)
@@ -723,6 +727,7 @@ public:
     double frequency() const;
     double displayFrequency() const;
     void setFrequency(double);
+    QObject* q65Doppler() const;
     QString mode() const;
     void setMode(const QString&);
     bool ft2LinkAccessUnlocked() const;
@@ -771,6 +776,7 @@ public:
     QObject* sstvDigital() const;
     QObject* sstvDiagnostics() const;
     bool sstvTxCanStart() const;
+    QString sstvTxUnavailableReason() const;
     QVariantMap sstvTxDiagnostics() const;
     bool sstvTxActive() const;
     QString sstvTxState() const;
@@ -1307,6 +1313,8 @@ public:
     // I ritegni sono quelli di DecoPort e valgono identici: niente audio e
     // niente PTT mentre il sequencer dei modi digitali trasmette o accorda.
     void   rttyAlzaPtt(bool on);
+    bool   rttyCanTransmit();
+    bool   rttyTxActive() const { return m_rttyTxActive; }
     void   rttyMandaAudioTx(const QVector<short>& campioni12k);
     void   setSpectrumVisible(bool v);
     void   setRttyInAscolto(bool v);
@@ -2402,7 +2410,9 @@ private:
     int catSplitXitHzForTxFrequency(int txFrequencyHz) const;
     int effectiveTxAudioFrequencyHz() const;
     double catSplitTxDialFrequencyHz() const;
+    double catSplitTxPttDialFrequencyHz();
     void syncActiveCatTxSplitFrequency(const QString& reason);
+    void refreshQ65Doppler();
     void syncCatSplitModeToLegacy(const QString& mode, const QString& reason);
     bool checkSwrAllowsTransmission(const QString& reason);
     void enforceSwrTransmissionLimit(const QString& reason);
@@ -3216,6 +3226,7 @@ private:
     SatelliteTrackingService*   m_satelliteTracking {nullptr};
     MapIntelligenceService*      m_mapIntelligenceService {nullptr};
     bool                         m_satelliteDopplerApplying {false};
+    Q65DopplerTracker*            m_q65Doppler {nullptr};
     CallsignIntelligenceService* m_callsignIntelligence {nullptr};
     DecodiumDiagnostics*        m_diagnostics {nullptr};
     WavManager*           m_wavManager    {nullptr};
@@ -3230,6 +3241,7 @@ private:
     void onDecoPortRxAudio(const QVector<short>& samples, quint64 captureTsNs);
     void onDecoPortRemoteState();
     void decoPortKeyLocalRig(bool on);
+    void keySharedAudioTransmitter(bool on, bool allowWithoutCat);
     void decoPortEnsureRigDriver();
     QString catBackendForPersistence() const;
     DecoPortRigDriver* m_decoPortRig {nullptr};
@@ -3240,8 +3252,9 @@ private:
     quint64    m_decoPortTxStartNs {0};
     int        m_decoPortTxNextFrame {0};
     QTimer*    m_decoPortTxPacer {nullptr};
-    void decoPortPlayTxAudio(const QVector<short>& samples);
+    void decoPortPlayTxAudio(const QVector<short>& samples, bool fromRtty = false);
     bool       m_decoPortRemoteKeyed {false};
+    bool       m_rttyTxActive {false};
     QTimer*    m_decoPortTxGuard {nullptr};
     QThread*           m_decoPortTxOutThread {nullptr};
     RtlSdrAudioOutput* m_decoPortTxOut {nullptr};
@@ -3626,18 +3639,7 @@ private:
     QQueue<LegacyDecodeSecondaryWork> m_legacyDecodeSecondaryQueue;
     QSet<QString> m_legacyDecodeSecondaryPendingKeys;
     bool m_legacyDecodeSecondaryDrainScheduled {false};
-    struct NativeDecodeSecondaryWork {
-        QVariantMap entry;
-        QString rawRow;
-        quint64 serial {0};
-        QString key;
-        bool publishPsk {false};
-        bool updateActiveStation {false};
-        bool updateWorldMap {false};
-        bool sendUdp {false};
-        bool playAlert {false};
-        bool reportDecodeTiming {false};
-    };
+    using NativeDecodeSecondaryWork = decodium::NativeDecodeSecondaryWork;
     QQueue<NativeDecodeSecondaryWork> m_nativeDecodeSecondaryQueue;
     QSet<QString> m_nativeDecodeSecondaryPendingKeys;
     bool m_nativeDecodeSecondaryDrainScheduled {false};

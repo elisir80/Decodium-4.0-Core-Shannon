@@ -41,7 +41,44 @@ private slots:
     void incrementalAppendAvoidsSnapshotRebuild();
     void incrementalAppendDefersAndDeduplicatesPendingRows();
     void incrementalPrependPreservesNewestFirstOrder();
+    void contextResetCancelsPendingRows();
+    void contextResetWhileEmptyStillNotifiesViews();
 };
+
+void TestDecodeListModel::contextResetCancelsPendingRows()
+{
+    DecodeListModel model;
+    auto const oldRow = decodeRow("140237", "CQ ES5RY KO38");
+    model.setEntries(rows({oldRow}));
+    model.appendEntriesBudgeted(rows({decodeRow("140245", "CQ OLD FT4")}), false, 1);
+    QVERIFY(model.hasPendingBudgetedUpdate());
+    QSignalSpy resets(&model, &QAbstractItemModel::modelReset);
+    QSignalSpy applied(&model, &DecodeListModel::snapshotApplied);
+    model.resetForContextChange();
+    QCOMPARE(model.count(), 0);
+    QVERIFY(!model.hasPendingBudgetedUpdate());
+    QCOMPARE(resets.count(), 1);
+    QCOMPARE(applied.count(), 1);
+    QTest::qWait(100);
+    QCOMPARE(model.count(), 0);
+    model.setEntriesBudgeted(rows({decodeRow("140645", "CQ NEW FT8")}), 1);
+    QTRY_COMPARE(model.count(), 1);
+    QCOMPARE(model.entry(0).value("message").toString(), QStringLiteral("CQ NEW FT8"));
+}
+
+void TestDecodeListModel::contextResetWhileEmptyStillNotifiesViews()
+{
+    DecodeListModel model;
+    model.setEntriesBudgeted(rows({decodeRow("140237", "CQ ES5RY KO38")}), 1);
+    QCOMPARE(model.count(), 0); // initial batch has not reached the event loop
+    QSignalSpy resets(&model, &QAbstractItemModel::modelReset);
+    model.resetForContextChange();
+    model.resetForContextChange();
+    QCOMPARE(resets.count(), 2);
+    QTest::qWait(100);
+    QCOMPARE(model.count(), 0);
+    QVERIFY(!model.hasPendingBudgetedUpdate());
+}
 
 void TestDecodeListModel::appendAndShiftStayIncremental()
 {

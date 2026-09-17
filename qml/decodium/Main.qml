@@ -8090,6 +8090,15 @@ ApplicationWindow {
                     Connections {
                         target: (bridge && bridge.bandActivityModel) ? bridge.bandActivityModel : null
                         ignoreUnknownSignals: true
+                        function onModelReset() {
+                            decodePanel.bandActivitySnapshotPending = false
+                            decodePanel.lastSyncCount = 0
+                            decodePanel.currentPeriodDecodeCount = 0
+                            decodePanel.heldPeriodDecodeCount = 0
+                            decodePanel.heldPeriodDecodeCountUntilIndex = -1
+                            decodePanel.bandActivityCountVersion++
+                            decodePanel.decodeListVersion++
+                        }
                         function onSnapshotApplied() {
                             decodePanel.queueDecodeSnapshotUiCommit(true, false)
                         }
@@ -8097,6 +8106,10 @@ ApplicationWindow {
                     Connections {
                         target: (bridge && bridge.rxDecodeModel) ? bridge.rxDecodeModel : null
                         ignoreUnknownSignals: true
+                        function onModelReset() {
+                            decodePanel.rxSnapshotPending = false
+                            decodePanel.rxDecodeListVersion++
+                        }
                         function onSnapshotApplied() {
                             decodePanel.queueDecodeSnapshotUiCommit(false, true)
                         }
@@ -9365,6 +9378,13 @@ ApplicationWindow {
 
                                     ListView {
                                         id: evenPeriodList
+                                        property int resetEpoch: 0
+                                        DecodeListResetGuard {
+                                            view: evenPeriodList
+                                            sourceModel: bridge ? bridge.bandActivityModel : null
+                                            scrollAnimation: evenPeriodTailAnimation
+                                            settleTimer: evenPeriodTailSettleTimer
+                                        }
                                         anchors.fill: parent
                                         anchors.margins: 2
                                         clip: true
@@ -9445,7 +9465,9 @@ ApplicationWindow {
     if (evenPeriodList.tailFollowQueued)
         return
     evenPeriodList.tailFollowQueued = true
+    var resetEpoch = evenPeriodList.resetEpoch
     Qt.callLater(function() {
+        if (resetEpoch !== evenPeriodList.resetEpoch) return
         evenPeriodList.tailFollowQueued = false
         if (!evenPeriodList)
             return
@@ -10064,6 +10086,13 @@ NumberAnimation {
 
                                     ListView {
                                         id: rxFrequencyList
+                                        property int resetEpoch: 0
+                                        DecodeListResetGuard {
+                                            view: rxFrequencyList
+                                            sourceModel: bridge ? bridge.rxDecodeModel : null
+                                            scrollAnimation: rxFrequencyTailAnimation
+                                            settleTimer: rxFrequencyTailSettleTimer
+                                        }
                                         anchors.fill: parent
                                         anchors.margins: 2
 	                                        clip: true
@@ -10130,7 +10159,9 @@ NumberAnimation {
     if (rxFrequencyList.tailFollowQueued)
         return
     rxFrequencyList.tailFollowQueued = true
+    var resetEpoch = rxFrequencyList.resetEpoch
     Qt.callLater(function() {
+        if (resetEpoch !== rxFrequencyList.resetEpoch) return
         rxFrequencyList.tailFollowQueued = false
         if (!rxFrequencyList)
             return
@@ -15353,6 +15384,13 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
 
                     ListView {
                         id: period1FloatingList
+                        property int resetEpoch: 0
+                        DecodeListResetGuard {
+                            view: period1FloatingList
+                            sourceModel: bridge ? bridge.bandActivityModel : null
+                            scrollAnimation: period1FloatingTailAnimation
+                            settleTimer: period1FloatingTailSettleTimer
+                        }
                         anchors.fill: parent
                         anchors.margins: 4
                         clip: true
@@ -15426,7 +15464,9 @@ NumberAnimation { properties: "y"; duration: mainWindow.decodeRowSlideAnim ? 100
     if (period1FloatingList.tailFollowQueued)
         return
     period1FloatingList.tailFollowQueued = true
+    var resetEpoch = period1FloatingList.resetEpoch
     Qt.callLater(function() {
+        if (resetEpoch !== period1FloatingList.resetEpoch) return
         period1FloatingList.tailFollowQueued = false
         if (!period1FloatingList)
             return
@@ -15994,6 +16034,13 @@ NumberAnimation {
 
                     ListView {
                         id: rxFrequencyFloatingList
+                        property int resetEpoch: 0
+                        DecodeListResetGuard {
+                            view: rxFrequencyFloatingList
+                            sourceModel: bridge ? bridge.rxDecodeModel : null
+                            scrollAnimation: rxFrequencyFloatingTailAnimation
+                            settleTimer: rxFrequencyFloatingTailSettleTimer
+                        }
                         anchors.fill: parent
                         anchors.margins: 4
 	                        clip: true
@@ -16060,7 +16107,9 @@ NumberAnimation {
     if (rxFrequencyFloatingList.tailFollowQueued)
         return
     rxFrequencyFloatingList.tailFollowQueued = true
+    var resetEpoch = rxFrequencyFloatingList.resetEpoch
     Qt.callLater(function() {
+        if (resetEpoch !== rxFrequencyFloatingList.resetEpoch) return
         rxFrequencyFloatingList.tailFollowQueued = false
         if (!rxFrequencyFloatingList)
             return

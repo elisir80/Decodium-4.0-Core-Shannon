@@ -66,7 +66,7 @@ Rectangle {
                 spacing: 1
 
                 Text {
-                    text: radio.connected ? radio.radioName : "No radio"
+                    text: radio.connected ? radio.radioName : qsTr("Audio only — no CAT")
                     color: Theme.textPrimary
                     font.pixelSize: 13
                 }

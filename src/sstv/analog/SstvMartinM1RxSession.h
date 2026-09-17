@@ -24,6 +24,9 @@ struct SstvMartinM1RxSessionConfig final
     std::size_t maximumPendingDirtyEvents {
         SstvImageFrame::kDefaultMaximumDirtyEvents};
     SstvMartinMode mode {SstvMartinMode::M1};
+    // VIS timing is quantised by the tone detector.  Refine its initial
+    // anchor from the real sync-to-porch edge before collecting any pixels.
+    bool refineInitialSync {false};
 };
 
 enum class SstvMartinM1RxSessionState : std::uint8_t
@@ -113,6 +116,7 @@ private:
     void applySyncEvents(const std::vector<SstvSyncEvent>& events,
                          SstvMartinM1RxSessionUpdate* update);
     void updateTerminalState(SstvMartinM1DecodeState decoderState) noexcept;
+    void refineInitialSync(const SstvFrequencyObservation& observation);
 
     SstvMartinM1RxSessionConfig config_;
     SstvMartinModeSpec spec_;
@@ -130,6 +134,9 @@ private:
     std::uint64_t lastInputSequence_ {0U};
     bool haveLastInputSample_ {false};
     bool haveLastInputSequence_ {false};
+    bool initialSyncRefined_ {false};
+    bool initialSyncObserved_ {false};
+    std::vector<SstvFrequencyObservation> initialObservations_;
 };
 
 } // namespace decodium::sstv

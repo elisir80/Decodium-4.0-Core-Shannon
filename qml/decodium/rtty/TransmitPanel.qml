@@ -71,7 +71,7 @@ GlassPanel {
                         anchors.fill: parent
                         placeholderText: radio.canTransmit
                                          ? qsTr("Type here — Enter sends the line")
-                                         : qsTr("Connect a radio to transmit")
+                                         : qsTr("Select RTTY and an available audio output")
                         color: Theme.textPrimary
                         placeholderTextColor: Theme.textSecondary
                         font.family: Theme.monoFamily
@@ -111,7 +111,7 @@ GlassPanel {
                     implicitHeight: 28
                     font.pixelSize: 12
                     font.bold: true
-                    enabled: radio.canTransmit
+                    enabled: rtty.transmitting || radio.canTransmit
                     // Se c'e' del testo scritto, questo pulsante lo manda. Prima
                     // apriva solo la portante e il testo restava nella casella
                     // finche' non si premeva Invio: chi scrive e poi preme

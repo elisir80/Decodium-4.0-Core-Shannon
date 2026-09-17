@@ -598,11 +598,11 @@ SstvPage {
                             enabled: !!(root.engine && root.engine.sstvStorageReady
                                          && !root.audioJobBusy
                                          && Number(root.stats.replayRetainedSamples || 0) > 0)
-                            Accessible.name: qsTr("Save the retained SSTV acquisition as a diagnostic WAV")
+                            Accessible.name: qsTr("Save retained receiver audio as a diagnostic WAV, even without a recognised image")
                             onClicked: {
                                 if (root.engine)
                                     root.feedback = root.engine.saveSstvRxRawAudio()
-                                            ? qsTr("Saving retained diagnostic WAV")
+                                            ? ""
                                             : qsTr("Diagnostic WAV could not be saved")
                             }
                         }
@@ -626,6 +626,24 @@ SstvPage {
                         }
                     }
                 }
+            }
+
+            Label {
+                objectName: "sstvRxAudioResult"
+                Layout.fillWidth: true
+                visible: text.length > 0
+                text: root.audioJobBusy
+                      ? qsTr("Audio job: %1").arg(root.engine.sstvRxAudioJobState)
+                      : root.engine && root.engine.sstvRxAudioJobError
+                        ? root.engine.sstvRxAudioJobError
+                      : root.engine && root.engine.sstvRxRawAudioPath
+                        ? qsTr("Diagnostic WAV saved: %1").arg(root.engine.sstvRxRawAudioPath)
+                        : root.feedback
+                textFormat: Text.PlainText
+                color: root.engine && root.engine.sstvRxAudioJobError
+                       ? root.warningColor : root.secondaryTextColor
+                wrapMode: Text.WrapAnywhere
+                font.pixelSize: 12
             }
 
             Rectangle {

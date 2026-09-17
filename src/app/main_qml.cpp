@@ -4167,20 +4167,16 @@ int main(int argc, char* argv[])
         ganci.nomeRadio          = [&bridge] { return bridge.catRigName (); };
         ganci.frequenzaHz        = [&bridge] { return bridge.frequency (); };
         ganci.modo               = [&bridge] { return bridge.catMode (); };
-        // Comprende il PTT che RTTY stessa ha alzato: il motore ferma la
-        // trasmissione se la radio dice di non essere in aria, e transmitting()
-        // da solo riguarda il sequencer dei modi digitali, non questo PTT.
+        // Report ownership of this RTTY audio session, not another mode's
+        // transmission or invented CAT feedback for a radio without CAT.
         ganci.inTrasmissione     = [&bridge] {
-            return bridge.transmitting () || bridge.decoPortRemoteKeyed ();
+            return bridge.rttyTxActive ();
         };
-        // La trasmissione passa dalla stessa uscita che Decodium apre per
-        // l'audio dei client DecoPort: una sola strada verso la radio, con i
-        // ritegni gia' scritti — non suona nulla mentre il sequencer dei modi
-        // digitali sta trasmettendo o accordando, e il PTT viene rifiutato se
-        // il CAT non c'e'.
+        // The shared output excludes simultaneous local/DecoPort producers.
+        // CAT is optional for local audio/AFSK (VOX or manual PTT). Readiness
+        // still checks the audio device and excludes competing transmitters.
         ganci.puoTrasmettere     = [&bridge] {
-            return bridge.mode() == QStringLiteral("RTTY")
-                && bridge.catConnected () && !bridge.transmitting ();
+            return bridge.rttyCanTransmit ();
         };
         ganci.impostaPtt         = [&bridge] (bool on) { bridge.rttyAlzaPtt (on); };
         ganci.mandaAudioTx       = [&bridge] (QVector<short> const& c) {

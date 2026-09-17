@@ -117,14 +117,13 @@ void RttyEngine::attachRadio(link::RadioHub* radio)
             this, &RttyEngine::processRadioAudio);
     connect(m_radio, &link::RadioHub::connectionChanged,
             this, &RttyEngine::applyRadioTransmitLevelPolicy);
-    // Follow the radio's own idea of whether it is transmitting, rather than
-    // assuming our PTT request succeeded.
+    // Follow the link's TX state. For a local audio-only link this means
+    // ownership of the audio session, not a hardware PTT acknowledgement.
     connect(m_radio, &link::RadioHub::transmittingChanged, this, [this] {
         const bool radioTx = m_radio->transmitting();
         if (!radioTx && m_transmitting) {
-            m_transmitting = false;
-            m_txTimer.stop();
-            emit transmitStateChanged();
+            stopAutoCq();
+            stopTransmit(true);
         }
     });
     applyRadioTransmitLevelPolicy();
@@ -181,6 +180,10 @@ void RttyEngine::applyParams()
     cfg.unshiftOnSpace = m_params.unshiftOnSpace;
     cfg.figuresSet     = m_params.figuresSet;
     m_viterbi.setConfig(cfg);
+    m_rxFecPending = false;
+    m_rxSessionActive = false;
+    m_rxSamplesSinceFrame = 0;
+    m_rxQuietSamples = 0;
 
     emit paramsChanged();
 }
@@ -430,13 +433,16 @@ void RttyEngine::stopAutoCq()
 
 void RttyEngine::forgetBand()
 {
-    m_demod.reset();
     m_demod.clearSpectrum();
 }
 
 void RttyEngine::clearReceiveText()
 {
     m_viterbi.reset();
+    m_rxFecPending = false;
+    m_rxSessionActive = false;
+    m_rxSamplesSinceFrame = 0;
+    m_rxQuietSamples = 0;
 }
 
 void RttyEngine::processRadioAudio(const std::vector<float>& samples, int frames)
@@ -481,6 +487,13 @@ void RttyEngine::processRadioAudio(const std::vector<float>& samples, int frames
     // leaves the decoder deaf for seconds afterwards.
     const bool radioTransmitting = m_radio && m_radio->transmitting();
     if (radioTransmitting || m_transmitting) {
+        if (!m_mutedByTransmit) {
+            m_viterbi.reset();
+            m_rxFecPending = false;
+            m_rxSessionActive = false;
+            m_rxSamplesSinceFrame = 0;
+            m_rxQuietSamples = 0;
+        }
         m_mutedByTransmit = true;
         return;
     }
@@ -488,16 +501,19 @@ void RttyEngine::processRadioAudio(const std::vector<float>& samples, int frames
         // Come back with the levels and the timing loop cleared, rather than
         // carrying the transmit blast's AGC state into the first received
         // character.
-        m_demod.reset();
         // E anche senza la memoria spettrale: il monitor della radio ha appena
         // rimandato la nostra nota nell'ingresso, ed e' il segnale piu' forte
         // che l'auto-centratura possa trovare.
-        m_demod.clearSpectrum();
+        m_demod.clearSpectrum(); // Atomic filter/framing/spectrum/AFC reset.
         m_sinceReceive.restart();
         m_mutedByTransmit = false;
     }
 
-    m_demod.process(audio, decimated, [this](const dsp::SoftFrame& frame) {
+    bool receivedFrame = false;
+    m_demod.process(audio, decimated, [this, &receivedFrame](const dsp::SoftFrame& frame) {
+        receivedFrame = true;
+        m_rxFecPending = true;
+        m_rxSessionActive = true;
         m_viterbi.push(frame, [this](const dsp::DecodedChar& dc) {
             // Alla finestra di ricezione si manda la certezza, non la qualita'.
             //
@@ -514,6 +530,31 @@ void RttyEngine::processRadioAudio(const std::vector<float>& samples, int frames
                                   dc.corrected);
         });
     });
+
+    m_rxSamplesSinceFrame = receivedFrame ? 0 : m_rxSamplesSinceFrame + decimated;
+    m_rxQuietSamples = (receivedFrame || m_demod.signalPresent())
+        ? 0 : m_rxQuietSamples + decimated;
+    // Release only frames already validated by the demodulator. A short over
+    // must not leave its last FEC-depth characters waiting for another station.
+    // Use received sample time so offline replay and live RX behave alike.
+    const auto tailSamples = static_cast<qint64>(dsp::kWorkRate * std::max(1.0,
+        3.0 * m_params.bitsPerCharacter() / std::max(1.0f, m_params.baud)));
+    const bool endOfSignal = m_rxQuietSamples >= dsp::kWorkRate * 0.4;
+    if (m_rxFecPending && (endOfSignal || m_rxSamplesSinceFrame >= tailSamples)) {
+        m_viterbi.flush([this](const dsp::DecodedChar& dc) {
+            emit characterDecoded(QString(QChar::fromLatin1(dc.text)),
+                                  static_cast<double>(dc.certainty), dc.corrected);
+        });
+        m_rxFecPending = false;
+    }
+    // Do not carry a previous over's flywheel/shift/AFC into the next one.
+    // Only reset after a validated session and sustained closed squelch;
+    // waiting for lock during a new live preamble is NOT end-of-signal.
+    if (m_rxSessionActive && endOfSignal) {
+        m_demod.clearSpectrum();
+        m_viterbi.reset();
+        m_rxSessionActive = false;
+    }
 
     float x = 0.0f, y = 0.0f;
     m_demod.scopePoint(x, y);
@@ -591,6 +632,15 @@ void RttyEngine::transmitText(const QString& text)
     if (text.isEmpty())
         return;
 
+    if (!m_transmitting) {
+        beginTransmit(true);
+        if (!m_transmitting)
+            return;
+    }
+    // More text during the audio tail extends this over, not the previous
+    // stop timer. Keep the current Baudot shift state for queued fragments.
+    m_txTailTimer.stop();
+
     m_modulator.enqueueText(text.toUpper().toStdString());
     // Un breve postambolo di LTRS: senza di esso l'ultimo carattere finisce
     // contro la fine della portante e il decodificatore all'altro capo, che sta
@@ -600,8 +650,6 @@ void RttyEngine::transmitText(const QString& text)
         m_modulator.enqueueCode(dsp::kBaudotLtrs);
 
     m_drainingTransmit = false;
-    if (!m_transmitting)
-        beginTransmit(true);
     emit transmitStateChanged();
 }
 
@@ -650,7 +698,18 @@ void RttyEngine::beginTransmit(bool autoReturn)
     m_transmitting     = true;
     m_drainingTransmit = false;
     m_autoReturnToRx   = autoReturn;
+    // Some devices stop delivering RX samples while keyed. Arm the RX reset
+    // here as well, rather than relying on a muted input callback occurring.
+    m_mutedByTransmit = true;
+    clearReceiveText();
+    m_modulator.clearQueue();
     m_modulator.reset();
+    // Standard non-printing LTRS startup: allow tone filters, clock and lock
+    // validation to settle before the first payload character (even "OK").
+    // Keep the decoder's noise/carrier rejection intact instead of bypassing
+    // its lock requirement for short local messages.
+    for (int i = 0; i < 12; ++i)
+        m_modulator.enqueueCode(dsp::kBaudotLtrs);
     // Il diddle serve a chi scrive dal vivo, per non lasciare buchi fra un
     // carattere e il successivo. In una macro invece terrebbe il trasmettitore
     // in aria per sempre: la coda si svuota, il modulatore continua a mandare
@@ -672,7 +731,7 @@ void RttyEngine::stopTransmit(bool immediate)
 
     if (immediate) {
         m_modulator.clearQueue();
-    } else if (m_modulator.pending() > 0) {
+    } else if (!m_modulator.idle()) {
         // Let the queue drain, then drop PTT — cutting the carrier mid-character
         // would leave the far end with a corrupted last word.
         m_drainingTransmit = true;
@@ -700,6 +759,8 @@ void RttyEngine::finishTransmit()
 void RttyEngine::onTransmitTick()
 {
     pumpTransmit();
+    if (!m_transmitting)
+        return;
 
     if ((m_drainingTransmit || m_autoReturnToRx)
         && m_modulator.idle() && !m_txTailTimer.isActive()) {
@@ -730,7 +791,12 @@ void RttyEngine::pumpTransmit()
     m_modulator.generate(m_txBuffer.data(), static_cast<int>(needed));
     m_txSamplesSent += needed;
 
-    m_radio->sendTransmitAudio(m_txBuffer.data(), static_cast<int>(needed));
+    if (m_radio->sendTransmitAudio(m_txBuffer.data(), static_cast<int>(needed)) <= 0) {
+        stopAutoCq();
+        stopTransmit(true);
+        emit errorOccurred(tr("RTTY audio transmission stopped: output unavailable or transmitter busy."));
+        return;
+    }
 
     if (const char echo = m_modulator.takeEchoChar())
         emit characterTransmitted(QString(QChar::fromLatin1(echo)));

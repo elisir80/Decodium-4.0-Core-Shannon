@@ -449,6 +449,7 @@ extern "C"
                                 signed char const* apmask, signed char* message91,
                                 signed char* cw, int* ntype, int* nharderror, float* dmin);
   void fastldpc_set_ft8_mode_c (int on);
+  int fastldpc_is_enabled_c ();
   void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
                                       int Keff, int maxosd, int norder,
                                       signed char* message91, signed char* cw,
@@ -7449,12 +7450,16 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   //
   // Richiede fastldpc: i posteriori del min-sum esistono solo li'.
   std::array<float, 174> bicm_llra {}, bicm_llrb {}, bicm_llrc {}, bicm_llrd {}, bicm_llre {};
-  bool usa_bicm = ft8_bicm_giri () > 0 && ft8_use_fastldpc () && !g_ft8_forza_classico;
+  // The FT8 preference alone does not imply CPU/OS SIMD support. BICM must
+  // obey the same runtime dispatcher (and UI/emergency disable) as decoding.
+  bool usa_bicm = ft8_bicm_giri () > 0 && ft8_use_fastldpc () && !g_ft8_forza_classico
+                 && fastldpc_is_enabled_c () != 0;
   if (usa_bicm)
     {
       std::array<float, 174> est {};
       std::array<float, 174> sonda = llra;
       bool ottenuta = false;
+      fastldpc_set_ft8_mode_c (1);
       for (int giro = 0; giro < ft8_bicm_giri (); ++giro)
         {
           // Se la sonda accetta, l'anello si ferma qui. Al primo giro vuol dire

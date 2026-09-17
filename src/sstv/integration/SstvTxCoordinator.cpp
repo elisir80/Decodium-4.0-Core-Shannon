@@ -1367,7 +1367,7 @@ SstvTxCoordinatorResult SstvTxCoordinator::startValidated(
 
     BuiltAudio audio;
     try {
-        audio = build(!preflight.pttReleaseRequired);
+        audio = build(preflight.voxAudioActivation);
     } catch (const std::invalid_argument& exception) {
         return rejectStart(SstvTxErrorCode::EncodingFailure,
                            exception.what(), diagnosticMode);

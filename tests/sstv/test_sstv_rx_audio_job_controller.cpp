@@ -46,11 +46,11 @@ QVector<short> diagnosticTone(std::size_t count,
     return result;
 }
 
-void fillRetainedAudio(SstvRxRuntime& runtime)
+void fillRetainedAudio(SstvRxRuntime& runtime, bool retainRawAudio = true)
 {
     SstvRxControlSettings settings = runtime.rxControlSnapshot().settings;
     settings.replayRetentionSeconds = 5U;
-    settings.retainRawAudio = true;
+    settings.retainRawAudio = retainRawAudio;
     QVERIFY(runtime.replaceRxControlSettings(settings));
     QVERIFY(runtime.start(SstvAudioSourceKind::Replay, 501U));
     const SstvRxRouteToken token = runtime.routeToken();
@@ -82,12 +82,27 @@ class TestSstvRxAudioJobController final : public QObject
     Q_OBJECT
 
 private Q_SLOTS:
+    void exportsBoundedRawWavAndMetadataOffThread_data()
+    {
+        QTest::addColumn<bool>("retainRawAudio");
+        QTest::newRow("diagnostic-retention-enabled") << true;
+        QTest::newRow("live-default-no-image-no-raw-retention") << false;
+    }
+
     void exportsBoundedRawWavAndMetadataOffThread()
     {
+        QFETCH(bool, retainRawAudio);
         QTemporaryDir directory;
         QVERIFY(directory.isValid());
         SstvRxRuntime runtime(boundedConfig());
-        fillRetainedAudio(runtime);
+        fillRetainedAudio(runtime, retainRawAudio);
+        // No VIS or image was received: exporting the recent PCM must still
+        // work, including with the live receiver's default retention setting.
+        QVERIFY(!runtime.snapshot().vis.valid);
+        QVERIFY(!runtime.snapshot().image.available);
+        QCOMPARE(runtime.snapshot().image.acquisitionId, std::uint64_t {0U});
+        QCOMPARE(runtime.snapshot().replay.mostRecentAcquisitionId,
+                 std::uint64_t {0U});
         SstvRxAudioJobController controller(&runtime);
         QSignalSpy finished(&controller,
                             &SstvRxAudioJobController::rawAudioExportFinished);
@@ -105,6 +120,7 @@ private Q_SLOTS:
         const QList<QVariant> result = finished.takeFirst();
         QVERIFY(result.at(0).toBool());
         QCOMPARE(result.at(1).toString(), wavPath);
+        QCOMPARE(result.at(2).toULongLong(), quint64 {0U});
         QVERIFY(result.at(3).toString().isEmpty());
         QCOMPARE(controller.state(),
                  SstvRxAudioJobController::State::Completed);
@@ -113,6 +129,8 @@ private Q_SLOTS:
         QVERIFY(wav.size() > 44);
         QCOMPARE(wav.first(4), QByteArray("RIFF"));
         QCOMPARE(wav.mid(8, 4), QByteArray("WAVE"));
+        QCOMPARE(wav.size(), 44 + static_cast<qsizetype>(
+            runtime.snapshot().replay.retainedSamples * 2U));
         QVERIFY(QFileInfo(wavPath).size()
                 <= 44 + static_cast<qint64>(
                     runtime.snapshot().replay.capacitySamples * 2U));
@@ -128,6 +146,8 @@ private Q_SLOTS:
             QStringLiteral("diagnosticRawAudio")).toBool());
         QCOMPARE(diagnostic.value(
             QStringLiteral("sampleRateHz")).toInt(), kSampleRate);
+        QCOMPARE(diagnostic.value(QStringLiteral("acquisitionId")).toInteger(),
+                 qint64 {0});
 
         controller.shutdown();
         QCOMPARE(controller.state(),

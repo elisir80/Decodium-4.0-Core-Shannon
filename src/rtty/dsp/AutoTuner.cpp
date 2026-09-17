@@ -31,13 +31,12 @@ AutoTuner::Decision AutoTuner::update(const RttyDemodulator& demod,
     if (!m_enabled)
         return decision;
 
-    m_sinceActionSec += elapsedSec;
-
     // Agganciati: si sta copiando, e non c'e' niente di piu' dannoso che
     // spostare la sintonia adesso. Il contatore dei tentativi si azzera, cosi'
     // la prossima caccia riparte pulita.
     if (demod.locked()) {
         m_idleSec      = 0.0;
+        m_sinceActionSec = 0.0;
         m_flips        = 0;
         m_wasLocked    = true;
         m_sinceLockSec = 0.0;
@@ -62,8 +61,12 @@ AutoTuner::Decision AutoTuner::update(const RttyDemodulator& demod,
         return decision;
 
     const RttyDemodulator::TonePair pair = demod.searchTonePair(m_minHz, m_maxHz);
-    if (!pair.found || pair.marginDb < kMinMarginDb || pair.balanceDb > kMaxBalanceDb)
+    if (!pair.found || pair.marginDb < kMinMarginDb || pair.balanceDb > kMaxBalanceDb) {
+        // Time spent listening to silence is NOT a failed polarity attempt.
+        // Give every newly arriving signal a full acquisition interval.
+        m_sinceActionSec = 0.0;
         return decision;   // non c'e' niente che somigli a una coppia di toni
+    }
 
     const float delta = std::abs(pair.markHz - params.markHz);
     if (delta >= kMinMoveHz) {
@@ -84,7 +87,10 @@ AutoTuner::Decision AutoTuner::update(const RttyDemodulator& demod,
     // spiegazioni: il verso e' sbagliato, oppure quello che si vede non e' RTTY
     // che possiamo leggere. La prima si prova; della seconda ci si accorge
     // perche' provare non serve a niente.
-    if (m_sinceActionSec >= kSettleAfterMove && m_flips < 2) {
+    m_sinceActionSec += std::max(0.0, elapsedSec);
+    const double acquisitionSeconds = std::max(kSettleAfterMove,
+        16.0 * params.bitsPerCharacter() / std::max(1.0f, params.baud));
+    if (m_sinceActionSec >= acquisitionSeconds && m_flips < 2) {
         decision.changed  = true;
         decision.reverse  = !params.reverse;
         decision.action   = Decision::Action::FlipReverse;
