@@ -53,7 +53,9 @@ public:
   static void diagQml    (const QString& msg) { diag (DiagCategory::QML,     msg); }
 
   // Log startup diagnostics (OS, Qt, locale, screen, audio, etc.)
-  void logStartupDiagnostics ();
+  // Statica: main_qml.cpp usa solo l'API statica e non costruisce mai
+  // un'istanza, quindi legarla a instance() la rendeva codice morto.
+  static void logStartupDiagnostics ();
 
   // Returns the full path to the diagnostic log file
   static QString diagnosticLogPath ();

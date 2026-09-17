@@ -297,6 +297,10 @@ DecodiumLogging::~DecodiumLogging ()
 #include <QWaitCondition>
 #ifdef Q_OS_WIN
 #include <windows.h>
+
+// Definita in Detector/superldpc/decodium_dispatch.cpp: estensioni della CPU
+// e decodificatore scelto. Nei log degli utenti era l'informazione mancante.
+extern "C" void superldpc_descrivi_c (char* out, int n);
 #endif
 #include <csignal>
 
@@ -619,12 +623,70 @@ void DecodiumLogging::logStartupDiagnostics() {
     MEMORYSTATUSEX m; m.dwLength = sizeof(m); GlobalMemoryStatusEx(&m);
     diagInfo(QString("RAM: %1 MB free / %2 MB total").arg(m.ullAvailPhys/1048576).arg(m.ullTotalPhys/1048576));
 #endif
+    {
+        char descrizione[512] = {};
+        superldpc_descrivi_c(descrizione, static_cast<int>(sizeof(descrizione)));
+        if (descrizione[0])
+            diagInfo(QStringLiteral("superldpc: ") + QString::fromLatin1(descrizione));
+    }
     diagInfo("======================================");
 }
 
 #ifdef Q_OS_WIN
+// Il solo codice di eccezione non basta a capire dove si e' rotto: con
+// 0xC000001D (istruzione illegale) la domanda vera e' QUALE istruzione, e
+// la risposta sta nei primi byte all'indirizzo dell'eccezione (un prefisso
+// VEX C4/C5 significa AVX su una CPU che non lo ha, 0F 0B e' una trappola
+// del compilatore, byte incoerenti significano salto in memoria dati).
 static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
-    DecodiumLogging::diag(DiagCategory::ERR, QString("CRASH: code=0x%1").arg(ep->ExceptionRecord->ExceptionCode, 8, 16, QChar('0')));
+    EXCEPTION_RECORD const* rec = ep && ep->ExceptionRecord ? ep->ExceptionRecord : nullptr;
+    if (!rec) {
+        DecodiumLogging::diag(DiagCategory::ERR, QStringLiteral("CRASH: nessun record di eccezione"));
+        return EXCEPTION_EXECUTE_HANDLER;
+    }
+    quintptr const addr = reinterpret_cast<quintptr>(rec->ExceptionAddress);
+    QString msg = QString("CRASH: code=0x%1 address=0x%2 thread=%3")
+                      .arg(rec->ExceptionCode, 8, 16, QChar('0'))
+                      .arg(addr, 0, 16)
+                      .arg(GetCurrentThreadId());
+    HMODULE mod = nullptr;
+    if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+                               | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                           reinterpret_cast<LPCWSTR>(rec->ExceptionAddress), &mod)
+        && mod) {
+        wchar_t path[MAX_PATH] = {};
+        DWORD const n = GetModuleFileNameW(mod, path, MAX_PATH);
+        QString name = n ? QString::fromWCharArray(path, static_cast<int>(n)) : QString();
+        int const slash = name.lastIndexOf(QLatin1Char('\\'));
+        if (slash >= 0) name = name.mid(slash + 1);
+        msg += QString(" module=%1+0x%2")
+                   .arg(name.isEmpty() ? QStringLiteral("?") : name)
+                   .arg(addr - reinterpret_cast<quintptr>(mod), 0, 16);
+    } else {
+        msg += QStringLiteral(" module=fuori-da-ogni-modulo");
+    }
+    if (rec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && rec->NumberParameters >= 2) {
+        msg += QString(" access=%1 at=0x%2")
+                   .arg(rec->ExceptionInformation[0] == 0 ? QStringLiteral("read")
+                        : rec->ExceptionInformation[0] == 1 ? QStringLiteral("write")
+                                                           : QStringLiteral("exec"))
+                   .arg(static_cast<quintptr>(rec->ExceptionInformation[1]), 0, 16);
+    }
+    MEMORY_BASIC_INFORMATION info {};
+    if (VirtualQuery(rec->ExceptionAddress, &info, sizeof(info)) == sizeof(info)
+        && info.State == MEM_COMMIT
+        && (info.Protect & (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE
+                            | PAGE_EXECUTE_WRITECOPY | PAGE_READONLY | PAGE_READWRITE
+                            | PAGE_WRITECOPY)) != 0) {
+        unsigned char const* p = reinterpret_cast<unsigned char const*>(rec->ExceptionAddress);
+        quintptr const fine = reinterpret_cast<quintptr>(info.BaseAddress) + info.RegionSize;
+        int const quanti = static_cast<int>(qMin<quintptr>(16, fine - addr));
+        QString byte;
+        for (int i = 0; i < quanti; ++i)
+            byte += QString("%1 ").arg(p[i], 2, 16, QChar('0'));
+        msg += " bytes=" + byte.trimmed();
+    }
+    DecodiumLogging::diag(DiagCategory::ERR, msg);
     return EXCEPTION_EXECUTE_HANDLER;
 }
 #else

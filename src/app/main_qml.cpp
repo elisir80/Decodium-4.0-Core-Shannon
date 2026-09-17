@@ -4036,8 +4036,7 @@ int main(int argc, char* argv[])
                          }
                      });
 #endif
-    if (DecodiumLogging::instance())
-        DecodiumLogging::instance()->logStartupDiagnostics();
+    DecodiumLogging::logStartupDiagnostics();
     L("bridge OK");
 
     // 1.0.364+ — MAM multi-stream nativo (FASE 1): hook di verifica env-gated.

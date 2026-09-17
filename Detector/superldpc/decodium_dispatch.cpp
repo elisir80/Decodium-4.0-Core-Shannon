@@ -387,6 +387,25 @@ extern "C" void superldpc_set_enabled_c (int on)
     logDecoderSelection ("settings", true);
 }
 
+// superldpc_descrivi_c: la stessa riga che logDecoderSelection manda su
+// stderr, ma restituita al chiamante. Serve al log diagnostico: nei log
+// degli utenti mancava proprio l'informazione decisiva, cioe' quali
+// estensioni ha la CPU e quale decodificatore e' stato scelto.
+extern "C" void superldpc_descrivi_c (char* out, int n)
+{
+    if (!out || n <= 0) return;
+    CpuCapabilities const& cpu = cpuCapabilities ();
+    bool const selected = useFastLdpc ();
+    std::snprintf (out, static_cast<std::size_t> (n),
+                   "CPU=\"%s\" x86=%d ARM64=%d AVX=%d AVX2=%d FMA=%d OSXSAVE=%d "
+                   "OS_AVX_STATE=%d NEON=%d backend=%s decoder=%s reason=\"%s\"",
+                   cpu.model.c_str (), cpu.x86 ? 1 : 0, cpu.arm64 ? 1 : 0,
+                   cpu.avx ? 1 : 0, cpu.avx2 ? 1 : 0, cpu.fma ? 1 : 0,
+                   cpu.osxsave ? 1 : 0, cpu.osAvxState ? 1 : 0, cpu.neon ? 1 : 0,
+                   backendDescription (cpu), selectedDecoder (cpu, selected),
+                   selected ? "none" : fallbackReason ());
+}
+
 extern "C" int superldpc_is_enabled_c ()
 {
     logDecoderSelection ("status", false);
