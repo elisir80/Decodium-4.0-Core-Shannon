@@ -616,6 +616,8 @@ set (wsjtx_CXXSRCS
   src/services/RotatorService.h
   src/services/SatelliteTrackingService.cpp
   src/services/SatelliteTrackingService.h
+  src/services/Q65DopplerTracker.cpp
+  src/services/Q65DopplerTracker.h
   src/services/satellite/sgp4/SGP4.cpp
   src/services/satellite/sgp4/SGP4.h
   src/services/MapIntelligenceService.cpp
@@ -2061,6 +2063,8 @@ add_executable (decodium_qml
   src/services/RotatorService.h
   src/services/SatelliteTrackingService.cpp
   src/services/SatelliteTrackingService.h
+  src/services/Q65DopplerTracker.cpp
+  src/services/Q65DopplerTracker.h
   src/services/satellite/sgp4/SGP4.cpp
   src/services/satellite/sgp4/SGP4.h
   src/services/MapIntelligenceService.cpp

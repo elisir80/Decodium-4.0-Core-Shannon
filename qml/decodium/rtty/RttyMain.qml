@@ -19,7 +19,7 @@ ApplicationWindow {
     minimumWidth: 760
     minimumHeight: 440
     visible: false
-    title: qsTr("RTTY") + " — " + (radio.connected ? radio.radioName : qsTr("nessuna radio"))
+    title: qsTr("RTTY") + " — " + (radio.connected ? radio.radioName : qsTr("Audio only — no CAT"))
     color: Theme.bgDeep
 
     // Il tema dei controlli va rimesso qui. Le proprieta' Material si

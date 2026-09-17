@@ -95,6 +95,7 @@ private:
     // L'ultimo stato visto, per emettere i segnali solo quando cambia davvero:
     // il sondaggio gira di continuo, i binding del QML no.
     bool    m_ultimoConnesso {false};
+    bool    m_ultimaPuoTrasmettere {false};
     double  m_ultimaFrequenzaHz {0.0};
     QString m_ultimoModo;
     bool    m_ultimaTrasmissione {false};

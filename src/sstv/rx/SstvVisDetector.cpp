@@ -634,6 +634,41 @@ void SstvVisDetector::processEvent (
   if (state_ == SstvVisDetectorState::Cancelled)
     return;
 
+  // A VOX pre-key tone may be contiguous with the first 1900 Hz leader.
+  // Keep only its most recent canonical leader window, not an ever-growing
+  // header.  The break, second leader, data timing and parity remain strict.
+  // This also bounds the diagnostic trace during a continuous carrier.
+  if (event.tone == SstvVisToneKind::Leader
+      && event.confidence >= config_.minimumObservationConfidence
+      && (state_ == SstvVisDetectorState::SearchingLeader
+          || (state_ == SstvVisDetectorState::FirstLeader && run_.active
+              && event.start <= run_.end + config_.maximumGapUs
+              && runConfidence () >= config_.minimumObservationConfidence
+              && run_.end > run_.start
+              && static_cast<double> (run_.coveredUs)
+                     / static_cast<double> (run_.end - run_.start)
+                     >= config_.minimumSlotCoverage)))
+    {
+      auto const start = state_ == SstvVisDetectorState::FirstLeader
+                             ? run_.start : event.start;
+      auto const maximum = static_cast<double> (config_.leaderDurationUs)
+                           * (1.0 + config_.headerDurationTolerance);
+      if (static_cast<double> (event.end - start) > maximum)
+        {
+          NormalizedEvent tail = event;
+          tail.start = event.end - config_.leaderDurationUs;
+          if (tail.start > std::numeric_limits<std::uint64_t>::max ()
+                               - config_.maximumFrameDurationUs)
+            return;
+          if (state_ == SstvVisDetectorState::FirstLeader)
+            tail.confidence = std::min(tail.confidence, runConfidence ());
+          beginFrame (tail);
+          if (appendRawEvent (tail, results))
+            startRun (tail);
+          return;
+        }
+    }
+
   if (state_ == SstvVisDetectorState::SearchingLeader)
     {
       if (event.tone != SstvVisToneKind::Leader)

@@ -36,7 +36,7 @@ public:
     void setParams(const RttyParams& params);
     const RttyParams& params() const { return m_params; }
 
-    // Restart timing and framing without discarding the tuning.
+    // Restart filters, timing and framing without discarding the tuning.
     void reset();
 
     // Butta via la stima spettrale accumulata. Serve al rientro dalla
@@ -44,6 +44,7 @@ public:
     // il segnale piu' forte che ci sia, e resta nella media per qualche secondo
     // dopo che il trasmettitore ha smesso. Una ricerca fatta in quel momento
     // troverebbe la propria eco e ci porterebbe sopra la sintonia.
+    // Also reset AFC, oscillators and framing atomically to nominal tuning.
     void clearSpectrum();
 
     // Feed audio. Every completed character frame goes to the callback.
@@ -61,6 +62,12 @@ public:
         return m_spbEst > 1.0 ? static_cast<float>(m_sampleRate / m_spbEst) : 0.0f;
     }
     bool  locked() const { return m_lockCounter > kLockThreshold; }
+    bool signalPresent() const {
+        // A tone RATIO can remain large on floating-point filter residue
+        // even after PCM16 input becomes exactly zero. This floor is well
+        // below one input LSB; it is not an extra on-air squelch threshold.
+        return m_squelchOpen && m_inputPower > 1e-12f;
+    }
     // Mark/space separation in dB — what the squelch gates on, and a far
     // better signal-present indicator for the UI than raw audio level.
     float toneSeparationDb() const { return m_toneRatioDb; }
@@ -134,6 +141,7 @@ private:
     float m_noiseFloor{1e-6f};
     float m_snrDb{0.0f};
     float m_toneRatioDb{0.0f};
+    float m_inputPower{0.0f};
     bool  m_squelchOpen{false};
     // Fraction of recent time spent on the space tone. Real RTTY alternates
     // constantly and sits near a third; a carrier, a CW signal or a data mode

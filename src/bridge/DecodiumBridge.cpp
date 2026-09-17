@@ -29,6 +29,7 @@
 #include "DecodiumDiagnostics.h"
 #include "DecodiumPropagationManager.h"
 #include "SatelliteTrackingService.h"
+#include "Q65DopplerTracker.h"
 #include "MapExternalOverlayService.h"
 #include "MapIntelligenceService.h"
 #include "CallsignIntelligenceService.h"
@@ -9268,16 +9269,20 @@ void DecodiumBridge::startDecodeUiSnapshotRefresh()
     }
 
     m_decodeUiSnapshotInFlight = true;
+    quint64 const decodeSession = m_decodeSessionId;
     auto* watcher = new QFutureWatcher<DecodeUiSnapshotResult>(this);
     connect(watcher, &QFutureWatcher<DecodeUiSnapshotResult>::finished,
-            this, [this, watcher]() {
+            this, [this, watcher, decodeSession]() {
         DecodeUiSnapshotResult result = watcher->result();
         watcher->deleteLater();
         m_decodeUiSnapshotInFlight = false;
 
         bool const stale = result.generation != m_decodeUiSnapshotGeneration
             && m_decodeUiPendingFlags != 0;
-        if (stale) {
+        if (decodeSession != m_decodeSessionId) {
+            // A mode/session reset is a hard boundary, even when no newer
+            // snapshot is pending. Never reinsert rows from the old worker.
+        } else if (stale) {
             // Preserve all requested panes when a newer snapshot supersedes
             // this one; otherwise a late RX notification could drop a pending
             // Band Activity refresh.
@@ -9939,6 +9944,13 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
     m_themeManager    = new DecodiumThemeManager(this);
     m_propagationManager = new DecodiumPropagationManager(this);
     m_satelliteTracking = new SatelliteTrackingService(this);
+    m_q65Doppler = new Q65DopplerTracker(this);
+    connect(m_q65Doppler, &Q65DopplerTracker::configurationChanged,
+            this, &DecodiumBridge::refreshQ65Doppler);
+    auto* emeTimer = new QTimer(this);
+    emeTimer->setInterval(1000);
+    connect(emeTimer, &QTimer::timeout, this, &DecodiumBridge::refreshQ65Doppler);
+    emeTimer->start();
     if (m_satelliteTracking) {
         connect(this, &DecodiumBridge::gridChanged, this, [this]() {
             if (m_satelliteTracking) m_satelliteTracking->setObserverGrid(m_grid);
@@ -10789,6 +10801,9 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             double const f = logicalFrequencyFromCatDial(rigFrequency,
                                                          &resolvedBand,
                                                          &resolvedOffsetHz);
+            if (m_q65Doppler && backend == QStringLiteral("hamlib") && f > 0.0
+                && m_q65Doppler->consumeFrequencyReport(f, QDateTime::currentMSecsSinceEpoch()))
+                return; // tracking CAT dial must not become the nominal/logged dial
             if (f > 0.0 && shouldIgnoreCatFrequencyDuringLocalQsy(f, backend)) {
                 return;
             }
@@ -10850,6 +10865,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             if (useLegacyRigControlFallback(m_legacyBackend, m_catBackend) && backend == QStringLiteral("hamlib")) return;
             if (!catSignalMatchesBackend(m_catBackend, backend)) return;
             bool c = catProp("connected").toBool();
+            if (!c && m_q65Doppler) m_q65Doppler->disconnected();
             bridgeLog("CAT[" + backend + "] connectedChanged: " + QString::number(c));
             if (m_catConnected != c) {
                 if (!c) m_rttyRigModeState.clear();
@@ -10947,6 +10963,11 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                 syncActiveCatTxSplitFrequency(QStringLiteral("connect"));
                 auto applyCatStartupFrequency = [this, backend, catProp]() {
                     if (!catSignalMatchesBackend(m_catBackend, backend)) {
+                        return;
+                    }
+                    // A delayed startup retry must not adopt the Doppler-shifted
+                    // dial as a new nominal frequency after tracking is armed.
+                    if (m_q65Doppler && (m_q65Doppler->enabled() || m_q65Doppler->applied())) {
                         return;
                     }
                     if (!catProp("connected").toBool()) {
@@ -12067,6 +12088,15 @@ bool DecodiumBridge::shouldIgnoreDecodeCallbacks() const
 
 void DecodiumBridge::beginDecodeCallbackShutdown()
 {
+    if (!m_shuttingDown && m_q65Doppler && m_q65Doppler->applied()
+        && m_catBackend == QStringLiteral("hamlib") && m_hamlibCat && m_hamlibCat->connected()) {
+        // Stop keying before restoring either VFO; each following Hamlib state
+        // retains PTT=OFF. Request nominal-dial restoration before CAT teardown.
+        m_hamlibCat->setRigPtt(false);
+        m_hamlibCat->setRigFrequency(applyFrequencyCalibration(m_frequency));
+        m_hamlibCat->setRigTxFrequency(0);
+        m_q65Doppler->disconnected();
+    }
     m_shuttingDown = true;
     m_asyncDecodePending = false;
     if (m_asyncDecodeTimer) {
@@ -12249,7 +12279,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                             syncTimer.start();
                             syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-on"));
                             qint64 const syncMs = syncTimer.elapsed();
-                            double const txDialHz = catSplitTxDialFrequencyHz();
+                            double const txDialHz = catSplitTxPttDialFrequencyHz();
                             QElapsedTimer catTimer;
                             catTimer.start();
                             m_pttOnDispatched = true;
@@ -12318,7 +12348,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                             syncTimer.start();
                             syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-on"));
                             syncMs = syncTimer.elapsed();
-                            txDialHz = catSplitTxDialFrequencyHz();
+                            txDialHz = catSplitTxPttDialFrequencyHz();
                         }
                         QElapsedTimer catTimer;
                         catTimer.start();
@@ -12407,7 +12437,7 @@ bool DecodiumBridge::ensureLegacyBackendAvailable()
                                     syncTimer.start();
                                     syncActiveCatTxSplitFrequency(QStringLiteral("legacy-ptt-delayed"));
                                     qint64 const syncMs = syncTimer.elapsed();
-                                    double const txDialHz = catSplitTxDialFrequencyHz();
+                                    double const txDialHz = catSplitTxPttDialFrequencyHz();
                                     QElapsedTimer catTimer;
                                     catTimer.start();
                                     bool const useAsyncPtt = shouldUseBridgeAudioForLegacyDigitalTx();
@@ -13572,6 +13602,19 @@ void DecodiumBridge::clearDecodeWindowsForModeChange(const QString& previousMode
     ++m_decodeSessionId;
     invalidateLegacyDecodeModelDeltaFastPath();
 
+    // Cancel every queued UI handoff. The in-flight worker is invalidated by
+    // the session above and allowed to finish without blocking the GUI.
+    ++m_decodeUiSnapshotGeneration;
+    m_decodeUiPendingFlags = 0;
+    if (m_decodeUiRefreshTimer) m_decodeUiRefreshTimer->stop();
+    if (m_fullSpectrumRefreshTimer) m_fullSpectrumRefreshTimer->stop();
+    m_fullSpectrumSnapshotPending = false;
+    m_pendingFullSpectrumModelEntries.clear();
+    m_pendingFullSpectrumModelKeys.clear();
+    invalidateDecodeUiPredicateCaches();
+    if (m_decodeReleaseTimer) m_decodeReleaseTimer->stop();
+    m_pendingDecodeReleaseQueue.clear();
+
     resetWorldMapDisplayFromCurrentDecodes();
 
     m_legacyModeChangeClearedDecodeKeys.clear();
@@ -13609,6 +13652,11 @@ void DecodiumBridge::clearDecodeWindowsForModeChange(const QString& previousMode
     m_nativeDecodeSecondaryQueue.clear();
     m_nativeDecodeSecondaryPendingKeys.clear();
     clearRemoteActivityCache(true);
+    // Do not wait for the next asynchronous snapshot to clear visible rows.
+    // A model reset also removes delegates retained by ListView transitions.
+    if (m_bandActivityModel) m_bandActivityModel->resetForContextChange();
+    if (m_rxDecodeModel) m_rxDecodeModel->resetForContextChange();
+    if (m_fullSpectrumModel) m_fullSpectrumModel->resetForContextChange();
     if (m_activeStations) {
         m_activeStations->clear();
     }
@@ -16994,6 +17042,8 @@ void DecodiumBridge::requestRigFrequencyFromBridge(double hz, const QString& rea
     if (hz <= 0.0) {
         return;
     }
+    // A user QSY ends tracking; do not add an old-band correction to a new dial.
+    if (m_q65Doppler) m_q65Doppler->setEnabled(false);
 
     // Resolve and validate the physical rig/IF dial before publishing the
     // logical QSY.  A large negative transverter offset can otherwise turn a
@@ -17168,6 +17218,8 @@ bool DecodiumBridge::catSplitOperationActiveForMode() const
 
 int DecodiumBridge::catSplitXitHzForTxFrequency(int txFrequencyHz) const
 {
+    // EME owns absolute RF offsets; do not also apply the FT audio/XIT shift.
+    if (m_q65Doppler && m_q65Doppler->applied()) return 0;
     if (!catSplitOperationActiveForMode() || txFrequencyHz <= 0) {
         return 0;
     }
@@ -17183,6 +17235,8 @@ int DecodiumBridge::effectiveTxAudioFrequencyHz() const
 
 double DecodiumBridge::catSplitTxDialFrequencyHz() const
 {
+    if (m_q65Doppler && m_q65Doppler->applied())
+        return m_q65Doppler->txDialHz();
     if (!catSplitOperationActiveForMode() || m_txFrequency <= 0) {
         return 0.0;
     }
@@ -17198,8 +17252,66 @@ double DecodiumBridge::catSplitTxDialFrequencyHz() const
     return dialHz + static_cast<double>(catSplitXitHzForTxFrequency(m_txFrequency));
 }
 
+QObject* DecodiumBridge::q65Doppler() const { return m_q65Doppler; }
+
+double DecodiumBridge::catSplitTxPttDialFrequencyHz()
+{
+    if (m_q65Doppler && (m_q65Doppler->enabled() || m_q65Doppler->applied())) {
+        refreshQ65Doppler();
+        // Unlike UI/log dials the PTT transaction takes the physical CAT/IF
+        // frequency. Keep the transverter and calibration mapping exactly once.
+        if (m_q65Doppler->applied())
+            return applyFrequencyCalibration(m_q65Doppler->txDialHz());
+    }
+    return catSplitTxDialFrequencyHz();
+}
+
+void DecodiumBridge::refreshQ65Doppler()
+{
+    if (!m_q65Doppler || m_shuttingDown) return;
+    Q65DopplerTracker::Context context;
+    context.mode = m_mode;
+    context.myGrid = m_grid;
+    context.dxGrid = m_dxGrid;
+    context.nominalHz = m_frequency;
+    context.periodMs = effectivePeriodMsForMode(m_mode);
+    context.connected = m_catConnected;
+    context.supported = m_catBackend == QStringLiteral("hamlib") && m_hamlibCat;
+    context.split = context.supported
+        && normalizedCatSplitMode(m_hamlibCat->splitMode()) != QStringLiteral("none");
+    context.monitoring = m_monitoring;
+    context.transmitting = m_transmitting || m_tuning || m_pttPending || m_pttOnDispatched
+        || (context.supported && m_hamlibCat->pttActive());
+    context.conflict = (usingLegacyBackendForTx() && !shouldUseBridgeAudioForLegacyDigitalTx())
+        || (legacyOwnsRigControl(m_legacyBackend) && m_legacyBackend->catConnected())
+        || hamlibCatFrequencySettleActive(QStringLiteral("eme"))
+        || m_decoPortUseRemote || rtlSdrEnabled() || sstvRxRequested() || sstvTxActive()
+        || (m_satelliteTracking && m_satelliteTracking->dopplerTracking());
+    auto const action = m_q65Doppler->update(context, QDateTime::currentDateTimeUtc());
+    if (!action.tune || !context.supported || !m_hamlibCat->connected()) return;
+    double const rx = applyFrequencyCalibration(action.rxHz);
+    double const logicalTx = action.restore ? catSplitTxDialFrequencyHz() : action.txHz;
+    double const tx = logicalTx > 0.0 ? applyFrequencyCalibration(logicalTx) : 0.0;
+    if (rx <= 0.0 || (logicalTx > 0.0 && tx <= 0.0)) {
+        m_q65Doppler->disconnected();
+        emit errorMessage(tr("Invalid CAT frequency after EME/transverter correction"));
+        return;
+    }
+    m_hamlibCat->setRigFrequency(rx);
+    m_hamlibCat->setRigTxFrequency(tx);
+    bridgeLog(QStringLiteral("[EME] %1 nominal=%2 rx=%3 tx=%4 method=%5")
+                  .arg(action.restore ? QStringLiteral("restore") : QStringLiteral("tracking"))
+                  .arg(m_frequency, 0, 'f', 0).arg(rx, 0, 'f', 0).arg(tx, 0, 'f', 0)
+                  .arg(m_q65Doppler->method()));
+    emit displayFrequencyChanged();
+}
+
 void DecodiumBridge::syncActiveCatTxSplitFrequency(const QString& reason)
 {
+    if (m_q65Doppler && (m_q65Doppler->enabled() || m_q65Doppler->applied())) {
+        refreshQ65Doppler();
+        if (m_q65Doppler->applied()) return;
+    }
     // A satellite half-duplex operation owns both VFOs until the RX restore is
     // complete.  The ordinary FT split code derives a few-kHz XIT from the
     // audio offset and would otherwise overwrite the cross-band CAT state.
@@ -17912,6 +18024,7 @@ void DecodiumBridge::setMode(const QString& v) {
     }
 
     if (m_mode != normalizedMode) {
+        if (m_q65Doppler) m_q65Doppler->setEnabled(false);
         quint64 const rttyRigGeneration = ++m_rttyRigModeGeneration;
         if (normalizedMode == QStringLiteral("RTTY")) {
             m_rttyRigModeState.enter(rttyCatContext(), m_catMode);
@@ -20786,7 +20899,9 @@ QObject* DecodiumBridge::decoPortGatewayObject() const
 
         m_decoPortGateway->setRigHooks(std::move(hooks));
         connect(m_decoPortGateway, &DecodiumDecoPortGateway::txAudioDue,
-                self, &DecodiumBridge::decoPortPlayTxAudio);
+                self, [self](const QVector<short>& samples) {
+                    self->decoPortPlayTxAudio(samples);
+                });
         m_decoPortGateway->setAuthKey(decoPortAuthKey());
     }
     return m_decoPortGateway;
@@ -21196,8 +21311,18 @@ void DecodiumBridge::decoPortStopTx(const QString& reason)
 // rinnova: quando l'audio smette, entro tre secondi il PTT scende da solo.
 void DecodiumBridge::decoPortKeyLocalRig(bool on)
 {
+    // Remote clients must still have a real CAT radio, and may not take
+    // ownership of a local RTTY audio session.
+    if (on && m_rttyTxActive)
+        return;
+    keySharedAudioTransmitter(on, false);
+}
+
+void DecodiumBridge::keySharedAudioTransmitter(bool on, bool allowWithoutCat)
+{
     bool const haveOwnRig = m_decoPortRig && m_decoPortRig->isOpen();
-    if (on && ((!m_catConnected && !haveOwnRig) || m_transmitting || m_tuning)) {
+    if (on && ((!allowWithoutCat && !m_catConnected && !haveOwnRig)
+               || m_transmitting || m_tuning || sstvTxActive())) {
         bridgeLog(QStringLiteral("DecoPort remote PTT refused: cat=%1 tx=%2 tune=%3")
                       .arg(m_catConnected ? 1 : 0).arg(m_transmitting ? 1 : 0)
                       .arg(m_tuning ? 1 : 0));
@@ -21214,20 +21339,32 @@ void DecodiumBridge::decoPortKeyLocalRig(bool on)
             if (!m_decoPortRemoteKeyed)
                 return;
             bridgeLog(QStringLiteral("DecoPort remote PTT dropped: no transmit audio for 3s"));
-            decoPortKeyLocalRig(false);
+            keySharedAudioTransmitter(false, false);
         });
     }
 
     m_decoPortRemoteKeyed = on;
     if (m_decoPortRig && m_decoPortRig->isOpen())
         m_decoPortRig->setPtt(on);
-    else
+    else if (m_catConnected)
         activeCatSetPtt(m_nativeCat, m_hamlibCat, m_catBackend, on,
                         m_omniRigCat, m_legacyBackend);
     if (on)
         m_decoPortTxGuard->start();
     else
         m_decoPortTxGuard->stop();
+    if (!on && m_rttyTxActive) {
+        m_rttyTxActive = false;
+        // Stop/abort/watchdog must also silence a VOX radio and discard any
+        // queued samples. Stopping CAT alone cannot end an audio-only TX.
+        if (m_decoPortTxOut) {
+            QPointer<RtlSdrAudioOutput> out(m_decoPortTxOut);
+            QMetaObject::invokeMethod(m_decoPortTxOut, [out]() {
+                if (out) out->stop(QStringLiteral("rtty-tx-ended"));
+            }, Qt::QueuedConnection);
+        }
+        m_decoPortTxOutRate = 0;
+    }
     bridgeLog(QStringLiteral("DecoPort remote PTT %1").arg(on ? "up" : "down"));
 }
 
@@ -21235,8 +21372,10 @@ void DecodiumBridge::decoPortKeyLocalRig(bool on)
 // va suonato: il gateway l'ha trattenuto fino a qui apposta. Va nel codec USB
 // della radio, cioe' nello stesso dispositivo che userebbe la trasmissione
 // locale.
-void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples)
+void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples, bool fromRtty)
 {
+    if (m_rttyTxActive != fromRtty)
+        return;
     if (samples.isEmpty() || m_transmitting || m_tuning)
         return;
 
@@ -21248,8 +21387,10 @@ void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples)
         connect(m_decoPortTxOutThread, &QThread::finished,
                 m_decoPortTxOut, &QObject::deleteLater);
         connect(m_decoPortTxOut, &RtlSdrAudioOutput::error, this,
-                [](const QString& message) {
+                [this](const QString& message) {
             bridgeLog(QStringLiteral("DecoPort transmit audio error: %1").arg(message));
+            if (m_rttyTxActive)
+                rttyAlzaPtt(false);
         }, Qt::QueuedConnection);
         m_decoPortTxOutThread->start();
     }
@@ -21259,6 +21400,7 @@ void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples)
         QAudioDevice const outDev = resolveTxOutputDevice(&found);
         if (outDev.id().isEmpty()) {
             bridgeLog(QStringLiteral("DecoPort transmit audio dropped: no output device"));
+            if (m_rttyTxActive) rttyAlzaPtt(false);
             return;
         }
         auto supportsRate = [&outDev](int rate) {
@@ -21282,6 +21424,7 @@ void DecodiumBridge::decoPortPlayTxAudio(const QVector<short>& samples)
         if (m_decoPortTxOutRate == 0) {
             bridgeLog(QStringLiteral("DecoPort transmit audio dropped: [%1] takes neither 48000 nor 12000 Hz")
                           .arg(outDev.description()));
+            if (m_rttyTxActive) rttyAlzaPtt(false);
             return;
         }
         QPointer<RtlSdrAudioOutput> out(m_decoPortTxOut);
@@ -26491,6 +26634,9 @@ bool DecodiumBridge::transmitFt2LinkAudio(const QString& text,
 
 void DecodiumBridge::startTx()
 {
+    // Refresh before waveform/audio-offset selection, not only at PTT time.
+    if (m_q65Doppler && (m_q65Doppler->enabled() || m_q65Doppler->applied()))
+        refreshQ65Doppler();
     // RTL-SDR devices have no transmit chain.  Enforce receive-only operation
     // in the backend as well as in QML so an auto-sequence or shortcut can
     // never key an unrelated CAT/PTT configuration while RTL RX is selected.
@@ -26819,7 +26965,7 @@ void DecodiumBridge::startTx()
             bridgeLog(QStringLiteral("[FT2SAT] PTT ON after CAT settle (macOS)"));
         } else if (!voxPtt && activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend)) {
             activeCatSetTxPtt(m_nativeCat, m_hamlibCat, m_catBackend,
-                              true, catSplitTxDialFrequencyHz(),
+                              true, catSplitTxPttDialFrequencyHz(),
                               m_omniRigCat, m_legacyBackend);
         } else if (voxPtt) {
             bridgeLog("PTT VOX(mac): audio-only TX; no CAT/DTR/RTS command will be sent");
@@ -27026,7 +27172,7 @@ void DecodiumBridge::startTx()
     bool const voxPtt = activeCatUsesVoxPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat);
     double const startTxDialHz = satelliteHalfDuplex
         ? static_cast<double>(m_ft2LinkSatelliteHalfDuplexTxDialHz)
-        : catSplitTxDialFrequencyHz();
+        : catSplitTxPttDialFrequencyHz();
     bool const startTxCanPtt =
         activeCatCanPtt(m_nativeCat, m_hamlibCat, m_catBackend, m_omniRigCat, m_legacyBackend);
     bool const hamlibAsyncFakeSplitPtt =
@@ -29560,6 +29706,7 @@ void DecodiumBridge::setCatBackend(const QString& v)
         normalized = QStringLiteral("hamlib");
     }
     if (m_catBackend == normalized) return;
+    if (m_q65Doppler) m_q65Doppler->setEnabled(false);
     if (sstvTxActive()) {
         cancelSstvTx();
         emit errorMessage(tr("SSTV TX is releasing PTT: change the CAT backend again after transmission has stopped"));
@@ -41738,18 +41885,41 @@ void DecodiumBridge::reloadActiveLogbookState(const QString& reason)
                   .arg(reason, path));
 }
 
+bool DecodiumBridge::rttyCanTransmit()
+{
+    if (m_mode != QStringLiteral("RTTY") || m_transmitting || m_tuning
+        || sstvTxActive() || (m_decoPortRemoteKeyed && !m_rttyTxActive)
+        || m_decoPortUseRemote)
+        return false;
+    bool found = false;
+    const QAudioDevice device = resolveTxOutputDevice(&found);
+    return found && !device.isNull();
+}
+
 void DecodiumBridge::rttyAlzaPtt(bool on)
 {
-    if (on && m_mode != QStringLiteral("RTTY"))
+    if (!on) {
+        if (m_rttyTxActive)
+            keySharedAudioTransmitter(false, false);
         return;
-    decoPortKeyLocalRig(on);
+    }
+    if (!rttyCanTransmit() || m_rttyTxActive)
+        return;
+    keySharedAudioTransmitter(true, true);
+    m_rttyTxActive = m_decoPortRemoteKeyed;
+    bridgeLog(QStringLiteral("RTTY TX start: active=%1 CAT=%2 (without CAT: audio/AFSK, operator VOX/manual PTT)")
+                  .arg(m_rttyTxActive).arg(m_catConnected));
 }
 
 void DecodiumBridge::rttyMandaAudioTx(const QVector<short>& campioni12k)
 {
-    if (m_mode != QStringLiteral("RTTY"))
+    if (!m_rttyTxActive)
         return;
-    decoPortPlayTxAudio(campioni12k);
+    if (!rttyCanTransmit()) {
+        rttyAlzaPtt(false);
+        return;
+    }
+    decoPortPlayTxAudio(campioni12k, true);
 }
 
 void DecodiumBridge::setRttyInAscolto(bool v)
@@ -46769,6 +46939,7 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
     int uiFiltered = 0;
     int cqOnlyFiltered = 0;
     int myCallOnlyFiltered = 0;
+    int myCallMatches = 0;
     int duplicatesSkipped = 0;
     int accepted = 0;
     DecodeUserFilterConfig const userFilterConfig = readDecodeUserFilterConfig();
@@ -47338,20 +47509,11 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
         if (!ft8DeepInTxListOnly && !hasUnresolvedPlaceholder) {
             maybeEnqueueMamCallerFromDecode(f);
             // Legacy owns its own incremental secondary queue. The native
-            // path below queues reporter/map/UDP/alert work after the entry
-            // has passed the UI filters, keeping this callback short.
+            // path below queues secondary work independently of presentation;
+            // UI filters must not silence calls addressed to the operator.
             if (legacyUiMirrorActive) {
                 maybeQueuePskReporterSpot(entry, msg, isCQ, f[7], f[1], entry.value("mode").toString());
             }
-        }
-
-        NativeDecodeSecondaryWork secondaryWork;
-        if (!legacyUiMirrorActive && !ft8DeepInTxListOnly && !hasUnresolvedPlaceholder) {
-            secondaryWork.entry = entry;
-            secondaryWork.rawRow = row;
-            secondaryWork.serial = serial;
-            secondaryWork.key = dedupKey;
-            secondaryWork.publishPsk = true;
         }
 
         // ALL.TXT must reflect valid decoder output, not the current frontend
@@ -47391,10 +47553,24 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
 
         bool const filteredByCqOnly = !m_filtersBypassed && m_filterCqOnly && !passesCqFilter(isCQ, msg);
         bool const filteredByMyCallOnly = !m_filtersBypassed && m_filterMyCallOnly && !isMyCall;
-        if (filteredByCqOnly || filteredByMyCallOnly) {
-            if (secondaryWork.publishPsk) {
+        if (isMyCall) {
+            ++myCallMatches;
+        }
+        if (!legacyUiMirrorActive) {
+            NativeDecodeSecondaryWork secondaryWork;
+            secondaryWork.entry = entry;
+            secondaryWork.rawRow = row;
+            secondaryWork.serial = serial;
+            secondaryWork.key = dedupKey;
+            secondaryWork.route(!filteredByCqOnly && !filteredByMyCallOnly, ft8DeepInTxListOnly);
+            if (secondaryWork.hasWork()) {
+                QElapsedTimer sectionTimer;
+                sectionTimer.start();
                 queueNativeDecodeSecondaryWork(std::move(secondaryWork));
+                rowSecondaryQueueMs += sectionTimer.elapsed();
             }
+        }
+        if (filteredByCqOnly || filteredByMyCallOnly) {
             // L'archivio SQLite e' un registro come ALL.TXT e PSK Reporter, non
             // una vista: con "solo CQ" acceso perdeva tutte le righe dirette
             // (misurato il 10/9/2026: 14% conservate in un'ora con il filtro
@@ -47441,22 +47617,6 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
             appendRxDecodeEntry(entry);
                 rowRxMirrorMs += sectionTimer.elapsed();
             }
-            secondaryWork.entry = entry;
-            secondaryWork.rawRow = row;
-            secondaryWork.serial = serial;
-            secondaryWork.key = dedupKey;
-            secondaryWork.publishPsk = !ft8DeepInTxListOnly && !hasUnresolvedPlaceholder;
-            secondaryWork.updateActiveStation = !ft8DeepInTxListOnly && isCQ && !hasUnresolvedPlaceholder;
-            secondaryWork.updateWorldMap = true;
-            secondaryWork.sendUdp = !ft8DeepInTxListOnly;
-            secondaryWork.playAlert = !ft8DeepInTxListOnly;
-            secondaryWork.reportDecodeTiming = true;
-            {
-                QElapsedTimer sectionTimer;
-                sectionTimer.start();
-            queueNativeDecodeSecondaryWork(std::move(secondaryWork));
-                rowSecondaryQueueMs += sectionTimer.elapsed();
-            }
             changed = true;
         }
         ++accepted;
@@ -47488,7 +47648,8 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                                  legacyAllTxtPath(),
                                  std::move(legacyAllTxtBatch));
 
-    bridgeLog(QStringLiteral("onFt8DecodeReady summary: raw=%1 accepted=%2 parse_fail=%3 guardrail=%4 semantic=%5 user_filtered=%6 ui_filtered=%7 cq_only=%8 mycall_only=%9 dupes=%10")
+    // cq_only/mycall_only are rejection counters, not alert matches.
+    bridgeLog(QStringLiteral("onFt8DecodeReady summary: raw=%1 accepted=%2 parse_fail=%3 guardrail=%4 semantic=%5 user_filtered=%6 ui_filtered=%7 cq_only=%8 mycall_only=%9 dupes=%10 mycall_matches=%11")
                   .arg(rows.size())
                   .arg(accepted)
                   .arg(parseFailures)
@@ -47498,7 +47659,8 @@ void DecodiumBridge::onFt8DecodeReady(quint64 serial, QStringList rows)
                   .arg(uiFiltered)
                   .arg(cqOnlyFiltered)
                   .arg(myCallOnlyFiltered)
-                  .arg(duplicatesSkipped));
+                  .arg(duplicatesSkipped)
+                  .arg(myCallMatches));
     phasePostRowsMs = ft8PhaseTimer.elapsed();
     trace.addDetail(QStringLiteral("phase_ms=setup:%1 autoseq:%2 rows:%3 post:%4")
                         .arg(phaseSetupMs)
@@ -55008,12 +55170,20 @@ void DecodiumBridge::reloadDxccLookupAsync(const std::function<void(bool, const 
 
 void DecodiumBridge::maybePlayDecodeAlert(bool isCQ, bool isMyCall, const QString &message)
 {
+    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
+    qint64 const alertGapMs = qMax<qint64>(2500, periodMsForMode(m_mode) * 3 / 4);
+    if (isMyCall) {
+        QString const reason = !m_alertSoundsEnabled ? QStringLiteral("sounds-disabled")
+            : !m_alertManager ? QStringLiteral("no-manager")
+            : !m_alertOnMyCall ? QStringLiteral("mycall-disabled")
+            : nowMs - m_lastMyCallAlertMs < alertGapMs ? QStringLiteral("cooldown")
+            : QStringLiteral("play-requested");
+        bridgeLog(QStringLiteral("[DECODE-ALERT] type=MyCall decision=%1 mode=%2 msg=[%3]")
+                      .arg(reason, m_mode, message));
+    }
     if (!m_alertSoundsEnabled || !m_alertManager) {
         return;
     }
-
-    qint64 const nowMs = QDateTime::currentMSecsSinceEpoch();
-    qint64 const alertGapMs = qMax<qint64>(2500, periodMsForMode(m_mode) * 3 / 4);
 
     if (isMyCall && m_alertOnMyCall && nowMs - m_lastMyCallAlertMs >= alertGapMs) {
         m_lastMyCallAlertMs = nowMs;

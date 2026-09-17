@@ -210,6 +210,10 @@ add_executable (test_auto_cq_call_policy test_auto_cq_call_policy.cpp)
 target_link_libraries (test_auto_cq_call_policy Qt6::Test Qt6::Core)
 add_test (NAME test_auto_cq_call_policy COMMAND $<TARGET_FILE:test_auto_cq_call_policy>)
 
+add_executable (test_native_decode_secondary_work test_native_decode_secondary_work.cpp)
+target_link_libraries (test_native_decode_secondary_work Qt6::Test Qt6::Core)
+add_test (NAME test_native_decode_secondary_work COMMAND $<TARGET_FILE:test_native_decode_secondary_work>)
+
 add_executable (test_rtty_rig_mode_state test_rtty_rig_mode_state.cpp)
 target_link_libraries (test_rtty_rig_mode_state Qt6::Test Qt6::Core)
 add_test (NAME test_rtty_rig_mode_state COMMAND $<TARGET_FILE:test_rtty_rig_mode_state>)
@@ -348,9 +352,21 @@ target_link_libraries (test_udp_client_id wsjt_qt Qt6::Test Qt6::Network Qt6::Co
 add_test (NAME test_udp_client_id COMMAND $<TARGET_FILE:test_udp_client_id>)
 
 add_executable (test_ftx_weak_decode test_ftx_weak_decode.cpp)
+add_executable (test_q65_doppler test_q65_doppler.cpp
+  ../src/services/Q65DopplerTracker.cpp ../src/services/Q65DopplerTracker.h)
+target_link_libraries (test_q65_doppler wsjt_qt wsjt_cxx wsjt_fort Qt6::Test Qt6::Quick Qt6::Qml)
+target_compile_definitions (test_q65_doppler PRIVATE DECODIUM_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+add_test (NAME test_q65_doppler COMMAND $<TARGET_FILE:test_q65_doppler>)
+set_tests_properties (test_q65_doppler PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Material")
 target_link_libraries (test_ftx_weak_decode wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_ftx_weak_decode COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
 set_tests_properties (test_ftx_weak_decode PROPERTIES ENVIRONMENT "DECODIUM_WEAK_TEST_SNR=-15")
+add_test (NAME test_ft8_bicm_generic_fallback COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
+set_tests_properties (test_ft8_bicm_generic_fallback PROPERTIES
+  ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-15;DECODIUM_WEAK_TEST_TRIALS=1;DECODIUM_FT8_BICM=1;DECODIUM_FT2_DISABLE_SUPERLDPC=1")
+add_test (NAME test_ft8_bicm_runtime_dispatch COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
+set_tests_properties (test_ft8_bicm_runtime_dispatch PROPERTIES
+  ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-15;DECODIUM_WEAK_TEST_TRIALS=1;DECODIUM_FT8_BICM=1;DECODIUM_FT2_DISABLE_SUPERLDPC=0")
 add_test (NAME test_ft8_weak_decode_deep COMMAND $<TARGET_FILE:test_ftx_weak_decode>)
 set_tests_properties (test_ft8_weak_decode_deep PROPERTIES
   ENVIRONMENT "DECODIUM_WEAK_TEST_MODE=FT8;DECODIUM_WEAK_TEST_SNR=-26;DECODIUM_WEAK_TEST_TRIALS=1")
@@ -397,6 +413,19 @@ if (DECODIUM_SUPERLDPC_ARM64_TARGET OR DECODIUM_SUPERLDPC_X86_TARGET)
   endif ()
   add_test (NAME test_superldpc_dispatch
     COMMAND $<TARGET_FILE:test_superldpc_dispatch>)
+
+  # Backend stubs emulate x86 CPU/OS combinations safely, including on ARM CI.
+  add_executable (test_superldpc_cpu_fallback
+    test_superldpc_dispatch.cpp
+    ../Detector/superldpc/decodium_dispatch.cpp)
+  set_target_properties (test_superldpc_cpu_fallback PROPERTIES
+    CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  target_compile_definitions (test_superldpc_cpu_fallback PRIVATE
+    DECODIUM_SUPERLDPC_TESTING=1 DECODIUM_SUPERLDPC_AVX2_BUILT=1)
+  foreach (cpu_case environment ui-disabled ivybridge no-avx no-avx2 no-fma no-osxsave no-ymm-state supported)
+    add_test (NAME test_superldpc_cpu_${cpu_case}
+      COMMAND $<TARGET_FILE:test_superldpc_cpu_fallback> ${cpu_case})
+  endforeach ()
 endif ()
 
 add_executable (test_secure_settings test_secure_settings.cpp)
@@ -439,6 +468,14 @@ add_executable (test_decode_list_model
   ../src/models/DecodeListModel.cpp)
 target_link_libraries (test_decode_list_model Qt6::Test Qt6::Core)
 add_test (NAME test_decode_list_model COMMAND $<TARGET_FILE:test_decode_list_model>)
+
+add_executable (test_decode_list_reset_qml
+  test_decode_list_reset_qml.cpp ../src/models/DecodeListModel.cpp)
+target_link_libraries (test_decode_list_reset_qml Qt6::Test Qt6::Quick Qt6::Qml)
+target_compile_definitions (test_decode_list_reset_qml PRIVATE DECODIUM_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
+add_test (NAME test_decode_list_reset_qml COMMAND $<TARGET_FILE:test_decode_list_reset_qml>)
+set_tests_properties (test_decode_list_reset_qml PROPERTIES
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
 
 add_executable (test_ft_decode_thread_budget test_ft_decode_thread_budget.cpp)
 target_link_libraries (test_ft_decode_thread_budget Qt6::Test Qt6::Core)
@@ -560,6 +597,7 @@ set (_decodium_regression_test_targets
   test_rtty_rx_recovery
   test_rtty_rig_mode_state
   test_auto_cq_call_policy
+  test_native_decode_secondary_work
   test_adif_udp_payload
   test_amplifier_telemetry
   test_station_telemetry_codec
@@ -576,6 +614,7 @@ set (_decodium_regression_test_targets
   test_decoport_rig_driver_thread
   test_udp_client_id
   test_ftx_weak_decode
+  test_q65_doppler
   test_ft2_qso_sim
   test_secure_settings
   test_callsign_intelligence
@@ -583,6 +622,7 @@ set (_decodium_regression_test_targets
   test_filedownload
   test_streaming_list_model
   test_decode_list_model
+  test_decode_list_reset_qml
   test_ft_decode_thread_budget
   test_legacy_decode_window
   test_b4_worked_before
@@ -599,7 +639,7 @@ if (TARGET test_superldpc_neon)
   list (APPEND _decodium_regression_test_targets test_superldpc_neon)
 endif ()
 if (TARGET test_superldpc_dispatch)
-  list (APPEND _decodium_regression_test_targets test_superldpc_dispatch)
+  list (APPEND _decodium_regression_test_targets test_superldpc_dispatch test_superldpc_cpu_fallback)
 endif ()
 if (TARGET test_decortty_tx)
   list (APPEND _decodium_regression_test_targets test_decortty_tx)

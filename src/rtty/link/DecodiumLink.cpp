@@ -23,7 +23,7 @@ DecodiumLink::DecodiumLink(Ganci ganci, QObject* parent)
     : RadioLink(parent)
     , m_ganci(std::move(ganci))
 {
-    m_stato = tr("radio di Decodium");
+    m_stato = tr("RTTY TX unavailable: check audio output and active mode");
 
     m_sonda = new QTimer(this);
     m_sonda->setInterval(kIntervalloSondaggioMs);
@@ -49,7 +49,7 @@ QString DecodiumLink::radioName() const
 
 bool DecodiumLink::requiresFullScaleTransmitAudio() const
 {
-    return isQmxFamily(radioName());
+    return isConnected() && isQmxFamily(radioName());
 }
 
 double DecodiumLink::frequencyMhz() const
@@ -61,7 +61,8 @@ double DecodiumLink::frequencyMhz() const
 
 QString DecodiumLink::mode() const
 {
-    return m_ganci.modo ? m_ganci.modo() : QString();
+    // A saved CAT mode is not evidence of the current mode of a manual radio.
+    return isConnected() && m_ganci.modo ? m_ganci.modo() : QString();
 }
 
 bool DecodiumLink::isTransmitting() const
@@ -93,7 +94,7 @@ void DecodiumLink::setFrequencyMhz(double mhz)
 
 void DecodiumLink::setMode(const QString& mode)
 {
-    if (!m_ganci.impostaModo || mode.isEmpty())
+    if (!isConnected() || !m_ganci.impostaModo || mode.isEmpty())
         return;
 
     QString requested = mode.trimmed().toUpper();
@@ -143,6 +144,8 @@ int DecodiumLink::sendTransmitAudio(const float* samples, int count)
 {
     if (!m_ganci.mandaAudioTx || !samples || count <= 1)
         return 0;
+    if (!canTransmit() || (m_ganci.inTrasmissione && !isTransmitting()))
+        return 0;
 
     // Il modulatore genera a 24 kHz, l'uscita di Decodium prende 12 e da li'
     // interpola verso la scheda. Si dimezza percio' la frequenza facendo la
@@ -157,6 +160,8 @@ int DecodiumLink::sendTransmitAudio(const float* samples, int count)
         m_txBuffer[i] = static_cast<short>(scalato);
     }
     m_ganci.mandaAudioTx(m_txBuffer);
+    if (m_ganci.inTrasmissione && !isTransmitting())
+        return 0;
     return coppie;
 }
 
@@ -173,10 +178,13 @@ void DecodiumLink::sondaggio()
     // binding del QML si rivalutano a ogni emissione, e emetterli quattro
     // volte al secondo a vuoto ridisegnerebbe i pannelli per niente.
     bool const connesso = isConnected();
-    if (connesso != m_ultimoConnesso) {
+    bool const puoTrasmettere = canTransmit();
+    if (connesso != m_ultimoConnesso || puoTrasmettere != m_ultimaPuoTrasmettere) {
         m_ultimoConnesso = connesso;
+        m_ultimaPuoTrasmettere = puoTrasmettere;
         m_stato = connesso ? tr("collegato: %1").arg(radioName())
-                           : tr("radio di Decodium non collegata");
+                           : (puoTrasmettere ? tr("Audio/AFSK — use VOX or manual PTT")
+                                             : tr("RTTY TX unavailable: check audio output and active mode"));
         // Una riga nel log a ogni cambiamento, mai a ogni sondaggio. Quello che
         // RTTY crede della radio e quello che il CAT dell'applicazione riporta
         // devono coincidere, e quando l'interfaccia dice "CAT non connesso"

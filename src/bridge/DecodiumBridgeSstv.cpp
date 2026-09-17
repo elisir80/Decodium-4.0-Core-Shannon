@@ -1051,13 +1051,28 @@ void DecodiumBridge::refreshSstvDiagnosticsSnapshot()
 
 bool DecodiumBridge::sstvTxCanStart() const
 {
+    return sstvTxUnavailableReason().isEmpty();
+}
+
+QString DecodiumBridge::sstvTxUnavailableReason() const
+{
 #if DECODIUM_HAS_SSTV
-    return m_sstvStudioController
-        && m_sstvStudioController->preparedReady()
-        && !m_sstvStudioController->busy()
-        && sstvTxGlobalPreflightReady();
+    if (!m_sstvStudioController) {
+        return tr("SSTV Transmit Studio is not available");
+    }
+    if (m_sstvStudioController->busy()) {
+        return tr("Wait for the current image operation to finish");
+    }
+    if (!m_sstvStudioController->preparedReady()) {
+        return m_sstvStudioController->sourceReady()
+            ? tr("Press Preview to prepare the image for transmission")
+            : tr("Load an image, then press Preview");
+    }
+    const QStringList blockers = sstvTxPreflightBlockers();
+    return blockers.isEmpty() ? QString()
+        : tr("SSTV TX is not ready: %1").arg(blockers.join(QStringLiteral("; ")));
 #else
-    return false;
+    return tr("SSTV support is not available in this build");
 #endif
 }
 
@@ -1568,6 +1583,7 @@ void DecodiumBridge::initialiseSstvTx()
             || (!vox && sstvTxPttActive())
             || m_shuttingDown || QCoreApplication::closingDown();
         result.pttReleaseRequired = !vox && !audioOnly;
+        result.voxAudioActivation = vox;
         if (!localAudioRoute) {
             result.detail =
                 "SSTV TX currently requires Decodium's local SoundOutput route";
@@ -2833,6 +2849,18 @@ void DecodiumBridge::initialiseSstvRuntime()
         connect(m_sstvStudioController,
                 &decodium::sstv::SstvStudioController::preparedChanged,
                 this, &DecodiumBridge::handleSstvStudioPreparedChanged);
+        // TX readiness depends on the prepared image AND busy state. Neither
+        // changes the coordinator's TX state, so forward both notifications
+        // even when an image is cleared or an operation is cancelled.
+        connect(m_sstvStudioController,
+                &decodium::sstv::SstvStudioController::preparedChanged,
+                this, &DecodiumBridge::sstvTxStateChanged);
+        connect(m_sstvStudioController,
+                &decodium::sstv::SstvStudioController::stateChanged,
+                this, &DecodiumBridge::sstvTxStateChanged);
+        connect(m_sstvStudioController,
+                &decodium::sstv::SstvStudioController::sourceChanged,
+                this, &DecodiumBridge::sstvTxStateChanged);
     }
     if (!m_sstvShareController) {
         m_sstvShareController = new decodium::sstv::SstvShareController(
@@ -5407,10 +5435,14 @@ bool DecodiumBridge::saveSstvRxRawAudio()
     const quint64 acquisitionId = snapshot.image.acquisitionId != 0U
         ? snapshot.image.acquisitionId
         : snapshot.replay.mostRecentAcquisitionId;
-    if (snapshot.replay.retainedSamples == 0U || acquisitionId == 0U) {
-        emit errorMessage(tr("No retained SSTV acquisition is available to save"));
+    if (snapshot.replay.retainedSamples == 0U) {
+        emit errorMessage(tr("No retained SSTV audio is available to save"));
         return false;
     }
+    // A failed VIS acquisition is precisely when diagnostic audio is needed.
+    // The worker falls back to the bounded recent-audio buffer for ID zero.
+    m_sstvRxRawAudioPath.clear();
+    m_sstvRxRawAudioAcquisitionId = 0U;
     const decodium::sstv::SstvStorageLayout layout(
         m_sstvStorageWorker->storageRoot());
     const QString token = QDateTime::currentDateTimeUtc().toString(

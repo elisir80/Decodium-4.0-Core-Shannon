@@ -76,6 +76,7 @@ private:
     float  m_minHz{400.0f};
     float  m_maxHz{2600.0f};
     double m_idleSec{0.0};
+    // Duration of a plausible on-frequency signal, excluding silence.
     double m_sinceActionSec{0.0};
     // Quante volte di fila si e' provato il verso senza cavarne nulla: dopo un
     // giro completo si smette di rigirare la manopola e si aspetta che cambi

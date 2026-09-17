@@ -87,6 +87,10 @@ public:
     // La diff confronta entries via decodeMatchKey() (freq+message+timestamp).
     void setEntries(QVariantList const& newEntries);
 
+    // Mode/session boundary: cancel pending batches and discard delegates,
+    // rather than animating an incremental removal of the previous session.
+    void resetForContextChange();
+
     // Applica lo snapshot in piu turni dell'event loop. Il numero di righe
     // modificate per frame resta limitato anche quando un decode pass
     // sostituisce una porzione ampia della history.

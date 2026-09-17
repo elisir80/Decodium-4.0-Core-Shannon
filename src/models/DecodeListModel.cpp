@@ -137,6 +137,22 @@ QString DecodeListModel::decodeMatchKey(QVariantMap const& entry)
     return isTx + QStringLiteral("|") + time + QStringLiteral("|") + freq + QStringLiteral("|") + msg;
 }
 
+void DecodeListModel::resetForContextChange()
+{
+    if (m_budgetTimer) m_budgetTimer->stop();
+    clearBudgetedTarget();
+    m_budgetStepExpectedAtMs = 0;
+    m_budgetBackpressureUntilMs = 0;
+    m_completedNonEmptySnapshot = false;
+    // Emit even when already empty: a view may still have removal animations,
+    // a reuse pool or a scroll operation belonging to the previous context.
+    beginResetModel();
+    m_entries.clear();
+    m_entryKeys.clear();
+    endResetModel();
+    emit snapshotApplied();
+}
+
 void DecodeListModel::setEntries(QVariantList const& newEntries)
 {
     if (m_budgetTimer) m_budgetTimer->stop();

@@ -311,6 +311,16 @@ Dialog {
                     width: Math.max(astroScroll.availableWidth, 0)
                     spacing: 12
 
+                Q65DopplerPanel {
+                    Layout.fillWidth: true
+                    tracker: bridge.q65Doppler
+                    stationGrid: bridge.grid
+                    dxGrid: bridge.dxGrid
+                    textColor: astroWindow.textPrimary
+                    accentColor: astroWindow.secondaryCyan
+                    onDxGridEdited: function(grid) { bridge.dxGrid = grid }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 50

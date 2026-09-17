@@ -700,7 +700,9 @@ SstvPage {
                     ToolTip.visible: hovered
                     ToolTip.text: root.engine && root.engine.sstvTxActive
                                   ? qsTr("Stop audio and release PTT safely")
-                                  : qsTr("Start native TX through Decodium audio and CAT/PTT")
+                                  : root.engine && !root.engine.sstvTxCanStart
+                                    ? root.engine.sstvTxUnavailableReason
+                                    : qsTr("Start SSTV audio using the configured output and PTT route")
                     onClicked: {
                         if (root.engine.sstvTxActive) {
                             root.engine.cancelSstvTx()
@@ -711,6 +713,16 @@ SstvPage {
                         }
                     }
                 }
+            }
+
+            Label {
+                objectName: "sstvTxUnavailableReason"
+                Layout.fillWidth: true
+                visible: !!(root.engine && !root.engine.sstvTxActive
+                            && !root.engine.sstvTxCanStart)
+                text: root.engine ? root.engine.sstvTxUnavailableReason : ""
+                color: root.secondaryTextColor
+                wrapMode: Text.WordWrap
             }
 
             GridLayout {

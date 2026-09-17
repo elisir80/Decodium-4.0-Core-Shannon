@@ -133,6 +133,7 @@ SstvMartinM1RxSessionUpdate SstvMartinM1RxSession::consume(
 
     for (std::size_t index = 0U; index < count; ++index) {
         const SstvFrequencyObservation& observation = observations[index];
+        refineInitialSync(observation);
         lastInputSample_ = observation.centreSample;
         lastInputEndSample_ = observationIntervalEnd(
             observation.centreSample, config_.observationSpanSamples);
@@ -170,6 +171,16 @@ SstvMartinM1RxSessionUpdate SstvMartinM1RxSession::consume(
         }
     }
 
+    // Refinement can move the seed past observations buffered earlier in
+    // this same call. Do not replay that prefix behind the tracker's clock.
+    if (config_.refineInitialSync && !syncObservations.empty()) {
+        const auto first = std::find_if(syncObservations.begin(),
+            syncObservations.end(), [this](const auto& item) {
+                return observationIntervalEnd(item.centreSample,
+                    config_.observationSpanSamples) > initialSyncEndSample_;
+            });
+        syncObservations.erase(syncObservations.begin(), first);
+    }
     metrics_.peakFilteredObservations = std::max(
         metrics_.peakFilteredObservations, filtered.size());
     saturatingAdd(metrics_.syncObservations,
@@ -180,12 +191,22 @@ SstvMartinM1RxSessionUpdate SstvMartinM1RxSession::consume(
     }
 
     const auto before = decoder_.metrics();
-    if (!filtered.empty()) {
-        update.decoderAcceptedObservations = decoder_.consume(filtered);
-        saturatingAdd(metrics_.decoderAcceptedObservations,
-                      static_cast<std::uint64_t>(
-                          update.decoderAcceptedObservations));
+    if (config_.refineInitialSync && !initialSyncRefined_) {
+        // With an early VIS estimate, sync samples can otherwise be written
+        // as pixels before the real edge arrives in the next audio block.
+        // The refinement deadline bounds this prefix to two sync durations.
+        initialObservations_.insert(initialObservations_.end(),
+                                    filtered.begin(), filtered.end());
+        filtered.clear();
+    } else if (!initialObservations_.empty()) {
+        update.decoderAcceptedObservations = decoder_.consume(initialObservations_);
+        initialObservations_.clear();
     }
+    if (!filtered.empty()) {
+        update.decoderAcceptedObservations += decoder_.consume(filtered);
+    }
+    saturatingAdd(metrics_.decoderAcceptedObservations,
+                  static_cast<std::uint64_t>(update.decoderAcceptedObservations));
     const auto after = decoder_.metrics();
     update.linesPublished = after.linesPublished;
     update.publishedLineRevision = after.linesPublished;
@@ -201,6 +222,55 @@ SstvMartinM1RxSessionUpdate SstvMartinM1RxSession::consume(
             || terminalMetrics.linesPublished > after.linesPublished;
     }
     return update;
+}
+
+void SstvMartinM1RxSession::refineInitialSync(
+    const SstvFrequencyObservation& observation)
+{
+    if (!config_.refineInitialSync || initialSyncRefined_)
+        return;
+    const auto syncSamples = samplesFor(config_.sampleRate, spec_.syncDuration);
+    if (observation.centreSample < config_.imageStartSample)
+        return;
+    if (observation.centreSample > initialSyncEndSample_ + syncSamples) {
+        initialSyncRefined_ = true;
+        return;
+    }
+    if (!observation.valid() || !isFiniteUnit(observation.confidence)
+        || observation.confidence < 0.45
+        || !std::isfinite(observation.correctedFrequencyHz))
+        return;
+    const double frequency = observation.correctedFrequencyHz
+        - config_.frequencyOffsetHz;
+    if (std::abs(frequency - SstvMartinM1Protocol::SyncFrequencyHz) < 55.0) {
+        initialSyncObserved_ = true;
+        return;
+    }
+    if (!initialSyncObserved_ || frequency < 1'350.0)
+        return;
+    initialSyncRefined_ = true;
+    if (observation.centreSample < syncSamples)
+        return;
+    const auto start = observation.centreSample - syncSamples;
+    const auto delta = start > config_.imageStartSample
+        ? start - config_.imageStartSample : config_.imageStartSample - start;
+    if (delta > syncSamples / 2U
+        || start > std::numeric_limits<std::uint64_t>::max()
+                       - mapper_.imageSampleCount()
+        || decoder_.metrics().acceptedObservations != 0U)
+        return;
+    // No pixel has yet been consumed. Re-seed both the pixel mapper and the
+    // sync tracker from the same measured edge; never repair by fabricating
+    // a missing component or by changing the definition of a complete image.
+    config_.imageStartSample = start;
+    imageEndSample_ = start + mapper_.imageSampleCount();
+    initialSyncEndSample_ = observation.centreSample;
+    lastSyncInputEndSample_ = initialSyncEndSample_;
+    decoder_.reset();
+    syncTracker_.reset();
+    const SstvExplicitSyncPulse pulse {start, initialSyncEndSample_,
+                                      observation.confidence};
+    applySyncEvents(syncTracker_.consumeExplicit(&pulse, 1U), nullptr);
 }
 
 SstvMartinM1RxSessionUpdate SstvMartinM1RxSession::consume(

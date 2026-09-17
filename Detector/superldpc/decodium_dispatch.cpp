@@ -53,6 +53,12 @@ extern "C" void superldpc_simd_gate_dump_open_c (char const*);
 extern "C" void superldpc_simd_gate_dump_close_c ();
 extern "C" void superldpc_simd_gate_truth_set_c (signed char const*);
 extern "C" void superldpc_simd_gate_truth_clear_c ();
+extern "C" int superldpc_simd_extrinsic174_91_c (float const*, int, float, float*);
+#endif
+
+#if defined(DECODIUM_SUPERLDPC_TESTING)
+// Test-only CPUID snapshot injection. Never enabled in the application.
+extern "C" unsigned superldpc_test_x86_features_c ();
 #endif
 
 namespace {
@@ -84,7 +90,7 @@ struct CpuCapabilities {
     bool avx2BackendBuilt = false;
     bool neonBackendBuilt = false;
 
-    bool fastLdpcUsable () const
+    bool superLdpcUsable () const
     {
         if (x86)
             return avx2BackendBuilt && avx && avx2 && fma && osxsave && osAvxState;
@@ -237,6 +243,18 @@ CpuCapabilities detectCpuCapabilities ()
     result.neonBackendBuilt = true;
 #endif
 
+#if defined(DECODIUM_SUPERLDPC_TESTING)
+    unsigned const features = superldpc_test_x86_features_c ();
+    result.model = "test x86 CPU";
+    result.x86 = true;
+    result.avx = (features & 1u) != 0;
+    result.avx2 = (features & 2u) != 0;
+    result.fma = (features & 4u) != 0;
+    result.osxsave = (features & 8u) != 0;
+    result.osAvxState = (features & 16u) != 0;
+    return result;
+#endif
+
 #if DECODIUM_SUPERLDPC_X86
     result.x86 = true;
     CpuidRegisters leaf0;
@@ -294,7 +312,7 @@ bool disabledByEnvironment ()
     return disabled;
 }
 
-bool fastLdpcRequested ()
+bool superLdpcRequested ()
 {
     // La variabile d'ambiente e' l'interruttore di emergenza usato quando si
     // deve avviare Decodium su una CPU problematica. Deve avere precedenza
@@ -306,15 +324,15 @@ bool fastLdpcRequested ()
     return ui >= 0 ? ui != 0 : true;
 }
 
-bool useFastLdpc ()
+bool useSuperLdpc ()
 {
-    return fastLdpcRequested () && cpuCapabilities ().fastLdpcUsable ();
+    return superLdpcRequested () && cpuCapabilities ().superLdpcUsable ();
 }
 
 char const* fallbackReason ()
 {
     CpuCapabilities const& cpu = cpuCapabilities ();
-    if (!fastLdpcRequested ()) return "disabled by settings/environment";
+    if (!superLdpcRequested ()) return "disabled by settings/environment";
     if (cpu.x86) {
         if (!cpu.avx2BackendBuilt) return "AVX2 backend not built";
         if (!cpu.avx) return "CPU has no AVX";
@@ -356,7 +374,7 @@ void logDecoderSelection (char const* trigger, bool force)
     }
 
     CpuCapabilities const& cpu = cpuCapabilities ();
-    bool const selected = useFastLdpc ();
+    bool const selected = useSuperLdpc ();
     std::fprintf (stderr,
                   "[superldpc] CPU=\"%s\" x86=%d ARM64=%d AVX=%d AVX2=%d FMA=%d "
                   "OSXSAVE=%d OS_AVX_STATE=%d NEON=%d backend=%s decoder=%s "
@@ -395,7 +413,7 @@ extern "C" void superldpc_descrivi_c (char* out, int n)
 {
     if (!out || n <= 0) return;
     CpuCapabilities const& cpu = cpuCapabilities ();
-    bool const selected = useFastLdpc ();
+    bool const selected = useSuperLdpc ();
     std::snprintf (out, static_cast<std::size_t> (n),
                    "CPU=\"%s\" x86=%d ARM64=%d AVX=%d AVX2=%d FMA=%d OSXSAVE=%d "
                    "OS_AVX_STATE=%d NEON=%d backend=%s decoder=%s reason=\"%s\"",
@@ -409,7 +427,7 @@ extern "C" void superldpc_descrivi_c (char* out, int n)
 extern "C" int superldpc_is_enabled_c ()
 {
     logDecoderSelection ("status", false);
-    return useFastLdpc () ? 1 : 0;
+    return useSuperLdpc () ? 1 : 0;
 }
 
 extern "C" void superldpc_set_ft8_mode_c (int on)
@@ -427,7 +445,7 @@ extern "C" void superldpc_decode174_91_c (float const* llrIn, int Keff, int maxo
 
     logDecoderSelection ("decode", false);
 #if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
-    if (Keff == 91 && useFastLdpc ()) {
+    if (Keff == 91 && useSuperLdpc ()) {
         superldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
         superldpc_simd_decode174_91_c (llrIn, Keff, maxosd, norder, apmaskIn,
                                     message91Out, cwOut, ntypeOut,
@@ -450,7 +468,7 @@ extern "C" void superldpc_decode174_91_batch_c (int n, float const* llrIn,
 
     logDecoderSelection ("batch-decode", false);
 #if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
-    if (Keff == 91 && useFastLdpc ()) {
+    if (Keff == 91 && useSuperLdpc ()) {
         superldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
         superldpc_simd_decode174_91_batch_c (n, llrIn, apmaskIn, Keff, maxosd,
                                           norder, message91Out, cwOut, ntypeOut,
@@ -473,13 +491,31 @@ extern "C" void superldpc_decode174_91_batch_c (int n, float const* llrIn,
     }
 }
 
+// BICM-ID is optional: the generic LDPC decoder has no min-sum posterior.
+// Return neutral extrinsic information without entering the SIMD translation
+// unit on unsupported CPUs, or when disabled by the UI/emergency switch.
+extern "C" int superldpc_extrinsic174_91_c (float const* llrIn, int norder,
+                                          float clamp, float* extrinsicOut)
+{
+    if (extrinsicOut) std::memset (extrinsicOut, 0, kN * sizeof (float));
+    if (!llrIn || !extrinsicOut) return 0;
+    logDecoderSelection ("extrinsic", false);
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
+    if (useSuperLdpc ()) {
+        superldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
+        return superldpc_simd_extrinsic174_91_c (llrIn, norder, clamp, extrinsicOut);
+    }
+#endif
+    return 0;
+}
+
 // Raccolta dati per il riaddestramento del gate (tests/ft2_gate_dump.cpp):
 // niente da fare senza il backend SIMD, non esiste un gate nel decoder
 // originale a cui agganciarsi.
 extern "C" void superldpc_gate_dump_open_c (char const* path)
 {
 #if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
-    superldpc_simd_gate_dump_open_c (path);
+    if (cpuCapabilities ().superLdpcUsable ()) superldpc_simd_gate_dump_open_c (path);
 #else
     (void) path;
 #endif
@@ -488,14 +524,14 @@ extern "C" void superldpc_gate_dump_open_c (char const* path)
 extern "C" void superldpc_gate_dump_close_c ()
 {
 #if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
-    superldpc_simd_gate_dump_close_c ();
+    if (cpuCapabilities ().superLdpcUsable ()) superldpc_simd_gate_dump_close_c ();
 #endif
 }
 
 extern "C" void superldpc_gate_truth_set_c (signed char const* cw174)
 {
 #if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
-    superldpc_simd_gate_truth_set_c (cw174);
+    if (cpuCapabilities ().superLdpcUsable ()) superldpc_simd_gate_truth_set_c (cw174);
 #else
     (void) cw174;
 #endif
@@ -504,6 +540,6 @@ extern "C" void superldpc_gate_truth_set_c (signed char const* cw174)
 extern "C" void superldpc_gate_truth_clear_c ()
 {
 #if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
-    superldpc_simd_gate_truth_clear_c ();
+    if (cpuCapabilities ().superLdpcUsable ()) superldpc_simd_gate_truth_clear_c ();
 #endif
 }

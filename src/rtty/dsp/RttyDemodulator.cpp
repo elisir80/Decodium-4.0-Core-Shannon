@@ -82,7 +82,6 @@ RttyDemodulator::RttyDemodulator(const RttyParams& params, int sampleRate)
     m_afcBuffer.assign(kAfcSize, 0.0f);
     m_afcScratch.assign(kAfcSize, {});
     m_afcSpectrum.assign(kAfcSize / 2, 0.0f);
-    rebuildFilters();
     reset();
 }
 
@@ -90,12 +89,12 @@ void RttyDemodulator::setParams(const RttyParams& params)
 {
     const bool retune = params.markHz  != m_params.markHz
                      || params.shiftHz != m_params.shiftHz
-                     || params.baud    != m_params.baud;
+                     || params.baud    != m_params.baud
+                     || params.reverse != m_params.reverse;
+    const bool disableAfc = m_params.afcEnabled && !params.afcEnabled;
     m_params = params;
-    if (retune) {
-        rebuildFilters();
-        reset();
-    }
+    if (retune || disableAfc)
+        clearSpectrum();
 }
 
 void RttyDemodulator::rebuildFilters()
@@ -115,10 +114,18 @@ void RttyDemodulator::rebuildFilters()
 
 void RttyDemodulator::reset()
 {
+    // Reset the actual oscillators and their integration history together
+    // with framing. Keep the current tuning unless clearSpectrum resets AFC.
+    rebuildFilters();
     m_state          = State::Hunt;
     m_bitIndex       = -1;
     m_bitTimer       = 0.0;
     m_prevSoft       = 0.0f;
+    m_samplesSinceEdge = 0;
+    m_bitPhase       = 0.0f;
+    m_idleSlots      = 0;
+    m_frameStartIndex = m_sampleIndex;
+    m_frameSnr       = 0.0f;
     m_lockCounter    = 0;
     m_startConfidence = 0.0f;
     m_stopConfidence  = 0.0f;
@@ -132,6 +139,10 @@ void RttyDemodulator::reset()
     m_agc         = 1e-6f;
     m_noiseFloor  = 1e-6f;
     m_toneRatioDb = 0.0f;
+    m_inputPower = 0.0f;
+    m_markLevelSmooth = m_spaceLevelSmooth = 0.0f;
+    m_scopeX = m_scopeY = 0.0f;
+    m_snrDb = 0.0f;
     std::fill(std::begin(m_frameBits), std::end(m_frameBits), 0.0f);
 }
 
@@ -140,6 +151,7 @@ void RttyDemodulator::process(const float* samples, int count,
 {
     for (int i = 0; i < count; ++i) {
         const float x = samples[i];
+        m_inputPower = smooth(m_inputPower, x * x, 0.01f);
         ++m_sampleIndex;
 
         const float markMag  = m_mark.push(x);
@@ -443,8 +455,11 @@ void RttyDemodulator::sampleBit(float soft, float llr, bool squelchOpen,
 void RttyDemodulator::clearSpectrum()
 {
     std::fill(m_afcSpectrum.begin(), m_afcSpectrum.end(), 0.0f);
+    std::fill(m_afcBuffer.begin(), m_afcBuffer.end(), 0.0f);
+    std::fill(m_afcScratch.begin(), m_afcScratch.end(), std::complex<float>{});
     m_afcFill     = 0;
     m_afcOffsetHz = 0.0f;
+    reset();
 }
 
 void RttyDemodulator::updateSpectrum(float sample)
@@ -470,48 +485,17 @@ void RttyDemodulator::updateSpectrum(float sample)
 
 void RttyDemodulator::steerAfc()
 {
-    const float binHz = static_cast<float>(m_sampleRate) / kAfcSize;
-
-    // Search for the strongest pair of bins spaced by the configured shift,
-    // within the AFC window. Scoring the pair rather than each tone alone is
-    // what keeps AFC from locking onto a lone carrier next door.
-    const float nominalSpace = m_params.spaceHz();
-    const int   shiftBins    = static_cast<int>(std::lround(m_params.shiftHz / binHz));
-    const int   range        = static_cast<int>(std::lround(m_params.afcRangeHz / binHz));
-    const int   centreBin    = static_cast<int>(std::lround(nominalSpace / binHz));
-
-    float bestScore = 0.0f;
-    int   bestBin   = centreBin;
-    for (int b = centreBin - range; b <= centreBin + range; ++b) {
-        if (b < 1 || b + shiftBins >= kAfcSize / 2)
-            continue;
-        const float score = m_afcSpectrum[static_cast<size_t>(b)]
-                          + m_afcSpectrum[static_cast<size_t>(b + shiftBins)];
-        if (score > bestScore) {
-            bestScore = score;
-            bestBin   = b;
-        }
-    }
-
-    if (bestScore <= 0.0f)
+    // Use the weaker of BOTH tones, their balance, noise margin and current
+    // FFT evidence. A sum lets a single carrier win; the averaged spectrum
+    // alone keeps steering on the ghost of a transmission during silence.
+    const auto pair = searchTonePair(m_params.spaceHz() - m_params.afcRangeHz,
+                                    m_params.markHz + m_params.afcRangeHz);
+    if (!pair.found || pair.marginDb < 6.0f || pair.balanceDb > 10.0f)
         return;
-
-    // Parabolic interpolation around the space tone for sub-bin resolution.
-    float refined = static_cast<float>(bestBin);
-    if (bestBin > 0 && bestBin + 1 < kAfcSize / 2) {
-        const float ym = m_afcSpectrum[static_cast<size_t>(bestBin - 1)];
-        const float y0 = m_afcSpectrum[static_cast<size_t>(bestBin)];
-        const float yp = m_afcSpectrum[static_cast<size_t>(bestBin + 1)];
-        const float den = ym - 2.0f * y0 + yp;
-        if (std::abs(den) > kEps)
-            refined += 0.5f * (ym - yp) / den;
-    }
-
-    const float offset = refined * binHz - nominalSpace;
+    const float offset = pair.markHz - m_params.markHz;
     const float clamped = std::clamp(offset, -m_params.afcRangeHz, m_params.afcRangeHz);
 
-    // Move a fraction of the way each time: the tone filters get rebuilt on
-    // every change, and a jumpy AFC would keep resetting their integrators.
+    // Retune continuously without discarding the active character's history.
     const float updated = m_afcOffsetHz + 0.2f * (clamped - m_afcOffsetHz);
     if (std::abs(updated - m_afcOffsetHz) > 0.5f) {
         m_afcOffsetHz = updated;
@@ -565,6 +549,14 @@ RttyDemodulator::TonePair RttyDemodulator::searchTonePair(float minHz, float max
 
     const float lower = m_afcSpectrum[static_cast<size_t>(bestBin)];
     const float upper = m_afcSpectrum[static_cast<size_t>(bestBin + shiftBins)];
+    // The averaged spectrum retains an old pair long after a short over.
+    // Do not let AUTO count that memory as a live failed decoding attempt.
+    // Use a relative freshness check so weak signals remain eligible.
+    const float currentPeak = std::max(
+        std::abs(m_afcScratch[static_cast<size_t>(bestBin)]),
+        std::abs(m_afcScratch[static_cast<size_t>(bestBin + shiftBins)]));
+    if (currentPeak < 0.05f * std::max(lower, upper))
+        return result;
 
     // Interpolazione parabolica sul tono inferiore: i bin sono larghi quasi
     // quattro hertz, e centrarsi a mezzo bin di distanza si sente.

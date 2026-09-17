@@ -82,8 +82,15 @@ public:
     }
     bool sstvRxAudioJobBusy() const noexcept { return m_audioBusy; }
     QString sstvRxAudioJobState() const { return QStringLiteral("Idle"); }
-    QString sstvRxAudioJobError() const { return {}; }
-    QString sstvRxRawAudioPath() const { return {}; }
+    QString sstvRxAudioJobError() const { return m_audioError; }
+    QString sstvRxRawAudioPath() const { return m_rawAudioPath; }
+    void simulateAudioExportResult(const QString& path, const QString& error = {})
+    {
+        m_audioBusy = false;
+        m_rawAudioPath = path;
+        m_audioError = error;
+        Q_EMIT audioJobChanged();
+    }
     bool sstvWavReplayActive() const noexcept { return m_replayActive; }
     QString sstvWavReplayState() const
     {
@@ -160,6 +167,8 @@ public:
     int slantResetCount {0};
     int redecodeCount {0};
     int rawSaveCount {0};
+    QString m_rawAudioPath;
+    QString m_audioError;
 
 Q_SIGNALS:
     void rxChanged();
@@ -306,6 +315,17 @@ private slots:
         QCOMPARE(fixture.slantResetCount, 1);
         QCOMPARE(fixture.redecodeCount, 1);
         QCOMPARE(fixture.rawSaveCount, 1);
+        QObject* audioResult = page->findChild<QObject*>(
+            QStringLiteral("sstvRxAudioResult"));
+        QVERIFY(audioResult);
+        const QString savedPath = QStringLiteral("/tmp/SSTV test/rx-recent.wav");
+        fixture.simulateAudioExportResult(savedPath);
+        QTRY_VERIFY(audioResult->property("text").toString().contains(savedPath));
+        QCOMPARE(audioResult->property("visible").toBool(), true);
+        fixture.simulateAudioExportResult({}, QStringLiteral("Disk full"));
+        QTRY_COMPARE(audioResult->property("text").toString(),
+                     QStringLiteral("Disk full"));
+        fixture.simulateAudioExportResult({});
         QVERIFY(QMetaObject::invokeMethod(noVis, "click"));
         QTRY_VERIFY(fixture.controlUpdateCount > 0);
         QCOMPARE(fixture.sstvRxControls()

@@ -157,6 +157,7 @@ class TestSstvMartinM1RxSession final : public QObject
 private slots:
     void validatesConfigurationAndSeedsLineZero();
     void syntheticFullFrameIsProgressiveAndChunkInvariant();
+    void refinesVisAnchorBeforeReceivingPixels();
     void frequencyOffsetAlsoCalibratesSyncTracking();
     void discontinuityPreservesAUsablePartialFrame();
     void rejectsClockRegressionTransactionally();
@@ -208,6 +209,34 @@ void TestSstvMartinM1RxSession::validatesConfigurationAndSeedsLineZero()
     QCOMPARE(empty.finish(), SstvMartinM1RxSessionState::Partial);
     QCOMPARE(empty.syncSnapshot().metrics.clockRegressions,
              std::uint64_t {0U});
+}
+
+void TestSstvMartinM1RxSession::refinesVisAnchorBeforeReceivingPixels()
+{
+    SstvMartinM1Mapper mapper({kSampleRate, 0});
+    const auto observations = syntheticObservations(0U, mapper.imageSampleCount());
+    for (const int offset : {-16, 16}) {
+        for (const auto chunkSize : {1U, 240U, 8'192U}) {
+            auto config = sessionConfig();
+            config.imageStartSample = static_cast<std::uint64_t>(
+                static_cast<std::int64_t>(kImageStart) + offset);
+            config.refineInitialSync = true;
+            SstvMartinM1RxSession session(config);
+            consumeChunks(session, observations, {chunkSize});
+            QCOMPARE(session.finish(), SstvMartinM1RxSessionState::Complete);
+            QVERIFY(session.snapshot().isComplete());
+            QVERIFY(session.imageStartSample() != config.imageStartSample);
+            QCOMPARE(session.syncSnapshot().metrics.clockRegressions,
+                     std::uint64_t {0});
+        }
+    }
+    // An interrupted transmission must not become complete as a side effect.
+    auto config = sessionConfig();
+    config.refineInitialSync = true;
+    SstvMartinM1RxSession truncated(config);
+    consumeChunks(truncated, syntheticObservations(0U, mapper.lineEndSample(1)), {240U});
+    QCOMPARE(truncated.finish(), SstvMartinM1RxSessionState::Partial);
+    QVERIFY(!truncated.snapshot().isComplete());
 }
 
 void TestSstvMartinM1RxSession::syntheticFullFrameIsProgressiveAndChunkInvariant()
