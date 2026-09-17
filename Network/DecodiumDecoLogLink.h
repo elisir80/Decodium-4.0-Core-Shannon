@@ -58,6 +58,10 @@ signals:
     void qsoWritten(const QJsonObject& message);
     void awardChanged(const QJsonObject& award);
     void queryAnswered(int id, const QJsonArray& results);
+    // Uno spot del cluster di DecoLog, gia' confrontato con il log.
+    void spotReceived(const QJsonObject& spot);
+    // L'operatore ha scelto uno spot in DecoLog: sintonizzare (mai trasmettere).
+    void tuneRequested(const QJsonObject& request);
 
 private:
     void connectNow();

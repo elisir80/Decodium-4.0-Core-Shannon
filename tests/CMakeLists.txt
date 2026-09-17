@@ -264,6 +264,12 @@ add_executable (test_dx_cluster_band test_dx_cluster_band.cpp ../src/services/De
 target_link_libraries (test_dx_cluster_band Qt6::Test Qt6::Network Qt6::Core)
 add_test (NAME test_dx_cluster_band COMMAND $<TARGET_FILE:test_dx_cluster_band>)
 
+add_executable (test_decolog_cluster_link test_decolog_cluster_link.cpp
+  ../src/services/DecodiumDxCluster.cpp ../Network/DecodiumDecoLogLink.cpp ../Network/DecodiumDecoLogLink.h)
+target_include_directories (test_decolog_cluster_link PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries (test_decolog_cluster_link Qt6::Test Qt6::Network Qt6::Core)
+add_test (NAME test_decolog_cluster_link COMMAND $<TARGET_FILE:test_decolog_cluster_link>)
+
 add_executable (test_map_layer_service
   test_map_layer_service.cpp
   ../src/services/MapIntelligenceService.cpp
@@ -561,6 +567,7 @@ set (_decodium_regression_test_targets
   test_decodium_update_support
   test_jt4_roundtrip
   test_dx_cluster_band
+  test_decolog_cluster_link
   test_map_layer_service
   test_sgp4
   test_rotator_service

@@ -68,6 +68,9 @@ public slots:
     Q_INVOKABLE bool sendSpot(const QString& dxCall, double freqKhz, const QString& comment = QString());
     Q_INVOKABLE bool submitSpotVerified(const QString& dxCall, double freqKhz, const QString& comment = QString());
     Q_INVOKABLE void clearSpots();
+    // Uno spot che arriva da un'altra fonte (il cluster di DecoLog): stesse chiavi
+    // di newSpot. Lo stesso DX sulla stessa banda e modo sostituisce la riga vecchia.
+    void injectSpot(const QVariantMap& spot);
 
 signals:
     void connectedChanged();

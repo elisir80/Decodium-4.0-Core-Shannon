@@ -10384,6 +10384,65 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         }
         emit decoLogStateChanged();
     });
+    // Il cluster di DecoLog: gli spot entrano nella lista del DX Cluster (e quindi
+    // nella cascata), marcati con quello che il log ne sa.
+    connect(m_decoLogLink, &DecodiumDecoLogLink::spotReceived, this, [this](const QJsonObject& msg) {
+        if (!m_dxCluster)
+            return;
+        const QString call = msg.value(QStringLiteral("call")).toString().trimmed().toUpper();
+        const double freqKhz = msg.value(QStringLiteral("freqKhz")).toDouble();
+        if (call.isEmpty() || freqKhz <= 0.0)
+            return;
+        const QString status = msg.value(QStringLiteral("status")).toString();
+        const QString comment = msg.value(QStringLiteral("comment")).toString();
+        QDateTime at = QDateTime::fromString(msg.value(QStringLiteral("time")).toString(), Qt::ISODate).toUTC();
+        if (!at.isValid())
+            at = QDateTime::currentDateTimeUtc();
+        QVariantMap spot;
+        spot[QStringLiteral("spotter")] = msg.value(QStringLiteral("spotter")).toString();
+        spot[QStringLiteral("dxCall")] = call;
+        spot[QStringLiteral("frequency")] = freqKhz;
+        spot[QStringLiteral("comment")] = status.isEmpty() ? comment : QStringLiteral("[%1] %2").arg(status, comment);
+        spot[QStringLiteral("time")] = at.toString(QStringLiteral("HHmm")) + QLatin1Char('Z');
+        spot[QStringLiteral("band")] = DecodiumDxCluster::bandLabelFromFrequencyKhz(freqKhz);
+        spot[QStringLiteral("mode")] = msg.value(QStringLiteral("mode")).toString();
+        spot[QStringLiteral("timestamp")] = at.toString(Qt::ISODate);
+        spot[QStringLiteral("source")] = QStringLiteral("DecoLog");
+        spot[QStringLiteral("status")] = status;
+        spot[QStringLiteral("statusBits")] = msg.value(QStringLiteral("statusBits")).toInt();
+        spot[QStringLiteral("entity")] = msg.value(QStringLiteral("entity")).toString();
+        spot[QStringLiteral("alert")] = msg.value(QStringLiteral("alert")).toBool();
+        m_dxCluster->injectSpot(spot);
+        if (msg.value(QStringLiteral("alert")).toBool()) {
+            emit statusMessage(QStringLiteral("DecoLog cluster: %1 %2 %3 kHz %4 %5")
+                                   .arg(status.isEmpty() ? QStringLiteral("spot") : status, call,
+                                        QString::number(freqKhz, 'f', 1), msg.value(QStringLiteral("mode")).toString(),
+                                        msg.value(QStringLiteral("entity")).toString()));
+        }
+    });
+    // Doppio clic su uno spot in DecoLog: radio sulla frequenza, modo se Decodium lo
+    // conosce, DX pronto nel pannello del QSO. Nessuna trasmissione.
+    connect(m_decoLogLink, &DecodiumDecoLogLink::tuneRequested, this, [this](const QJsonObject& msg) {
+        const QString call = msg.value(QStringLiteral("call")).toString().trimmed().toUpper();
+        const double dialKhz = msg.value(QStringLiteral("dialKhz")).toDouble();
+        const int audioHz = msg.value(QStringLiteral("audioHz")).toInt();
+        const QString mode = msg.value(QStringLiteral("mode")).toString().trimmed().toUpper();
+        if (dialKhz <= 0.0)
+            return;
+        bridgeLog(QStringLiteral("DecoLink tune: %1 dial=%2 kHz audio=%3 Hz mode=%4").arg(call).arg(dialKhz, 0, 'f', 1).arg(audioHz).arg(mode));
+        static const QStringList digital{QStringLiteral("FT8"), QStringLiteral("FT4"), QStringLiteral("FT2")};
+        if (digital.contains(mode) && m_mode.compare(mode, Qt::CaseInsensitive) != 0)
+            setMode(mode);
+        setFrequency(dialKhz * 1000.0);
+        if (!call.isEmpty())
+            setDxCall(call);
+        const QString grid = msg.value(QStringLiteral("grid")).toString().trimmed();
+        if (grid.size() >= 4)
+            setDxGrid(grid);
+        if (audioHz >= 100 && audioHz <= 5000)
+            setRxFrequency(audioHz);
+        emit statusMessage(QStringLiteral("DecoLog: sintonizzato su %1 %2 kHz %3").arg(call, QString::number(dialKhz, 'f', 1), mode));
+    });
     connect(m_decoLogLink, &DecodiumDecoLogLink::awardChanged, this, [this](const QJsonObject& award) {
         QVariantMap map = award.value(QStringLiteral("ft2")).toObject().toVariantMap();
         const QJsonObject dxcc = award.value(QStringLiteral("dxcc")).toObject();

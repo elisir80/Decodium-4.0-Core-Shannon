@@ -1121,6 +1121,29 @@ void DecodiumDxCluster::clearSpots()
     scheduleSpotsChanged(0);
 }
 
+void DecodiumDxCluster::injectSpot(const QVariantMap& spot)
+{
+    const QString call = spot.value(QStringLiteral("dxCall")).toString();
+    const QString band = spot.value(QStringLiteral("band")).toString();
+    const QString mode = spot.value(QStringLiteral("mode")).toString();
+    if (call.isEmpty())
+        return;
+    for (int i = m_spots.size() - 1; i >= 0; --i) {
+        const QVariantMap old = m_spots.at(i).toMap();
+        if (old.value(QStringLiteral("dxCall")).toString() == call
+            && old.value(QStringLiteral("band")).toString() == band
+            && old.value(QStringLiteral("mode")).toString() == mode) {
+            m_spots.removeAt(i);
+        }
+    }
+    while (m_spots.size() >= k_maxSpots)
+        m_spots.removeFirst();
+    m_spots.append(spot);
+    // Niente newSpot: quello e' per gli spot del nodo di Decodium (e per chi li
+    // ritrasmette in rete locale), questi hanno gia' una loro strada.
+    scheduleSpotsChanged();
+}
+
 // ---------------------------------------------------------------------------
 // Private slots — socket events
 // ---------------------------------------------------------------------------

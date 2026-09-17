@@ -155,6 +155,10 @@ void DecodiumDecoLogLink::handle(const QJsonObject& message)
         emit qsoWritten(message);
     } else if (type == QLatin1String("award")) {
         emit awardChanged(message);
+    } else if (type == QLatin1String("spot")) {
+        emit spotReceived(message);
+    } else if (type == QLatin1String("tune")) {
+        emit tuneRequested(message);
     } else if (type == QLatin1String("status")) {
         emit queryAnswered(message.value(QStringLiteral("id")).toInt(), message.value(QStringLiteral("results")).toArray());
     } else if (type == QLatin1String("pong")) {
