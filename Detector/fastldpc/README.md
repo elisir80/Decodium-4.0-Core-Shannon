@@ -5,7 +5,8 @@
     gate      CRC-14 (poly 0x2757, identica a WSJT-X) + distanza soft normalizzata
 
 Header-only, GPL-3.0, si integra in DECODIUM includendo `cpp/ft2_decoder.hpp`.
-Scritto ex novo: non e' un adattamento del decoder di WSJT-X. Opera pero' sul
+Scritto ex novo: non e' un adattamento del decoder di WSJT-X (che in Decodium
+esiste ancora, portato in C++, in `Detector/FtxLdpc.cpp`). Opera pero' sul
 codice LDPC(174,91) e sulla CRC-14 del protocollo FT8, usati **senza
 modifiche** (vedi "Provenienza e attribuzione" in fondo).
 
@@ -403,7 +404,23 @@ Formula breve, se serve citarlo:
 > ordered statistics decoding — con vettorizzazione AVX2 e ottimizzazioni
 > originali. Opera sul codice LDPC(174,91) e sulla CRC-14 del protocollo FT8
 > (Franke K9AN, Taylor K1JT), usati senza modifiche per garantire compatibilita'
-> bit-a-bit. GPL-3.0.
+> bit-a-bit. GPL-3.0; tabelle del codice verificate contro ft8_lib (MIT,
+> Karlis Goba YL3JG).
 
-Tutto il progetto e' GPL-3.0, come WSJT-X e ft8_lib da cui provengono le
-tabelle.
+**Licenze.** `fastldpc` e tutto Decodium sono GPL-3.0. Le tabelle del codice
+vengono da `constants.c` di **ft8_lib, che e' sotto licenza MIT** (Karlis Goba
+YL3JG) — codice MIT si puo' includere in un progetto GPL, ma la licenza e'
+quella, non la GPL. WSJT-X, da cui viene l'idea dei passi npre1/npre2 della
+ricerca a coppie, e' GPL-3.0.
+
+**Dove stanno davvero le tabelle nell'integrazione.** Dentro Decodium
+`fastldpc` non porta con se' le proprie tabelle: le chiede al programma con
+`ftx_ldpc174_91_tables_c` (`Detector/FtxLdpc.cpp`). La verifica bit per bit
+contro `constants.c` di ft8_lib e' servita a garantire che siano le stesse,
+ma la copia usata a runtime e' quella di Decodium.
+
+**Una precisazione che conviene fare per primi.** "Scritto da zero" vale per
+`fastldpc`, non per tutto Decodium: il decodificatore precedente,
+`Detector/FtxLdpc.cpp`, e' un porting del decodificatore di WSJT-X — si vede
+dalle tabelle `Mn`/`Nm`/`nrw` indicizzate da 1 e da `platanh` con le stesse
+costanti del Fortran. Sono due cose diverse e vanno dette separate.
