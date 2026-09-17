@@ -628,6 +628,53 @@ Rectangle {
             }
         }
 
+        // Separator
+        Rectangle { width: 1; height: footerSeparatorHeight; color: Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.1) }
+
+        // DecoLog (DecoLink): collegamento e FT2 Award del log
+        RowLayout {
+            id: decoLogStatusRow
+            spacing: 4
+            property bool linkEnabled: bridge ? bridge.decoLogLinkEnabled : false
+            property bool linkConnected: bridge ? bridge.decoLogConnected : false
+            property var award: bridge ? bridge.decoLogAward : ({})
+
+            Rectangle {
+                width: 8
+                height: 8
+                radius: 4
+                color: decoLogStatusRow.linkConnected ? accentGreen :
+                       decoLogStatusRow.linkEnabled ? Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.3)
+                                                    : Qt.rgba(textPrimary.r, textPrimary.g, textPrimary.b, 0.15)
+            }
+
+            Text {
+                text: decoLogStatusRow.linkConnected && decoLogStatusRow.award.dxccWorked !== undefined
+                      ? "LOG FT2 " + decoLogStatusRow.award.dxccWorked + "/" + decoLogStatusRow.award.dxccConfirmed
+                      : "LOG"
+                font.pixelSize: 10
+                color: decoLogStatusRow.linkConnected ? accentGreen : textSecondary
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    ToolTip {
+                        visible: parent.containsMouse
+                        delay: 500
+                        text: !decoLogStatusRow.linkEnabled
+                              ? "DecoLog: DecoLink disattivato"
+                              : !decoLogStatusRow.linkConnected
+                                ? "DecoLog: non collegato (127.0.0.1:" + bridge.decoLogLinkPort + ")"
+                                : bridge.decoLogStatus
+                                  + "\nFT2 Award: DXCC " + (decoLogStatusRow.award.dxccWorked || 0)
+                                  + " lavorati, " + (decoLogStatusRow.award.dxccConfirmed || 0) + " confermati"
+                                  + "\nLocatori FT2: " + (decoLogStatusRow.award.gridsWorked || 0)
+                                  + " · QSO FT2: " + (decoLogStatusRow.award.qsos || 0)
+                    }
+                }
+            }
+        }
+
         Item {
             Layout.fillWidth: true
             Layout.minimumWidth: 0

@@ -44,6 +44,7 @@
 #include "DecodiumLegacyBackend.h"
 #include "Network/DecodiumPskReporterLite.h"
 #include "Network/DecodiumCloudlogLite.h"
+#include "Network/DecodiumDecoLogLink.h"
 #include "Network/DecodiumQrzLogbookLite.h"
 #include "Network/DecodiumWsprUploader.h"
 #include "Network/NtpClient.hpp"
@@ -10321,6 +10322,77 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             this, [this]() { emit errorMessage(QStringLiteral("Cloudlog: API key non valida o senza permessi di scrittura")); });
 
     // QRZ Logbook
+    // DecoLink: DecoLog racconta il suo log. I QSO continuano ad andare a DecoLog
+    // via UDP come a ogni logger; da qui arrivano la conferma di scrittura, chi e'
+    // gia' stato lavorato fuori dal file ADIF di Decodium e l'FT2 Award.
+    m_decoLogLink = new DecodiumDecoLogLink(this);
+    connect(m_decoLogLink, &DecodiumDecoLogLink::connectedChanged, this, [this](bool connected) {
+        m_decoLogConnected = connected;
+        m_decoLogStatus = connected
+            ? QStringLiteral("DecoLog %1 collegato").arg(m_decoLogLink->peerVersion())
+            : QStringLiteral("DecoLog non collegato");
+        bridgeLog(QStringLiteral("DecoLink: %1").arg(m_decoLogStatus));
+        emit decoLogStateChanged();
+    });
+    connect(m_decoLogLink, &DecodiumDecoLogLink::workedRows, this,
+            [this](const QJsonArray& rows, bool first, bool final) {
+                if (first)
+                    m_decoLogPendingRows.clear();
+                for (const QJsonValue& v : rows) {
+                    const QJsonArray r = v.toArray();
+                    if (r.size() < 6)
+                        continue;
+                    m_decoLogPendingRows.append(DecoLogRow{r.at(0).toString().toUpper(), r.at(1).toString().toLower(),
+                                                           r.at(2).toString().toUpper(), r.at(3).toString(),
+                                                           r.at(4).toString().toUpper(), r.at(5).toInt() != 0});
+                }
+                if (!final)
+                    return;
+                m_decoLogRows = m_decoLogPendingRows;
+                m_decoLogPendingRows.clear();
+                applyDecoLogRows();
+                refreshDecodeListDxcc();
+                emit workedCountChanged();
+                m_decoLogStatus = QStringLiteral("DecoLog: %1 QSO nel worked-before").arg(m_decoLogRows.size());
+                bridgeLog(QStringLiteral("DecoLink: %1 righe dal log di DecoLog").arg(m_decoLogRows.size()));
+                emit decoLogStateChanged();
+            });
+    connect(m_decoLogLink, &DecodiumDecoLogLink::qsoWritten, this, [this](const QJsonObject& msg) {
+        const QJsonArray r = msg.value(QStringLiteral("row")).toArray();
+        const QString call = r.at(0).toString().toUpper();
+        const QString status = msg.value(QStringLiteral("status")).toString();
+        const bool fromDecodium = msg.value(QStringLiteral("source")).toString() == QLatin1String("udp_decodium");
+        if (status == QLatin1String("logged") && r.size() >= 6) {
+            const DecoLogRow row{call, r.at(1).toString().toLower(), r.at(2).toString().toUpper(),
+                                 r.at(3).toString(), r.at(4).toString().toUpper(), r.at(5).toInt() != 0};
+            m_decoLogRows.append(row);
+            m_workedCalls.insert(call);
+            appendWorkedQsoBand(row.call, row.grid, row.band, row.mode, row.date);
+            refreshWorkedBeforeDecodeEntriesForCall(call);
+            m_decoLogStatus = QStringLiteral("DecoLog: %1 salvato").arg(call);
+            if (fromDecodium)
+                emit statusMessage(QStringLiteral("DecoLog: QSO con %1 salvato nel log").arg(call));
+        } else if (status == QLatin1String("duplicate")) {
+            m_decoLogStatus = QStringLiteral("DecoLog: %1 gia' nel log").arg(call);
+            if (fromDecodium)
+                emit statusMessage(QStringLiteral("DecoLog: %1 era gia' nel log").arg(call));
+        } else if (status == QLatin1String("error")) {
+            m_decoLogStatus = QStringLiteral("DecoLog: %1 non salvato").arg(call);
+            if (fromDecodium)
+                emit errorMessage(QStringLiteral("DecoLog: QSO con %1 NON salvato: %2")
+                                      .arg(call, msg.value(QStringLiteral("message")).toString()));
+        }
+        emit decoLogStateChanged();
+    });
+    connect(m_decoLogLink, &DecodiumDecoLogLink::awardChanged, this, [this](const QJsonObject& award) {
+        QVariantMap map = award.value(QStringLiteral("ft2")).toObject().toVariantMap();
+        const QJsonObject dxcc = award.value(QStringLiteral("dxcc")).toObject();
+        map.insert(QStringLiteral("dxccAllWorked"), dxcc.value(QStringLiteral("worked")).toInt());
+        map.insert(QStringLiteral("dxccAllConfirmed"), dxcc.value(QStringLiteral("confirmed")).toInt());
+        m_decoLogAward = map;
+        emit decoLogStateChanged();
+    });
+
     m_qrzLogbook = new DecodiumQrzLogbookLite(this);
     connect(m_qrzLogbook, &DecodiumQrzLogbookLite::apiKeyOk,
             this, [this]() { emit statusMessage(QStringLiteral("QRZ Logbook: API key OK")); });
@@ -15551,10 +15623,15 @@ static QString yesterdayAdifDateTokenUtc()
 void DecodiumBridge::appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz,
                                      const QString& mode, const QString& qsoDateUtc)
 {
+    appendWorkedQsoBand(call, grid, freqHzToBandToken(freqHz), mode, qsoDateUtc);
+}
+
+void DecodiumBridge::appendWorkedQsoBand(const QString& call, const QString& grid, const QString& band,
+                                         const QString& mode, const QString& qsoDateUtc)
+{
     const QString upCall = call.trimmed().toUpper();
     if (upCall.isEmpty()) return;
 
-    const QString band = freqHzToBandToken(freqHz);
     const QString callBandKey = workedCallBandKey(band, upCall);
     if (!band.isEmpty()) {
         m_worked.callByBand.insert(callBandKey);
@@ -15611,6 +15688,51 @@ void DecodiumBridge::appendWorkedQso(const QString& call, const QString& grid, q
             m_worked.gridByBand.insert(band + QLatin1Char('|') + grid4);
         }
     }
+}
+
+void DecodiumBridge::applyDecoLogRows()
+{
+    // DecoLink aggiunge e non toglie: quello che c'e' nel file ADIF di Decodium resta.
+    for (const DecoLogRow& row : m_decoLogRows) {
+        m_workedCalls.insert(row.call);
+        appendWorkedQsoBand(row.call, row.grid, row.band, row.mode, row.date);
+    }
+}
+
+void DecodiumBridge::configureDecoLogLink()
+{
+    if (!m_decoLogLink)
+        return;
+    m_decoLogLink->setIdentity(version(), m_callsign.trimmed().toUpper());
+    m_decoLogLink->setPort(static_cast<quint16>(m_decoLogLinkPort));
+    m_decoLogLink->setEnabled(m_decoLogLinkEnabled);
+    if (!m_decoLogLinkEnabled && m_decoLogConnected) {
+        m_decoLogConnected = false;
+        emit decoLogStateChanged();
+    }
+    if (!m_decoLogLinkEnabled) {
+        m_decoLogStatus = QStringLiteral("DecoLink disattivato");
+        emit decoLogStateChanged();
+    }
+}
+
+void DecodiumBridge::setDecoLogLinkEnabled(bool v)
+{
+    if (m_decoLogLinkEnabled == v)
+        return;
+    m_decoLogLinkEnabled = v;
+    configureDecoLogLink();
+    emit decoLogLinkChanged();
+}
+
+void DecodiumBridge::setDecoLogLinkPort(int v)
+{
+    v = qBound(1, v, 65535);
+    if (m_decoLogLinkPort == v)
+        return;
+    m_decoLogLinkPort = v;
+    configureDecoLogLink();
+    emit decoLogLinkChanged();
 }
 
 void DecodiumBridge::refreshWorkedBeforeDecodeEntriesForCall(const QString& call)
@@ -15725,6 +15847,7 @@ void DecodiumBridge::rebuildWorkedSetsFromAdifRecords(QList<ParsedAdifRecord> co
             }
         }
     }
+    applyDecoLogRows();
 }
 
 namespace {
@@ -34040,6 +34163,8 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("alert_Enabled",      m_alertSoundsEnabled);
     // Cloudlog
     s.setValue("CloudLog", m_cloudlogEnabled);
+    s.setValue("DecoLogLink", m_decoLogLinkEnabled);
+    s.setValue("DecoLogLinkPort", m_decoLogLinkPort);
     s.setValue("CloudLogApiUrl", m_cloudlogUrl);
     s.setValue("CloudLogApiKey",
                secure_settings::value_for_write(
@@ -40545,6 +40670,9 @@ void DecodiumBridge::loadSettings()
             QStringLiteral("CloudLogApiKey"),
             cloudlogKeyValue.toString()).trimmed();
     s.sync();
+    m_decoLogLinkEnabled = s.value(QStringLiteral("DecoLogLink"), true).toBool();
+    m_decoLogLinkPort = qBound(1, s.value(QStringLiteral("DecoLogLinkPort"), 52237).toInt(), 65535);
+    configureDecoLogLink();
     if (m_cloudlog) {
         m_cloudlog->setEnabled(m_cloudlogEnabled);
         m_cloudlog->setApiUrl(m_cloudlogUrl);

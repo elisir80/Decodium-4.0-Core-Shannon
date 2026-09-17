@@ -53,6 +53,7 @@ class DecoPortRigDriver;
 #include "DecodiumSpotShare.h"
 class DecodiumPskReporterLite;
 class DecodiumCloudlogLite;
+class DecodiumDecoLogLink;
 class DecodiumQrzLogbookLite;
 class DecodiumWsprUploader;
 class DxccLookup;
@@ -492,6 +493,13 @@ class DecodiumBridge : public QObject
 
     // === CLOUDLOG ===
     Q_PROPERTY(bool    cloudlogEnabled READ cloudlogEnabled WRITE setCloudlogEnabled NOTIFY cloudlogEnabledChanged)
+    // DecoLink: il log di DecoLog (worked-before, conferme, FT2 Award) dentro Decodium.
+    Q_PROPERTY(bool        decoLogLinkEnabled READ decoLogLinkEnabled WRITE setDecoLogLinkEnabled NOTIFY decoLogLinkChanged)
+    Q_PROPERTY(int         decoLogLinkPort    READ decoLogLinkPort    WRITE setDecoLogLinkPort    NOTIFY decoLogLinkChanged)
+    Q_PROPERTY(bool        decoLogConnected   READ decoLogConnected   NOTIFY decoLogStateChanged)
+    Q_PROPERTY(QString     decoLogStatus      READ decoLogStatus      NOTIFY decoLogStateChanged)
+    Q_PROPERTY(int         decoLogQsoCount    READ decoLogQsoCount    NOTIFY decoLogStateChanged)
+    Q_PROPERTY(QVariantMap decoLogAward       READ decoLogAward       NOTIFY decoLogStateChanged)
     Q_PROPERTY(QString cloudlogUrl     READ cloudlogUrl     WRITE setCloudlogUrl     NOTIFY cloudlogUrlChanged)
     Q_PROPERTY(QString cloudlogApiKey  READ cloudlogApiKey  WRITE setCloudlogApiKey  NOTIFY cloudlogApiKeyChanged)
 
@@ -1916,6 +1924,14 @@ public:
 
     // Cloudlog
     bool    cloudlogEnabled() const { return m_cloudlogEnabled; }
+    bool        decoLogLinkEnabled() const { return m_decoLogLinkEnabled; }
+    void        setDecoLogLinkEnabled(bool v);
+    int         decoLogLinkPort() const { return m_decoLogLinkPort; }
+    void        setDecoLogLinkPort(int v);
+    bool        decoLogConnected() const { return m_decoLogConnected; }
+    QString     decoLogStatus() const { return m_decoLogStatus; }
+    int         decoLogQsoCount() const { return m_decoLogRows.size(); }
+    QVariantMap decoLogAward() const { return m_decoLogAward; }
     void    setCloudlogEnabled(bool v);
     QString cloudlogUrl()      const { return m_cloudlogUrl; }
     void    setCloudlogUrl(const QString& v);
@@ -2292,6 +2308,8 @@ signals:
     void showUsStateChanged();
     void usStateDataChanged();
     void cloudlogEnabledChanged();
+    void decoLogLinkChanged();
+    void decoLogStateChanged();
     void cloudlogUrlChanged();
     void cloudlogApiKeyChanged();
     void qrzLogbookEnabledChanged();
@@ -3305,6 +3323,7 @@ private:
     bool                  m_nextLogClusterSpotEnabled {false};
     DecodiumPskReporterLite* m_pskReporter {nullptr};
     DecodiumCloudlogLite*    m_cloudlog    {nullptr};
+    DecodiumDecoLogLink*     m_decoLogLink {nullptr};
     DecodiumQrzLogbookLite*  m_qrzLogbook  {nullptr};
     QHash<quint32, ExternalAdifUploadPending> m_externalAdifUploads;
     std::atomic<quint64> m_ft2LinkReceivedFileIoSerial {0};
@@ -3933,6 +3952,12 @@ private:
     void appendWorkedQso(const QString& call, const QString& grid, quint64 freqHz,
                          const QString& mode, const QString& qsoDateUtc = QString());
     void refreshWorkedBeforeDecodeEntriesForCall(const QString& call);
+    // Come appendWorkedQso, con la banda gia' nota (i QSO di DecoLog non hanno la frequenza).
+    void appendWorkedQsoBand(const QString& call, const QString& grid, const QString& band,
+                             const QString& mode, const QString& qsoDateUtc);
+    // Riapplica le righe di DecoLog agli insiemi "lavorato" (dopo ogni ricostruzione dal file ADIF).
+    void applyDecoLogRows();
+    void configureDecoLogLink();
 
     // B8 — Alert sounds
     bool                 m_alertSoundsEnabled {false};
@@ -4045,6 +4070,15 @@ private:
 
     // Cloudlog
     bool    m_cloudlogEnabled {false};
+    // DecoLink
+    bool        m_decoLogLinkEnabled {true};
+    int         m_decoLogLinkPort {52237};
+    bool        m_decoLogConnected {false};
+    QString     m_decoLogStatus;
+    QVariantMap m_decoLogAward;
+    struct DecoLogRow { QString call; QString band; QString mode; QString date; QString grid; bool confirmed; };
+    QList<DecoLogRow> m_decoLogRows;          // l'ultimo elenco completo ricevuto, piu' i QSO arrivati dopo
+    QList<DecoLogRow> m_decoLogPendingRows;   // elenco in arrivo a blocchi
     QString m_cloudlogUrl;
     QString m_cloudlogApiKey;
 

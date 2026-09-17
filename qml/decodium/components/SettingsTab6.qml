@@ -261,6 +261,50 @@ SettingsPageScroll {
             Layout.columnSpan: Math.max(1, pageColumns - 1)
         }
 
+        // ── DecoLog (DecoLink) ──
+        Text { text: qsTr("DECOLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
+        Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
+
+        Text { text: qsTr("DecoLink:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        CheckBox {
+            checked: bridge.decoLogLinkEnabled
+            onCheckedChanged: {
+                bridge.decoLogLinkEnabled = checked
+                dialog.scheduleSettingsPersist()
+            }
+            indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
+            contentItem: Text { text: ""; leftPadding: 24 }
+        }
+        Text {
+            text: bridge.decoLogConnected ? bridge.decoLogStatus
+                  : bridge.decoLogLinkEnabled ? qsTr("DecoLog non aperto: nuovo tentativo ogni 5 s") : qsTr("disattivato")
+            color: bridge.decoLogConnected ? accentGreen : textSecondary
+            font.pixelSize: 12
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+            Layout.columnSpan: Math.max(1, pageColumns - 2)
+        }
+
+        Text { text: qsTr("Porta:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
+        DecoTextField {
+            text: bridge.decoLogLinkPort; implicitWidth: 100; implicitHeight: controlHeight; leftPadding: 8
+            color: textPrimary; font.pixelSize: controlFontSize
+            validator: IntValidator { bottom: 1; top: 65535 }
+            background: Rectangle { color: bgMedium; border.color: parent.activeFocus ? secondaryCyan : glassBorder; radius: 4 }
+            onEditingFinished: {
+                bridge.decoLogLinkPort = parseInt(text)
+                dialog.scheduleSettingsPersist()
+            }
+        }
+        Text {
+            text: qsTr("I QSO vanno a DecoLog via UDP come a ogni logger. Con DecoLink, DecoLog manda a Decodium il suo log (worked-before, nuovi DXCC), la conferma di ogni QSO salvato e lo stato dell'FT2 Award. Solo 127.0.0.1.")
+            color: textSecondary
+            font.pixelSize: 11
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+            Layout.columnSpan: Math.max(1, pageColumns - 1)
+        }
+
         // ── Cloudlog ──
         Text { text: qsTr("CLOUDLOG"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.columnSpan: pageColumns; Layout.topMargin: 10 }
         Rectangle { Layout.fillWidth: true; Layout.columnSpan: pageColumns; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
