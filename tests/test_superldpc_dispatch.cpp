@@ -20,42 +20,42 @@ extern "C" void ftx_decode174_91_c (float const*, int, int, int,
     if (dmin) *dmin = 0.0f;
 }
 
-extern "C" void fastldpc_simd_set_ft8_mode_c (int) {}
+extern "C" void superldpc_simd_set_ft8_mode_c (int) {}
 
-extern "C" void fastldpc_simd_decode174_91_c (
+extern "C" void superldpc_simd_decode174_91_c (
     float const*, int, int, int, signed char const*, signed char*,
     signed char*, int*, int*, float*)
 {
     ++simdCalls;
 }
 
-extern "C" void fastldpc_simd_decode174_91_batch_c (
+extern "C" void superldpc_simd_decode174_91_batch_c (
     int, float const*, signed char const*, int, int, int, signed char*,
     signed char*, int*, int*, float*)
 {
     ++simdCalls;
 }
 
-extern "C" void fastldpc_set_enabled_c (int);
-extern "C" int fastldpc_is_enabled_c ();
-extern "C" void fastldpc_decode174_91_c (
+extern "C" void superldpc_set_enabled_c (int);
+extern "C" int superldpc_is_enabled_c ();
+extern "C" void superldpc_decode174_91_c (
     float const*, int, int, int, signed char const*, signed char*,
     signed char*, int*, int*, float*);
-extern "C" void fastldpc_decode174_91_batch_c (
+extern "C" void superldpc_decode174_91_batch_c (
     int, float const*, signed char const*, int, int, int, signed char*,
     signed char*, int*, int*, float*);
 
 int main ()
 {
 #if defined(_WIN32)
-    _putenv_s ("DECODIUM_FT2_DISABLE_FASTLDPC", "1");
+    _putenv_s ("DECODIUM_FT2_DISABLE_SUPERLDPC", "1");
 #else
-    setenv ("DECODIUM_FT2_DISABLE_FASTLDPC", "1", 1);
+    setenv ("DECODIUM_FT2_DISABLE_SUPERLDPC", "1", 1);
 #endif
 
     // Simula il caricamento di una configurazione con il toggle acceso.
-    fastldpc_set_enabled_c (1);
-    if (fastldpc_is_enabled_c () != 0) {
+    superldpc_set_enabled_c (1);
+    if (superldpc_is_enabled_c () != 0) {
         std::cerr << "the saved UI setting overrode the emergency environment switch\n";
         return 1;
     }
@@ -68,10 +68,10 @@ int main ()
     std::array<int, 2> nhard {};
     std::array<float, 2> dmin {};
 
-    fastldpc_decode174_91_c (llr.data (), 91, 3, 3, mask.data (),
+    superldpc_decode174_91_c (llr.data (), 91, 3, 3, mask.data (),
                              message.data (), codeword.data (), ntype.data (),
                              nhard.data (), dmin.data ());
-    fastldpc_decode174_91_batch_c (
+    superldpc_decode174_91_batch_c (
         2, llr.data (), mask.data (), 91, 3, 3, message.data (),
         codeword.data (), ntype.data (), nhard.data (), dmin.data ());
 

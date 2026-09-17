@@ -1,7 +1,7 @@
 // ft2_gate_dump.cpp — banco di raccolta dati per il riaddestramento del gate
-// appreso di fastldpc (FASTLDPC-AI-SPEC-001 §2b).
+// appreso di superldpc (SUPERLDPC-AI-SPEC-001 §2b).
 //
-// Il pacchetto di ricerca originale (Detector/fastldpc/lab/neural/gate/) ha
+// Il pacchetto di ricerca originale (Detector/superldpc/lab/neural/gate/) ha
 // generato il dataset attuale su un canale AWGN sintetico modellato a mano
 // (train/ft2chan.py): la nota in cima a gate_weights.hpp dice esplicitamente
 // che va rifatto sui LLR REALI. Questo banco fa esattamente quello, ma con la
@@ -55,10 +55,10 @@ extern "C"
   void ftx_ft2_stage7_clravg_c ();
   void ftx_ft2_rvec_c (signed char* out77);
   int ftx_encode174_91_message77_c (signed char const* message77, signed char* codeword_out);
-  void fastldpc_gate_dump_open_c (char const* path);
-  void fastldpc_gate_dump_close_c ();
-  void fastldpc_gate_truth_set_c (signed char const* cw174);
-  void fastldpc_gate_truth_clear_c ();
+  void superldpc_gate_dump_open_c (char const* path);
+  void superldpc_gate_dump_close_c ();
+  void superldpc_gate_truth_set_c (signed char const* cw174);
+  void superldpc_gate_truth_clear_c ();
 }
 
 namespace {
@@ -264,7 +264,7 @@ int main (int argc, char* argv[])
       qputenv ("DECODIUM_LDPC_GATE", "1");
       qputenv ("DECODIUM_LDPC_GATE_RELAX", QByteArray::number (relax));
 
-      fastldpc_gate_dump_open_c (out_path.toLocal8Bit ().constData ());
+      superldpc_gate_dump_open_c (out_path.toLocal8Bit ().constData ());
 
       QTextStream out {stdout};
       long long trials = 0, decodes = 0;
@@ -281,9 +281,9 @@ int main (int argc, char* argv[])
           auto run_one = [&] (bool has_noise, double snr_db, unsigned seed) {
             std::vector<qint16> const pcm =
                 make_wav_samples (message, freq, 0.85f, 600.0f, static_cast<float> (snr_db), has_noise, seed);
-            fastldpc_gate_truth_set_c (truth.data ());
+            superldpc_gate_truth_set_c (truth.data ());
             int const n = run_decode (pcm, stage, nfqso);
-            fastldpc_gate_truth_clear_c ();
+            superldpc_gate_truth_clear_c ();
             ++trials;
             decodes += n;
           };
@@ -298,7 +298,7 @@ int main (int argc, char* argv[])
           out.flush ();
         }
 
-      fastldpc_gate_dump_close_c ();
+      superldpc_gate_dump_close_c ();
       out << "totale: " << trials << " prove -> " << out_path << '\n';
       return 0;
     }

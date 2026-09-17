@@ -27,7 +27,7 @@ la parte más útil, porque cada uno habría llevado al aire un empeoramiento
 presentado como mejora.
 
 Todo es reproducible. El código es header-only bajo GPL-3.0 en
-`Detector/fastldpc/`, los bancos de medida en `lab/cpp/`, y cada número aquí
+`Detector/superldpc/`, los bancos de medida en `lab/cpp/`, y cada número aquí
 recogido procede de un comando que puede volver a ejecutarse.
 
 ---
@@ -104,8 +104,8 @@ era errónea porque optimizaba mentalmente la parte que ya era rápida.
 ## 03 · FT8: el mismo decodificador, la misma ganancia
 
 FT8 y FT2 comparten el código, así que comparten el decodificador. En Decodium 4
-la ruta de FT8 usa `fastldpc` incluida la decodificación por bloques de las
-pasadas, con un interruptor de entorno (`DECODIUM_FT8_FASTLDPC=0`) para volver
+la ruta de FT8 usa `superldpc` incluida la decodificación por bloques de las
+pasadas, con un interruptor de entorno (`DECODIUM_FT8_SUPERLDPC=0`) para volver
 al decodificador original y un mecanismo de recuperación que, para un número
 limitado de candidatos por ciclo, reintenta con el clásico.
 
@@ -121,7 +121,7 @@ profundidad 3, dos vueltas por configuración:
 | Decodificador LDPC | Vuelta 1 | Vuelta 2 | Decodificaciones |
 |---|---:|---:|---:|
 | Original `ftx_decode174_91_c` | 71 648 ms | 71 373 ms | 3 |
-| **`fastldpc`** | **9 316 ms** | **9 319 ms** | 3 |
+| **`superldpc`** | **9 316 ms** | **9 319 ms** | 3 |
 
 **7,7 veces más rápido, con decodificaciones idénticas.** La repetibilidad está
 dentro del 0,4%, y las mismas tres líneas con el indicativo salen de ambas
@@ -146,7 +146,7 @@ tanto tiene verdad de referencia. Siete puntos de −19 a −25 dB, 25
 realizaciones de ruido cada uno, perfil deep, mensaje `K1ABC W9XYZ EN37` a
 1500 Hz:
 
-| SNR | con `fastldpc` | decodificador original | `jt9` deep |
+| SNR | con `superldpc` | decodificador original | `jt9` deep |
 |---:|---:|---:|---:|
 | −19 dB | 25/25 | 25/25 | 25/25 |
 | −20 dB | 24/25 | 23/25 | 23/25 |
@@ -156,17 +156,17 @@ realizaciones de ruido cada uno, perfil deep, mensaje `K1ABC W9XYZ EN37` a
 
 | | umbral al 50% |
 |---|---:|
-| Decodium con **`fastldpc`** | **−20,88 dB** |
+| Decodium con **`superldpc`** | **−20,88 dB** |
 | Decodium con el decodificador original | −20,66 dB |
 | `jt9` de WSJT-X, perfil deep | −20,75 dB |
 
-**El factor 7,7 de velocidad no cuesta sensibilidad.** `fastldpc` resulta 0,22 dB
+**El factor 7,7 de velocidad no cuesta sensibilidad.** `superldpc` resulta 0,22 dB
 más sensible que el decodificador original y 0,13 dB más que `jt9`.
 
 Sobre la fuerza estadística hay que decir la verdad: los dos puntos informativos
 son −21 dB (11/25 frente a 7/25) y −22 dB (6/25 frente a 3/25), cada uno a unos
 1,2 sigma, que combinados dan alrededor de 1,7. Sugerente, no concluyente. **Lo
-que puede afirmarse sin reservas es que fastldpc no cuesta sensibilidad**; para
+que puede afirmarse sin reservas es que superldpc no cuesta sensibilidad**; para
 establecer los +0,2 dB harían falta un centenar de realizaciones por punto en
 lugar de veinticinco.
 
@@ -181,7 +181,7 @@ Dos puntos (−21 y −22 dB), 40 realizaciones, perfil deep:
 
 | | umbral | −21 dB | −22 dB | tiempo total |
 |---|---:|---:|---:|---:|
-| `fastldpc`, plazo 8 s | **−21,29 dB** | 24/40 | 10/40 | 547 s |
+| `superldpc`, plazo 8 s | **−21,29 dB** | 24/40 | 10/40 | 547 s |
 | original, plazo 8 s | −21,00 dB | 20/40 | 5/40 | 647 s |
 | original, plazo **40 s** | −21,05 dB | 21/40 | 1/40 | **3208 s** |
 
@@ -406,7 +406,7 @@ campo: por lotes, multiproceso, la misma infraestructura para todos los
 decodificadores, y reproducible por cualquiera sin tener nuestro código. Surface
 code d=5, 50 000 disparos por punto, seis procesos:
 
-| p | fastldpc | BP+LSD | BP+OSD-7 | pymatching |
+| p | superldpc | BP+LSD | BP+OSD-7 | pymatching |
 |---:|---:|---:|---:|---:|
 | 0,001 | 3 err · 190 µs | 4 · 1107 µs | 1 · 1039 µs | 7 · 0,9 µs |
 | 0,002 | **17** · 119 µs | 30 · 2001 µs | 29 · 2570 µs | 59 · 1,5 µs |
@@ -537,9 +537,9 @@ las palabras «correctas», que no son mensajes.
 
 ---
 
-*Informe técnico sobre Decodium 4.0 Core Shannon · `fastldpc` · GPL-3.0.*
+*Informe técnico sobre Decodium 4.0 Core Shannon · `superldpc` · GPL-3.0.*
 
-**Atribución.** `fastldpc` es un decodificador escrito desde cero para Decodium
+**Atribución.** `superldpc` es un decodificador escrito desde cero para Decodium
 4.0 Core Shannon. Implementa algoritmos conocidos — códigos LDPC (Gallager,
 1962), min-sum normalizado, ordered statistics decoding — con vectorización AVX2
 y optimizaciones originales. La búsqueda por pares está modelada sobre los pasos

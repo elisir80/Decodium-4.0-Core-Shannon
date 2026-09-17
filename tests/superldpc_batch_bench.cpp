@@ -1,4 +1,4 @@
-// fastldpc_batch_bench.cpp — quanto costa una chiamata al decoder LDPC al
+// superldpc_batch_bench.cpp — quanto costa una chiamata al decoder LDPC al
 // variare di quante parole porta.
 //
 // Il min-sum vettorizzato lavora su 16 corsie per volta: una chiamata con 5
@@ -8,7 +8,7 @@
 // sprecati. Prima di riscrivere Stage4 per mettere nello stesso blocco
 // candidati diversi, questo banco dice quanto varrebbe: e' il tetto.
 //
-// Uso: fastldpc_batch_bench [ripetizioni]
+// Uso: superldpc_batch_bench [ripetizioni]
 
 #include <algorithm>
 #include <chrono>
@@ -18,8 +18,8 @@
 #include <vector>
 
 extern "C" {
-void fastldpc_set_ft8_mode_c (int on);
-void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
+void superldpc_set_ft8_mode_c (int on);
+void superldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
                                     int Keff, int maxosd, int norder,
                                     signed char* message91, signed char* cw,
                                     int* ntype, int* nharderror, float* dmin);
@@ -30,7 +30,7 @@ int main (int argc, char** argv)
     int const ripetizioni = argc > 1 ? std::atoi (argv[1]) : 400;
     constexpr int kN = 174;
 
-    fastldpc_set_ft8_mode_c (1);
+    superldpc_set_ft8_mode_c (1);
 
     std::printf ("%d ripetizioni per punto, LLR di solo rumore (caso peggiore: nessuna\n"
                  "parola chiude subito, quindi il min-sum itera fino in fondo)\n\n", ripetizioni);
@@ -51,13 +51,13 @@ int main (int argc, char** argv)
             std::vector<float> dmin (static_cast<size_t> (n));
 
             // un giro a vuoto: la prima chiamata costruisce il decoder del thread
-            fastldpc_decode174_91_batch_c (n, llr.data (), apmask.data (), 91, 2, 2,
+            superldpc_decode174_91_batch_c (n, llr.data (), apmask.data (), 91, 2, 2,
                                            msg.data (), cw.data (), ntype.data (),
                                            hard.data (), dmin.data ());
 
             auto const t0 = std::chrono::steady_clock::now ();
             for (int r = 0; r < ripetizioni; ++r)
-                fastldpc_decode174_91_batch_c (n, llr.data (), apmask.data (), 91, 2, 2,
+                superldpc_decode174_91_batch_c (n, llr.data (), apmask.data (), 91, 2, 2,
                                                msg.data (), cw.data (), ntype.data (),
                                                hard.data (), dmin.data ());
             auto const t1 = std::chrono::steady_clock::now ();

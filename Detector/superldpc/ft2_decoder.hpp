@@ -1,4 +1,4 @@
-// ft2_decoder.hpp — l'unico header che serve includere per usare fastldpc.
+// ft2_decoder.hpp — l'unico header che serve includere per usare superldpc.
 //
 // Incapsula la catena completa: min-sum SIMD (AVX2 o NEON) su un batch di
 // candidati, OSD sui non convergenti, CRC-14 e gate sulla distanza soft. Gestisce da solo il
@@ -33,7 +33,7 @@ struct Ft2Config {
     int   span2     = 91;       // bit d'informazione esplorati a coppie
     int   span3     = 48;       // ... e a terne
     float nd_max    = 0.075f;   // gate anti-false-decode; 1.0 lo disattiva
-    // Strato 2 (FASTLDPC-AI-SPEC-001 §2): gate appreso al posto della sola
+    // Strato 2 (SUPERLDPC-AI-SPEC-001 §2): gate appreso al posto della sola
     // soglia su nd. 0 = solo nd_max (oggi, invariato). 1 = l'OSD accetta
     // candidati fino a nd <= gate_relax e la decisione finale la prende
     // gate_accept() sulle feature del candidato (gate.hpp).
@@ -51,13 +51,13 @@ struct Ft2Config {
     // va detto a gate_accept() quale tabella usare. Deciso una volta sola a
     // costruzione, come gli altri campi di questa struct.
     bool  gate_is_ft8 = false;
-    // Raccolta dati per il riaddestramento (FASTLDPC-AI-SPEC-001 §2b): se
+    // Raccolta dati per il riaddestramento (SUPERLDPC-AI-SPEC-001 §2b): se
     // impostato, viene chiamato per OGNI candidato che chiude (min-sum o
     // OSD), gate_mode permettendo, con le feature appena calcolate e i 174
     // bit del candidato -- accettato dal gate o no. Il chiamante (banco di
     // prova con messaggio noto) confronta la parola con la verita' e scrive
     // la riga del dataset; a callback nullo (default, produzione) costo zero
-    // e comportamento invariato. Vedi Detector/fastldpc/decodium_bridge.cpp.
+    // e comportamento invariato. Vedi Detector/superldpc/decodium_bridge.cpp.
     std::function<void(int, const GateFeatures&, const uint8_t*)> gate_dump_cb = nullptr;
     // Tipi di messaggio i3 ammessi dal controllo di plausibilita' dentro
     // l'OSD: 0 lo spegne. Vedi cpp/plausible.hpp.

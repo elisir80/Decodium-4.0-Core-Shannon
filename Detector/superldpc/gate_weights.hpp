@@ -1,4 +1,4 @@
-// gate_weights.hpp — pesi del gate appreso (strato 2, FASTLDPC-AI-SPEC-001 §2).
+// gate_weights.hpp — pesi del gate appreso (strato 2, SUPERLDPC-AI-SPEC-001 §2).
 //
 // 9 settembre 2026: GATE_NF passa da 10 a 12 (rango e passaggi CRC, vedi
 // gate.hpp). Le due colonne nuove hanno qui peso 0, media 0 e deviazione 1:
@@ -27,7 +27,7 @@
 // in aria (Decodium/decodifiche per ciclo invariato spegnendo/accendendo il
 // gate, 5 settembre 2026 sera) -- ma quel confronto era su traffico FT8, non
 // FT2 (vedi sotto perche' questo file adesso separa i due modi).
-// Per riaddestrare: Detector/fastldpc/lab/neural/gate/train_gate.py.
+// Per riaddestrare: Detector/superldpc/lab/neural/gate/train_gate.py.
 static const float GATE_W_FT2[12] = {-0.419673f, -0.581239f, -0.205885f, -0.043541f, 0.299545f, 0.000000f, -0.332447f, -0.486771f, 0.178712f, 0.000000f, 0.000000f, 0.000000f};
 static const float GATE_B_FT2 = -7.146039f;
 static const float GATE_MU_FT2[12] = {0.102884f, 0.230003f, 0.025739f, 0.017413f, 1.949061f, 1.000000f, 0.264674f, 0.067119f, 0.970600f, 1.000000f, 0.000000f, 0.000000f};
@@ -49,7 +49,7 @@ static const float GATE_THRESHOLD_FT2 = -4.125135f;
 // 91,04%) E abbassa i falsi di ~16x insieme, a differenza di FT2 dove il
 // guadagno sui falsi costava un po' di sensibilita'. Train ed eval coerenti
 // (92,55%/0,50 per mille contro 91,04%/0,46 per mille).
-// Per riaddestrare: Detector/fastldpc/lab/neural/gate/train_gate.py.
+// Per riaddestrare: Detector/superldpc/lab/neural/gate/train_gate.py.
 static const float GATE_W_FT8[12] = {-0.346551f, -0.081185f, -0.079960f, 0.053433f, 0.493541f, 0.000000f, -0.332220f, -0.650949f, 0.000000f, 0.000000f, 0.000000f, 0.000000f};
 static const float GATE_B_FT8 = -7.126093f;
 static const float GATE_MU_FT8[12] = {0.108834f, 0.226586f, 0.028659f, 0.027788f, 2.227563f, 1.000000f, 0.257168f, 0.086401f, 1.000000f, 1.000000f, 0.000000f, 0.000000f};

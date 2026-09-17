@@ -1,4 +1,4 @@
-// gate.hpp — gate appreso contro le false decodifiche (FASTLDPC-AI-SPEC-001, strato 2).
+// gate.hpp — gate appreso contro le false decodifiche (SUPERLDPC-AI-SPEC-001, strato 2).
 // Sostituisce la sola soglia su nd con una regressione logistica su GATE_NF feature
 // del candidato che ha passato la CRC-14. Pesi in gate_weights.hpp (appresi offline).
 #pragma once
@@ -45,7 +45,7 @@ inline float& gate_threshold_delta() {
     return v;
 }
 
-#ifdef FASTLDPC_HAVE_GATE_WEIGHTS
+#ifdef SUPERLDPC_HAVE_GATE_WEIGHTS
 #include "gate_weights.hpp"
 inline float gate_logit(const GateFeatures& g, bool ft8 = false) {
     const float* W  = ft8 ? GATE_W_FT8  : GATE_W_FT2;

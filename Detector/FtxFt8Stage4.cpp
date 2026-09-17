@@ -390,11 +390,11 @@ extern "C"
                                       float* llra, float* llrb, float* llrc,
                                       float* llrd, float* llre);
   // Metriche FT8 con l'estrinseca del decodificatore (BICM-ID, FtxBitmetrics.cpp),
-  // e l'estrinseca stessa dai posteriori del min-sum (fastldpc/decodium_bridge.cpp).
+  // e l'estrinseca stessa dai posteriori del min-sum (superldpc/decodium_bridge.cpp).
   void ftx_ft8_bitmetrics_bicm_c (std::complex<float> const* cs, float scale,
                                   float const* la, float* llra, float* llrb,
                                   float* llrc, float* llrd, float* llre);
-  int fastldpc_extrinsic174_91_c (float const* llr_in, int norder, float clamp,
+  int superldpc_extrinsic174_91_c (float const* llr_in, int norder, float clamp,
                                   float* est_out);
   // Governatore delle leve adattive (FtxDecodeBookkeeping.cpp)
   int ftx_ft8_leve_adattive_attive_c ();
@@ -442,14 +442,14 @@ extern "C"
                            signed char const* apmask_in, signed char* message91_out,
                            signed char* cw_out, int* ntype_out, int* nharderror_out,
                            float* dmin_out);
-  // Detector/fastldpc/: stessa firma, min-sum SIMD (AVX2/FMA su x86, NEON su
+  // Detector/superldpc/: stessa firma, min-sum SIMD (AVX2/FMA su x86, NEON su
   // ARM64). Ricade da solo su ftx_decode174_91_c se il backend richiesto non
   // e' disponibile o Keff != 91.
-  void fastldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
+  void superldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
                                 signed char const* apmask, signed char* message91,
                                 signed char* cw, int* ntype, int* nharderror, float* dmin);
-  void fastldpc_set_ft8_mode_c (int on);
-  void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
+  void superldpc_set_ft8_mode_c (int on);
+  void superldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
                                       int Keff, int maxosd, int norder,
                                       signed char* message91, signed char* cw,
                                       int* ntype, int* nharderror, float* dmin);
@@ -493,24 +493,24 @@ namespace {
 
 // Quale decoder LDPC usa FT8. ACCESO di default dal 28/08/2026.
 // Attenzione, la differenza non e' solo di velocita': con maxosd=3 e
-// norder=4 il decoder originale usa il BP ESATTO, mentre fastldpc e' sempre
+// norder=4 il decoder originale usa il BP ESATTO, mentre superldpc e' sempre
 // min-sum, che ne e' un'approssimazione. Il confronto appaiato sugli stessi
 // wav (18 prove fra -20 e -22 dB) non ha mostrato perdite -- una sola
-// discordanza, a favore di fastldpc, con p=1,00 al test dei segni -- ma non
+// discordanza, a favore di superldpc, con p=1,00 al test dei segni -- ma non
 // ha nemmeno dimostrato un guadagno: campione troppo piccolo per concludere.
-// Si spegne con DECODIUM_FT8_FASTLDPC=0 senza ricompilare.
-bool ft8_use_fastldpc ()
+// Si spegne con DECODIUM_FT8_SUPERLDPC=0 senza ricompilare.
+bool ft8_use_superldpc ()
 {
   static bool const on = [] {
-    char const* raw = std::getenv ("DECODIUM_FT8_FASTLDPC");
+    char const* raw = std::getenv ("DECODIUM_FT8_SUPERLDPC");
     return !raw || (raw[0] != '0' && raw[0] != 0);
   }();
   return on;
 }
 
-// Decodifica a BLOCCHI delle passate FT8: acceso di default quando fastldpc e'
+// Decodifica a BLOCCHI delle passate FT8: acceso di default quando superldpc e'
 // attivo, si spegne con DECODIUM_FT8_BATCH=0 per tornare passata per passata.
-// Forza il decoder classico per la chiamata in corso, ignorando fastldpc.
+// Forza il decoder classico per la chiamata in corso, ignorando superldpc.
 // Serve alla seconda passata di recupero: vedi il commento al suo punto d'uso.
 thread_local bool g_ft8_forza_classico = false;
 
@@ -600,12 +600,12 @@ void ft8_ldpc_decode (float const* llr, int Keff, int maxosd, int norder,
                       signed char const* apmask, signed char* message91,
                       signed char* cw, int* ntype, int* nharderror, float* dmin)
 {
-  if (ft8_use_fastldpc () && !g_ft8_forza_classico)
+  if (ft8_use_superldpc () && !g_ft8_forza_classico)
     {
       // Tiene tutti i tipi di messaggio: i formati da contest che FT2 esclude
       // in FT8 esistono, e filtrarli via renderebbe il decoder cieco a quelli.
-      fastldpc_set_ft8_mode_c (1);
-      fastldpc_decode174_91_c (llr, Keff, maxosd, norder, apmask, message91, cw,
+      superldpc_set_ft8_mode_c (1);
+      superldpc_decode174_91_c (llr, Keff, maxosd, norder, apmask, message91, cw,
                                ntype, nharderror, dmin);
     }
   else
@@ -7447,9 +7447,9 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
   // per questo candidato -- e' il caso piu' frequente sui segnali forti, dove
   // questo costa una decodifica e basta.
   //
-  // Richiede fastldpc: i posteriori del min-sum esistono solo li'.
+  // Richiede superldpc: i posteriori del min-sum esistono solo li'.
   std::array<float, 174> bicm_llra {}, bicm_llrb {}, bicm_llrc {}, bicm_llrd {}, bicm_llre {};
-  bool usa_bicm = ft8_bicm_giri () > 0 && ft8_use_fastldpc () && !g_ft8_forza_classico;
+  bool usa_bicm = ft8_bicm_giri () > 0 && ft8_use_superldpc () && !g_ft8_forza_classico;
   if (usa_bicm)
     {
       std::array<float, 174> est {};
@@ -7461,7 +7461,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
           // che la llra decideva gia' da sola e non c'e' niente da recuperare;
           // dal secondo in poi vuol dire che le metriche del giro PRECEDENTE
           // funzionano, e quelle si tengono (ottenuta e' gia' vera).
-          if (fastldpc_extrinsic174_91_c (sonda.data (), 2, 2.0f, est.data ()))
+          if (superldpc_extrinsic174_91_c (sonda.data (), 2, 2.0f, est.data ()))
             break;
           ftx_ft8_bitmetrics_bicm_c (current_cs.data (), kFt8BitMetricScale, est.data (),
                                      bicm_llra.data (), bicm_llrb.data (), bicm_llrc.data (),
@@ -7513,7 +7513,7 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
         float dmin {0.0f};
       };
       std::vector<PassoPronto> passi_pronti;
-      if (ft8_use_fastldpc () && ft8_batch_passes () && !g_ft8_forza_classico)
+      if (ft8_use_superldpc () && ft8_batch_passes () && !g_ft8_forza_classico)
         {
           struct PassoDaFare
           {
@@ -7603,8 +7603,8 @@ bool decode_main_candidate_cpp (float* dd0, int* newdat, Ft8Request const& reque
               std::vector<int> blocco_ntype (static_cast<size_t> (n));
               std::vector<int> blocco_hard (static_cast<size_t> (n));
               std::vector<float> blocco_dmin (static_cast<size_t> (n));
-              fastldpc_set_ft8_mode_c (1);
-              fastldpc_decode174_91_batch_c (n, blocco_llr.data (), blocco_ap.data (),
+              superldpc_set_ft8_mode_c (1);
+              superldpc_decode174_91_batch_c (n, blocco_llr.data (), blocco_ap.data (),
                                              da_fare[i].Keff, da_fare[i].maxosd,
                                              da_fare[i].norder, blocco_msg.data (),
                                              blocco_cw.data (), blocco_ntype.data (),
@@ -8709,16 +8709,16 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           //
           // I due decoder non si battono sempre allo stesso modo, misurato su
           // registrazioni off-air il 29/08/2026, 19 slot per banda:
-          //   40 m, banda piena : fastldpc 250 messaggi distinti, classico 198.
+          //   40 m, banda piena : superldpc 250 messaggi distinti, classico 198.
           //     Il classico impiega ~16 s per slot contro una scadenza di 8,
           //     viene troncato a meta' della lista dei candidati e perde cio'
           //     che non ha raggiunto.
-          //   80 m, banda scarica : fastldpc 52, classico 56. Qui il tempo
+          //   80 m, banda scarica : superldpc 52, classico 56. Qui il tempo
           //     basta a entrambi, e la propagazione ESATTA del classico batte
           //     l'approssimazione min-sum sui segnali marginali. Le quattro in
           //     piu' erano stazioni vere (DO8JB/YU1LD, PE1NAO/M7XRI,
           //     RA3VME/CT3MD, W3UCA/DA6IT), e il classico non perdeva nulla di
-          //     quanto trovava fastldpc: era un sovrainsieme.
+          //     quanto trovava superldpc: era un sovrainsieme.
           //
           // Non c'e' un criterio a priori per scegliere: dipende da quante
           // stazioni ci sono da trovare, e non si sa prima di cercarle. Il
@@ -8726,13 +8726,13 @@ void run_main_passes (Ft8Stage4State& state, Ft8Request const& request, int jseq
           // in 80 m: la banda scarica ne produce di piu', perche' il sync
           // aggancia rumore).
           //
-          // Quindi si prendono entrambi: fastldpc arriva in fondo alla lista e
+          // Quindi si prendono entrambi: superldpc arriva in fondo alla lista e
           // garantisce di non perdere nulla per scadenza, e sul candidato che
           // non ha dato nulla si spende il tempo risparmiato per un secondo
           // tentativo col BP esatto. Il tetto per ciclo evita che una banda
           // piena di candidati sterili consumi il margine.
           if (nbadcrc != 0
-              && ft8_use_fastldpc ()
+              && ft8_use_superldpc ()
               && ft8_classic_rescue_budget () > 0
               && ft8_classic_rescue_used () < ft8_classic_rescue_budget ()
               && stage4_remaining_ms () >= 1200

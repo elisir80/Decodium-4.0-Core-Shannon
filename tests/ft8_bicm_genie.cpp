@@ -64,7 +64,7 @@
 
 #include "Modulator/FtxMessageEncoder.hpp"
 #include "Modulator/FtxWaveformGenerator.hpp"
-#include "Detector/fastldpc/ft2_decoder.hpp"
+#include "Detector/superldpc/ft2_decoder.hpp"
 
 extern "C"
 {
@@ -614,7 +614,7 @@ int main (int argc, char* argv[])
                         float amax = 0.0f;
                         for (int i = 0; i < kCodeword; ++i) amax = std::max (amax, std::fabs (lf[static_cast<size_t> (i)]));
                         float const apmag = 1.1f * amax;
-                        // in fastldpc il segno e' invertito: positivo = bit 0
+                        // in superldpc il segno e' invertito: positivo = bit 0
                         for (int i = 0; i < ap_bits; ++i)
                           lf[static_cast<size_t> (i)] = vero[static_cast<size_t> (i)] ? -apmag : apmag;
                       }

@@ -42,7 +42,11 @@ constexpr int kLunghezzaCall = 14;
 // monotono di slot: chi chiama decide la scala, purche' sia coerente.
 // Chiamarla piu' volte con lo stesso nominativo e' normale e voluto -- serve a
 // sapere quale sia il piu' recente.
-void registra (int ciclo, float freq_hz, char const* nominativo);
+// `modo` tiene separati FT8 e FT2: le due liste vivono nello stesso processo
+// ma un mittente sentito a 1500 Hz in FT8 non dice niente su chi trasmette a
+// 1500 Hz in FT2 (dial diversi, traffico diverso), e mescolarli costerebbe
+// ipotesi sbagliate. Vedi kModoFt8/kModoFt2 piu' sotto.
+void registra (int ciclo, float freq_hz, char const* nominativo, int modo = 0);
 
 // I mittenti sentiti entro +-hz nei `memoria` cicli precedenti a `ciclo`, dal
 // piu' recente al piu' vecchio, senza ripetizioni. Ritorna quanti ne ha
@@ -50,7 +54,7 @@ void registra (int ciclo, float freq_hz, char const* nominativo);
 //
 // out deve essere un array [max][kLunghezzaCall].
 int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
-            char (*out)[kLunghezzaCall]);
+            char (*out)[kLunghezzaCall], int modo = 0);
 
 // Estrae il MITTENTE da un messaggio decodificato e lo registra.
 //
@@ -60,7 +64,20 @@ int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
 // e, se non regge come nominativo, il terzo: chi costruisce i bit rifiuta
 // comunque tutto cio' che non e' codificabile in forma standard, quindi un
 // errore di lettura costa un'ipotesi saltata e non un'ipotesi SBAGLIATA.
-void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio);
+void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio, int modo = 0);
+
+// Il contatore di cicli di FT2, separato da quello di FT8: uno slot FT2 dura
+// 3,75 s contro i 15 di FT8, quindi "dieci cicli" e' una memoria diversa e i
+// due modi non devono farsi avanzare il contatore a vicenda.
+int avanza_ciclo_ft2 ();
+int ciclo_corrente_ft2 ();
+
+// Le frequenze dove un MITTENTE e' stato sentito nei `memoria` cicli
+// precedenti, distinte entro `hz`, dalla piu' recente. Serve a FT2 per forzare
+// un candidato dove una stazione e' attesa: il banco del 16/9 ha mostrato che
+// le decodifiche perse le perde l'aggancio, non il decodificatore.
+int frequenze_mittenti (int ciclo, int memoria, float hz, float* out, int max_out,
+                        int modo = 0);
 
 // Il contatore di slot. avanza_ciclo() va chiamata una volta per invocazione
 // del decodificatore, ciclo_corrente() ovunque serva sapere a che punto si e'.

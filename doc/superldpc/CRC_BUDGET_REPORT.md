@@ -26,7 +26,7 @@ are the most useful part, because each one would have taken a regression on air
 dressed up as an improvement.
 
 Everything is reproducible. The code is header-only under GPL-3.0 in
-`Detector/fastldpc/`, the benchmarks in `lab/cpp/`, and every number here comes
+`Detector/superldpc/`, the benchmarks in `lab/cpp/`, and every number here comes
 from a command that can be re-run.
 
 ---
@@ -102,8 +102,8 @@ because it mentally optimised the part that was already fast.
 ## 03 · FT8: the same decoder, the same gain
 
 FT8 and FT2 share the code, so they share the decoder. In Decodium 4 the FT8
-path uses `fastldpc` including batch decoding of the passes, with an environment
-switch (`DECODIUM_FT8_FASTLDPC=0`) to fall back to the original decoder, and a
+path uses `superldpc` including batch decoding of the passes, with an environment
+switch (`DECODIUM_FT8_SUPERLDPC=0`) to fall back to the original decoder, and a
 rescue mechanism that retries with the classic one for a limited number of
 candidates per cycle.
 
@@ -118,7 +118,7 @@ runs per configuration:
 | LDPC decoder | Run 1 | Run 2 | Decodes |
 |---|---:|---:|---:|
 | Original `ftx_decode174_91_c` | 71,648 ms | 71,373 ms | 3 |
-| **`fastldpc`** | **9,316 ms** | **9,319 ms** | 3 |
+| **`superldpc`** | **9,316 ms** | **9,319 ms** | 3 |
 
 **7.7 times faster, with identical decodes.** Repeatability is within 0.4%, and
 the same three lines carrying the callsign come out of both configurations: the
@@ -141,7 +141,7 @@ Measured with `decode_bench/`, which generates the signals with WSJT-X's
 `ft8sim` and therefore has ground truth. Seven points from −19 to −25 dB, 25
 noise realisations each, deep profile, message `K1ABC W9XYZ EN37` at 1500 Hz:
 
-| SNR | with `fastldpc` | original decoder | `jt9` deep |
+| SNR | with `superldpc` | original decoder | `jt9` deep |
 |---:|---:|---:|---:|
 | −19 dB | 25/25 | 25/25 | 25/25 |
 | −20 dB | 24/25 | 23/25 | 23/25 |
@@ -151,17 +151,17 @@ noise realisations each, deep profile, message `K1ABC W9XYZ EN37` at 1500 Hz:
 
 | | 50% threshold |
 |---|---:|
-| Decodium with **`fastldpc`** | **−20.88 dB** |
+| Decodium with **`superldpc`** | **−20.88 dB** |
 | Decodium with the original decoder | −20.66 dB |
 | WSJT-X `jt9`, deep profile | −20.75 dB |
 
-**The factor of 7.7 in speed costs no sensitivity.** `fastldpc` comes out 0.22 dB
+**The factor of 7.7 in speed costs no sensitivity.** `superldpc` comes out 0.22 dB
 more sensitive than the original decoder and 0.13 dB more than `jt9`.
 
 On statistical strength the truth must be told: the two informative points are
 −21 dB (11/25 against 7/25) and −22 dB (6/25 against 3/25), each at about 1.2
 sigma, combining to roughly 1.7. Suggestive, not conclusive. **What can be
-stated without reservation is that fastldpc costs no sensitivity**; establishing
+stated without reservation is that superldpc costs no sensitivity**; establishing
 the +0.2 dB would need a hundred realisations per point rather than twenty-five.
 
 ### The control: it is not the deadline
@@ -175,7 +175,7 @@ Two points (−21 and −22 dB), 40 realisations, deep profile:
 
 | | threshold | −21 dB | −22 dB | total time |
 |---|---:|---:|---:|---:|
-| `fastldpc`, 8 s deadline | **−21.29 dB** | 24/40 | 10/40 | 547 s |
+| `superldpc`, 8 s deadline | **−21.29 dB** | 24/40 | 10/40 | 547 s |
 | original, 8 s deadline | −21.00 dB | 20/40 | 5/40 | 647 s |
 | original, **40 s** deadline | −21.05 dB | 21/40 | 1/40 | **3208 s** |
 
@@ -395,7 +395,7 @@ harness: batched, multi-process, the same infrastructure for every decoder, and
 reproducible by anyone without our code. Surface code d=5, 50,000 shots per
 point, six workers:
 
-| p | fastldpc | BP+LSD | BP+OSD-7 | pymatching |
+| p | superldpc | BP+LSD | BP+OSD-7 | pymatching |
 |---:|---:|---:|---:|---:|
 | 0.001 | 3 err · 190 µs | 4 · 1107 µs | 1 · 1039 µs | 7 · 0.9 µs |
 | 0.002 | **17** · 119 µs | 30 · 2001 µs | 29 · 2570 µs | 59 · 1.5 µs |
@@ -524,9 +524,9 @@ messages.
 
 ---
 
-*Technical report on Decodium 4.0 Core Shannon · `fastldpc` · GPL-3.0.*
+*Technical report on Decodium 4.0 Core Shannon · `superldpc` · GPL-3.0.*
 
-**Attribution.** `fastldpc` is a decoder written from scratch for Decodium 4.0
+**Attribution.** `superldpc` is a decoder written from scratch for Decodium 4.0
 Core Shannon. It implements known algorithms — LDPC codes (Gallager, 1962),
 normalised min-sum, ordered statistics decoding — with AVX2 vectorisation and
 original optimisations. The pair search is modelled on the `npre1`/`npre2` steps

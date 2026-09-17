@@ -1,7 +1,7 @@
 // ft2_llr_clip_bench.cpp — quanto costa e quanto rende il taglio degli LLR
 // (Ft2Config::llr_clip) sul demodulatore 4-GFSK VERO di FT2.
 //
-// La domanda aperta in Detector/fastldpc/lab/README.md: il taglio e' tarato
+// La domanda aperta in Detector/superldpc/lab/README.md: il taglio e' tarato
 // oggi a 2,5 su un canale AWGN/BPSK sintetico, e la nota dice "quale dei due
 // (2 o 2,5) sia giusto lo dira' il canale reale". Il banco sintetico non puo'
 // rispondere perche' il taglio serve contro l'interferenza IMPULSIVA, che li'

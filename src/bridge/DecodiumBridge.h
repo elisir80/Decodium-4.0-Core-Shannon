@@ -135,12 +135,12 @@ class RemoteCommandServer;
 class DecodeHistoryWorker;  // 1.0.238 Phase 5.2 perf roadmap: write-behind SQLite
 class QSqlDatabase;          // 1.0.268 Phase 5.3 query API (forward decl)
 
-// Detector/fastldpc/decodium_dispatch.cpp: accende o spegne il decoder LDPC
+// Detector/superldpc/decodium_dispatch.cpp: accende o spegne il decoder LDPC
 // veloce per FT2. Il dispatcher seleziona NEON su ARM64, AVX2/FMA su x86 o il
 // fallback generico. Il decoder gira nel thread di FT2DecodeWorker e la
 // funzione scrive una variabile atomica.
-extern "C" void fastldpc_set_enabled_c(int on);
-extern "C" int  fastldpc_is_enabled_c();
+extern "C" void superldpc_set_enabled_c(int on);
+extern "C" int  superldpc_is_enabled_c();
 
 class DecodiumBridge : public QObject
 {
@@ -989,7 +989,7 @@ public:
     // Accumulo di energia fra slot ripetuti FT2 (RX), opt-in, spento di
     // default a ogni avvio come DualCarrier: non persiste su QSettings di
     // proposito, e' una funzione non ancora confermata su traffico reale
-    // (vedi Detector/fastldpc/lab/misure/20260907_accumulo_ft2.md).
+    // (vedi Detector/superldpc/lab/misure/20260907_accumulo_ft2.md).
     bool ft2AccumuloEnabled() const { return m_ft2AccumuloEnabled; }
     Q_INVOKABLE void setFt2AccumuloEnabled(bool v);
     // FT2 Log Bridge (client di community.ft2.it): avvio automatico con
@@ -1140,7 +1140,7 @@ public:
     bool   turboFeedbackEnabled() const { return m_turboFeedbackEnabled; }
     void   setTurboFeedbackEnabled(bool v) { if (m_turboFeedbackEnabled != v) { m_turboFeedbackEnabled = v; emit turboFeedbackEnabledChanged(); } }
     bool   fastLdpcEnabled() const { return m_fastLdpcEnabled; }
-    void   setFastLdpcEnabled(bool v) { if (m_fastLdpcEnabled != v) { m_fastLdpcEnabled = v; fastldpc_set_enabled_c(v ? 1 : 0); emit fastLdpcEnabledChanged(); } }
+    void   setFastLdpcEnabled(bool v) { if (m_fastLdpcEnabled != v) { m_fastLdpcEnabled = v; superldpc_set_enabled_c(v ? 1 : 0); emit fastLdpcEnabledChanged(); } }
     bool   advAutoModeEnabled()   const { return m_advAutoModeEnabled; }
     void   setAdvAutoModeEnabled(bool v);
     bool   advNeuralSyncActive()  const { return m_advNeuralSyncActive; }

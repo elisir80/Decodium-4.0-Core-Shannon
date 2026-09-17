@@ -31,6 +31,9 @@ extern "C"
   void ftx_ft2_cpp_dsp_rollout_stage_reset_c ();
   void ftx_ft2_stage7_clravg_c ();
   int ftx_ft2_ap_msg_tentativi_c ();
+  int ftx_ft2_storico_tentativi_c ();
+  int ftx_ft2_storico_candidati_c ();
+  int ftx_ft2_storico_voci_c ();
   int ftx_ft2_ap_msg_successi_c ();
   int ftx_ft2_ap_msg_memoria_c ();
   int ftx_ft2_ap_msg_candidati_c ();
@@ -573,6 +576,9 @@ int main (int argc, char * argv[])
           // state provate, quante hanno decodificato, quanti messaggi in memoria.
           if (std::getenv ("DECODIUM_AP_STORICO_DIAG"))
             {
+              out << "storico: voci=" << ftx_ft2_storico_voci_c ()
+                  << " candidati_forzati=" << ftx_ft2_storico_candidati_c ()
+                  << " tipo7=" << ftx_ft2_storico_tentativi_c () << "\n";
               out << "ap_msg: tentativi=" << ftx_ft2_ap_msg_tentativi_c ()
                   << " successi=" << ftx_ft2_ap_msg_successi_c ()
                   << " memoria=" << ftx_ft2_ap_msg_memoria_c ()

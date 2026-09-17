@@ -147,7 +147,8 @@ tools/*.dxcert
 dxped_handoff/
 build_3*.log
 
-# Laboratorio di fastldpc: banchi di prova, vettori generati e misure.
+# Laboratorio di superldpc: banchi di prova, vettori generati e misure.
 # Ha un repo git suo; i sorgenti che servono al programma stanno in
-# Detector/fastldpc/ e sono versionati normalmente.
+# Detector/superldpc/ e sono versionati normalmente.
+Detector/superldpc/lab/
 Detector/fastldpc/lab/

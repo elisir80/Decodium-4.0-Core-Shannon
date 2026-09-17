@@ -1,6 +1,6 @@
 // ft2_llr_vectors.cpp — vettori .llr dal demodulatore 4-GFSK VERO di FT2.
 //
-// Tutti i vettori in Detector/fastldpc/lab/data/*.llr sono sintetici: li
+// Tutti i vettori in Detector/superldpc/lab/data/*.llr sono sintetici: li
 // genera tools/gen_test.py con un canale BPSK/AWGN e LLR esatti
 // (llr = 2*y/sigma^2). La roadmap del laboratorio chiede da tempo la stessa
 // misura sui LLR VERI, perche' il demodulatore a 4 toni non produce affatto
@@ -17,10 +17,10 @@
 // e scrive il risultato nel formato binario che i banchi del laboratorio
 // (ml_gap2, gate_stats, bench*) gia' leggono.
 //
-// Convenzione dei segni: dentro Decodium LLR positivo = bit 1, in fastldpc
+// Convenzione dei segni: dentro Decodium LLR positivo = bit 1, in superldpc
 // positivo = bit 0 (decodium_bridge.cpp nega all'ingresso). I file .llr sono
 // letti da programmi che includono ft2_decoder.hpp, quindi qui si scrive
-// nella convenzione di fastldpc, gia' negata.
+// nella convenzione di superldpc, gia' negata.
 //
 // Le passate cieche di Stage7 usano cinque insiemi di metrici (llra..llre,
 // ipass 1..5): --set sceglie quale scrivere. "a" e' la prima passata.
@@ -339,7 +339,7 @@ int main (int argc, char* argv[])
                 std::array<float, kCodeword> const& chosen =
                     set == "a" ? llra : set == "b" ? llrb : set == "c" ? llrc : set == "d" ? llrd : llre;
 
-                // Decodium: positivo = bit 1. fastldpc e i file .llr: = bit 0.
+                // Decodium: positivo = bit 1. superldpc e i file .llr: = bit 0.
                 for (int i = 0; i < kCodeword; ++i) all_llr.push_back (-chosen[static_cast<size_t> (i)]);
                 for (int i = 0; i < kCodeword; ++i) all_tx.push_back (truth[static_cast<size_t> (i)]);
                 ++trials;

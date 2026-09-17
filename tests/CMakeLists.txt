@@ -108,8 +108,8 @@ add_executable (ft2_make_test_wav ft2_make_test_wav.cpp)
 target_link_libraries (ft2_make_test_wav wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_dependencies (test_qt_helpers ft2_make_test_wav)
 
-# Raccolta dati per il riaddestramento del gate appreso di fastldpc
-# (FASTLDPC-AI-SPEC-001 SS2b): messaggi FT2 noti attraverso la catena di
+# Raccolta dati per il riaddestramento del gate appreso di superldpc
+# (SUPERLDPC-AI-SPEC-001 SS2b): messaggi FT2 noti attraverso la catena di
 # decodifica vera, con verita' calcolata a mano (vedi ftx_ft2_rvec_c in
 # FtxFt2Stage7.cpp) invece che sul canale AWGN sintetico del pacchetto di
 # ricerca originale. Produce il dataset che train_gate.py si aspetta.
@@ -129,12 +129,12 @@ add_dependencies (test_qt_helpers ft8_gate_dump)
 # Quanto costa una chiamata al decoder LDPC al variare di quante parole porta:
 # serve a decidere se vale la pena raggruppare piu' candidati di sincronismo
 # nello stesso blocco (vedi lab/misure/20260910_corsie_batch.md).
-add_executable (fastldpc_batch_bench fastldpc_batch_bench.cpp)
-target_link_libraries (fastldpc_batch_bench wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
+add_executable (superldpc_batch_bench superldpc_batch_bench.cpp)
+target_link_libraries (superldpc_batch_bench wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 if (MINGW)
-  target_link_options (fastldpc_batch_bench PRIVATE -Wl,--stack,67108864)
+  target_link_options (superldpc_batch_bench PRIVATE -Wl,--stack,67108864)
 endif ()
-add_dependencies (test_qt_helpers fastldpc_batch_bench)
+add_dependencies (test_qt_helpers superldpc_batch_bench)
 
 # Demodulazione iterativa (BICM-ID) per FT2: l'estrinseca del decodificatore
 # torna al demodulatore, che pesa le ipotesi di tono anche per l'altro bit
@@ -145,9 +145,9 @@ add_dependencies (test_qt_helpers fastldpc_batch_bench)
 # (e trovato poco redditizio) su FT2.
 add_executable (ft8_bicm_genie ft8_bicm_genie.cpp)
 target_link_libraries (ft8_bicm_genie wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
-if (DECODIUM_FASTLDPC_X86_TARGET AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if (DECODIUM_SUPERLDPC_X86_TARGET AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options (ft8_bicm_genie PRIVATE -mavx2 -mfma)
-elseif (DECODIUM_FASTLDPC_X86_TARGET AND MSVC)
+elseif (DECODIUM_SUPERLDPC_X86_TARGET AND MSVC)
   target_compile_options (ft8_bicm_genie PRIVATE /arch:AVX2)
 endif ()
 if (MINGW)
@@ -160,9 +160,9 @@ target_link_libraries (ft2_bicm_id wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 # Include ft2_decoder.hpp direttamente (servono i posteriori del min-sum), e
 # senza AVX2 MinSumV3 diventa un alias della versione scalare, che non ha
 # set_alpha: stessi flag che la produzione da' a decodium_bridge.cpp.
-if (DECODIUM_FASTLDPC_X86_TARGET AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if (DECODIUM_SUPERLDPC_X86_TARGET AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options (ft2_bicm_id PRIVATE -mavx2 -mfma)
-elseif (DECODIUM_FASTLDPC_X86_TARGET AND MSVC)
+elseif (DECODIUM_SUPERLDPC_X86_TARGET AND MSVC)
   target_compile_options (ft2_bicm_id PRIVATE /arch:AVX2)
 endif ()
 add_dependencies (test_qt_helpers ft2_bicm_id)
@@ -367,30 +367,30 @@ add_executable (test_nonstandard_call_directed
 target_link_libraries (test_nonstandard_call_directed wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_nonstandard_call_directed COMMAND $<TARGET_FILE:test_nonstandard_call_directed>)
 
-if (DECODIUM_FASTLDPC_ARM64_TARGET)
-  add_executable (test_fastldpc_neon test_fastldpc_neon.cpp)
-  set_target_properties (test_fastldpc_neon PROPERTIES
+if (DECODIUM_SUPERLDPC_ARM64_TARGET)
+  add_executable (test_superldpc_neon test_superldpc_neon.cpp)
+  set_target_properties (test_superldpc_neon PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON)
-  add_test (NAME test_fastldpc_neon COMMAND $<TARGET_FILE:test_fastldpc_neon>)
+  add_test (NAME test_superldpc_neon COMMAND $<TARGET_FILE:test_superldpc_neon>)
 endif ()
 
-if (DECODIUM_FASTLDPC_ARM64_TARGET OR DECODIUM_FASTLDPC_X86_TARGET)
-  add_executable (test_fastldpc_dispatch
-    test_fastldpc_dispatch.cpp
-    ../Detector/fastldpc/decodium_dispatch.cpp)
-  set_target_properties (test_fastldpc_dispatch PROPERTIES
+if (DECODIUM_SUPERLDPC_ARM64_TARGET OR DECODIUM_SUPERLDPC_X86_TARGET)
+  add_executable (test_superldpc_dispatch
+    test_superldpc_dispatch.cpp
+    ../Detector/superldpc/decodium_dispatch.cpp)
+  set_target_properties (test_superldpc_dispatch PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON)
-  if (DECODIUM_FASTLDPC_ARM64_TARGET)
-    target_compile_definitions (test_fastldpc_dispatch
-      PRIVATE DECODIUM_FASTLDPC_NEON_BUILT=1)
+  if (DECODIUM_SUPERLDPC_ARM64_TARGET)
+    target_compile_definitions (test_superldpc_dispatch
+      PRIVATE DECODIUM_SUPERLDPC_NEON_BUILT=1)
   else ()
-    target_compile_definitions (test_fastldpc_dispatch
-      PRIVATE DECODIUM_FASTLDPC_AVX2_BUILT=1)
+    target_compile_definitions (test_superldpc_dispatch
+      PRIVATE DECODIUM_SUPERLDPC_AVX2_BUILT=1)
   endif ()
-  add_test (NAME test_fastldpc_dispatch
-    COMMAND $<TARGET_FILE:test_fastldpc_dispatch>)
+  add_test (NAME test_superldpc_dispatch
+    COMMAND $<TARGET_FILE:test_superldpc_dispatch>)
 endif ()
 
 add_executable (test_secure_settings test_secure_settings.cpp)
@@ -588,11 +588,11 @@ set (_decodium_regression_test_targets
   test_rtlsdr_tuning_plan
   test_ft2link_qml_adapter
   )
-if (TARGET test_fastldpc_neon)
-  list (APPEND _decodium_regression_test_targets test_fastldpc_neon)
+if (TARGET test_superldpc_neon)
+  list (APPEND _decodium_regression_test_targets test_superldpc_neon)
 endif ()
-if (TARGET test_fastldpc_dispatch)
-  list (APPEND _decodium_regression_test_targets test_fastldpc_dispatch)
+if (TARGET test_superldpc_dispatch)
+  list (APPEND _decodium_regression_test_targets test_superldpc_dispatch)
 endif ()
 if (TARGET test_decortty_tx)
   list (APPEND _decodium_regression_test_targets test_decortty_tx)

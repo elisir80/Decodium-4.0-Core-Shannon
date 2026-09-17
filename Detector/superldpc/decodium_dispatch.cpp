@@ -1,4 +1,4 @@
-// decodium_dispatch.cpp — dispatcher portabile per il decoder fastldpc.
+// decodium_dispatch.cpp — dispatcher portabile per il decoder superldpc.
 //
 // Questo file DEVE essere compilato per la CPU minima supportata. Non deve
 // ricevere -mavx2, -mfma o /arch:AVX2: contiene il rilevamento delle capacita'
@@ -40,19 +40,19 @@
 extern "C" void ftx_decode174_91_c (float const*, int, int, int, signed char const*,
                                     signed char*, signed char*, int*, int*, float*);
 
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-extern "C" void fastldpc_simd_set_ft8_mode_c (int);
-extern "C" void fastldpc_simd_decode174_91_c (float const*, int, int, int,
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
+extern "C" void superldpc_simd_set_ft8_mode_c (int);
+extern "C" void superldpc_simd_decode174_91_c (float const*, int, int, int,
                                               signed char const*, signed char*,
                                               signed char*, int*, int*, float*);
-extern "C" void fastldpc_simd_decode174_91_batch_c (int, float const*,
+extern "C" void superldpc_simd_decode174_91_batch_c (int, float const*,
                                                     signed char const*, int, int, int,
                                                     signed char*, signed char*, int*,
                                                     int*, float*);
-extern "C" void fastldpc_simd_gate_dump_open_c (char const*);
-extern "C" void fastldpc_simd_gate_dump_close_c ();
-extern "C" void fastldpc_simd_gate_truth_set_c (signed char const*);
-extern "C" void fastldpc_simd_gate_truth_clear_c ();
+extern "C" void superldpc_simd_gate_dump_open_c (char const*);
+extern "C" void superldpc_simd_gate_dump_close_c ();
+extern "C" void superldpc_simd_gate_truth_set_c (signed char const*);
+extern "C" void superldpc_simd_gate_truth_clear_c ();
 #endif
 
 namespace {
@@ -60,15 +60,15 @@ namespace {
 constexpr int kN = 174;
 
 #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
-#  define DECODIUM_FASTLDPC_X86 1
+#  define DECODIUM_SUPERLDPC_X86 1
 #else
-#  define DECODIUM_FASTLDPC_X86 0
+#  define DECODIUM_SUPERLDPC_X86 0
 #endif
 
 #if defined(__aarch64__) || defined(_M_ARM64)
-#  define DECODIUM_FASTLDPC_ARM64 1
+#  define DECODIUM_SUPERLDPC_ARM64 1
 #else
-#  define DECODIUM_FASTLDPC_ARM64 0
+#  define DECODIUM_SUPERLDPC_ARM64 0
 #endif
 
 struct CpuCapabilities {
@@ -94,7 +94,7 @@ struct CpuCapabilities {
     }
 };
 
-#if DECODIUM_FASTLDPC_X86
+#if DECODIUM_SUPERLDPC_X86
 struct CpuidRegisters {
     std::uint32_t eax = 0;
     std::uint32_t ebx = 0;
@@ -180,7 +180,7 @@ std::string detectX86CpuModel (std::uint32_t maxExtendedLeaf,
 }
 #endif
 
-#if DECODIUM_FASTLDPC_ARM64
+#if DECODIUM_SUPERLDPC_ARM64
 bool detectArmNeon ()
 {
 #if defined(__APPLE__)
@@ -203,7 +203,7 @@ bool detectArmNeon ()
 }
 #endif
 
-#if !DECODIUM_FASTLDPC_X86
+#if !DECODIUM_SUPERLDPC_X86
 std::string nonX86Model ()
 {
 #if defined(__APPLE__)
@@ -230,14 +230,14 @@ std::string nonX86Model ()
 CpuCapabilities detectCpuCapabilities ()
 {
     CpuCapabilities result;
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT)
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT)
     result.avx2BackendBuilt = true;
 #endif
-#if defined(DECODIUM_FASTLDPC_NEON_BUILT)
+#if defined(DECODIUM_SUPERLDPC_NEON_BUILT)
     result.neonBackendBuilt = true;
 #endif
 
-#if DECODIUM_FASTLDPC_X86
+#if DECODIUM_SUPERLDPC_X86
     result.x86 = true;
     CpuidRegisters leaf0;
     if (!cpuid (0, 0, leaf0)) {
@@ -267,7 +267,7 @@ CpuCapabilities detectCpuCapabilities ()
         result.avx2 = (leaf7.ebx & (1u << 5)) != 0;
 #else
     result.model = nonX86Model ();
-#if DECODIUM_FASTLDPC_ARM64
+#if DECODIUM_SUPERLDPC_ARM64
     result.arm64 = true;
     result.neon = detectArmNeon ();
 #endif
@@ -288,7 +288,7 @@ thread_local bool g_ft8Mode = false;
 bool disabledByEnvironment ()
 {
     static bool const disabled = [] {
-        char const* raw = std::getenv ("DECODIUM_FT2_DISABLE_FASTLDPC");
+        char const* raw = std::getenv ("DECODIUM_FT2_DISABLE_SUPERLDPC");
         return raw && std::atoi (raw) != 0;
     }();
     return disabled;
@@ -299,8 +299,8 @@ bool fastLdpcRequested ()
     // La variabile d'ambiente e' l'interruttore di emergenza usato quando si
     // deve avviare Decodium su una CPU problematica. Deve avere precedenza
     // assoluta: durante il caricamento delle impostazioni la GUI chiama
-    // fastldpc_set_enabled_c() con il valore salvato e, in precedenza, quel
-    // valore poteva riattivare il backend nonostante DISABLE_FASTLDPC=1.
+    // superldpc_set_enabled_c() con il valore salvato e, in precedenza, quel
+    // valore poteva riattivare il backend nonostante DISABLE_SUPERLDPC=1.
     if (disabledByEnvironment ()) return false;
     int const ui = g_enabledFromUi.load (std::memory_order_relaxed);
     return ui >= 0 ? ui != 0 : true;
@@ -341,7 +341,7 @@ char const* backendDescription (CpuCapabilities const& cpu)
 char const* selectedDecoder (CpuCapabilities const& cpu, bool selected)
 {
     if (!selected) return "original-generic";
-    return cpu.arm64 ? "fastldpc-neon" : "fastldpc-avx2-fma";
+    return cpu.arm64 ? "superldpc-neon" : "superldpc-avx2-fma";
 }
 
 void logDecoderSelection (char const* trigger, bool force)
@@ -358,7 +358,7 @@ void logDecoderSelection (char const* trigger, bool force)
     CpuCapabilities const& cpu = cpuCapabilities ();
     bool const selected = useFastLdpc ();
     std::fprintf (stderr,
-                  "[fastldpc] CPU=\"%s\" x86=%d ARM64=%d AVX=%d AVX2=%d FMA=%d "
+                  "[superldpc] CPU=\"%s\" x86=%d ARM64=%d AVX=%d AVX2=%d FMA=%d "
                   "OSXSAVE=%d OS_AVX_STATE=%d NEON=%d backend=%s decoder=%s "
                   "trigger=%s reason=\"%s\"\n",
                   cpu.model.c_str (), cpu.x86 ? 1 : 0, cpu.arm64 ? 1 : 0,
@@ -381,24 +381,24 @@ void initialiseOutputs (signed char* message91, signed char* cw, int* ntype,
 
 } // namespace
 
-extern "C" void fastldpc_set_enabled_c (int on)
+extern "C" void superldpc_set_enabled_c (int on)
 {
     g_enabledFromUi.store (on ? 1 : 0, std::memory_order_relaxed);
     logDecoderSelection ("settings", true);
 }
 
-extern "C" int fastldpc_is_enabled_c ()
+extern "C" int superldpc_is_enabled_c ()
 {
     logDecoderSelection ("status", false);
     return useFastLdpc () ? 1 : 0;
 }
 
-extern "C" void fastldpc_set_ft8_mode_c (int on)
+extern "C" void superldpc_set_ft8_mode_c (int on)
 {
     g_ft8Mode = on != 0;
 }
 
-extern "C" void fastldpc_decode174_91_c (float const* llrIn, int Keff, int maxosd,
+extern "C" void superldpc_decode174_91_c (float const* llrIn, int Keff, int maxosd,
                                          int norder, signed char const* apmaskIn,
                                          signed char* message91Out, signed char* cwOut,
                                          int* ntypeOut, int* nharderrorOut, float* dminOut)
@@ -407,10 +407,10 @@ extern "C" void fastldpc_decode174_91_c (float const* llrIn, int Keff, int maxos
     if (!llrIn || !apmaskIn) return;
 
     logDecoderSelection ("decode", false);
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
     if (Keff == 91 && useFastLdpc ()) {
-        fastldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
-        fastldpc_simd_decode174_91_c (llrIn, Keff, maxosd, norder, apmaskIn,
+        superldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
+        superldpc_simd_decode174_91_c (llrIn, Keff, maxosd, norder, apmaskIn,
                                     message91Out, cwOut, ntypeOut,
                                     nharderrorOut, dminOut);
         return;
@@ -420,7 +420,7 @@ extern "C" void fastldpc_decode174_91_c (float const* llrIn, int Keff, int maxos
                         cwOut, ntypeOut, nharderrorOut, dminOut);
 }
 
-extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llrIn,
+extern "C" void superldpc_decode174_91_batch_c (int n, float const* llrIn,
                                                 signed char const* apmaskIn,
                                                 int Keff, int maxosd, int norder,
                                                 signed char* message91Out,
@@ -430,10 +430,10 @@ extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llrIn,
     if (n <= 0 || !llrIn || !apmaskIn) return;
 
     logDecoderSelection ("batch-decode", false);
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
     if (Keff == 91 && useFastLdpc ()) {
-        fastldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
-        fastldpc_simd_decode174_91_batch_c (n, llrIn, apmaskIn, Keff, maxosd,
+        superldpc_simd_set_ft8_mode_c (g_ft8Mode ? 1 : 0);
+        superldpc_simd_decode174_91_batch_c (n, llrIn, apmaskIn, Keff, maxosd,
                                           norder, message91Out, cwOut, ntypeOut,
                                           nharderrorOut, dminOut);
         return;
@@ -441,7 +441,7 @@ extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llrIn,
 #endif
 
     for (int word = 0; word < n; ++word) {
-        fastldpc_decode174_91_c (llrIn + static_cast<std::size_t> (word) * kN,
+        superldpc_decode174_91_c (llrIn + static_cast<std::size_t> (word) * kN,
                                  Keff, maxosd, norder,
                                  apmaskIn + static_cast<std::size_t> (word) * kN,
                                  message91Out
@@ -457,34 +457,34 @@ extern "C" void fastldpc_decode174_91_batch_c (int n, float const* llrIn,
 // Raccolta dati per il riaddestramento del gate (tests/ft2_gate_dump.cpp):
 // niente da fare senza il backend SIMD, non esiste un gate nel decoder
 // originale a cui agganciarsi.
-extern "C" void fastldpc_gate_dump_open_c (char const* path)
+extern "C" void superldpc_gate_dump_open_c (char const* path)
 {
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_dump_open_c (path);
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
+    superldpc_simd_gate_dump_open_c (path);
 #else
     (void) path;
 #endif
 }
 
-extern "C" void fastldpc_gate_dump_close_c ()
+extern "C" void superldpc_gate_dump_close_c ()
 {
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_dump_close_c ();
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
+    superldpc_simd_gate_dump_close_c ();
 #endif
 }
 
-extern "C" void fastldpc_gate_truth_set_c (signed char const* cw174)
+extern "C" void superldpc_gate_truth_set_c (signed char const* cw174)
 {
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_truth_set_c (cw174);
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
+    superldpc_simd_gate_truth_set_c (cw174);
 #else
     (void) cw174;
 #endif
 }
 
-extern "C" void fastldpc_gate_truth_clear_c ()
+extern "C" void superldpc_gate_truth_clear_c ()
 {
-#if defined(DECODIUM_FASTLDPC_AVX2_BUILT) || defined(DECODIUM_FASTLDPC_NEON_BUILT)
-    fastldpc_simd_gate_truth_clear_c ();
+#if defined(DECODIUM_SUPERLDPC_AVX2_BUILT) || defined(DECODIUM_SUPERLDPC_NEON_BUILT)
+    superldpc_simd_gate_truth_clear_c ();
 #endif
 }

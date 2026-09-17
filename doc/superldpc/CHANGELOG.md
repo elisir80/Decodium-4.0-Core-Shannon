@@ -1,4 +1,4 @@
-# fastldpc — cronologia e misure, v1.0.590 → v1.0.596
+# superldpc — cronologia e misure, v1.0.590 → v1.0.596
 
 **Italiano** · [English below](#english)
 
@@ -58,7 +58,7 @@ discordanze, soglie coincidenti.
 
 ### FT8, banco appaiato sugli stessi segnali
 
-| SNR | decodificatore originale | fastldpc |
+| SNR | decodificatore originale | superldpc |
 |---|---|---|
 | −20 dB | 6/6 | 6/6 |
 | −21 dB | 2/6 | 3/6 |
@@ -71,20 +71,20 @@ Una sola discordanza su 18 prove, p = 1,00 al test dei segni: **indistinguibili*
 | | decodifiche | nominativi distinti |
 |---|---|---|
 | decodificatore originale | 663 | 122 |
-| fastldpc | 711 | 123 |
+| superldpc | 711 | 123 |
 
 Stesse stazioni. Il decodificatore da solo non aggiunge nulla.
 
 ### FT8, 19 slot registrati off-air — qui la differenza esiste
 
-| banda | originale | fastldpc | perché |
+| banda | originale | superldpc | perché |
 |---|---|---|---|
 | 40 m, affollata | 198 distinti in 306 s | **250 in 75 s** | l'originale impiega ~16 s per slot contro una scadenza di 8: viene troncato a metà della lista dei candidati |
 | 80 m, scarica | **56** distinti in 306 s | 52 in 61 s | qui il tempo basta a entrambi, e la propagazione esatta batte l'approssimazione min-sum sui segnali marginali |
 
 Le quattro decodifiche che solo l'originale trovava in 80 metri erano stazioni
 autentiche — `DO8JB/YU1LD`, `PE1NAO/M7XRI`, `RA3VME/CT3MD`, `W3UCA/DA6IT` — e
-l'originale non perdeva nulla di ciò che trovava fastldpc: era un sovrainsieme.
+l'originale non perdeva nulla di ciò che trovava superldpc: era un sovrainsieme.
 
 Non esiste un criterio a priori per scegliere il decodificatore: dipende da
 quante stazioni ci sono da trovare, cosa che non si sa prima di cercarle. Il
@@ -94,7 +94,7 @@ rumore.
 
 ### La passata di recupero
 
-Da qui la soluzione: si usano entrambi. fastldpc arriva in fondo alla lista e
+Da qui la soluzione: si usano entrambi. superldpc arriva in fondo alla lista e
 garantisce di non perdere nulla per scadenza; sui candidati che non hanno dato
 nulla si spende il tempo risparmiato per un secondo tentativo con la
 propagazione esatta.
@@ -106,7 +106,7 @@ propagazione esatta.
 
 Recupera tre delle quattro marginali in banda scarica e mantiene intatto il
 vantaggio in banda piena, al prezzo del 30-50% di tempo in più rispetto al solo
-fastldpc — restando tre volte più rapido dell'originale. Il numero di recuperi
+superldpc — restando tre volte più rapido dell'originale. Il numero di recuperi
 per ciclo ha un tetto (`DECODIUM_FT8_CLASSIC_RESCUE`, 0 disattiva) perché
 ognuno costa come un intero slot del decodificatore lento.
 
@@ -299,7 +299,7 @@ riparazione.
 
 | variabile | effetto |
 |---|---|
-| `DECODIUM_FT8_FASTLDPC=0` | FT8 torna al decodificatore originale |
+| `DECODIUM_FT8_SUPERLDPC=0` | FT8 torna al decodificatore originale |
 | `DECODIUM_FT8_BATCH=0` | FT8 decodifica una passata alla volta |
 | `DECODIUM_FT8_CLASSIC_RESCUE=n` | tetto dei recuperi per ciclo, 0 disattiva |
 | `DECODIUM_FT8_SYNCMIN_SCALE=x` | scala la soglia di aggancio dei candidati |
@@ -307,8 +307,8 @@ riparazione.
 | `DECODIUM_LDPC_MAX_HARD=n` | soglia sui bit ribaltati |
 | `DECODIUM_LDPC_AP_CHECK=0` | disattiva il controllo di coerenza con l'AP |
 | `DECODIUM_LDPC_GATE_LOG=1` | mostra che cosa i filtri scartano e perché |
-| `DECODIUM_FT2_DISABLE_FASTLDPC=1` | FT2 torna al decodificatore originale |
-| `FASTLDPC_TIPI=tutti` | non esclude alcun tipo di messaggio |
+| `DECODIUM_FT2_DISABLE_SUPERLDPC=1` | FT2 torna al decodificatore originale |
+| `SUPERLDPC_TIPI=tutti` | non esclude alcun tipo di messaggio |
 
 ---
 
@@ -330,9 +330,9 @@ dichiarata come non conclusiva.
 
 <a name="english"></a>
 
-# fastldpc — history and measurements, v1.0.590 → v1.0.596
+# superldpc — history and measurements, v1.0.590 → v1.0.596
 
-[Italiano sopra](#fastldpc--cronologia-e-misure-v10590--v10596) · **English**
+[Italiano sopra](#superldpc--cronologia-e-misure-v10590--v10596) · **English**
 
 > What was introduced, what was withdrawn and why, with the numbers behind each
 > decision. Measurements come from synthetic benches, from off-air recordings on
@@ -370,7 +370,7 @@ indistinguishable. Live traffic over two seven-minute windows: 711 decodes from
 
 On 19 recorded slots the difference appears:
 
-| band | original | fastldpc |
+| band | original | superldpc |
 |---|---|---|
 | 40 m, busy | 198 distinct in 306 s | **250 in 75 s** |
 | 80 m, quiet | **56** distinct in 306 s | 52 in 61 s |
@@ -380,7 +380,7 @@ and is cut off partway through the candidate list. On a quiet band there is time
 for both, and exact belief propagation beats the min-sum approximation on
 marginal signals — the four extra decodes were genuine stations.
 
-The recovery pass runs both: fastldpc reaches the end of the list, then the
+The recovery pass runs both: superldpc reaches the end of the list, then the
 original re-decodes the candidates that produced nothing. On 80 m it recovers
 three of the four marginals (55 distinct, 145 decodes, 91 s against 306); on
 40 m the advantage is untouched (250 distinct, 512 decodes, 98 s).

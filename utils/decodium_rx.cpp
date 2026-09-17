@@ -1008,7 +1008,7 @@ int main (int argc, char* argv[])
 
   Screen screen {options, style};
 
-  // I decoder scrivono la loro diagnostica (Boost.Log, fastldpc) su stderr:
+  // I decoder scrivono la loro diagnostica (Boost.Log, superldpc) su stderr:
   // in un terminale coprirebbe le righe decodificate. Va in un file accanto
   // all'ALL.TXT, salvo --verbose. Gli errori di questo programma vanno su stdout.
   if (!parser.isSet (verboseOpt))

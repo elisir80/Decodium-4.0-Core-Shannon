@@ -1,5 +1,5 @@
-// ft8_gate_dump.cpp — banco di raccolta dati per il gate appreso di fastldpc,
-// versione FT8 (FASTLDPC-AI-SPEC-001 SS2b). Fratello di ft2_gate_dump.cpp:
+// ft8_gate_dump.cpp — banco di raccolta dati per il gate appreso di superldpc,
+// versione FT8 (SUPERLDPC-AI-SPEC-001 SS2b). Fratello di ft2_gate_dump.cpp:
 // stesso principio (WAV con messaggio noto attraverso la catena di
 // decodifica vera, confronto col codeword atteso), ma per FT8, che ha il
 // proprio banco di pesi separato (GATE_*_FT8 in gate_weights.hpp, vedi
@@ -54,10 +54,10 @@ extern "C"
   void ftx_ft8_stage4_set_supplemental_c (int supplemental);
   int ftx_encode_ft8_candidate_c (char const* message37, char* msgsent_out,
                                   int* itone_out, signed char* codeword_out);
-  void fastldpc_gate_dump_open_c (char const* path);
-  void fastldpc_gate_dump_close_c ();
-  void fastldpc_gate_truth_set_c (signed char const* cw174);
-  void fastldpc_gate_truth_clear_c ();
+  void superldpc_gate_dump_open_c (char const* path);
+  void superldpc_gate_dump_close_c ();
+  void superldpc_gate_truth_set_c (signed char const* cw174);
+  void superldpc_gate_truth_clear_c ();
 }
 
 namespace {
@@ -333,7 +333,7 @@ int main (int argc, char* argv[])
       qputenv ("DECODIUM_LDPC_GATE", "1");
       qputenv ("DECODIUM_LDPC_GATE_RELAX", QByteArray::number (relax));
 
-      fastldpc_gate_dump_open_c (out_path.toLocal8Bit ().constData ());
+      superldpc_gate_dump_open_c (out_path.toLocal8Bit ().constData ());
 
       QTextStream out {stdout};
       long long trials = 0, decodes = 0, pileup_trials = 0;
@@ -383,9 +383,9 @@ int main (int argc, char* argv[])
             std::vector<qint16> const pcm =
                 make_wav_samples (tones.data (), freq, 0.85f, 6000, static_cast<float> (snr_db),
                                   has_noise, seed, interferers);
-            fastldpc_gate_truth_set_c (truth.data ());
+            superldpc_gate_truth_set_c (truth.data ());
             int const n = run_decode (pcm, depth, freq);
-            fastldpc_gate_truth_clear_c ();
+            superldpc_gate_truth_clear_c ();
             ++trials;
             decodes += n;
           };
@@ -401,7 +401,7 @@ int main (int argc, char* argv[])
           ++message_index;
         }
 
-      fastldpc_gate_dump_close_c ();
+      superldpc_gate_dump_close_c ();
       out << "totale: " << trials << " prove -> " << out_path << '\n';
       return 0;
     }

@@ -26,6 +26,11 @@
 #include "Detector/CallsignHash28.h"  // 1.0.294 — hash28 condiviso per AP cache
 #include "Detector/FtxApStorico.hpp"   // tipo 8: il messaggio intero sentito due slot fa
 
+// I 29 bit che dicono "il mittente e' questo nominativo" (Modulator/
+// FtxMessageEncoder.cpp). FT2 usa lo stesso pack77 di FT8, quindi la stessa
+// funzione vale per entrambi: qui i bit vanno poi mescolati con rvec.
+extern "C" int ftx_ft8_ap_bits_mittente_c (char const* nominativo, int bits[29]);
+
 namespace
 {
 
@@ -81,8 +86,8 @@ constexpr int kFt2FoxMax = 1000;
 //
 // Serve a separare il demodulatore dal decodificatore: Decodium produce gli
 // LLR veri, con la sua sincronizzazione e su rumore vero, e il confronto fra
-// decodificatori (min-sum, AP, liste, fastldpc) si fa dopo, offline, sugli
-// STESSI candidati. Formato e convenzioni: doc/fastldpc/llr_dump.md.
+// decodificatori (min-sum, AP, liste, superldpc) si fa dopo, offline, sugli
+// STESSI candidati. Formato e convenzioni: doc/superldpc/llr_dump.md.
 //
 // Un record per candidato, little-endian, 735 byte:
 //   uint32  magic 0x4C4C5231 ("LLR1")
@@ -95,7 +100,7 @@ constexpr int kFt2FoxMax = 1000;
 //   uint8   messaggio 77 bit impacchettati in 10 byte (primo bit = bit 7 del
 //           primo byte; zeri se l'esito e' 0)
 //   float   llr[174] col segno del chiamante: POSITIVO = bit 1, come vuole
-//           ftx_decode174_91_c (gli script di fastldpc usano il segno opposto).
+//           ftx_decode174_91_c (gli script di superldpc usano il segno opposto).
 constexpr std::uint32_t kLlrDumpMagic = 0x4C4C5231u;
 constexpr std::uint32_t kLlrDumpVersione = 1u;
 constexpr size_t kLlrDumpRecord = 4 + 4 + 8 + 4 + 4 + 4 + 1 + 10 + 4 * 174;
@@ -213,18 +218,18 @@ extern "C"
   // resta impostata fino alla chiamata successiva, quindi va dichiarata
   // esplicitamente anche qui: un thread che avesse gia' decodificato FT8
   // lascerebbe altrimenti a FT2 le soglie larghe di FT8.
-  void fastldpc_set_ft8_mode_c (int on);
-  // fastldpc (Detector/fastldpc/): stessa firma, backend AVX2/FMA su x86 o
+  void superldpc_set_ft8_mode_c (int on);
+  // superldpc (Detector/superldpc/): stessa firma, backend AVX2/FMA su x86 o
   // NEON su ARM64. Ricade da solo su ftx_decode174_91_c se il backend SIMD
   // richiesto non e' disponibile o se Keff != 91.
-  void fastldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
+  void superldpc_decode174_91_c (float const* llr, int Keff, int maxosd, int norder,
                                 signed char const* apmask, signed char* message91, signed char* cw,
                                 int* ntype, int* nharderror, float* dmin);
   // Versione a blocco: decodifica n candidati in una volta, cosi' il min-sum
   // riempie le corsie SIMD AVX2 o NEON invece di lasciarle inutilizzate.
   // llr e apmask sono [n][174] contigui, le uscite [n] o [n][...].
 
-  void fastldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
+  void superldpc_decode174_91_batch_c (int n, float const* llr, signed char const* apmask,
 
                                       int Keff, int maxosd, int norder,
 
@@ -1043,6 +1048,63 @@ void fill_scrambled_symbol (std::array<int, 29>& dest,
     }
 }
 
+// ---------------------------------------------------------------------------
+// MEMORIA DEI MITTENTI IN FT2 (opt-in: DECODIUM_FT2_STORICO=1). Vedi il
+// commento esteso accanto a ft2_storico_registra, piu' in basso.
+inline bool ft2_storico_attivo ()
+{
+  static bool const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_STORICO");
+    return e && e[0] != 0 && e[0] != '0';
+  }();
+  return v;
+}
+
+std::atomic<int> g_ft2_storico_voci {0};
+std::atomic<int> g_ft2_storico_candidati {0};
+std::atomic<int> g_ft2_storico_tentativi {0};
+
+// Due ipotesi per candidato: sul traffico FT2 vero la media e' 1,7.
+constexpr int kFt2StoricoMaxIpotesi = 2;
+
+// L'a priori a 29 bit sul mittente (tipo 7) e' separato dalla forzatura del
+// candidato, perche' i due valgono in modo molto diverso. Banco a sequenze del
+// 17/9, 240 slot: la sola forzatura porta le decodifiche da 164 a 183 (+11,6%),
+// il tipo 7 aggiunge altre 2 righe e costa DUE passate del decodificatore per
+// candidato. Acceso a parte con DECODIUM_FT2_STORICO_AP=1.
+inline bool ft2_storico_ap_attivo ()
+{
+  static bool const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_STORICO_AP");
+    return e && e[0] != 0 && e[0] != '0';
+  }();
+  return v;
+}
+
+// +-5 Hz e dieci cicli: gli stessi valori tarati su FT8 e confermati sul
+// traffico FT2 (86,2% di copertura, 1,7 ipotesi per candidato).
+// DECODIUM_FT2_STORICO_HZ li allarga, per misurare se in FT2 le stazioni si
+// spostano piu' che in FT8.
+inline float ft2_storico_hz ()
+{
+  static float const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_STORICO_HZ");
+    float const f = e ? static_cast<float> (std::atof (e)) : 5.0f;
+    return std::max (1.0f, std::min (f, 100.0f));
+  }();
+  return v;
+}
+
+inline int ft2_storico_memoria ()
+{
+  static int const v = [] {
+    char const* e = std::getenv ("DECODIUM_FT2_STORICO_CICLI");
+    int const n = e ? std::atoi (e) : 10;
+    return std::max (1, std::min (n, 60));
+  }();
+  return v;
+}
+
 void ensure_symbol_tables (Stage7State& state)
 {
   if (state.symbol_ready)
@@ -1118,6 +1180,28 @@ void ensure_symbol_tables (Stage7State& state)
                             : std::array<int, 5> {{3, 4, 5, 6, 0}};
   state.naptypes[4] = state.naptypes[3];
   state.naptypes[5] = {{3, 1, 2, 0, 0}};
+
+  // TIPO 7 IN FT2: il mittente e' una stazione sentita di recente qui.
+  // Riempie gli slot liberi della riga, cosi' le passate in piu' sono due e
+  // non tre come in FT8: sul traffico FT2 vero le ipotesi per candidato sono
+  // 1,7 in media, la terza servirebbe di rado. Ai livelli 3 e 4 (QSO mio in
+  // corso) la riga e' gia' piena e il tipo 7 non entra.
+  if (ft2_storico_attivo () && ft2_storico_ap_attivo ())
+    {
+      for (size_t riga = 0; riga < state.naptypes.size (); ++riga)
+        {
+          int aggiunti = 0;
+          for (size_t k = 0; k < state.naptypes[riga].size (); ++k)
+            {
+              if (state.naptypes[riga][k] == 0 && aggiunti < kFt2StoricoMaxIpotesi)
+                {
+                  state.naptypes[riga][k] = 7;
+                  ++aggiunti;
+                  state.nappasses[riga] = static_cast<int> (k) + 1;
+                }
+            }
+        }
+    }
   state.symbol_ready = true;
 }
 
@@ -2274,6 +2358,34 @@ float ft2_ap_msg_nd_max ()
 }
 
 // Registra i 77 bit (de-scrambled) di una riga emessa, se il tipo 8 e' acceso.
+// ---------------------------------------------------------------------------
+// MEMORIA DEI MITTENTI IN FT2 (opt-in: DECODIUM_FT2_STORICO=1)
+//
+// FT8 ha da tempo l'elenco delle stazioni sentite di recente a ogni frequenza
+// (FtxApStorico) e ci costruisce sopra l'a priori tipo 7, che al banco vale un
+// terzo delle righe. FT2 quella memoria non ce l'ha mai avuta: tiene solo i
+// MESSAGGI interi degli ultimi 25-35 s (tipo 8).
+//
+// Sul traffico FT2 vero (7355 decodifiche, lab/tools/pool_ipotesi.py) il
+// mittente era gia' stato sentito entro +-5 Hz nei dieci cicli precedenti
+// nell'86,2% dei casi, con 1,7 ipotesi per candidato: piu' copertura e meta'
+// del costo di FT8 (83% con 2,9 ipotesi). Uno slot FT2 dura 3,75 s, quindi
+// dieci cicli sono 37 s: le stazioni non fanno in tempo a spostarsi.
+//
+// Qui si registra soltanto. Chi legge la memoria arriva dopo, misurato a parte.
+
+void ft2_storico_registra (float freq, QByteArray const& messaggio)
+{
+  if (!ft2_storico_attivo ())
+    {
+      return;
+    }
+  decodium::apstorico::registra_da_messaggio (
+      decodium::apstorico::ciclo_corrente_ft2 (), freq, messaggio.constData (),
+      decodium::apstorico::kModoFt2);
+  g_ft2_storico_voci.fetch_add (1, std::memory_order_relaxed);
+}
+
 void ft2_ap_msg_registra (float freq, int nap, std::array<signed char, kFt2Bits> const& bits)
 {
   // Registra se un QUALUNQUE meccanismo che legge questo archivio e' acceso:
@@ -2313,18 +2425,27 @@ bool prepare_ap_pass (Stage7State const& state, ApSetup const& setup,
     }
 
   int const napwid = 75;
-  if (ncontest <= 5 && iaptype >= 3
-      && std::fabs (f_for_ap - static_cast<float> (nfqso)) > static_cast<float> (napwid))
+  // I tre cancelli qui sotto riguardano gli a priori legati al QSO in corso,
+  // che hanno senso solo vicino alla frequenza del corrispondente e solo se i
+  // due nominativi sono noti. Il tipo 7 non dipende da nessuno dei due e vale
+  // su TUTTA la banda -- ed e' anzi li' che serve: in FT8 lo stesso controllo
+  // lo scartava per ogni candidato lontano dal QSO, cioe' quasi tutti, e il
+  // meccanismo sembrava inutile solo per questo.
+  if (iaptype != 7)
     {
-      return false;
-    }
-  if (iaptype >= 2 && setup.apbits[0] > 1)
-    {
-      return false;
-    }
-  if (iaptype >= 3 && setup.apbits[29] > 1)
-    {
-      return false;
+      if (ncontest <= 5 && iaptype >= 3
+          && std::fabs (f_for_ap - static_cast<float> (nfqso)) > static_cast<float> (napwid))
+        {
+          return false;
+        }
+      if (iaptype >= 2 && setup.apbits[0] > 1)
+        {
+          return false;
+        }
+      if (iaptype >= 3 && setup.apbits[29] > 1)
+        {
+          return false;
+        }
     }
 
   if (iaptype == 1)
@@ -2372,6 +2493,46 @@ bool prepare_ap_pass (Stage7State const& state, ApSetup const& setup,
               llr[static_cast<size_t> (i + 1)] = apmag * static_cast<float> (setup.apmy_ru[static_cast<size_t> (i)]);
             }
         }
+    }
+
+  // TIPO 7 -- il mittente e' una stazione sentita di recente a questa
+  // frequenza. Ventinove bit, l'ipotesi piu' sicura che esista (in FT8
+  // un'ipotesi sbagliata a questo livello viene accettata 0-1 volte su 20000),
+  // e non dipende dal QSO in corso: salta i controlli su mycall/hiscall.
+  // I bit vengono dal pack77 e vanno mescolati con rvec, come tutto il resto
+  // in FT2.
+  if (iaptype == 7)
+    {
+      int slot = 0;
+      for (size_t k = 0; k + 6 < static_cast<size_t> (pass_index); ++k)
+        {
+          if (state.naptypes[static_cast<size_t> (qso_progress)][k] == 7) ++slot;
+        }
+      char trovati[kFt2StoricoMaxIpotesi][decodium::apstorico::kLunghezzaCall] {};
+      int const n = decodium::apstorico::vicini (
+          decodium::apstorico::ciclo_corrente_ft2 (), f_for_ap, ft2_storico_hz (),
+          ft2_storico_memoria (), kFt2StoricoMaxIpotesi, trovati,
+          decodium::apstorico::kModoFt2);
+      if (slot >= n)
+        {
+          return false;
+        }
+      int bits[29] {};
+      if (ftx_ft8_ap_bits_mittente_c (trovati[slot], bits) != 1)
+        {
+          return false;              // nominativo non codificabile: si salta
+        }
+      apmask.fill (0);
+      for (int i = 0; i < 29; ++i)
+        {
+          size_t const idx = static_cast<size_t> (29 + i);
+          int const msgbit = bits[i] > 0 ? 1 : 0;
+          int const mescolato = (msgbit + state.rvec[idx]) & 1;
+          apmask[idx] = 1;
+          llr[idx] = apmag * static_cast<float> (2 * mescolato - 1);
+        }
+      g_ft2_storico_tentativi.fetch_add (1, std::memory_order_relaxed);
+      return true;
     }
 
   if (iaptype == 3)
@@ -2729,8 +2890,8 @@ DecodePassResult run_decode_passes (Stage7State const& state, ApSetup const& set
   std::vector<float> batch_dmin (static_cast<size_t> (nprep));
 
   // Taratura FT2: soglia stretta sui bit ribaltati, contro i fantasmi.
-  fastldpc_set_ft8_mode_c (0);
-  fastldpc_decode174_91_batch_c (nprep, batch_llr.data (), batch_apmask.data (),
+  superldpc_set_ft8_mode_c (0);
+  superldpc_decode174_91_batch_c (nprep, batch_llr.data (), batch_apmask.data (),
                                  91, maxosd, 3,
                                  batch_msg.data (), batch_cw.data (),
                                  batch_ntype.data (), batch_nhard.data (),
@@ -2889,6 +3050,8 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
   Stage7State& state = stage7_state ();
   ensure_tweaks (state);
   ensure_symbol_tables (state);
+  // Un'invocazione del decodificatore = uno slot, per la memoria dei mittenti.
+  decodium::apstorico::avanza_ciclo_ft2 ();
   // Marca temporale unica per tutti i candidati di questo ciclo (dump LLR).
   double const inizio_ciclo_utc = llr_dump_adesso_utc ();
   decodium::txmsg::Decode77Context context = make_decode77_context (mycall, hiscall);
@@ -3078,6 +3241,50 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
               ++ncand;
               g_ft2_msg_candidati.fetch_add (1);
               stage7_debug_logf ("pass=%d candidato atteso f=%.1f", isp, fm);
+            }
+        }
+
+      // Stessa idea, ma dalla memoria dei MITTENTI invece che dei messaggi
+      // interi (DECODIUM_FT2_STORICO=1). Copre molto di piu': il messaggio
+      // intero si ritrova nel 48,8% dei casi e solo entro 25-35 s, il mittente
+      // nell'86,2% ed entro dieci cicli, cioe' 37 s. Il banco del 16/9 ha
+      // mostrato che cio' che si perde lo perde l'aggancio, non il
+      // decodificatore: qui si da' un candidato dove una stazione e' attesa,
+      // esente dai cancelli del sincronismo come quelli del tipo 8.
+      if (ft2_storico_attivo () && ndepth0 != 1)
+        {
+          std::array<float, 24> fmit {};
+          int const nmit = decodium::apstorico::frequenze_mittenti (
+              decodium::apstorico::ciclo_corrente_ft2 (), ft2_storico_memoria (),
+              ft2_storico_hz (), fmit.data (), static_cast<int> (fmit.size ()),
+              decodium::apstorico::kModoFt2);
+          for (int k = 0; k < nmit && ncand < kFt2MaxCand; ++k)
+            {
+              float const fm = fmit[static_cast<size_t> (k)];
+              if (fm < static_cast<float> (nfa) || fm > static_cast<float> (nfb))
+                {
+                  continue;
+                }
+              int vicino = -1;
+              for (int j = 0; j < ncand; ++j)
+                {
+                  if (std::fabs (candidate[static_cast<size_t> (j * 2)] - fm) <= ft2_storico_hz ())
+                    {
+                      vicino = j;
+                      break;
+                    }
+                }
+              if (vicino >= 0)
+                {
+                  cand_atteso[static_cast<size_t> (vicino)] = 1;
+                  continue;
+                }
+              candidate[static_cast<size_t> (ncand * 2)] = fm;
+              candidate[static_cast<size_t> (ncand * 2 + 1)] = 1.0f;
+              cand_atteso[static_cast<size_t> (ncand)] = 1;
+              ++ncand;
+              g_ft2_storico_candidati.fetch_add (1, std::memory_order_relaxed);
+              stage7_debug_logf ("pass=%d candidato dal mittente f=%.1f", isp, fm);
             }
         }
 
@@ -3476,7 +3683,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
 
               // Gli LLR di questo candidato, con l'esito che il decodificatore
               // di oggi ne ha tratto: il confronto con altri decodificatori si
-              // fa offline, sugli stessi dati (doc/fastldpc/llr_dump.md).
+              // fa offline, sugli stessi dati (doc/superldpc/llr_dump.md).
               llr_dump_scrivi (inizio_ciclo_utc, f1,
                                static_cast<float> (ibest) * kFt2FreqDtScale - 0.5f,
                                smax, decoded.ok, decoded.bits.data (), llra.data ());
@@ -3863,6 +4070,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                                    decoded_best.bits, decoded_best.message_fixed, syncs, snrs, dts, freqs,
                                    naps, quals, bits77, decodeds);
                   ft2_ap_msg_registra (f1_best, napForRow, decoded_best.bits);
+                  ft2_storico_registra (f1_best, decoded_best.message_fixed);
                 }
               ++ndecodes;
               break;
@@ -4029,6 +4237,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                                decoded.bits, decoded.message_fixed,
                                syncs, snrs, dts, freqs, naps, quals, bits77, decodeds);
               ft2_ap_msg_registra (v.f, decoded.iaptype, decoded.bits);
+              ft2_storico_registra (v.f, decoded.message_fixed);
               ++ndecodes;
               v.decoded_call = state.accumulo_call;
               svuota (v);
@@ -4107,6 +4316,7 @@ void decode_ft2_stage7 (short const* iwave, int nqsoprogress, int nfqso, int nfa
                                decoded.bits, decoded.message_fixed,
                                syncs, snrs, dts, freqs, naps, quals, bits77, decodeds);
               ft2_ap_msg_registra (state.f_avg, decoded.iaptype, decoded.bits);
+              ft2_storico_registra (state.f_avg, decoded.message_fixed);
               ++ndecodes;
               reset_average_state (state);
             }
@@ -4229,6 +4439,10 @@ extern "C" void ftx_ft2_stage7_clravg_c ()
 }
 
 // Contatori dell'accumulo fra slot (banchi e DECODEMETRIC).
+extern "C" int ftx_ft2_storico_tentativi_c () { return g_ft2_storico_tentativi.load (); }
+extern "C" int ftx_ft2_storico_candidati_c () { return g_ft2_storico_candidati.load (); }
+extern "C" int ftx_ft2_storico_voci_c () { return g_ft2_storico_voci.load (); }
+
 extern "C" int ftx_ft2_accumulo_tentativi_c ()
 {
   return g_ft2_accumulo_tentativi.load ();

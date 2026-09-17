@@ -822,7 +822,7 @@ SettingsPageScroll {
                 // FT2 accumulo fra slot ripetuti (RX): somma l'energia di
                 // piu' slot della stessa stazione per decodificare dove il
                 // singolo slot non basta. Sperimentale, mai confermato su
-                // traffico reale: vedi Detector/fastldpc/lab/misure/
+                // traffico reale: vedi Detector/superldpc/lab/misure/
                 // 20260907_accumulo_ft2.md. Default OFF, non persiste.
                 Text {
                     text: qsTr("FT2: accumulate repeated slots (RX):")

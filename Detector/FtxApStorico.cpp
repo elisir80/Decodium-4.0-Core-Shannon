@@ -18,6 +18,7 @@ namespace
 struct Voce
 {
   int ciclo;
+  int modo;
   float freq;
   char call[kLunghezzaCall];
 };
@@ -57,10 +58,11 @@ bool copia_call (char* dst, char const* src)
 
 }  // namespace
 
-void registra (int ciclo, float freq_hz, char const* nominativo)
+void registra (int ciclo, float freq_hz, char const* nominativo, int modo)
 {
   Voce v {};
   v.ciclo = ciclo;
+  v.modo = modo;
   v.freq = freq_hz;
   if (!copia_call (v.call, nominativo))
     {
@@ -76,7 +78,7 @@ void registra (int ciclo, float freq_hz, char const* nominativo)
 }
 
 int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
-            char (*out)[kLunghezzaCall])
+            char (*out)[kLunghezzaCall], int modo)
 {
   if (!out || max <= 0)
     {
@@ -88,7 +90,7 @@ int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
   // Le voci troppo vecchie si buttano qui: e' l'unico punto in cui la lista
   // viene percorsa comunque, e cosi' non serve un altro passaggio di pulizia.
   int const soglia = ciclo - memoria;
-  while (!g_voci.empty () && g_voci.front ().ciclo < soglia)
+  while (!g_voci.empty () && g_voci.front ().modo == modo && g_voci.front ().ciclo < soglia)
     {
       g_voci.pop_front ();
     }
@@ -98,7 +100,11 @@ int vicini (int ciclo, float freq_hz, float hz, int memoria, int max,
   int n = 0;
   for (auto it = g_voci.rbegin (); it != g_voci.rend () && n < max; ++it)
     {
-      if (it->ciclo >= ciclo)
+      if (it->modo != modo)
+        {
+          continue;               // FT8 e FT2 non si prestano ipotesi
+        }
+      if (it->ciclo >= ciclo || it->ciclo < ciclo - memoria)
         {
           continue;               // il ciclo corrente non e' storia
         }
@@ -148,7 +154,7 @@ bool sembra_call (char const* t)
 
 }  // namespace
 
-void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio)
+void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio, int modo)
 {
   if (!messaggio) return;
 
@@ -176,7 +182,7 @@ void registra_da_messaggio (int ciclo, float freq_hz, char const* messaggio)
   char const* mittente = sembra_call (campi[1]) ? campi[1]
                        : (nc > 2 && sembra_call (campi[2]) ? campi[2] : nullptr);
   if (!mittente) return;
-  registra (ciclo, freq_hz, mittente);
+  registra (ciclo, freq_hz, mittente, modo);
 }
 
 namespace
@@ -187,6 +193,51 @@ std::atomic<int> g_ciclo {0};
 int avanza_ciclo ()
 {
   return g_ciclo.fetch_add (1, std::memory_order_relaxed) + 1;
+}
+
+namespace
+{
+std::atomic<int> g_ciclo_ft2 {0};
+}
+
+int avanza_ciclo_ft2 ()
+{
+  return g_ciclo_ft2.fetch_add (1, std::memory_order_relaxed) + 1;
+}
+
+int ciclo_corrente_ft2 ()
+{
+  return g_ciclo_ft2.load (std::memory_order_relaxed);
+}
+
+// Le frequenze dove qualcuno e' stato sentito di recente, dalla piu' recente,
+// senza doppioni entro `hz`.
+int frequenze_mittenti (int ciclo, int memoria, float hz, float* out, int max_out,
+                        int modo)
+{
+  if (!out || max_out <= 0)
+    {
+      return 0;
+    }
+  std::lock_guard<std::mutex> guardia {g_mutex};
+  int n = 0;
+  for (auto it = g_voci.rbegin (); it != g_voci.rend () && n < max_out; ++it)
+    {
+      if (it->modo != modo || it->ciclo >= ciclo || it->ciclo < ciclo - memoria)
+        {
+          continue;
+        }
+      bool doppione = false;
+      for (int k = 0; k < n && !doppione; ++k)
+        {
+          doppione = std::fabs (out[k] - it->freq) <= hz;
+        }
+      if (!doppione)
+        {
+          out[n++] = it->freq;
+        }
+    }
+  return n;
 }
 
 int ciclo_corrente ()

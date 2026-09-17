@@ -1,4 +1,4 @@
-// decodium_bridge.cpp — backend SIMD del decoder fastldpc.
+// decodium_bridge.cpp — backend SIMD del decoder superldpc.
 //
 // Questo file e' intenzionalmente una translation unit separata, compilata
 // con AVX2/FMA sui target x86-64 oppure con NEON sui target ARM64. Le API
@@ -9,18 +9,18 @@
 // In Detector/FtxFt2Stage7.cpp:
 //     ftx_decode174_91_c (llr.data (), 91, maxosd, 3, apmask.data (), ...);
 // diventa
-//     fastldpc_decode174_91_c (llr.data (), 91, maxosd, 3, apmask.data (), ...);
+//     superldpc_decode174_91_c (llr.data (), 91, maxosd, 3, apmask.data (), ...);
 //
-// Aggiungere questo file e i cpp/*.hpp di fastldpc alla build. FtxLdpc.cpp
+// Aggiungere questo file e i cpp/*.hpp di superldpc alla build. FtxLdpc.cpp
 // resta dov'e': serve ancora per encode174_91_nocrc_, le tabelle e le CRC.
 //
 // COSE DA SAPERE:
 //
-//  * Convenzione dei segni. Decodium usa LLR positivo = bit 1, fastldpc =
+//  * Convenzione dei segni. Decodium usa LLR positivo = bit 1, superldpc =
 //    bit 0. La conversione la fa questo file, il chiamante non cambia.
 //
 //  * maxosd e norder sono accettati per compatibilita' di firma ma non hanno
-//    lo stesso significato: fastldpc non lavora sugli snapshot del BP, l'OSD
+//    lo stesso significato: superldpc non lavora sugli snapshot del BP, l'OSD
 //    parte sempre dai posterior finali. maxosd < 0 disattiva l'OSD (come in
 //    Decodium), norder sceglie il preset (<=2 conservativo, >=3 sensibile).
 //
@@ -100,7 +100,7 @@ const Code& shared_code () {
 // centinaio. L'unico filtro sui candidati e' il CRC-14, che ne lascia passare
 // uno ogni 16384: ~1,3 false decodifiche per chiamata, moltiplicate per le
 // centinaia di candidati di un ciclo FT2. Sono le decine di nominativi fantasma
-// osservate in FT2 il 27/08/2026, sparite spegnendo fastldpc.
+// osservate in FT2 il 27/08/2026, sparite spegnendo superldpc.
 //
 // Qui la corrispondenza segue la tabella originale.
 // FT8 e FT4 ammettono tipi di messaggio che FT2 non usa: i formati da contest
@@ -110,7 +110,7 @@ const Code& shared_code () {
 // ed e' il prezzo giusto: un filtro non deve rendere cieco il decoder.
 static thread_local bool g_modo_ft8 = false;
 
-extern "C" void fastldpc_simd_set_ft8_mode_c (int on) { g_modo_ft8 = on != 0; }
+extern "C" void superldpc_simd_set_ft8_mode_c (int on) { g_modo_ft8 = on != 0; }
 
 // Manopole per misurare in FT8 quanto costa ciascun filtro tarato su FT2.
 // Si applicano a TUTTI i preset e SOLO in modalita' FT8: la taratura FT2
@@ -217,7 +217,7 @@ unsigned alpha_scelto () {
     return v;
 }
 
-// Strato 2 (FASTLDPC-AI-SPEC-001 §2): gate appreso al posto della sola soglia
+// Strato 2 (SUPERLDPC-AI-SPEC-001 §2): gate appreso al posto della sola soglia
 // su nd. DECODIUM_LDPC_GATE, se impostata esplicitamente (0 o 1), vale per
 // entrambi i modi e vince su tutto il resto.
 //
@@ -278,8 +278,8 @@ float gate_delta_scelto () {
     return v;
 }
 
-// Raccolta LLR reali per il riaddestramento del gate (FASTLDPC-AI-SPEC-001
-// §2b, vedi il commento su gate_weights.hpp e Detector/fastldpc/lab/neural/gate/).
+// Raccolta LLR reali per il riaddestramento del gate (SUPERLDPC-AI-SPEC-001
+// §2b, vedi il commento su gate_weights.hpp e Detector/superldpc/lab/neural/gate/).
 // Il pacchetto di ricerca originale genera il dataset su un canale AWGN
 // sintetico (train/ft2chan.py); qui invece si raccolgono le feature VERE che
 // il decoder calcola su un WAV con contenuto NOTO, passato per la stessa
@@ -294,7 +294,7 @@ float gate_delta_scelto () {
 // piu' d'uno.
 thread_local std::vector<uint8_t> g_gate_truth_cw174;
 
-// Microsecondi spesi dentro fastldpc, sommati su tutti i thread. Serve solo
+// Microsecondi spesi dentro superldpc, sommati su tutti i thread. Serve solo
 // alla diagnostica DECODIUM_LDPC_CORSIE: dice che frazione del tempo di uno
 // slot va nel decoder LDPC, cioe' quanto vale ottimizzarlo.
 std::atomic<long long>& tempo_ldpc_ms ()
@@ -341,7 +341,7 @@ void gate_dump_write (const GateFeatures& g, bool label, bool ft8, long long tri
 // con i due gate strutturali (bit ribaltati, coerenza AP) piu' in basso in
 // questo file: stessa variabile d'ambiente, cosi' un operatore vede tutti e
 // tre i filtri insieme sullo stesso log.
-static bool fastldpc_gate_log () {
+static bool superldpc_gate_log () {
     static bool const v = [] {
         char const* raw = std::getenv ("DECODIUM_LDPC_GATE_LOG");
         return raw && raw[0] != '0' && raw[0] != 0;
@@ -356,7 +356,7 @@ void gate_dump_callback (int /*i*/, const GateFeatures& g, const uint8_t* word) 
     // riga lo rende osservabile in aria, sulla stessa variabile d'ambiente.
     // g_modo_ft8 (sopra in questo file) dice quale tabella di pesi usare: FT2
     // e FT8 hanno canali diversi, vedi gate_weights.hpp.
-    if (fastldpc_gate_log () && !gate_accept (g, g_modo_ft8))
+    if (superldpc_gate_log () && !gate_accept (g, g_modo_ft8))
         std::fprintf (stderr, "[GATE-ML%s] scartata: nd=%.3f nhard=%.3f score=%.3f\n",
                      g_modo_ft8 ? "-FT8" : "-FT2",
                      (double) g.f[0], (double) g.f[1], (double) g.f[7]);
@@ -521,16 +521,16 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
             // standard, e lascia fuori i tre formati da contest (EU VHF, ARRL
             // RTTY): in FT2 non si vedono, e tenerli fuori vale la meta' del
             // filtro. E' una POLITICA, non un test di formato: un messaggio di
-            // quei tipi non verrebbe mai decodificato. Con FASTLDPC_TIPI=tutti
+            // quei tipi non verrebbe mai decodificato. Con SUPERLDPC_TIPI=tutti
             // si torna a non escludere niente, al prezzo di piu' fantasmi.
             {
-                // FASTLDPC_TIPI=nessuno spegne del tutto il filtro. Serve a
+                // SUPERLDPC_TIPI=nessuno spegne del tutto il filtro. Serve a
                 // misurare quanto costa in FT2, dove i 77 bit che il decoder
                 // vede sono MESCOLATI con rvec (FtxFt2Stage7 de-mescola solo
                 // dopo, riga ~2649): li' i controlli di struttura leggono un
                 // numero casuale invece del messaggio. In FT8, che non mescola,
                 // il filtro lavora sui bit veri e non c'e' niente da misurare.
-                char const* env = std::getenv ("FASTLDPC_TIPI");
+                char const* env = std::getenv ("SUPERLDPC_TIPI");
                 std::string const scelta = env ? std::string (env) : std::string {};
                 c.tipi_ammessi = scelta == "nessuno"
                                      ? 0u
@@ -541,7 +541,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
                 // rimette in chiaro FtxFt2Stage7 dopo, riga ~2649): senza
                 // togliere lo scrambling qui il filtro leggerebbe un numero
                 // casuale e scarterebbe parole vere. FT8 non mescola.
-                // FASTLDPC_TIPI=mescolato ripristina il comportamento di prima
+                // SUPERLDPC_TIPI=mescolato ripristina il comportamento di prima
                 // della correzione: serve solo a misurare quanto costava.
                 c.descramble77 = (g_modo_ft8 || scelta == "mescolato") ? nullptr : rvec_ft2 ();
             }
@@ -602,7 +602,7 @@ Ft2Decoder& decoder_for_preset (int ndeep) {
 // Da verificare con banda aperta: l'AP e' un'ipotesi soft e il decoder ha il
 // diritto di contraddirla, quindi in teoria il test puo' scartare decodifiche
 // vere. Con DECODIUM_LDPC_AP_CHECK=0 si spegne senza ricompilare.
-static bool fastldpc_ap_check () {
+static bool superldpc_ap_check () {
     static bool const v = [] {
         char const* raw = std::getenv ("DECODIUM_LDPC_AP_CHECK");
         return !raw || (raw[0] != '0' && raw[0] != 0);
@@ -621,7 +621,7 @@ static bool fastldpc_ap_check () {
 // dell'originale: lo stadio 4 applica comunque a valle 58 per i messaggi
 // standard e 36 per i non standard.
 // DECODIUM_LDPC_MAX_HARD forza il valore per entrambi i modi.
-static int fastldpc_max_hard () {
+static int superldpc_max_hard () {
     static int const forzato = [] {
         char const* raw = std::getenv ("DECODIUM_LDPC_MAX_HARD");
         if (!raw) raw = std::getenv ("DECODIUM_FT2_LDPC_MAX_HARD");
@@ -638,7 +638,7 @@ static int fastldpc_max_hard () {
 // non c'entra: taglierebbe proprio le verifiche deboli che sono il senso
 // dell'ipotesi. Si usa il valore di FT8, dove il tipo 8 e' stato misurato.
 // DECODIUM_LDPC_MAX_HARD_APMSG lo forza.
-static int fastldpc_max_hard_apmsg () {
+static int superldpc_max_hard_apmsg () {
     static int const v = [] {
         char const* raw = std::getenv ("DECODIUM_LDPC_MAX_HARD_APMSG");
         int const n = raw ? std::atoi (raw) : 0;
@@ -650,45 +650,45 @@ static int fastldpc_max_hard_apmsg () {
 // Le quattro leve del banco di raccolta dati (tests/ft2_gate_dump.cpp).
 // Nessun altro chiamante nel programma le usa: in produzione restano mute.
 //
-// fastldpc_simd_gate_dump_open_c: apre (in append) il file dove scrivere le righe
+// superldpc_simd_gate_dump_open_c: apre (in append) il file dove scrivere le righe
 // del dataset; path vuoto o nullo chiude e basta. Va chiamata PRIMA del primo
 // decode del thread che decodifica, insieme a DECODIUM_LDPC_GATE=1 (altrimenti
 // gate_mode e' spento e nessuna feature viene calcolata).
-extern "C" void fastldpc_simd_gate_dump_open_c (char const* path) {
+extern "C" void superldpc_simd_gate_dump_open_c (char const* path) {
     std::lock_guard<std::mutex> lock (gate_dump_mutex ());
     std::FILE*& f = gate_dump_file ();
     if (f) { std::fclose (f); f = nullptr; }
     if (path && path[0]) f = std::fopen (path, "a");
 }
 
-extern "C" void fastldpc_simd_gate_dump_close_c () {
+extern "C" void superldpc_simd_gate_dump_close_c () {
     std::lock_guard<std::mutex> lock (gate_dump_mutex ());
     std::FILE*& f = gate_dump_file ();
     if (f) { std::fclose (f); f = nullptr; }
 }
 
-// fastldpc_simd_gate_truth_set_c: i 174 bit (dominio scrambled+LDPC) del messaggio
+// superldpc_simd_gate_truth_set_c: i 174 bit (dominio scrambled+LDPC) del messaggio
 // che il banco di prova sta per far decodificare. Senza questa chiamata i
 // candidati passano da gate_dump_callback ma vengono scartati (nessuna
 // etichetta nota): serve per non scrivere righe non etichettabili quando il
 // banco genera anche slot di solo rumore.
-extern "C" void fastldpc_simd_gate_truth_set_c (signed char const* cw174) {
+extern "C" void superldpc_simd_gate_truth_set_c (signed char const* cw174) {
     g_gate_truth_cw174.assign (cw174, cw174 + kN);
     ++g_gate_trial;
 }
 
-extern "C" void fastldpc_simd_gate_truth_clear_c () {
+extern "C" void superldpc_simd_gate_truth_clear_c () {
     g_gate_truth_cw174.clear ();
 }
 
-static int fastldpc_max_hard_per (signed char const* apmask_word) {
-    if (!apmask_word) return fastldpc_max_hard ();
+static int superldpc_max_hard_per (signed char const* apmask_word) {
+    if (!apmask_word) return superldpc_max_hard ();
     int n_ap = 0;
     for (int i = 0; i < kN; ++i) n_ap += apmask_word[i] != 0;
-    return n_ap >= 77 ? fastldpc_max_hard_apmsg () : fastldpc_max_hard ();
+    return n_ap >= 77 ? superldpc_max_hard_apmsg () : superldpc_max_hard ();
 }
 
-extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
+extern "C" void superldpc_simd_decode174_91_c (float const* llr_in, int Keff,
                                               int maxosd, int norder,
                                               signed char const* apmask_in,
                                               signed char* message91_out,
@@ -704,7 +704,7 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
 
     Ft2Decoder& dec = decoder_for_preset (norder);
 
-    // Decodium: positivo = bit 1. fastldpc: positivo = bit 0.
+    // Decodium: positivo = bit 1. superldpc: positivo = bit 0.
     float llr[kN];
     uint8_t apmask[kN];
     for (int i = 0; i < kN; ++i) {
@@ -745,7 +745,7 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
         const int hdec = llr_in[i] >= 0.0f ? 1 : 0;
         if ((hdec ^ bit) != 0) { ++nhard; dmin += std::fabs (llr_in[i]); }
     }
-    // Gate sui bit ribaltati. Con fastldpc attivo il percorso NON passa da
+    // Gate sui bit ribaltati. Con superldpc attivo il percorso NON passa da
     // ftx_decode174_91_c, quindi ldpc174_reject_by_nd non viene mai
     // applicato: senza questo controllo l'unico filtro resta nd, e nd non
     // basta perche' pesa i bit per il loro |LLR| e nel rumore vero gli LLR
@@ -758,7 +758,7 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
     // d'ambiente del gate consolidato, cosi' i due percorsi si regolano
     // insieme.
     {
-        if (nhard > fastldpc_max_hard_per (apmask_in)) {
+        if (nhard > superldpc_max_hard_per (apmask_in)) {
             if (message91_out) std::memset (message91_out, 0, 91);
             if (cw_out) std::memset (cw_out, 0, kN);
             if (ntype_out) *ntype_out = 0;
@@ -792,7 +792,7 @@ extern "C" void fastldpc_simd_decode174_91_c (float const* llr_in, int Keff,
 //
 // Misure: lab/misure/20260910_bicm_id_ft8.md (+21,3% di decodifiche, ~0,3 dB,
 // zero falsi su 2236 cornici di rumore e 960 prove con segnale).
-extern "C" int fastldpc_extrinsic174_91_c (float const* llr_in, int norder,
+extern "C" int superldpc_extrinsic174_91_c (float const* llr_in, int norder,
                                            float clamp, float* est_out)
 {
     if (!llr_in || !est_out) return 0;
@@ -801,7 +801,7 @@ extern "C" int fastldpc_extrinsic174_91_c (float const* llr_in, int norder,
     Ft2Decoder& dec = decoder_for_preset (norder);
 
     float llr[kN];
-    for (int i = 0; i < kN; ++i) llr[i] = -llr_in[i];   // -> convenzione fastldpc
+    for (int i = 0; i < kN; ++i) llr[i] = -llr_in[i];   // -> convenzione superldpc
 
     uint8_t bits[kN], accepted = 0;
     dec.decode_batch (llr, 1, bits, &accepted);
@@ -836,7 +836,7 @@ extern "C" int fastldpc_extrinsic174_91_c (float const* llr_in, int norder,
 // llr_in, apmask_in: [n][174] contigui. Le uscite sono [n] o [n][...].
 // Il chiamante scorre poi i risultati nell'ordine originale e prende il primo
 // valido: la semantica resta quella del ciclo sequenziale.
-extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
+extern "C" void superldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
                                                     signed char const* apmask_in,
                                                     int Keff, int maxosd, int norder,
                                                     signed char* message91_out,
@@ -930,9 +930,9 @@ extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
         // 1) bit ribaltati. Su 74 decodifiche vere di stazioni ripetute, da
         //    +11 a -26 dB: mediana 1, p99 16, massimo 20. I fantasmi partivano
         //    da 23, con una valle netta fra 19 e 22.
-        int const max_hard = fastldpc_max_hard_per (apmask_in + (size_t) w * kN);
+        int const max_hard = superldpc_max_hard_per (apmask_in + (size_t) w * kN);
         if (nhard > max_hard) {
-            if (fastldpc_gate_log ())
+            if (superldpc_gate_log ())
                 std::fprintf (stderr, "[GATE] scartata: bit ribaltati %d > %d\n",
                               nhard, max_hard);
             if (msg) std::memset (msg, 0, 91);
@@ -950,7 +950,7 @@ extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
         //    segnale lo richiede, quindi questo test puo' scartare decodifiche
         //    vere deboli. Qui tiene fuori molti fantasmi, ma il bilancio sui
         //    segnali veri non e' stato misurato: la banda era ferma.
-        if (fastldpc_ap_check ()) {
+        if (superldpc_ap_check ()) {
             const signed char* apm = apmask_in + (size_t) w * kN;
             bool coerente = true;
             for (int i = 0; i < kN && coerente; ++i) {
@@ -959,7 +959,7 @@ extern "C" void fastldpc_simd_decode174_91_batch_c (int n, float const* llr_in,
                 if ((b[i] ? 1 : 0) != atteso) coerente = false;
             }
             if (!coerente) {
-                if (fastldpc_gate_log ())
+                if (superldpc_gate_log ())
                     std::fprintf (stderr, "[GATE] scartata: bit AP contraddetti\n");
                 if (msg) std::memset (msg, 0, 91);
                 if (cw) std::memset (cw, 0, kN);

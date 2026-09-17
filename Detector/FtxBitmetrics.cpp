@@ -1667,7 +1667,7 @@ extern "C" void ftx_ft8_bitmetrics_coherent_c (Complex const* cs, float scale,
 // sarebbe tempo buttato.
 //
 // COME. `la` porta l'estrinseca del decodificatore
-// (fastldpc_extrinsic174_91_c): per ogni ipotesi si somma alla metrica il
+// (superldpc_extrinsic174_91_c): per ogni ipotesi si somma alla metrica il
 // contributo a priori di TUTTI i bit del gruppo TRANNE quello che si sta
 // calcolando. Escluderlo e' cio' che rende l'uscita estrinseca, cioe' notizia
 // nuova per il decodificatore e non l'eco della sua stessa opinione.

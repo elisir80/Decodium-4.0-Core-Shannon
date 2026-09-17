@@ -5314,7 +5314,7 @@ ApplicationWindow {
                                 ToolTip.text: qsTr("Gallager — deep dig for weak signals.\nEnables a second decoding pass (LDPC subpass\nparallelized across cores, named after R. Gallager, father of LDPC)\nthat recovers near-noise stations missed by the normal decode.\nRequires a multi-core CPU: on old PCs it may burden the audio\n→ in that case leave it off.")
                             }
 
-                            // fastldpc — decoder LDPC SIMD per FT2 (AVX2 o NEON)
+                            // superldpc — decoder LDPC SIMD per FT2 (AVX2 o NEON)
                             Rectangle {
                                 Layout.preferredWidth: 38
                                 Layout.preferredHeight: 16

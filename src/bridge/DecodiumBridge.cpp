@@ -40447,7 +40447,7 @@ void DecodiumBridge::loadSettings()
         m_neuralSyncEnabled    = s.value("neuralSyncEnabled",    false).toBool();
         m_turboFeedbackEnabled = s.value("turboFeedbackEnabled", false).toBool();
         m_fastLdpcEnabled = s.value("fastLdpcEnabled", true).toBool();
-        fastldpc_set_enabled_c(m_fastLdpcEnabled ? 1 : 0);
+        superldpc_set_enabled_c(m_fastLdpcEnabled ? 1 : 0);
         m_advAutoModeEnabled   = s.value("advAutoModeEnabled",   true).toBool();
     }
     m_singleDecode = getSetting(QStringLiteral("SingleDecode"), false).toBool();

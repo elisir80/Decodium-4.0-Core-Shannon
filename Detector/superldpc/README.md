@@ -1,4 +1,4 @@
-# fastldpc — decoder SIMD a due stadi per LDPC(174,91) di FT2
+# superldpc — decoder SIMD a due stadi per LDPC(174,91) di FT2
 
     stadio 1  min-sum normalizzato, layered, int16, AVX2 su x86 o NEON su ARM64
     stadio 2  OSD di ordine 0..3 SOLO sulle parole che lo stadio 1 non chiude
@@ -206,7 +206,7 @@ arriveranno gli LLR del 4-GFSK.
 FT2 non decodifica alla cieca: fa piu' passate in cui alcuni bit del messaggio
 sono gia' noti (il proprio nominativo, quello del corrispondente, CQ), e li
 passa al decoder come `apmask` con gli LLR gia' portati al valore giusto e
-magnitudine grande. Senza supportarlo, fastldpc non e' utilizzabile li'.
+magnitudine grande. Senza supportarlo, superldpc non e' utilizzabile li'.
 
 `decode_batch` accetta ora una `apmask` opzionale: i bit noti vengono saturati
 al massimo rappresentabile, cosi' il min-sum non li ribalta e l'OSD, che ordina
@@ -233,7 +233,7 @@ con la soglia adattiva, 1992. Il gate si regola da solo: basta passare
 
 ### Innesto: `cpp/decodium_bridge.cpp`
 
-Espone `fastldpc_decode174_91_c` con la **stessa firma** di
+Espone `superldpc_decode174_91_c` con la **stessa firma** di
 `ftx_decode174_91_c` di Decodium 4, conversione di segno inclusa (li' LLR
 positivo = bit 1, qui = bit 0). Sostituirlo e' una riga in
 `Detector/FtxFt2Stage7.cpp`. Un'istanza per thread; `FtxLdpc.cpp` resta al suo
@@ -242,7 +242,7 @@ posto, serve ancora per l'encoder, le tabelle e le CRC.
 Misura a 1 dB, 1000 parole, contro il decoder di Decodium (con il fix del segno
 del min-sum gia' applicato — vedi sotto):
 
-| bit noti | Decodium | fastldpc | false | velocita' |
+| bit noti | Decodium | superldpc | false | velocita' |
 |---:|---:|---:|---:|---:|
 | 0  |  834 | **893** | 0 | 718x |
 | 14 |  952 | **977** | 0 | 270x |
@@ -389,7 +389,7 @@ progettato da Steve Franke K9AN e Joe Taylor K1JT e pubblicato su QEX
 ft8_lib e verificate bit per bit. **Non vanno cambiate**: cambiarle romperebbe
 la compatibilita' con qualunque altra stazione.
 
-**Il decodificatore.** `fastldpc` e' scritto da zero. Sono originali il min-sum
+**Il decodificatore.** `superldpc` e' scritto da zero. Sono originali il min-sum
 vettorizzato AVX2 a sedici parole per registro, l'eliminazione di Gauss senza
 salti condizionati, la sindrome CRC incrementale ottenuta sfruttando la
 linearita' della CRC-14 con bit-slicing, la potatura per limite inferiore, il
@@ -399,7 +399,7 @@ questo README.
 
 Formula breve, se serve citarlo:
 
-> `fastldpc` e' un decodificatore scritto ex novo per Decodium 4.0 Core Shannon.
+> `superldpc` e' un decodificatore scritto ex novo per Decodium 4.0 Core Shannon.
 > Implementa algoritmi noti — codici LDPC (Gallager, 1962), min-sum normalizzato,
 > ordered statistics decoding — con vettorizzazione AVX2 e ottimizzazioni
 > originali. Opera sul codice LDPC(174,91) e sulla CRC-14 del protocollo FT8
@@ -407,20 +407,20 @@ Formula breve, se serve citarlo:
 > bit-a-bit. GPL-3.0; tabelle del codice verificate contro ft8_lib (MIT,
 > Karlis Goba YL3JG).
 
-**Licenze.** `fastldpc` e tutto Decodium sono GPL-3.0. Le tabelle del codice
+**Licenze.** `superldpc` e tutto Decodium sono GPL-3.0. Le tabelle del codice
 vengono da `constants.c` di **ft8_lib, che e' sotto licenza MIT** (Karlis Goba
 YL3JG) — codice MIT si puo' includere in un progetto GPL, ma la licenza e'
 quella, non la GPL. WSJT-X, da cui viene l'idea dei passi npre1/npre2 della
 ricerca a coppie, e' GPL-3.0.
 
 **Dove stanno davvero le tabelle nell'integrazione.** Dentro Decodium
-`fastldpc` non porta con se' le proprie tabelle: le chiede al programma con
+`superldpc` non porta con se' le proprie tabelle: le chiede al programma con
 `ftx_ldpc174_91_tables_c` (`Detector/FtxLdpc.cpp`). La verifica bit per bit
 contro `constants.c` di ft8_lib e' servita a garantire che siano le stesse,
 ma la copia usata a runtime e' quella di Decodium.
 
 **Una precisazione che conviene fare per primi.** "Scritto da zero" vale per
-`fastldpc`, non per tutto Decodium: il decodificatore precedente,
+`superldpc`, non per tutto Decodium: il decodificatore precedente,
 `Detector/FtxLdpc.cpp`, e' un porting del decodificatore di WSJT-X — si vede
 dalle tabelle `Mn`/`Nm`/`nrw` indicizzate da 1 e da `platanh` con le stesse
 costanti del Fortran. Sono due cose diverse e vanno dette separate.

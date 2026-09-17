@@ -2,7 +2,7 @@
 
 Serve a separare il **demodulatore** dal **decodificatore**. Decodium produce
 gli LLR veri — con la sua sincronizzazione, su rumore e QRM veri — e il
-confronto fra decodificatori (min-sum, a priori, decodifica a lista, fastldpc)
+confronto fra decodificatori (min-sum, a priori, decodifica a lista, superldpc)
 si fa **dopo, offline, sugli stessi candidati**. Così non serve scrivere in
 C++ un decodificatore nuovo prima di sapere se conviene.
 
@@ -65,7 +65,7 @@ Gli LLR sono salvati **con il segno del chiamante**, cioè quello che vuole
 
 > **LLR positivo = bit 1** (`FtxLdpc.cpp`: `cw[bit] = zn[bit] > 0 ? 1 : 0`).
 
-Gli script Python di `fastldpc` usano la convenzione **opposta** (LLR positivo
+Gli script Python di `superldpc` usano la convenzione **opposta** (LLR positivo
 = bit 0): lì i valori vanno **invertiti di segno** prima di darli in pasto al
 min-sum. La decodifica a lista e il gate `nd` non dipendono dalla scala; il
 min-sum sì, ma poco.

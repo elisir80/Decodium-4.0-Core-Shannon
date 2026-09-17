@@ -48,7 +48,7 @@
 
 #include "Modulator/FtxMessageEncoder.hpp"
 #include "Modulator/FtxWaveformGenerator.hpp"
-#include "Detector/fastldpc/ft2_decoder.hpp"
+#include "Detector/superldpc/ft2_decoder.hpp"
 
 extern "C"
 {
@@ -731,7 +731,7 @@ int main (int argc, char* argv[])
                         if (!fatto)
                           {
                             // estrinseca = posteriore - ingresso, in convenzione
-                            // fastldpc; riportata a quella del demodulatore.
+                            // superldpc; riportata a quella del demodulatore.
                             for (int i = 0; i < kCodeword; ++i) llr_fast[static_cast<size_t> (i)] = -l[static_cast<size_t> (i)];
                             dec.decode_batch (llr_fast.data (), 1, bits.data (), acc.data ());
                             int16_t const* post = dec.posterior (0);

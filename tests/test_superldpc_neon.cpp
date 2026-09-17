@@ -1,4 +1,4 @@
-#include "Detector/fastldpc/minsum_neon.hpp"
+#include "Detector/superldpc/minsum_neon.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -51,14 +51,14 @@ bool compareOneTrial (Code const& code, std::mt19937& random, int trial)
 
     if (scalarBits != neonBits || scalarOk != neonOk
         || scalarIterations != neonIterations) {
-        std::cerr << "fastldpc NEON mismatch in trial " << trial
+        std::cerr << "superldpc NEON mismatch in trial " << trial
                   << " (bits/status/iterations)\n";
         return false;
     }
     if (trial == 0
         && !std::all_of (neonOk.begin (), neonOk.end (),
                          [] (std::uint8_t value) { return value != 0; })) {
-        std::cerr << "fastldpc NEON did not close the known valid codeword\n";
+        std::cerr << "superldpc NEON did not close the known valid codeword\n";
         return false;
     }
 
@@ -67,7 +67,7 @@ bool compareOneTrial (Code const& code, std::mt19937& random, int trial)
             || !std::equal (scalar.posterior (word),
                             scalar.posterior (word) + code.N,
                             neon.posterior (word))) {
-            std::cerr << "fastldpc NEON mismatch in trial " << trial
+            std::cerr << "superldpc NEON mismatch in trial " << trial
                       << ", word " << word << " (posterior/syndrome)\n";
             return false;
         }
@@ -84,6 +84,6 @@ int main ()
     for (int trial = 0; trial < 250; ++trial) {
         if (!compareOneTrial (code, random, trial)) return 1;
     }
-    std::cout << "fastldpc NEON matches the scalar reference (250 trials)\n";
+    std::cout << "superldpc NEON matches the scalar reference (250 trials)\n";
     return 0;
 }
