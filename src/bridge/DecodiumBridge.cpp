@@ -3453,6 +3453,14 @@ static QVariantMap qsoStatsFromRows(QVariantList const& rows)
     return stats;
 }
 
+static QString exportRecordFingerprint(ParsedAdifRecord const& record)
+{
+    QByteArray bytes;
+    QDataStream stream(&bytes, QIODevice::WriteOnly);
+    stream << record.fields;
+    return QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
+}
+
 static QsoLogSnapshot buildQsoLogSnapshot(QString const& path, QString const& myGrid)
 {
     QElapsedTimer timer;
@@ -3468,7 +3476,11 @@ static QsoLogSnapshot buildQsoLogSnapshot(QString const& path, QString const& my
     QList<QVariantMap> sortedRows;
     sortedRows.reserve(doc.records.size());
     for (ParsedAdifRecord const& record : doc.records) {
-        sortedRows.append(qsoMapFromAdifRecord(record.fields, myGrid));
+        auto row = qsoMapFromAdifRecord(record.fields, myGrid);
+        row.insert(QStringLiteral("exportIndex"), sortedRows.size());
+        row.insert(QStringLiteral("exportFingerprint"), exportRecordFingerprint(record));
+        row.insert(QStringLiteral("exportLogPath"), path);
+        sortedRows.append(row);
     }
 
     std::sort(sortedRows.begin(), sortedRows.end(), [] (QVariantMap const& lhs, QVariantMap const& rhs) {
@@ -7619,6 +7631,27 @@ void DecodiumBridge::setMaxCallerRetries(int v)
     settings.setValue(QStringLiteral("MaxCallerRetries"), clamped);
     emit maxCallerRetriesChanged();
     bridgeLog(QStringLiteral("[FT2WS] Caller retries cap = %1").arg(clamped));
+}
+
+void DecodiumBridge::setAutoCqMaxCycles(int v)
+{
+    v = qBound(0, v, 999);
+    if (m_autoCqMaxCycles == v) return;
+    m_autoCqMaxCycles = v;
+    applyAutoCqBurstCadenceToLegacyBackend();
+    emit autoCqMaxCyclesChanged();
+    saveSettingsAsync();
+}
+
+void DecodiumBridge::setAutoCqPauseSec(int v)
+{
+    v = qBound(0, v, 300);
+    if (m_autoCqPauseSec == v) return;
+    m_autoCqPauseSec = v;
+    m_autoCqGenericListenUntilMs = 0;
+    applyAutoCqBurstCadenceToLegacyBackend();
+    emit autoCqPauseSecChanged();
+    saveSettingsAsync();
 }
 
 void DecodiumBridge::setAutoCqBurstCalls(int v)
@@ -34332,6 +34365,8 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     s.setValue("alt12Enabled",      m_alt12Enabled);
     s.setValue("quickQsoEnabled",   m_quickQsoEnabled);
     s.setValue("AutoCqBurstCalls",  m_autoCqBurstCalls);
+    s.setValue("AutoCqMaxCycles", m_autoCqMaxCycles);
+    s.setValue("AutoCqPauseSec", m_autoCqPauseSec);
     s.setValue("AutoCqListenCycles", m_autoCqListenCycles);
     // B7 — Colors
     s.setValue("colorCQ",        m_colorCQ);
@@ -35507,6 +35542,7 @@ void DecodiumBridge::resetAutoCqBurstCadence(const QString& reason)
     ++m_autoCqBurstSerial;
     m_autoCqBurstCompletedCalls = 0;
     m_autoCqBurstListenUntilMs = 0;
+    m_autoCqGenericListenUntilMs = 0;
     m_autoCqBurstListenMode.clear();
     // A CQ that was in flight belongs to the preceding cadence session.  Do
     // not let its completion start a new pause after a configuration, mode or
@@ -35519,6 +35555,9 @@ void DecodiumBridge::resetAutoCqBurstCadence(const QString& reason)
 
 bool DecodiumBridge::autoCqBurstListening()
 {
+    if (m_autoCqRepeat && decodium::autoCqPausePending(
+            correctedUtcEpochMs(), m_autoCqGenericListenUntilMs, 0))
+        return true;
     if (!autoCqBurstCadenceEnabled() || m_autoCqBurstListenUntilMs <= 0) {
         return false;
     }
@@ -35543,7 +35582,8 @@ void DecodiumBridge::applyAutoCqBurstCadenceToLegacyBackend()
 {
     if (m_legacyBackend) {
         m_legacyBackend->setAutoCqBurstCadence(m_autoCqBurstCalls,
-                                                m_autoCqListenCycles);
+                                                m_autoCqListenCycles,
+                                                m_autoCqMaxCycles, m_autoCqPauseSec);
     }
 }
 
@@ -35551,9 +35591,23 @@ void DecodiumBridge::noteAutoCqBurstCqCompleted(bool completedPureAutoCqCq,
                                                   const QString& reason,
                                                   bool error)
 {
-    if (error || !completedPureAutoCqCq || !autoCqBurstCadenceEnabled()) {
+    if (error || !completedPureAutoCqCq || !m_autoCqRepeat) return;
+    bool const limitReached = decodium::completeAutoCq(true, false,
+        m_autoCqMaxCycles, m_autoCqCycleCount);
+    bridgeLog(QStringLiteral("AutoCQ: completed call %1 / %2 (%3)")
+        .arg(m_autoCqCycleCount).arg(m_autoCqMaxCycles).arg(reason));
+    if (limitReached) {
+        bridgeLog(QStringLiteral("AutoCQ: completed-call limit reached; stopping"));
+        setAutoCqRepeat(false);
+        setTxEnabled(false);
         return;
     }
+    if (m_autoCqPauseSec > 0) {
+        m_autoCqGenericListenUntilMs = correctedUtcEpochMs() + qint64(m_autoCqPauseSec) * 1000;
+        bridgeLog(QStringLiteral("AutoCQ: generic listening pause %1s after completed CQ")
+                      .arg(m_autoCqPauseSec));
+    }
+    if (!autoCqBurstCadenceEnabled()) return;
 
     ++m_autoCqBurstCompletedCalls;
     if (m_autoCqBurstCompletedCalls < m_autoCqBurstCalls) {
@@ -39070,39 +39124,9 @@ void DecodiumBridge::checkAndStartPeriodicTx()
             if (continueQueuedCaller) {
                 processNextInQueue();
             } else if (continueAutoCq) {
-                ++m_autoCqCycleCount;
-                bridgeLog("AutoCQ cycle " + QString::number(m_autoCqCycleCount) +
-                          " / " + (m_autoCqMaxCycles > 0 ? QString::number(m_autoCqMaxCycles) : "inf"));
-                if (m_autoCqMaxCycles > 0 && m_autoCqCycleCount >= m_autoCqMaxCycles) {
-                    bridgeLog("AutoCQ: max cycles reached, stopping");
-                    setAutoCqRepeat(false);
-                    setTxEnabled(false);
-                    return;
-                }
-                if (m_autoCqPauseSec > 0) {
-                    bridgeLog("AutoCQ: pausing " + QString::number(m_autoCqPauseSec) + "s before next CQ");
-                    QTimer::singleShot(m_autoCqPauseSec * 1000, this, [this]() {
-                        if (autoCqCanRestartTx6() && !m_transmitting && !m_tuning) {
-                            if (!advanceQsoState(6)) {
-                                return;
-                            }
-                            if (!m_txEnabled) {
-                                setTxEnabled(true);
-                            }
-                            // 1.0.256 fix BUG #1 FT8/FT4: parity check
-                            checkAndStartPeriodicTx();
-                        }
-                    });
-                } else {
-                    if (!advanceQsoState(6)) {  // CQ
-                        return;
-                    }
-                    if (!m_txEnabled) {
-                        setTxEnabled(true);
-                    }
-                    // 1.0.256 fix BUG #1 FT8/FT4: parity check
-                    checkAndStartPeriodicTx();
-                }
+                if (!advanceQsoState(6)) return;
+                if (!m_txEnabled) setTxEnabled(true);
+                checkAndStartPeriodicTx();
             } else {
                 if (m_qsoProgress != 0) {
                     m_qsoProgress = 0;
@@ -40807,6 +40831,8 @@ void DecodiumBridge::loadSettings()
     m_alt12Enabled      =s.value("alt12Enabled",     false).toBool();
     m_quickQsoEnabled   =s.value("quickQsoEnabled",  false).toBool();
     m_autoCqBurstCalls  =qBound(0, s.value("AutoCqBurstCalls", 0).toInt(), 999);
+    m_autoCqMaxCycles = qBound(0, s.value("AutoCqMaxCycles", 0).toInt(), 999);
+    m_autoCqPauseSec = qBound(0, s.value("AutoCqPauseSec", 0).toInt(), 300);
     m_autoCqListenCycles=qBound(0, s.value("AutoCqListenCycles", 0).toInt(), 999);
     // B7 — Colors
     m_colorCQ       = s.value("colorCQ",        "#33FF33").toString();
@@ -54567,7 +54593,6 @@ void DecodiumBridge::processNextInQueue()
         m_lastCqPidx = -1;
         m_txWatchdogTicks = 0;
         m_autoCQPeriodsMissed = 0;
-        m_autoCqCycleCount = 0;
         m_logAfterOwn73 = false;
         m_ft2DeferredLogPending = false;
         m_quickPeerSignaled = false;
@@ -58060,6 +58085,44 @@ int DecodiumBridge::importFromAdif(const QString& filename)
     // Compatibility wrapper: imports are now asynchronous. A positive return
     // value means that the job was accepted, not that all records are done.
     return importFromAdifAsync(filename) ? 1 : 0;
+}
+
+bool DecodiumBridge::exportSelectedToAdif(const QString& filename, const QVariantList& selection)
+{
+    if (filename.isEmpty() || selection.isEmpty()) return false;
+    QString const sourcePath = effectiveAdifLogPath();
+    // Never allow a partial export to replace the active log (including symlinks).
+    QFileInfo const target(filename), source(sourcePath);
+    if (target.absoluteFilePath() == source.absoluteFilePath()
+        || (target.exists() && target.canonicalFilePath() == source.canonicalFilePath())) {
+        emit errorMessage(tr("Choose a different file: the active logbook cannot be overwritten."));
+        return false;
+    }
+    ParsedAdifDocument const document = loadAdifDocument(sourcePath);
+    ParsedAdifDocument subset;
+    subset.header = document.header;
+    QSet<int> seen;
+    for (auto const& value : selection) {
+        auto const row = value.toMap();
+        bool validIndex = false;
+        int const index = row.value(QStringLiteral("exportIndex")).toInt(&validIndex);
+        if (!document.loaded || !validIndex || index < 0 || index >= document.records.size()
+            || row.value(QStringLiteral("exportLogPath")).toString() != sourcePath
+            || row.value(QStringLiteral("exportFingerprint")).toString()
+                != exportRecordFingerprint(document.records.at(index))) {
+            emit errorMessage(tr("The logbook changed. Refresh it and select the QSOs again."));
+            return false;
+        }
+        if (!seen.contains(index)) {
+            seen.insert(index);
+            subset.records.append(document.records.at(index));
+        }
+    }
+    if (!writeAdifDocument(filename, subset)) {
+        emit errorMessage(tr("Unable to export the selected QSOs."));
+        return false;
+    }
+    return true;
 }
 
 bool DecodiumBridge::exportToAdif(const QString& filename)

@@ -318,8 +318,12 @@ void RttyDemodulator::trackEdge(double excess)
     // error means the edge was probably not a clean bit boundary, and feeding it
     // to an integrator is how a timing loop walks itself into its own limits.
     m_bitTimer -= kTimingKp * excess;
+    // Positive excess means our next sample is late: shorten the period,
+    // just as the proportional correction above advances the sample timer.
+    // Adding here creates positive feedback and drives a steady 50-baud
+    // signal to the 52.63-baud clamp after a long reception.
     if (std::abs(excess) < m_spbEst * 0.15)
-        m_spbEst += kTimingKi * excess;
+        m_spbEst -= kTimingKi * excess;
     // Never let the estimate wander more than 5% from nominal; beyond that the
     // operator has the wrong baud rate selected and tracking would only make the
     // decode worse.

@@ -213,7 +213,7 @@ public:
   bool legacyHoldTxFreq() const;
   void legacySetTxWatchdogMinutes(int minutes);
   void legacySetAutoCq(bool enabled);
-  void legacySetAutoCqBurstCadence(int callsPerBurst, int listeningCycles);
+  void legacySetAutoCqBurstCadence(int callsPerBurst, int listeningCycles, int maximum, int pauseSeconds);
   void legacySetDecodeDepthBits(int bits);
   void legacySetFt8DeepThreadPenalty(bool enabled);
   void legacySetCqOnly(bool enabled);
@@ -1131,6 +1131,10 @@ private:
   bool    m_bCallingCQ;
   bool    m_autoCQ;
   int     m_autoCqBurstCallsPerBurst {0};
+  int     m_autoCqMaximum {0};
+  int     m_autoCqPauseSeconds {0};
+  int     m_autoCqCompletedTotal {0};
+  qint64  m_autoCqGenericListenUntilMs {0};
   int     m_autoCqBurstListeningCycles {0};
   int     m_autoCqBurstCompletedCalls {0};
   qint64  m_autoCqBurstListenUntilMs {0};

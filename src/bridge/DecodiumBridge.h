@@ -937,9 +937,9 @@ public:
     Q_INVOKABLE bool isTxDisabled(int n) const { return n >= 1 && n <= 6 && (m_txDisabledMask & (1 << (n - 1))); }
     Q_INVOKABLE void setTxDisabled(int n, bool disabled);
     int  autoCqMaxCycles()   const { return m_autoCqMaxCycles; }
-    void setAutoCqMaxCycles(int v) { if (m_autoCqMaxCycles != v) { m_autoCqMaxCycles = qBound(0, v, 999); emit autoCqMaxCyclesChanged(); } }
+    void setAutoCqMaxCycles(int v);
     int  autoCqPauseSec()    const { return m_autoCqPauseSec; }
-    void setAutoCqPauseSec(int v) { if (m_autoCqPauseSec != v) { m_autoCqPauseSec = qBound(0, v, 300); emit autoCqPauseSecChanged(); } }
+    void setAutoCqPauseSec(int v);
     int  autoCqBurstCalls() const { return m_autoCqBurstCalls; }
     void setAutoCqBurstCalls(int v);
     int  autoCqListenCycles() const { return m_autoCqListenCycles; }
@@ -1905,6 +1905,7 @@ public:
     Q_INVOKABLE bool importFromAdifAsync(const QString& filename);
     Q_INVOKABLE int importFromAdif(const QString& filename);
     Q_INVOKABLE bool exportToAdif(const QString& filename);
+    Q_INVOKABLE bool exportSelectedToAdif(const QString& filename, const QVariantList& selection);
     Q_INVOKABLE bool deleteQso(const QString& call, const QString& dateTime);
     Q_INVOKABLE bool editQso(const QString& call, const QString& dateTime, const QVariantMap& newData);
     Q_INVOKABLE QStringList workedCallsigns() const;
@@ -3743,6 +3744,7 @@ private:
     int  m_txDisabledMask {0};     // bitmask: bit N-1 set = TX(N) saltato in auto-seq (1.0.130)
     int  m_autoCqMaxCycles  {0};   // 0 = infinito, >0 = max cicli CQ
     int  m_autoCqPauseSec   {0};   // pausa (s) tra cicli CQ (0 = nessuna pausa)
+    qint64 m_autoCqGenericListenUntilMs {0};
     int  m_autoCqCycleCount {0};   // contatore cicli CQ corrente
     // A separate, persistent cadence for AutoCQ: N completed CQs followed by
     // M full receive periods. Defaults preserve continuous AutoCQ exactly.

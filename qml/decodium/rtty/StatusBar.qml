@@ -55,7 +55,7 @@ Rectangle {
             value: (rtty.afcOffsetHz >= 0 ? "+" : "") + rtty.afcOffsetHz.toFixed(1) + " Hz"
             valueColor: Math.abs(rtty.afcOffsetHz) > 40 ? Theme.warning : Theme.textPrimary
         }
-        StatusItem { label: "BAUD"; value: rtty.measuredBaud.toFixed(2) }
+        StatusItem { label: "BAUD RX"; value: rtty.measuredBaud.toFixed(2) }
         StatusItem { label: "FEC"; value: rtty.correctionDepth > 0 ? rtty.correctionDepth + " ch" : "off" }
     }
 
