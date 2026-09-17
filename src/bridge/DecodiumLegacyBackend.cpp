@@ -1009,10 +1009,10 @@ void DecodiumLegacyBackend::setAutoCq(bool enabled)
     }
 }
 
-void DecodiumLegacyBackend::setAutoCqBurstCadence(int callsPerBurst, int listeningCycles)
+void DecodiumLegacyBackend::setAutoCqBurstCadence(int callsPerBurst, int listeningCycles, int maximum, int pauseSeconds)
 {
     if (m_mainWindow) {
-        m_mainWindow->legacySetAutoCqBurstCadence(callsPerBurst, listeningCycles);
+        m_mainWindow->legacySetAutoCqBurstCadence(callsPerBurst, listeningCycles, maximum, pauseSeconds);
     }
 }
 

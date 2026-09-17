@@ -57,7 +57,8 @@ GlassPanel {
                     model: [{ label: "45.45 / 170", baud: 45.45, shift: 170 },
                             { label: "50 / 170",    baud: 50.0,  shift: 170 },
                             { label: "75 / 170",    baud: 75.0,  shift: 170 },
-                            { label: "45.45 / 850", baud: 45.45, shift: 850 }]
+                            { label: "45.45 / 850", baud: 45.45, shift: 850 },
+                            { label: "50 / 450",    baud: 50.0,  shift: 450 }]
                     delegate: GlassButton {
                         required property var modelData
                         text: modelData.label
@@ -69,6 +70,12 @@ GlassPanel {
                         onClicked: { rtty.baud = modelData.baud; rtty.shiftHz = modelData.shift }
                     }
                 }
+            }
+
+            Text {
+                text: qsTr("Baud set: %1").arg(rtty.baud.toFixed(2))
+                color: Theme.textPrimary
+                font.pixelSize: 12
             }
 
             LabelledSlider {

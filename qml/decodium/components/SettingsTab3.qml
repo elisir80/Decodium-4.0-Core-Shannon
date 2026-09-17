@@ -1168,7 +1168,7 @@ Default: OFF.")
         Text { text: qsTr("TX Watchdog Mode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         DecoComboBox {
             id: txWdModeCombo
-            model: [qsTr("Off"), qsTr("Time"), qsTr("Count")]
+            model: [qsTr("Off"), qsTr("Time"), qsTr("Elapsed periods (not CQ calls)")]
             currentIndex: bridge ? bridge.txWatchdogMode : 0
             implicitHeight: controlHeight
             Layout.fillWidth: true
@@ -1206,7 +1206,7 @@ Default: OFF.")
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
-        Text { text: qsTr("TX Watchdog Count:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
+        Text { text: qsTr("TX Watchdog periods:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         SpinBox {
             id: txWdCountSpin
             from: 1; to: 50; value: bridge.txWatchdogCount; editable: true

@@ -5477,11 +5477,14 @@ void MainWindow::legacySetTxWatchdogMinutes(int minutes)
 
 void MainWindow::legacySetAutoCq(bool enabled)
 {
+  if (enabled && !m_autoCQ) m_autoCqCompletedTotal = 0;
   onRemoteSetAutoCqRequested(QString {}, enabled);
 }
 
-void MainWindow::legacySetAutoCqBurstCadence(int callsPerBurst, int listeningCycles)
+void MainWindow::legacySetAutoCqBurstCadence(int callsPerBurst, int listeningCycles, int maximum, int pauseSeconds)
 {
+  m_autoCqMaximum = qBound(0, maximum, 999);
+  m_autoCqPauseSeconds = qBound(0, pauseSeconds, 300);
   m_autoCqBurstCallsPerBurst = qBound (0, callsPerBurst, 999);
   m_autoCqBurstListeningCycles = qBound (0, listeningCycles, 999);
   resetAutoCqBurstCadenceState ();
@@ -31470,6 +31473,7 @@ void MainWindow::resetAutoCqBurstCadenceState ()
 {
   m_autoCqBurstCompletedCalls = 0;
   m_autoCqBurstListenUntilMs = 0;
+  m_autoCqGenericListenUntilMs = 0;
   m_autoCqBurstPttLatched = false;
   m_autoCqBurstModeSnapshot = m_mode;
 }
@@ -31477,8 +31481,8 @@ void MainWindow::resetAutoCqBurstCadenceState ()
 void MainWindow::ensureAutoCqBurstCadenceState ()
 {
   if (m_autoCqBurstModeSnapshot != m_mode
-      || !m_autoCQ
-      || !autoCqBurstCadenceEnabled ()) {
+      || !m_autoCQ) {
+    m_autoCqCompletedTotal = 0;
     resetAutoCqBurstCadenceState ();
   }
 }
@@ -31486,11 +31490,12 @@ void MainWindow::ensureAutoCqBurstCadenceState ()
 bool MainWindow::blockAutoCqBurstPureCqStart ()
 {
   ensureAutoCqBurstCadenceState ();
-  if (!autoCqBurstCadenceEnabled () || !isAutoCqBurstPureCq ()) {
+  if (!isAutoCqBurstPureCq ()) {
     return false;
   }
 
-  return QDateTime::currentMSecsSinceEpoch () < m_autoCqBurstListenUntilMs;
+  return decodium::autoCqPausePending(QDateTime::currentMSecsSinceEpoch (),
+      m_autoCqGenericListenUntilMs, m_autoCqBurstListenUntilMs);
 }
 
 void MainWindow::updateAutoCqBurstCadencePttEdges ()
@@ -31506,7 +31511,17 @@ void MainWindow::updateAutoCqBurstCadencePttEdges ()
     return;
   }
 
-  if (m_autoCqBurstPttLatched && autoCqBurstCadenceEnabled ()) {
+  if (m_autoCqBurstPttLatched) {
+    m_autoCqBurstPttLatched = false;
+    if (decodium::completeAutoCq(true, false, m_autoCqMaximum, m_autoCqCompletedTotal)) {
+      debugAutoCq("completed-call-limit", QString::number(m_autoCqCompletedTotal));
+      legacySetAutoCq(false);
+      auto_tx_mode(false);
+      return;
+    }
+    m_autoCqGenericListenUntilMs = QDateTime::currentMSecsSinceEpoch ()
+        + qint64(m_autoCqPauseSeconds) * 1000;
+    if (!autoCqBurstCadenceEnabled()) return;
     ++m_autoCqBurstCompletedCalls;
     if (m_autoCqBurstCompletedCalls >= m_autoCqBurstCallsPerBurst) {
       m_autoCqBurstCompletedCalls = 0;

@@ -38,6 +38,8 @@ class TestDecoRttyTx final : public QObject
     Q_OBJECT
 
 private slots:
+    void clockTracksTransmitter_data();
+    void clockTracksTransmitter();
     void setRadioUsesTheCatHook();
     void prepareProfileIsQmxAware();
     void nativeFskBlocksPttButDataAllowsAudio();
@@ -57,6 +59,59 @@ private slots:
     void receiveAfterTransmit();
     void afcNeedsLivePairAndResetMatchesFreshReceiver();
 };
+
+// Long receptions expose positive feedback that short round trips cannot see.
+void TestDecoRttyTx::clockTracksTransmitter_data()
+{
+    QTest::addColumn<double>("baud");
+    QTest::addColumn<double>("shift");
+    QTest::addColumn<double>("offset");
+    for (double baud : {45.45, 50.0, 75.0})
+        for (double shift : {170.0, 450.0, 850.0})
+            for (double offset : {-0.02, 0.0, 0.02})
+                QTest::newRow(qPrintable(QString("%1-%2-%3").arg(baud).arg(shift).arg(offset)))
+                    << baud << shift << offset;
+}
+
+void TestDecoRttyTx::clockTracksTransmitter()
+{
+    QFETCH(double, baud);
+    QFETCH(double, shift);
+    QFETCH(double, offset);
+    using namespace decortty::dsp;
+    RttyParams params;
+    params.baud = baud;
+    params.shiftHz = shift;
+    params.afcEnabled = false;
+    // The built-in transmitter encodes spaces using the amateur USOS convention.
+    params.unshiftOnSpace = true;
+    RttyDemodulator receiver(params);
+    params.baud = baud * (1.0 + offset);
+    FskModulator transmitter(params, kWorkRate);
+    transmitter.setDiddle(false);
+    const std::string line = "RY TEST 123 456 WEATHER NW 5-6 1.5 M\r\n";
+    std::string message;
+    for (int i = 0; i < 90; ++i)
+        message += line;
+    transmitter.enqueueText(message);
+    ShiftState shiftState(true);
+    std::string received;
+    float samples[800];
+    while (!transmitter.idle()) {
+        transmitter.generate(samples, 800);
+        receiver.process(samples, 800, [&](const SoftFrame& frame) {
+            const char c = shiftState.feed(frame.hardCode);
+            if (c) received += c;
+        });
+    }
+    QVERIFY2(std::abs(receiver.measuredBaud() - params.baud) < baud * 0.003,
+             qPrintable(QString("Expected %1, measured %2").arg(params.baud).arg(receiver.measuredBaud())));
+    // Allow initial acquisition and the final filter tail, but require sustained copy.
+    size_t count = 0;
+    for (size_t pos = 0; (pos = received.find(line, pos)) != std::string::npos; pos += line.size())
+        ++count;
+    QVERIFY2(count >= 85, qPrintable(QString("Only %1 complete lines").arg(count)));
+}
 
 void TestDecoRttyTx::receiveAfterTransmit_data()
 {

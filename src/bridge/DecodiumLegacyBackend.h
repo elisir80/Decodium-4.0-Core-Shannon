@@ -78,7 +78,7 @@ public:
     bool holdTxFreq() const;
     void setTxWatchdogMinutes(int minutes);
     void setAutoCq(bool enabled);
-    void setAutoCqBurstCadence(int callsPerBurst, int listeningCycles);
+    void setAutoCqBurstCadence(int callsPerBurst, int listeningCycles, int maximum, int pauseSeconds);
     void setDecodeDepthBits(int bits);
     void setFt8DeepThreadPenalty(bool enabled);
     void setCqOnly(bool enabled);

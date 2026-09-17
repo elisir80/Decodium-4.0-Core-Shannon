@@ -26,6 +26,35 @@ Rectangle {
     property var stats: ({})
     property int selectedIndex: -1
     property var selectedQso: null
+    // Export selection is independent of the single-row editor.
+    property var exportSelection: ({})
+    readonly property int exportSelectionCount: Object.keys(exportSelection).length
+
+    function toggleExportRow(row) {
+        var copy = Object.assign({}, exportSelection)
+        var key = String(row.exportIndex)
+        if (copy[key]) delete copy[key]
+        else copy[key] = row
+        exportSelection = copy
+    }
+
+    Menu {
+        id: exportScopeMenu
+        MenuItem {
+            text: qsTr("Export selected QSOs (%1)").arg(logContent.exportSelectionCount)
+            enabled: logContent.exportSelectionCount > 0
+            onTriggered: logContent.saveAdifExport(true)
+        }
+        MenuItem {
+            text: qsTr("Export entire logbook")
+            onTriggered: logContent.saveAdifExport(false)
+        }
+        MenuItem {
+            text: qsTr("Clear export selection")
+            enabled: logContent.exportSelectionCount > 0
+            onTriggered: logContent.exportSelection = ({})
+        }
+    }
     property bool refreshActive: true
     property var logbookProfiles: []
     property var logbookNames: []
@@ -153,11 +182,21 @@ Rectangle {
     }
 
     function openExportAdifDialog() {
+        exportScopeMenu.popup()
+    }
+
+    function saveAdifExport(selectedOnly) {
+        // Capture the exact records before entering the native file dialog.
+        var rows = Object.keys(exportSelection).map(function(key) { return exportSelection[key] })
         var path = bridge.saveFileDialog(qsTr("Esporta file ADIF"),
                                          "",
                                          [qsTr("ADIF files (*.adi *.adif)"), qsTr("All files (*)")])
-        if (path.length > 0 && appEngine && appEngine.logManager)
-            appEngine.logManager.exportToAdif(path)
+        if (path.length > 0 && appEngine && appEngine.logManager) {
+            if (selectedOnly)
+                bridge.exportSelectedToAdif(path, rows)
+            else
+                appEngine.logManager.exportToAdif(path)
+        }
     }
 
     function openAddLogbookDialog() {
@@ -225,6 +264,7 @@ Rectangle {
     }
 
     function clearSelection() {
+        exportSelection = ({})
         selectedIndex = -1
         selectedQso = null
     }
@@ -640,7 +680,7 @@ Rectangle {
 
                 delegate: Rectangle {
                     width: logListView.width - 6; height: 24; radius: 3
-                    color: index === selectedIndex
+                    color: (logContent.exportSelection[String(modelData.exportIndex)] !== undefined || index === selectedIndex)
                            ? Qt.rgba(primaryBlue.r, primaryBlue.g, primaryBlue.b, 0.3)
                            : logRowMA.containsMouse
                              ? Qt.rgba(secondaryCyan.r, secondaryCyan.g, secondaryCyan.b, 0.18)
@@ -679,6 +719,15 @@ Rectangle {
                     Menu {
                         id: logCallContextMenu
                         MenuItem {
+                            text: qsTr("Select/deselect for export")
+                            onTriggered: logContent.toggleExportRow(modelData)
+                        }
+                        MenuItem {
+                            text: qsTr("Export selected QSOs (%1)").arg(logContent.exportSelectionCount)
+                            enabled: logContent.exportSelectionCount > 0
+                            onTriggered: logContent.saveAdifExport(true)
+                        }
+                        MenuItem {
                             text: qsTr("Copy Callsign")
                             height: 32
                             onTriggered: {
@@ -708,7 +757,22 @@ Rectangle {
 
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: 8; anchors.rightMargin: 8; spacing: 0
-                        Text { text: index === selectedIndex ? "\u25B6" : ""; font.pixelSize: 7; color: primaryBlue; Layout.preferredWidth: 10 }
+                        CheckBox {
+                            Layout.preferredWidth: 10
+                            Layout.preferredHeight: 22
+                            padding: 0
+                            checked: logContent.exportSelection[String(modelData.exportIndex)] !== undefined
+                            onClicked: logContent.toggleExportRow(modelData)
+                            indicator: Rectangle {
+                                width: 10; height: 10
+                                y: (parent.height - height) / 2
+                                radius: 2
+                                color: parent.checked ? accentGreen : "transparent"
+                                border.color: parent.checked ? accentGreen : textSecondary
+                            }
+                            ToolTip.visible: hovered
+                            ToolTip.text: qsTr("Select QSO for ADIF export")
+                        }
                         Text { text: modelData.dateTime || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: textSecondary; Layout.preferredWidth: 118 }
                         Text { text: modelData.call || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 10; font.bold: true; color: accentGreen; Layout.preferredWidth: 85 }
                         Text { text: modelData.grid || ""; font.family: decodiumMonoFontFamily; font.pixelSize: 10; color: secondaryCyan; Layout.preferredWidth: 50 }

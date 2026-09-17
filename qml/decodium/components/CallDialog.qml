@@ -686,7 +686,7 @@ Window {
                     Layout.fillWidth: true
                     spacing: 8
                     Text {
-                        text: qsTr("Pausa fra cicli CQ (s)")
+                        text: qsTr("Pause after each CQ (s)")
                         color: callDialog.cMuted
                         font.pixelSize: 12
                         Layout.preferredWidth: 180
@@ -697,6 +697,13 @@ Window {
                         Layout.preferredWidth: 100
                         onValueModified: if (bridge) bridge.autoCqPauseSec = value
                     }
+                }
+                Text {
+                    text: qsTr("Completed CQs only (including custom calls); QSO replies do not count. Pauses start after playback and TX resumes at the next permitted slot. Generic and burst pauses overlap. The safety watchdog remains active during listening: its period count is NOT a CQ count.")
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    color: callDialog.cMuted
+                    font.pixelSize: 10
                 }
                 Text {
                     text: qsTr("CQ burst / listening cadence")
