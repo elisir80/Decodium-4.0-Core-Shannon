@@ -37,6 +37,8 @@
 #include <vector>
 
 #include <QCoreApplication>
+#include <QFile>
+#include <QIODevice>
 #include <QMutexLocker>
 #include <QString>
 #include <QStringList>
@@ -257,6 +259,57 @@ int main (int argc, char* argv[])
             QStringLiteral ("nominativo mio composto: l'hash puo' essere il mio"));
   verifica (hiddenHashCanBeOwnCall (QStringLiteral ("VP2E/K1ABC"), kMyCall),
             QStringLiteral ("mittente composto: l'hash puo' essere il mio"));
+
+  // --- 6. Il caso segnalato del 18/09/2026, sul codice vero
+  //
+  // IT9MBM chiamava KG6DX e ha ricevuto "<...> KG6DX R-07": KG6DX stava
+  // rispondendo a un terzo con nominativo composto, che il protocollo manda
+  // come HASH dentro un normale messaggio con rapporto. Il sequencer lo ha
+  // scambiato per una risposta e ha avviato il QSO.
+  {
+    QString const kTerzoComposto {QStringLiteral ("PJ4/K1ABC")};
+    QString const kPartner {QStringLiteral ("KG6DX")};
+    QString const kMioStandard {QStringLiteral ("IT9MBM")};
+
+    // a) l'encoder di produzione: il composto viaggia come hash in un messaggio
+    //    STANDARD (i3=1) con rapporto. E' esattamente la forma segnalata.
+    auto const enc = decodium::txmsg::encodeFt2 (
+        QStringLiteral ("<%1> %2 R-07").arg (kTerzoComposto, kPartner));
+    verifica (enc.ok && enc.i3 == 1 && !enc.tones.isEmpty (),
+              QStringLiteral ("l'encoder manda il composto come hash in un messaggio con rapporto"));
+
+    // b) un hash mai sentito si legge "<...>": lo dice il contesto vero.
+    auto& contesto = decodium::txmsg::sharedDecode77Context ();
+    verifica (contesto.lookupHash22 (12345) == QStringLiteral ("<...>"),
+              QStringLiteral ("un hash sconosciuto si presenta proprio come <...>"));
+
+    // c) la regola: con due nominativi standard quel messaggio non e' nostro.
+    verifica (!hiddenHashCanBeOwnCall (kPartner, kMioStandard),
+              QStringLiteral ("il sequencer NON deve rispondere a <...> KG6DX R-07"));
+    verifica (hiddenHashCanBeOwnCall (kPartner, kTerzoComposto),
+              QStringLiteral ("al vero destinatario, composto, la regola lo concede"));
+
+    // d) e il bridge la consulta dove serve: dentro il ramo dell'hash non
+    //    risolto e PRIMA delle euristiche sul QSO in corso, che da sole
+    //    avevano dato il via libera.
+    QFile sorgente {QStringLiteral (DECODIUM_SOURCE_DIR "/src/bridge/DecodiumBridge.cpp")};
+    QString testo;
+    if (sorgente.open (QIODevice::ReadOnly | QIODevice::Text))
+      testo = QString::fromUtf8 (sorgente.readAll ());
+    int const inizioFunzione =
+        testo.indexOf (QStringLiteral ("bool DecodiumBridge::isDirectedToLocalHashFromActivePartner"));
+    int const fineFunzione =
+        testo.indexOf (QStringLiteral ("bool DecodiumBridge::isDirectedActivePartnerSignoffDecode"));
+    QString const corpo = (inizioFunzione >= 0 && fineFunzione > inizioFunzione)
+                              ? testo.mid (inizioFunzione, fineFunzione - inizioFunzione)
+                              : QString ();
+    int const posRegola = corpo.indexOf (QStringLiteral ("hiddenHashCanBeOwnCall"));
+    int const posEuristica = corpo.indexOf (QStringLiteral ("knownExchangePartner"));
+    verifica (posRegola > 0,
+              QStringLiteral ("il bridge consulta la regola nel ramo dell'hash non risolto"));
+    verifica (posRegola > 0 && posEuristica > posRegola,
+              QStringLiteral ("la consulta PRIMA delle euristiche sul QSO in corso"));
+  }
 
   std::printf ("\n%s (%d controlli falliti)\n", falliti == 0 ? "TUTTO A POSTO" : "CI SONO ERRORI",
                falliti);

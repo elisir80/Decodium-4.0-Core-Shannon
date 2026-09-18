@@ -386,6 +386,7 @@ add_executable (test_nonstandard_call_directed
   test_nonstandard_call_directed.cpp
   ../Sequencer/MessageTokenRules.cpp
   ../src/radio/Radio.cpp)
+target_compile_definitions (test_nonstandard_call_directed PRIVATE DECODIUM_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries (test_nonstandard_call_directed wsjt_qt wsjt_cxx wsjt_fort Qt6::Core)
 add_test (NAME test_nonstandard_call_directed COMMAND $<TARGET_FILE:test_nonstandard_call_directed>)
 
