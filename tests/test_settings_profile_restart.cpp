@@ -33,8 +33,13 @@ static int child(const QStringList &args)
     for (const auto &entry : inventory) {
         const QString key = entry.toString();
         if (key == "WeatherApiEnable" || key == "SendStationTelemetry") continue;
-        if (operation == "write") settings.setValue(key, stamp + ":" + key);
-        else if (settings.value(key).toString() != stamp + ":" + key) return 11;
+        // Chiavi che differiscono solo per le maiuscole esistono apposta (backend
+        // QML e classico). Su Windows le chiavi INI sono case-insensitive: se il
+        // valore portasse il nome esatto, la seconda grafia sovrascriverebbe la
+        // prima e la rilettura fallirebbe. Col nome in minuscolo le due grafie
+        // scrivono lo stesso valore e il test resta valido ovunque.
+        if (operation == "write") settings.setValue(key, stamp + ":" + key.toLower());
+        else if (settings.value(key).toString() != stamp + ":" + key.toLower()) return 11;
     }
     if (operation == "write") {
         settings.setValue("WeatherApiEnable", false);
