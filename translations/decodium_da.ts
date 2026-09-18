@@ -18711,7 +18711,7 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3213"/>
         <source>TX Delay (s):</source>
-        <translation>TX Forsinkelse (r):</translation>
+        <translation>TX-forsinkelse (s):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3183"/>
@@ -20918,7 +20918,7 @@ Hvis du er i tvivl, brug Høj.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="94"/>
         <source>TX Delay (s):</source>
-        <translation>TX Forsinkelse (r):</translation>
+        <translation>TX-forsinkelse (s):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="109"/>

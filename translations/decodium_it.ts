@@ -19437,7 +19437,7 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3213"/>
         <source>TX Delay (s):</source>
-        <translation>TX Ritardo/i:</translation>
+        <translation>Ritardo TX (s):</translation>
     </message>
     <message>
         <location filename="../qml/decodium/components/SettingsDialog.qml" line="3183"/>
@@ -21666,7 +21666,7 @@ Nel dubbio, usa Alta.</translation>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="94"/>
         <source>TX Delay (s):</source>
-        <translation>TX Ritardo/i:</translation>
+        <translation>Ritardo TX (s):</translation>
     </message>
     <message>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab3.qml" line="109"/>
