@@ -243,6 +243,17 @@ private slots:
         auto* page = qobject_cast<QQuickItem*>(object.data());
         QVERIFY(page);
 
+        // Regression #86: receive action buttons must not inherit a textured
+        // platform/Material background that only becomes valid after hover.
+        for (const char* name : {"sstvReplayWavOpen", "sstvRxAfcReset", "sstvRxSlantReset"}) {
+            auto* button = page->findChild<QObject*>(QString::fromLatin1(name));
+            QVERIFY(button);
+            auto* background = button->property("background").value<QObject*>();
+            QVERIFY(background);
+            QCOMPARE(background->objectName(), QStringLiteral("sstvPlainButtonBackground"));
+            QVERIFY(background->property("color").value<QColor>().isValid());
+        }
+
         QObject* open = page->findChild<QObject*>(
             QStringLiteral("sstvReplayWavOpen"));
         QObject* cancel = page->findChild<QObject*>(

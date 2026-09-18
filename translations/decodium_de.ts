@@ -29723,4 +29723,18 @@ in das Feld HIS CALL.</translation>
         <translation>ABSTIMMUNG</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Aktuell: %1°C, Wind %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Wird abgerufen…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Aus — Temperatur/Wind werden als „unbekannt“ gesendet</translation></message>
+    <message><source>Clear sky</source><translation>Klarer Himmel</translation></message>
+    <message><source>Partly cloudy</source><translation>Teilweise bewölkt</translation></message>
+    <message><source>Cloudy</source><translation>Bewölkt</translation></message>
+    <message><source>Rain</source><translation>Regen</translation></message>
+    <message><source>Snow</source><translation>Schnee</translation></message>
+    <message><source>Thunderstorm</source><translation>Gewitter</translation></message>
+    <message><source>Fog</source><translation>Nebel</translation></message>
+    <message><source>Unknown</source><translation>Unbekannt</translation></message>
+</context>
 </TS>

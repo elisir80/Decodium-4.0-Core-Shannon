@@ -103,8 +103,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("Auto Grid:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         CheckBox {
-            checked: bridge.getSetting("AutoGrid", false)
-            onCheckedChanged: bridge.setSetting("AutoGrid", checked)
+            checked: dialog.boolSetting("AutoGrid", false)
+            onToggled: bridge.setSetting("AutoGrid", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -229,7 +229,7 @@ SettingsPageScroll {
             id: stPowerSpin
             from: 0; to: 9999; value: bridge.stationPowerWatts; editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: fieldMinWidth
-            onValueChanged: {
+            onValueModified: {
                 bridge.stationPowerWatts = value
                 dialog.scheduleSettingsPersist()
             }
@@ -272,8 +272,8 @@ SettingsPageScroll {
             spacing: 10
             CheckBox {
                 id: weatherApiCheck
-                checked: bridge.getSetting("WeatherApiEnable", false)
-                onCheckedChanged: { bridge.setSetting("WeatherApiEnable", checked); if (checked) bridge.fetchWeatherForGrid() }
+                checked: dialog.boolSetting("WeatherApiEnable", false)
+                onToggled: { bridge.setSetting("WeatherApiEnable", checked); if (checked) bridge.fetchWeatherForGrid() }
                 indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                 contentItem: Text { text: ""; leftPadding: 24 }
             }
@@ -281,9 +281,9 @@ SettingsPageScroll {
                 property var preview: bridge.currentWeatherPreview()
                 text: weatherApiCheck.checked
                     ? (preview.available
-                        ? qsTr("Now: %1°C, wind %2 km/h %3, %4").arg(preview.tempC).arg(preview.windKmh).arg(preview.windDirLabel).arg(preview.sky)
-                        : qsTr("Fetching…"))
-                    : qsTr("Off — temperature/wind sent as “unknown”")
+                        ? qsTranslate("StationWeather", "Now: %1°C, wind %2 km/h %3, %4").arg(preview.tempC).arg(preview.windKmh).arg(preview.windDirLabel).arg(preview.sky)
+                        : qsTranslate("StationWeather", "Fetching…"))
+                    : qsTranslate("StationWeather", "Off — temperature/wind sent as “unknown”")
                 color: textSecondary; font.pixelSize: 11
                 Timer { interval: 15000; running: weatherApiCheck.checked; repeat: true; onTriggered: parent.preview = bridge.currentWeatherPreview() }
             }
@@ -291,15 +291,15 @@ SettingsPageScroll {
 
         Text { text: qsTr("After each QSO:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         CheckBox {
-            checked: bridge.getSetting("SendStationTelemetry", false)
-            onCheckedChanged: bridge.setSetting("SendStationTelemetry", checked)
+            checked: dialog.boolSetting("SendStationTelemetry", false)
+            onToggled: bridge.setSetting("SendStationTelemetry", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: qsTr("Send station + weather info"); leftPadding: 24; color: textSecondary; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter; height: 18 }
         }
         Text { text: qsTr("On receive:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         CheckBox {
-            checked: bridge.getSetting("ShowTelemetryPopup", false)
-            onCheckedChanged: bridge.setSetting("ShowTelemetryPopup", checked)
+            checked: dialog.boolSetting("ShowTelemetryPopup", false)
+            onToggled: bridge.setSetting("ShowTelemetryPopup", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: qsTr("Show popup with correspondent's info"); leftPadding: 24; color: textSecondary; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter; height: 18 }
         }

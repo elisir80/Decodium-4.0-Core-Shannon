@@ -352,7 +352,7 @@ SettingsPageScroll {
                 stepSize: 1
                 value: Math.max(0, Math.min(100, Number(bridge.getSetting("uiDecodeColorBoost", 35))))
                 Layout.fillWidth: true
-                onValueChanged: bridge.setSetting("uiDecodeColorBoost", Math.round(value))
+                onMoved: bridge.setSetting("uiDecodeColorBoost", Math.round(value))
             }
             Text {
                 text: Math.round(decodeColorBoostSlider.value) + "%"
@@ -376,8 +376,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("Highlight 73:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("Highlight73", true)
-            onCheckedChanged: bridge.setSetting("Highlight73", checked)
+            checked: dialog.boolSetting("Highlight73", true)
+            onToggled: bridge.setSetting("Highlight73", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -385,8 +385,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("HL Orange:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("HighlightOrange", false)
-            onCheckedChanged: bridge.setSetting("HighlightOrange", checked)
+            checked: dialog.boolSetting("HighlightOrange", false)
+            onToggled: bridge.setSetting("HighlightOrange", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -400,8 +400,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("HL Blue:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("HighlightBlue", false)
-            onCheckedChanged: bridge.setSetting("HighlightBlue", checked)
+            checked: dialog.boolSetting("HighlightBlue", false)
+            onToggled: bridge.setSetting("HighlightBlue", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -492,19 +492,19 @@ SettingsPageScroll {
         Text { text: qsTr("Black Level:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Slider {
             from: 0; to: 100; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallBlackLevel", 15)); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onValueChanged: bridge.setSetting("uiWaterfallBlackLevel", value)
+            onMoved: bridge.setSetting("uiWaterfallBlackLevel", value)
         }
 
         Text { text: qsTr("Color Gain:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Slider {
             from: 0; to: 100; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallColorGain", 50)); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onValueChanged: bridge.setSetting("uiWaterfallColorGain", value)
+            onMoved: bridge.setSetting("uiWaterfallColorGain", value)
         }
 
         Text { text: qsTr("Contrast:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         Slider {
             from: 10; to: 150; stepSize: 1; value: Number(bridge.getSetting("uiWaterfallContrast", 80)); Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onValueChanged: bridge.setSetting("uiWaterfallContrast", value)
+            onMoved: bridge.setSetting("uiWaterfallContrast", value)
         }
 
     }

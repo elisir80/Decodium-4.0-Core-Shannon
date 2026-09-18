@@ -29553,4 +29553,18 @@ in the HIS CALL field.</translation>
         <translation>TUNING</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Now: %1°C, wind %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Fetching…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Off — temperature/wind sent as “unknown”</translation></message>
+    <message><source>Clear sky</source><translation>Clear sky</translation></message>
+    <message><source>Partly cloudy</source><translation>Partly cloudy</translation></message>
+    <message><source>Cloudy</source><translation>Cloudy</translation></message>
+    <message><source>Rain</source><translation>Rain</translation></message>
+    <message><source>Snow</source><translation>Snow</translation></message>
+    <message><source>Thunderstorm</source><translation>Thunderstorm</translation></message>
+    <message><source>Fog</source><translation>Fog</translation></message>
+    <message><source>Unknown</source><translation>Unknown</translation></message>
+</context>
 </TS>

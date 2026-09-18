@@ -59,7 +59,7 @@ struct StationTelemetryFields
 // impostazioni) — indice 0 e' sempre "Non specificato" in entrambi.
 QStringList const& stationRadioModelNames ();
 QStringList const& stationAntennaTypeNames ();
-QStringList const& stationSkyConditionNames ();
+QStringList stationSkyConditionNames ();
 
 // Converte una direzione vento in gradi (0-359) nell'indice a 16 punti piu'
 // vicino; converte l'indice a 16 punti in un'etichetta testuale ("NW", ecc.).

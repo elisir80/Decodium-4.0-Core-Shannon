@@ -29725,4 +29725,18 @@ al camp HIS CALL.</translation>
         <translation>SINTONIA</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Ara: %1°C, vent %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>S'estan obtenint dades…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Desactivat — temperatura/vent enviats com a desconeguts</translation></message>
+    <message><source>Clear sky</source><translation>Cel serè</translation></message>
+    <message><source>Partly cloudy</source><translation>Parcialment ennuvolat</translation></message>
+    <message><source>Cloudy</source><translation>Ennuvolat</translation></message>
+    <message><source>Rain</source><translation>Pluja</translation></message>
+    <message><source>Snow</source><translation>Neu</translation></message>
+    <message><source>Thunderstorm</source><translation>Tempesta</translation></message>
+    <message><source>Fog</source><translation>Boira</translation></message>
+    <message><source>Unknown</source><translation>Desconegut</translation></message>
+</context>
 </TS>

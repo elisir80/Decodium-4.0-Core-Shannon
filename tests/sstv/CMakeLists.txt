@@ -240,6 +240,15 @@ set_tests_properties (test_sstv_receive_qml PROPERTIES
     "QT_QPA_PLATFORM=offscreen;QSG_RHI_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic"
   )
 
+foreach (sstv_button_style IN ITEMS Material Fusion)
+  add_test (NAME test_sstv_receive_qml_${sstv_button_style}
+    COMMAND $<TARGET_FILE:test_sstv_receive_qml>)
+  set_tests_properties (test_sstv_receive_qml_${sstv_button_style} PROPERTIES
+    LABELS "sstv;replay;qml;render"
+    TIMEOUT 20
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=${sstv_button_style}")
+endforeach ()
+
 add_executable (test_sstv_settings_qml test_sstv_settings_qml.cpp)
 target_link_libraries (test_sstv_settings_qml
   PRIVATE

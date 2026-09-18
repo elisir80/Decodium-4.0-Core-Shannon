@@ -7341,6 +7341,7 @@ void DecodiumBridge::setFiltersBypassed(bool v)
     if (m_filtersBypassed == v) return;
     m_filtersBypassed = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("filtersBypassed"), m_filtersBypassed);
     settings.setValue(QStringLiteral("FiltersBypassed"), m_filtersBypassed);
     settings.sync();
@@ -7506,6 +7507,7 @@ void DecodiumBridge::setFtxImmediateClickTx(bool v)
     if (m_ftxImmediateClickTx == v) return;
     m_ftxImmediateClickTx = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("FtxImmediateClickTx"), v);
     emit ftxImmediateClickTxChanged();
     bridgeLog(QStringLiteral("[FT2WS] Immediate-click TX (FT2/FT8/FT4) %1").arg(v ? "ON" : "OFF"));
@@ -7518,6 +7520,7 @@ void DecodiumBridge::setFt2LogRr73OnPartnerLeft(bool v)
     if (m_ft2LogRr73OnPartnerLeft == v) return;
     m_ft2LogRr73OnPartnerLeft = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2LogRr73OnPartnerLeft"), v);
     emit ft2LogRr73OnPartnerLeftChanged();
     bridgeLog(QStringLiteral("[FT2WS] Log RR73 on partner-left (FT2 async TX4) %1").arg(v ? "ON" : "OFF"));
@@ -7591,6 +7594,7 @@ void DecodiumBridge::setFt2PostLogReengageGuard(bool v)
     if (m_ft2PostLogReengageGuard == v) return;
     m_ft2PostLogReengageGuard = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2PostLogReengageGuard"), v);
     emit ft2PostLogReengageGuardChanged();
     bridgeLog(QStringLiteral("[FT2WS] Post-log RRR re-engage guard %1").arg(v ? "ON" : "OFF"));
@@ -7602,6 +7606,7 @@ void DecodiumBridge::setFt2PostLogReengageMax(int v)
     if (m_ft2PostLogReengageMax == clamped) return;
     m_ft2PostLogReengageMax = clamped;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2PostLogReengageMax"), clamped);
     emit ft2PostLogReengageMaxChanged();
     bridgeLog(QStringLiteral("[FT2WS] Post-log RRR re-engage max = %1").arg(clamped));
@@ -7613,6 +7618,7 @@ void DecodiumBridge::setTxWatchdogLogOnClose(bool v)
     if (m_txWatchdogLogOnClose == v) return;
     m_txWatchdogLogOnClose = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("TxWatchdogLogOnClose"), v);
     emit txWatchdogLogOnCloseChanged();
     bridgeLog(QStringLiteral("[Watchdog] Log QSO on close at timeout %1").arg(v ? "ON" : "OFF"));
@@ -7706,6 +7712,7 @@ void DecodiumBridge::setFt2TransitionCensus(bool v)
     if (m_ft2TransitionCensus == v) return;
     m_ft2TransitionCensus = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2TransitionCensus"), v);
     emit ft2TransitionCensusChanged();
     bridgeLog(QStringLiteral("[STATE] FT2 transition census %1").arg(v ? "ON" : "OFF"));
@@ -7717,6 +7724,7 @@ void DecodiumBridge::setFt2AdaptiveTxGates(bool v)
     if (m_ft2AdaptiveTxGates == v) return;
     m_ft2AdaptiveTxGates = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2AdaptiveTxGates"), v);
     emit ft2AdaptiveTxGatesChanged();
     bridgeLog(QStringLiteral("[FT2WS] Adaptive TX gates %1").arg(v ? "ON" : "OFF"));
@@ -7729,6 +7737,7 @@ void DecodiumBridge::setFt2ManualOneShotEnabled(bool v)
     if (m_ft2ManualOneShotEnabled == v) return;
     m_ft2ManualOneShotEnabled = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2ManualOneShotEnabled"), v);
     emit ft2ManualOneShotEnabledChanged();
     bridgeLog(QStringLiteral("[FT2WS] FT2 manual one-shot disarm %1").arg(v ? "ON" : "OFF"));
@@ -7743,6 +7752,7 @@ void DecodiumBridge::setFt8FastSequence(bool v)
     if (m_ft8FastSequence == v) return;
     m_ft8FastSequence = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft8FastSequence"), v);
     emit ft8FastSequenceChanged();
     bridgeLog(QStringLiteral("[FT2WS] FT8 fast sequence %1").arg(v ? "ON" : "OFF"));
@@ -7757,6 +7767,7 @@ void DecodiumBridge::setFt2ConservativeTiming(bool v)
     if (m_ft2ConservativeTiming == v) return;
     m_ft2ConservativeTiming = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2ConservativeTiming"), v);
     emit ft2ConservativeTimingChanged();
     bridgeLog(QStringLiteral("[FT2WS] FT2 conservative TX window %1").arg(v ? "ON" : "OFF"));
@@ -7801,6 +7812,7 @@ void DecodiumBridge::setFt2NarrowAsyncDecode(bool v)
     if (m_ft2NarrowAsyncDecode == v) return;
     m_ft2NarrowAsyncDecode = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2NarrowAsyncDecode"), v);
     emit ft2NarrowAsyncDecodeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Narrow async decode %1").arg(v ? "ON" : "OFF"));
@@ -7826,6 +7838,7 @@ void DecodiumBridge::setFt2AsyncSkipRedundantSyncDecode(bool v)
     if (m_ft2AsyncSkipRedundantSyncDecode == v) return;
     m_ft2AsyncSkipRedundantSyncDecode = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft2AsyncSkipRedundantSyncDecode"), v);
     emit ft2AsyncSkipRedundantSyncDecodeChanged();
     bridgeLog(QStringLiteral("[FT2WS] Skip redundant end-slot sync decode %1").arg(v ? "ON" : "OFF"));
@@ -7840,6 +7853,7 @@ void DecodiumBridge::setFt8DeepDecodeInTx(bool v)
     if (m_ft8DeepDecodeInTx == v) return;
     m_ft8DeepDecodeInTx = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("Ft8DeepDecodeInTx"), v);
     emit ft8DeepDecodeInTxChanged();
     bridgeLog(QStringLiteral("[FT8] Deep decode in TX %1").arg(v ? "ON" : "OFF"));
@@ -7868,6 +7882,7 @@ void DecodiumBridge::setResumeQsoOnReply(bool v)
     if (m_resumeQsoOnReply == v) return;
     m_resumeQsoOnReply = v;
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
     settings.setValue(QStringLiteral("ResumeQsoOnReply"), v);
     if (!v) {
         clearResumeQsoOnReplyArm(QStringLiteral("disabled"));
@@ -8083,7 +8098,9 @@ void DecodiumBridge::setFt2Tx2ResendOnStall(bool v)
 {
     if (m_ft2Tx2ResendOnStall == v) return;
     m_ft2Tx2ResendOnStall = v;
-    QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("Ft2Tx2ResendOnStall"), v);
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("Ft2Tx2ResendOnStall"), v);
     emit ft2Tx2ResendOnStallChanged();
     bridgeLog(QStringLiteral("[FT2WS-G] TX2ResendOnStall %1").arg(v ? "ON" : "OFF"));
 }
@@ -8186,7 +8203,7 @@ void DecodiumBridge::setUiStyle(QString const& v)
     if (!valid.contains(norm)) return;
     if (m_uiStyle == norm) return;
     m_uiStyle = norm;
-    QSettings().setValue(QStringLiteral("UI/Style"), norm);
+    QSettings(QCoreApplication::organizationName(), QStringLiteral("Decodium")).setValue(QStringLiteral("UI/Style"), norm);
     emit uiStyleChanged();
     bridgeLog(QStringLiteral("[UI] Style = %1 (restart richiesto)").arg(norm));
 }
@@ -10923,12 +10940,14 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
                     emit lastCatErrorChanged();
                 }
                 QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+                decodium::beginActiveSettingsProfile(s);
                 s.setValue("lastSuccessfulCatConnected", true);
                 s.setValue("lastSuccessfulCatBackend", m_catBackend);
             } else if (!m_shuttingDown) {
                 m_lastSuccessfulCatConnected = false;
                 m_lastSuccessfulCatBackend = m_catBackend;
                 QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+                decodium::beginActiveSettingsProfile(s);
                 s.setValue("lastSuccessfulCatConnected", false);
                 s.setValue("lastSuccessfulCatBackend", m_catBackend);
                 // 1.0.303 — auto-reconnect runtime OmniRig (feedback tester "OmniRig si
@@ -11238,7 +11257,8 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
         QSettings s;
         m_uiQuality          = s.value(QStringLiteral("UI/Quality"), "Medium").toString();
         m_uiFramelessPopouts = s.value(QStringLiteral("UI/FramelessPopouts"), false).toBool();
-        m_uiStyle            = s.value(QStringLiteral("UI/Style"), "Material").toString();
+        QSettings styleSettings(QCoreApplication::organizationName(), QStringLiteral("Decodium"));
+        m_uiStyle = styleSettings.value(QStringLiteral("UI/Style"), "Material").toString();
 
         // 1.0.185 — Migrazione: alias "Default" -> "Material" + fallback per stili
         // deprecati (Imagine, Basic) o sconosciuti. Material e' baseline customizable.
@@ -11257,7 +11277,7 @@ DecodiumBridge::DecodiumBridge(QObject* parent)
             bridgeLog(QStringLiteral("[UI] Style \"%1\" migrato a \"Material\" "
                                      "(Default su Windows risolve a native non-customizable)").arg(m_uiStyle));
             m_uiStyle = QStringLiteral("Material");
-            s.setValue(QStringLiteral("UI/Style"), m_uiStyle);
+            styleSettings.setValue(QStringLiteral("UI/Style"), m_uiStyle);
         }
 
         // 1.0.186 — Full Spectrum auto-detach + Spectrum FPS cap.
@@ -11993,6 +12013,7 @@ void DecodiumBridge::runPostQmlStartupServices()
     // Auto Connect is the explicit preference; lastSuccessfulCatConnected
     // preserves the common "close while connected, reopen connected" workflow.
     QSettings catLastSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(catLastSettings);
     bool const lastSuccess = catLastSettings.value(QStringLiteral("lastSuccessfulCatConnected"), false).toBool();
     QString const lastBackend = catLastSettings.value(QStringLiteral("lastSuccessfulCatBackend")).toString();
     bool const sameBackend = (lastBackend == m_catBackend);
@@ -16106,6 +16127,7 @@ void DecodiumBridge::setDecodeColorEnabled(const QString& prop, bool enabled)
 
     m_decodeColorEnabled.insert(prop, enabled);
     QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     const QString key = decodeColorEnabledSettingKey(prop);
     s.setValue(key, enabled);
     s.sync();
@@ -16130,6 +16152,7 @@ void DecodiumBridge::setDecodeColorBold(const QString& prop, bool bold)
 
     m_decodeColorBold.insert(prop, bold);
     QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     const QString key = decodeColorBoldSettingKey(prop);
     s.setValue(key, bold);
     s.sync();
@@ -16187,8 +16210,9 @@ void DecodiumBridge::setDecodeColorBg(const QString& prop, const QString& hex)
     if (!isDecodeColorProperty(prop)) return;
     if (m_decodeColorBg.value(prop) == hex) return;
     m_decodeColorBg.insert(prop, hex);
-    QSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-        .setValue(QStringLiteral("bg_%1").arg(prop), hex);
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("bg_%1").arg(prop), hex);
     emit decodeColorBgChanged();
 }
 
@@ -16197,8 +16221,9 @@ void DecodiumBridge::setDecodeColorBgEnabled(const QString& prop, bool enabled)
     if (!isDecodeColorProperty(prop)) return;
     if (m_decodeColorBgEnabled.value(prop, false) == enabled) return;
     m_decodeColorBgEnabled.insert(prop, enabled);
-    QSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-        .setValue(QStringLiteral("bgEnabled_%1").arg(prop), enabled);
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("bgEnabled_%1").arg(prop), enabled);
     emit decodeColorBgChanged();
 }
 
@@ -19870,6 +19895,7 @@ void DecodiumBridge::setWaitPounceActive(bool v)
     }
 
     QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("WaitPounceActive"), m_waitPounceActive);
     s.sync();
 
@@ -19891,6 +19917,7 @@ void DecodiumBridge::setHoldTxFreq(bool v)
             m_legacyBackend->setHoldTxFreq(v);
         }
         QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("HoldTxFreq"), m_holdTxFreq);
         s.setValue(QStringLiteral("holdTxFreq"), m_holdTxFreq);
         s.sync();
@@ -20235,9 +20262,10 @@ void DecodiumBridge::setAutoCallMaxQsos(int v)
     }
     m_autoCallMaxQsos = v;
     emit autoCallMaxQsosChanged();
-    QSettings(QSettings::IniFormat, QSettings::UserScope,
-              QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-        .setValue(QStringLiteral("CallFeature/AutoCallMaxQsos"), v);
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+              QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("CallFeature/AutoCallMaxQsos"), v);
 }
 
 void DecodiumBridge::setAutoCallPriority(int v)
@@ -20248,9 +20276,10 @@ void DecodiumBridge::setAutoCallPriority(int v)
     }
     m_autoCallPriority = v;
     emit autoCallPriorityChanged();
-    QSettings(QSettings::IniFormat, QSettings::UserScope,
-              QStringLiteral("Decodium"), QStringLiteral("Decodium3"))
-        .setValue(QStringLiteral("CallFeature/AutoCallPriority"), v);
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+              QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
+    settings.setValue(QStringLiteral("CallFeature/AutoCallPriority"), v);
 }
 
 void DecodiumBridge::resetAutoCallQsoCount()
@@ -20296,6 +20325,7 @@ void DecodiumBridge::setVhfUhfFeatures(bool v)
     m_vhfUhfFeatures = v;
 
     QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("vhfUhfFeatures"), m_vhfUhfFeatures);
     s.setValue(QStringLiteral("VHFUHF"), m_vhfUhfFeatures);
     s.sync();
@@ -20318,7 +20348,9 @@ void DecodiumBridge::setTargetCallSign(const QString& v)
     if (m_targetCallSign != cleaned) {
         m_targetCallSign = cleaned;
         emit targetCallSignChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/TargetCallSign"), m_targetCallSign);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/TargetCallSign"), m_targetCallSign);
     }
 }
 
@@ -20328,7 +20360,9 @@ void DecodiumBridge::setTargetCallMaxRetries(int v)
     if (m_targetCallMaxRetries != v) {
         m_targetCallMaxRetries = v;
         emit targetCallMaxRetriesChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/MaxRetries"), v);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/MaxRetries"), v);
     }
 }
 
@@ -20338,7 +20372,9 @@ void DecodiumBridge::setTargetCallTimeoutS(int v)
     if (m_targetCallTimeoutS != v) {
         m_targetCallTimeoutS = v;
         emit targetCallTimeoutSChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/TimeoutS"), v);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/TimeoutS"), v);
     }
 }
 
@@ -20348,7 +20384,9 @@ void DecodiumBridge::setTargetCallPeriod(int v)
     if (m_targetCallPeriod != v) {
         m_targetCallPeriod = v;
         emit targetCallPeriodChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/Period"), v);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/Period"), v);
     }
 }
 
@@ -20358,7 +20396,9 @@ void DecodiumBridge::setTargetCallPauseS(int v)
     if (m_targetCallPauseS != v) {
         m_targetCallPauseS = v;
         emit targetCallPauseSChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/PauseS"), v);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/PauseS"), v);
     }
 }
 
@@ -20367,7 +20407,9 @@ void DecodiumBridge::setArmedWatchEnabled(bool v)
     if (m_armedWatchEnabled != v) {
         m_armedWatchEnabled = v;
         emit armedWatchEnabledChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/Armed"), v);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/Armed"), v);
         bridgeLog(QStringLiteral("[CALL] DX-watch armato %1").arg(v ? "ON" : "OFF"));
     }
 }
@@ -20377,7 +20419,9 @@ void DecodiumBridge::setArmedReArm(bool v)
     if (m_armedReArm != v) {
         m_armedReArm = v;
         emit armedReArmChanged();
-        QSettings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3").setValue(QStringLiteral("CallFeature/ReArm"), v);
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(settings);
+        settings.setValue(QStringLiteral("CallFeature/ReArm"), v);
         bridgeLog(QStringLiteral("[CALL] re-arm %1").arg(v ? "ON" : "OFF"));
     }
 }
@@ -22380,6 +22424,7 @@ void DecodiumBridge::setNdepth(int v)
     int const legacyBits = legacyCompatibleDecodeDepthBits();
 
     QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("ndepth"), m_ndepth);
     s.setValue(QStringLiteral("NDepth"), legacyBits);
     s.setValue(QStringLiteral("decodeDepthMigratedFromLegacy"), true);
@@ -22401,6 +22446,7 @@ void DecodiumBridge::setSingleDecode(bool v)
     m_singleDecode = v;
 
     QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(s);
     s.setValue(QStringLiteral("SingleDecode"), m_singleDecode);
     s.sync();
     syncSettingToLegacyIni(QStringLiteral("SingleDecode"), m_singleDecode);
@@ -26319,8 +26365,12 @@ void DecodiumBridge::fetchWeatherForGrid()
         m_weatherFetchedAtMs = QDateTime::currentMSecsSinceEpoch();
         bridgeLog(QStringLiteral("fetchWeatherForGrid: tempC=%1 windKmh=%2 windDeg=%3 wmo=%4")
                       .arg(m_weatherTempC).arg(m_weatherWindKmh).arg(m_weatherWindDirDeg).arg(wmo));
-        emit statusMessage(QStringLiteral("Meteo aggiornato: %1°C, vento %2 km/h")
-                                .arg(m_weatherTempC).arg(m_weatherWindKmh));
+        emit statusMessage(QCoreApplication::translate("StationWeather", "Now: %1°C, wind %2 km/h %3, %4")
+                                .arg(m_weatherTempC).arg(m_weatherWindKmh)
+                                .arg(decodium::telemetry::windDirIndex16ToLabel(
+                                    decodium::telemetry::windDirDegToIndex16(m_weatherWindDirDeg)))
+                                .arg(decodium::telemetry::stationSkyConditionNames().value(
+                                    static_cast<int>(m_weatherSky))));
     });
 }
 
@@ -26328,7 +26378,8 @@ QVariantMap DecodiumBridge::currentWeatherPreview() const
 {
     QVariantMap out;
     qint64 const ageMs = QDateTime::currentMSecsSinceEpoch() - m_weatherFetchedAtMs;
-    bool const fresh = m_weatherFetchedAtMs > 0 && ageMs < (30 * 60 * 1000);
+    bool const fresh = getSetting(QStringLiteral("WeatherApiEnable"), false).toBool()
+        && m_weatherFetchedAtMs > 0 && ageMs < (30 * 60 * 1000);
     out[QStringLiteral("available")] = fresh;
     if (fresh) {
         out[QStringLiteral("tempC")] = m_weatherTempC;
@@ -30213,6 +30264,11 @@ void DecodiumBridge::notifyMainQmlLoadStarted()
 
 QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultValue) const
 {
+    // Startup reads this before a configuration/profile can be selected.
+    if (key == QStringLiteral("uiScaleFactor")) {
+        QSettings root(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        return root.value(key, defaultValue);
+    }
     QVariant effectiveDefault = defaultValue;
     if (!effectiveDefault.isValid()
         && (key == QStringLiteral("ShowDXCC") || key == QStringLiteral("DXCCEntity"))) {
@@ -30361,6 +30417,13 @@ QVariant DecodiumBridge::getSetting(const QString& key, const QVariant& defaultV
 
 void DecodiumBridge::setSetting(const QString& key, const QVariant& value)
 {
+    if (key == QStringLiteral("uiScaleFactor")) {
+        QSettings root(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        root.setValue(key, value);
+        root.sync();
+        emit settingValueChanged(key, value);
+        return;
+    }
     if (key == QStringLiteral("b4Strikethrough")) {
         setB4Strikethrough(value.toBool());
         return;
@@ -32639,30 +32702,11 @@ QString DecodiumBridge::legacyIniPath() const
 {
     QString const configDir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     QDir const configRoot(configDir.isEmpty() ? QDir::homePath() : configDir);
-    QStringList candidates;
-    QString const appName = QCoreApplication::applicationName();
-    if (!appName.isEmpty()) {
-        QString const appSpecificPath =
-            configRoot.absoluteFilePath(appName + QStringLiteral(".ini"));
-        if (QFileInfo::exists(appSpecificPath)
-            || appName.contains(QStringLiteral(" - "))) {
-            return appSpecificPath;
-        }
-        candidates << appSpecificPath;
-    }
-    candidates
-        << configRoot.absoluteFilePath(QStringLiteral("Decodium4.ini"))
-        << configRoot.absoluteFilePath(QStringLiteral("decodium4.ini"))
-        << configRoot.absoluteFilePath(QStringLiteral("ft2.ini"));
-
-    candidates.removeDuplicates();
-    for (QString const& path : candidates) {
-        if (QFileInfo::exists(path)) {
-            return path;
-        }
-    }
-
-    return configRoot.absoluteFilePath(QStringLiteral("Decodium4.ini"));
+    // The embedded legacy MainWindow creates MultiSettings, which uses the
+    // decodium4.ini file.  Using ft2.ini here made the QML UDP page update a
+    // different store, while the legacy MessageClient kept the default 2237.
+    // Keep one authoritative store for the embedded backend.
+    return configRoot.absoluteFilePath(QStringLiteral("decodium4.ini"));
 }
 
 QString DecodiumBridge::legacyConfigGroupName() const
@@ -32908,6 +32952,16 @@ void DecodiumBridge::syncSettingToLegacyIni(const QString& key, const QVariant& 
 
 QVariant DecodiumBridge::readSettingFromLegacyIni(const QString& key) const
 {
+    // The embedded legacy backend has one current/root configuration.  A
+    // value explicitly saved for this dashboard profile must not be shadowed
+    // by another instance's legacy root value.
+    if (!decodium::activeSettingsProfileName().isEmpty()) {
+        QSettings profile(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+        decodium::beginActiveSettingsProfile(profile);
+        if (profile.contains(key)) return profile.value(key);
+        const QString alias = aliasedBridgeSettingKey(key);
+        if (alias != key && profile.contains(alias)) return profile.value(alias);
+    }
     QString const iniPath = legacyIniPath();
     if (iniPath.isEmpty()) return {};
 
@@ -34507,7 +34561,9 @@ void DecodiumBridge::shutdown()
     // close path waits for the final queued snapshot before saveSettings()
     // writes the rest of the application state.
     settingsWriteThreadPool().waitForDone(5000);
-    saveSettingsAsync();
+    // No queued completion is guaranteed once the GUI event loop exits.
+    // Also persist CAT/DX-cluster managers, skipped by the asynchronous path.
+    saveSettings();
 }
 
 void DecodiumBridge::copyToClipboard(const QString &text)
@@ -42235,6 +42291,7 @@ int DecodiumBridge::effectiveFt4DecodeDepth(int requestedDepth) const
 int DecodiumBridge::effectiveSpectrumTimerIntervalMs() const
 {
     QSettings s(QSettings::IniFormat, QSettings::UserScope, "Decodium", "Decodium3");
+    decodium::beginActiveSettingsProfile(s);
     int const configured = qBound(10, s.value(QStringLiteral("spectrumInterval"), 20).toInt(), 500);
     if (m_lowCpuModeEnabled) {
         return qMax(configured, 500);
@@ -44542,7 +44599,7 @@ DecodeUserFilterConfig DecodiumBridge::readDecodeUserFilterConfig() const
         return filters;
     }
 
-    // Keep getSetting()'s legacy-INI-first precedence, but open each backing
+    // Keep getSetting()'s profile-aware precedence, but open each backing
     // store only once for the complete filter snapshot. Constructing two or
     // more QSettings objects per key was a visible decode-delivery spike on
     // Windows and also performed repeated filesystem/profile discovery.
@@ -44582,8 +44639,12 @@ DecodeUserFilterConfig DecodiumBridge::readDecodeUserFilterConfig() const
 
     auto readSetting = [&readLegacySetting, &profileSettings](QString const& key,
                                                               QVariant const& fallback) {
-        QVariant value = readLegacySetting(key);
         QString const alias = aliasedBridgeSettingKey(key);
+        if (!decodium::activeSettingsProfileName().isEmpty()) {
+            if (profileSettings.contains(key)) return profileSettings.value(key);
+            if (alias != key && profileSettings.contains(alias)) return profileSettings.value(alias);
+        }
+        QVariant value = readLegacySetting(key);
         if (!value.isValid() && alias != key) {
             value = readLegacySetting(alias);
         }
@@ -55239,6 +55300,7 @@ void DecodiumBridge::maybePlayDecodeAlert(bool isCQ, bool isMyCall, const QStrin
 
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+    decodium::beginActiveSettingsProfile(settings);
     if (!settings.value(QStringLiteral("alertOnWantedCallsign"), false).toBool()) return;
     const QString wantedText = settings.value(QStringLiteral("wantedCallsigns"), QString()).toString().toUpper();
     const QStringList wanted = wantedText.split(QRegularExpression(QStringLiteral("[,\\s;]+")), Qt::SkipEmptyParts);
@@ -56869,6 +56931,7 @@ void DecodiumBridge::setShowUsState(bool v)
     m_showUsState = v;
     {
         QSettings s(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("Decodium"), QStringLiteral("Decodium3"));
+        decodium::beginActiveSettingsProfile(s);
         s.setValue(QStringLiteral("showUsState"), m_showUsState);
     }
     emit showUsStateChanged();

@@ -29588,4 +29588,18 @@ mezőbe kerüljön.</translation>
         <translation>HANGOLÁS</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Most: %1°C, szél %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Lekérés…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Kikapcsolva — a hőmérséklet/szél ismeretlenként kerül elküldésre</translation></message>
+    <message><source>Clear sky</source><translation>Derült ég</translation></message>
+    <message><source>Partly cloudy</source><translation>Részben felhős</translation></message>
+    <message><source>Cloudy</source><translation>Felhős</translation></message>
+    <message><source>Rain</source><translation>Eső</translation></message>
+    <message><source>Snow</source><translation>Hó</translation></message>
+    <message><source>Thunderstorm</source><translation>Zivatar</translation></message>
+    <message><source>Fog</source><translation>Köd</translation></message>
+    <message><source>Unknown</source><translation>Ismeretlen</translation></message>
+</context>
 </TS>

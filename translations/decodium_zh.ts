@@ -29716,4 +29716,18 @@ HIS CALL 栏。</translation>
         <translation>调谐</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>当前：%1°C，风速 %2 km/h %3，%4</translation></message>
+    <message><source>Fetching…</source><translation>正在获取…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>关闭 — 温度和风作为未知数据发送</translation></message>
+    <message><source>Clear sky</source><translation>晴朗</translation></message>
+    <message><source>Partly cloudy</source><translation>局部多云</translation></message>
+    <message><source>Cloudy</source><translation>多云</translation></message>
+    <message><source>Rain</source><translation>雨</translation></message>
+    <message><source>Snow</source><translation>雪</translation></message>
+    <message><source>Thunderstorm</source><translation>雷暴</translation></message>
+    <message><source>Fog</source><translation>雾</translation></message>
+    <message><source>Unknown</source><translation>未知</translation></message>
+</context>
 </TS>

@@ -72,7 +72,7 @@ SettingsPageScroll {
             id: txFreqSpin
             from: 0; to: 5000; value: bridge.txFrequency; editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: {
+            onValueModified: {
                 if (bridge.txFrequency !== value)
                     bridge.txFrequency = value
                 bridge.setSetting("txFrequency", value)
@@ -108,14 +108,14 @@ SettingsPageScroll {
             }
             validator: DoubleValidator { bottom: 0.0; top: 0.5; decimals: 1; notation: DoubleValidator.StandardNotation }
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: bridge.setSetting("TxDelay", value / 10)
+            onValueModified: bridge.setSetting("TxDelay", value / 10)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txDelaySpin.textFromValue(txDelaySpin.value, txDelaySpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txDelaySpin.editable; validator: txDelaySpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Allow TX QSY:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         CheckBox {
-            checked: bridge.getSetting("TxQSYAllowed", false)
-            onCheckedChanged: bridge.setSetting("TxQSYAllowed", checked)
+            checked: dialog.boolSetting("TxQSYAllowed", false)
+            onToggled: bridge.setSetting("TxQSYAllowed", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -212,7 +212,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge.autoSeq
-                    onCheckedChanged: {
+                    onToggled: {
                         bridge.autoSeq = checked
                         bridge.setSetting("autoSeq", checked)
                         bridge.setSetting("AutoSeq", checked)
@@ -233,7 +233,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge.sendRR73
-                    onCheckedChanged: {
+                    onToggled: {
                         bridge.sendRR73 = checked
                         bridge.setSetting("sendRR73", checked)
                     }
@@ -254,7 +254,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge.quickQsoEnabled
-                    onCheckedChanged: {
+                    onToggled: {
                         bridge.quickQsoEnabled = checked
                         bridge.setSetting("quickQsoEnabled", checked)
                     }
@@ -277,7 +277,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.resumeQsoOnReply : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) {
                             bridge.resumeQsoOnReply = checked
                             dialog.scheduleSettingsPersist()
@@ -302,8 +302,8 @@ SettingsPageScroll {
                 CheckBox {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
-                    checked: bridge.getSetting("73TxDisable", true)
-                    onCheckedChanged: bridge.setSetting("73TxDisable", checked)
+                    checked: dialog.boolSetting("73TxDisable", true)
+                    onToggled: bridge.setSetting("73TxDisable", checked)
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }
@@ -320,8 +320,8 @@ SettingsPageScroll {
                 CheckBox {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
-                    checked: bridge.getSetting("RepeatTx", false)
-                    onCheckedChanged: bridge.setSetting("RepeatTx", checked)
+                    checked: dialog.boolSetting("RepeatTx", false)
+                    onToggled: bridge.setSetting("RepeatTx", checked)
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }
@@ -347,7 +347,7 @@ SettingsPageScroll {
                     implicitHeight: controlHeight
                     from: 1; to: 8; editable: true
                     value: bridge ? bridge.ft2SignoffRetryCap : 4
-                    onValueChanged: if (bridge && bridge.ft2SignoffRetryCap !== value) bridge.setFt2SignoffRetryCap(value)
+                    onValueModified: if (bridge && bridge.ft2SignoffRetryCap !== value) bridge.setFt2SignoffRetryCap(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft2SignoffCapSpin.textFromValue(ft2SignoffCapSpin.value, ft2SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2SignoffCapSpin.editable; validator: ft2SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
@@ -373,7 +373,7 @@ SettingsPageScroll {
                     implicitHeight: controlHeight
                     from: 1; to: 8; editable: true
                     value: bridge ? bridge.ft4SignoffRetryCap : 4
-                    onValueChanged: if (bridge && bridge.ft4SignoffRetryCap !== value) bridge.setFt4SignoffRetryCap(value)
+                    onValueModified: if (bridge && bridge.ft4SignoffRetryCap !== value) bridge.setFt4SignoffRetryCap(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft4SignoffCapSpin.textFromValue(ft4SignoffCapSpin.value, ft4SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft4SignoffCapSpin.editable; validator: ft4SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
@@ -399,7 +399,7 @@ SettingsPageScroll {
                     implicitHeight: controlHeight
                     from: 1; to: 8; editable: true
                     value: bridge ? bridge.ft8SignoffRetryCap : 3
-                    onValueChanged: if (bridge && bridge.ft8SignoffRetryCap !== value) bridge.setFt8SignoffRetryCap(value)
+                    onValueModified: if (bridge && bridge.ft8SignoffRetryCap !== value) bridge.setFt8SignoffRetryCap(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft8SignoffCapSpin.textFromValue(ft8SignoffCapSpin.value, ft8SignoffCapSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft8SignoffCapSpin.editable; validator: ft8SignoffCapSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
@@ -423,7 +423,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ftxWeakSignoffBoost : false
-                    onCheckedChanged: if (bridge && bridge.ftxWeakSignoffBoost !== checked) bridge.setFtxWeakSignoffBoost(checked)
+                    onToggled: if (bridge && bridge.ftxWeakSignoffBoost !== checked) bridge.setFtxWeakSignoffBoost(checked)
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                     hoverEnabled: true
@@ -449,7 +449,7 @@ SettingsPageScroll {
                     from: -30; to: -5; editable: true
                     enabled: ftxWeakBoostCheck.checked
                     value: bridge ? bridge.ftxWeakSnrThreshold : -15
-                    onValueChanged: if (bridge && bridge.ftxWeakSnrThreshold !== value) bridge.setFtxWeakSnrThreshold(value)
+                    onValueModified: if (bridge && bridge.ftxWeakSnrThreshold !== value) bridge.setFtxWeakSnrThreshold(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ftxWeakSnrSpin.textFromValue(ftxWeakSnrSpin.value, ftxWeakSnrSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakSnrSpin.editable; validator: ftxWeakSnrSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
@@ -475,7 +475,7 @@ SettingsPageScroll {
                     from: 1; to: 6; editable: true
                     enabled: ftxWeakBoostCheck.checked
                     value: bridge ? bridge.ftxWeakSignoffBonus : 3
-                    onValueChanged: if (bridge && bridge.ftxWeakSignoffBonus !== value) bridge.setFtxWeakSignoffBonus(value)
+                    onValueModified: if (bridge && bridge.ftxWeakSignoffBonus !== value) bridge.setFtxWeakSignoffBonus(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ftxWeakBonusSpin.textFromValue(ftxWeakBonusSpin.value, ftxWeakBonusSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ftxWeakBonusSpin.editable; validator: ftxWeakBonusSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
@@ -499,7 +499,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2PostLogReengageGuard : false
-                    onCheckedChanged: if (bridge && bridge.ft2PostLogReengageGuard !== checked) bridge.setFt2PostLogReengageGuard(checked)
+                    onToggled: if (bridge && bridge.ft2PostLogReengageGuard !== checked) bridge.setFt2PostLogReengageGuard(checked)
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                     hoverEnabled: true
@@ -525,7 +525,7 @@ SettingsPageScroll {
                     from: 0; to: 5; editable: true
                     enabled: ft2ReengageGuardCheck.checked
                     value: bridge ? bridge.ft2PostLogReengageMax : 1
-                    onValueChanged: if (bridge && bridge.ft2PostLogReengageMax !== value) bridge.setFt2PostLogReengageMax(value)
+                    onValueModified: if (bridge && bridge.ft2PostLogReengageMax !== value) bridge.setFt2PostLogReengageMax(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: ft2ReengageMaxSpin.textFromValue(ft2ReengageMaxSpin.value, ft2ReengageMaxSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !ft2ReengageMaxSpin.editable; validator: ft2ReengageMaxSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     hoverEnabled: true
@@ -549,7 +549,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ftxImmediateClickTx : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ftxImmediateClickTx !== checked)
                             bridge.setFtxImmediateClickTx(checked)
                     }
@@ -576,7 +576,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2LogRr73OnPartnerLeft : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ft2LogRr73OnPartnerLeft !== checked)
                             bridge.setFt2LogRr73OnPartnerLeft(checked)
                     }
@@ -603,7 +603,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft8FastSequence : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ft8FastSequence !== checked)
                             bridge.setFt8FastSequence(checked)
                     }
@@ -630,7 +630,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2ConservativeTiming : true
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ft2ConservativeTiming !== checked)
                             bridge.setFt2ConservativeTiming(checked)
                     }
@@ -657,7 +657,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2ManualOneShotEnabled : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ft2ManualOneShotEnabled !== checked)
                             bridge.setFt2ManualOneShotEnabled(checked)
                     }
@@ -688,7 +688,7 @@ SettingsPageScroll {
                     implicitHeight: controlHeight
                     from: 1; to: 99; editable: true
                     value: bridge ? bridge.maxCallerRetries : 10
-                    onValueChanged: if (bridge && bridge.maxCallerRetries !== value) bridge.setMaxCallerRetries(value)
+                    onValueModified: if (bridge && bridge.maxCallerRetries !== value) bridge.setMaxCallerRetries(value)
                     contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: maxCallerRetriesSpin.textFromValue(maxCallerRetriesSpin.value, maxCallerRetriesSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !maxCallerRetriesSpin.editable; validator: maxCallerRetriesSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                     background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
                     // 1.0.493 — segnale visivo: col watchdog owner (hard cap OFF) questo numero è ignorato
@@ -724,7 +724,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.callerRetriesAlwaysHard : true
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.callerRetriesAlwaysHard !== checked)
                             bridge.setCallerRetriesAlwaysHard(checked)
                     }
@@ -751,7 +751,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2TransitionCensus : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ft2TransitionCensus !== checked)
                             bridge.setFt2TransitionCensus(checked)
                     }
@@ -778,7 +778,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2AdaptiveTxGates : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge && bridge.ft2AdaptiveTxGates !== checked)
                             bridge.setFt2AdaptiveTxGates(checked)
                     }
@@ -808,7 +808,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2Conservative : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2Conservative(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -838,7 +838,7 @@ SettingsPageScroll {
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2AccumuloEnabled : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2AccumuloEnabled(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -868,7 +868,7 @@ Default: OFF.")
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2FullDecodeInAutoCq : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2FullDecodeInAutoCq(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -894,7 +894,7 @@ Default: OFF.")
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2QuickGiveUpStrong : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2QuickGiveUpStrong(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -920,7 +920,7 @@ Default: OFF.")
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2AdaptiveDecode : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2AdaptiveDecode(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -946,7 +946,7 @@ Default: OFF.")
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2NarrowAsyncDecode : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2NarrowAsyncDecode(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -972,7 +972,7 @@ Default: OFF.")
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2ApHashCache : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2ApHashCache(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -1092,7 +1092,7 @@ Default: OFF.")
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2PartnerMemoryEnabled : false
                     enabled: bridge ? bridge.ft2Conservative : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2PartnerMemoryEnabled(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2; opacity: parent.enabled ? 1.0 : 0.4 }
@@ -1119,7 +1119,7 @@ Default: OFF.")
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.ft2Tx2ResendOnStall : true
                     enabled: bridge ? bridge.ft2Conservative : false
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setFt2Tx2ResendOnStall(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2; opacity: parent.enabled ? 1.0 : 0.4 }
@@ -1148,7 +1148,7 @@ Default: OFF.")
                     Layout.preferredWidth: autoSequenceGrid.checkWidth
                     Layout.preferredHeight: controlHeight
                     checked: bridge ? bridge.smoothDecodeFlow : true
-                    onCheckedChanged: {
+                    onToggled: {
                         if (bridge) bridge.setSmoothDecodeFlow(checked)
                     }
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -1201,7 +1201,7 @@ Default: OFF.")
                 }
             }
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: if (completed) applyWatchdog()
+            onValueModified: if (completed) applyWatchdog()
             Component.onCompleted: completed = true
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txWdSpin.textFromValue(txWdSpin.value, txWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdSpin.editable; validator: txWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
@@ -1219,7 +1219,7 @@ Default: OFF.")
                 }
             }
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: if (completed) applyWatchdog()
+            onValueModified: if (completed) applyWatchdog()
             Component.onCompleted: completed = true
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: txWdCountSpin.textFromValue(txWdCountSpin.value, txWdCountSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !txWdCountSpin.editable; validator: txWdCountSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
@@ -1230,7 +1230,7 @@ Default: OFF.")
             id: txWdLogOnCloseCheck
             implicitHeight: controlHeight
             checked: bridge ? bridge.txWatchdogLogOnClose : false
-            onCheckedChanged: if (bridge && bridge.txWatchdogLogOnClose !== checked) bridge.setTxWatchdogLogOnClose(checked)
+            onToggled: if (bridge && bridge.txWatchdogLogOnClose !== checked) bridge.setTxWatchdogLogOnClose(checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
             hoverEnabled: true
@@ -1243,8 +1243,8 @@ Default: OFF.")
             Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth + 44; Layout.preferredWidth: numericFieldMinWidth + 44; spacing: 6
             CheckBox {
                 id: tuneWdCheck
-                checked: bridge.getSetting("TuneWatchdog", true)
-                onCheckedChanged: bridge.setSetting("TuneWatchdog", checked)
+                checked: dialog.boolSetting("TuneWatchdog", true)
+                onToggled: bridge.setSetting("TuneWatchdog", checked)
                 indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                 contentItem: Text { text: ""; leftPadding: 24 }
             }
@@ -1252,7 +1252,7 @@ Default: OFF.")
                 id: tuneWdSpin
                 from: 0; to: 300; value: Number(bridge.getSetting("TuneWatchdogTime", 90)); editable: true; enabled: tuneWdCheck.checked
                 implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-                onValueChanged: bridge.setSetting("TuneWatchdogTime", value)
+                onValueModified: bridge.setSetting("TuneWatchdogTime", value)
                 contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: tuneWdSpin.textFromValue(tuneWdSpin.value, tuneWdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !tuneWdSpin.editable; validator: tuneWdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                 background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
             }
@@ -1264,8 +1264,8 @@ Default: OFF.")
 
         Text { text: qsTr("CW ID after 73:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("After73", false)
-            onCheckedChanged: bridge.setSetting("After73", checked)
+            checked: dialog.boolSetting("After73", false)
+            onToggled: bridge.setSetting("After73", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -1274,7 +1274,7 @@ Default: OFF.")
             id: cwIdIntSpin
             from: 0; to: 999; value: Number(bridge.getSetting("IDint", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("IDint", value)
+            onValueModified: bridge.setSetting("IDint", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: cwIdIntSpin.textFromValue(cwIdIntSpin.value, cwIdIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cwIdIntSpin.editable; validator: cwIdIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -1286,8 +1286,8 @@ Default: OFF.")
         Text { text: qsTr("2x Tone Spacing:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             id: x2ToneSpacingCheck
-            checked: bridge.getSetting("x2ToneSpacing", false)
-            onCheckedChanged: {
+            checked: dialog.boolSetting("x2ToneSpacing", false)
+            onToggled: {
                 if (checked) {
                     x4ToneSpacingCheck.checked = false
                     bridge.setSetting("x4ToneSpacing", false)
@@ -1300,8 +1300,8 @@ Default: OFF.")
         Text { text: qsTr("4x Tone Spacing:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             id: x4ToneSpacingCheck
-            checked: bridge.getSetting("x4ToneSpacing", false)
-            onCheckedChanged: {
+            checked: dialog.boolSetting("x4ToneSpacing", false)
+            onToggled: {
                 if (checked) {
                     x2ToneSpacingCheck.checked = false
                     bridge.setSetting("x2ToneSpacing", false)
@@ -1320,8 +1320,8 @@ Default: OFF.")
 
         Text { text: qsTr("Alt F1-F6 Bind:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("AlternateBindings", false)
-            onCheckedChanged: bridge.setSetting("AlternateBindings", checked)
+            checked: dialog.boolSetting("AlternateBindings", false)
+            onToggled: bridge.setSetting("AlternateBindings", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }

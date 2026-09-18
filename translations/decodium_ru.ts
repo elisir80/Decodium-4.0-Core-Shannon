@@ -29757,4 +29757,18 @@ in the HIS CALL field.</source>
         <translation>НАСТРОЙКА</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Сейчас: %1°C, ветер %2 км/ч %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Загрузка…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Выключено — температура/ветер передаются как неизвестные</translation></message>
+    <message><source>Clear sky</source><translation>Ясно</translation></message>
+    <message><source>Partly cloudy</source><translation>Переменная облачность</translation></message>
+    <message><source>Cloudy</source><translation>Облачно</translation></message>
+    <message><source>Rain</source><translation>Дождь</translation></message>
+    <message><source>Snow</source><translation>Снег</translation></message>
+    <message><source>Thunderstorm</source><translation>Гроза</translation></message>
+    <message><source>Fog</source><translation>Туман</translation></message>
+    <message><source>Unknown</source><translation>Неизвестно</translation></message>
+</context>
 </TS>

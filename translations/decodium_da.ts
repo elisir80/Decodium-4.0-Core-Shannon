@@ -29723,4 +29723,18 @@ i feltet HIS CALL.</translation>
         <translation>AFSTEMNING</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Nu: %1°C, vind %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Henter…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Fra — temperatur/vind sendes som ukendt</translation></message>
+    <message><source>Clear sky</source><translation>Klar himmel</translation></message>
+    <message><source>Partly cloudy</source><translation>Delvist skyet</translation></message>
+    <message><source>Cloudy</source><translation>Skyet</translation></message>
+    <message><source>Rain</source><translation>Regn</translation></message>
+    <message><source>Snow</source><translation>Sne</translation></message>
+    <message><source>Thunderstorm</source><translation>Tordenvejr</translation></message>
+    <message><source>Fog</source><translation>Tåge</translation></message>
+    <message><source>Unknown</source><translation>Ukendt</translation></message>
+</context>
 </TS>

@@ -29734,4 +29734,18 @@ HIS CALL te zetten.</translation>
         <translation>AFSTEMMING</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Nu: %1°C, wind %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Ophalen…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Uit — temperatuur/wind worden als onbekend verzonden</translation></message>
+    <message><source>Clear sky</source><translation>Onbewolkt</translation></message>
+    <message><source>Partly cloudy</source><translation>Gedeeltelijk bewolkt</translation></message>
+    <message><source>Cloudy</source><translation>Bewolkt</translation></message>
+    <message><source>Rain</source><translation>Regen</translation></message>
+    <message><source>Snow</source><translation>Sneeuw</translation></message>
+    <message><source>Thunderstorm</source><translation>Onweer</translation></message>
+    <message><source>Fog</source><translation>Mist</translation></message>
+    <message><source>Unknown</source><translation>Onbekend</translation></message>
+</context>
 </TS>

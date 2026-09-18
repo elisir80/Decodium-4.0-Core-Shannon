@@ -170,7 +170,7 @@ SstvPage {
                     }
                 }
 
-                Button {
+                SstvButton {
                     text: root.engine && root.engine.sstvRxActive ? qsTr("Stop monitor") : qsTr("Start monitor")
                     enabled: !!(root.engine && root.engine.sstvAvailable
                                  && !root.replayActive)
@@ -189,7 +189,7 @@ SstvPage {
                         }
                     }
                 }
-                Button {
+                SstvButton {
                     text: qsTr("Reset")
                     enabled: !!(root.engine && root.engine.sstvRxActive
                                  && !root.replayActive)
@@ -200,7 +200,7 @@ SstvPage {
                             root.feedback = qsTr("Decoder state reset")
                     }
                 }
-                Button {
+                SstvButton {
                     objectName: "sstvRxAbortFrame"
                     text: qsTr("Abort frame")
                     enabled: !!(root.engine && root.engine.sstvRxActive
@@ -212,7 +212,7 @@ SstvPage {
                             root.feedback = qsTr("Current frame aborted")
                     }
                 }
-                Button {
+                SstvButton {
                     objectName: "sstvReplayWavOpen"
                     text: qsTr("Replay WAV…")
                     enabled: !!(root.engine && root.engine.sstvAvailable
@@ -221,7 +221,7 @@ SstvPage {
                     Accessible.name: qsTr("Replay an SSTV WAV file")
                     onClicked: wavPicker.open()
                 }
-                Button {
+                SstvButton {
                     objectName: "sstvReplayWavCancel"
                     text: qsTr("Cancel replay")
                     visible: root.replayActive
@@ -259,7 +259,7 @@ SstvPage {
                     }
                 }
 
-                Button {
+                SstvButton {
                     objectName: "sstvRxSaveImage"
                     text: root.stats && root.stats.imageComplete
                           ? qsTr("Save image") : qsTr("Save partial")
@@ -462,7 +462,7 @@ SstvPage {
                             Accessible.name: qsTr("Manual SSTV frequency correction in hertz")
                             onValueModified: root.applyControl("manualFrequencyCorrectionHz", value)
                         }
-                        Button {
+                        SstvButton {
                             objectName: "sstvRxAfcReset"
                             text: qsTr("Reset AFC")
                             Accessible.name: text
@@ -506,7 +506,7 @@ SstvPage {
                             Accessible.name: qsTr("Manual SSTV clock error in parts per million")
                             onValueModified: root.applyControl("manualClockErrorPpm", value)
                         }
-                        Button {
+                        SstvButton {
                             objectName: "sstvRxSlantReset"
                             text: qsTr("Reset slant")
                             Accessible.name: text
@@ -570,7 +570,7 @@ SstvPage {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Button {
+                        SstvButton {
                             objectName: "sstvRxRedecodeRecent"
                             text: qsTr("Re-decode recent")
                             enabled: !!(root.engine && !root.audioJobBusy
@@ -592,7 +592,7 @@ SstvPage {
                                    : qsTr("Retained audio re-decode could not start")
                             }
                         }
-                        Button {
+                        SstvButton {
                             objectName: "sstvRxSaveRawAudio"
                             text: qsTr("Save raw audio")
                             enabled: !!(root.engine && root.engine.sstvStorageReady
@@ -606,7 +606,7 @@ SstvPage {
                                             : qsTr("Diagnostic WAV could not be saved")
                             }
                         }
-                        Button {
+                        SstvButton {
                             objectName: "sstvRxCancelAudioJob"
                             text: qsTr("Cancel audio job")
                             visible: root.audioJobBusy
@@ -716,7 +716,7 @@ SstvPage {
                     anchors.margins: 9
                     spacing: 5
                     visible: root.imageAvailable
-                    Button {
+                    SstvButton {
                         objectName: "sstvRxImageFit"
                         text: qsTr("Fit")
                         checked: root.imageViewMode === "fit"
@@ -724,7 +724,7 @@ SstvPage {
                         Accessible.name: qsTr("Fit SSTV image to view")
                         onClicked: root.imageViewMode = "fit"
                     }
-                    Button {
+                    SstvButton {
                         objectName: "sstvRxImagePixel"
                         text: qsTr("1:1 pixels")
                         checked: root.imageViewMode === "pixel"
@@ -735,7 +735,7 @@ SstvPage {
                             root.imageZoom = 1.0
                         }
                     }
-                    Button {
+                    SstvButton {
                         objectName: "sstvRxImageZoomOut"
                         text: qsTr("−")
                         enabled: root.imageViewMode !== "fit" && root.imageZoom > 0.25
@@ -751,7 +751,7 @@ SstvPage {
                         color: root.secondaryTextColor
                         font.pixelSize: 10
                     }
-                    Button {
+                    SstvButton {
                         objectName: "sstvRxImageZoomIn"
                         text: qsTr("+")
                         enabled: root.imageViewMode !== "fit" && root.imageZoom < 8.0

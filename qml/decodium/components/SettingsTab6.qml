@@ -139,7 +139,7 @@ SettingsPageScroll {
         Text { text: qsTr("PSK Reporter:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.pskReporterEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.pskReporterEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -148,8 +148,8 @@ SettingsPageScroll {
         }
         Text { text: qsTr("TCP/IP:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("PSKReporterTCPIP", false)
-            onCheckedChanged: bridge.setSetting("PSKReporterTCPIP", checked)
+            checked: dialog.boolSetting("PSKReporterTCPIP", false)
+            onToggled: bridge.setSetting("PSKReporterTCPIP", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -199,7 +199,7 @@ SettingsPageScroll {
             implicitHeight: controlHeight
             Layout.fillWidth: true
             Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: if (bridge.dxCluster) bridge.dxCluster.port = value
+            onValueModified: if (bridge.dxCluster) bridge.dxCluster.port = value
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: dxClusterPortSpin.textFromValue(dxClusterPortSpin.value, dxClusterPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !dxClusterPortSpin.editable; validator: dxClusterPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -268,7 +268,7 @@ SettingsPageScroll {
         Text { text: qsTr("DecoLink:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.decoLogLinkEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.decoLogLinkEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -312,7 +312,7 @@ SettingsPageScroll {
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.cloudlogEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.cloudlogEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -348,7 +348,7 @@ SettingsPageScroll {
             id: cloudlogStIdSpin
             from: 0; to: 999; value: Number(bridge.getSetting("CloudLogStationID", 1)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("CloudLogStationID", value)
+            onValueModified: bridge.setSetting("CloudLogStationID", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: cloudlogStIdSpin.textFromValue(cloudlogStIdSpin.value, cloudlogStIdSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !cloudlogStIdSpin.editable; validator: cloudlogStIdSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -363,7 +363,7 @@ SettingsPageScroll {
             checked: bridge.qrzLogbookEnabled
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: {
+            onToggled: {
                 bridge.qrzLogbookEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -376,7 +376,7 @@ SettingsPageScroll {
             checked: bridge.qrzLogbookReplaceDuplicates
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: {
+            onToggled: {
                 bridge.qrzLogbookReplaceDuplicates = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -445,7 +445,7 @@ SettingsPageScroll {
             checked: bridge.lotwEnabled
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: {
+            onToggled: {
                 bridge.lotwEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -463,10 +463,10 @@ SettingsPageScroll {
 
         Text { text: qsTr("Non-QSL'd:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("NonQsl", false)
+            checked: dialog.boolSetting("NonQsl", false)
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: bridge.setSetting("NonQsl", checked)
+            onToggled: bridge.setSetting("NonQsl", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -475,7 +475,7 @@ SettingsPageScroll {
             id: lotwDaysSpin
             from: 0; to: 9999; value: Number(bridge.getSetting("LotWDaysSinceLastUpload", 365)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth
-            onValueChanged: bridge.setSetting("LotWDaysSinceLastUpload", value)
+            onValueModified: bridge.setSetting("LotWDaysSinceLastUpload", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: lotwDaysSpin.textFromValue(lotwDaysSpin.value, lotwDaysSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !lotwDaysSpin.editable; validator: lotwDaysSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -514,20 +514,20 @@ SettingsPageScroll {
 
         Text { text: qsTr("Log as RTTY:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("LogAsRTTY", false)
+            checked: dialog.boolSetting("LogAsRTTY", false)
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: bridge.setSetting("LogAsRTTY", checked)
+            onToggled: bridge.setSetting("LogAsRTTY", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
 
         Text { text: qsTr("4-digit Grids:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("Log4DigitGrids", false)
+            checked: dialog.boolSetting("Log4DigitGrids", false)
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: bridge.setSetting("Log4DigitGrids", checked)
+            onToggled: bridge.setSetting("Log4DigitGrids", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -535,35 +535,35 @@ SettingsPageScroll {
         CheckBox {
             enabled: !promptToLogCheck.checked
             opacity: enabled ? 1.0 : 0.45
-            checked: bridge.getSetting("ContestingOnly", false)
+            checked: dialog.boolSetting("ContestingOnly", false)
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: bridge.setSetting("ContestingOnly", checked)
+            onToggled: bridge.setSetting("ContestingOnly", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
 
         Text { text: qsTr("Spec Op Cmts:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("SpecOpInComments", false)
+            checked: dialog.boolSetting("SpecOpInComments", false)
             Layout.fillWidth: true
             Layout.minimumWidth: fieldMinWidth
-            onCheckedChanged: bridge.setSetting("SpecOpInComments", checked)
+            onToggled: bridge.setSetting("SpecOpInComments", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
         Text { text: qsTr("dB in Cmts:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("dBReportsToComments", false)
-            onCheckedChanged: bridge.setSetting("dBReportsToComments", checked)
+            checked: dialog.boolSetting("dBReportsToComments", false)
+            onToggled: bridge.setSetting("dBReportsToComments", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
 
         Text { text: qsTr("ZZ00:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("ZZ00", false)
-            onCheckedChanged: bridge.setSetting("ZZ00", checked)
+            checked: dialog.boolSetting("ZZ00", false)
+            onToggled: bridge.setSetting("ZZ00", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -576,7 +576,7 @@ SettingsPageScroll {
         Text { text: qsTr("Record RX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.recordRxEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.recordRxEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -586,7 +586,7 @@ SettingsPageScroll {
         Text { text: qsTr("Record TX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.recordTxEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.recordTxEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -597,7 +597,7 @@ SettingsPageScroll {
         Text { text: qsTr("WSPR Upload:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.wsprUploadEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.wsprUploadEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -612,8 +612,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("RemoteWebEnabled", false)
-            onCheckedChanged: bridge.setSetting("RemoteWebEnabled", checked)
+            checked: dialog.boolSetting("RemoteWebEnabled", false)
+            onToggled: bridge.setSetting("RemoteWebEnabled", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -622,7 +622,7 @@ SettingsPageScroll {
             id: remoteHttpPortSpin
             from: 1025; to: 65535; value: Number(bridge.getSetting("RemoteHttpPort", 19091)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("RemoteHttpPort", value)
+            onValueModified: bridge.setSetting("RemoteHttpPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: remoteHttpPortSpin.textFromValue(remoteHttpPortSpin.value, remoteHttpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !remoteHttpPortSpin.editable; validator: remoteHttpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -729,7 +729,7 @@ SettingsPageScroll {
             id: udpPortSpin
             from: 1; to: 65535; value: Number(bridge.getSetting("UDPServerPort", 2237)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPServerPort", value)
+            onValueModified: bridge.setSetting("UDPServerPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpPortSpin.textFromValue(udpPortSpin.value, udpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpPortSpin.editable; validator: udpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -739,7 +739,7 @@ SettingsPageScroll {
             id: udpListenSpin
             from: 0; to: 65535; value: Number(bridge.getSetting("UDPListenPort", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPListenPort", value)
+            onValueModified: bridge.setSetting("UDPListenPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpListenSpin.textFromValue(udpListenSpin.value, udpListenSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpListenSpin.editable; validator: udpListenSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -748,7 +748,7 @@ SettingsPageScroll {
             id: udpTtlSpin
             from: 0; to: 255; value: Number(bridge.getSetting("UDPTTL", 1)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPTTL", value)
+            onValueModified: bridge.setSetting("UDPTTL", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpTtlSpin.textFromValue(udpTtlSpin.value, udpTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpTtlSpin.editable; validator: udpTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -847,7 +847,7 @@ SettingsPageScroll {
             id: udpSecondaryPortSpin
             from: 1; to: 65535; value: Number(bridge.getSetting("UDPSecondaryServerPort", 2239)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPSecondaryServerPort", value)
+            onValueModified: bridge.setSetting("UDPSecondaryServerPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpSecondaryPortSpin.textFromValue(udpSecondaryPortSpin.value, udpSecondaryPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpSecondaryPortSpin.editable; validator: udpSecondaryPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -856,7 +856,7 @@ SettingsPageScroll {
             id: udpSecondaryTtlSpin
             from: 0; to: 255; value: Number(bridge.getSetting("UDPSecondaryTTL", bridge.getSetting("UDPTTL", 1))); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPSecondaryTTL", value)
+            onValueModified: bridge.setSetting("UDPSecondaryTTL", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpSecondaryTtlSpin.textFromValue(udpSecondaryTtlSpin.value, udpSecondaryTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpSecondaryTtlSpin.editable; validator: udpSecondaryTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -960,7 +960,7 @@ SettingsPageScroll {
             enabled: udpTertiaryCheck.checked
             opacity: enabled ? 1.0 : 0.5
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPTertiaryServerPort", value)
+            onValueModified: bridge.setSetting("UDPTertiaryServerPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpTertiaryPortSpin.textFromValue(udpTertiaryPortSpin.value, udpTertiaryPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpTertiaryPortSpin.editable; validator: udpTertiaryPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: udpTertiaryPortSpin.enabled }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -971,7 +971,7 @@ SettingsPageScroll {
             enabled: udpTertiaryCheck.checked
             opacity: enabled ? 1.0 : 0.5
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("UDPTertiaryTTL", value)
+            onValueModified: bridge.setSetting("UDPTertiaryTTL", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: udpTertiaryTtlSpin.textFromValue(udpTertiaryTtlSpin.value, udpTertiaryTtlSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !udpTertiaryTtlSpin.editable; validator: udpTertiaryTtlSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: udpTertiaryTtlSpin.enabled }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -1188,7 +1188,7 @@ SettingsPageScroll {
             enabled: n1mmEnableCheck.checked
             opacity: enabled ? 1.0 : 0.5
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("N1MMServerPort", value)
+            onValueModified: bridge.setSetting("N1MMServerPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: n1mmPortSpin.textFromValue(n1mmPortSpin.value, n1mmPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !n1mmPortSpin.editable; validator: n1mmPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: n1mmPortSpin.enabled }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -1210,23 +1210,23 @@ SettingsPageScroll {
             // Default allineato con Configuration.cpp (true) per evitare
             // che il primo onCheckedChanged scriva `false` nel legacy INI
             // prima che Configuration abbia fatto write_settings.
-            checked: bridge.getSetting("AcceptUDPRequests", true)
-            onCheckedChanged: bridge.setSetting("AcceptUDPRequests", checked)
+            checked: dialog.boolSetting("AcceptUDPRequests", true)
+            onToggled: bridge.setSetting("AcceptUDPRequests", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
         Text { text: qsTr("Notify Request:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("NotifyOnRequest", false)
-            onCheckedChanged: bridge.setSetting("NotifyOnRequest", checked)
+            checked: dialog.boolSetting("NotifyOnRequest", false)
+            onToggled: bridge.setSetting("NotifyOnRequest", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
 
         Text { text: qsTr("Restore Win:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("udpWindowRestore", false)
-            onCheckedChanged: bridge.setSetting("udpWindowRestore", checked)
+            checked: dialog.boolSetting("udpWindowRestore", false)
+            onToggled: bridge.setSetting("udpWindowRestore", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -1251,7 +1251,7 @@ SettingsPageScroll {
             enabled: adifTcpCheck.checked
             opacity: enabled ? 1.0 : 0.5
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.preferredWidth: portFieldMinWidth
-            onValueChanged: bridge.setSetting("ADIFTcpPort", value)
+            onValueModified: bridge.setSetting("ADIFTcpPort", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: adifTcpPortSpin.textFromValue(adifTcpPortSpin.value, adifTcpPortSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !adifTcpPortSpin.editable; validator: adifTcpPortSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly; enabled: adifTcpPortSpin.enabled }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }

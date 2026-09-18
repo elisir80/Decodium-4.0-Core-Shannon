@@ -29737,4 +29737,18 @@ ieliktu laukā HIS CALL.</translation>
         <translation>NOSKAŅOŠANA</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Tagad: %1°C, vējš %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Ielādē…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Izslēgts — temperatūra/vējš tiek nosūtīti kā nezināmi</translation></message>
+    <message><source>Clear sky</source><translation>Skaidras debesis</translation></message>
+    <message><source>Partly cloudy</source><translation>Daļēji mākoņains</translation></message>
+    <message><source>Cloudy</source><translation>Mākoņains</translation></message>
+    <message><source>Rain</source><translation>Lietus</translation></message>
+    <message><source>Snow</source><translation>Sniegs</translation></message>
+    <message><source>Thunderstorm</source><translation>Pērkona negaiss</translation></message>
+    <message><source>Fog</source><translation>Migla</translation></message>
+    <message><source>Unknown</source><translation>Nezināms</translation></message>
+</context>
 </TS>

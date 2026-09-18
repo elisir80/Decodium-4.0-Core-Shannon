@@ -246,7 +246,7 @@ SettingsPageScroll {
         RtlCheckBox {
             id: rtlEnabledCheck
             theme: settingsTab2
-            checked: bridge.getSetting("RtlSdrEnabled", false)
+            checked: dialog.boolSetting("RtlSdrEnabled", false)
             enabled: bridge.rtlSdrSupported
             Layout.preferredHeight: controlHeight
             onClicked: {
@@ -383,7 +383,7 @@ SettingsPageScroll {
         RtlCheckBox {
             id: rtlReceiverAudioCheck
             theme: settingsTab2
-            checked: bridge.getSetting("RtlSdrAudioEnabled", rtlDemodCombo.currentIndex !== 0)
+            checked: dialog.boolSetting("RtlSdrAudioEnabled", rtlDemodCombo.currentIndex !== 0)
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlDemodCombo.currentIndex !== 0
             Layout.preferredHeight: controlHeight
             onClicked: {
@@ -415,7 +415,7 @@ SettingsPageScroll {
                 RtlCheckBox {
                     id: rtlFollowDialCheck
                     theme: settingsTab2
-                    checked: bridge.getSetting("RtlSdrFollowDial", true)
+                    checked: dialog.boolSetting("RtlSdrFollowDial", true)
                     enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
                     Layout.preferredHeight: controlHeight
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
@@ -429,7 +429,7 @@ SettingsPageScroll {
                 RtlCheckBox {
                     id: rtlIfEnabledCheck
                     theme: settingsTab2
-                    checked: bridge.getSetting("RtlSdrIfEnabled", false)
+                    checked: dialog.boolSetting("RtlSdrIfEnabled", false)
                     enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
                     Layout.preferredHeight: controlHeight
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
@@ -515,7 +515,7 @@ SettingsPageScroll {
                 RtlCheckBox {
                     id: rtlIfSpectrumInvertedCheck
                     theme: settingsTab2
-                    checked: bridge.getSetting("RtlSdrIfSpectrumInverted", false)
+                    checked: dialog.boolSetting("RtlSdrIfSpectrumInverted", false)
                     enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked && rtlIfEnabledCheck.checked
                     Layout.preferredHeight: controlHeight
                     Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
@@ -653,7 +653,7 @@ SettingsPageScroll {
         RtlCheckBox {
             id: rtlAgcCheck
             theme: settingsTab2
-            checked: bridge.getSetting("RtlSdrGainTenthsDb", -1) < 0
+            checked: dialog.boolSetting("RtlSdrGainTenthsDb", -1) < 0
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.preferredHeight: controlHeight
             onClicked: {
@@ -682,7 +682,7 @@ SettingsPageScroll {
         Text { text: qsTr("Digital AGC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         RtlCheckBox {
             theme: settingsTab2
-            checked: bridge.getSetting("RtlSdrDigitalAgc", false)
+            checked: dialog.boolSetting("RtlSdrDigitalAgc", false)
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.preferredHeight: controlHeight
             onClicked: {
@@ -697,7 +697,7 @@ SettingsPageScroll {
         Text { text: qsTr("Bias tee:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth; Layout.preferredHeight: controlHeight; verticalAlignment: Text.AlignVCenter }
         RtlCheckBox {
             theme: settingsTab2
-            checked: bridge.getSetting("RtlSdrBiasTee", false)
+            checked: dialog.boolSetting("RtlSdrBiasTee", false)
             enabled: bridge.rtlSdrSupported && rtlEnabledCheck.checked
             Layout.preferredHeight: controlHeight
             onClicked: {
@@ -996,15 +996,15 @@ SettingsPageScroll {
 
         Text { text: qsTr("Band TX Memory:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("PowerBandTXMemory", false)
-            onCheckedChanged: bridge.setSetting("PowerBandTXMemory", checked)
+            checked: dialog.boolSetting("PowerBandTXMemory", false)
+            onToggled: bridge.setSetting("PowerBandTXMemory", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
         Text { text: qsTr("Band Tune Mem:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("PowerBandTuneMemory", false)
-            onCheckedChanged: bridge.setSetting("PowerBandTuneMemory", checked)
+            checked: dialog.boolSetting("PowerBandTuneMemory", false)
+            onToggled: bridge.setSetting("PowerBandTuneMemory", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }

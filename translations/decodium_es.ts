@@ -30232,4 +30232,18 @@ en el campo HIS CALL.</translation>
         <translation>SINTONÍA</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Ahora: %1°C, viento %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Obteniendo datos…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Desactivado — temperatura/viento enviados como «desconocidos»</translation></message>
+    <message><source>Clear sky</source><translation>Despejado</translation></message>
+    <message><source>Partly cloudy</source><translation>Parcialmente nublado</translation></message>
+    <message><source>Cloudy</source><translation>Nublado</translation></message>
+    <message><source>Rain</source><translation>Lluvia</translation></message>
+    <message><source>Snow</source><translation>Nieve</translation></message>
+    <message><source>Thunderstorm</source><translation>Tormenta</translation></message>
+    <message><source>Fog</source><translation>Niebla</translation></message>
+    <message><source>Unknown</source><translation>Desconocido</translation></message>
+</context>
 </TS>

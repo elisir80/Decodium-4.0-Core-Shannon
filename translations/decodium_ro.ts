@@ -22026,4 +22026,18 @@ in the HIS CALL field.</source>
         <translation>ACORD</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Acum: %1°C, vânt %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Se încarcă…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Oprit — temperatura/vântul sunt trimise ca necunoscute</translation></message>
+    <message><source>Clear sky</source><translation>Cer senin</translation></message>
+    <message><source>Partly cloudy</source><translation>Parțial noros</translation></message>
+    <message><source>Cloudy</source><translation>Noros</translation></message>
+    <message><source>Rain</source><translation>Ploaie</translation></message>
+    <message><source>Snow</source><translation>Ninsoare</translation></message>
+    <message><source>Thunderstorm</source><translation>Furtună</translation></message>
+    <message><source>Fog</source><translation>Ceață</translation></message>
+    <message><source>Unknown</source><translation>Necunoscut</translation></message>
+</context>
 </TS>

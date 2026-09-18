@@ -1,4 +1,5 @@
 #include "StationTelemetryCodec.hpp"
+#include <QCoreApplication>
 
 #include <QRegularExpression>
 
@@ -178,15 +179,19 @@ QStringList const& stationAntennaTypeNames ()
     return names;
 }
 
-QStringList const& stationSkyConditionNames ()
+QStringList stationSkyConditionNames ()
 {
-    static QStringList const names {
-        QStringLiteral ("Sereno"), QStringLiteral ("Poco nuvoloso"),
-        QStringLiteral ("Nuvoloso"), QStringLiteral ("Pioggia"),
-        QStringLiteral ("Neve"), QStringLiteral ("Temporale"),
-        QStringLiteral ("Nebbia"), QStringLiteral ("Sconosciuto"),
+    // Translate at call time: do not retain labels from a previous UI language.
+    return {
+        QCoreApplication::translate("StationWeather", "Clear sky"),
+        QCoreApplication::translate("StationWeather", "Partly cloudy"),
+        QCoreApplication::translate("StationWeather", "Cloudy"),
+        QCoreApplication::translate("StationWeather", "Rain"),
+        QCoreApplication::translate("StationWeather", "Snow"),
+        QCoreApplication::translate("StationWeather", "Thunderstorm"),
+        QCoreApplication::translate("StationWeather", "Fog"),
+        QCoreApplication::translate("StationWeather", "Unknown"),
     };
-    return names;
 }
 
 int windDirDegToIndex16 (int degrees)

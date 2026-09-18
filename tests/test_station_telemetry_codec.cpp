@@ -23,6 +23,7 @@ private slots:
     void rejectsForeignHex ();
     void rejectsWrongLength ();
     void windDirRoundTrip ();
+    void weatherLanguageChanges ();
 };
 
 void TestStationTelemetryCodec::roundTripTypical ()
@@ -175,6 +176,26 @@ void TestStationTelemetryCodec::windDirRoundTrip ()
     QCOMPARE (windDirIndex16ToLabel (0), QStringLiteral ("N"));
     QCOMPARE (windDirIndex16ToLabel (8), QStringLiteral ("S"));
     QCOMPARE (windDirIndex16ToLabel (14), QStringLiteral ("NW"));
+}
+
+void TestStationTelemetryCodec::weatherLanguageChanges ()
+{
+    QCOMPARE(stationSkyConditionNames().size(), 8);
+    QCOMPARE(stationSkyConditionNames().at(1), QStringLiteral("Partly cloudy"));
+    class WeatherTranslator final : public QTranslator {
+    public:
+        bool isEmpty() const override { return false; }
+        QString translate(const char *context, const char *source,
+                          const char *, int) const override {
+            if (QByteArray(context) == "StationWeather" && QByteArray(source) == "Partly cloudy")
+                return QStringLiteral("Poco nuvoloso");
+            return {};
+        }
+    } translator;
+    QCoreApplication::installTranslator(&translator);
+    QCOMPARE(stationSkyConditionNames().at(1), QStringLiteral("Poco nuvoloso"));
+    QCoreApplication::removeTranslator(&translator);
+    QCOMPARE(stationSkyConditionNames().at(1), QStringLiteral("Partly cloudy"));
 }
 
 QTEST_MAIN (TestStationTelemetryCodec)

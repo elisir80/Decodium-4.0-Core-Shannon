@@ -230,6 +230,12 @@ target_include_directories (test_station_telemetry_codec PRIVATE ${CMAKE_SOURCE_
 target_link_libraries (test_station_telemetry_codec Qt6::Test Qt6::Core)
 add_test (NAME test_station_telemetry_codec COMMAND $<TARGET_FILE:test_station_telemetry_codec>)
 
+add_executable(test_settings_profile_restart test_settings_profile_restart.cpp)
+target_link_libraries(test_settings_profile_restart Qt6::Test Qt6::Core)
+target_compile_definitions(test_settings_profile_restart PRIVATE
+  SETTINGS_AUDIT_KEYS="${CMAKE_CURRENT_SOURCE_DIR}/settings_audit_keys.json")
+add_test(NAME test_settings_profile_restart COMMAND $<TARGET_FILE:test_settings_profile_restart>)
+
 add_executable (test_qmx_telemetry test_qmx_telemetry.cpp)
 target_link_libraries (test_qmx_telemetry Qt6::Test Qt6::Core)
 add_test (NAME test_qmx_telemetry COMMAND $<TARGET_FILE:test_qmx_telemetry>)

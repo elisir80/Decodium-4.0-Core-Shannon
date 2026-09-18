@@ -102,8 +102,8 @@ SettingsPageScroll {
                 Text { text: qsTr("Auto Astro:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }
                 CheckBox {
                     Layout.preferredWidth: advancedStartupGrid.checkWidth; Layout.preferredHeight: controlHeight
-                    checked: bridge.getSetting("AutoAstroWindow", false)
-                    onCheckedChanged: bridge.setSetting("AutoAstroWindow", checked)
+                    checked: dialog.boolSetting("AutoAstroWindow", false)
+                    onToggled: bridge.setSetting("AutoAstroWindow", checked)
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }
@@ -136,8 +136,8 @@ SettingsPageScroll {
                 Text { text: qsTr("Larger Tab:"); color: textSecondary; font.pixelSize: 12; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter; Layout.preferredWidth: advancedStartupGrid.labelWidth; Layout.preferredHeight: controlHeight }
                 CheckBox {
                     Layout.preferredWidth: advancedStartupGrid.checkWidth; Layout.preferredHeight: controlHeight
-                    checked: bridge.getSetting("LargerTabWidget", false)
-                    onCheckedChanged: bridge.setSetting("LargerTabWidget", checked)
+                    checked: dialog.boolSetting("LargerTabWidget", false)
+                    onToggled: bridge.setSetting("LargerTabWidget", checked)
                     indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
                     contentItem: Text { text: ""; leftPadding: 24 }
                 }
@@ -166,7 +166,7 @@ SettingsPageScroll {
                     visible: Qt.platform.os === "linux"
                     Layout.preferredWidth: advancedStartupGrid.checkWidth
                     Layout.preferredHeight: visible ? controlHeight : 0
-                    checked: bridge.getSetting("OpenGlGpuPanadapterFft", false)
+                    checked: dialog.boolSetting("OpenGlGpuPanadapterFft", false)
                     onToggled: bridge.setSetting("OpenGlGpuPanadapterFft", checked)
                     ToolTip.visible: hovered
                     ToolTip.text: qsTr("After restart, offloads the visual panadapter FFT to OpenGL compute on supported Linux drivers. It does not move FT decoding to the GPU. A failed or stalled GPU path falls back automatically to asynchronous CPU FFT. Default: OFF.")
@@ -652,7 +652,7 @@ SettingsPageScroll {
         }
         Text { text: qsTr("RF self-calibration:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("DecoSyncSelfCalEnabled", false)
+            checked: dialog.boolSetting("DecoSyncSelfCalEnabled", false)
             onClicked: bridge.setSetting("DecoSyncSelfCalEnabled", checked)
             ToolTip.visible: hovered
             ToolTip.text: qsTr("Use received decode DT values only as a secondary time-sync hint after NTP/HTTPS is already locked. Default: OFF.")
@@ -790,8 +790,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("OTP Enabled:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("OTPEnabled", false)
-            onCheckedChanged: bridge.setSetting("OTPEnabled", checked)
+            checked: dialog.boolSetting("OTPEnabled", false)
+            onToggled: bridge.setSetting("OTPEnabled", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -808,7 +808,7 @@ SettingsPageScroll {
             id: otpIntSpin
             from: 1; to: 3600; value: Number(bridge.getSetting("OTPinterval", 1)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("OTPinterval", value)
+            onValueModified: bridge.setSetting("OTPinterval", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: otpIntSpin.textFromValue(otpIntSpin.value, otpIntSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !otpIntSpin.editable; validator: otpIntSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }

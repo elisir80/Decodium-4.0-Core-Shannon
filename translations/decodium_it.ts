@@ -36029,4 +36029,18 @@ nel campo HIS CALL.</translation>
         <translation>Sono richiesti Hamlib e split Rig/Fake It. La correzione TX resta fissa durante la trasmissione. Il tracking parte SPENTO a ogni avvio; concordare il metodo con il corrispondente.</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>Ora: %1°C, vento %2 km/h %3, %4</translation></message>
+    <message><source>Fetching…</source><translation>Recupero dati…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>Disattivato — temperatura/vento inviati come “sconosciuti”</translation></message>
+    <message><source>Clear sky</source><translation>Sereno</translation></message>
+    <message><source>Partly cloudy</source><translation>Poco nuvoloso</translation></message>
+    <message><source>Cloudy</source><translation>Nuvoloso</translation></message>
+    <message><source>Rain</source><translation>Pioggia</translation></message>
+    <message><source>Snow</source><translation>Neve</translation></message>
+    <message><source>Thunderstorm</source><translation>Temporale</translation></message>
+    <message><source>Fog</source><translation>Nebbia</translation></message>
+    <message><source>Unknown</source><translation>Sconosciuto</translation></message>
+</context>
 </TS>

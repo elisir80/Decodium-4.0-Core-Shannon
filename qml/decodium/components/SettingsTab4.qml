@@ -362,7 +362,7 @@ SettingsPageScroll {
             id: framelessPopoutsCheck
             Layout.leftMargin: 24
             checked: bridge ? bridge.uiFramelessPopouts : false
-            onCheckedChanged: {
+            onToggled: {
                 if (bridge) bridge.setUiFramelessPopouts(checked)
             }
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -380,7 +380,7 @@ SettingsPageScroll {
             id: autoDetachFullSpectrumCheck
             Layout.leftMargin: 24
             checked: bridge ? bridge.autoDetachFullSpectrum : false
-            onCheckedChanged: {
+            onToggled: {
                 if (bridge) bridge.setAutoDetachFullSpectrum(checked)
             }
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -548,8 +548,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("Show DXCC:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("ShowDXCC", true)
-            onCheckedChanged: bridge.setSetting("ShowDXCC", checked)
+            checked: dialog.boolSetting("ShowDXCC", true)
+            onToggled: bridge.setSetting("ShowDXCC", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -561,7 +561,7 @@ SettingsPageScroll {
             spacing: 8
             CheckBox {
                 checked: bridge.showUsState
-                onCheckedChanged: bridge.showUsState = checked
+                onToggled: bridge.showUsState = checked
                 Layout.preferredWidth: 28
                 Layout.preferredHeight: controlHeight
                 indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
@@ -599,8 +599,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("TX Msg to RX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("TXMessagesToRX", true)
-            onCheckedChanged: bridge.setSetting("TXMessagesToRX", checked)
+            checked: dialog.boolSetting("TXMessagesToRX", true)
+            onToggled: bridge.setSetting("TXMessagesToRX", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -608,7 +608,7 @@ SettingsPageScroll {
         Text { text: qsTr("Waterfall Calls:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.boolSetting("uiWaterfallShowCallsigns", true)
-            onCheckedChanged: bridge.setSetting("uiWaterfallShowCallsigns", checked)
+            onToggled: bridge.setSetting("uiWaterfallShowCallsigns", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -616,7 +616,7 @@ SettingsPageScroll {
         Text { text: qsTr("FS Dist:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.boolSetting("uiFullSpectrumShowDistColumn", true)
-            onCheckedChanged: bridge.setSetting("uiFullSpectrumShowDistColumn", checked)
+            onToggled: bridge.setSetting("uiFullSpectrumShowDistColumn", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -624,7 +624,7 @@ SettingsPageScroll {
         Text { text: qsTr("FS Az:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.boolSetting("uiFullSpectrumShowAzColumn", true)
-            onCheckedChanged: bridge.setSetting("uiFullSpectrumShowAzColumn", checked)
+            onToggled: bridge.setSetting("uiFullSpectrumShowAzColumn", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -632,7 +632,7 @@ SettingsPageScroll {
         Text { text: qsTr("RX Freq:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.boolSetting("uiSignalRxShowFreqColumn", true)
-            onCheckedChanged: bridge.setSetting("uiSignalRxShowFreqColumn", checked)
+            onToggled: bridge.setSetting("uiSignalRxShowFreqColumn", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -640,7 +640,7 @@ SettingsPageScroll {
         Text { text: qsTr("RX Dist:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.boolSetting("uiSignalRxShowDistColumn", true)
-            onCheckedChanged: bridge.setSetting("uiSignalRxShowDistColumn", checked)
+            onToggled: bridge.setSetting("uiSignalRxShowDistColumn", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -648,7 +648,7 @@ SettingsPageScroll {
         Text { text: qsTr("RX Az:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: dialog.boolSetting("uiSignalRxShowAzColumn", true)
-            onCheckedChanged: bridge.setSetting("uiSignalRxShowAzColumn", checked)
+            onToggled: bridge.setSetting("uiSignalRxShowAzColumn", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -661,7 +661,7 @@ SettingsPageScroll {
         Text { text: qsTr("Miles:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: boolSetting("Miles", false)
-            onCheckedChanged: bridge.setSetting("Miles", checked)
+            onToggled: bridge.setSetting("Miles", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -679,16 +679,16 @@ SettingsPageScroll {
 
         Text { text: qsTr("Map All Msgs:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("MapAllMessages", false)
-            onCheckedChanged: bridge.setSetting("MapAllMessages", checked)
+            checked: dialog.boolSetting("MapAllMessages", false)
+            onToggled: bridge.setSetting("MapAllMessages", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
 
         Text { text: qsTr("Click TX:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("MapSingleClickTX", false)
-            onCheckedChanged: bridge.setSetting("MapSingleClickTX", checked)
+            checked: dialog.boolSetting("MapSingleClickTX", false)
+            onToggled: bridge.setSetting("MapSingleClickTX", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -718,8 +718,8 @@ SettingsPageScroll {
 
         Text { text: qsTr("Align:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("Align", false)
-            onCheckedChanged: bridge.setSetting("Align", checked)
+            checked: dialog.boolSetting("Align", false)
+            onToggled: bridge.setSetting("Align", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -728,7 +728,7 @@ SettingsPageScroll {
             id: alignStepsSpin
             from: 0; to: 999; value: Number(bridge.getSetting("AlignSteps", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("AlignSteps", value)
+            onValueModified: bridge.setSetting("AlignSteps", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: alignStepsSpin.textFromValue(alignStepsSpin.value, alignStepsSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !alignStepsSpin.editable; validator: alignStepsSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -738,7 +738,7 @@ SettingsPageScroll {
             id: alignSteps2Spin
             from: 0; to: 999; value: Number(bridge.getSetting("AlignSteps2", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("AlignSteps2", value)
+            onValueModified: bridge.setSetting("AlignSteps2", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: alignSteps2Spin.textFromValue(alignSteps2Spin.value, alignSteps2Spin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !alignSteps2Spin.editable; validator: alignSteps2Spin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }

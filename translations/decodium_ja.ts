@@ -29718,4 +29718,18 @@ HIS CALL 欄に入ります。</translation>
         <translation>同調</translation>
     </message>
 </context>
+<context>
+    <name>StationWeather</name>
+    <message><source>Now: %1°C, wind %2 km/h %3, %4</source><translation>現在: %1°C、風 %2 km/h %3、%4</translation></message>
+    <message><source>Fetching…</source><translation>取得中…</translation></message>
+    <message><source>Off — temperature/wind sent as “unknown”</source><translation>オフ — 気温・風は不明として送信されます</translation></message>
+    <message><source>Clear sky</source><translation>快晴</translation></message>
+    <message><source>Partly cloudy</source><translation>晴れ時々曇り</translation></message>
+    <message><source>Cloudy</source><translation>曇り</translation></message>
+    <message><source>Rain</source><translation>雨</translation></message>
+    <message><source>Snow</source><translation>雪</translation></message>
+    <message><source>Thunderstorm</source><translation>雷雨</translation></message>
+    <message><source>Fog</source><translation>霧</translation></message>
+    <message><source>Unknown</source><translation>不明</translation></message>
+</context>
 </TS>

@@ -71,7 +71,7 @@ SettingsPageScroll {
         CheckBox {
             id: webServerToggle
             checked: bridge.webServerRunning()
-            onCheckedChanged: {
+            onToggled: {
                 if (checked) {
                     var port = parseInt(webServerPortField.text) || 8080
                     bridge.startWebServer(port)
@@ -148,7 +148,7 @@ SettingsPageScroll {
             // m_decodeShowPeriodSeparator a runtime (era solo
             // letto al boot via loadSettings).
             checked: bridge.decodeShowPeriodSeparator()
-            onCheckedChanged: {
+            onToggled: {
                 bridge.setDecodeShowPeriodSeparator(checked)
                 bridge.setSetting("decodeShowPeriodSeparator", checked)
             }
@@ -157,8 +157,8 @@ SettingsPageScroll {
         }
         Text { text: qsTr("Newest first:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 160 }
         CheckBox {
-            checked: bridge.getSetting("decodeNewestFirst", false)
-            onCheckedChanged: bridge.setSetting("decodeNewestFirst", checked)
+            checked: dialog.boolSetting("decodeNewestFirst", false)
+            onToggled: bridge.setSetting("decodeNewestFirst", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -189,7 +189,7 @@ SettingsPageScroll {
             id: nfaSpin
             from: 0; to: 5000; value: bridge.nfa; editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: {
+            onValueModified: {
                 bridge.nfa = value
                 dialog.scheduleSettingsPersist()
             }
@@ -201,7 +201,7 @@ SettingsPageScroll {
             id: nfbSpin
             from: 0; to: 5000; value: bridge.nfb; editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: {
+            onValueModified: {
                 bridge.nfb = value
                 dialog.scheduleSettingsPersist()
             }
@@ -214,14 +214,14 @@ SettingsPageScroll {
             id: rxBwSpin
             from: 100; to: 5000; value: Number(bridge.getSetting("RXBandwidth", 2500)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.minimumWidth: numericFieldMinWidth; Layout.preferredWidth: numericFieldMinWidth
-            onValueChanged: bridge.setSetting("RXBandwidth", value)
+            onValueModified: bridge.setSetting("RXBandwidth", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: rxBwSpin.textFromValue(rxBwSpin.value, rxBwSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !rxBwSpin.editable; validator: rxBwSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
         Text { text: qsTr("Decode at 52s:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: labelWidth }
         CheckBox {
-            checked: bridge.getSetting("DecodeAt52s", false)
-            onCheckedChanged: bridge.setSetting("DecodeAt52s", checked)
+            checked: dialog.boolSetting("DecodeAt52s", false)
+            onToggled: bridge.setSetting("DecodeAt52s", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -247,7 +247,7 @@ SettingsPageScroll {
             id: erasurePatSpin
             from: 0; to: 99999; value: Number(bridge.getSetting("RandomErasurePatterns", 7)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("RandomErasurePatterns", value)
+            onValueModified: bridge.setSetting("RandomErasurePatterns", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: erasurePatSpin.textFromValue(erasurePatSpin.value, erasurePatSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !erasurePatSpin.editable; validator: erasurePatSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -256,15 +256,15 @@ SettingsPageScroll {
             id: aggressiveSpin
             from: 0; to: 10; value: Number(bridge.getSetting("AggressiveLevel", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("AggressiveLevel", value)
+            onValueModified: bridge.setSetting("AggressiveLevel", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: aggressiveSpin.textFromValue(aggressiveSpin.value, aggressiveSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !aggressiveSpin.editable; validator: aggressiveSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
 
         Text { text: qsTr("Two-Pass:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: bridge.getSetting("TwoPassDecoding", false)
-            onCheckedChanged: bridge.setSetting("TwoPassDecoding", checked)
+            checked: dialog.boolSetting("TwoPassDecoding", false)
+            onToggled: bridge.setSetting("TwoPassDecoding", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
         }
@@ -291,7 +291,7 @@ SettingsPageScroll {
             id: degradeSnSpin
             from: 0; to: 100; value: Number(bridge.getSetting("DegradeSN", 0)); editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true
-            onValueChanged: bridge.setSetting("DegradeSN", value)
+            onValueModified: bridge.setSetting("DegradeSN", value)
             contentItem: TextInput { selectByMouse: true; onActiveFocusChanged: if (activeFocus) selectAll(); text: degradeSnSpin.textFromValue(degradeSnSpin.value, degradeSnSpin.locale); color: textPrimary; font.pixelSize: controlFontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; leftPadding: spinTextSidePadding; rightPadding: spinTextSidePadding; readOnly: !degradeSnSpin.editable; validator: degradeSnSpin.validator; inputMethodHints: Qt.ImhFormattedNumbersOnly }
             background: Rectangle { color: bgMedium; border.color: glassBorder; radius: 4 }
         }
@@ -303,7 +303,7 @@ SettingsPageScroll {
         Text { text: qsTr("CQ Only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.filterCqOnly
-            onCheckedChanged: {
+            onToggled: {
                 bridge.filterCqOnly = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -334,7 +334,7 @@ SettingsPageScroll {
         Text { text: qsTr("My Call Only:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.filterMyCallOnly
-            onCheckedChanged: {
+            onToggled: {
                 bridge.filterMyCallOnly = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -345,7 +345,7 @@ SettingsPageScroll {
         Text { text: qsTr("Zap:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.zapEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.zapEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -355,7 +355,7 @@ SettingsPageScroll {
         Text { text: qsTr("Deep Search:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.deepSearchEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.deepSearchEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -366,7 +366,7 @@ SettingsPageScroll {
         Text { text: qsTr("AP Decode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.ft8ApEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.ft8ApEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -377,7 +377,7 @@ SettingsPageScroll {
         Text { text: qsTr("Avg Decode:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             checked: bridge.avgDecodeEnabled
-            onCheckedChanged: {
+            onToggled: {
                 bridge.avgDecodeEnabled = checked
                 dialog.scheduleSettingsPersist()
             }
@@ -397,7 +397,7 @@ SettingsPageScroll {
         }
         CheckBox {
             checked: bridge.ft8DeepDecodeInTx
-            onCheckedChanged: {
+            onToggled: {
                 bridge.ft8DeepDecodeInTx = checked
                 dialog.scheduleSettingsPersist()
             }

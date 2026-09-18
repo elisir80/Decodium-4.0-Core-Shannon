@@ -847,7 +847,7 @@ SettingsPageScroll {
             text: qsTr("Strict match (abort if configured radio is not current in HRD)")
             Layout.fillWidth: true
             Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onCheckedChanged: {
+            onToggled: {
                 if (bridge.catManager && bridge.catManager.hrdStrictRadioMatch !== checked) {
                     bridge.catManager.hrdStrictRadioMatch = checked
                     dialog.scheduleCatPersist()
@@ -901,7 +901,7 @@ SettingsPageScroll {
             text: qsTr("RX/TX via TCI")
             Layout.fillWidth: true
             Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onCheckedChanged: {
+            onToggled: {
                 if (bridge.catManager) bridge.catManager.tciAudioEnabled = checked
                 dialog.scheduleCatPersist()
             }
@@ -1039,7 +1039,7 @@ SettingsPageScroll {
             visible: !dialog.usesCat4OmControls()
             from: 2; to: 99; value: bridge.catManager ? Math.max(2, bridge.catManager.pollInterval) : 2; editable: true
             implicitHeight: controlHeight; Layout.fillWidth: true; Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onValueChanged: {
+            onValueModified: {
                 if (bridge.catManager) bridge.catManager.pollInterval = value
                 dialog.scheduleCatPersist()
             }
@@ -1060,7 +1060,7 @@ SettingsPageScroll {
             text: qsTr("Light polling for interface activity LEDs")
             Layout.fillWidth: true
             Layout.columnSpan: Math.max(1, pageColumns - 1)
-            onCheckedChanged: {
+            onToggled: {
                 if (bridge.catManager && bridge.catManager.catKeepAlive !== checked)
                     bridge.catManager.catKeepAlive = checked
                 dialog.scheduleCatPersist()
@@ -1477,7 +1477,7 @@ SettingsPageScroll {
         Text { text: qsTr("On shared CAT:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
             id: secondInstanceShared
-            checked: bridge.getSetting("SecondInstanceSharedCat", true)
+            checked: dialog.boolSetting("SecondInstanceSharedCat", true)
             onToggled: bridge.setSetting("SecondInstanceSharedCat", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
             contentItem: Text { text: ""; leftPadding: 24 }
@@ -1671,7 +1671,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("Check SWR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: dialog.supportsSwrTelemetry() ? bridge.getSetting("CheckSWR", false) : false
+            checked: dialog.supportsSwrTelemetry() ? dialog.boolSetting("CheckSWR", false) : false
             enabled: dialog.supportsSwrTelemetry()
             // Only a user gesture may change CAT telemetry settings.  A
             // checked binding is evaluated while this lazy page is created;
@@ -1687,7 +1687,7 @@ SettingsPageScroll {
         }
         Text { text: qsTr("PWR and SWR:"); color: textSecondary; font.pixelSize: 12; Layout.preferredWidth: 100 }
         CheckBox {
-            checked: dialog.supportsSwrTelemetry() ? bridge.getSetting("PWRandSWR", false) : false
+            checked: dialog.supportsSwrTelemetry() ? dialog.boolSetting("PWRandSWR", false) : false
             enabled: dialog.supportsSwrTelemetry()
             onToggled: if (enabled) bridge.setSetting("PWRandSWR", checked)
             indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
