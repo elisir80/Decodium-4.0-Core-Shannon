@@ -297,11 +297,13 @@ DecodiumLogging::~DecodiumLogging ()
 #include <QWaitCondition>
 #ifdef Q_OS_WIN
 #include <windows.h>
+#endif
 
 // Definita in Detector/superldpc/decodium_dispatch.cpp: estensioni della CPU
 // e decodificatore scelto. Nei log degli utenti era l'informazione mancante.
+// Fuori da Q_OS_WIN: il blocco di avvio e' uguale su tutte le piattaforme e
+// su Linux la dichiarazione dentro il ramo Windows non esisteva (build rotta).
 extern "C" void superldpc_descrivi_c (char* out, int n);
-#endif
 #include <csignal>
 
 DecodiumLogging* DecodiumLogging::s_instance = nullptr;
