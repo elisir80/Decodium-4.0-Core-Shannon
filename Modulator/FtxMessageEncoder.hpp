@@ -78,6 +78,10 @@ private:
 Decode77Context& sharedDecode77Context ();
 
 bool isStandardFtxCall (QString const& call);
+// Un hash non risolto ("<...>") puo' nascondere il PROPRIO nominativo solo se
+// almeno uno dei due e' non standard: fra due nominativi standard il protocollo
+// non usa l'hash. Serve a non scambiare per nostra la risposta a un terzo.
+bool hiddenHashCanBeOwnCall (QString const& plainCall, QString const& ownCall);
 QString bracketHashCall (QString const& call);
 
 EncodedMessage encodeFt2 (QString const& message, bool check_only = false);

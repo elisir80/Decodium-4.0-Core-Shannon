@@ -3746,6 +3746,15 @@ bool isStandardFtxCall (QString const& call)
   return is_standard_callsign_ftx (call);
 }
 
+bool hiddenHashCanBeOwnCall (QString const& plainCall, QString const& ownCall)
+{
+  // In un messaggio con hash non risolto decide il nominativo scritto per
+  // esteso: se e' NON standard l'hash e' un nominativo standard e puo' essere
+  // il nostro; se e' standard l'hash e' per forza non standard, e allora e'
+  // nostro solo se il nostro nominativo e' composto o speciale.
+  return !(is_standard_callsign_ftx (plainCall) && is_standard_callsign_ftx (ownCall));
+}
+
 }
 }
 

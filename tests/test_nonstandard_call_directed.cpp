@@ -241,6 +241,23 @@ int main (int argc, char* argv[])
                 && d3 != kMyCall,
             QStringLiteral ("diretto a un altro: si estrae, ma non e' per me"));
 
+  // --- 5. Il "<...>" non risolto: chi puo' esserci sotto
+  //
+  // Segnalato in aria il 18/09/2026 (IT9MBM, FT4): mentre chiamava KG6DX e'
+  // arrivato "<...> KG6DX R-07" e il sequencer ha risposto, ma KG6DX stava
+  // lavorando un terzo. Fra due nominativi standard il protocollo NON usa
+  // l'hash: quel messaggio non poteva essere per noi, per quanto il QSO in
+  // corso lo facesse sembrare. La funzione chiamata e' quella vera del bridge.
+  using decodium::txmsg::hiddenHashCanBeOwnCall;
+  verifica (!hiddenHashCanBeOwnCall (QStringLiteral ("KG6DX"), QStringLiteral ("IT9MBM")),
+            QStringLiteral ("due nominativi standard: il <...> non e' il mio"));
+  verifica (hiddenHashCanBeOwnCall (kSpecialCall, kMyCall),
+            QStringLiteral ("mittente non standard: l'hash puo' essere il mio"));
+  verifica (hiddenHashCanBeOwnCall (QStringLiteral ("KG6DX"), QStringLiteral ("IU8LMC/P")),
+            QStringLiteral ("nominativo mio composto: l'hash puo' essere il mio"));
+  verifica (hiddenHashCanBeOwnCall (QStringLiteral ("VP2E/K1ABC"), kMyCall),
+            QStringLiteral ("mittente composto: l'hash puo' essere il mio"));
+
   std::printf ("\n%s (%d controlli falliti)\n", falliti == 0 ? "TUTTO A POSTO" : "CI SONO ERRORI",
                falliti);
   return falliti == 0 ? 0 : 1;

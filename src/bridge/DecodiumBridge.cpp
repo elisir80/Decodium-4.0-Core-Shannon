@@ -37033,6 +37033,21 @@ bool DecodiumBridge::isDirectedToLocalHashFromActivePartner(const QString& messa
         return false;
     }
 
+    // CERTEZZA sul destinatario, al posto del dubbio dei puntini. In un
+    // messaggio con hash non risolto decide il nominativo scritto per esteso:
+    //   - se chi trasmette e' NON standard, l'hash e' un nominativo standard e
+    //     puo' essere il nostro (e' il caso II8IHBC del 12/09/2026);
+    //   - se chi trasmette e' STANDARD, l'hash e' per forza un nominativo non
+    //     standard: il nostro lo e' solo se lo abbiamo composto noi.
+    // Con entrambi standard il messaggio NON e' nostro, per quanto il QSO in
+    // corso lo faccia sembrare. Segnalato in aria il 18/09/2026: "<...> KG6DX
+    // R-07" mentre si chiamava KG6DX, che stava rispondendo a un terzo, ha
+    // avviato la sequenza di risposta.
+    if (!decodium::txmsg::hiddenHashCanBeOwnCall(partner,
+                                                m_callsign.trimmed().toUpper())) {
+        return false;
+    }
+
     QStringList payload = tokens.mid(2);
     while (!payload.isEmpty() && payload.constLast() == QStringLiteral("?")) {
         payload.removeLast();
