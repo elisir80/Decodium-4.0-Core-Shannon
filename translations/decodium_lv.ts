@@ -2715,6 +2715,82 @@ Noklikšķiniet uz Monitor, lai sāktu</translation>
         <source>Could not start %1</source>
         <translation>Neizdevās palaist %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>Uztveršana sākta caur mantoto aizmuguri - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>Uztveršana apturēta</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune pabeigts</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>Raidīšana pabeigta</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>Raidīšana pabeigta pilnībā</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>Raidīšanas audio ierīce nav atrasta, tiek izmantota noklusējuma ierīce: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT nav pieejams: pārbaudi CAT savienojumu (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>Raidīšana apturēta</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>Tune audio ierīce nav atrasta, tiek izmantota noklusējuma ierīce: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>Iestatījumi saglabāti</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>Raidīšanas uzraugs: laiks beidzies, raidīšana apturēta</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>Audio uztveršana sākta: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>cty.dat lejupielāde jau notiek...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat atjaunināts un ielādēts: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>Neviens WAV fails nav atrasts: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>Raidīšana nav sākta</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>Saspiestais izsaukuma signāls nav atšifrēts</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ apturēts</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>Saņemts tiešs izsaukums, taču izsaukuma signāls nav atšifrēts</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2762,6 +2838,18 @@ Noklikšķiniet uz Monitor, lai sāktu</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Cloudlog API atslēga ir derīga, bet bez rakstīšanas tiesībām.</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401. Serveris vai starpniekserveris pieprasa autentifikāciju pirms Cloudlog API. Pārbaudi URL, Basic/Auth/Cloudflare vai aizsardzību uz /index.php/api; ar Cloudlog API atslēgu vien nepietiek.%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407. Starpniekserveris pieprasa autentifikāciju, pirms sasniedz Cloudlog.%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>Cloudlog API atslēga ir derīga, taču tai nav rakstīšanas tiesību.</translation>
     </message>
 </context>
 <context>
@@ -3113,6 +3201,22 @@ Noklikšķiniet uz Monitor, lai sāktu</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>augšupielāde noraidīta priekš %1: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>Trūkst API atslēgas.</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>tests neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>nederīga API atslēga: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>augšupielāde neizdevās: %1</translation>
     </message>
 </context>
 <context>
@@ -6357,6 +6461,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>VUCC lauciņi: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>Pakalpojums nav norādījis derīgumu</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>Vietējs atlants, OpenStreetMap/OpenTopoMap, GEBCO batimetrija, NASA GIBS un MapTiler. Ja pakalpojums neizdodas, tiek mēģināta konfigurētā rezerve.</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>Aktīvā rezerve: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>Novecojis kešs · notiek atjaunināšana</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>Nav pieejamas atsauksmes</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6708,6 +6832,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Error: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>Nosūtīt šo QSO uz DX Cluster, ja savienojums ar klasteri jau bija aktīvs.</translation>
     </message>
 </context>
 <context>
@@ -13344,6 +13472,22 @@ UDP server %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Are you sure you want to clear the QSO queues?</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>Nosūtīt spotu konfigurētajam klasterim pēc QSO ierakstīšanas žurnālā (73 apstiprināts).</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>CW audio: notiek RTTY raidīšana, mēģini vēlreiz</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>CW audio: raidīšana jau ir aktīva, komanda ignorēta</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>CW audio nav pieejams ar TCI audio</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -14107,6 +14251,18 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>nezināma protokola kļūda</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>CAT seriālais ports nav pieejams. Pagaidi, līdz Windows atpazīst staciju, un mēģini vēlreiz.</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Ports %1 nav pieejams. Pagaidi, līdz Windows atpazīst staciju, un mēģini vēlreiz.</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>CAT atspējots uztveršanas/ierakstīšanas testiem: seriālais ports paliek pieejams JTDX.</translation>
     </message>
 </context>
 <context>
@@ -20468,6 +20624,30 @@ Noklusējums: IZSL.</translation>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>Tikai manuāla atkopšana: ADI importēšana apvieno tā apstiprinājumus aktīvajā žurnālā, tāpat kā Atjaunināt. Tā nepavirza tiešsaistes LoTW lejupielādes kursoru.</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>Vietēja meklēšana ar DXCC rezervi, SQLite kešu un atjaunināmiem pakalpojumiem. eQSL un Club Log akreditācijas dati tiek glabāti atslēgu saišķī caur secure settings kanālu.</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>Atvērt meklēšanas paneli</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>Automātiski aizvērt pēc ierakstīšanas žurnālā</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>Aizvērt paneli pēc QSO</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>Lejupielādē eQSL InBox/Arhīvu ADIF formātā un sinhronizē apstiprinājumus aktīvajā žurnālā. Noklusējuma lietotājvārds ir stacijas izsaukuma signāls.</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>Lejupielādē saņemtās LoTW QSL un sinhronizē tās žurnālā. Parole tiek izmantota no sadaļas Reporting → LoTW; LoTW lietotājvārds var atšķirties no darba izsaukuma signāla.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22743,6 +22923,18 @@ QSO laikā tērē papildu CPU. Noklusējums: IZSL.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>Terciārā datplūsma:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog nedarbojas: jauns mēģinājums ik pēc 5 s</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>atspējots</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>QSO nonāk DecoLog caur UDP tāpat kā jebkurā citā žurnālā. Ar DecoLink DecoLog sūta Decodium savu žurnālu (worked-before, jauni DXCC), katra saglabātā QSO apstiprinājumu un FT2 Award statusu. Tikai 127.0.0.1.</translation>
     </message>
 </context>
 <context>
@@ -27923,6 +28115,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>Pakalpojums nav pieejams</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>nav pieejams</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>nav norādes</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Aizvērt</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28240,6 +28448,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>%1 sinhronizācija neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>Gatavs: pieejama vietējā izsaukuma signālu datubāze</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>Izsaukuma signālu datubāze nav pieejama: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>Nederīgs izsaukuma signāls</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>Nav vietējā ieraksta: tiek mēģināti attālie pakalpojumi...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>Bezsaistē: attālais ieraksts netika pieprasīts</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>DXCC rezerve: nav pieejams neviens pakalpojuma profils</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>Neviens pakalpojums neatrada izsaukuma signālu</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log nav pieejams: izmantota vietējā rezerve (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>Attālie pakalpojumi nav pieejami: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>Atjaunināšana jau notiek</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>Nepieciešams LoTW lietotājvārds un parole; parole atrodama sadaļā Reporting → LoTW</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>LoTW apstiprinājumi: nepieciešams lietotājvārds un parole</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: tiek lejupielādēta pirmā apstiprinājumu kopa...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>Trūkst QRZ API atslēgas: norādi to sadaļā QRZ Logbook</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: trūkst API atslēgas</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>Nepieciešams eQSL lietotājvārds un parole</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: nepieciešams eQSL lietotājvārds un parole</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>Notiek eQSL InBox lejupielāde...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: nepieciešama API atslēga, e-pasts, lietotnes parole un operatora izsaukuma signāls</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Notiek Club Log OQRS atjaunināšana...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>Notiek %1 atjaunināšana...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>%1 atjaunināšana neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>LoTW atbilde nesatur derīgu ADIF</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>nederīga API atbilde</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: notiek ADI faila lejupielāde...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>nederīga eQSL atbilde</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox neizdevās: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>Nederīgs ADI fails</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>Lejupielādēts; notiek žurnāla sinhronizācija...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 lejupielādēts: notiek žurnāla sinhronizācija...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>ADI failu nevar nolasīt</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>%1 imports neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>%1 ADI fails nolasīts; notiek imports fonā...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>Notiek %1 imports fonā...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>Neatpazīts datu formāts vai nav ierakstu</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>%1 sinhronizācija neizdevās: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>Nevar atvērt ārējo meklēšanu: nederīgs izsaukuma signāls</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>Nevar izveidot ārējā pakalpojuma URL</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: notiek apstiprinājumu 1. lapas lejupielāde...</translation>
     </message>
 </context>
 <context>

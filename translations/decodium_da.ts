@@ -2702,6 +2702,82 @@ Klik på Monitor for at starte</translation>
         <source>Could not start %1</source>
         <translation>Kunne ikke starte %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>Modtagelse startet via ældre backend - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>Modtagelse stoppet</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune afsluttet</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>Transmission afsluttet</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>Transmission gennemført</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>Sendelydenhed ikke fundet, bruger standardenheden: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT ikke tilgængelig: kontrollér CAT-forbindelsen (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>Transmission stoppet</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>Tune-lydenhed ikke fundet, bruger standardenheden: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>Indstillinger gemt</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>Sende-watchdog: tiden udløb, transmissionen blev stoppet</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>Lydoptagelse startet: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>Download af cty.dat er allerede i gang...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat opdateret og indlæst: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>Ingen WAV-fil fundet i: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>Transmission ikke startet</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>Komprimeret kaldesignal ikke opløst</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ stoppet</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>Direkte kald modtaget, men kaldesignalet er ikke opløst</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2749,6 +2825,18 @@ Klik på Monitor for at starte</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Cloudlog API-nøgle er gyldig, men uden skriverettigheder.</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401. Serveren eller proxyen kræver godkendelse før Cloudlog-API'et. Kontrollér URL, Basic/Auth/Cloudflare eller beskyttelser på /index.php/api; Cloudlog-API-nøglen er ikke nok.%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407. Proxyen kræver godkendelse, før Cloudlog kan nås.%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>Cloudlog-API-nøglen er gyldig, men har ikke skriverettigheder.</translation>
     </message>
 </context>
 <context>
@@ -3100,6 +3188,22 @@ Klik på Monitor for at starte</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>upload afvist for %1: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>API-nøgle mangler.</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>test mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>ugyldig API-nøgle: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>upload mislykkedes: %1</translation>
     </message>
 </context>
 <context>
@@ -6344,6 +6448,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>VUCC-lokatorer: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>Gyldighed ikke oplyst af udbyderen</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>Lokalt atlas, OpenStreetMap/OpenTopoMap, GEBCO-batymetri, NASA GIBS og MapTiler. Hvis en udbyder fejler, forsøges den konfigurerede reserve.</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>Reserve i brug: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>Forældet cache · opdaterer</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>Ingen tilbagemelding tilgængelig</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6696,6 +6820,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Fejl: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>Send denne QSO til DX Cluster, hvis clusterforbindelsen allerede var aktiv.</translation>
     </message>
 </context>
 <context>
@@ -13330,6 +13458,22 @@ UDP-server %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Er du sikker på, at du vil rydde QSO-køerne?</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>Send et spot til det konfigurerede cluster, når QSO'en er logget (73 bekræftet).</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>CW-lyd: RTTY-transmission i gang, prøv igen</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>CW-lyd: transmission allerede aktiv, kommando ignoreret</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>CW-lyd er ikke tilgængelig med TCI-lyd</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -14093,6 +14237,18 @@ Den downloadede fil overskrider grænsen på %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>ukendt protokolfejl</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>CAT-serielport ikke tilgængelig. Vent, til Windows har fundet radioen, og prøv igen.</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Port %1 ikke tilgængelig. Vent, til Windows har fundet radioen, og prøv igen.</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>CAT deaktiveret til modtage-/optagetest: serielporten forbliver tilgængelig for JTDX.</translation>
     </message>
 </context>
 <context>
@@ -20453,6 +20609,30 @@ Hvis du er i tvivl, brug Høj.</translation>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>Kun manuel gendannelse: import af en ADI fletter dens bekræftelser ind i den aktive logbog, ligesom Opdater. Den flytter ikke den online LoTW-downloadmarkør.</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>Lokalt opslag med DXCC-reserve, SQLite-cache og udbydere, der kan opdateres. Legitimationsoplysninger til eQSL og Club Log gemmes i nøgleringen via secure settings-kanalen.</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>Åbn opslagspanelet</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>Luk automatisk efter logning</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>Luk panelet efter QSO'en</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>Download eQSL InBox/Arkiv som ADIF, og synkronisér bekræftelserne ind i den aktive logbog. Standardbrugernavnet er stationens kaldesignal.</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>Download de modtagne LoTW-QSL'er, og synkronisér dem ind i logbogen. Adgangskoden genbruges fra afsnittet Reporting → LoTW; LoTW-loginnet kan være et andet end det kaldesignal, der køres med.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22728,6 +22908,18 @@ Koster ekstra CPU under QSO'er. Standard: OFF.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>Tertiær trafik:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog kører ikke: nyt forsøg hvert 5. s</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>deaktiveret</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>QSO'er når DecoLog over UDP ligesom til enhver anden logger. Med DecoLink sender DecoLog sin egen log til Decodium (worked-before, nye DXCC), kvitteringen for hver gemt QSO og status for FT2 Award. Kun 127.0.0.1.</translation>
     </message>
 </context>
 <context>
@@ -27909,6 +28101,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>Tjeneste ikke tilgængelig</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>ikke tilgængelig</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>ingen angivelse</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Luk</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28226,6 +28434,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>Synkronisering af %1 mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>Klar: lokal kaldesignaldatabase tilgængelig</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>Kaldesignaldatabase ikke tilgængelig: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>Ugyldigt kaldesignal</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>Ingen lokal post: prøver de eksterne udbydere...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>Offline: ingen ekstern post anmodet</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>DXCC-reserve: ingen udbyderprofil tilgængelig</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>Ingen udbyder fandt kaldesignalet</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log ikke tilgængelig: lokal reserve brugt (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>Eksterne udbydere ikke tilgængelige: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>En opdatering er allerede i gang</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>LoTW-brugernavn og -adgangskode er påkrævet; adgangskoden findes i afsnittet Reporting → LoTW</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>LoTW-bekræftelser: brugernavn og adgangskode påkrævet</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: downloader det første sæt bekræftelser...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>QRZ-API-nøgle mangler: angiv den i afsnittet QRZ Logbook</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: API-nøgle mangler</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>eQSL-brugernavn og -adgangskode er påkrævet</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: eQSL-brugernavn og -adgangskode påkrævet</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>Downloader eQSL InBox...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: API-nøgle, e-mail, programadgangskode og operatørkaldesignal er påkrævet</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Club Log OQRS-opdatering i gang...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>%1-opdatering i gang...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>%1-opdatering mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>LoTW-svaret indeholder ikke en gyldig ADIF</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>ugyldigt API-svar</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: downloader ADI-filen...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>ugyldigt eQSL-svar</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox mislykkedes: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>Ugyldig ADI-fil</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>Downloadet; synkroniserer logbogen...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 downloadet: synkroniserer logbogen...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>ADI-filen kan ikke læses</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>%1-import mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>ADI-fil %1 læst; importerer i baggrunden...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>Importerer %1 i baggrunden...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>Dataformatet blev ikke genkendt, eller der er ingen poster</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>%1-synkronisering mislykkedes: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>Kan ikke åbne det eksterne opslag: ugyldigt kaldesignal</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>Kan ikke danne URL'en til den eksterne udbyder</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: downloader side 1 af bekræftelserne...</translation>
     </message>
 </context>
 <context>

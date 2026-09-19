@@ -2702,6 +2702,82 @@ Click Monitor to start</source>
         <source>Could not start %1</source>
         <translation>Не удалось запустить %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>Приём запущен через устаревший бэкенд - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>Приём остановлен</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune завершён</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>Передача завершена</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>Передача выполнена</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>Аудиоустройство передачи не найдено, используется устройство по умолчанию: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT недоступен: проверьте подключение CAT (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>Передача остановлена</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>Аудиоустройство для Tune не найдено, используется устройство по умолчанию: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>Настройки сохранены</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>Сторожевой таймер передачи: время истекло, передача остановлена</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>Захват звука начат: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>Загрузка cty.dat уже выполняется...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat обновлён и загружен: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>WAV-файл не найден в: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>Передача не начата</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>Сжатый позывной не распознан</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ остановлен</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>Принят прямой вызов, но позывной не распознан</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2749,6 +2825,18 @@ Click Monitor to start</source>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Ключ API Cloudlog действителен, но без прав на запись.</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401. Сервер или прокси требует аутентификации перед API Cloudlog. Проверьте URL, Basic/Auth/Cloudflare или защиту на /index.php/api; одного API-ключа Cloudlog недостаточно.%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407. Прокси требует аутентификации перед обращением к Cloudlog.%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>API-ключ Cloudlog действителен, но не имеет прав на запись.</translation>
     </message>
 </context>
 <context>
@@ -3100,6 +3188,22 @@ Click Monitor to start</source>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>загрузка отклонена для %1: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>Отсутствует API-ключ.</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>тест не пройден: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>недействительный API-ключ: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>ошибка выгрузки: %1</translation>
     </message>
 </context>
 <context>
@@ -6345,6 +6449,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>Квадраты VUCC: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>Срок действия службой не указан</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>Локальный атлас, OpenStreetMap/OpenTopoMap, батиметрия GEBCO, NASA GIBS и MapTiler. Если служба недоступна, используется настроенный резерв.</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>Резерв активен: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>Кэш устарел · обновляется</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>Отклик недоступен</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6697,6 +6821,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Ошибка: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>Отправить это QSO в DX Cluster, если подключение к кластеру уже было активно.</translation>
     </message>
 </context>
 <context>
@@ -13342,6 +13470,22 @@ UDP-сервер %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Вы уверены, что хотите очистить очереди QSO?</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>Отправлять спот на настроенный кластер после записи QSO в журнал (73 подтверждено).</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>CW-аудио: идёт передача RTTY, повторите попытку</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>CW-аудио: передача уже активна, команда проигнорирована</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>CW-аудио недоступно при использовании звука TCI</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -14105,6 +14249,18 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>неизвестная ошибка протокола</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Последовательный порт CAT недоступен. Дождитесь, пока Windows определит трансивер, и повторите попытку.</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Порт %1 недоступен. Дождитесь, пока Windows определит трансивер, и повторите попытку.</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>CAT отключён для тестов приёма/записи: последовательный порт остаётся доступным для JTDX.</translation>
     </message>
 </context>
 <context>
@@ -20467,6 +20623,30 @@ If unsure, use High.</source>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>Только ручное восстановление: импорт ADI сливает его подтверждения в активный журнал, как и «Обновить». Указатель онлайн-загрузки LoTW при этом не сдвигается.</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>Локальный поиск с резервом DXCC, кэшем SQLite и обновляемыми службами. Учётные данные eQSL и Club Log хранятся в связке ключей через канал secure settings.</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>Открыть панель поиска</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>Автоматически закрывать после записи в журнал</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>Закрывать панель после QSO</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>Загрузить eQSL InBox/Архив в формате ADIF и синхронизировать подтверждения с активным журналом. Имя пользователя по умолчанию — позывной станции.</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>Загрузить полученные QSL LoTW и синхронизировать их с журналом. Пароль берётся из раздела Reporting → LoTW; логин LoTW может отличаться от рабочего позывного.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22742,6 +22922,18 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>Третий трафик:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog не запущен: повтор попытки каждые 5 с</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>отключено</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>QSO поступают в DecoLog по UDP, как в любой журнал. С DecoLink DecoLog передаёт Decodium свой журнал (worked-before, новые DXCC), подтверждение каждого сохранённого QSO и статус FT2 Award. Только 127.0.0.1.</translation>
     </message>
 </context>
 <context>
@@ -27942,6 +28134,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>Служба недоступна</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>недоступно</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>нет данных</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28259,6 +28467,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>Сбой синхронизации %1: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>Готово: локальная база позывных доступна</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>База позывных недоступна: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>Недопустимый позывной</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>Локальной записи нет: пробуем удалённые службы...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>Офлайн: удалённая запись не запрашивалась</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>Резерв DXCC: нет доступного профиля службы</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>Ни одна служба не нашла позывной</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log недоступен: использован локальный резерв (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>Удалённые службы недоступны: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>Обновление уже выполняется</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>Требуются имя пользователя и пароль LoTW; пароль находится в разделе Reporting → LoTW</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>Подтверждения LoTW: требуются имя пользователя и пароль</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: загрузка первой партии подтверждений...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>Отсутствует API-ключ QRZ: укажите его в разделе QRZ Logbook</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: отсутствует API-ключ</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>Требуются имя пользователя и пароль eQSL</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: требуются имя пользователя и пароль eQSL</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>Загрузка eQSL InBox...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: требуются API-ключ, e-mail, пароль приложения и позывной оператора</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Выполняется обновление Club Log OQRS...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>Выполняется обновление %1...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>Не удалось обновить %1: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>ответ LoTW не содержит корректного ADIF</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>сбой LoTW: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>недопустимый ответ API</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>сбой QRZ.com: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: загрузка файла ADI...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>недопустимый ответ eQSL</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>сбой eQSL InBox: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>Недопустимый файл ADI</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>сбой %1: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>Загружено; синхронизация журнала...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 загружено: выполняется синхронизация журнала...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>не удаётся прочитать файл ADI</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>Не удался импорт %1: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>Файл ADI %1 прочитан; импорт в фоновом режиме...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>Импорт %1 в фоновом режиме...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>Формат данных не распознан либо записей нет</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>Не удалась синхронизация %1: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>Не удаётся открыть внешний поиск: недопустимый позывной</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>Не удаётся сформировать URL внешней службы</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: загрузка страницы 1 подтверждений...</translation>
     </message>
 </context>
 <context>

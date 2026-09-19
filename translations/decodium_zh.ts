@@ -2700,6 +2700,82 @@ Click Monitor to start</source>
         <source>Could not start %1</source>
         <translation>无法启动 %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>已通过旧后端启动接收 - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>接收已停止</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>调谐结束</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>发射结束</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>发射完成</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>未找到发射音频设备，改用默认设备：%1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT 不可用：请检查 CAT 连接（%1）</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>发射已停止</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>未找到调谐音频设备，改用默认设备：%1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>设置已保存</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>发射看门狗：超时，发射已停止</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>音频采集已启动：%1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>cty.dat 已在下载中……</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat 已更新并加载：%1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>未在此处找到 WAV 文件：%1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>发射未启动</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>压缩呼号未解析</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ 已停止</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>收到定向呼叫，但呼号未解析</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2747,6 +2823,18 @@ Click Monitor to start</source>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Cloudlog API 密钥有效，但无写入权限。</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1：HTTP 401。服务器或代理在 Cloudlog API 之前要求认证。请检查 URL、Basic/Auth/Cloudflare 或 /index.php/api 上的保护措施；仅有 Cloudlog API 密钥并不够。%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1：HTTP 407。代理在访问 Cloudlog 之前要求认证。%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>Cloudlog API 密钥有效，但没有写入权限。</translation>
     </message>
 </context>
 <context>
@@ -3098,6 +3186,22 @@ Click Monitor to start</source>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>%1 上传被拒绝：%2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>缺少 API 密钥。</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>测试失败：%1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>API 密钥无效：%1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>上传失败：%1</translation>
     </message>
 </context>
 <context>
@@ -6342,6 +6446,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>VUCC 网格：%1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>服务方未声明有效期</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>本地地图集、OpenStreetMap/OpenTopoMap、GEBCO 水深数据、NASA GIBS 和 MapTiler。若某个服务方失败，将尝试已配置的回退。</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>回退生效：%1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>缓存已过期 · 正在更新</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>没有可用的反馈</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6693,6 +6817,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>错误: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>如果集群连接此前已激活，则把该 QSO 发送到 DX 集群。</translation>
     </message>
 </context>
 <context>
@@ -13330,6 +13458,22 @@ UDP 服务器 %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>确定要清除 QSO 队列吗？</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>记录 QSO 后向已配置的集群发送点位（73 已确认）。</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>CW 音频：RTTY 正在发射，请重试</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>CW 音频：发射已在进行，忽略该命令</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>使用 TCI 音频时无法使用 CW 音频</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -14093,6 +14237,18 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>未知的协议错误</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>CAT 串口不可用。请等待 Windows 识别电台后重试。</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>端口 %1 不可用。请等待 Windows 识别电台后重试。</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>接收/录音测试期间已禁用 CAT：串口仍可供 JTDX 使用。</translation>
     </message>
 </context>
 <context>
@@ -20453,6 +20609,30 @@ If unsure, use High.</source>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>仅用于手动恢复：导入 ADI 会把其中的确认合并到当前日志，与「刷新」相同。它不会推进 LoTW 在线下载的游标。</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>本地查询，带 DXCC 回退、SQLite 缓存和可更新的服务方。eQSL 与 Club Log 的凭据通过 secure settings 通道保存在密钥链中。</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>打开查询面板</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>记录日志后自动关闭</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>QSO 结束后关闭面板</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>以 ADIF 格式下载 eQSL 的 InBox/存档，并把确认信息同步到当前日志。默认用户名为本站呼号。</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>下载收到的 LoTW QSL 并同步到日志。密码沿用 Reporting → LoTW 部分的设置；LoTW 登录名可能与操作呼号不同。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22728,6 +22908,18 @@ Costs extra CPU during QSOs. Default: OFF.</source>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>第三流量：</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog 未运行：每 5 秒重试一次</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>已停用</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>QSO 像发给其他日志程序一样通过 UDP 送达 DecoLog。启用 DecoLink 后，DecoLog 会把自己的日志（worked-before、新 DXCC）、每条已保存 QSO 的确认以及 FT2 Award 状态发送给 Decodium。仅限 127.0.0.1。</translation>
     </message>
 </context>
 <context>
@@ -27908,6 +28100,22 @@ VUCC：%2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>服务不可用</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>不可用</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>无说明</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28225,6 +28433,174 @@ VUCC：%2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>%1 同步失败：%2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>就绪：本地呼号数据库可用</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>呼号数据库不可用：%1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>呼号无效</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>没有本地记录：正在尝试远程服务方……</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>离线：未请求远程记录</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>DXCC 回退：没有可用的服务方配置</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>没有服务方找到该呼号</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log 不可用：已使用本地回退（%1）</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>远程服务方不可用：%1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>更新已在进行中</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>需要 LoTW 用户名和密码；密码位于 Reporting → LoTW 部分</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>LoTW 确认：需要用户名和密码</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW：正在下载第一批确认记录……</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>缺少 QRZ API 密钥：请在 QRZ Logbook 部分设置</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com：缺少 API 密钥</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>需要 eQSL 用户名和密码</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox：需要 eQSL 用户名和密码</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>正在下载 eQSL InBox……</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS：需要 API 密钥、电子邮件、应用密码和操作员呼号</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Club Log OQRS 更新进行中……</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>%1 更新进行中……</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>%1 更新失败：%2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>LoTW 的响应不包含有效的 ADIF</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW 失败：%1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>API 响应无效</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com 失败：%1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox：正在下载 ADI 文件……</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>eQSL 响应无效</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox 失败：%1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>ADI 文件无效</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 失败：%2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>已下载；正在同步日志……</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 已下载：正在同步日志……</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>无法读取 ADI 文件</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>%1 导入失败：%2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>已读取 %1 的 ADI 文件；正在后台导入……</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>正在后台导入 %1……</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>数据格式无法识别，或没有记录</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>%1 同步失败：%2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>无法打开外部查询：呼号无效</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>无法生成外部服务方的 URL</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com：正在下载确认记录的第 1 页……</translation>
     </message>
 </context>
 <context>

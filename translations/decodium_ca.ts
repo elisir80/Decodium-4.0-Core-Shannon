@@ -2703,6 +2703,82 @@ Prem Monitor per començar</translation>
         <source>Could not start %1</source>
         <translation>No s'ha pogut iniciar %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>Recepció iniciada mitjançant el backend antic - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>Recepció aturada</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune finalitzat</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>Transmissió finalitzada</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>Transmissió completada</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>Dispositiu d'àudio de transmissió no trobat, s'utilitza el predeterminat: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT no disponible: comprova la connexió CAT (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>Transmissió aturada</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>Dispositiu d'àudio del Tune no trobat, s'utilitza el predeterminat: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>Configuració desada</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>Watchdog de transmissió: temps esgotat, transmissió aturada</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>Captura d'àudio iniciada: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>La descàrrega de cty.dat ja està en curs...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat actualitzat i carregat: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>No s'ha trobat cap fitxer WAV a: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>Transmissió no iniciada</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>Indicatiu comprimit no resolt</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ aturat</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>Crida directa rebuda, però l'indicatiu no està resolt</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2750,6 +2826,18 @@ Prem Monitor per començar</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Clau API de Cloudlog vàlida però sense permisos d&apos;escriptura.</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401. El servidor o el proxy requereix autenticació abans de l'API de Cloudlog. Comprova l'URL, Basic/Auth/Cloudflare o les proteccions a /index.php/api; la clau API de Cloudlog no n'hi ha prou.%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407. El proxy requereix autenticació abans d'arribar a Cloudlog.%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>La clau API de Cloudlog és vàlida però no té permís d'escriptura.</translation>
     </message>
 </context>
 <context>
@@ -3101,6 +3189,22 @@ Prem Monitor per començar</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>pujada rebutjada per a %1: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>Falta la clau API.</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>prova fallida: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>clau API no vàlida: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>error en la pujada: %1</translation>
     </message>
 </context>
 <context>
@@ -6345,6 +6449,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>Locators VUCC: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>Validesa no declarada pel proveïdor</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>Atles local, OpenStreetMap/OpenTopoMap, batimetria GEBCO, NASA GIBS i MapTiler. Si un proveïdor falla, es prova l'alternativa configurada.</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>Alternativa activa: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>Memòria cau obsoleta · actualitzant</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>No hi ha cap resposta disponible</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6696,6 +6820,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Error: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>Envia aquest QSO al DX Cluster si la connexió al cluster ja era activa.</translation>
     </message>
 </context>
 <context>
@@ -13332,6 +13460,22 @@ Servidor UDP %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Segur que vols esborrar les cues de QSO?</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>Envia un spot al cluster configurat després de registrar el QSO (73 confirmat).</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>Àudio CW: transmissió RTTY en curs, torna-ho a provar</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>Àudio CW: transmissió ja activa, ordre ignorada</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>L'àudio CW no està disponible amb àudio TCI</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -14095,6 +14239,18 @@ El fitxer baixat supera el límit de %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>error de protocol desconegut</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Port sèrie CAT no disponible. Espera que Windows detecti la ràdio i torna-ho a provar.</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Port %1 no disponible. Espera que Windows detecti la ràdio i torna-ho a provar.</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>CAT desactivat per a les proves de recepció/enregistrament: el port sèrie continua disponible per al JTDX.</translation>
     </message>
 </context>
 <context>
@@ -20456,6 +20612,30 @@ En cas de dubte, fes servir Alta.</translation>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>Només recuperació manual: importar un ADI fusiona les seves confirmacions al quadern actiu, igual que Actualitza. No fa avançar el marcador de baixades de LoTW en línia.</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>Cerca local amb alternativa DXCC, memòria cau SQLite i proveïdors actualitzables. Les credencials d'eQSL i Club Log es desen a l'anell de claus mitjançant el canal secure settings.</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>Obre el plafó de cerca</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>Tanca automàticament després de registrar</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>Tanca el plafó després del QSO</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>Descarrega la InBox/Arxiu d'eQSL en format ADIF i sincronitza les confirmacions amb el quadern de guàrdia actiu. El nom d'usuari predeterminat és l'indicatiu de l'estació.</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>Descarrega les QSL LoTW rebudes i sincronitza-les amb el quadern de guàrdia. La contrasenya es reutilitza de la secció Reporting → LoTW; l'usuari de LoTW pot ser diferent de l'indicatiu d'operació.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22731,6 +22911,18 @@ Costa CPU extra durant els QSO. Per defecte: OFF.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>Trànsit terciari:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog no s'està executant: nou intent cada 5 s</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>desactivat</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>Els QSO arriben a DecoLog per UDP com a qualsevol logger. Amb DecoLink, DecoLog envia a Decodium el seu propi log (worked-before, DXCC nous), la confirmació de cada QSO desat i l'estat de l'FT2 Award. Només 127.0.0.1.</translation>
     </message>
 </context>
 <context>
@@ -27911,6 +28103,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>Servei no disponible</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>no disponible</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>cap indicació</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Tanca</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28228,6 +28436,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>La sincronització de %1 ha fallat: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>A punt: base de dades local d'indicatius disponible</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>Base de dades d'indicatius no disponible: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>Indicatiu no vàlid</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>Cap registre local: es proven els proveïdors remots...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>Fora de línia: no s'ha demanat cap registre remot</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>Alternativa DXCC: cap perfil de proveïdor disponible</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>Cap proveïdor no ha trobat l'indicatiu</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log no disponible: s'ha usat l'alternativa local (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>Proveïdors remots no disponibles: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>Ja hi ha una actualització en curs</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>Calen el nom d'usuari i la contrasenya de LoTW; la contrasenya és a la secció Reporting → LoTW</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>Confirmacions LoTW: calen nom d'usuari i contrasenya</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: descarregant el primer conjunt de confirmacions...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>Falta la clau API de QRZ: configura-la a la secció QRZ Logbook</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: falta la clau API</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>Calen el nom d'usuari i la contrasenya d'eQSL</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: calen nom d'usuari i contrasenya d'eQSL</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>Descarregant l'eQSL InBox...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: calen la clau API, el correu electrònic, la contrasenya d'aplicació i l'indicatiu de l'operador</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Actualització de Club Log OQRS en curs...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>Actualització de %1 en curs...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>Ha fallat l'actualització de %1: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>la resposta de LoTW no conté cap ADIF vàlid</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW ha fallat: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>resposta API no vàlida</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com ha fallat: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: descarregant el fitxer ADI...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>resposta eQSL no vàlida</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox ha fallat: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>Fitxer ADI no vàlid</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 ha fallat: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>Descarregat; sincronitzant el quadern de guàrdia...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 descarregat: sincronitzant el quadern de guàrdia...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>no es pot llegir el fitxer ADI</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>Ha fallat la importació de %1: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>Fitxer ADI %1 llegit; important en segon pla...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>Important %1 en segon pla...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>Format de dades no reconegut, o cap registre</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>Ha fallat la sincronització de %1: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>No es pot obrir la cerca externa: indicatiu no vàlid</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>No es pot construir l'URL del proveïdor extern</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: descarregant la pàgina 1 de les confirmacions...</translation>
     </message>
 </context>
 <context>

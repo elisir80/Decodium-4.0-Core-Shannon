@@ -2705,6 +2705,82 @@ A kezdéshez kattintson a Monitor gombra</translation>
         <source>Could not start %1</source>
         <translation>Nem sikerült elindítani: %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>Vétel elindítva a régi backenden keresztül - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>Vétel leállítva</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune befejezve</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>Adás befejezve</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>Adás kész</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>Az adás hangeszköze nem található, az alapértelmezett lesz használva: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT nem érhető el: ellenőrizd a CAT-kapcsolatot (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>Adás leállítva</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>A Tune hangeszköze nem található, az alapértelmezett lesz használva: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>Beállítások mentve</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>Adásfigyelő: lejárt az idő, az adás leállt</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>Hangrögzítés elindítva: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>A cty.dat letöltése már folyamatban van...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat frissítve és betöltve: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>Nem található WAV-fájl itt: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>Az adás nem indult el</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>A tömörített hívójel nem oldható fel</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ leállítva</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>Közvetlen hívás érkezett, de a hívójel nincs feloldva</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2752,6 +2828,18 @@ A kezdéshez kattintson a Monitor gombra</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Az API-kulcs érvényes, de nincs írási jogosultsága.</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401. A kiszolgáló vagy a proxy hitelesítést kér a Cloudlog API előtt. Ellenőrizd az URL-t, a Basic/Auth/Cloudflare beállításokat vagy a /index.php/api védelmeit; a Cloudlog API-kulcs nem elegendő.%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407. A proxy hitelesítést kér, mielőtt elérné a Cloudlogot.%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>A Cloudlog API-kulcs érvényes, de nincs írási jogosultsága.</translation>
     </message>
 </context>
 <context>
@@ -3103,6 +3191,22 @@ A kezdéshez kattintson a Monitor gombra</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>feltöltés elutasítva ehhez: %1: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>Hiányzó API-kulcs.</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>a teszt sikertelen: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>érvénytelen API-kulcs: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>a feltöltés sikertelen: %1</translation>
     </message>
 </context>
 <context>
@@ -6343,6 +6447,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>VUCC-lokátorok: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>A szolgáltató nem adta meg az érvényességet</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>Helyi atlasz, OpenStreetMap/OpenTopoMap, GEBCO batimetria, NASA GIBS és MapTiler. Ha egy szolgáltató kiesik, a beállított tartalék következik.</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>Aktív tartalék: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>Elavult gyorsítótár · frissítés folyamatban</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>Nincs elérhető visszajelzés</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6694,6 +6818,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Hiba: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>Küldd el ezt a QSO-t a DX Clusterre, ha a cluster kapcsolat már aktív volt.</translation>
     </message>
 </context>
 <context>
@@ -13201,6 +13329,22 @@ UDP szerver %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>Biztosan törli a QSO-sorokat?</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>Spot küldése a beállított clusterre a QSO naplózása után (73 megerősítve).</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>CW hang: RTTY adás van folyamatban, próbáld újra</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>CW hang: az adás már aktív, a parancs figyelmen kívül hagyva</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>A CW hang nem érhető el TCI hanggal</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -13962,6 +14106,18 @@ A letöltött fájl meghaladja a%1MiB korlátot:%2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>ismeretlen protokollhiba</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>A CAT soros port nem érhető el. Várd meg, amíg a Windows felismeri a rádiót, majd próbáld újra.</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>A(z) %1 port nem érhető el. Várd meg, amíg a Windows felismeri a rádiót, majd próbáld újra.</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>CAT letiltva a vételi/felvételi tesztekhez: a soros port továbbra is elérhető a JTDX számára.</translation>
     </message>
 </context>
 <context>
@@ -20323,6 +20479,30 @@ Ha bizonytalan vagy, használd a Magas beállítást.</translation>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>Csak kézi helyreállítás: egy ADI importálása a visszaigazolásait az aktív naplóba olvasztja, akárcsak a Frissítés. Az online LoTW letöltési mutatót nem lépteti tovább.</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>Helyi keresés DXCC tartalékkal, SQLite gyorsítótárral és frissíthető szolgáltatókkal. Az eQSL és a Club Log hitelesítő adatai a kulcstartóban tárolódnak a secure settings csatornán keresztül.</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>A kereső panel megnyitása</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>Automatikus bezárás naplózás után</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>A panel bezárása a QSO után</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>Töltsd le az eQSL InBox/Archívumot ADIF formátumban, és szinkronizáld a visszaigazolásokat az aktív naplóba. Az alapértelmezett felhasználónév az állomás hívójele.</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>Töltsd le a kapott LoTW QSL-eket, és szinkronizáld őket a naplóba. A jelszót a Reporting → LoTW szakaszból veszi át; a LoTW belépési név eltérhet a forgalmazási hívójeltől.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22598,6 +22778,18 @@ Extra CPU-ba kerül QSO-k alatt. Alapértelmezett: KI.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>Harmadlagos forgalom:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>A DecoLog nem fut: új próbálkozás 5 másodpercenként</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>letiltva</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>A QSO-k UDP-n jutnak el a DecoLoghoz, mint bármelyik loggerhez. A DecoLinkkel a DecoLog elküldi a Decodiumnak a saját naplóját (worked-before, új DXCC), minden mentett QSO visszaigazolását és az FT2 Award állapotát. Csak 127.0.0.1.</translation>
     </message>
 </context>
 <context>
@@ -27774,6 +27966,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>A szolgáltatás nem érhető el</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>nem érhető el</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>nincs adat</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Bezárás</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28091,6 +28299,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>A(z) %1 szinkronizálása nem sikerült: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>Kész: a helyi hívójel-adatbázis elérhető</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>A hívójel-adatbázis nem érhető el: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>Érvénytelen hívójel</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>Nincs helyi rekord: a távoli szolgáltatók következnek...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>Offline: nem kértünk távoli rekordot</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>DXCC tartalék: nincs elérhető szolgáltatói profil</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>Egyik szolgáltató sem találta meg a hívójelet</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>A Club Log nem érhető el: helyi tartalék használva (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>A távoli szolgáltatók nem érhetők el: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>Már folyamatban van egy frissítés</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>LoTW felhasználónév és jelszó szükséges; a jelszó a Reporting → LoTW szakaszban található</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>LoTW visszaigazolások: felhasználónév és jelszó szükséges</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: a visszaigazolások első csomagjának letöltése...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>Hiányzik a QRZ API-kulcs: add meg a QRZ Logbook szakaszban</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: hiányzik az API-kulcs</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>eQSL felhasználónév és jelszó szükséges</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: eQSL felhasználónév és jelszó szükséges</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>Az eQSL InBox letöltése...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: API-kulcs, e-mail, alkalmazásjelszó és operátor hívójel szükséges</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Club Log OQRS frissítés folyamatban...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>%1 frissítés folyamatban...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>A(z) %1 frissítése sikertelen: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>a LoTW válasza nem tartalmaz érvényes ADIF-et</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW sikertelen: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>érvénytelen API-válasz</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com sikertelen: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: az ADI-fájl letöltése...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>érvénytelen eQSL-válasz</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox sikertelen: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>Érvénytelen ADI-fájl</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 sikertelen: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>Letöltve; a napló szinkronizálása...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 letöltve: a napló szinkronizálása folyamatban...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>az ADI-fájl nem olvasható</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>A(z) %1 importálása sikertelen: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>%1 ADI-fájl beolvasva; importálás a háttérben...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>%1 importálása a háttérben...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>Ismeretlen adatformátum, vagy nincs rekord</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>A(z) %1 szinkronizálása sikertelen: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>A külső keresés nem nyitható meg: érvénytelen hívójel</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>A külső szolgáltató URL-je nem állítható össze</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: a visszaigazolások 1. oldalának letöltése...</translation>
     </message>
 </context>
 <context>

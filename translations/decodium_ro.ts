@@ -2107,6 +2107,82 @@ Apasă Monitor pentru a începe</translation>
         <source>Could not start %1</source>
         <translation>Nu s-a putut porni %1</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>Recepție pornită prin backend-ul vechi - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>Recepție oprită</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune încheiat</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>Emisie încheiată</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>Emisie finalizată</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>Dispozitivul audio de emisie nu a fost găsit, se folosește cel implicit: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT indisponibil: verifică conexiunea CAT (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>Emisie oprită</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>Dispozitivul audio pentru Tune nu a fost găsit, se folosește cel implicit: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>Setări salvate</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>Watchdog de emisie: timpul a expirat, emisia a fost oprită</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>Captura audio a pornit: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>Descărcarea cty.dat este deja în curs...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat actualizat și încărcat: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>Niciun fișier WAV găsit în: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>Emisia nu a pornit</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>Indicativ comprimat nerezolvat</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ oprit</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>Apel direct recepționat, dar indicativul nu este rezolvat</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2149,6 +2225,18 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Cheia API Cloudlog este valabilă, dar nu are drept de scriere.</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401. Serverul sau proxy-ul cere autentificare înainte de API-ul Cloudlog. Verifică URL-ul, Basic/Auth/Cloudflare sau protecțiile pe /index.php/api; cheia API Cloudlog nu este suficientă.%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407. Proxy-ul cere autentificare înainte de a ajunge la Cloudlog.%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>Cheia API Cloudlog este validă, dar nu are drept de scriere.</translation>
     </message>
 </context>
 <context>
@@ -2492,6 +2580,22 @@ Apasă Monitor pentru a începe</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>trimitere respinsă pentru %1: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>Cheia API lipsește.</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>test eșuat: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>cheie API nevalidă: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>încărcare eșuată: %1</translation>
     </message>
 </context>
 <context>
@@ -5670,6 +5774,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>Locatoare VUCC: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>Valabilitate nedeclarată de furnizor</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>Atlas local, OpenStreetMap/OpenTopoMap, batimetrie GEBCO, NASA GIBS și MapTiler. Dacă un furnizor eșuează, se încearcă rezerva configurată.</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>Rezervă activă: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>Cache învechit · se actualizează</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>Niciun răspuns disponibil</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6012,6 +6136,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>Eroare: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>Trimite acest QSO către DX Cluster dacă legătura cu clusterul era deja activă.</translation>
     </message>
 </context>
 <context>
@@ -7967,6 +8095,22 @@ Clic dreapta: deconectează</translation>
         <source>Network Error</source>
         <translation>Eroare de rețea</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>Trimite un spot către clusterul configurat după logarea QSO-ului (73 confirmat).</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>Audio CW: emisie RTTY în curs, încearcă din nou</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>Audio CW: emisie deja activă, comandă ignorată</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>Audio CW nu este disponibil cu audio TCI</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -8708,6 +8852,18 @@ Fișierul descărcat depășește limita de %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>eroare de protocol necunoscută</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Portul serial CAT este indisponibil. Așteaptă ca Windows să detecteze stația și încearcă din nou.</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>Portul %1 este indisponibil. Așteaptă ca Windows să detecteze stația și încearcă din nou.</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>CAT dezactivat pentru testele de recepție/înregistrare: portul serial rămâne disponibil pentru JTDX.</translation>
     </message>
 </context>
 <context>
@@ -15002,6 +15158,30 @@ Dacă eziți, alege înaltă.</translation>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>Doar pentru recuperare manuală: importul unui ADI îi îmbină confirmările în jurnalul activ, la fel ca Actualizarea. Nu avansează cursorul descărcărilor LoTW online.</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>Căutare locală cu rezervă DXCC, cache SQLite și furnizori actualizabili. Credențialele eQSL și Club Log sunt păstrate în portchei prin canalul secure settings.</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>Deschide panoul de căutare</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>Închidere automată după logare</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>Închide panoul după QSO</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>Descarcă InBox/Arhiva eQSL în format ADIF și sincronizează confirmările în jurnalul activ. Numele de utilizator implicit este indicativul stației.</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>Descarcă QSL-urile LoTW primite și sincronizează-le în jurnal. Parola este preluată din secțiunea Reporting → LoTW; utilizatorul LoTW poate fi diferit de indicativul folosit în trafic.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -17272,6 +17452,18 @@ Costă procesor în plus în timpul QSO-urilor. Implicit: oprit.</translation>
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>Trafic terțiar:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog nu rulează: o nouă încercare la fiecare 5 s</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>dezactivat</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>QSO-urile ajung la DecoLog prin UDP ca la orice logger. Cu DecoLink, DecoLog trimite către Decodium propriul jurnal (worked-before, DXCC noi), confirmarea fiecărui QSO salvat și starea FT2 Award. Doar 127.0.0.1.</translation>
     </message>
 </context>
 <context>
@@ -20185,6 +20377,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>Serviciu indisponibil</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>indisponibil</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>nicio indicație</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Închide</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -20502,6 +20710,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>Sincronizarea %1 a eșuat: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>Gata: baza de date locală de indicative este disponibilă</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>Baza de date de indicative este indisponibilă: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>Indicativ nevalid</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>Nicio înregistrare locală: se încearcă furnizorii la distanță...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>Offline: nu s-a cerut nicio înregistrare la distanță</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>Rezervă DXCC: niciun profil de furnizor disponibil</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>Niciun furnizor nu a găsit indicativul</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log indisponibil: s-a folosit rezerva locală (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>Furnizorii la distanță sunt indisponibili: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>O actualizare este deja în curs</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>Sunt necesare numele de utilizator și parola LoTW; parola se află în secțiunea Reporting → LoTW</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>Confirmări LoTW: sunt necesare numele de utilizator și parola</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: se descarcă primul set de confirmări...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>Cheia API QRZ lipsește: configureaz-o în secțiunea QRZ Logbook</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: cheia API lipsește</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>Sunt necesare numele de utilizator și parola eQSL</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: sunt necesare numele de utilizator și parola eQSL</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>Se descarcă eQSL InBox...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: sunt necesare cheia API, e-mailul, parola de aplicație și indicativul operatorului</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Actualizare Club Log OQRS în curs...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>Actualizare %1 în curs...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>Actualizarea %1 a eșuat: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>răspunsul LoTW nu conține un ADIF valid</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW a eșuat: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>răspuns API nevalid</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com a eșuat: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: se descarcă fișierul ADI...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>răspuns eQSL nevalid</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox a eșuat: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>Fișier ADI nevalid</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 a eșuat: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>Descărcat; se sincronizează jurnalul...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 descărcat: se sincronizează jurnalul...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>fișierul ADI nu poate fi citit</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>Importul %1 a eșuat: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>Fișierul ADI %1 a fost citit; se importă în fundal...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>Se importă %1 în fundal...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>Format de date nerecunoscut sau fără înregistrări</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>Sincronizarea %1 a eșuat: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>Nu se poate deschide căutarea externă: indicativ nevalid</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>Nu se poate construi URL-ul furnizorului extern</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: se descarcă pagina 1 a confirmărilor...</translation>
     </message>
 </context>
 <context>

@@ -2700,6 +2700,82 @@ Monitor を押すと開始します</translation>
         <source>Could not start %1</source>
         <translation>%1 を起動できませんでした</translation>
     </message>
+    <message>
+        <source>Reception started via legacy backend - %1</source>
+        <translation>レガシーバックエンドで受信を開始しました - %1</translation>
+    </message>
+    <message>
+        <source>Reception stopped</source>
+        <translation>受信を停止しました</translation>
+    </message>
+    <message>
+        <source>Tune finished</source>
+        <translation>Tune を終了しました</translation>
+    </message>
+    <message>
+        <source>Transmission finished</source>
+        <translation>送信を終了しました</translation>
+    </message>
+    <message>
+        <source>Transmission complete</source>
+        <translation>送信が完了しました</translation>
+    </message>
+    <message>
+        <source>Transmit audio device not found, using the default one: %1</source>
+        <translation>送信用オーディオデバイスが見つかりません。既定のデバイスを使用します: %1</translation>
+    </message>
+    <message>
+        <source>PTT unavailable: check the CAT connection (%1)</source>
+        <translation>PTT を利用できません: CAT 接続を確認してください (%1)</translation>
+    </message>
+    <message>
+        <source>Transmission stopped</source>
+        <translation>送信を停止しました</translation>
+    </message>
+    <message>
+        <source>Tune audio device not found, using the default one: %1</source>
+        <translation>Tune 用オーディオデバイスが見つかりません。既定のデバイスを使用します: %1</translation>
+    </message>
+    <message>
+        <source>Settings saved</source>
+        <translation>設定を保存しました</translation>
+    </message>
+    <message>
+        <source>Transmit watchdog: timed out, transmission stopped</source>
+        <translation>送信ウォッチドッグ: タイムアウトのため送信を停止しました</translation>
+    </message>
+    <message>
+        <source>Audio capture started: %1</source>
+        <translation>音声キャプチャを開始しました: %1</translation>
+    </message>
+    <message>
+        <source>cty.dat download already under way...</source>
+        <translation>cty.dat のダウンロードは既に実行中です...</translation>
+    </message>
+    <message>
+        <source>cty.dat updated and loaded: %1</source>
+        <translation>cty.dat を更新して読み込みました: %1</translation>
+    </message>
+    <message>
+        <source>No WAV file found in: %1</source>
+        <translation>WAV ファイルが見つかりません: %1</translation>
+    </message>
+    <message>
+        <source>Transmission not started</source>
+        <translation>送信を開始していません</translation>
+    </message>
+    <message>
+        <source>Compressed callsign not resolved</source>
+        <translation>圧縮されたコールサインを解決できません</translation>
+    </message>
+    <message>
+        <source>AutoCQ stopped</source>
+        <translation>AutoCQ を停止しました</translation>
+    </message>
+    <message>
+        <source>Direct call received, but the callsign is not resolved</source>
+        <translation>直接呼び出しを受信しましたが、コールサインを解決できません</translation>
+    </message>
 </context>
 <context>
     <name>DecodiumCloudlogLite</name>
@@ -2747,6 +2823,18 @@ Monitor を押すと開始します</translation>
         <location filename="../Network/DecodiumCloudlogLite.cpp" line="621"/>
         <source>Cloudlog API key valida ma senza permessi di scrittura.</source>
         <translation>Cloudlog API キーは有効ですが書き込み権限がありません。</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2</source>
+        <translation>%1: HTTP 401。サーバーまたはプロキシが Cloudlog API の手前で認証を要求しています。URL、Basic/Auth/Cloudflare、/index.php/api の保護設定を確認してください。Cloudlog の API キーだけでは足りません。%2</translation>
+    </message>
+    <message>
+        <source>%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2</source>
+        <translation>%1: HTTP 407。プロキシが Cloudlog に到達する前に認証を要求しています。%2</translation>
+    </message>
+    <message>
+        <source>Cloudlog API key is valid but has no write permission.</source>
+        <translation>Cloudlog の API キーは有効ですが、書き込み権限がありません。</translation>
     </message>
 </context>
 <context>
@@ -3098,6 +3186,22 @@ Monitor を押すと開始します</translation>
         <location filename="../Network/DecodiumQrzLogbookLite.cpp" line="194"/>
         <source>upload rifiutato per %1: %2</source>
         <translation>%1 のアップロードが拒否されました: %2</translation>
+    </message>
+    <message>
+        <source>API key missing.</source>
+        <translation>API キーがありません。</translation>
+    </message>
+    <message>
+        <source>test failed: %1</source>
+        <translation>テスト失敗: %1</translation>
+    </message>
+    <message>
+        <source>invalid API key: %1</source>
+        <translation>無効な API キー: %1</translation>
+    </message>
+    <message>
+        <source>upload failed: %1</source>
+        <translation>アップロード失敗: %1</translation>
     </message>
 </context>
 <context>
@@ -6343,6 +6447,26 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <source>VUCC grids: %1</source>
         <translation>VUCC グリッド: %1</translation>
     </message>
+    <message>
+        <source>Validity not declared by the provider</source>
+        <translation>提供元が有効期限を示していません</translation>
+    </message>
+    <message>
+        <source>Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.</source>
+        <translation>ローカルアトラス、OpenStreetMap/OpenTopoMap、GEBCO 海底地形、NASA GIBS、MapTiler。提供元が失敗した場合は、設定済みのフォールバックを試します。</translation>
+    </message>
+    <message>
+        <source>Fallback in use: %1</source>
+        <translation>フォールバック使用中: %1</translation>
+    </message>
+    <message>
+        <source>Stale cache · updating</source>
+        <translation>キャッシュが古いため更新中</translation>
+    </message>
+    <message>
+        <source>No feedback available</source>
+        <translation>利用できるフィードバックがありません</translation>
+    </message>
 </context>
 <context>
     <name>LogQSO</name>
@@ -6694,6 +6818,10 @@ FT8 / FT4 / FT2 / Q65 / JT65 / MSK144 / MSK40 / JTMS / FSK441</translation>
         <location filename="../widgets/logqso.cpp" line="716"/>
         <source>Error: %1</source>
         <translation>エラー: %1</translation>
+    </message>
+    <message>
+        <source>Send this QSO to the DX Cluster if the cluster connection was already active.</source>
+        <translation>クラスター接続が既に有効だった場合、この QSO を DX クラスターへ送信します。</translation>
     </message>
 </context>
 <context>
@@ -13328,6 +13456,22 @@ UDPサーバー %2:%3</translation>
         <source>Are you sure you want to clear the QSO queues?</source>
         <translation>QSOキューをすべて消去してもよろしいですか?</translation>
     </message>
+    <message>
+        <source>Send a spot to the configured cluster after logging the QSO (73 confirmed).</source>
+        <translation>QSO をログに記録した後、設定済みのクラスターへスポットを送信します (73 確認済み)。</translation>
+    </message>
+    <message>
+        <source>CW audio: RTTY transmission under way, try again</source>
+        <translation>CW オーディオ: RTTY 送信中です。もう一度お試しください</translation>
+    </message>
+    <message>
+        <source>CW audio: transmission already active, command ignored</source>
+        <translation>CW オーディオ: 送信が既に有効です。コマンドを無視しました</translation>
+    </message>
+    <message>
+        <source>CW audio is not available with TCI audio</source>
+        <translation>CW オーディオは TCI オーディオでは利用できません</translation>
+    </message>
 </context>
 <context>
     <name>MamPanel</name>
@@ -14091,6 +14235,18 @@ Downloaded file exceeds limit of %1 MiB:
         <location filename="../../../../../../../../../decodium-4.0/src/radio/DecodiumCat4OmManager.cpp" line="572"/>
         <source>unknown protocol error</source>
         <translation>不明なプロトコルエラー</translation>
+    </message>
+    <message>
+        <source>CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>CAT シリアルポートを利用できません。Windows が無線機を認識するまで待ってから、もう一度お試しください。</translation>
+    </message>
+    <message>
+        <source>Port %1 unavailable. Wait for Windows to enumerate the radio and try again.</source>
+        <translation>ポート %1 を利用できません。Windows が無線機を認識するまで待ってから、もう一度お試しください。</translation>
+    </message>
+    <message>
+        <source>CAT disabled for receive/recording tests: the serial port stays available for JTDX.</source>
+        <translation>受信・録音テストのため CAT を無効にしました: シリアルポートは JTDX 用に空いたままです。</translation>
     </message>
 </context>
 <context>
@@ -20453,6 +20609,30 @@ If unsure, use High.</source>
         <source>Manual recovery only: importing an ADI merges its confirmations into the active logbook, just like Update. It does not advance the online LoTW download cursor.</source>
         <translation>手動リカバリ専用: ADIの取り込みは「更新」と同じくアクティブなログブックに確認を統合します。オンラインLoTWのダウンロード位置は進みません。</translation>
     </message>
+    <message>
+        <source>Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.</source>
+        <translation>DXCC フォールバック、SQLite キャッシュ、更新可能な提供元によるローカル検索。eQSL と Club Log の認証情報は secure settings チャンネル経由でキーチェーンに保存されます。</translation>
+    </message>
+    <message>
+        <source>Open the lookup panel</source>
+        <translation>検索パネルを開く</translation>
+    </message>
+    <message>
+        <source>Close automatically after logging</source>
+        <translation>ログ記録後に自動的に閉じる</translation>
+    </message>
+    <message>
+        <source>Close the panel after the QSO</source>
+        <translation>QSO の後にパネルを閉じる</translation>
+    </message>
+    <message>
+        <source>Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.</source>
+        <translation>eQSL の InBox/アーカイブを ADIF でダウンロードし、確認情報を有効なログブックに同期します。既定のユーザー名は局のコールサインです。</translation>
+    </message>
+    <message>
+        <source>Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.</source>
+        <translation>受信した LoTW の QSL をダウンロードしてログブックに同期します。パスワードは Reporting → LoTW セクションのものを使用します。LoTW のログイン名は運用コールサインと異なる場合があります。</translation>
+    </message>
 </context>
 <context>
     <name>SettingsTab2</name>
@@ -22728,6 +22908,18 @@ QSO 中に余分な CPU を消費します。デフォルト: OFF。</translatio
         <location filename="../../../../../../../../../decodium-4.0/qml/decodium/components/SettingsTab6.qml" line="890"/>
         <source>Tertiary traffic:</source>
         <translation>第三トラフィック:</translation>
+    </message>
+    <message>
+        <source>DecoLog not running: retrying every 5 s</source>
+        <translation>DecoLog が起動していません: 5 秒ごとに再試行します</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation>無効</translation>
+    </message>
+    <message>
+        <source>QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.</source>
+        <translation>QSO は他のロガーと同じく UDP で DecoLog に届きます。DecoLink を使うと、DecoLog は自身のログ (worked-before、新しい DXCC)、保存された各 QSO の確認、FT2 Award の状況を Decodium へ送ります。127.0.0.1 のみ。</translation>
     </message>
 </context>
 <context>
@@ -27908,6 +28100,22 @@ VUCC: %2</translation>
         <source>Club Log</source>
         <translation>Club Log</translation>
     </message>
+    <message>
+        <source>Service unavailable</source>
+        <translation>サービスを利用できません</translation>
+    </message>
+    <message>
+        <source>not available</source>
+        <translation>利用できません</translation>
+    </message>
+    <message>
+        <source>no indication</source>
+        <translation>表示なし</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>閉じる</translation>
+    </message>
 </context>
 <context>
     <name>CallsignIntelligenceService</name>
@@ -28225,6 +28433,174 @@ VUCC: %2</translation>
         <location filename="../../../../../../../../../decodium-4.0/src/services/CallsignIntelligenceService.cpp" line="1721"/>
         <source>Sincronizzazione %1 fallita: %2</source>
         <translation>%1 の同期に失敗: %2</translation>
+    </message>
+    <message>
+        <source>Ready: local callsign database available</source>
+        <translation>準備完了: ローカルのコールサインデータベースを利用できます</translation>
+    </message>
+    <message>
+        <source>Callsign database unavailable: %1</source>
+        <translation>コールサインデータベースを利用できません: %1</translation>
+    </message>
+    <message>
+        <source>Invalid callsign</source>
+        <translation>無効なコールサイン</translation>
+    </message>
+    <message>
+        <source>No local record: trying the remote providers...</source>
+        <translation>ローカルレコードなし: リモートの提供元を試します...</translation>
+    </message>
+    <message>
+        <source>Offline: no remote record requested</source>
+        <translation>オフライン: リモートレコードは要求していません</translation>
+    </message>
+    <message>
+        <source>DXCC fallback: no provider profile available</source>
+        <translation>DXCC フォールバック: 利用できる提供元プロファイルがありません</translation>
+    </message>
+    <message>
+        <source>No provider found the callsign</source>
+        <translation>どの提供元もコールサインを見つけられませんでした</translation>
+    </message>
+    <message>
+        <source>Club Log unavailable: local fallback used (%1)</source>
+        <translation>Club Log を利用できません: ローカルのフォールバックを使用しました (%1)</translation>
+    </message>
+    <message>
+        <source>Remote providers unavailable: %1</source>
+        <translation>リモートの提供元を利用できません: %1</translation>
+    </message>
+    <message>
+        <source>An update is already under way</source>
+        <translation>更新は既に実行中です</translation>
+    </message>
+    <message>
+        <source>LoTW username and password are required; the password is in the Reporting → LoTW section</source>
+        <translation>LoTW のユーザー名とパスワードが必要です。パスワードは Reporting → LoTW セクションにあります</translation>
+    </message>
+    <message>
+        <source>LoTW confirmations: username and password required</source>
+        <translation>LoTW 確認: ユーザー名とパスワードが必要です</translation>
+    </message>
+    <message>
+        <source>LoTW: downloading the initial set of confirmations...</source>
+        <translation>LoTW: 確認データの初回分をダウンロードしています...</translation>
+    </message>
+    <message>
+        <source>QRZ API key missing: set it in the QRZ Logbook section</source>
+        <translation>QRZ の API キーがありません: QRZ Logbook セクションで設定してください</translation>
+    </message>
+    <message>
+        <source>QRZ.com: API key missing</source>
+        <translation>QRZ.com: API キーがありません</translation>
+    </message>
+    <message>
+        <source>eQSL username and password are required</source>
+        <translation>eQSL のユーザー名とパスワードが必要です</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: eQSL username and password required</source>
+        <translation>eQSL InBox: eQSL のユーザー名とパスワードが必要です</translation>
+    </message>
+    <message>
+        <source>Downloading the eQSL InBox...</source>
+        <translation>eQSL InBox をダウンロードしています...</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS: API key, e-mail, application password and operator callsign are required</source>
+        <translation>Club Log OQRS: API キー、メールアドレス、アプリケーションパスワード、運用者のコールサインが必要です</translation>
+    </message>
+    <message>
+        <source>Club Log OQRS update under way...</source>
+        <translation>Club Log OQRS を更新しています...</translation>
+    </message>
+    <message>
+        <source>%1 update under way...</source>
+        <translation>%1 を更新しています...</translation>
+    </message>
+    <message>
+        <source>%1 update failed: %2</source>
+        <translation>%1 の更新に失敗しました: %2</translation>
+    </message>
+    <message>
+        <source>the LoTW response does not contain a valid ADIF</source>
+        <translation>LoTW の応答に有効な ADIF が含まれていません</translation>
+    </message>
+    <message>
+        <source>LoTW failed: %1</source>
+        <translation>LoTW 失敗: %1</translation>
+    </message>
+    <message>
+        <source>invalid API response</source>
+        <translation>無効な API 応答</translation>
+    </message>
+    <message>
+        <source>QRZ.com failed: %1</source>
+        <translation>QRZ.com 失敗: %1</translation>
+    </message>
+    <message>
+        <source>eQSL InBox: downloading the ADI file...</source>
+        <translation>eQSL InBox: ADI ファイルをダウンロードしています...</translation>
+    </message>
+    <message>
+        <source>invalid eQSL response</source>
+        <translation>無効な eQSL 応答</translation>
+    </message>
+    <message>
+        <source>eQSL InBox failed: %1</source>
+        <translation>eQSL InBox 失敗: %1</translation>
+    </message>
+    <message>
+        <source>Invalid ADI file</source>
+        <translation>無効な ADI ファイル</translation>
+    </message>
+    <message>
+        <source>%1 failed: %2</source>
+        <translation>%1 失敗: %2</translation>
+    </message>
+    <message>
+        <source>Downloaded; synchronising the logbook...</source>
+        <translation>ダウンロードしました。ログブックを同期しています...</translation>
+    </message>
+    <message>
+        <source>%1 downloaded: synchronising the logbook...</source>
+        <translation>%1 をダウンロードしました: ログブックを同期しています...</translation>
+    </message>
+    <message>
+        <source>the ADI file cannot be read</source>
+        <translation>ADI ファイルを読み取れません</translation>
+    </message>
+    <message>
+        <source>%1 import failed: %2</source>
+        <translation>%1 のインポートに失敗しました: %2</translation>
+    </message>
+    <message>
+        <source>%1 ADI file read; importing in the background...</source>
+        <translation>%1 の ADI ファイルを読み込みました。バックグラウンドでインポートしています...</translation>
+    </message>
+    <message>
+        <source>Importing %1 in the background...</source>
+        <translation>%1 をバックグラウンドでインポートしています...</translation>
+    </message>
+    <message>
+        <source>Unrecognised data format, or no records</source>
+        <translation>データ形式を認識できないか、レコードがありません</translation>
+    </message>
+    <message>
+        <source>%1 synchronisation failed: %2</source>
+        <translation>%1 の同期に失敗しました: %2</translation>
+    </message>
+    <message>
+        <source>Cannot open the external lookup: invalid callsign</source>
+        <translation>外部検索を開けません: 無効なコールサイン</translation>
+    </message>
+    <message>
+        <source>Cannot build the external provider URL</source>
+        <translation>外部提供元の URL を作成できません</translation>
+    </message>
+    <message>
+        <source>QRZ.com: downloading page 1 of the confirmations...</source>
+        <translation>QRZ.com: 確認データの 1 ページ目をダウンロードしています...</translation>
     </message>
 </context>
 <context>
