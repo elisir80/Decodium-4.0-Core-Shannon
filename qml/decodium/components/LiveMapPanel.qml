@@ -1496,7 +1496,7 @@ Rectangle {
                                 return qsTr("Spot scaduto")
                             if (remaining > 0)
                                 return qsTr("Spot valido ancora %1 s").arg(remaining)
-                            return qsTr("Validità non dichiarata dal provider")
+                            return qsTr("Validity not declared by the provider")
                         }
                         color: root.textSecondary
                         font.pixelSize: 9
@@ -2417,7 +2417,7 @@ Rectangle {
                                                 root.baseMapService.provider = currentText
                                         }
                                         ToolTip.visible: hovered
-                                        ToolTip.text: qsTr("Atlas locale, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS e MapTiler. Se un provider fallisce viene provato il fallback configurato.")
+                                        ToolTip.text: qsTr("Local atlas, OpenStreetMap/OpenTopoMap, GEBCO bathymetry, NASA GIBS and MapTiler. If a provider fails, the configured fallback is tried.")
                                     }
                                     CheckBox {
                                         Layout.preferredWidth: implicitWidth
@@ -2456,9 +2456,9 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: root.baseMapService && root.baseMapService.fallbackActive
-                                            ? qsTr("Fallback attivo: %1").arg(root.baseMapService.activeProvider)
+                                            ? qsTr("Fallback in use: %1").arg(root.baseMapService.activeProvider)
                                             : (root.baseMapService && root.baseMapService.staleCache
-                                               ? qsTr("Cache obsoleta · aggiornamento in corso") : "")
+                                               ? qsTr("Stale cache · updating") : "")
                                         color: root.baseMapService && root.baseMapService.fallbackActive
                                             ? root.accentAmber : root.textSecondary
                                         font.pixelSize: 8
@@ -3566,7 +3566,7 @@ Rectangle {
                                                 ? qsTr("FB AZ %1° / EL %2°")
                                                       .arg(root.mapOperations.rotatorCurrentAzimuth.toFixed(1))
                                                       .arg(root.mapOperations.rotatorCurrentElevation.toFixed(1))
-                                                : qsTr("Feedback non disponibile")
+                                                : qsTr("No feedback available")
                                             return feedback + (root.mapOperations.rotatorTracking
                                                 ? qsTr(" · tracking") : "")
                                         }

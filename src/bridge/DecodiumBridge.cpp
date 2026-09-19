@@ -23387,7 +23387,7 @@ void DecodiumBridge::startRx()
                           ? QStringLiteral("startRx: FT2-Link legacy RX uses backend waterfall rows for visual panadapter")
                           : QStringLiteral("startRx: legacy PCM tap feeds fast QML panadapter"));
         }
-        emit statusMessage("RX avviato via backend legacy - " + m_mode);
+        emit statusMessage(tr("Reception started via legacy backend - %1").arg(m_mode));
         return;
     }
 
@@ -23503,7 +23503,7 @@ void DecodiumBridge::stopRx()
         m_legacyBackend->setMonitoring(false);
         syncLegacyBackendState();
         scheduleIdleAudioBufferRelease(30000);
-        emit statusMessage("RX fermato");
+        emit statusMessage(tr("Reception stopped"));
         return;
     }
 
@@ -23520,7 +23520,7 @@ void DecodiumBridge::stopRx()
     m_decoding = false;
     emit decodingChanged();
     scheduleIdleAudioBufferRelease(30000);
-    emit statusMessage("RX fermato");
+    emit statusMessage(tr("Reception stopped"));
 }
 
 // === TX helpers ============================================================
@@ -23846,11 +23846,11 @@ void DecodiumBridge::finishModulatorIdlePlayback(const QString& reason)
     if (m_tuning) {
         m_tuning = false;
         emit tuningChanged();
-        emit statusMessage("Tune terminato");
+        emit statusMessage(tr("Tune finished"));
     } else if (wasTransmitting) {
         m_transmitting = false;
         emit transmittingChanged();
-        emit statusMessage("TX terminato");
+        emit statusMessage(tr("Transmission finished"));
     }
     cleanupMs = phaseTimer.elapsed();
 
@@ -26070,7 +26070,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
 
     if (txPlaybackFinalizedQso) {
         if (wasTransmitting && !error) {
-            emit statusMessage("TX completato");
+            emit statusMessage(tr("Transmission complete"));
         }
         if (m_mode == QStringLiteral("FT2") && m_asyncTxEnabled) {
             m_asyncLastTxEndMs = QDateTime::currentMSecsSinceEpoch();
@@ -26124,7 +26124,7 @@ void DecodiumBridge::completeTxPlayback(const QString& reason, bool error)
                                        QString::number(finishedTx),
                                        m_activeTxMessage.trimmed()));
         } else {
-            emit statusMessage("TX completato");
+            emit statusMessage(tr("Transmission complete"));
         }
     }
 
@@ -26952,7 +26952,8 @@ void DecodiumBridge::startTx()
                       " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
                       " requested=[" + m_audioOutputDevice + "] requested_id=" +
                       audioDeviceIdSettingForLog(m_audioOutputDeviceId));
-            emit statusMessage("Audio TX non trovato, uso default: " + outDev.description());
+            emit statusMessage(tr("Transmit audio device not found, using the default one: %1")
+                           .arg(outDev.description()));
         }
         const QAudioFormat outFmt = chooseTxAudioFormat(outDev);
         const AudioDevice::Channel outChannel = txOutputChannelForFormat(outFmt, m_audioOutputChannel);
@@ -27190,7 +27191,8 @@ void DecodiumBridge::startTx()
                       " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
                       " requested=[" + m_audioOutputDevice + "] requested_id=" +
                       audioDeviceIdSettingForLog(m_audioOutputDeviceId));
-            emit statusMessage("Audio TX non trovato, uso default: " + outDev.description());
+            emit statusMessage(tr("Transmit audio device not found, using the default one: %1")
+                           .arg(outDev.description()));
         }
         if (!outFmt.isValid() || m_txPcmData.isEmpty()) {
             bridgeLog("startTx: prepared PCM buffer invalid for " + audioFormatToString(outFmt));
@@ -27319,7 +27321,7 @@ void DecodiumBridge::startTx()
                            : m_audioOutputDevice));
     } else {
         bridgeLog("WARNING: PTT not available — backend=" + m_catBackend + " not connected. TX audio will play but radio stays in RX.");
-        emit statusMessage("PTT non disponibile: verifica connessione CAT (" + m_catBackend + ")");
+        emit statusMessage(tr("PTT unavailable: check the CAT connection (%1)").arg(m_catBackend));
     }
 
     quint64 const txSerial = ++m_txPlaybackSerial;
@@ -28153,7 +28155,7 @@ void DecodiumBridge::stopTx()
     if (m_transmitting) {
         m_transmitting = false;
         emit transmittingChanged();
-        emit statusMessage("TX fermato");
+        emit statusMessage(tr("Transmission stopped"));
     }
     if (satelliteHalfDuplex) {
         cancelFt2LinkSatelliteHalfDuplexTx(QStringLiteral("TX cancelled by operator"));
@@ -28185,7 +28187,7 @@ void DecodiumBridge::stopTx()
     if (m_transmitting) {
         m_transmitting = false;
         emit transmittingChanged();
-        emit statusMessage("TX fermato");
+        emit statusMessage(tr("Transmission stopped"));
     }
     if (satelliteHalfDuplex) {
         cancelFt2LinkSatelliteHalfDuplexTx(QStringLiteral("TX cancelled by operator"));
@@ -28335,7 +28337,8 @@ void DecodiumBridge::startTune()
                       " selected_id=" + audioDeviceIdSettingForLog(audioDeviceIdForSettings(outDev)) +
                       " requested=[" + m_audioOutputDevice + "] requested_id=" +
                       audioDeviceIdSettingForLog(m_audioOutputDeviceId));
-            emit statusMessage("Audio TUNE non trovato, uso default: " + outDev.description());
+            emit statusMessage(tr("Tune audio device not found, using the default one: %1")
+                           .arg(outDev.description()));
         }
         const QAudioFormat outFmt = chooseTxAudioFormat(outDev);
         const AudioDevice::Channel outChannel = txOutputChannelForFormat(outFmt, m_audioOutputChannel);
@@ -28615,7 +28618,7 @@ void DecodiumBridge::stopTune()
             if (m_tuning) {
                 m_tuning = false;
                 emit tuningChanged();
-                emit statusMessage("Tune terminato");
+                emit statusMessage(tr("Tune finished"));
             }
             scheduleLegacyStateRefreshBurst();
         }
@@ -28648,7 +28651,7 @@ void DecodiumBridge::stopTune()
     if (m_tuning) {
         m_tuning = false;
         emit tuningChanged();
-        emit statusMessage("Tune terminato");
+        emit statusMessage(tr("Tune finished"));
     }
     resumeNonAudioTxWork(QStringLiteral("stopTune"));
     return;
@@ -28675,7 +28678,7 @@ void DecodiumBridge::stopTune()
     if (usingTciAudioInput()) stopTciTxAudioStream(true);
     m_tuning = false;
     emit tuningChanged();
-    emit statusMessage("Tune terminato");
+    emit statusMessage(tr("Tune finished"));
     resumeNonAudioTxWork(QStringLiteral("stopTune"));
 }
 
@@ -34504,7 +34507,7 @@ void DecodiumBridge::saveSettingsInternal(bool asynchronous)
     if (!asynchronous) {
         delete stagedLegacySettings;
         delete stagedSettings;
-        emit statusMessage("Impostazioni salvate");
+        emit statusMessage(tr("Settings saved"));
         return;
     }
 
@@ -35335,8 +35338,8 @@ void DecodiumBridge::processDecodeDoubleClick(const QString& message,
     if (hisCall.isEmpty()) {
         DIAG_WARN(QStringLiteral("processDecodeDoubleClick ignored: unresolved compressed callsign msg=\"%1\"")
                       .arg(bridgeDiagnosticOneLine(message)));
-        emit warningRaised(tr("TX non avviata"),
-                           tr("Nominativo compresso non risolto"),
+        emit warningRaised(tr("Transmission not started"),
+                           tr("Compressed callsign not resolved"),
                            message);
         return;
     }
@@ -39767,8 +39770,8 @@ void DecodiumBridge::autoSequenceStep(const QStringList& f)
             m_lastCqPidx = -1;
             clearAutoCqPartnerLock();
             emit statusMessage(QStringLiteral("AutoCQ fermato: chiamata diretta con nominativo compresso"));
-            emit warningRaised(tr("AutoCQ fermato"),
-                               tr("Chiamata diretta ricevuta, ma il nominativo non e' risolto"),
+            emit warningRaised(tr("AutoCQ stopped"),
+                               tr("Direct call received, but the callsign is not resolved"),
                                msg);
             return;
         }
@@ -49187,7 +49190,7 @@ void DecodiumBridge::onPeriodTimer()
             clearAutoCqPartnerLock();
             halt();
             setTxEnabled(false);
-            emit statusMessage("TX watchdog: timeout, TX fermato");
+            emit statusMessage(tr("Transmit watchdog: timed out, transmission stopped"));
         }
     } else {
         if (m_txWatchdogElapsedActive || m_txWatchdogActiveSinceMs > 0) {
@@ -51369,7 +51372,7 @@ void DecodiumBridge::startAudioCapture(bool watchdogRecovery)
                         .arg(rxFramesPerBuffer)
                         .arg(static_cast<int>(channel)));
 
-    emit statusMessage("Audio capture avviato: " + selectedDevice.description());
+    emit statusMessage(tr("Audio capture started: %1").arg(selectedDevice.description()));
 
     // Auto-match: se l'output TX non è configurato, cerca un device di output
     // che appartiene alla stessa scheda audio dell'input (es. "USB Audio CODEC")
@@ -54832,7 +54835,7 @@ void DecodiumBridge::checkCtyDatUpdate(bool forceDownload)
     }
     if (m_ctyDatUpdating) {
         bridgeLog("cty.dat update requested while another update is already running");
-        emit statusMessage("Download cty.dat già in corso...");
+        emit statusMessage(tr("cty.dat download already under way..."));
         return;
     }
 
@@ -54948,7 +54951,7 @@ void DecodiumBridge::checkCtyDatUpdate(bool forceDownload)
                         m_workedHistoryLoaded = false;
                         loadWorkedBeforeHistoryAsync();
                         bridgeLog("cty.dat updated and reloaded from " + loadedPath);
-                        emit statusMessage("cty.dat aggiornato e caricato: " + loadedPath);
+                        emit statusMessage(tr("cty.dat updated and loaded: %1").arg(loadedPath));
                     } else {
                         m_ctyDatLastError = QStringLiteral("caricamento DXCC fallito");
                         bridgeLog("cty.dat downloaded but DXCC reload failed");
@@ -56175,7 +56178,7 @@ void DecodiumBridge::openWavFolderDecode(const QString& folderPath)
 
     QStringList wavFiles = dir.entryList({"*.wav", "*.WAV"}, QDir::Files, QDir::Name);
     if (wavFiles.isEmpty()) {
-        emit statusMessage("Nessun file WAV trovato in: " + folderPath);
+        emit statusMessage(tr("No WAV file found in: %1").arg(folderPath));
         return;
     }
 

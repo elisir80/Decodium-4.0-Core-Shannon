@@ -93,7 +93,7 @@ Dialog {
 
             Text {
                 Layout.fillWidth: true
-                text: lookupDialog.service ? lookupDialog.service.status : qsTr("Service non disponibile")
+                text: lookupDialog.service ? lookupDialog.service.status : qsTr("Service unavailable")
                 color: lookupDialog.service && lookupDialog.service.lookupPending ? secondaryCyan : textSecondary
                 elide: Text.ElideRight
             }
@@ -115,17 +115,17 @@ Dialog {
             Text { text: qsTr("Callsign"); color: textSecondary }
             Text { text: lookupDialog.value("call") || lookupDialog.requestedCall; color: textPrimary; font.bold: true; elide: Text.ElideRight; Layout.fillWidth: true }
             Text { text: qsTr("Nome"); color: textSecondary }
-            Text { text: lookupDialog.value("name") || qsTr("non disponibile"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
+            Text { text: lookupDialog.value("name") || qsTr("not available"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
             Text { text: qsTr("QTH"); color: textSecondary }
-            Text { text: lookupDialog.value("qth") || qsTr("non disponibile"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
+            Text { text: lookupDialog.value("qth") || qsTr("not available"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
             Text { text: qsTr("Grid"); color: textSecondary }
-            Text { text: lookupDialog.value("grid") || qsTr("non disponibile"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
+            Text { text: lookupDialog.value("grid") || qsTr("not available"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
             Text { text: qsTr("DXCC / continente"); color: textSecondary }
-            Text { text: (lookupDialog.value("dxcc") || lookupDialog.value("country") || qsTr("non disponibile")) + (lookupDialog.value("continent") ? " / " + lookupDialog.value("continent") : ""); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
+            Text { text: (lookupDialog.value("dxcc") || lookupDialog.value("country") || qsTr("not available")) + (lookupDialog.value("continent") ? " / " + lookupDialog.value("continent") : ""); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
             Text { text: qsTr("CQ / ITU zone"); color: textSecondary }
             Text { text: (lookupDialog.value("cqZone") || "—") + " / " + (lookupDialog.value("ituZone") || "—"); color: textPrimary; Layout.fillWidth: true }
             Text { text: qsTr("Conferme"); color: textSecondary }
-            Text { text: (lookupDialog.value("lotw") === "true" ? "LoTW " : "") + (lookupDialog.value("eqsl") === "true" ? "eQSL " : "") + (lookupDialog.value("oqrs") === "true" ? "OQRS" : "") || qsTr("nessuna indicazione"); color: textPrimary; Layout.fillWidth: true }
+            Text { text: (lookupDialog.value("lotw") === "true" ? "LoTW " : "") + (lookupDialog.value("eqsl") === "true" ? "eQSL " : "") + (lookupDialog.value("oqrs") === "true" ? "OQRS" : "") || qsTr("no indication"); color: textPrimary; Layout.fillWidth: true }
             Text { text: qsTr("Provider"); color: textSecondary }
             Text { text: lookupDialog.value("provider") || qsTr("fallback DXCC"); color: textPrimary; elide: Text.ElideRight; Layout.fillWidth: true }
         }
@@ -179,7 +179,7 @@ Dialog {
                 font.pixelSize: 10
                 elide: Text.ElideRight
             }
-            Button { text: qsTr("Chiudi"); onClicked: lookupDialog.close() }
+            Button { text: qsTr("Close"); onClicked: lookupDialog.close() }
         }
     }
 

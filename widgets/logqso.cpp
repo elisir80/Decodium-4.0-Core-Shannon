@@ -220,7 +220,7 @@ LogQSO::LogQSO(QString const& programTitle, QSettings * settings
   setAttribute (Qt::WA_QuitOnClose, false);
   setWindowTitle(programTitle + " - Log QSO");
   m_clusterSpotCheckBox = new QCheckBox {tr ("Spot su DX Cluster"), this};
-  m_clusterSpotCheckBox->setToolTip (tr ("Invia questo QSO al DX Cluster se la connessione cluster era gia' attiva."));
+  m_clusterSpotCheckBox->setToolTip (tr ("Send this QSO to the DX Cluster if the cluster connection was already active."));
   if (ui->verticalLayout_5) {
     int const insertAt = qMax (0, ui->verticalLayout_5->count () - 1);
     ui->verticalLayout_5->insertWidget (insertAt, m_clusterSpotCheckBox);

@@ -3426,7 +3426,7 @@ MainWindow::MainWindow(QDir const& temp_directory, bool multiple,
             {
               m_autoSpotCheckBox = new QCheckBox {tr("AutoSpot"), controls};
               m_autoSpotCheckBox->setToolTip(
-                tr("Invia spot al cluster configurato dopo il log QSO (73 confermato)."));
+                tr("Send a spot to the configured cluster after logging the QSO (73 confirmed)."));
               m_autoSpotCheckBox->setChecked(m_autoSpotEnabled);
               grid->addWidget(m_autoSpotCheckBox, 0, 13);
               connect(m_autoSpotCheckBox, &QCheckBox::toggled, this, [this](bool enabled) {
@@ -34091,7 +34091,7 @@ void MainWindow::startCwAudioTx(QString const& message, qint64 dialFrequencyHz, 
   // una sessione RTTY manuale in corso.
   if (m_rttyManualTxActive)
     {
-      showStatusMessage(tr("CW audio: TX RTTY in corso, riprova"));
+      showStatusMessage(tr("CW audio: RTTY transmission under way, try again"));
       return;
     }
 
@@ -34115,7 +34115,7 @@ void MainWindow::startCwAudioTx(QString const& message, qint64 dialFrequencyHz, 
   // Se siamo gia' in TX, non sovrapporre: ignora.
   if (g_iptt == 1 || m_transmitting)
     {
-      showStatusMessage(tr("CW audio: TX gia' attivo, comando ignorato"));
+      showStatusMessage(tr("CW audio: transmission already active, command ignored"));
       return;
     }
 
@@ -34166,7 +34166,7 @@ void MainWindow::transmitCwAudio()
   if (m_tci_audio)
     {
       // Percorso TCI non supportato per il CW audio: abbandona in sicurezza.
-      showStatusMessage(tr("CW audio non disponibile con audio TCI"));
+      showStatusMessage(tr("CW audio is not available with TCI audio"));
       finishCwAudioTx();
       return;
     }

@@ -380,7 +380,7 @@ CallsignIntelligenceService::CallsignIntelligenceService(QObject* parent)
 
     openDatabase();
     loadSettings();
-    setStatus(tr("Pronto: database locale callsign disponibile"));
+    setStatus(tr("Ready: local callsign database available"));
 }
 
 CallsignIntelligenceService::~CallsignIntelligenceService()
@@ -413,7 +413,7 @@ CallsignIntelligenceService::~CallsignIntelligenceService()
 bool CallsignIntelligenceService::openDatabase()
 {
     if (!m_database || !m_database->open()) {
-        setStatus(tr("Database callsign non disponibile: %1").arg(m_database ? m_database->lastError().text() : QString()));
+        setStatus(tr("Callsign database unavailable: %1").arg(m_database ? m_database->lastError().text() : QString()));
         return false;
     }
     createSchema();
@@ -774,7 +774,7 @@ void CallsignIntelligenceService::lookup(const QString& callsign, bool forceRefr
 {
     const QString call = normalizeCall(callsign);
     if (call.isEmpty()) {
-        setStatus(tr("Callsign non valido"));
+        setStatus(tr("Invalid callsign"));
         return;
     }
     if (m_activeReply) {
@@ -799,13 +799,13 @@ void CallsignIntelligenceService::lookup(const QString& callsign, bool forceRefr
     }
     if (!m_offlineMode) {
         setPending(true);
-        setStatus(tr("Nessun record locale: provo i provider remoti..."));
+        setStatus(tr("No local record: trying the remote providers..."));
         if (!m_clubLogApiKey.isEmpty()) {
             lookupRemoteClubLog(call);
             return;
         }
     } else {
-        setStatus(tr("Offline: nessun record remoto richiesto"));
+        setStatus(tr("Offline: no remote record requested"));
     }
     QVariantMap fallback;
     fallback.insert(QStringLiteral("call"), call);
@@ -821,8 +821,8 @@ void CallsignIntelligenceService::lookup(const QString& callsign, bool forceRefr
         }
     }
     finishLookup(fallback, false, fallback.size() > 1
-                 ? tr("Fallback DXCC: nessun profilo provider disponibile")
-                 : tr("Nessun provider ha trovato il callsign"));
+                 ? tr("DXCC fallback: no provider profile available")
+                 : tr("No provider found the callsign"));
 }
 
 void CallsignIntelligenceService::lookupRemoteClubLog(const QString& callsign)
@@ -878,10 +878,10 @@ void CallsignIntelligenceService::handleRemoteLookupFinished(QNetworkReply* repl
     }
     if (!local.isEmpty()) {
         cacheResult(local);
-        finishLookup(local, false, tr("Club Log non disponibile: usato fallback locale (%1)").arg(errorText));
+        finishLookup(local, false, tr("Club Log unavailable: local fallback used (%1)").arg(errorText));
     } else {
         finishLookup(QVariantMap{{QStringLiteral("call"), callsign}}, false,
-                     tr("Provider remoti non disponibile: %1").arg(errorText));
+                     tr("Remote providers unavailable: %1").arg(errorText));
     }
 }
 
@@ -1102,7 +1102,7 @@ bool CallsignIntelligenceService::importDatabase(const QString& provider, const 
     if (cleanProvider == QStringLiteral("lotw_confirmed")
         || cleanProvider == QStringLiteral("qrz_confirmed")) {
         if (m_databaseUpdatePending || m_databaseImportWatcher) {
-            setStatus(tr("Aggiornamento già in corso"));
+            setStatus(tr("An update is already under way"));
             return false;
         }
         setDatabaseUpdatePending(true);
@@ -1139,15 +1139,15 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
         return;
     }
     if (m_activeReply || m_databaseUpdatePending) {
-        setStatus(tr("Aggiornamento già in corso"));
+        setStatus(tr("An update is already under way"));
         return;
     }
     if (cleanProvider == QStringLiteral("lotw_confirmed")) {
         const QString username = lotwUsername().trimmed();
         if (username.isEmpty() || m_lotwPassword.isEmpty()) {
             refreshDatabaseState(cleanProvider, 0, 0, tr("Error"),
-                                 tr("Username e password LoTW richiesti; la password è nella sezione Reporting → LoTW"));
-            setStatus(tr("LoTW conferme: username e password richiesti"));
+                                 tr("LoTW username and password are required; the password is in the Reporting → LoTW section"));
+            setStatus(tr("LoTW confirmations: username and password required"));
             emit databasesChanged();
             return;
         }
@@ -1170,7 +1170,7 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
         setDatabaseUpdatePending(true);
         m_updateProvider = cleanProvider;
         setStatus(m_lotwLastQsl.isEmpty()
-                      ? tr("LoTW: download iniziale delle conferme in corso...")
+                      ? tr("LoTW: downloading the initial set of confirmations...")
                       : tr("LoTW: cerco nuove conferme dal %1...").arg(m_lotwLastQsl));
         m_activeReply = m_network->get(request);
         connect(m_activeReply, &QNetworkReply::finished, this, [this, reply = m_activeReply, cleanProvider]() {
@@ -1180,8 +1180,8 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
     }
     if (cleanProvider == QStringLiteral("qrz_confirmed")) {
         if (m_qrzApiKey.trimmed().isEmpty()) {
-            refreshDatabaseState(cleanProvider, 0, 0, tr("Error"), tr("Chiave API QRZ mancante: configurarla nella sezione QRZ Logbook"));
-            setStatus(tr("QRZ.com: chiave API mancante"));
+            refreshDatabaseState(cleanProvider, 0, 0, tr("Error"), tr("QRZ API key missing: set it in the QRZ Logbook section"));
+            setStatus(tr("QRZ.com: API key missing"));
             emit databasesChanged();
             return;
         }
@@ -1190,15 +1190,15 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
         m_qrzAdifPayload.clear();
         setDatabaseUpdatePending(true);
         m_updateProvider = cleanProvider;
-        setStatus(tr("QRZ.com: pagina 1 delle conferme in download..."));
+        setStatus(tr("QRZ.com: downloading page 1 of the confirmations..."));
         requestQrzConfirmedPage();
         return;
     }
     if (cleanProvider == QStringLiteral("eqsl_inbox")) {
         const QString username = eqslUsername().trimmed();
         if (username.isEmpty() || m_eqslPassword.isEmpty()) {
-            refreshDatabaseState(cleanProvider, 0, 0, tr("Error"), tr("Username e password eQSL richiesti"));
-            setStatus(tr("eQSL InBox: username e password eQSL richiesti"));
+            refreshDatabaseState(cleanProvider, 0, 0, tr("Error"), tr("eQSL username and password are required"));
+            setStatus(tr("eQSL InBox: eQSL username and password required"));
             emit databasesChanged();
             return;
         }
@@ -1217,12 +1217,12 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
         connect(m_activeReply, &QNetworkReply::finished, this, [this, reply = m_activeReply, cleanProvider]() {
             handleDatabaseReply(reply, cleanProvider);
         });
-        setStatus(tr("Download eQSL InBox in corso..."));
+        setStatus(tr("Downloading the eQSL InBox..."));
         return;
     }
     if (cleanProvider == QStringLiteral("clublog_oqrs")) {
         if (m_clubLogApiKey.isEmpty() || m_clubLogEmail.isEmpty() || m_clubLogApplicationPassword.isEmpty() || m_operatorCallsign.isEmpty()) {
-            setStatus(tr("Club Log OQRS: API key, email, application password e callsign operatore richiesti"));
+            setStatus(tr("Club Log OQRS: API key, e-mail, application password and operator callsign are required"));
             return;
         }
         QUrl url(QStringLiteral("https://clublog.org/getoqrsmatches.php"));
@@ -1241,7 +1241,7 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
         connect(m_activeReply, &QNetworkReply::finished, this, [this, reply = m_activeReply, cleanProvider]() {
             handleDatabaseReply(reply, cleanProvider);
         });
-        setStatus(tr("Aggiornamento Club Log OQRS in corso..."));
+        setStatus(tr("Club Log OQRS update under way..."));
         return;
     }
     const QUrl url(providerUrl(cleanProvider));
@@ -1254,7 +1254,7 @@ void CallsignIntelligenceService::refreshDatabase(const QString& provider)
     connect(m_activeReply, &QNetworkReply::finished, this, [this, reply = m_activeReply, cleanProvider]() {
         handleDatabaseReply(reply, cleanProvider);
     });
-    setStatus(tr("Aggiornamento %1 in corso...").arg(providerLabel(cleanProvider)));
+    setStatus(tr("%1 update under way...").arg(providerLabel(cleanProvider)));
 }
 
 void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
@@ -1274,7 +1274,7 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
     }
     if (error != QNetworkReply::NoError) {
         refreshDatabaseState(provider, 0, 0, tr("Error"), errorText);
-        setStatus(tr("Aggiornamento %1 fallito: %2").arg(providerLabel(provider), errorText));
+        setStatus(tr("%1 update failed: %2").arg(providerLabel(provider), errorText));
         m_updateProvider.clear();
         setDatabaseUpdatePending(false);
         emit databasesChanged();
@@ -1284,12 +1284,12 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
         const decodium::lotw::ReportResponse response = decodium::lotw::parseReportResponse(payload);
         if (response.kind != decodium::lotw::ReportResponseKind::Adif) {
             const QString detail = response.error.isEmpty()
-                ? tr("la risposta LoTW non contiene un ADIF valido")
+                ? tr("the LoTW response does not contain a valid ADIF")
                 : response.error;
             refreshDatabaseState(provider, 0, 0, tr("Error"), detail);
             m_updateProvider.clear();
             setDatabaseUpdatePending(false);
-            setStatus(tr("LoTW fallito: %1").arg(detail));
+            setStatus(tr("LoTW failed: %1").arg(detail));
             emit databasesChanged();
             return;
         }
@@ -1302,11 +1302,11 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
         if (result != QStringLiteral("OK")) {
             QString reason = qrzFormValue(payload, QStringLiteral("REASON"));
             if (reason.isEmpty()) reason = qrzFormValue(payload, QStringLiteral("DATA"));
-            const QString detail = reason.isEmpty() ? tr("risposta API non valida") : reason;
+            const QString detail = reason.isEmpty() ? tr("invalid API response") : reason;
             refreshDatabaseState(provider, 0, 0, tr("Error"), detail);
             m_updateProvider.clear();
             setDatabaseUpdatePending(false);
-            setStatus(tr("QRZ.com fallito: %1").arg(detail));
+            setStatus(tr("QRZ.com failed: %1").arg(detail));
             emit databasesChanged();
             return;
         }
@@ -1373,7 +1373,7 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
                         [this, reply = m_activeReply, provider]() {
                     handleDatabaseReply(reply, provider, true);
                 });
-                setStatus(tr("eQSL InBox: download del file ADI in corso..."));
+                setStatus(tr("eQSL InBox: downloading the ADI file..."));
                 return;
             }
             if (page.kind == decodium::eqsl::InboxPageKind::NoRecords) {
@@ -1385,12 +1385,12 @@ void CallsignIntelligenceService::handleDatabaseReply(QNetworkReply* reply,
             }
             if (page.kind != decodium::eqsl::InboxPageKind::DirectAdif) {
                 const QString detail = page.error.isEmpty()
-                    ? tr("risposta eQSL non valida")
+                    ? tr("invalid eQSL response")
                     : page.error;
                 refreshDatabaseState(provider, 0, 0, tr("Error"), detail);
                 m_updateProvider.clear();
                 setDatabaseUpdatePending(false);
-                setStatus(tr("eQSL InBox fallito: %1").arg(detail));
+                setStatus(tr("eQSL InBox failed: %1").arg(detail));
                 emit databasesChanged();
                 return;
             }
@@ -1424,7 +1424,7 @@ void CallsignIntelligenceService::requestQrzConfirmedPage()
 void CallsignIntelligenceService::startConfirmedAdifSave(const QString& provider, const QByteArray& data)
 {
     if (m_databaseImportWatcher) {
-        setStatus(tr("Aggiornamento già in corso"));
+        setStatus(tr("An update is already under way"));
         return;
     }
 
@@ -1446,14 +1446,14 @@ void CallsignIntelligenceService::startConfirmedAdifSave(const QString& provider
         watcher->deleteLater();
 
         if (!result.value(QStringLiteral("ok")).toBool()) {
-            const QString error = result.value(QStringLiteral("error"), tr("File ADI non valido")).toString();
+            const QString error = result.value(QStringLiteral("error"), tr("Invalid ADI file")).toString();
             refreshDatabaseState(provider, 0, 0, tr("Error"), error);
             m_updateProvider.clear();
             setDatabaseUpdatePending(false);
             if (provider == QStringLiteral("lotw_confirmed")) {
                 m_pendingLotwLastQsl.clear();
             }
-            setStatus(tr("%1 fallito: %2").arg(providerLabel(provider), error));
+            setStatus(tr("%1 failed: %2").arg(providerLabel(provider), error));
             emit databasesChanged();
             return;
         }
@@ -1461,13 +1461,13 @@ void CallsignIntelligenceService::startConfirmedAdifSave(const QString& provider
         QSqlQuery query(*m_database);
         query.prepare(QStringLiteral("UPDATE callsign_provider_state SET local_path=?,status=?,error='' WHERE provider=?"));
         query.addBindValue(path);
-        query.addBindValue(tr("Scaricato; sincronizzazione logbook..."));
+        query.addBindValue(tr("Downloaded; synchronising the logbook..."));
         query.addBindValue(provider);
         query.exec();
         refreshDatabaseState(provider, QDateTime::currentMSecsSinceEpoch(),
                              result.value(QStringLiteral("rowCount")).toInt(),
-                             tr("Scaricato; sincronizzazione logbook..."));
-        setStatus(tr("%1 scaricato: sincronizzazione logbook in corso...").arg(providerLabel(provider)));
+                             tr("Downloaded; synchronising the logbook..."));
+        setStatus(tr("%1 downloaded: synchronising the logbook...").arg(providerLabel(provider)));
         emit databasesChanged();
         emit confirmedAdifDownloaded(provider, path);
     });
@@ -1525,7 +1525,7 @@ void CallsignIntelligenceService::startConfirmedAdifSave(const QString& provider
 void CallsignIntelligenceService::startConfirmedAdifFileImport(const QString& provider, const QString& path)
 {
     if (m_databaseImportWatcher) {
-        setStatus(tr("Aggiornamento già in corso"));
+        setStatus(tr("An update is already under way"));
         return;
     }
 
@@ -1538,14 +1538,14 @@ void CallsignIntelligenceService::startConfirmedAdifFileImport(const QString& pr
         watcher->deleteLater();
 
         if (!result.value(QStringLiteral("ok")).toBool()) {
-            const QString error = result.value(QStringLiteral("error"), tr("impossibile leggere il file ADI")).toString();
+            const QString error = result.value(QStringLiteral("error"), tr("the ADI file cannot be read")).toString();
             refreshDatabaseState(provider, 0, 0, tr("Error"), error);
             m_updateProvider.clear();
             setDatabaseUpdatePending(false);
             if (provider == QStringLiteral("lotw_confirmed")) {
                 m_pendingLotwLastQsl.clear();
             }
-            setStatus(tr("Importazione %1 fallita: %2").arg(providerLabel(provider), error));
+            setStatus(tr("%1 import failed: %2").arg(providerLabel(provider), error));
             emit databasesChanged();
             return;
         }
@@ -1557,7 +1557,7 @@ void CallsignIntelligenceService::startConfirmedAdifFileImport(const QString& pr
         if (provider == QStringLiteral("lotw_confirmed")) {
             m_pendingLotwLastQsl.clear();
         }
-        setStatus(tr("File ADI %1 letto; importazione in background...").arg(providerLabel(provider)));
+        setStatus(tr("%1 ADI file read; importing in the background...").arg(providerLabel(provider)));
         startConfirmedAdifSave(provider, result.value(QStringLiteral("payload")).toByteArray());
     });
     watcher->setFuture(QtConcurrent::run([path]() {
@@ -1581,11 +1581,11 @@ void CallsignIntelligenceService::startConfirmedAdifFileImport(const QString& pr
 void CallsignIntelligenceService::startDatabaseImport(const QString& provider, const QByteArray& data)
 {
     if (m_databaseImportWatcher) {
-        setStatus(tr("Aggiornamento già in corso"));
+        setStatus(tr("An update is already under way"));
         return;
     }
 
-    setStatus(tr("Importazione %1 in background...").arg(providerLabel(provider)));
+    setStatus(tr("Importing %1 in the background...").arg(providerLabel(provider)));
     auto* watcher = new QFutureWatcher<QVariantMap>(this);
     m_databaseImportWatcher = watcher;
     const QString databasePath = m_databasePath;
@@ -1600,9 +1600,9 @@ void CallsignIntelligenceService::startDatabaseImport(const QString& provider, c
         const bool ok = result.value(QStringLiteral("ok")).toBool();
         const int imported = result.value(QStringLiteral("imported")).toInt();
         if (!ok) {
-            const QString error = result.value(QStringLiteral("error"), tr("Formato dati non riconosciuto o nessun record")).toString();
+            const QString error = result.value(QStringLiteral("error"), tr("Unrecognised data format, or no records")).toString();
             refreshDatabaseState(provider, 0, 0, tr("Error"), error);
-            setStatus(tr("Aggiornamento %1 fallito: %2").arg(providerLabel(provider), error));
+            setStatus(tr("%1 update failed: %2").arg(providerLabel(provider), error));
         } else {
             refreshDatabaseState(provider, QDateTime::currentMSecsSinceEpoch(), imported, tr("Updated"));
             setStatus(tr("%1 aggiornato").arg(providerLabel(provider)));
@@ -1717,7 +1717,7 @@ void CallsignIntelligenceService::completeConfirmedAdifImport(const QString& pro
 
     if (!ok) {
         refreshDatabaseState(provider, 0, 0, tr("Error"), error);
-        setStatus(tr("Sincronizzazione %1 fallita: %2").arg(providerLabel(provider), error));
+        setStatus(tr("%1 synchronisation failed: %2").arg(providerLabel(provider), error));
     } else {
         const QString status = tr("Updated: %1 new, %2 confirmations updated")
                                    .arg(imported)
@@ -1789,7 +1789,7 @@ bool CallsignIntelligenceService::openProviderLookup(const QString& provider,
     const QString call = normalizeCall(callsign.trimmed().isEmpty()
                                            ? m_currentCall : callsign);
     if (call.isEmpty()) {
-        setStatus(tr("Impossibile aprire il lookup esterno: callsign non valido"));
+        setStatus(tr("Cannot open the external lookup: invalid callsign"));
         qWarning().noquote()
             << "[CALLLOOKUP] external lookup rejected: invalid callsign"
             << "provider=" << cleanProvider;
@@ -1798,7 +1798,7 @@ bool CallsignIntelligenceService::openProviderLookup(const QString& provider,
 
     const QString url = externalUrl(cleanProvider, call);
     if (url.isEmpty()) {
-        setStatus(tr("Impossibile creare l'URL del provider esterno"));
+        setStatus(tr("Cannot build the external provider URL"));
         qWarning().noquote()
             << "[CALLLOOKUP] external lookup rejected: empty URL"
             << "provider=" << cleanProvider

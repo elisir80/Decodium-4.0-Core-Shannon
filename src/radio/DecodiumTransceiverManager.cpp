@@ -115,9 +115,9 @@ QString sanitizeHamlibFailure(QString const& reason)
         if (reason.contains(marker, Qt::CaseInsensitive)) {
             QString port = extractPortNameFromReason(reason);
             if (port.isEmpty()) {
-                return QObject::tr("Porta seriale CAT non disponibile. Attendi che Windows enumeri la radio e riprova.");
+                return QObject::tr("CAT serial port unavailable. Wait for Windows to enumerate the radio and try again.");
             }
-            return QObject::tr("Porta %1 non disponibile. Attendi che Windows enumeri la radio e riprova.").arg(port);
+            return QObject::tr("Port %1 unavailable. Wait for Windows to enumerate the radio and try again.").arg(port);
         }
     }
 
@@ -201,7 +201,7 @@ bool catSuppressedByEnvironment()
 QString catSuppressionReason()
 {
     if (truthyEnvironmentFlag("DECODIUM_RX_RECORD_DISABLE_CAT")) {
-        return QObject::tr("CAT disabilitato per test RX/recording: la seriale resta disponibile per JTDX.");
+        return QObject::tr("CAT disabled for receive/recording tests: the serial port stays available for JTDX.");
     }
     return QObject::tr("CAT disabilitato da variabile d'ambiente DECODIUM_DISABLE_CAT.");
 }

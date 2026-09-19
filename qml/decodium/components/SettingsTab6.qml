@@ -277,7 +277,7 @@ SettingsPageScroll {
         }
         Text {
             text: bridge.decoLogConnected ? bridge.decoLogStatus
-                  : bridge.decoLogLinkEnabled ? qsTr("DecoLog non aperto: nuovo tentativo ogni 5 s") : qsTr("disattivato")
+                  : bridge.decoLogLinkEnabled ? qsTr("DecoLog not running: retrying every 5 s") : qsTr("disabled")
             color: bridge.decoLogConnected ? accentGreen : textSecondary
             font.pixelSize: 12
             wrapMode: Text.Wrap
@@ -297,7 +297,7 @@ SettingsPageScroll {
             }
         }
         Text {
-            text: qsTr("I QSO vanno a DecoLog via UDP come a ogni logger. Con DecoLink, DecoLog manda a Decodium il suo log (worked-before, nuovi DXCC), la conferma di ogni QSO salvato e lo stato dell'FT2 Award. Solo 127.0.0.1.")
+            text: qsTr("QSOs reach DecoLog over UDP as they do any logger. With DecoLink, DecoLog sends Decodium its own log (worked-before, new DXCC), the acknowledgement of every stored QSO and the FT2 Award status. 127.0.0.1 only.")
             color: textSecondary
             font.pixelSize: 11
             wrapMode: Text.Wrap

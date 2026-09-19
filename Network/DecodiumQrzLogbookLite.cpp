@@ -81,7 +81,7 @@ QByteArray DecodiumQrzLogbookLite::formBody(const QList<QPair<QString, QString>>
 void DecodiumQrzLogbookLite::testApi()
 {
     if (m_apiKey.trimmed().isEmpty()) {
-        emit errorOccurred(tr("API key mancante."));
+        emit errorOccurred(tr("API key missing."));
         return;
     }
 
@@ -103,7 +103,7 @@ void DecodiumQrzLogbookLite::testApi()
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError && raw.isEmpty()) {
-            emit errorOccurred(tr("test fallito: %1").arg(reply->errorString()));
+            emit errorOccurred(tr("test failed: %1").arg(reply->errorString()));
             return;
         }
 
@@ -113,7 +113,7 @@ void DecodiumQrzLogbookLite::testApi()
             return;
         }
 
-        emit errorOccurred(tr("API key non valida: %1").arg(qrzFailureReason(bodyText)));
+        emit errorOccurred(tr("invalid API key: %1").arg(qrzFailureReason(bodyText)));
     });
 }
 
@@ -128,7 +128,7 @@ void DecodiumQrzLogbookLite::uploadAdif(const QString& dxCall,
         return;
     }
     if (m_apiKey.trimmed().isEmpty()) {
-        const QString detail = tr("API key mancante.");
+        const QString detail = tr("API key missing.");
         emit errorOccurred(detail);
         if (requestId != 0) {
             emit adifUploadFinished(requestId, dxCall, false, detail);
@@ -169,7 +169,7 @@ void DecodiumQrzLogbookLite::uploadAdif(const QString& dxCall,
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError && raw.isEmpty()) {
-            const QString detail = tr("upload fallito: %1").arg(reply->errorString());
+            const QString detail = tr("upload failed: %1").arg(reply->errorString());
             emit errorOccurred(detail);
             if (requestId != 0) {
                 emit adifUploadFinished(requestId, dxCall, false, detail);

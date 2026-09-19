@@ -163,12 +163,12 @@ QString cloudlogHttpErrorMessage(const QString& context,
         : QObject::tr(" Risposta: %1").arg(detail);
 
     if (networkError == QNetworkReply::AuthenticationRequiredError || httpStatus == 401) {
-        return QObject::tr("%1: HTTP 401. Il server o proxy richiede autenticazione prima dell'API Cloudlog. Controlla URL, Basic/Auth/Cloudflare o protezioni su /index.php/api; l'API key Cloudlog non basta.%2")
+        return QObject::tr("%1: HTTP 401. The server or proxy requires authentication before the Cloudlog API. Check the URL, Basic/Auth/Cloudflare or protections on /index.php/api; the Cloudlog API key is not enough.%2")
             .arg(context, detailSuffix);
     }
 
     if (networkError == QNetworkReply::ProxyAuthenticationRequiredError || httpStatus == 407) {
-        return QObject::tr("%1: HTTP 407. Il proxy richiede autenticazione prima di raggiungere Cloudlog.%2")
+        return QObject::tr("%1: HTTP 407. The proxy requires authentication before reaching Cloudlog.%2")
             .arg(context, detailSuffix);
     }
 
@@ -618,7 +618,7 @@ void DecodiumCloudlogLite::testApi()
                     emit apiKeyOk();
                 } else if (state == CloudlogApiKeyState::readOnly) {
                     qDebug() << "[CloudlogLite] API key read-only.";
-                    emit errorOccurred(tr("Cloudlog API key valida ma senza permessi di scrittura."));
+                    emit errorOccurred(tr("Cloudlog API key is valid but has no write permission."));
                 } else {
                     qDebug() << "[CloudlogLite] API key invalid. Response:" << replyPreview(body);
                     emit apiKeyInvalid();

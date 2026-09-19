@@ -65,7 +65,7 @@ SettingsPageScroll {
         Text { text: qsTr("CALLSIGN INTELLIGENCE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 4 }
         Rectangle { Layout.fillWidth: true; height: 1; color: Qt.rgba(secondaryCyan.r,secondaryCyan.g,secondaryCyan.b,0.3) }
         Text {
-            text: qsTr("Lookup locale con fallback DXCC, cache SQLite e provider aggiornabili. Le credenziali eQSL e Club Log sono salvate nel portachiavi tramite il canale secure settings.")
+            text: qsTr("Local lookup with DXCC fallback, SQLite cache and updatable providers. eQSL and Club Log credentials are stored in the keychain through the secure settings channel.")
             color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }
 
@@ -80,14 +80,14 @@ SettingsPageScroll {
                 checked: dialog.callsignService ? dialog.callsignService.autoOpenOnQsoStart : false
                 onToggled: if (dialog.callsignService) dialog.callsignService.autoOpenOnQsoStart = checked
                 indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-                contentItem: Text { text: qsTr("Apri il pannello lookup"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
+                contentItem: Text { text: qsTr("Open the lookup panel"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
             }
-            Text { text: qsTr("Chiusura automatica dopo logging"); color: textSecondary }
+            Text { text: qsTr("Close automatically after logging"); color: textSecondary }
             CheckBox {
                 checked: dialog.callsignService ? dialog.callsignService.autoCloseAfterLogging : false
                 onToggled: if (dialog.callsignService) dialog.callsignService.autoCloseAfterLogging = checked
                 indicator: Rectangle { width: 18; height: 18; radius: 3; color: parent.checked ? primaryBlue : bgMedium; border.color: glassBorder; y: parent.height/2 - height/2 }
-                contentItem: Text { text: qsTr("Chiudi il pannello dopo il QSO"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
+                contentItem: Text { text: qsTr("Close the panel after the QSO"); color: textPrimary; leftPadding: 24; verticalAlignment: Text.AlignVCenter }
             }
             Text { text: qsTr("Arricchimento campi mancanti"); color: textSecondary }
             CheckBox {
@@ -106,7 +106,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("eQSL INBOX — CONFERME RICEVUTE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
         Text {
-            text: qsTr("Scarica l'InBox/Archivio eQSL in ADIF e sincronizza le conferme nel logbook attivo. Il nome utente predefinito è il callsign della stazione.")
+            text: qsTr("Download the eQSL InBox/Archive as ADIF and synchronise the confirmations into the active logbook. The default user name is the station callsign.")
             color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }
         Text {
@@ -136,7 +136,7 @@ SettingsPageScroll {
 
         Text { text: qsTr("LoTW — CONFERME RICEVUTE"); color: secondaryCyan; font.pixelSize: 12; font.bold: true; Layout.fillWidth: true; Layout.topMargin: 8 }
         Text {
-            text: qsTr("Scarica le QSL LoTW ricevute e sincronizzale nel logbook. La password viene riutilizzata dalla sezione Reporting → LoTW; il login LoTW può essere diverso dal callsign operativo.")
+            text: qsTr("Download the LoTW QSLs received and synchronise them into the logbook. The password is reused from the Reporting → LoTW section; the LoTW login may differ from the operating callsign.")
             color: textSecondary; wrapMode: Text.WordWrap; Layout.fillWidth: true
         }
         GridLayout {
